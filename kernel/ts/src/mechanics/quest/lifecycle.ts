@@ -119,6 +119,10 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef,
   const d = definition(world, quest);
   if (d.exchange) return typeof ready(world, actor, quest, steps) !== 'string';
   const o = d.objective;
+  if (o.evidence === 'patrol') {
+    const q = questOf(world, actor, quest);
+    return !!q && world.state.patrols?.[q[0]]?.status === 'completed';
+  }
   return o.evidence === 'current_state' && holds(world, actor, o.policy.root, { steps });
 }
 

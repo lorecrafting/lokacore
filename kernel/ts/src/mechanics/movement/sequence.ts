@@ -9,6 +9,7 @@ import {
   type Mint,
   type World,
 } from '../../runtime/decision.ts';
+import * as patrol from '../patrol/sequence.ts';
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
@@ -20,7 +21,13 @@ type MoveCommand = {
   readonly id: CommandId;
   readonly payload: { readonly actor_id: CharacterId; readonly direction: Key };
 };
-export function moveSequence(world: World, command: MoveCommand, mint: Mint, outcome: string) {
+export function moveSequence(
+  world: World,
+  command: MoveCommand,
+  mint: Mint,
+  outcome: string,
+  steps = { n: 0 },
+) {
   const plan = movementPlan(world, command.payload.actor_id, command.payload.direction);
   if (typeof plan === 'string') return rejected(plan);
   const { body, here, there, paid } = plan;
@@ -31,22 +38,24 @@ export function moveSequence(world: World, command: MoveCommand, mint: Mint, out
     source_id: here,
     destination_id: there,
   } as const;
+  const ops = [
+    ...paid.ops,
+    transfer,
+    ...travel(world, command.payload.actor_id, here, there),
+    ...closeEncounter(world, body),
+  ];
+  const entered = event(world, command, mint, 1, {
+    type: 'entity_entered_room',
+    entity_id: body,
+    room_id: there,
+  });
+  const joined = patrol.travel(world, command, here, there, ops, mint, steps);
   return accepted(
     world,
     outcome,
-    [
-      ...paid.ops,
-      transfer,
-      ...travel(world, command.payload.actor_id, here, there),
-      ...closeEncounter(world, body),
-    ],
-    [
-      event(world, command, mint, 1, {
-        type: 'entity_entered_room',
-        entity_id: body,
-        room_id: there,
-      }),
-    ],
+    [...ops, ...joined.ops],
+    [entered, ...joined.events],
+    joined.narration.length ? joined.narration : undefined,
   );
 }
 

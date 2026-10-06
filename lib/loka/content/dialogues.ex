@@ -267,6 +267,7 @@ defmodule Loka.Content.Dialogues do
     ) ++
       sequence(rel, steps, o, ctx) ++
       accept(rel, steps, o, d, ctx) ++
+      Loka.Content.Patrol.choice(rel, steps, o, d, ctx) ++
       Loka.Content.Escort.choice(rel, steps, o, d, ctx) ++
       hand_over(rel, steps, o, d) ++
       receive_item(rel, steps, o, d, ctx) ++

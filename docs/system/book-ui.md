@@ -513,7 +513,7 @@ the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
 saved state. Book owns neither liquid math nor a consumption effect producer.
 ## C2 watch patrol details
 
-**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source implemented; independent review pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
 page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
 current state; C1 lessons remain available at his actual location. The journal names

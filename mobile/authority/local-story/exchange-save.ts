@@ -13,6 +13,7 @@ export function exchangeSave(
   historyChecked: boolean,
 ): boolean {
   if (
+    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.patrol) &&
     !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
     !Object.keys(fresh.fuelSpecs).length &&
     saved.state.fuel === undefined

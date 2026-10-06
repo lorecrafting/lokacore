@@ -189,11 +189,19 @@ export function hint(store: Store, key: string) {
 // The pending choice's available answers and its Close (06 §43: never a trap).
 function asked(v: GameView, label: Say): Press[] {
   const c = v.choice;
-  const answer = (o: { choice_id: string; label: string }) => ({
+  const answer = (o: {
+    choice_id: string;
+    label: string;
+    patrol?: NonNullable<GameView['choice']>['choices'][number]['patrol'];
+  }) => ({
     label: label(o.label),
     action_key: 'choose',
     target_ids: [],
-    input: { choice_id: o.choice_id, continuation_id: c!.continuation_id },
+    input: {
+      choice_id: o.choice_id,
+      continuation_id: c!.continuation_id,
+      ...(o.patrol && { patrol: o.patrol }),
+    },
   });
   return [
     ...(c?.choices.filter((o) => o.available) ?? []).map(answer),

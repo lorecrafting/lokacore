@@ -1,3 +1,5 @@
+// size: allow 320, choice projection captures exact patrol attempt input beside existing dialogue contracts
+import * as patrol from '../patrol/shared.ts';
 import { pending } from './selection.ts';
 import { validAttempts } from './behavior.ts';
 import { membership } from '../skills.ts';
@@ -9,6 +11,7 @@ import { living } from '../death/shared.ts';
 // definition, its talk's bound roles, the actor's pending choice, and why a choice of it cannot be
 // made now. A choice's durable occurrence is a row of State.choices (runtime/decision.ts ChoiceRow), keyed
 // by the ContinuationId its talk minted.
+import { refusal } from '../../commands/actions.ts';
 import type { ActionSet, Offered } from '../../commands/actions.ts';
 import type {
   ActionInputParameter,
@@ -20,6 +23,7 @@ import type {
   EntityId,
   Key,
   PendingChoice,
+  PatrolDraw,
   RoleBinding,
   TextKey,
   VersionedPolicy,
@@ -79,8 +83,14 @@ export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(
  * holds; then revalidate actual custody and presence (06 §43): not_present while a bound NPC is not in the actor's room, else not_owned while a
  * bound item is not held by the actor body (or the selected receive NPC); Choose and GameView agree.
  */
-// size: allow 50, dialogue availability and bound custody share one admission check
-export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, steps: Steps) {
+// size: allow 55, dialogue availability and bound custody share one admission check
+export function blocked(
+  world: World,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  steps: Steps,
+  draw?: PatrolDraw,
+) {
   const body = bodyOf(world, row.actor_id);
   const d = definition(world, row.source);
   if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
@@ -111,6 +121,8 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   const roles = roleBlocked(world, row, d, option, body!, allRolesNeeded);
   if (option.exchange && d.quest) return roles ?? exchangeBlocked(world, row, d.quest, steps);
   if (roles) return roles;
+  const watched = patrol.refused(world, row, option, draw, steps);
+  if (watched) return watched;
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
   for (const step of option.sequence ?? [])
@@ -188,6 +200,7 @@ function roleBlocked(
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
+// size: allow 55, exact drawn choice input shares keyed admission and mechanic eligibility
 export function choiceView(
   world: World,
   actor: CharacterId,
@@ -216,15 +229,31 @@ export function choiceView(
     choices: row.choice_ids.map((choice_id) => {
       const option = d.choices[choice_id]!;
       const { label, accept } = option;
-      const code = blocked(world, row, option, steps);
+      const q = option.patrol && questOf(world, actor, option.patrol.quest);
+      const saved = q && world.state.patrols?.[q[0]];
+      const draw = saved && patrol.drawn(saved);
+      const code =
+        refusal(
+          world,
+          {
+            type: 'choose',
+            actor_id: actor,
+            continuation_id,
+            choice_id,
+            ...(draw && { patrol: draw }),
+          },
+          steps,
+          'choose' as Key,
+        ) ?? blocked(world, row, option, steps, draw);
+      const state = draw ? { patrol: draw } : {};
       const quest = !code && d.quest && resolution(world, actor, d.quest, choice_id, 0, steps);
       const why =
         code ??
         (typeof quest === 'string' ? quest : undefined) ??
         (accept && acceptRefused(world, actor, accept, steps));
       return why
-        ? { available: false, choice_id, label, reason: { code: why } }
-        : { available: true, choice_id, label };
+        ? { ...state, available: false, choice_id, label, reason: { code: why } }
+        : { ...state, available: true, choice_id, label };
     }),
   };
 }

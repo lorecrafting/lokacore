@@ -22,6 +22,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "encounter." <> _, "encounter_id" => e}),
     do: %{"kind" => "encounter", "encounter_id" => e}
 
+  def target(%{"op" => "patrol.transition", "quest_instance_id" => q}),
+    do: %{"kind" => "patrol", "quest_instance_id" => q}
+
   def target(%{"op" => "escort.transition", "actor_id" => a}),
     do: %{"kind" => "escort", "actor_id" => a}
 

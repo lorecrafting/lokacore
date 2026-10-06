@@ -6,6 +6,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { level, resourceRef, recoveryAdjustments, adjust } from '../resource.ts';
 import { fact, positionOf } from '../position/shared.ts';
 import { wornIn } from '../equipment/rule.ts';
+import { fail } from '../patrol/sequence.ts';
 import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
 
@@ -114,7 +115,10 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const owner_id = fatal.owner_id!;
   const writer_group = fatal.loss.writer_group;
   const room_id = world.state.containers[victim_id];
-  const ops: DeltaOp[] = separate(world, owner_id, writer_group);
+  const ops: DeltaOp[] = [
+    ...separate(world, owner_id, writer_group),
+    ...fail(world, owner_id, writer_group),
+  ];
   ops.push({
     op: 'entity.transfer',
     writer_group,

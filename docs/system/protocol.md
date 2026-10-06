@@ -687,7 +687,7 @@ adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets sta
 in force; pair enumeration is bounded before work, not an unmetered all-item scan.
 ## C2 patrol composition and admission
 
-**Selected, pending implementation.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source implemented; independent review pending.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
 quest instance, independently of the unchanged escort row. Register its minimal
 state/mutation target/transition and invariant under the patrol owner. Preserve
@@ -715,6 +715,19 @@ neither relation adds a second player transfer or steals the other's mutation ta
 No due-job chain, new player verb, global objective interpreter or per-frame writer
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
 update generated contracts and current release pins in the implementation PR.
+
+C2 typed patrol state and drawn control input require kernel API **1.22**.
+The concrete row is `PatrolRelation`, stored in `State.patrols` by QuestInstanceId:
+actor/body/NPC, quest instance, activation continuation/choice, accepted command
+`attempt_id`, route `cursor`, ordered unique room-ID `credit` and status.
+`patrol.transition` targets that quest instance and compares its full prior row.
+`QuestDefinition.patrol` owns leader, cyclic route, initial cursor, checkpoint subset,
+required count, reserved trust fact and completion narration; its objective evidence
+is `patrol`. Bound dialogue choices declare `patrol {quest, npc, transition}`.
+Non-start Choose input carries `patrol {quest_instance_id, attempt_id, cursor, status}`
+from the drawn PendingChoice. Shared read-only admission checks that exact value
+before execution or GameView eligibility. Bounds are at most 64 route occurrences
+and checkpoints; the authored count never exceeds its unique subset.
 
 ## B6 bounded sitting and topic composition
 

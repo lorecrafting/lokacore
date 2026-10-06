@@ -4,6 +4,7 @@
 // its offer's label (the offer is optional) and every journal text have catalog entries; a
 // post_activation_event objective names an item of this cartridge. Its policies are walked with every other policy
 // (content/cartridge_refs.ts nodes).
+import { patrol } from './cartridge_patrol.ts';
 import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
@@ -15,6 +16,7 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, q] of Object.entries((c.quests ?? {}) as Obj)) {
     const at = `.cartridge.quests${step(ref)}`;
+    out.push(...patrol(c, q, at, { named, text } as Checks));
     if (taken.has(q.key)) out.push(diag('DUPLICATE_DEFINITION', at));
     text(q, ['title'], at);
     if (q.offer) text(q.offer, ['label'], `${at}.offer`);
@@ -72,15 +74,17 @@ export function featureApi(c: Obj): Diagnostic[] {
     Object.values((c.dialogues ?? {}) as Obj).some(
       (d) => !d.quest && Object.values(d.choices as Obj).some((o) => o.receive),
     );
-  const minimum = debt
-    ? 14
-    : Object.hasOwn(c.manifest.requires.capabilities, 'escort')
-      ? 11
-      : transfers
-        ? 10
-        : riddles
-          ? 9
-          : 0;
+  const minimum = Object.values((c.quests ?? {}) as Obj).some((q) => q.patrol)
+    ? 22
+    : debt
+      ? 14
+      : Object.hasOwn(c.manifest.requires.capabilities, 'escort')
+        ? 11
+        : transfers
+          ? 10
+          : riddles
+            ? 9
+            : 0;
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   return minimum > 0 && (major < 1 || (major === 1 && minor < minimum))
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]

@@ -51,11 +51,18 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
-  owner?: 'skills',
+  owner?: 'skills' | 'patrol',
 ): R {
   if (
     owner !== 'skills' &&
     Object.values(world.cartridge.skills ?? {}).some((skill) => s.fact.key === `skill_${skill.key}`)
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'patrol' &&
+    Object.values(world.cartridge.quests ?? {}).some(
+      (q) => q.patrol && same(q.patrol.trust_fact, s.fact),
+    )
   )
     throw new KernelError('precondition_failed');
   const scope = scopeOf(world, actor, s.fact);

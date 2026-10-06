@@ -42,6 +42,9 @@ defmodule Loka.Content.Requires do
 
   defp minimum_feature_api(m, all) do
     cond do
+      is_map_key(m["requires"]["capabilities"], "patrol") ->
+        [1, 22]
+
       is_map_key(m["requires"]["capabilities"], "skills") ->
         [1, 18]
 

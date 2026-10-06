@@ -1,0 +1,9 @@
+{
+  "title": "room.gate_tower.title",
+  "description": "room.gate_tower.description",
+  "exits": {
+    "down": {
+      "to": "watch_post"
+    }
+  }
+}

@@ -1,0 +1,5308 @@
+{
+  "description": "Independent literal C2 portable lifecycle and boundary answers; no composer or validator derives results.",
+  "contracts": [
+    {
+      "name": "valid PatrolRelation",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": []
+    },
+    {
+      "name": "PatrolRelation requires /kind",
+      "contract": "PatrolRelation",
+      "value": {
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /actor_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /body_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/body_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /npc_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/npc_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /quest_instance_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /continuation_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/continuation_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /choice_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/choice_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /attempt_id",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/attempt_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /cursor",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /credit",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/credit",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation requires /status",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": []
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "valid PatrolDraw",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      },
+      "errors": []
+    },
+    {
+      "name": "PatrolDraw requires /quest_instance_id",
+      "contract": "PatrolDraw",
+      "value": {
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw requires /attempt_id",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/attempt_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw requires /cursor",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw requires /status",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "valid DeltaOp",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "writer_group": 0,
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "DeltaOp requires /op",
+      "contract": "DeltaOp",
+      "value": {
+        "writer_group": 0,
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/op",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DeltaOp requires /writer_group",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/writer_group",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DeltaOp requires /quest_instance_id",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "writer_group": 0,
+        "expected": null,
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DeltaOp requires /expected",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "writer_group": 0,
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DeltaOp requires /value",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "writer_group": 0,
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "expected": null
+      },
+      "errors": [
+        {
+          "path": "/value",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "valid MutationTarget",
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "patrol",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+      },
+      "errors": []
+    },
+    {
+      "name": "MutationTarget requires /kind",
+      "contract": "MutationTarget",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "MutationTarget requires /quest_instance_id",
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "patrol"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "valid QuestDefinition",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "QuestDefinition requires /patrol/npc",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/npc",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/route",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/route",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/initial_cursor",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/initial_cursor",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/checkpoints",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/checkpoints",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/required",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/trust_fact",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/trust_fact",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition requires /patrol/narration",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          }
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/narration",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "valid DialogueChoice",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "npc": "leader",
+          "quest": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "watch"
+          },
+          "transition": "start"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "DialogueChoice requires /patrol/npc",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "quest": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "watch"
+          },
+          "transition": "start"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/npc",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DialogueChoice requires /patrol/quest",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "npc": "leader",
+          "transition": "start"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/quest",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "DialogueChoice requires /patrol/transition",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "npc": "leader",
+          "quest": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "watch"
+          }
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/transition",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation bound cursor -1",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": -1,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation bound cursor 64",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 64,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw bound cursor 64",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 64,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw bound cursor -1",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": -1,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation bound credit ['00000100-2222",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [
+          "00000100-2222-4333-8444-555555555555",
+          "00000101-2222-4333-8444-555555555555",
+          "00000102-2222-4333-8444-555555555555",
+          "00000103-2222-4333-8444-555555555555",
+          "00000104-2222-4333-8444-555555555555",
+          "00000105-2222-4333-8444-555555555555",
+          "00000106-2222-4333-8444-555555555555",
+          "00000107-2222-4333-8444-555555555555",
+          "00000108-2222-4333-8444-555555555555",
+          "00000109-2222-4333-8444-555555555555",
+          "00000110-2222-4333-8444-555555555555",
+          "00000111-2222-4333-8444-555555555555",
+          "00000112-2222-4333-8444-555555555555",
+          "00000113-2222-4333-8444-555555555555",
+          "00000114-2222-4333-8444-555555555555",
+          "00000115-2222-4333-8444-555555555555",
+          "00000116-2222-4333-8444-555555555555",
+          "00000117-2222-4333-8444-555555555555",
+          "00000118-2222-4333-8444-555555555555",
+          "00000119-2222-4333-8444-555555555555",
+          "00000120-2222-4333-8444-555555555555",
+          "00000121-2222-4333-8444-555555555555",
+          "00000122-2222-4333-8444-555555555555",
+          "00000123-2222-4333-8444-555555555555",
+          "00000124-2222-4333-8444-555555555555",
+          "00000125-2222-4333-8444-555555555555",
+          "00000126-2222-4333-8444-555555555555",
+          "00000127-2222-4333-8444-555555555555",
+          "00000128-2222-4333-8444-555555555555",
+          "00000129-2222-4333-8444-555555555555",
+          "00000130-2222-4333-8444-555555555555",
+          "00000131-2222-4333-8444-555555555555",
+          "00000132-2222-4333-8444-555555555555",
+          "00000133-2222-4333-8444-555555555555",
+          "00000134-2222-4333-8444-555555555555",
+          "00000135-2222-4333-8444-555555555555",
+          "00000136-2222-4333-8444-555555555555",
+          "00000137-2222-4333-8444-555555555555",
+          "00000138-2222-4333-8444-555555555555",
+          "00000139-2222-4333-8444-555555555555",
+          "00000140-2222-4333-8444-555555555555",
+          "00000141-2222-4333-8444-555555555555",
+          "00000142-2222-4333-8444-555555555555",
+          "00000143-2222-4333-8444-555555555555",
+          "00000144-2222-4333-8444-555555555555",
+          "00000145-2222-4333-8444-555555555555",
+          "00000146-2222-4333-8444-555555555555",
+          "00000147-2222-4333-8444-555555555555",
+          "00000148-2222-4333-8444-555555555555",
+          "00000149-2222-4333-8444-555555555555",
+          "00000150-2222-4333-8444-555555555555",
+          "00000151-2222-4333-8444-555555555555",
+          "00000152-2222-4333-8444-555555555555",
+          "00000153-2222-4333-8444-555555555555",
+          "00000154-2222-4333-8444-555555555555",
+          "00000155-2222-4333-8444-555555555555",
+          "00000156-2222-4333-8444-555555555555",
+          "00000157-2222-4333-8444-555555555555",
+          "00000158-2222-4333-8444-555555555555",
+          "00000159-2222-4333-8444-555555555555",
+          "00000160-2222-4333-8444-555555555555",
+          "00000161-2222-4333-8444-555555555555",
+          "00000162-2222-4333-8444-555555555555",
+          "00000163-2222-4333-8444-555555555555",
+          "00000164-2222-4333-8444-555555555555"
+        ],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/credit",
+          "code": "too_many_items"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound route [{'cartridge_id",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/route",
+          "code": "too_few_items"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound route [{'cartridge_id",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/route",
+          "code": "too_many_items"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound checkpoints []",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/checkpoints",
+          "code": "too_few_items"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound checkpoints [{'cartridge_id",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/checkpoints",
+          "code": "too_many_items"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound initial_cursor -1",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": -1,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/initial_cursor",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound initial_cursor 64",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 64,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/initial_cursor",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound required 0",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 0,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition bound required 65",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 65,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "valid patrol QuestView",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "patrol view requires leader_id",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/leader_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires leader_name",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/leader_name",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires room_title",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/room_title",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires next_title",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/next_title",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires room",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/room",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires next_room",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/next_room",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires direction",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "credit": 0,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/direction",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires credit",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/credit",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires required",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view requires status",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "patrol view bound credit-1",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": -1,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/credit",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "patrol view bound credit65",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 65,
+          "required": 1,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/credit",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "patrol view bound required0",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 0,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "patrol view bound required65",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 65,
+          "status": "together"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/required",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires kind",
+      "contract": "Relation",
+      "value": {
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires actor_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires body_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/body_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires npc_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/npc_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires quest_instance_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires continuation_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/continuation_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires choice_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/choice_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires attempt_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/attempt_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires cursor",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires credit",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/credit",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol requires status",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": []
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol bound cursor-1",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": -1,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol bound cursor64",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 64,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/cursor",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "Relation patrol bound credit['00000002",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555",
+          "00000002-2222-4333-8444-555555555555"
+        ],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/credit",
+          "code": "too_many_items"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation invalid kind",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation invalid status",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "unknown"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw invalid status",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "unknown"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolStatus invalid ",
+      "contract": "PatrolStatus",
+      "value": "unknown",
+      "errors": [
+        {
+          "path": "",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "DialogueChoice invalid transition",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "npc": "leader",
+          "quest": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "watch"
+          },
+          "transition": "tick"
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/transition",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "PatrolRelation closed patrol object",
+      "contract": "PatrolRelation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together",
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation closed patrol object",
+      "contract": "Relation",
+      "value": {
+        "kind": "patrol",
+        "actor_id": "00000001-2222-4333-8444-555555555555",
+        "body_id": "00000002-2222-4333-8444-555555555555",
+        "npc_id": "00000003-2222-4333-8444-555555555555",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "continuation_id": "00000005-2222-4333-8444-555555555555",
+        "choice_id": "start",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together",
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "PatrolDraw closed patrol object",
+      "contract": "PatrolDraw",
+      "value": {
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "attempt_id": "00000006-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together",
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "DeltaOp closed patrol object",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "patrol.transition",
+        "writer_group": 0,
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "patrol",
+          "actor_id": "00000001-2222-4333-8444-555555555555",
+          "body_id": "00000002-2222-4333-8444-555555555555",
+          "npc_id": "00000003-2222-4333-8444-555555555555",
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "continuation_id": "00000005-2222-4333-8444-555555555555",
+          "choice_id": "start",
+          "attempt_id": "00000006-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "credit": [],
+          "status": "together"
+        },
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "MutationTarget closed patrol object",
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "patrol",
+        "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestDefinition closed patrol object",
+      "contract": "QuestDefinition",
+      "value": {
+        "key": "watch",
+        "title": "watch.title",
+        "objective": {
+          "evidence": "patrol"
+        },
+        "patrol": {
+          "npc": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "leader"
+          },
+          "route": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "post"
+            },
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "initial_cursor": 0,
+          "checkpoints": [
+            {
+              "cartridge_id": "patrol_test",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gate"
+            }
+          ],
+          "required": 1,
+          "trust_fact": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "narration": "watch.complete",
+          "unknown": true
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "DialogueChoice closed patrol object",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "watch.start",
+        "narration": "watch.started",
+        "accept": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "patrol": {
+          "npc": "leader",
+          "quest": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "watch"
+          },
+          "transition": "start",
+          "unknown": true
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "QuestView closed patrol object",
+      "contract": "QuestView",
+      "value": {
+        "quest": {
+          "cartridge_id": "patrol_test",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "watch"
+        },
+        "state": "active",
+        "title": "watch.title",
+        "patrol": {
+          "leader_id": "00000003-2222-4333-8444-555555555555",
+          "leader_name": "leader.name",
+          "room_title": "room.post",
+          "next_title": "room.gate",
+          "room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "post"
+          },
+          "next_room": {
+            "cartridge_id": "patrol_test",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gate"
+          },
+          "direction": "west",
+          "credit": 0,
+          "required": 1,
+          "status": "together",
+          "unknown": true
+        }
+      },
+      "errors": [
+        {
+          "path": "/patrol/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "closed patrol objective",
+      "contract": "QuestObjective",
+      "value": {
+        "evidence": "patrol",
+        "unknown": true
+      },
+      "errors": [
+        {
+          "path": "/unknown",
+          "code": "unknown_property"
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "activation without presence credit",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 0,
+              "credit": [],
+              "status": "together"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "leader departure retains credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "awaiting"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "player join appends one checkpoint",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [
+                "00000010-2222-4333-8444-555555555555"
+              ],
+              "status": "together"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "connector join retains credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [
+                "00000010-2222-4333-8444-555555555555"
+              ],
+              "status": "together"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "detour retains cursor and credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [
+                "00000010-2222-4333-8444-555555555555"
+              ],
+              "status": "paused"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "awaiting detour pauses",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "paused"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "paused"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit Rejoin retains credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [
+                "00000010-2222-4333-8444-555555555555"
+              ],
+              "status": "together"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fatal together clears credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "failed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fatal awaiting clears credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "failed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fatal paused clears credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "failed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "Restart replaces only attempt",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000007-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000007-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [],
+              "status": "together"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "terminal unique join",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "completed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "patrol",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "patrol",
+              "actor_id": "00000001-2222-4333-8444-555555555555",
+              "body_id": "00000002-2222-4333-8444-555555555555",
+              "npc_id": "00000003-2222-4333-8444-555555555555",
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "continuation_id": "00000005-2222-4333-8444-555555555555",
+              "choice_id": "start",
+              "attempt_id": "00000006-2222-4333-8444-555555555555",
+              "cursor": 1,
+              "credit": [
+                "00000010-2222-4333-8444-555555555555"
+              ],
+              "status": "completed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale full prior row",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 2,
+            "credit": [],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "swapped original leader",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000099-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "wrong mutation target binding",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000099-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "death retains credit",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "failed"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "restart reuses attempt",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "failed"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "implicit Rejoin on paused travel",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "paused"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555",
+              "00000011-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "duplicate player checkpoint",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555",
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "terminal cannot restart",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "completed"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "completed"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [
+              "00000010-2222-4333-8444-555555555555"
+            ],
+            "status": "together"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "second writer faults whole proposal",
+      "state": {
+        "clock": 0,
+        "patrols": {
+          "00000004-2222-4333-8444-555555555555": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "patrol.transition",
+          "writer_group": 0,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 0,
+            "credit": [],
+            "status": "together"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          }
+        },
+        {
+          "op": "patrol.transition",
+          "writer_group": 1,
+          "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "awaiting"
+          },
+          "value": {
+            "kind": "patrol",
+            "actor_id": "00000001-2222-4333-8444-555555555555",
+            "body_id": "00000002-2222-4333-8444-555555555555",
+            "npc_id": "00000003-2222-4333-8444-555555555555",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+            "continuation_id": "00000005-2222-4333-8444-555555555555",
+            "choice_id": "start",
+            "attempt_id": "00000006-2222-4333-8444-555555555555",
+            "cursor": 1,
+            "credit": [],
+            "status": "paused"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "patrol",
+            "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    }
+  ]
+}

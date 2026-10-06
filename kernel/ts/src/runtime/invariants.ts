@@ -1,6 +1,7 @@
 // size: allow 315, independent retirement pairing joins precondition replay
 import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
+import { patrolsHold } from './invariants_patrol.ts';
 import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
@@ -153,6 +154,8 @@ function extra(
 }
 
 const CHECKS: Record<string, (o: Any) => boolean> = {
+  patrol_transitions_hold: ({ state, delta, result }) =>
+    'fault' in result || patrolsHold(state, delta.ops, result),
   liquid_rows_valid: ({ state, result }) => liquidRowsValid(state, result),
   one_container_per_item: ({ state, delta, result }) => {
     if ('fault' in result) return true;
@@ -194,13 +197,17 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   },
   // Replay the contract preconditions on independent overlays; never use compose's result to
   // compute the expected answer. A fault vacuously holds this success-only invariant.
-  // size: allow 45, independent retirement pairing joins existing ordered precondition replay
+  // size: allow 46, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     if (!Number.isInteger(state.clock) || !retirementsHold(delta.ops)) return false;
     if (!creationsHold(state, delta.ops, result) || !liquidsHold(state, delta.ops, result))
       return false;
-    if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
+    if (
+      !encountersHold(state, delta.ops, result) ||
+      !escortsHold(state, delta.ops, result) ||
+      !patrolsHold(state, delta.ops, result)
+    )
       return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
@@ -209,7 +216,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
-      if (op.op === 'escort.transition' || op.op === 'liquid.set') continue;
+      if (op.op === 'escort.transition' || op.op === 'patrol.transition' || op.op === 'liquid.set')
+        continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
       const [need, give] = link(op);

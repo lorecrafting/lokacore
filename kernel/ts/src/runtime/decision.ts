@@ -19,6 +19,7 @@ import {
   type EntityId,
   type EntityIdentity,
   type EscortRelation,
+  type PatrolRelation,
   type ErrorCode,
   type EventPayload,
   type FactValue,
@@ -47,6 +48,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 export type State = {
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
+  readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
@@ -162,9 +164,10 @@ export type Mint = () => string;
  */
 export const COMPOSES = {
   action_recipe: ['check'],
-  schedule: ['movement', 'combat', 'death'],
-  combat: ['movement'],
-  dialogue: ['quest', 'containment'],
+  schedule: ['movement', 'combat', 'death', 'quest'],
+  combat: ['movement', 'quest'],
+  dialogue: ['quest', 'containment', 'movement'],
+  movement: ['quest'],
   commerce: ['containment'],
   scene: ['dialogue'],
   reaction: ['quest'],

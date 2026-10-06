@@ -162,6 +162,15 @@
     "implemented_in": "typescript"
   },
   {
+    "id": "patrol_transitions_hold",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "## 5. State delta composition"
+    },
+    "statement": "Patrol transitions preserve original identity, compare complete prior rows and obey bounded attempt lifecycle with final-row proof.",
+    "implemented_in": "elixir_and_typescript"
+  },
+  {
     "id": "liquid_rows_valid",
     "citation": {
       "document": "04-command-event-effect-protocol.md",

@@ -955,7 +955,7 @@ reduces load. Take, Buy and incoming transfer must include current liquid mass;
 Drop and recovery move the same contents without refilling them.
 ## S3 finite watch patrol (C2 selected contract)
 
-**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
+**Local source implemented; independent review pending.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
 selects an all-hours, player-started patrol led by the original noncombatant Tobin.
 The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
 walk and checkpoints. This is player-follow-leader behavior; it does not change

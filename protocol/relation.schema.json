@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Relation and provenance contracts",
-  "description": "Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).",
+  "description": "Typed relations and runtime entity identity/provenance (21 \u00a74; 03 \u00a73, \u00a711; 05 \u00a725).",
   "$defs": {
     "Relation": {
-      "description": "A typed, capability-owned relation between runtime entities (21 §4 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 §23). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.",
+      "description": "A typed, capability-owned relation between runtime entities (21 \u00a74 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 \u00a723). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.",
       "oneOf": [
         {
           "description": "entity_id is directly inside container_id (a room, character or container).",
@@ -79,6 +79,65 @@
               "status": "following"
             }
           ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "patrol"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "npc_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "attempt_id": {
+              "$ref": "identity.schema.json#/$defs/CommandId"
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 63
+            },
+            "credit": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "maxItems": 64
+            },
+            "status": {
+              "$ref": "relation.schema.json#/$defs/PatrolStatus"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id",
+            "body_id",
+            "npc_id",
+            "quest_instance_id",
+            "continuation_id",
+            "choice_id",
+            "attempt_id",
+            "cursor",
+            "credit",
+            "status"
+          ],
+          "additionalProperties": false,
+          "description": "Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle."
         }
       ],
       "examples": [
@@ -100,7 +159,7 @@
       ]
     },
     "EntityOrigin": {
-      "description": "Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).",
+      "description": "Where a runtime entity came from (21 \u00a74 'spawn/population provenance'; 05 \u00a725 'Population provenance': a plan may only replenish or clean up what it spawned).",
       "oneOf": [
         {
           "description": "Placed by the cartridge's authored content.",
@@ -180,7 +239,7 @@
       ]
     },
     "EntityIdentity": {
-      "description": "A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.",
+      "description": "A runtime entity's identity and provenance (03 \u00a73, \u00a711; 21 \u00a74): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.",
       "type": "object",
       "properties": {
         "id": {
@@ -305,6 +364,102 @@
           "status": "following"
         }
       ]
+    },
+    "PatrolStatus": {
+      "enum": [
+        "together",
+        "awaiting",
+        "paused",
+        "failed",
+        "completed"
+      ],
+      "description": "Together, awaiting ordinary player entry, explicitly paused, fatally failed or terminally completed."
+    },
+    "PatrolRelation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "patrol"
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "npc_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "quest_instance_id": {
+          "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+        },
+        "continuation_id": {
+          "$ref": "delta.schema.json#/$defs/ContinuationId"
+        },
+        "choice_id": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "attempt_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "cursor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 63
+        },
+        "credit": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/EntityId"
+          },
+          "maxItems": 64
+        },
+        "status": {
+          "$ref": "relation.schema.json#/$defs/PatrolStatus"
+        }
+      },
+      "required": [
+        "kind",
+        "actor_id",
+        "body_id",
+        "npc_id",
+        "quest_instance_id",
+        "continuation_id",
+        "choice_id",
+        "attempt_id",
+        "cursor",
+        "credit",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle."
+    },
+    "PatrolDraw": {
+      "type": "object",
+      "properties": {
+        "quest_instance_id": {
+          "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+        },
+        "attempt_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "cursor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 63
+        },
+        "status": {
+          "$ref": "relation.schema.json#/$defs/PatrolStatus"
+        }
+      },
+      "required": [
+        "quest_instance_id",
+        "attempt_id",
+        "cursor",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "The exact quest instance, accepted attempt, occurrence cursor and lifecycle drawn on a patrol control; a fresh invocation cannot reuse a stale leg."
     }
   }
 }
