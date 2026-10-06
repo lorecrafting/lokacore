@@ -108,3 +108,50 @@ remain disclosed in the evidence, outside these two fixes. Final ordered release
 pins, hosted CI and fresh browser/native proof remain separate publication work.
 Ponytail Review: lean; exact saved receipt routing and one distinct behavioral
 regression are sufficient. No primary finding remains open.
+
+
+## B9 integrated successor carryover — APPROVE
+
+Exact source `f96e0245ab6086dacfaa276e338405f1710a0b8d`, frozen evidence
+`33163a1bca6de9d8b5e0e0bf0cf45134542b77fb`. Both published B9 predecessor
+`b9dd1d9c80cf25d46823f0c3df28830e2af8afdb` and approved strict C3 source
+`2dbf55b51cf7ae6bf930a550bb2dd61327a4127e` are ancestors. The evidence commit
+changes no source. Scope: R1/R2 carryover, shared Book/dream/navigation and
+receipt owners, successor pin and evidence; no broad re-review of published B9.
+
+**R1/R2 remain closed; no findings.** The merge retains the exact receipt-bound
+remounted corpse Take route and the night-only replacement branch/regression.
+B9’s dream pages remain nested under the real bed, while corpse pickup remains
+owned by its real corpse. The shared navigation checks combat, chapter and room
+changes before dream/detail continuity; exact saved command routing keeps dream
+and corpse receipt owners distinct. Frozen B9 v028 answers remain byte-for-byte
+unchanged.
+
+Independent current-head proof:
+
+- Standard-library Python reconstruction from frozen B9 v028 plus the reviewed
+  C3 content delta matches the complete v029 value, canonical bytes and SHA-256
+  `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`.
+  Independent Python UUID allocation matches all 140 frozen answers and all 140
+  actual fresh-world identities. Manifest and installed API are 1.25; release
+  is 0.0.29. `mise exec -- mix loka.compile` emits the exact independent artifact.
+- Kernel hounds, Book hounds/dream, real-SQLite hounds/dream and app chapter tests:
+  **25/25 pass**. Entire touched Book polish suite: **15/15 pass**, including
+  corpse Take retry/remount and Combat Flee. The two existing D2 remounted Read
+  cases also pass. No old app-pin mismatch remains in the checked app path.
+- A temporary copy of the real Book dream harness outside the repository runs
+  both routes against the actual v029 successor, with its independently pinned
+  bed identity: paid Rest, nested Close/Resume, choice, acknowledgement and cold
+  World resume; uncertain paid Rest remount opens only after settlement.
+  **2/2 pass**. This checks integrated data as well as current code; the original
+  standalone B9 tests retain their frozen v028 consumer.
+- All 13 C3 evidence hashes match. The retained exact-head full active line is
+  green with 360 Elixir tests and the remaining contract/kernel/docs/architecture/
+  size/format checks; inspected rather than rerun for this carryover review.
+  `git diff --check` passes. No source edit or new source mutant was made.
+
+The earlier provisional release-pin carry is resolved. Ponytail Review: lean;
+no new framework or dependency, only the declared successor data and existing
+Book owners. This carries forward the primary approval; hosted publication checks
+and browser/native proof retain their separate scope. No owner save, preview or
+native session was opened.
