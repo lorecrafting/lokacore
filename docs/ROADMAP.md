@@ -327,6 +327,12 @@ Elspeth's Cottage, with finite Forage/Take apples and held-item Eat.
 approve, the local gate and isolated browser proof pass, and all six hosted
 checks are green on the exact reviewed head.
 
+D7 deer has a [PM-selected planning proposal](decisions/pm-decision-d7-deer-2026-10-06.md)
+and [re-pinned brief](briefs/chapter-one/d7-deer-brief-2026-10-05.md) on published
+C3/C4/D4. Three one-slot local populations replace the provisional nine-room
+corridor; delayed sight flight and typed deer/hide origin remain source work.
+Independent plan review, D7 release pins, checks and PR are pending.
+
 D3 western Ashmere has a [brief](briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md)
 and independently approved provisional source for five rooms, Hob, and readable
 mill clues. Final predecessor re-pin, accumulated gate and browser proof follow

@@ -1260,3 +1260,17 @@ The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerat
 Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
 
 D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
+
+## D7 deer planning declarations
+
+**PM-selected proposal; independent plan review and source proof pending.** The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+
+| Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
+|---|---|---|---|---|---|---|
+| Willow deer | Willow Shade | Willow Shade, Drowned Oak | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Oak deer | Drowned Oak | Drowned Oak, Willow Shade | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Orchard deer | Orchard | Orchard, Smithy | 1 / 1 day and night | 172800 | 3600 | 300 |
+
+The aggregate fresh and live cap is three. Each bundle has one HP1 attackable deer, one directly held 100g hide and one public fixed-room corpse template. The deer attack chance/damage must be selected and independently checked against actual C1 admission/draw rules before source assignment; the provisional brief did not establish those literals. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
+
+Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
