@@ -20,7 +20,7 @@ test('loader rejects impossible held-food declarations while retaining capped fo
     ['container', (c) => (c.items[`${prefix}:item/apple_01`].container = true)],
     ['equipment', (c) => (c.items[`${prefix}:item/apple_01`].slot = 'hand')],
     ['missing text', (c) => (c.items[`${prefix}:item/apple_01`].edible.narration = 'missing.line')],
-    ['old API', (c) => (c.manifest.requires.kernel_api.at_least = '1.25')],
+    ['old API', (c) => (c.manifest.requires.kernel_api.at_least = '1.26')],
     [
       'undeclared',
       (c) => {

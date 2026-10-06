@@ -13,7 +13,7 @@ defmodule Loka.ContentFoodTest do
       {file, &Map.put(&1, "container", true)},
       {file, &Map.put(&1, "slot", "hand")},
       {file, &put_in(&1, ["edible", "narration"], "missing.line")},
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.25")},
+      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.26")},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "food") end)}
     ]

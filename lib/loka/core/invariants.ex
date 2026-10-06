@@ -98,8 +98,8 @@ defmodule Loka.Core.Invariants do
         do: {e, c}
   end
 
-  defp preconditions_hold?(s, ops, result) do
-    is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
+  defp preconditions_hold?(%{"clock" => clock} = s, ops, result) when is_integer(clock) do
+    Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
       Loka.Core.InvariantsPatrol.holds?(s, ops, result) and
@@ -108,6 +108,8 @@ defmodule Loka.Core.Invariants do
       Loka.Core.InvariantsFood.holds?(s, ops) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
+
+  defp preconditions_hold?(_, _, _), do: false
 
   defp replay_preconditions(s, ops, result) do
     horizon =
