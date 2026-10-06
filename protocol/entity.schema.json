@@ -192,6 +192,9 @@
         },
         "vessel": {
           "$ref": "liquid.schema.json#/$defs/VesselSpec"
+        },
+        "readable": {
+          "$ref": "#/$defs/ItemReadable"
         }
       },
       "required": [
@@ -664,6 +667,38 @@
             "chance": 95,
             "damage_min": 3,
             "damage_max": 3
+          }
+        }
+      ]
+    },
+    "ItemReadable": {
+      "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "text": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "topic": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "required": [
+        "label",
+        "text"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "label": "actions.read_book",
+          "text": "readable.ward_of_the_fen",
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.26",
+            "kind": "topic",
+            "key": "ward"
           }
         }
       ]

@@ -2,7 +2,8 @@
   "title": "room.belfry.title",
   "description": "room.belfry.description",
   "exits": {
-    "down": { "to": "bell_tower" }
+    "down": { "to": "bell_tower" },
+    "up": { "to": "spire" }
   },
   "details": {
     "bell": {

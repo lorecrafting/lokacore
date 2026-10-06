@@ -212,6 +212,12 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.stack.map((p: any) => p.id),
     [corpse.id, pelt.id],
   );
+  h.tap('Back to container');
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id],
+  );
+  h.tap(h.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
   assert.ok(
     h.labels().some((x) => x.startsWith('Take')),
     JSON.stringify(h.labels()),

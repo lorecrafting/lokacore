@@ -32,6 +32,7 @@ export type Logs = {
   status: ElapsedStatus;
   recovered?: boolean;
   narrationId?: string;
+  confirmedRead?: string;
   returnWorld?: boolean;
   returnDetail?: string;
   fault?: string;

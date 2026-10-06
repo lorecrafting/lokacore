@@ -54,6 +54,15 @@ function metadata(
           ['title'],
           `.cartridge.rooms${step(ref)}.details${step(key)}.perception`,
         );
+  for (const [ref, item] of Object.entries((c.items ?? {}) as Obj)) {
+    if (!item.readable) continue;
+    const at = `.cartridge.items${step(ref)}.readable`;
+    if (item.readable.topic) checks.named(item.readable.topic, 'topic', `${at}.topic`);
+    if (Number(c.manifest.requires.kernel_api.at_least.split('.')[1]) < 24)
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
+  }
   if (usesB6(c) && Number(c.manifest.requires.kernel_api.at_least.split('.')[1]) < 21)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
 }

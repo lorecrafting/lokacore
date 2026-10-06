@@ -2,7 +2,19 @@
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
 
-import type { Failed, GameView, Reply } from '../../packages/game-view/session.ts';
+import type { Failed, Game, GameView, Reply } from '../../packages/game-view/session.ts';
+
+// A text key's words, and an action label's. ponytail: the cartridge has no text for most action
+// labels yet, so a label shows the key's last word, capitalised as the texted labels are.
+export const sayers = (g: Game): { text: Say; label: Say } => ({
+  text: (key) => g.text(key) ?? key,
+  label: (key) =>
+    g.text(key) ??
+    key
+      .replace(/^actions?\./, '')
+      .replaceAll('_', ' ')
+      .replace(/^./, (a) => a.toUpperCase()),
+});
 
 /** The line under the save-error headline: a Start over that is not confirmed gets its words. */
 export const detail = (f: Failed) =>

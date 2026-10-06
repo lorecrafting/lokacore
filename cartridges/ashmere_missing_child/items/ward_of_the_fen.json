@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "ward_of_the_fen",
+    "book"
+  ],
+  "short": "item.ward_of_the_fen.short",
+  "room_line": "item.ward_of_the_fen.room",
+  "description": "item.ward_of_the_fen.description",
+  "location": {
+    "in": "room",
+    "room": "scriptorium"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.ward_of_the_fen",
+    "topic": "ward"
+  }
+}

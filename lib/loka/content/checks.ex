@@ -38,6 +38,9 @@ defmodule Loka.Content.Checks do
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
 
+  def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
+    do: Map.put(readable, "topic", ref(topic, "topic", m))
+
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
     field = fn {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)} end
@@ -128,8 +131,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"items" => _, "label" => _, "narration" => _} = h, m),
     do: Map.update!(h, "items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
 
-  # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
-  # map may have a detail keyed resource, whose value is a map).
+  # Recipe costs and thresholds expand only their owned reference fields.
   def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
@@ -353,9 +355,7 @@ defmodule Loka.Content.Checks do
       )
   end
 
-  # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
-  # dialogue's.
+  # Policy trees from named/inline rules, variants, recipes, quests, reactions and dialogues.
   defp trees(defs, actions) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),

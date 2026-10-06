@@ -150,7 +150,7 @@ function sharedGame(
       };
     },
     text: (key) => cartridge.text[key as Key],
-    lastNarration: story.narration,
+    lastNarration: (command_id) => (pending() ? undefined : story.narration(command_id)),
   };
 }
 

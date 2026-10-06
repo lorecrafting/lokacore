@@ -78,6 +78,7 @@ export function parts(c: Obj): [string, Obj, string][] {
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
+    if (i.readable) out.push(['readable', i.readable, `.cartridge.items${step(ref)}.readable`]);
     if (i.fuel) out.push(['fuel', i.fuel, `.cartridge.items${step(ref)}.fuel`]);
     add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
     if (i.slot) out.push(['slot', i.slot, `.cartridge.items${step(ref)}.slot`]);

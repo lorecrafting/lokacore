@@ -1,5 +1,5 @@
-"""Independent provisional C3+D5 answer: frozen C3 plus seven D5 room sources.
-Python JSON/SHA-256/UUID only; final successor version re-pins after D2 integration.
+"""Independent provisional C3+D2 answer: published D2 plus frozen C3-only delta.
+Python JSON/SHA-256/UUID only; final successor version re-pins after parallel integration.
 """
 import hashlib
 import json
@@ -8,23 +8,30 @@ import uuid
 
 here = Path(__file__).parent
 source = here.parent.parent / 'cartridges/ashmere_missing_child'
-v = json.loads((here / 'missing_child_v026_hash.json').read_text())['value']
+v = json.loads((here / 'missing_child_v027_hash.json').read_text())['value']
+c3 = json.loads((here / 'missing_child_c3_b8_hash.json').read_text())['value']
 version = json.loads((source / 'cartridge.json').read_text())['version']
-v = json.loads(json.dumps(v).replace('0.0.26', version))
-
-def ref(kind, key):
-    return {'cartridge_id': 'ashmere_missing_child', 'cartridge_version': version, 'kind': kind, 'key': key}
-
-for key in ['drowned_oak', 'fox_hollow', 'oak_branches', 'oak_crown', 'black_pool', 'fox_den_deep', 'fishing_shallows']:
-    room = json.loads((source / 'rooms' / f'{key}.json').read_text())
-    for edge in room['exits'].values():
-        edge['to'] = ref('room', edge['to'])
-    v['rooms'][f'ashmere_missing_child@{version}:room/{key}'] = {'key': key, **room}
-v['text'].update(json.loads((source / 'text.json').read_text()))
+v = json.loads(json.dumps(v).replace('0.0.27', version))
+c3 = json.loads(json.dumps(c3).replace('0.0.26', version))
+for section, keys in {
+    'rooms': ['adder_nest', 'hound_run', 'reed_bank'],
+    'npcs': ['fen_hound'],
+    'items': ['hound_pelt', 'hound_corpse'],
+    'population_bundles': ['fen_hounds'],
+    'populations': ['fen_hounds'],
+}.items():
+    for key in keys:
+        name = next(k for k in c3[section] if k.endswith('/' + key))
+        v.setdefault(section, {})[name] = c3[section][name]
+v['lock']['capabilities']['population'] = 1
+v['manifest']['requires']['capabilities']['population'] = 1
+c3_text = json.loads((here / 'missing_child_c3_b8_hash.json').read_text())['value']['text']
+b8_text = json.loads((here / 'missing_child_v025_hash.json').read_text())['value']['text']
+v['text'].update({key: value for key, value in c3_text.items() if b8_text.get(key) != value})
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 digest = hashlib.sha256(canonical.encode()).hexdigest()
 (here / 'missing_child_c3_provisional_hash.json').write_text(json.dumps({
-    'description': 'Provisional C3+D5: persistent Fen hounds and corpse loot on published dry Deep Fen rooms.',
+    'description': 'Provisional C3+D2: persistent Fen hounds and corpse loot on published Priory and dry Deep Fen.',
     'value': v, 'canonical': canonical, 'sha256': digest,
 }, indent=2, ensure_ascii=False) + '\n')
 rooms = sorted(v['rooms'].items())
@@ -44,4 +51,4 @@ for ordinal, label in enumerate(labels):
     raw[8] = (raw[8] & 63) | 128
     answers[label] = str(uuid.UUID(bytes=bytes(raw)))
 (here / 'missing_child_c3_provisional_ids.json').write_text(json.dumps(answers, indent=2) + '\n')
-print(f'Independent provisional C3+D5 {version}: {digest}, {len(answers)} initial IDs.')
+print(f'Independent provisional C3+D2 {version}: {digest}, {len(answers)} initial IDs.')

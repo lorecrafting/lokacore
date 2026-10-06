@@ -1,0 +1,12 @@
+{
+  "title": "room.scriptorium.title",
+  "description": "room.scriptorium.description",
+  "exits": {
+    "east": {
+      "to": "cloister"
+    },
+    "west": {
+      "to": "kitchen_garden"
+    }
+  }
+}

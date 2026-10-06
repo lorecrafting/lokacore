@@ -328,6 +328,7 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
   - `npc`
   - `item`
   - `template`
+- **ItemReadable**: API1.24: one explicit held-item Read, with optional declared Boolean topic grant.
 - **NpcDefinition**: A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).
 - **Shop**: A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).
 - **ShopOffer**: One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).

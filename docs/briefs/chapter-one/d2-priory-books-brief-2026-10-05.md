@@ -1,14 +1,20 @@
 # D2 — Public Priory rooms and held-book topics: adopted developer brief
 
-**Proposed source branch:** `chapter-one/d2-priory-books`, not created by planning.
-**Inspected planning base:** local main `4ec52632d510e45214e43a1fe5beca0ec5addbad`.
-A1 public Aldric/Belfry is installed; B5 source is provisionally integrated at chapter
-`ashmere_missing_child@0.0.19`/API1.17, with its independent v019 hash/ID fixtures.
-B5 independent source review is pending; B6 has an adopted plan and queued source,
-not an installed topic capability. Re-pin actually reviewed/integrated A1/B5/B6
-source heads and inherited check dispositions before assigning D2. Dependency final
-review heads, D2 implementation/review/PR, successor release/API/hash/IDs and proof:
-null. Planning selects behavior; it is not source GO or proof of gameplay.
+**Source branch:** `chapter-one/d2-priory-books`; isolated development, unpublished.
+**Revalidated published source base:** `ac9b22757a82c4b4c3d60ddf8f94e5c98014bae4`.
+A1 public Aldric/Belfry source `93b3531219685795e47a26577ae948101db0059d`,
+B5 Infirmary Herbs fix source `2df52d328adbfdea39a0cde623f6a9f34fffb186`, and
+B6 Wisp/ward source `e7aeace7f369254e3fb4b3f197dc1b641b6e6e87` are published
+ancestors with closed independent primary and separate save/protocol approvals
+([A1](../../reviews/2026-10-05-q3-bell-lost-review.md),
+[B5 primary](../../reviews/2026-10-05-b5-infirmary-herbs-primary-review.md),
+[B5 save](../../reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md),
+[B6 primary](../../reviews/2026-10-05-b6-wisp-primary-review.md),
+[B6 save](../../reviews/2026-10-05-b6-wisp-save-second-review.md)).
+The installed B8 predecessor is chapter `0.0.25`/API1.23; its frozen fixture remains
+unchanged. D2's local `0.0.26`/API1.24 successor fixtures are provisional until the
+PM integrates concurrent C3/B9 source and independently re-pins the final answer.
+D2 independent source review, hosted PR, CI and publication: null.
 PM adoption: Codex Sol medium; source implementation: Sol high (protocol/save).
 
 ## Outcome and governing clauses
@@ -142,3 +148,6 @@ nonrecoverable actual custody, changed ordinary notice grants, protocol/foundati
 scope beyond this consumer or conflicting governing clauses. No invented successor
 pins, passing proof, merge or publication. Planning self-review: reuse existing
 custody/topic/receipt/detail owners, no new framework/dependency; source proof null.
+
+Developer source and headless verification for independent review:
+[local D2 handoff](../../evidence/2026-10-05-d2-priory-books/README.md).

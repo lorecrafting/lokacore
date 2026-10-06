@@ -1,0 +1,83 @@
+(node:49769) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ fresh dry exploration traverses every reciprocal edge and reopens all five new rooms (2241.483875ms)
+✔ D5 movement and stone Read reconcile committed and absent COMMIT outcomes and replay exactly (837.621958ms)
+✔ actual fatal separation in the den reopens and permits gear-free original-Wren Rejoin and rescue (675.035958ms)
+✔ fixed stone preserves original-message custody before and after stays and preserves lost (507.284625ms)
+✔ the current chapter refuses a lookalike item substituted into the original-message role (115.932417ms)
+✔ literal public Priory route returns safely under both child/bell outcomes at day and night (510.073334ms)
+✔ only deliberate exact held Read teaches its declared topic and keeps time RNG and other membership (66.638208ms)
+✔ open held ancestors admit exactly the original book; closed ground foreign worn and departed children refuse (17.925125ms)
+✔ literal novice schedules keep distinct cards and exact departure contexts (63.7545ms)
+✔ one 100g book fills a 11900g held load and the second Take refuses unchanged (3.347708ms)
+✔ Wisp completion and held Ward Read compose in both acquisition orders (188.017042ms)
+✔ ordinary notice Read remains eventless and teaches no topic in the active book cartridge (37.134459ms)
+✔ item writing, topic refs, text and unique player Boolean mappings fail closed (1705.027ms)
+✔ loaded consult alias projects the Read command and resolves the exact nested book invocation (163.220958ms)
+(node:49772) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.162458ms)
+✔ journal cues belong only to changed NPC histories (0.312166ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.149791ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.567542ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.162208ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.163083ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.088041ms)
+✔ the log stops growing in one room, its last line the latest answer (2.612084ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.502709ms)
+✔ a narration recovery fault holds combat results while their line routing is unavailable (1.144667ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.7095ms)
+(node:49773) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual nested book Item opens locally and Read stays between description and options with local Back (580.182791ms)
+✔ Book restores Ward or Bell once through pulse after remount during uncertain Read (590.605959ms)
+✔ Book restores Ward or Bell once through title press after remount during uncertain Read (713.696416ms)
+(node:49774) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves (760.545334ms)
+✔ the 0.0.9 chapter save is refused intact until explicit Start over (156.860916ms)
+✔ actual App pause and resume preserve 9ms plus 11ms as exactly one logical unit (138.481334ms)
+✔ actual App stops unknown storage wakeups and resumes after confirmed user recovery (185.448208ms)
+✔ old App wakeups cannot mutate the same remounted Game or a replacement save (268.127333ms)
+✔ lantern-carry plays as its frozen trace; its story point reaches the run's account once (102.563459ms)
+✔ lantern-leave plays as its frozen trace; its story point reaches the run's account once (218.12225ms)
+✔ an old run's view token is stale after a new game, at the same revision (14.244917ms)
+✔ adverse early-possession (135.795417ms)
+✔ adverse drop-after-choice-opened (78.468875ms)
+✔ adverse walked-away-rejects-new-choice (43.217375ms)
+✔ adverse walked-away-keeps-receipt (33.135792ms)
+✔ adverse altered-choice (40.347292ms)
+✔ adverse choice-rollback (44.696625ms)
+✔ adverse choice-unknown-commit-absent (151.156375ms)
+✔ adverse choice-unknown-commit-committed (37.717458ms)
+✔ adverse commit-before-display (665.819166ms)
+✔ adverse reading-has-no-effect (26.796584ms)
+✔ adverse stale-choice-and-blocked-exit (35.974375ms)
+✔ a choice committed with its acknowledgement lost recovers to its receipt, reported once (32.525916ms)
+(node:49786) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (2860.976959ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (812.932125ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (656.506375ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (211.505375ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (136.851041ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (127.812542ms)
+✔ readable-only SQLite recovery rejects forged narration without another history consumer (17.005792ms)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6287.035125

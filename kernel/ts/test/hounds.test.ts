@@ -31,7 +31,7 @@ const fresh = () => newWorld(loaded.cartridge as Cartridge, context, [1, 2, 3, 4
 // Breaks: the installed loader accepts a forged one-way population area after its content hash is re-pinned.
 test('loader refuses a one-way hound area with a valid hash', () => {
   const c = structuredClone(pin.value);
-  const room = c.rooms['ashmere_missing_child@0.0.27:room/adder_nest'];
+  const room = c.rooms['ashmere_missing_child@0.0.28:room/adder_nest'];
   room.exits.north = room.exits.west;
   delete room.exits.west;
   const canonical = encode(c);
@@ -44,14 +44,14 @@ test('loader refuses a one-way hound area with a valid hash', () => {
   if (!result.ok)
     assert.equal(
       result.diagnostic.path,
-      '.cartridge.populations["ashmere_missing_child@0.0.27:population/fen_hounds"].area',
+      '.cartridge.populations["ashmere_missing_child@0.0.28:population/fen_hounds"].area',
     );
 });
 
 // Breaks: a plan whose wander interval exceeds its replacement delay enters the loaded world.
 test('loader refuses a slower wander than replacement with a valid hash', () => {
   const c = structuredClone(pin.value);
-  const plan = c.populations['ashmere_missing_child@0.0.27:population/fen_hounds'];
+  const plan = c.populations['ashmere_missing_child@0.0.28:population/fen_hounds'];
   plan.wander_interval = 7200;
   plan.replacement_delay = 3600;
   const canonical = encode(c);
@@ -64,7 +64,7 @@ test('loader refuses a slower wander than replacement with a valid hash', () => 
   if (!result.ok)
     assert.equal(
       result.diagnostic.path,
-      '.cartridge.populations["ashmere_missing_child@0.0.27:population/fen_hounds"].wander_interval',
+      '.cartridge.populations["ashmere_missing_child@0.0.28:population/fen_hounds"].wander_interval',
     );
 });
 const hounds = (w: World) =>
@@ -126,7 +126,7 @@ test('the integrated chapter has the independent genesis identities and one held
   assert.equal(w.character, ids.character);
   assert.equal(w.body, ids.body);
   for (const name of ['hound_run', 'adder_nest'])
-    assert.equal(w.roomIds[`ashmere_missing_child@0.0.27:room/${name}`], ids[`room/${name}`]);
+    assert.equal(w.roomIds[`ashmere_missing_child@0.0.28:room/${name}`], ids[`room/${name}`]);
   assert.equal(hounds(w).length, 4);
   assert.equal(pelts(w).length, 4);
   assert.equal(Object.keys(w.state.population_slots ?? {}).length, 6);
@@ -187,7 +187,7 @@ test('combat-first and population-first boundaries conserve the same fatal hound
     entity_id: member,
     resource: {
       cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.27',
+      cartridge_version: '0.0.28',
       kind: 'resource',
       key: 'hp',
     },
@@ -308,7 +308,7 @@ test('a lethal hound reply returns the same body and keeps the surviving hound',
     entity_id: body,
     resource: {
       cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.27',
+      cartridge_version: '0.0.28',
       kind: 'resource',
       key: 'hp',
     },
@@ -324,14 +324,14 @@ test('a lethal hound reply returns the same body and keeps the surviving hound',
   for (
     let i = 0;
     i < 20 &&
-    w.state.containers[body] !== w.roomIds['ashmere_missing_child@0.0.27:room/chapel_nave'];
+    w.state.containers[body] !== w.roomIds['ashmere_missing_child@0.0.28:room/chapel_nave'];
     i++
   )
     w = elapsed(w, w.state.clock + 150);
   assert.equal(w.body, body);
   assert.equal(
     w.state.containers[body],
-    w.roomIds['ashmere_missing_child@0.0.27:room/chapel_nave'],
+    w.roomIds['ashmere_missing_child@0.0.28:room/chapel_nave'],
   );
   assert.equal(live(w).length, 4);
   assert.equal(
