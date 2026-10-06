@@ -1,6 +1,7 @@
 // size: allow 325, food, water, and practical skill offers share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
+import { bandageActions } from './bleed.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
@@ -37,6 +38,7 @@ import { reach } from '../mechanics/lookups.ts';
 const HIDDEN = [
   'recover_corpse',
   'eat',
+  'bandage',
   'buy',
   'sell',
   'use_service',
@@ -95,6 +97,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
         foodActions(world, actor, id, set, steps),
+        bandageActions(world, actor, id, set, steps),
         readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>
@@ -225,7 +228,6 @@ const lidded = (world: World, id: string) => {
 };
 // Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
 const equip = (a: Offered) => equipment.VERBS.includes(a.command);
-
 // True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
 // then equipment@1's checks (equipment.transfer).
 function fits(world: World, actor: CharacterId, a: Offered, item: string) {

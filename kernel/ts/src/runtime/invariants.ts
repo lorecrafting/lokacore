@@ -14,7 +14,6 @@ import { validate } from '../foundation/validate.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
-
 const moved = (r: Result): [string, Json][] =>
   ('changes' in r ? r.changes : [])
     .filter((c) => c.target.kind === 'containment')
@@ -48,6 +47,7 @@ function link(op: Any): [Json | undefined, Json] {
   };
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];
+  if (op.op === 'bleed.transition') return [op.expected, op.value];
   if (op.op === 'entity.create') return [undefined, op.identity];
   if (op.op === 'entity.transfer') return [op.source_id, op.destination_id];
   if (op.op === 'cooldown.start') return [op.from, op.at];
@@ -62,6 +62,7 @@ function initial(op: Any, s: Any): Json | undefined {
   if (op.op === 'entity.transfer') return s.containers?.[op.entity_id];
   if (family === 'quest') return s.quests?.[op.instance_id]?.state;
   if (family === 'choice') return s.choices?.[op.continuation_id]?.status;
+  if (family === 'bleed') return s.bleeds?.[op.body_id] ?? null;
   if (family === 'cooldown') return s.cooldowns?.[key(target(op))];
   if (family === 'barrier')
     return s.barriers?.[key(target(op))] ?? s.barrier_initial?.[key(op.barrier)];

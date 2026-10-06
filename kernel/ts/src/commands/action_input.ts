@@ -18,6 +18,7 @@ const INPUTS: readonly string[] = [
   'line',
   'quoted_price',
   'method',
+  'effect_generation',
   'service',
   'route',
   'quoted_fare',

@@ -10,6 +10,9 @@ export function target(op: DeltaOp): MutationTarget {
     return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
   if (op.op === 'population.control' || op.op === 'population.slot') return populationTarget(op);
   if (op.op === 'crow.transition') return { kind: 'crow', plan: op.plan, slot: op.slot };
+  if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
+  if (op.op === 'time.advance') return { kind: 'clock' };
+
   switch (op.op) {
     case 'fact.assign':
       return factTarget(op);
@@ -34,8 +37,6 @@ export function target(op: DeltaOp): MutationTarget {
     case 'water.transition':
     case 'escort.transition':
       return { kind: op.op === 'water.transition' ? 'water' : 'escort', actor_id: op.actor_id };
-    case 'time.advance':
-      return { kind: 'clock' };
     case 'resource.adjust':
     case 'resource.initialize':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };

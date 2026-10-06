@@ -69,7 +69,8 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const now = game.view().view;
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
-  const itemChanged = !!accepted && ['taken', 'dropped', 'eaten'].includes(accepted.outcome);
+  const itemChanged =
+    !!accepted && ['taken', 'dropped', 'eaten', 'bandaged'].includes(accepted.outcome);
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const command_id =

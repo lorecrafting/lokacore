@@ -199,6 +199,7 @@ export function CharacterPage(
     <Sheet title="Character">
       {!known && <Text style={note}>Nothing is known about you yet.</Text>}
       {position && <Text style={prose}>{cap(position)}</Text>}
+      {p.view?.bleeding && <Text style={prose}>{p.text(p.view.bleeding.label)}</Text>}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>

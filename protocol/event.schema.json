@@ -532,7 +532,8 @@
             "cause": {
               "type": "string",
               "enum": [
-                "drowning"
+                "drowning",
+                "bleeding"
               ]
             }
           },

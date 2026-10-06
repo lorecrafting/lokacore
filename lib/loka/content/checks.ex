@@ -1,4 +1,4 @@
-# size: allow 400, careful and discounted skill refs join the shared checked expansion boundary
+# size: allow 410, skill and bleed refs share the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -112,6 +112,7 @@ defmodule Loka.Content.Checks do
     |> Map.delete("shop")
     |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
+    |> expand_attack(m)
     |> Map.merge(
       if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
     )
@@ -162,6 +163,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),
     do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
+
+  def expand(%{"effect" => e} = n, m) when is_binary(e),
+    do: n |> Map.delete("effect") |> expand(m) |> Map.put("effect", ref(e, "bleed", m))
 
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
@@ -388,6 +392,10 @@ defmodule Loka.Content.Checks do
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs)
     ])
+  end
+
+  defp expand_attack(npc, m) do
+    if npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc
   end
 
   # run_job is authority-internal (04 §1): no action builds it.

@@ -89,6 +89,7 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   draft.knownEntities[id] = {
     kind: entity.kind,
     ...(entity.kind === 'item' && entity.edible && { edible: true as const }),
+    ...(entity.kind === 'item' && entity.bandage && { bandage: true as const }),
   };
   return true;
 }
@@ -160,7 +161,8 @@ function custodyValid(world: World): boolean {
     if (
       id === world.consumed ||
       (container === world.consumed &&
-        (world.entities[id]?.kind !== 'item' || !world.entities[id].edible))
+        (world.entities[id]?.kind !== 'item' ||
+          (!world.entities[id].edible && !world.entities[id].bandage)))
     )
       return false;
     if (!world.knownEntities[id] && !world.state.created?.[id]) return false;

@@ -496,6 +496,18 @@
     ]
   },
   {
+    "key": "bleed",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "bandage"
+    ],
+    "definitions": [
+      "bleed"
+    ]
+  },
+  {
     "key": "water",
     "version": 1,
     "portability": "portable",
