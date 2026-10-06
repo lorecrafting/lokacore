@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Pre-production CI scope](2026-10-06-preproduction-ci-scope-review.md): initial head `0e3f49a1` CHANGES REQUIRED; scoped fix recheck at `92b0c864` APPROVE closes CI-S1/CI-S2. Browser-success mutation now fails both skipped and failed controls and restores green; active owner rules link the decision. Four local hook cases independently checked.
+
 - [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; scoped Beads pilot integration recheck at `8049a5f0` APPROVE. Docs and word-budget checks pass; the checkpoint prompt remains a future PM action.
 - [C4 over published D4 integrated primary review](2026-10-06-c4-d4-integrated-primary-review.md): exact source `749a1705`, frozen evidence `d4597c4c`, independent APPROVE, no open primary finding. v032/API1.28/hash/all 167 IDs, current-artifact SQLite flight/retry, browser Combat roster red/green, 23/23 schema mutants, 368-ExUnit full gate, 503-sequence simulator and 31 evidence hashes verified.
 - [C4 portable foundation second opinion](2026-10-06-c4-foundation-second-review.md): initial provisional source `252eb456` CHANGES REQUIRED; corrected source `251b0bff`, evidence `7b38aa14`, scoped APPROVE closes C4-A1/A2. Independent 31 TS/SQLite and 13 Elixir checks pass; malformed final proposals refuse, selected-flight and dead/absent cursor repair agree across twins, all 12 evidence hashes verify. D1 integration/pins/full gate remain pending.

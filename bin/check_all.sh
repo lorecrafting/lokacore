@@ -1,13 +1,21 @@
 #!/bin/sh
 # The full local check line (docs/CHECKS.md): everything CI runs except `mix hex.audit`,
 # which needs the network. Toolchain from mise.toml.
-# --no-ts skips the TypeScript checks (pre-push passes it when no TypeScript input changed).
+# --metadata runs docs and tracker guards for a verified metadata or Book-only push.
+# --no-ts remains available for a focused local Elixir run.
 set -e
 cd "$(dirname "$0")/.."
 export MIX_ENV=test
 # The dot reporter keeps the node test output to a line; failures still print in full.
 export TEST_REPORTER=dot
 m() { mise exec -- "$@"; }
+if [ "${1-}" = --metadata ]; then
+  m elixir bin/check_docs.exs
+  m bin/docs_red_controls.sh
+  python3 bin/check_beads_export.py
+  sh bin/beads_red_controls.sh
+  exit 0
+fi
 m mix deps.get --check-locked
 m mix format --check-formatted
 m mix compile --warnings-as-errors

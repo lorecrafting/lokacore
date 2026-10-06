@@ -1,16 +1,20 @@
 #!/bin/sh
-# The full check line; TypeScript checks only when a pushed ref changes kernel/ts, mobile/, protocol/ (TS tests read its fixtures), the TS size or kernel red-control scripts, the Prettier config or its root package files.
+# Metadata and Book-only changes use the short local lane; other changes run the full line.
 # ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
-ts=--no-ts
+scope=metadata
+seen=0
 while read -r _ local _ remote; do
   case $local in *[!0]*) ;; *) continue ;; esac          # branch deletion
+  seen=1
   case $remote in
     *[!0]*) ;;
     *) remote=$1/main # new branch: trust the local main only if the remote agrees
        tracked=$(git rev-parse -q --verify "$remote" 2>/dev/null)
        advertised=$(git ls-remote "$2" refs/heads/main 2>/dev/null | cut -f1)
-       [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { ts=; continue; } ;;
+       [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { scope=full; continue; } ;;
   esac
-  git diff --quiet "$remote" "$local" -- kernel/ts mobile protocol bin/check_ts_size.mjs bin/ts_size_red_controls.sh bin/kernel_red_controls.sh .prettierrc.json .prettierignore package.json package-lock.json 2>/dev/null || ts=
+  [ "$(bin/ci_scope.sh "$remote" "$local" code)" = skip ] || scope=full
 done
-exec bin/check_all.sh $ts
+[ "$seen" = 1 ] || scope=full
+[ "$scope" = metadata ] && exec bin/check_all.sh --metadata
+exec bin/check_all.sh
