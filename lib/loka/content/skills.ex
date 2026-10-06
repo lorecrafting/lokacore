@@ -35,23 +35,28 @@ defmodule Loka.Content.Skills do
   def check(m, defs, {_, settings}, text) do
     caps = m["requires"]["capabilities"]
 
-    Enum.flat_map(defs["skill"], fn
-      {_, {rel, _, s}} ->
-        if(caps["skills"] == 1 and caps["fact"] == 1 and caps["policy"] == 1,
-          do: [],
-          else: [diag("UNDECLARED_CAPABILITY", at(rel, []), %{"capability" => "skills"})]
-        ) ++
-          if(String.length(s["key"]) <= 58, do: [], else: [bad(at(rel, ["key"]))]) ++
-          for(
-            field <- ~w(label requirement),
-            text != :unknown and not is_map_key(text, s[field]),
-            do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
-          )
-
-      _ ->
-        []
-    end) ++ equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
+    Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
+      equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
+
+  defp definition({_, {rel, _, s}}, caps, text) do
+    capability(rel, caps) ++
+      if(String.length(s["key"]) <= 58, do: [], else: [bad(at(rel, ["key"]))]) ++
+      for(
+        field <- ~w(label requirement),
+        text != :unknown and not is_map_key(text, s[field]),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
+      )
+  end
+
+  defp definition(_, _, _), do: []
+
+  defp capability(rel, caps),
+    do:
+      if(caps["skills"] == 1 and caps["fact"] == 1 and caps["policy"] == 1,
+        do: [],
+        else: [diag("UNDECLARED_CAPABILITY", at(rel, []), %{"capability" => "skills"})]
+      )
 
   defp equipment(m, defs) do
     for {_, {rel, _, item}} <- defs["item"],
@@ -111,26 +116,23 @@ defmodule Loka.Content.Skills do
   defp lesson(rel, steps, %{"lesson_payment" => p} = o, d, ctx) do
     teacher = d["roles"][p["to"]]
 
-    funded =
-      case teacher do
-        %{"role" => "npc", "npc" => ref} ->
-          case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do
-            {_, _, npc} -> is_map_key(npc["resource_starts"] || %{}, p["resource"]["key"])
-            _ -> true
-          end
-
-        _ ->
-          false
-      end
-
     reference(rel, steps ++ ["lesson_payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++
       if(
-        funded and teacher["npc"] == d["npc"] and !o["payment"] and
+        funded?(teacher, p["resource"], ctx) and teacher["npc"] == d["npc"] and !o["payment"] and
           Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire")) == 1,
         do: [],
         else: [bad(at(rel, steps ++ ["lesson_payment"]))]
       )
   end
+
+  defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
+    case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do
+      {_, _, npc} -> is_map_key(npc["resource_starts"] || %{}, resource["key"])
+      _ -> true
+    end
+  end
+
+  defp funded?(_, _, _), do: false
 
   defp lesson(rel, steps, o, _, _) do
     if Enum.any?(o["sequence"] || [], &(&1["op"] == "skill.acquire")),

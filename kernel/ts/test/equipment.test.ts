@@ -197,7 +197,8 @@ test('wear and remove by invocation, with their refusals', () => {
 
 // Breaks: the view listing a worn item in the inventory, wear on a taken slot or an unslotted item,
 // remove on a held item, drop or give on a worn one, slots out of slot-key order, or descriptions
-// omitted/derived from short names rather than carried from explicit room/held/worn definitions.
+// omitted/derived from short names rather than carried from explicit room/held/worn definitions,
+// or an equipped item's authored slot lost from its item projection.
 test('the GameView lists the slots in order and wear and remove only where step accepts them', () => {
   let w = world('cartridge_wear_hash.json', (c) => {
     c.items[`${W}:item/leather_cap`].description = 'catalog.cap_body';
@@ -238,6 +239,7 @@ test('the GameView lists the slots in order and wear and remove only where step 
         name: 'item.leather_cap.short',
         description: 'catalog.cap_body',
         kind: 'item',
+        slot: 'head',
         actions: [remove],
       },
     },

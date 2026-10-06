@@ -1,6 +1,6 @@
 # C1 — Tobin training and the first armed/defense fight
 
-**Adopted PM assignment; local source implemented, independent review pending.**
+**Adopted PM assignment; local source implemented; independent scoped fix rechecks pending.**
 Source branch `chapter-one/c1-tobin-training`. Corrected B3 dependency
 `9c7e537942e13455a1f64b5afdb90b60faae27dd` is an ancestor of assigned base
 `4bfe252e`; C1 subsequently merged corrected B5 integration
@@ -8,8 +8,8 @@ Source branch `chapter-one/c1-tobin-training`. Corrected B3 dependency
 that handoff. C1's current release/API is chapter0.0.20/API1.18; its independent
 [payload/hash](../../../protocol/fixtures/missing_child_v020_hash.json) and
 [92-ID answer](../../../protocol/fixtures/missing_child_v020_ids.json) bind the source.
-Source head is supplied with the developer handoff. PR and implementation verdicts:
-null. Focused headless checks are implementation evidence, not hosted, browser or native proof.
+Source head is supplied with the developer handoff. Remote PR: null. Both independent
+reviews of `e8bf456e` requested changes; the [source fix round](c1-tobin-training-local-pr-2026-10-05.md#source-fix-round-1) awaits scoped recheck. Focused headless checks are implementation evidence, not hosted, browser or native proof.
 
 ## Goal and governing clauses
 

@@ -44,15 +44,16 @@ defmodule Loka.Content.Requires do
       Enum.any?(all, fn {_, _, d} -> transfer_feature?(d) end) ->
         [1, 10]
 
-      Enum.any?(all, fn {_, _, d} ->
-        is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
-      end) ->
+      Enum.any?(all, fn {_, _, d} -> variant_feature?(d) end) ->
         [1, 9]
 
       true ->
         []
     end
   end
+
+  defp variant_feature?(d),
+    do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
 
   defp debt_feature?(d) do
     is_map_key(d, "deadline") or is_map_key(d, "resource_starts") or

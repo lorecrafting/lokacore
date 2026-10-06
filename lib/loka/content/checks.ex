@@ -316,14 +316,17 @@ defmodule Loka.Content.Checks do
   # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
   # dialogue's.
   defp trees(defs, actions) do
-    for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
-      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      RoomParts.conditions(defs) ++
-      Entities.conditions(defs) ++
-      Recipes.conditions(defs) ++
-      Quests.conditions(defs) ++
-      Reactions.conditions(defs) ++
-      Dialogues.conditions(defs) ++ Loka.Content.Skills.conditions(defs)
+    Enum.concat([
+      for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
+      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}),
+      RoomParts.conditions(defs),
+      Entities.conditions(defs),
+      Recipes.conditions(defs),
+      Quests.conditions(defs),
+      Reactions.conditions(defs),
+      Dialogues.conditions(defs),
+      Loka.Content.Skills.conditions(defs)
+    ])
   end
 
   # run_job is authority-internal (04 §1): no action builds it.
