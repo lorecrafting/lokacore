@@ -106,3 +106,49 @@ function born(row: Extract<DeltaOp, { op: 'population.slot' }>['value']) {
     row.last_flight_at == null
   );
 }
+
+export function crowTransition(
+  op: Extract<DeltaOp, { op: 'crow.transition' }>,
+  row: Json | undefined,
+): Outcome {
+  const from = op.expected?.phase;
+  const to = op.value.phase;
+  const allowed: Record<string, readonly string[]> = {
+    idle: ['acquire'],
+    acquire: ['leg', 'idle', 'return', 'paused_return'],
+    leg: ['leg', 'return', 'idle', 'paused_return'],
+    return: ['return', 'idle', 'paused_return'],
+    paused_return: ['return', 'idle'],
+  };
+  const v = op.value;
+  return check(
+    same(row ?? null, op.expected) &&
+      (from === undefined ? to === 'acquire' : allowed[from]?.includes(to)) &&
+      (from === 'idle' ||
+        from === undefined ||
+        (op.expected!.member_id === v.member_id && op.expected!.generation === v.generation)) &&
+      crowShape(v),
+    v as Json,
+  );
+}
+
+function crowShape(v: Extract<DeltaOp, { op: 'crow.transition' }>['value']) {
+  const to = v.phase;
+  return to === 'idle'
+    ? v.item_id === null &&
+        v.nest_id === null &&
+        v.job_id === null &&
+        v.drop_event_id === null &&
+        v.encounter_id === null
+    : to === 'paused_return'
+      ? v.item_id === null &&
+        v.job_id === null &&
+        v.encounter_id !== null &&
+        v.nest_id !== null &&
+        v.drop_event_id !== null
+      : v.job_id !== null &&
+        v.nest_id !== null &&
+        v.drop_event_id !== null &&
+        v.encounter_id === null &&
+        (to === 'return' ? v.item_id === null : v.item_id !== null);
+}

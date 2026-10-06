@@ -12,7 +12,6 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
   if (payload.type === 'flee') return flee(world, { ...command, payload }, mint, steps);
   const refused = attackRefused(world, payload.actor_id, payload.target_id);
   if (refused) return rejected(refused);
-  const body_id = bodyOf(world, payload.actor_id)!;
   const job = npcRef(world, payload.target_id);
   if (!job) return rejected('invalid_target');
   const roster = admission(world, payload.target_id, steps);
@@ -28,9 +27,9 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
         writer_group: 0,
         encounter_id,
         character_id: payload.actor_id,
-        body_id,
+        body_id: bodyOf(world, payload.actor_id)!,
         npc_id: payload.target_id,
-        room_id: world.state.containers[body_id],
+        room_id: world.state.containers[bodyOf(world, payload.actor_id)!],
         job_id,
         ...(roster && { active_ids: roster, next_opponent_id: payload.target_id }),
       },

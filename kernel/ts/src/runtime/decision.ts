@@ -94,23 +94,8 @@ export type ChoiceRow = {
   readonly quest_instance_id?: QuestInstanceId;
 };
 
-/** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
-export type JobRow = {
-  readonly crow_member_id?: EntityId;
-  readonly crow_generation?: number;
-  readonly crow_phase?: 'acquire' | 'leg' | 'return';
-  readonly water_generation?: number;
-  readonly water_body_id?: EntityId;
-  readonly job: DefinitionRef;
-  readonly due_time: number;
-  readonly status: 'pending' | 'completed' | 'cancelled';
-  readonly encounter_id?: EncounterId;
-  readonly quest_instance_id?: QuestInstanceId;
-  readonly actor_id?: CharacterId;
-  readonly bleed_body_id?: EntityId;
-  readonly bleed_generation?: number;
-  readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
-};
+import type { JobRow } from './rows.ts';
+export type { JobRow } from './rows.ts';
 export { row } from './rows.ts';
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
 export type QuestRow = {

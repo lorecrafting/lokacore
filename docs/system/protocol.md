@@ -69,7 +69,7 @@ storage half):
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
-   (`runtime/proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
+   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
    The headless GameView/admission check classifies a foreign-world envelope
    against the observed world before comparing its action offer: only `not_found`
    rejection agrees. A current-world offer refused `not_found` remains a mismatch.
@@ -97,7 +97,7 @@ A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (a
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
 `protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:365`). A rejection or fault changes nothing: not the state, RNG,
-clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/runtime/invariants.ts:246`).
+clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/runtime/invariants.ts:116`).
 
 ## Composition
 
@@ -191,7 +191,7 @@ Admission independently revalidates its pair under the decision counter.
 
 `protocol/invariants.json` registers the active invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
-Pure checks by id: `kernel/ts/src/runtime/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
+Pure checks by id: `kernel/ts/src/runtime/invariants.ts:34` (all), `lib/loka/core/invariants.ex:34`
 (the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:141`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest

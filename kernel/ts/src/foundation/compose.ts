@@ -5,7 +5,11 @@ import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
-import { populationTransition, initializePopulationResource } from './compose_population.ts';
+import {
+  populationTransition,
+  initializePopulationResource,
+  crowTransition,
+} from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter } from './compose_encounter.ts';
 import { composeJob } from './compose_job.ts';
@@ -131,26 +135,23 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   return applyWorld(op, row, ctx);
 }
 
-function applyWorld(
-  op: Extract<
-    DeltaOp,
-    {
-      op:
-        | 'population.control'
-        | 'population.slot'
-        | 'crow.transition'
-        | 'water.transition'
-        | 'escort.transition'
-        | 'time.advance'
-        | 'resource.adjust'
-        | 'resource.initialize'
-        | 'cooldown.start'
-        | 'barrier.transition';
-    }
-  >,
-  row: Json | undefined,
-  ctx: Ctx,
-): Outcome {
+type WorldOp = Extract<
+  DeltaOp,
+  {
+    op:
+      | 'population.control'
+      | 'population.slot'
+      | 'crow.transition'
+      | 'water.transition'
+      | 'escort.transition'
+      | 'time.advance'
+      | 'resource.adjust'
+      | 'resource.initialize'
+      | 'cooldown.start'
+      | 'barrier.transition';
+  }
+>;
+function applyWorld(op: WorldOp, row: Json | undefined, ctx: Ctx): Outcome {
   switch (op.op) {
     case 'population.control':
     case 'population.slot':
@@ -181,49 +182,6 @@ function createEntity(
   return check(
     row === undefined && creationValid(op.identity as unknown as Json, state),
     op.identity as Json,
-  );
-}
-
-function crowTransition(
-  op: Extract<DeltaOp, { op: 'crow.transition' }>,
-  row: Json | undefined,
-): Outcome {
-  const from = op.expected?.phase;
-  const to = op.value.phase;
-  const allowed: Record<string, readonly string[]> = {
-    idle: ['acquire'],
-    acquire: ['leg', 'idle', 'return', 'paused_return'],
-    leg: ['leg', 'return', 'idle', 'paused_return'],
-    return: ['return', 'idle', 'paused_return'],
-    paused_return: ['return', 'idle'],
-  };
-  const v = op.value;
-  const shape =
-    to === 'idle'
-      ? v.item_id === null &&
-        v.nest_id === null &&
-        v.job_id === null &&
-        v.drop_event_id === null &&
-        v.encounter_id === null
-      : to === 'paused_return'
-        ? v.item_id === null &&
-          v.job_id === null &&
-          v.encounter_id !== null &&
-          v.nest_id !== null &&
-          v.drop_event_id !== null
-        : v.job_id !== null &&
-          v.nest_id !== null &&
-          v.drop_event_id !== null &&
-          v.encounter_id === null &&
-          (to === 'return' ? v.item_id === null : v.item_id !== null);
-  return check(
-    same(row ?? null, op.expected) &&
-      (from === undefined ? to === 'acquire' : allowed[from]?.includes(to)) &&
-      (from === 'idle' ||
-        from === undefined ||
-        (op.expected!.member_id === v.member_id && op.expected!.generation === v.generation)) &&
-      shape,
-    v as Json,
   );
 }
 

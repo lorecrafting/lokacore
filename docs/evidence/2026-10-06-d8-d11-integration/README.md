@@ -186,3 +186,24 @@ unrun. Resume by splitting existing cohesive crow composition/job/behavior/react
 and invariant logic into the established modules; retain all limits and safety
 checks. D8-specific schema sweep, crow30-day conservation, isolated browser proof,
 independent reviews and PR remain pending because the gate is not green.
+
+## TypeScript size refactor checkpoint
+
+All20 recorded TS size violations are resolved, with every existing allowance
+unchanged. Crow intent/shared/interaction/due-job phases now have cohesive files;
+CAS lives in the existing population composer. Job row types live beside row
+sections; independent delta replay and proposal adoption have focused modules;
+combat offer projection follows existing per-mechanic view modules. No protocol,
+release/hash/ID answer, validation or custody rule changed.
+
+- Full TS size check: exit0, no violations.
+- TS typecheck: exit0.
+- Existing crow CAS red control (temporarily remove expected-row comparison): exit1; restored.
+- Focused crow/composition/spawned-bundle/character-choice/real SQLite suite: exit0, 45 passed.
+
+Ponytail/correctness self-review retained allocator order, source custody, job
+binding/cancellation, return phases, FIFO budget/writer groups, independent replay
+and save refusal. Splits use concrete existing operations without a generic
+framework. The proposal adoption import cycle contains only calls after module
+initialization; focused real execution verifies that path. Final full gate remains
+pending on this source; schema/conservation/browser/review work remains pending.

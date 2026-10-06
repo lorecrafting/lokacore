@@ -129,7 +129,6 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
     hp.value > spec.hp.maximum
   )
     return false;
-  // A killed crow stays at its actual corridor room; accepted-history replay proves its path.
   if (!ordinary && !excursion && !(historical && hp.value === 0)) return false;
   draft.entityResourceSpecs ??= { ...world.entityResourceSpecs };
   draft.entityResourceSpecs[hpTarget] = spec.hp;

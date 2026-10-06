@@ -51,20 +51,7 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
     op.crow_generation !== undefined ||
     op.crow_phase !== undefined
   )
-    return (
-      op.crow_member_id !== undefined &&
-      op.crow_generation !== undefined &&
-      op.crow_phase !== undefined &&
-      op.job.kind === 'population_bundle' &&
-      op.encounter_id === undefined &&
-      op.quest_instance_id === undefined &&
-      op.water_generation === undefined &&
-      op.water_body_id === undefined &&
-      op.actor_id === undefined &&
-      op.sight === undefined &&
-      op.bleed_body_id === undefined &&
-      op.bleed_generation === undefined
-    );
+    return crowBindingValid(op);
   if (
     (op.quest_instance_id === undefined && op.water_generation === undefined) !==
       (op.actor_id === undefined) ||
@@ -91,6 +78,10 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
         op.sight !== undefined))
   )
     return false;
+  return waterBindingValid(op);
+}
+
+function waterBindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   if (
     (op.water_generation === undefined) !== (op.water_body_id === undefined) ||
     (op.water_generation !== undefined &&
@@ -130,4 +121,21 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
       ? {}
       : { bleed_body_id: op.bleed_body_id, bleed_generation: op.bleed_generation }),
   };
+}
+
+function crowBindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
+  return (
+    op.crow_member_id !== undefined &&
+    op.crow_generation !== undefined &&
+    op.crow_phase !== undefined &&
+    op.job.kind === 'population_bundle' &&
+    op.encounter_id === undefined &&
+    op.quest_instance_id === undefined &&
+    op.water_generation === undefined &&
+    op.water_body_id === undefined &&
+    op.actor_id === undefined &&
+    op.sight === undefined &&
+    op.bleed_body_id === undefined &&
+    op.bleed_generation === undefined
+  );
 }

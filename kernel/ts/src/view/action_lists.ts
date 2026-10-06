@@ -28,8 +28,8 @@ import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { movable as movableItem } from '../runtime/created.ts';
-import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
-import { shooRefused } from '../mechanics/crow/behavior.ts';
+import { attackRefused } from '../mechanics/combat/shared.ts';
+import { combatOffered } from './combat.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
@@ -255,20 +255,6 @@ function movable(world: World, a: Offered, id?: string): boolean {
     movableItem(world, id as EntityId) ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
-}
-
-function combatOffered(
-  world: World,
-  actor: CharacterId,
-  body: EntityId | undefined,
-  a: Offered,
-  id?: string,
-) {
-  if (a.command === 'move' && body && engaged(world, body)) return false;
-  if (a.command === 'flee') return !!body && !!engaged(world, body);
-  if (a.command === 'shoo') return !!id && !shooRefused(world, actor, id as EntityId);
-  const entity = id && world.entities[id];
-  return a.command !== 'attack' || (entity && entity.kind === 'npc' && !!entity.attack);
 }
 
 // Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.

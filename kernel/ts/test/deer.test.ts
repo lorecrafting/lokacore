@@ -11,7 +11,6 @@ import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
 import { content, fresh, ref } from './deer_fixture.ts';
 import { read } from './read.ts';
-
 const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 const missSeed = [2710938419, 1329376837, 2657997399, 1914447725] as const;
 function command(w: World, type: 'move' | 'attack', argument: string, n: number) {
@@ -65,7 +64,6 @@ function advance(w: World, until: number): World {
 function slot(w: World, member: string) {
   return Object.values(w.state.population_slots ?? {}).find((s) => s.member_id === member)!;
 }
-
 // Breaks: a new plan shifts genesis allocation or mints a second member or hide.
 test('independent active genesis IDs include all three deer pairs and control jobs', () => {
   const w = fresh();

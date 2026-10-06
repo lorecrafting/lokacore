@@ -167,24 +167,7 @@ function job(op: Any, row: Any, horizon: number): Any {
   }
   if (row?.status !== 'pending') return undefined;
   if (op.op === 'job.cancel')
-    return (
-      op.crow_member_id !== undefined
-        ? row.crow_member_id === op.crow_member_id &&
-          row.crow_generation === op.crow_generation &&
-          op.encounter_id === undefined &&
-          op.sight_member_id === undefined
-        : op.sight_member_id !== undefined
-          ? op.encounter_id === undefined &&
-            op.water_generation === undefined &&
-            row.sight?.member_id === op.sight_member_id
-          : op.water_generation !== undefined
-            ? row.water_generation === op.water_generation &&
-              row.actor_id === op.actor_id &&
-              op.encounter_id === undefined
-            : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
-    )
-      ? { ...row, status: 'cancelled' }
-      : undefined;
+    return cancelValid(op, row) ? { ...row, status: 'cancelled' } : undefined;
   return row.due_time <= horizon ? { ...row, status: 'completed' } : undefined;
 }
 
@@ -194,19 +177,7 @@ function bindingValid(op: Any) {
     op.crow_generation !== undefined ||
     op.crow_phase !== undefined
   )
-    return (
-      op.crow_member_id !== undefined &&
-      op.crow_generation !== undefined &&
-      ['acquire', 'leg', 'return'].includes(op.crow_phase) &&
-      op.job.kind === 'population_bundle' &&
-      [
-        op.encounter_id,
-        op.quest_instance_id,
-        op.actor_id,
-        op.water_generation,
-        op.water_body_id,
-      ].every((v) => v === undefined)
-    );
+    return crowBindingValid(op);
   if (
     (op.quest_instance_id === undefined && op.water_generation === undefined) !==
       (op.actor_id === undefined) ||
@@ -232,4 +203,37 @@ function bindingValid(op: Any) {
   )
     return false;
   return true;
+}
+
+function crowBindingValid(op: Any) {
+  return (
+    op.crow_member_id !== undefined &&
+    op.crow_generation !== undefined &&
+    ['acquire', 'leg', 'return'].includes(op.crow_phase) &&
+    op.job.kind === 'population_bundle' &&
+    [
+      op.encounter_id,
+      op.quest_instance_id,
+      op.actor_id,
+      op.water_generation,
+      op.water_body_id,
+    ].every((v) => v === undefined)
+  );
+}
+
+function cancelValid(op: Any, row: Any) {
+  return op.crow_member_id !== undefined
+    ? row.crow_member_id === op.crow_member_id &&
+        row.crow_generation === op.crow_generation &&
+        op.encounter_id === undefined &&
+        op.sight_member_id === undefined
+    : op.sight_member_id !== undefined
+      ? op.encounter_id === undefined &&
+        op.water_generation === undefined &&
+        row.sight?.member_id === op.sight_member_id
+      : op.water_generation !== undefined
+        ? row.water_generation === op.water_generation &&
+          row.actor_id === op.actor_id &&
+          op.encounter_id === undefined
+        : op.encounter_id !== undefined && row.encounter_id === op.encounter_id;
 }
