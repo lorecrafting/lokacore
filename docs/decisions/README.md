@@ -38,7 +38,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Chapter 1 architecture audit](owner-decision-chapter-one-architecture-audit-2026-10-05.md): one Astra high end-to-end seam and ownership pass after A–D source integration, before E3 closes.
 - [B9 Lantern Rest and dream PM decision](pm-decision-b9-lantern-dream-2026-10-05.md): first paid Rest, anchored resumable choice and final-only local memory.
 
-- [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
+- [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment; B7 source dependency re-pinned and B6/C2 integration scheduling recorded.
 
 - [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
 

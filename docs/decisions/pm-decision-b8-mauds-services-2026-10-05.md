@@ -35,8 +35,21 @@ adopted. Repeated rental cannot charge again; death retains entitlement. All
 ordinary Rest, upstairs/cellar and free corpse-retrieval routes remain legal.
 S1 offer, turn-in, key and chest remain independent direct paths.
 
-B3 is locally implemented/reviewed at chapter0.0.18/API1.16 on the inspected base;
-B7 has an adopted plan but no source proof. B8 assignment waits for actual B7
-integration and dependency review re-pins. Successor release/API/hash/IDs and
-implementation/review heads remain null. Planning base is
-`4ec52632d510e45214e43a1fe5beca0ec5addbad`; independent review follows WORKFLOW.
+## Source dependency re-pin
+
+The original planning base was `4ec52632d510e45214e43a1fe5beca0ec5addbad`;
+[its independent approval](../reviews/2026-10-05-b8-maud-services-plan-review.md)
+remains the behavior review. B7 Well Lane waterskins and liquid actions are now
+published in [#209](https://github.com/lorecrafting/lokacore/pull/209), and the
+[brief](../briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) pins its exact
+approved source/reviews and integrated chapter0.0.22/API1.20/96-ID baseline at
+GitHub main `547f809ccdd587498dee86cb14822f564efee642`. The B3/B7/Rest dependency
+gate is satisfied. B8 successor/source pins remain null.
+
+The full cross-layer B8 assignment queues behind active B6 Wisp and C2 Tobin
+patrol shared-source integration, followed by a latest reviewed-main re-pin.
+Those slices are scheduling predecessors, not new semantic dependencies. This
+avoids simultaneous protocol/save/Book/generation edits; the brief names the
+installed payment/liquid/history reuse and exact keyed-action acceptance.
+This docs re-pin needs one short fresh independent review; it neither starts
+source work nor replaces B8's later primary and save/protocol source opinions.
