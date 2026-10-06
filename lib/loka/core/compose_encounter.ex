@@ -1,25 +1,99 @@
 defmodule Loka.Core.ComposeEncounter do
   @moduledoc "Portable encounter and bound-job lifecycle over composition's current rows."
   alias Loka.Core.Int
+  alias Loka.Core.Canonical
 
   @spec open(map(), term(), map(), term(), term(), map()) :: {:ok, map()} | {:error, String.t()}
   def open(op, row, state, body_room, npc_room, encounters) do
     known = Map.get(state, "known_entities", %{})
-    participants = [op["body_id"], op["npc_id"]]
 
-    taken =
-      Enum.any?(encounters, fn {_, r} ->
-        r["status"] == "open" and (r["body_id"] in participants or r["npc_id"] in participants)
-      end)
-
-    valid = row == nil and participants?(op, known, body_room, npc_room) and not taken
+    valid =
+      row == nil and participants?(op, known, body_room, npc_room) and
+        participants_free?(op, encounters) and admission_shape?(op, state)
 
     if valid,
       do:
         {:ok,
-         Map.take(op, ~w(character_id body_id npc_id room_id job_id))
+         Map.take(op, ~w(character_id body_id npc_id room_id job_id active_ids next_opponent_id))
          |> Map.merge(%{"status" => "open", "round" => 1})},
       else: {:error, "precondition_failed"}
+  end
+
+  defp admission_shape?(op, state) do
+    origin = get_in(state, ["created", op["npc_id"], "origin"])
+
+    spec =
+      if is_map(origin) and origin["kind"] == "spawned",
+        do: get_in(state, ["population_specs", key(origin["by"])])
+
+    opted = is_map(get_in(spec || %{}, ["plan", "pack"]))
+    roster = op["active_ids"]
+
+    roster != nil == opted and
+      ((roster == nil and op["next_opponent_id"] == nil) or
+         (roster != nil and pack_members?(op, state)))
+  end
+
+  defp participants_free?(op, encounters) do
+    ids = [op["body_id"] | op["active_ids"] || [op["npc_id"]]]
+
+    Enum.all?(encounters, fn {_, row} ->
+      row["status"] != "open" or
+        Enum.all?([row["body_id"] | row["active_ids"] || [row["npc_id"]]], &(&1 not in ids))
+    end)
+  end
+
+  defp pack_members?(op, state) do
+    ids = op["active_ids"]
+    origin = get_in(state, ["created", op["npc_id"], "origin"])
+
+    spec =
+      if is_map(origin) and origin["kind"] == "spawned",
+        do: get_in(state, ["population_specs", key(origin["by"])])
+
+    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hound" and
+      is_map(spec) and is_map(get_in(spec, ["plan", "pack"])) and
+      roster_shape?(ids, op, spec["cap"]) and
+      Enum.all?(ids, &pack_member?(&1, op["room_id"], origin["by"], state))
+  end
+
+  defp roster_shape?(ids, op, cap) do
+    is_list(ids) and ids != [] and length(ids) <= 64 and is_integer(cap) and
+      length(ids) <= cap and ids == Enum.sort(Enum.uniq(ids)) and
+      op["npc_id"] in ids and op["next_opponent_id"] == op["npc_id"]
+  end
+
+  defp pack_member?(id, room, plan, state) do
+    member = get_in(state, ["created", id, "origin"])
+
+    get_in(state, ["known_entities", id, "kind"]) == "npc" and
+      get_in(state, ["containers", id]) == room and
+      member_provenance?(member, id, plan) and slot_membership?(member, id, state)
+  end
+
+  defp member_provenance?(member, id, plan),
+    do:
+      is_map(member) and member["kind"] == "spawned" and member["role"] == "hound" and
+        member["member_id"] == id and member["by"] == plan
+
+  defp slot_membership?(member, id, state) do
+    slot =
+      get_in(state, [
+        "population_slots",
+        key(%{
+          "kind" => "population_slot",
+          "plan" => member["by"],
+          "slot" => member["slot"]
+        })
+      ])
+
+    is_map(slot) and slot["member_id"] == id and slot["generation"] == member["generation"] and
+      slot["replacement_due"] == nil
+  end
+
+  defp key(value) do
+    {:ok, text} = Canonical.encode(value)
+    text
   end
 
   defp participants?(op, known, body_room, npc_room) do
@@ -31,28 +105,78 @@ defmodule Loka.Core.ComposeEncounter do
       npc_room == op["room_id"]
   end
 
-  @spec change(map(), term()) :: {:ok, map()} | {:error, String.t()}
-  def change(op, row) do
+  @spec change(map(), term(), (String.t(), String.t() -> boolean()), (String.t(), String.t() ->
+                                                                        boolean())) ::
+          {:ok, map()} | {:error, String.t()}
+  def change(op, row, present?, initially_present?) do
     cond do
-      row["status"] != "open" or row["job_id"] != op["job_id"] ->
+      not current_encounter?(op, row) ->
         {:error, "precondition_failed"}
 
       op["op"] == "encounter.close" ->
-        {:ok, Map.put(row, "status", "closed")}
+        {:ok,
+         Map.merge(
+           row,
+           if(row["active_ids"] == nil,
+             do: %{"status" => "closed"},
+             else: %{"status" => "closed", "active_ids" => [], "next_opponent_id" => nil}
+           )
+         )}
 
       row["round"] != op["round"] or op["job_id"] == op["next_job_id"] ->
         {:error, "precondition_failed"}
 
       true ->
-        advance(op, row)
+        advance(op, row, present?, initially_present?)
     end
   end
 
-  defp advance(op, row) do
-    case Int.add(op["round"], 1) do
-      {:ok, next} -> {:ok, Map.merge(row, %{"round" => next, "job_id" => op["next_job_id"]})}
-      {:error, :integer_overflow} -> {:error, "precondition_failed"}
+  defp current_encounter?(op, row),
+    do:
+      row["status"] == "open" and row["job_id"] == op["job_id"] and
+        (row["active_ids"] == nil or row == op["expected"])
+
+  defp advance(op, row, present?, initially_present?) do
+    valid = row["active_ids"] == nil or advance_pack?(op, row, present?, initially_present?)
+
+    case {valid, Int.add(op["round"], 1)} do
+      {true, {:ok, next}} ->
+        {:ok,
+         Map.merge(row, %{"round" => next, "job_id" => op["next_job_id"]})
+         |> Map.merge(
+           if(row["active_ids"] == nil,
+             do: %{},
+             else: Map.take(op, ~w(active_ids npc_id next_opponent_id))
+           )
+         )}
+
+      _ ->
+        {:error, "precondition_failed"}
     end
+  end
+
+  defp advance_pack?(op, row, present?, initially_present?) do
+    ids = op["active_ids"]
+
+    is_list(ids) and ids != [] and ids == Enum.sort(Enum.uniq(ids)) and
+      Enum.all?(ids, &(&1 in row["active_ids"])) and op["npc_id"] in ids and
+      op["next_opponent_id"] in ids and
+      Enum.all?(row["active_ids"], fn id -> id in ids == present?.(id, row["room_id"]) end) and
+      rotation?(op, row, ids, initially_present?)
+  end
+
+  defp rotation?(op, row, ids, initially_present?) do
+    start = Enum.filter(row["active_ids"], &initially_present?.(&1, row["room_id"]))
+    cursor = row["next_opponent_id"]
+
+    selected =
+      if cursor in start,
+        do: cursor,
+        else: Enum.find(start, &(&1 > cursor)) || List.first(start)
+
+    selected != nil and
+      op["npc_id"] == if(row["npc_id"] in ids, do: row["npc_id"], else: hd(ids)) and
+      op["next_opponent_id"] == (Enum.find(ids, &(&1 > selected)) || hd(ids))
   end
 
   @spec job(map(), term(), integer()) :: {:ok, map()} | {:error, String.t()}

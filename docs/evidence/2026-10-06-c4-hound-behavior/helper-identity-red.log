@@ -1,0 +1,30 @@
+X
+
+Failed tests:
+
+✖ two healthy rounds use the selected helper for its actual attack (21.047416ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+  +     '00a60498-0ca6-8137-8172-7101d3767e0c',
+  -     '6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2',
+        '3d4829ad-9e43-81ef-bc10-66b1b267e157'
+      ],
+      [
+        '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+        '00a60498-0ca6-8137-8172-7101d3767e0c'
+  
+      at TestContext.<anonymous> (repo/kernel/ts/test/c4_pack.test.ts:233:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ '00a60498-0ca6-8137-8172-7101d3767e0c', '3d4829ad-9e43-81ef-bc10-66b1b267e157' ], [ '3d4829ad-9e43-81ef-bc10-66b1b267e157', '00a60498-0ca6-8137-8172-7101d3767e0c' ] ],
+    expected: [ [ '6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2', '3d4829ad-9e43-81ef-bc10-66b1b267e157' ], [ '3d4829ad-9e43-81ef-bc10-66b1b267e157', '00a60498-0ca6-8137-8172-7101d3767e0c' ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

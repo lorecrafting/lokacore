@@ -77,6 +77,7 @@ function genesisSlots(
   mint: Mint,
 ): DeltaOp[] {
   const ops: DeltaOp[] = [];
+  const pack = !!world.populationSpecs[key(ref)]?.plan.pack;
   for (let slot = 1; slot <= cap; slot++) {
     const made =
       slot <= count ? birth(world, ref, slot, 1, occurrence_id, world.state.clock, mint) : [];
@@ -92,8 +93,14 @@ function genesisSlots(
               generation: 1,
               member_id: (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id,
               replacement_due: null,
+              ...(pack && { last_flight_at: null }),
             }
-          : { generation: 0, member_id: null, replacement_due: null },
+          : {
+              generation: 0,
+              member_id: null,
+              replacement_due: null,
+              ...(pack && { last_flight_at: null }),
+            },
     });
   }
   return ops;
@@ -173,7 +180,12 @@ function births(
       plan: job.job,
       slot,
       expected: row,
-      value: { generation, member_id, replacement_due: null },
+      value: {
+        generation,
+        member_id,
+        replacement_due: null,
+        ...(world.populationSpecs[key(job.job)]?.plan.pack && { last_flight_at: null }),
+      },
     });
     ids.add(member_id);
   }
@@ -196,6 +208,7 @@ function wanders(
       !member ||
       row.replacement_due !== null ||
       born.has(member) ||
+      row.last_flight_at === job.due_time ||
       !living(world, member) ||
       engaged(world, member as EntityId)
     )

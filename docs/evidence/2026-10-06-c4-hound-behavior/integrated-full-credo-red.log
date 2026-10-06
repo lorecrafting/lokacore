@@ -1,0 +1,31 @@
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+No cycles found
+Running ExUnit with seed: 951360, max_cases: 16
+
+............................................................................................................................................................................................................................................................................................................................................................................
+Finished in 20.2 seconds (20.2s async, 0.05s sync)
+
+Result: 364 passed
+Checking 143 source files (this might take a while) ...
+
+  Refactoring opportunities                                                     
+┃ 
+┃ [F] → Function is too complex (ABC size is 31, max is 30).
+┃       lib/loka/content/population.ex:76:8 #(Loka.Content.Population.pack_valid?)
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.1 seconds (0.05s to load, 0.05s running 4 checks on 143 files)
+1534 mods/funs, found 1 refactoring opportunity.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+
+Full gate exit: 8

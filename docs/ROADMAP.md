@@ -288,10 +288,9 @@ pack assistance and flight remains a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
-and an independently reviewed provisional implementation. Its primary, save and
-portable-foundation findings are closed on the local corrected source. D1 is
-integrated provisionally; D4 is published. Final successor release/API/hash/IDs,
-accumulated gate and C4 publication remain ahead.
+and an independently reviewed implementation integrated with published D1 and D4.
+Its v032/API1.28 successor hash and 167 starting IDs are frozen; the cumulative
+gate and primary and save/protocol carryover reviews passed. Publication remains ahead.
 
 D2 public Priory rooms and held-book Ward/Bell topics have an
 [adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),
