@@ -43,6 +43,11 @@
         "item": "wooden_shield",
         "buy": 4,
         "sell": 2
+      },
+      {
+        "item": "spare_waterskin",
+        "buy": 4,
+        "sell": 2
       }
     ],
     "bought": "shop.bought",

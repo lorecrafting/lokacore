@@ -44,6 +44,7 @@ export const base = (world: World) =>
     corpse_templates: world.corpseTemplates,
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
+    liquid_specs: world.liquidSpecs,
     resource_specs: world.resourceSpecs,
     entity_resource_specs: world.entityResourceSpecs,
     barrier_initial: world.barrierInitial,

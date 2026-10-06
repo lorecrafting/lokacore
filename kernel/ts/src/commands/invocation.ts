@@ -55,6 +55,9 @@ const intentDigest = (i: ActionInvocation): string =>
 
 // The Command fields an invocation's ordered target_ids fill, by Command type.
 const TARGETS: Readonly<Record<string, readonly string[]>> = {
+  fill: ['source_id', 'vessel_id'],
+  pour: ['source_id', 'receiver_id'],
+  drink: ['vessel_id'],
   look: ['target_id'],
   read: ['target_id'],
   harvest: ['target_id'],
@@ -95,11 +98,13 @@ export function resolve(
   // A target past the Command's slots lands under an unknown key, which validate rejects.
   const slots = TARGETS[a.command] ?? [];
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
-  const named = a.recipe
-    ? { action: a.key }
-    : a.quest
-      ? { quest: a.quest }
-      : a.continuation && { continuation_id: a.continuation };
+  const named = a.dialogue
+    ? { dialogue: a.dialogue }
+    : a.recipe
+      ? { action: a.key }
+      : a.quest
+        ? { quest: a.quest }
+        : a.continuation && { continuation_id: a.continuation };
   const payload = { type: a.command, actor_id: i.actor_id, ...named, ...i.input, ...targets };
   const command = { id: command_id, world_context_id: world.context, payload };
   return validate('Command', command).length

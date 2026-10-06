@@ -1,0 +1,36 @@
+✔ two real shop offers cost eight pennies and retain two empty shell identities (4.563584ms)
+✔ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (1.950417ms)
+✔ liquid refusal participants and custody leave every row unchanged while open nested skins work (0.947125ms)
+✔ Fill includes liquid mass, admits equality, and owned Pour/Drink remain legal while overloaded (0.883584ms)
+✔ Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs (3.364375ms)
+✔ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (0.698542ms)
+✔ closed owned nested vessels and exact out-of-room sources refuse without a write (0.245334ms)
+✖ liquid pair projection fails at the same exhausted budget as direct admission (0.516208ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 221.992792
+
+✖ failing tests:
+
+test at kernel/ts/test/liquid.test.ts:366:1
+✖ liquid pair projection fails at the same exhausted budget as direct admission (0.516208ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/liquid.test.ts:368:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /budget_exceeded/,
+    operator: 'throws',
+    diff: 'simple'
+  }

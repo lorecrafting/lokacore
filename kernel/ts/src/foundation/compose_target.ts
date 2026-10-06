@@ -6,6 +6,9 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
  */
 // size: allow 45, exhaustive mutation target mapping includes the separate patrol row
 export function target(op: DeltaOp): MutationTarget {
+  if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
+  if (op.op === 'liquid.set' || op.op === 'fuel.set')
+    return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
   switch (op.op) {
     case 'fact.assign':
       const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
@@ -19,10 +22,6 @@ export function target(op: DeltaOp): MutationTarget {
     case 'quest.retire':
     case 'quest.transition':
       return { kind: 'quest', instance_id: op.instance_id };
-    case 'choice.open':
-    case 'choice.resolve':
-    case 'choice.close':
-      return { kind: 'choice', continuation_id: op.continuation_id };
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
@@ -37,8 +36,6 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
-    case 'fuel.set':
-      return { kind: 'fuel', item_id: op.item_id };
     case 'resource.adjust':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':

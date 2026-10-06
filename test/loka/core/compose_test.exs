@@ -1,10 +1,12 @@
 defmodule Loka.Core.ComposeTest do
-  # Expected values are hand-written in protocol/fixtures/composition.json, decoded with the
-  # stdlib JSON so they never pass through the code under test.
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}
 
   @fixture JSON.decode!(File.read!("protocol/fixtures/composition.json"))
+  @invariant_cases @fixture["invariants"] ++
+                     JSON.decode!(File.read!("protocol/fixtures/liquid_composition.json"))[
+                       "invariants"
+                     ]
   @limits JSON.decode!(File.read!("docs/spec/conformance/composition-profile.json"))["limits"]
   @registered for i <- JSON.decode!(File.read!("protocol/invariants.json")),
                   i["implemented_in"] == "elixir_and_typescript",
@@ -13,7 +15,6 @@ defmodule Loka.Core.ComposeTest do
                          delta_preconditions_hold fault_discards_whole_proposal
                          fault_codes_are_evaluation_faults)
 
-  # Fixture states list facts as rows; the kernel reads them indexed by canonical text.
   defp index(state) do
     state
     |> Map.update("facts", %{}, &Map.new(&1, fn r -> {Compose.key(r["target"]), r["value"]} end))
@@ -24,6 +25,7 @@ defmodule Loka.Core.ComposeTest do
     )
   end
 
+  defp state(s) when is_map(s), do: s
   defp state(name), do: index(Map.get_lazy(@fixture["states"], name, fn -> built(name) end))
 
   @hub "10000000-0000-4000-8000-000000000000"
@@ -118,12 +120,12 @@ defmodule Loka.Core.ComposeTest do
   end
 
   test "invariant checks known answers, a holding and a violated case per invariant checked in both kernels" do
-    for c <- @fixture["invariants"] do
+    for c <- @invariant_cases do
       obs = Map.update(c["observation"], "state", nil, &state/1)
       assert Invariants.check(c["id"], obs) == c["holds"], "#{c["id"]}: #{c["note"]}"
     end
 
-    covered = for c <- @fixture["invariants"], uniq: true, do: {c["id"], c["holds"]}
+    covered = for c <- @invariant_cases, uniq: true, do: {c["id"], c["holds"]}
     for id <- @registered, holds <- [true, false], do: assert({id, holds} in covered, id)
   end
 
@@ -305,8 +307,6 @@ defmodule Loka.Core.ComposeTest do
     assert Enum.all?(ours, &Map.has_key?(&1["result"], "changes"))
   end
 
-  # Composes each {state, delta} in Elixir (every invariant holding) and through the TypeScript
-  # peer; the canonical results and invariant outcomes must be identical.
   defp differential(cases) do
     ours =
       for %{"state" => s, "delta" => d} <- cases do

@@ -1,3 +1,4 @@
+import { attemptEvidence } from './riddle-receipt.ts';
 import { assignmentEvidence, paymentEvidence } from './dialogue-consequences.ts';
 // Dialogue detail routing is derived from a committed command and its retained bound row.
 import type {
@@ -86,6 +87,7 @@ function evidence(
   row: ChoiceRow,
   wrong: boolean,
 ) {
+  if (wrong && row.attempts) return attemptEvidence(d, command, row);
   if (wrong)
     return (
       d.outcome === 'riddle_wrong' &&

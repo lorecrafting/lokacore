@@ -1,7 +1,4 @@
 // size: allow 350, current shop quotes join the shared button/freshness builder
-// How the book view sorts the controller's flat button list (presenter.ts `buttons`): the place's look,
-// the exits (a move button carries input.direction), the pending choice's answers and Close, other
-// place actions, and a thing's own actions.
 import type {
   ActionInput,
   EntityId,
@@ -13,6 +10,7 @@ import type { Button } from './presenter.ts';
 import { reason, SENTENCE } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
+const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -48,7 +46,6 @@ export function nextPosition(position: GameView['position'], actions: Button[]) 
   }
 }
 
-// Only projected items: contents are already flattened and filtered for reach by the engine.
 export const things = (v: GameView): Thing[] =>
   [
     ...v.entities,
@@ -77,8 +74,7 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
     return [...stack.slice(0, gone), { kind: 'dialogue', speaker: page.id }];
   return stack.slice(0, gone);
 }
-
-const OWN = ['flee', 'look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
+const OWN = ['flee', 'look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep'];
 
 export function group(buttons: Button[]) {
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
@@ -94,7 +90,6 @@ export function group(buttons: Button[]) {
     continue: buttons.find((b) => b.action_key === 'continue'),
     position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
-    // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
       (b) =>
         !b.detail_id &&
@@ -107,10 +102,8 @@ export function group(buttons: Button[]) {
       buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
   };
 }
-
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 
-// Why an exit or a choice is closed: the reason's own message if it has one, else its code in words.
 type Offered =
   | GameView['exits'][number]
   | GameView['actions'][number]
@@ -118,8 +111,6 @@ type Offered =
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
-// The log line for a drag toward a closed exit: the reason's own message (a sentence), else the
-// code's own sentence (words.ts), else its code's words in a sentence.
 export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
   e.available
     ? ''
@@ -127,20 +118,14 @@ export const refused = (e: GameView['exits'][number], text: (key: string) => str
       ? text(e.reason.message.key)
       : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`);
 
-// Under an open choice whose speaker is not here (the answers may also be closed for another
-// reason, a dropped lantern, so this keys on the speaker, not on the answers' not_present). A
-// choice with no speaker: no one answers it.
 export const absent = (v: GameView) =>
   !v.choice || v.entities.some((e) => e.id === v.choice!.speaker_id)
     ? ''
     : v.choice.speaker_id
       ? 'They are not here to answer. Find them, or close this.'
       : 'No one is here to answer.';
-
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// The status line's character label: each resource's amount, the hp band's name after hp only (the
-// owner's bands decision shows the phrase on hp only and colours every pool).
 export type Pool = NonNullable<GameView['resources']>[number];
 const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
@@ -154,9 +139,7 @@ export const said = (
 ) =>
   `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
 
-// The status line's time: the double hour's earthly branch, 子 from 23:00 to 01:00, then one
-// per two hours, with English words for VoiceOver (owner decision, untimed Lantern record). The
-// clock is logical seconds; the day's sexagenary name waits for a later status pane.
+// Logical seconds: 子 spans 23:00–01:00; English double-hour names serve VoiceOver.
 const ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ');
 const STARTS = ['eleven', 'one', 'three', 'five', 'seven', 'nine'];
 export const branch = (t: number) => {
@@ -251,7 +234,8 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   ) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
-    ...(a.command === 'refuel' && id && { detail_id: id }),
+    ...(a.command && { command: a.command }),
+    ...(['refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -275,7 +259,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         return button(
           a,
-          ` ${text(e.name)}${destination ? ` ${a.command === 'refuel' ? 'from' : 'in'} ${text(destination)}` : ''}`,
+          ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
       }),
@@ -289,20 +273,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     if (next)
       placed.push({ ...button(next, ''), input: { scene: v.scene.scene, line: v.scene.index } });
   }
-  const notices = [
-    ...(v.notices ?? []),
-    ...(v.notice_boards ?? []).flatMap((b) => b.notices),
-  ].flatMap((n) =>
-    (n.actions ?? [])
-      .filter(
-        (a) =>
-          a.available &&
-          !a.input.length &&
-          (a.target.kind === 'none' || a.action_key === 'harvest'),
-      )
-      .map((a) => ({ ...button(a, ''), detail_id: n.id })),
-  );
-
+  const notices = noticeButtons(v, button, names, text);
   return [
     ...placed,
     ...notices,
@@ -329,10 +300,27 @@ function shopButtons(v: GameView, text: Say): Press[] {
   );
 }
 
-// Capture only the interaction, not clock/resources or the whole GameView.
+function noticeButtons(
+  v: GameView,
+  button: (a: GameView['actions'][number], name: string) => Press,
+  names: Map<string, string>,
+  text: Say,
+) {
+  return [...(v.notices ?? []), ...(v.notice_boards ?? []).flatMap((b) => b.notices)].flatMap((n) =>
+    (n.actions ?? [])
+      .filter(
+        (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
+      )
+      .map((a) => ({
+        ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
+        detail_id: n.id,
+      })),
+  );
+}
+
 export function actionContext(
   view: GameView,
-  b: Pick<Button, 'action_key' | 'target_ids' | 'input' | 'detail_id'>,
+  b: Pick<Button, 'action_key' | 'command' | 'target_ids' | 'input' | 'detail_id'>,
   generation: number,
 ) {
   const exit = view.exits.find(
@@ -341,6 +329,7 @@ export function actionContext(
   return JSON.stringify([
     generation,
     b.action_key,
+    b.command,
     b.target_ids,
     b.detail_id,
     Object.entries(b.input)
@@ -351,12 +340,16 @@ export function actionContext(
     view.choice,
     view.scene,
     view.combat,
+    ['fill', 'pour', 'drink'].includes(commandOf(b))
+      ? things(view)
+          .filter((e) => b.target_ids.includes(e.id))
+          .map((e) => [e.id, e.liquid])
+      : null,
     ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key) ? view.position : null,
     exit ? [exit.sight?.room, exit.door?.state] : null,
   ]);
 }
 
-// The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
 export const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
   action_key: action_key as Key,
   target_ids: target_ids as EntityId[],

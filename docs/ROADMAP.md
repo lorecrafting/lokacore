@@ -162,9 +162,10 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **9 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, C1). The latest publication is
-[#206](https://github.com/lorecrafting/lokacore/pull/206), B4 refillable light and safe dark-well recovery.
+Local and GitHub `main` have completed **10 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B7, C1). The latest source publication is
+[#209](https://github.com/lorecrafting/lokacore/pull/209), B7 Well Lane waterskins
+and liquid actions.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -201,14 +202,30 @@ B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6
 and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 on local base `98cc60b1`. The route finding was fixed and its
 [independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
-B4 source is published in #206; B6 still needs its current-main dependency re-pin,
-implementation and successor release/proof pins.
+B4 source is published in #206; B6 implementation is active in an isolated worktree,
+with final shared release/proof pins to follow B7 integration.
 
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
-against local B3 integration at `4bfe252e`. Its
-[independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md) approved;
-source implementation, successor release pins and proof remain ahead.
+with an [independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md).
+Its [primary source review](reviews/2026-10-05-b7-waterskin-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-b7-waterskin-save-second-review.md)
+approved after the authored-alias, Pour ownership and live-quantity findings were
+fixed. Local `main` carries chapter 0.0.22/API1.20, hash
+`0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`
+and 96 IDs. Accumulated local and all six hosted checks passed; it is published in #209.
+
+B8 Maud's paid room, food and drink services have an
+[adopted immediate-benefit contract](decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+and [independently approved plan](reviews/2026-10-05-b8-maud-services-plan-review.md).
+The [brief](briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) now pins
+published B7's reviewed source and current GitHub main `547f809c`, chapter
+0.0.22/API1.20 with 96 independent IDs. B3/B7/Rest behavioral dependencies are met.
+Full source assignment queues behind active B6 Wisp and C2 Tobin patrol shared
+contract/save/Book/release integration, then re-pins latest reviewed main; these
+are scheduling predecessors, not additional chapter dependencies. This docs-only
+re-pin still needs a short independent review. B8 source, successor pins and
+playable service proof remain null.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
@@ -230,10 +247,11 @@ C2 Watchman's Rounds has an [adopted finite-patrol contract](decisions/pm-decisi
 [focused source brief](briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
 re-pinned to current GitHub main `cc43d018`, and
 [independent plan approval](reviews/2026-10-05-c2-watchmans-rounds-plan-review.md).
-B1, Q2-C-rescue and reviewed C1 are integrated. C2 can be assigned while B6/B7
-run; shared cartridge, protocol and generated edits require serialization and an
-intervening-main re-pin. C2 implementation, successor pins, source reviews and
-playable proof remain ahead.
+B1, Q2-C-rescue and reviewed C1 are integrated. C2 source work is active in an
+isolated worktree. It found a shared exact-Talk selector need also implemented
+by B6; final C2 integration now waits for that reviewed selector. Shared
+cartridge, protocol and generated edits require serialization and a final
+predecessor re-pin. C2 successor pins, source reviews and playable proof remain ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)

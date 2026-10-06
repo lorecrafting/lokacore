@@ -13,6 +13,7 @@ import { actionContext, buttonsOf, intentOf, things } from './model.ts';
 export type Button = {
   label: string;
   action_key: string;
+  command?: string; // semantic display metadata; invocation retains its authored key
   target_ids: string[];
   input: object;
   detail_id?: string; // UI owner only; concrete participants retain their wire target contract
@@ -108,7 +109,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
       : accepted?.outcome === 'choice_closed'
         ? ''
         : undefined;
-  const routed = retained?.combat_lines?.length ? narrationLines(retained, now, text) : undefined;
+  const routed = retained ? narrationLines(retained, now, text) : undefined;
   const line = repeated ? '' : routed ? routed[0] : replyLine(reply, text, now, fallback);
   if (line) lines.push(line);
   if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);

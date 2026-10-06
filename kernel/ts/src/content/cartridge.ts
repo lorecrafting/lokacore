@@ -1,6 +1,5 @@
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
-// stage. Stage order, codes, paths and data: protocol/cartridge.schema.json DiagnosticCode.
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
@@ -24,6 +23,7 @@ import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
+import { liquids } from './cartridge_liquids.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
 export interface Installed {
@@ -77,7 +77,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => refStage(c),
+    () => [...refStage(c), ...liquids(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -110,26 +110,29 @@ const schemaStage = (doc: Json) =>
 
 // Each map key's cartridge_id, cartridge_version and key against the manifest and definition.
 // The schema's propertyNames pattern already holds the key's shape and kind.
+const DEFINITION_MAPS = [
+  'facts',
+  'policies',
+  'actions',
+  'rooms',
+  'npcs',
+  'items',
+  'recipes',
+  'resources',
+  'attributes',
+  'barriers',
+  'quests',
+  'reactions',
+  'dialogues',
+  'story_points',
+  'scenes',
+  'skills',
+  'topics',
+  'liquids',
+];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of [
-    'facts',
-    'policies',
-    'actions',
-    'rooms',
-    'npcs',
-    'items',
-    'recipes',
-    'resources',
-    'attributes',
-    'barriers',
-    'quests',
-    'reactions',
-    'dialogues',
-    'story_points',
-    'scenes',
-    'skills',
-  ]) {
+  for (const map of DEFINITION_MAPS) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
@@ -220,7 +223,7 @@ function lockStage(c: Obj): Diagnostic[] {
           use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
-  for (const kind of ['resource', 'attribute', 'scene', 'skill'])
+  for (const kind of ['resource', 'attribute', 'scene', 'skill', 'topic'])
     for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))

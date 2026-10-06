@@ -45,6 +45,7 @@ export type Offered = {
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
   readonly speaker?: EntityId;
+  readonly dialogue?: DefinitionRef;
   readonly continuation?: ContinuationId;
   readonly engine?: true;
 };
@@ -202,9 +203,8 @@ export function refusal(
       : fighting(world, actor)
         ? 'invalid_state'
         : 'unsupported_capability';
-  const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const target = (a: Offered) =>
-    a.recipe ? detailOf(world, a.recipe.target) : (p.target_id ?? p.item_id);
+    a.recipe ? detailOf(world, a.recipe.target) : primaryTarget(payload);
   const ok = (a: Offered) =>
     (!a.recipe || visible(world, actor, detailOf(world, a.recipe.target), steps)) &&
     holds(world, actor, a.policy.root, { target: target(a), steps });
@@ -226,25 +226,17 @@ const INPUTS: readonly string[] = [
   'patrol',
 ];
 
-/**
- * True when action `a` resolves to `payload`'s Command and accepts its target and input. An
- * engine verb's contract is its rule, which re-validates the target with typed codes (a held
- * item's take is invalid_state, not refused here). Another action's is its TargetSpec: none
- * takes no target id, an entity one the id (target_id or item_id) of an entity in one of its
- * scopes for the actor (a room's detail is in none; a worn item is in inventory for an action
- * resolving to remove, equipment@1); and its input lists exactly the payload's
- * input parameters. accept_quest resolves only through the offer of the quest it names (an
- * action of the cartridge's with command accept_quest names no quest, so it never does), a talk
- * only to its dialogue's speaker, and close_choice only through the close_choice of the pending
- * continuation it names.
+/** Match the exact command, primary target/scope and input contract.
+ * Engine rules own their target checks; recipes, quests and dialogue bind their own identities.
  */
 function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandPayload): boolean {
   if (a.command !== payload.type) return false;
   if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
   if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
+  if (payload.type === 'talk' && payload.dialogue && !same(a.dialogue, payload.dialogue))
+    return false;
   if (a.engine) return true;
-  const p = payload as { target_id?: EntityId; item_id?: EntityId };
-  const id = p.target_id ?? p.item_id;
+  const id = primaryTarget(payload);
   if (a.speaker !== undefined && id !== a.speaker) return false;
   const inputs = Object.keys(payload).filter(
     (k) => INPUTS.includes(k) && !(a.command === 'choose' && ['answer', 'patrol'].includes(k)),
@@ -287,11 +279,20 @@ export function admission(
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
 }
 
+function primaryTarget(payload: CommandPayload): EntityId | undefined {
+  if (payload.type === 'fill' || payload.type === 'pour') return payload.source_id;
+  if (payload.type === 'drink') return payload.vessel_id;
+  const p = payload as { target_id?: EntityId; item_id?: EntityId };
+  return p.target_id ?? p.item_id;
+}
+
 function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
   const p = payload as { actor_id: CharacterId } & Partial<
     Record<'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id', EntityId>
   >;
-  return [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id].some(
-    (id) => id && !visible(world, p.actor_id, id, steps),
-  );
+  const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id];
+  if (payload.type === 'fill') ids.push(payload.source_id, payload.vessel_id);
+  if (payload.type === 'pour') ids.push(payload.source_id, payload.receiver_id);
+  if (payload.type === 'drink') ids.push(payload.vessel_id);
+  return ids.some((id) => id && !visible(world, p.actor_id, id, steps));
 }

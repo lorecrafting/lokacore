@@ -1,0 +1,23 @@
+{
+  "title": "quest.wisp_ward.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.wisp_ward.active",
+    "objectives_met": "quest.wisp_ward.active",
+    "resolved": "quest.wisp_ward.resolved",
+    "outcomes": {
+      "answer": "quest.wisp_ward.resolved"
+    },
+    "failed": "quest.wisp_ward.active",
+    "abandoned": "quest.wisp_ward.active"
+  }
+}

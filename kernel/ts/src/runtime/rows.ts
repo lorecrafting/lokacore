@@ -5,6 +5,7 @@ import { key } from '../foundation/compose.ts';
 const SECTIONS: Readonly<
   Record<
     string,
+    | 'liquids'
     | 'fuel'
     | 'containers'
     | 'facts'
@@ -20,6 +21,7 @@ const SECTIONS: Readonly<
     | 'patrols'
   >
 > = {
+  liquid: 'liquids',
   fuel: 'fuel',
   encounter: 'encounters',
   escort: 'escorts',
@@ -44,7 +46,7 @@ export const row = (t: MutationTarget) =>
   SECTIONS[t.kind] &&
   ([
     SECTIONS[t.kind]!,
-    t.kind === 'fuel'
+    t.kind === 'fuel' || t.kind === 'liquid'
       ? t.item_id
       : t.kind === 'containment' || t.kind === 'entity'
         ? t.entity_id

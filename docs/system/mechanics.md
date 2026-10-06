@@ -1014,8 +1014,8 @@ are outside this selected consumer.
 
 ## S4 all-hours wisp (B6 selected contract)
 
-Planned under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
-not installed behavior or proof. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+Installed under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
+using the selected contract. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
 owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
 no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
 

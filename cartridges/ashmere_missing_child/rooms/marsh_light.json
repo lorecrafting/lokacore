@@ -1,0 +1,32 @@
+{
+  "title": "room.marsh_light.title",
+  "description": "room.marsh_light.description",
+  "dark_description": "room.marsh_light.dark",
+  "exits": {
+    "west": {
+      "to": "mire_crossing"
+    },
+    "south": {
+      "to": "old_causeway"
+    }
+  },
+  "details": {
+    "glow": {
+      "aliases": [
+        "glow",
+        "wisp"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "self_luminous": true,
+        "title": "detail.glow.title"
+      }
+    },
+    "reeds": {
+      "aliases": [
+        "reeds"
+      ],
+      "description": "detail.marsh_reeds.description"
+    }
+  }
+}

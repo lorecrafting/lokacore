@@ -358,13 +358,31 @@
     "definitions": [
       "fuel",
       "darkness"
+    ],
+    "policies": [
+      "light_off"
     ]
   },
   {
     "key": "liquid",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "fill",
+      "pour",
+      "drink"
+    ],
+    "events": [
+      "filled",
+      "poured",
+      "drank"
+    ],
+    "definitions": [
+      "liquid",
+      "vessel",
+      "liquid_source"
+    ]
   },
   {
     "key": "readable",
@@ -382,7 +400,10 @@
     "key": "topics",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "topic"
+    ]
   },
   {
     "key": "relationship",

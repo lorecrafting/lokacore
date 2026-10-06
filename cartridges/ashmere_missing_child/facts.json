@@ -288,6 +288,39 @@
         "player"
       ],
       "meaning": "Watch recognition: only successful patrol completion writes it."
+    },
+    "fen_wisp_discovered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The actor found the original marsh wisp."
+    },
+    "fen_wisp_answered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The actor solved the wisp riddle."
+    },
+    "topic_ward_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The actor learned the ward topic."
     }
   }
 }

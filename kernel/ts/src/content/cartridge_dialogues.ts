@@ -67,7 +67,9 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [d, at] of each(c)) {
     if (taken.has(d.key)) out.push(diag('DUPLICATE_DEFINITION', at));
-    text(d, ['prompt'], at);
+    text(d, ['prompt', 'label'], at);
+    if (d.riddle?.wrong_limit !== undefined && !d.quest)
+      out.push(diag('OUTCOME_MISMATCH', `${at}.riddle.wrong_limit`));
     if (d.riddle) out.push(...riddle(d, at, checks));
     named(d.npc, 'npc', `${at}.npc`);
     if (d.quest) named(d.quest, 'quest', `${at}.quest`);

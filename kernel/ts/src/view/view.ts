@@ -1,5 +1,7 @@
 // size: allow 320, current GameView includes bounded patrol journal projection
 import * as patrol from '../mechanics/patrol/shared.ts';
+import { knownTopics } from '../mechanics/topics/shared.ts';
+import { liquidView } from './liquid.ts';
 import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
@@ -77,6 +79,7 @@ export function gameView(world: World): GameView {
   const view: GameView = {
     actor_id: world.character,
     ...skillViews(world, steps),
+    ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door, steps),
@@ -171,6 +174,7 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  ...liquidView(world, id),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });

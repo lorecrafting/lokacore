@@ -52,5 +52,6 @@
         "transition": "restart"
       }
     }
-  }
+  },
+  "label": "watch.talk"
 }

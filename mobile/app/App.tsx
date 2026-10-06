@@ -16,7 +16,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { KERNEL_ID, localSession } from '../authority/local-story/session';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import chapter from '../../protocol/fixtures/missing_child_v021_hash.json';
+import chapter from '../../protocol/fixtures/missing_child_v024_hash.json';
 import { SaveError } from './SaveError';
 
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.

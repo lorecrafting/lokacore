@@ -23,7 +23,7 @@ defmodule Loka.Content.Requires do
   def features(nil, _), do: []
 
   def features(m, all) do
-    minimum = max(minimum_feature_api(m, all), light_minimum(all))
+    minimum = Enum.max([minimum_feature_api(m, all), light_minimum(all), b6_minimum(all)])
 
     if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
@@ -38,8 +38,13 @@ defmodule Loka.Content.Requires do
        else: []
   end
 
+  defp b6_minimum(all), do: if(Enum.any?(all, &b6_feature?/1), do: [1, 21], else: [])
+
   defp minimum_feature_api(m, all) do
     cond do
+      is_map_key(m["requires"]["capabilities"], "patrol") ->
+        [1, 22]
+
       is_map_key(m["requires"]["capabilities"], "skills") ->
         [1, 18]
 
@@ -120,5 +125,12 @@ defmodule Loka.Content.Requires do
       %{"portability" => "server_only"} when offline? -> [diag("SERVER_ONLY_CAPABILITY", path)]
       _ -> []
     end
+  end
+
+  defp b6_feature?({_, _, d}) do
+    (d["label"] != nil and d["fact"] != nil) or get_in(d, ["riddle", "wrong_limit"]) != nil or
+      get_in(d, ["check", "kind"]) == "attribute_threshold" or
+      d["perception"] != nil or
+      Enum.any?(Map.values(Map.get(d, "details", %{})), &(&1["perception"] != nil))
   end
 end

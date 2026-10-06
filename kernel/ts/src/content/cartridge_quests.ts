@@ -74,15 +74,17 @@ export function featureApi(c: Obj): Diagnostic[] {
     Object.values((c.dialogues ?? {}) as Obj).some(
       (d) => !d.quest && Object.values(d.choices as Obj).some((o) => o.receive),
     );
-  const minimum = debt
-    ? 14
-    : Object.hasOwn(c.manifest.requires.capabilities, 'escort')
-      ? 11
-      : transfers
-        ? 10
-        : riddles
-          ? 9
-          : 0;
+  const minimum = Object.values((c.quests ?? {}) as Obj).some((q) => q.patrol)
+    ? 22
+    : debt
+      ? 14
+      : Object.hasOwn(c.manifest.requires.capabilities, 'escort')
+        ? 11
+        : transfers
+          ? 10
+          : riddles
+            ? 9
+            : 0;
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   return minimum > 0 && (major < 1 || (major === 1 && minor < minimum))
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]

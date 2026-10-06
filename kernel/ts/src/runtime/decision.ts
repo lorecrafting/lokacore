@@ -26,6 +26,7 @@ import {
   type InspectableDetail,
   type ItemDefinition,
   type Key,
+  type LiquidRow,
   type NpcDefinition,
   type Owned,
   type QuestState,
@@ -44,11 +45,8 @@ import type { RngState } from '../foundation/rng.ts';
 
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
-/**
- * Mutable hashed state. Optional sections appear only on first write, preserving untouched
- * world hashes; absent facts/resources/barriers retain their authored defaults.
- */
 export type State = {
+  readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
@@ -79,6 +77,7 @@ export type ChoiceRow = {
   readonly status: 'pending' | 'resolved' | 'closed';
   readonly opened_revision: number;
   readonly choice_id?: Key;
+  readonly attempts?: { readonly count: number; readonly limit: number };
   readonly quest_instance_id?: QuestInstanceId;
 };
 
@@ -117,6 +116,9 @@ export type World = {
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly knownEntities: Readonly<Record<string, { kind: string; owner_id?: CharacterId }>>;
   readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
+  readonly liquidSpecs: Readonly<
+    Record<string, { capacity: number; kinds: readonly DefinitionRef[] }>
+  >;
   readonly capacities: Readonly<Record<string, number>>; // by EntityId: declared limit, or zero for noncontainer items
   readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text

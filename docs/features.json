@@ -406,12 +406,16 @@
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_dialogues.ts"
+      "kernel/ts/src/content/cartridge_dialogues.ts",
+      "kernel/ts/src/mechanics/dialogue/selection.ts",
+      "kernel/ts/src/mechanics/dialogue/behavior.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json",
       "protocol/fixtures/composition.json",
-      "protocol/fixtures/cartridge_chapters_hash.json"
+      "protocol/fixtures/cartridge_chapters_hash.json",
+      "protocol/fixtures/wisp_contracts.json",
+      "protocol/fixtures/wisp_attempts.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -691,5 +695,53 @@
       "patrol_transitions_hold"
     ],
     "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
+  },
+  "topics": {
+    "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md B6 composition",
+    "contracts": [
+      "TopicDefinition",
+      "DialogueChoice",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/topics/shared.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/wisp_contracts.json",
+      "protocol/fixtures/missing_child_v023_hash.json"
+    ],
+    "invariants": [
+      "facts_typed"
+    ],
+    "implemented_in": "B6 declared Ward knowledge and exact public Aldric consumer (local implementation; independent review pending)"
+  },
+  "liquid": {
+    "spec": "docs/system/mechanics.md B7; docs/system/protocol.md B7 liquid composition",
+    "contracts": [
+      "LiquidDefinition",
+      "LiquidRow",
+      "VesselSpec",
+      "LiquidView",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/liquid/shared.ts",
+      "kernel/ts/src/view/liquid.ts",
+      "kernel/ts/src/foundation/compose_liquid.ts",
+      "lib/loka/core/liquid.ex",
+      "mobile/authority/local-story/liquid-save.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/liquid_composition.json",
+      "protocol/fixtures/missing_child_b7_hash.json"
+    ],
+    "invariants": [
+      "liquid_rows_valid",
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal"
+    ],
+    "implemented_in": "B7 finite Well Lane source and two waterskins (TypeScript; portable liquid.set twins)"
   }
 }

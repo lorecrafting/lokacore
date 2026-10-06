@@ -77,7 +77,11 @@ test('ordinary detour requires explicit Rejoin and fresh drawn continuation stat
   };
   a.choice('continue');
   a.move('south');
-  a.run({ type: 'talk', target_id: npc(a.world) });
+  a.run({
+    type: 'talk',
+    target_id: npc(a.world),
+    dialogue: ref(a.world, 'dialogue', 'tobin_watch'),
+  });
   const continuation_id = Object.entries(a.world.state.choices!).find(
     ([, c]) => c.status === 'pending',
   )![0];

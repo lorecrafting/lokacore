@@ -741,6 +741,30 @@
                 "difficulty"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "kind": {
+                  "const": "attribute_threshold"
+                },
+                "attribute": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "difficulty": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "key",
+                "kind",
+                "attribute",
+                "difficulty"
+              ],
+              "additionalProperties": false
             }
           ]
         },

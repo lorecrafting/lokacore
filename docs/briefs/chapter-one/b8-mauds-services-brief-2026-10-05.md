@@ -1,14 +1,28 @@
 # B8 — Maud's room, food and drink services
 
-**Adopted planning brief, source implementation pending.** Planning branch
-`planning/b8-maud-services`, inspected local base
-`4ec52632d510e45214e43a1fe5beca0ec5addbad`. B3 is locally implemented and reviewed
-at chapter `ashmere_missing_child@0.0.18`/API1.16; accumulated publication remains
-pending. B7 has an adopted plan, not merged source. Installed Rest/position and
-MV recovery exist; Inn/meal/Eat/service implementations do not. Re-pin actual
-B3/B7 integration and review heads before assignment. Implementation branch
-`chapter-1/b8-maud-services` (not created). Successor release/API/hash/entity IDs,
-implementation head, PR and verdicts: null. Docs only; no merge/push/play claim.
+**Adopted plan, dependencies re-pinned; source implementation pending.**
+Original planning branch `planning/b8-maud-services` was independently
+[approved](../../reviews/2026-10-05-b8-maud-services-plan-review.md) at
+`bfab9ffd4375bba7db21eefb471b3b539d5c4f07`. This docs-only re-pin uses
+`planning/b8-services-source-repin` from GitHub main
+`547f809ccdd587498dee86cb14822f564efee642` (remote `origin/main`).
+B7 Well Lane waterskins and liquid actions are published in
+[#209](https://github.com/lorecrafting/lokacore/pull/209), merge
+`66d36f9ccc5879eff31b6cfe845f7af7c6575e81`. Final source
+`d24b6f8917fa46e171fbf1791e3ed2c3bd848109` has approved
+[primary](../../reviews/2026-10-05-b7-waterskin-primary-review.md#scoped-fix-round-1--approve)
+and [save/protocol](../../reviews/2026-10-05-b7-waterskin-save-second-review.md#scoped-book-fix-recheck--2026-10-05)
+reviews. B3 commerce, B2 exact pennies and installed Rest/MV recovery are retained
+on this integrated base. Current chapter is `ashmere_missing_child@0.0.22`,
+API1.20, SHA-256
+`0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`,
+with [independent hash](../../../protocol/fixtures/missing_child_b7_hash.json)
+and [96 IDs](../../../protocol/fixtures/missing_child_b7_ids.json).
+Inn/meal/Eat/service source remains absent. Suggested implementation branch
+`chapter-1/b8-maud-services` is not created by this plan. B8 successor
+release/API/hash/allocated IDs, implementation head, PR and source verdicts:
+null. The dependency gate is satisfied; the scheduling gate below remains.
+No source, merge/push, browser/native or owner-save work is authorized here.
 
 ## Consumer, dependencies and governing clauses
 
@@ -32,6 +46,43 @@ supply consumer direction, not installed hunger/drunk/occupancy defaults.
 Follow world-parameters, fixed elapsed time, no-wait, forward-development and
 [composition](../../system/architecture.md#building-mechanics-by-composition).
 
+## Source scheduling and inspected reuse
+
+B6 Wisp and C2 Tobin patrol are not semantic prerequisites for B8. Their active
+cross-layer source work is nevertheless not file-disjoint from B8. Both extend
+protocol command/action/GameView/capability contracts, compiler/loader and runtime
+registration, Book model/presenter and save validation; all three change chapter
+manifest/text/facts, generated contracts/features, bundled release and independent
+hash/ID pins. C2 additionally waits for B6's reviewed exact-Talk selector. Source
+worktrees isolate edits but do not remove these integration conflicts.
+
+Queue the full B8 assignment behind the current B6→C2 shared-source integration
+lane. After those reviewed predecessors merge, merge latest main into the B8
+branch and re-pin its exact source/release before implementation. Do not treat
+this scheduling gate as a new chapter dependency, predict predecessor versions,
+or start three full contract/save/Book edits concurrently. Read-only inspection
+and planning can overlap; this brief offers no separate partial-source assignment.
+A PM-authorized disjoint split would require an explicit scoped brief and file
+ownership before changing that queue.
+
+Installed payment is the generic `transfer` helper in
+`kernel/ts/src/mechanics/resource.ts`, called by B3 commerce; `commerce.exchange`
+itself also requires a shop item/custody and is not a service-payment API.
+Installed B7 `mechanics/liquid/shared.ts` exposes `transition` with actor-owned
+vessel admission, while exact serving debit is in private `consumePlan`. Extract
+only its pure serving arithmetic into the same shared module when service needs
+it; keep actor-owned Drink and provider-owned service admission separate and
+never impersonate Maud as the command actor. `drink_amount` belongs to each
+liquid kind, not vessel metadata. No portable operation change is implied.
+
+Installed `mobile/authority/local-story/liquid-save.ts` already checks opted rows
+and invokes `receiptHistory` from `receipt-history.ts`. That verifier reconstructs
+accepted commands/decisions in revision order with normal `step`/`stepElapsed`
+and compares the whole resulting state. Reuse it for service provenance, including
+entitlement/stock/payment/MV; do not write a parallel service-history interpreter
+or duplicate liquid ledger. Verify the service-only/room-only path invokes the
+existing history guard even when a controlled cartridge has no liquid vessels.
+
 ## Minimal implementation and composition record
 
 - **Real consumer:** three exact original-Maud service offers and actual Inn
@@ -42,8 +93,8 @@ Follow world-parameters, fixed elapsed time, no-wait, forward-development and
   actor entitlement, settled MV/headroom, exact provider-held opted ale vessel
   kind/quantity and immutable serving metadata. One shared query budget covers
   all candidates, custody and arithmetic before allocation.
-- **Typed writes/owners:** service owns admission and lowering; reuse B3 exact
-  payment helper and existing resource/fact ops. Liquid owns the reusable pure
+- **Typed writes/owners:** service owns admission and lowering; reuse B3's
+  generic exact resource payment helper and existing resource/fact ops. Liquid owns the reusable pure
   serving transition; service uses it for its exact bound provider vessel, not
   a public actor-owned Drink call. Position owns actual Rest and MV rate changes.
   Proposal owns atomic writer conflict/adoption; authority owns changed-row
@@ -74,6 +125,39 @@ verifier and receipt narration recovery; shared Book Maud/bed detail/freshness.
 No mobile native changes, new dependencies, portable-foundation rewrites,
 extra source rooms, stock regeneration, shop buyback, edible inventory,
 bartering, passive physiology, B9 overlay, timed Inn reservation or Realm.
+
+## Exact offers and Book interaction acceptance
+
+Reuse [Book components](../../BOOK-UI-COMPONENTS.md): Maud's existing
+`NpcPage`/`NpcDetail`, shared `Act`/`Leave`, chronological detail history and
+current detail stack; the bed uses the shared inspectable-detail/reading pattern.
+Maud owns service results, bed owns actual Rest; Leave returns to World without
+inventing a child service page. Preserve S1 controls in that same NPC detail.
+No service-only design system or deferred navigation repair is needed.
+
+The three authored keys are `rent_lantern_room`, `eat_lantern_meal` and
+`drink_lantern_ale`; each resolves to `use_service`. Ordered invocation targets
+are `[provider_id]`; captured input carries its exact service DefinitionRef and
+`quoted_price`. Their service definitions are `lantern_room`, `lantern_meal` and
+`lantern_ale`. A single service availability query combines current service
+eligibility with each exact keyed action's ordinary target/input/policy admission,
+and is reused by raw execution and GameView. Book uses the resolved command for
+placement/freshness and preserves the authored key for invocation identity.
+The paid bed uses the existing targetless `rest`, ordered targets `[]`, no input;
+its local bed route is not an extra gameplay target or Rest writer.
+
+Use one loaded view→captured invocation→actual GameSession/Book press→receipt→cold
+reopen control for the differently named service keys. With actor20p/Maud10p,
+meals4/ale4/MV50, pressing the projected meal gives18p/12p/meals3/MV62 and exactly
+one Maud-local committed line live, after lost acknowledgement/retry, and reopened.
+Narrow the authored key's target, price input or policy independently: projection
+must show the same refusal as its exact invocation and preserve all prior state.
+Plant key==command filtering or bypassed keyed admission and demonstrate the red;
+reuse same-layer coverage where it already detects that break. Opening/leaving
+Maud or bed writes no benefit; rent-at-full-MV works; pending/refused/stale/fault
+service never announces success. Exercise the real bed Rest, S1 acceptance and
+turn-in alongside services, World/Leave and truthful refreshed stock/resources.
+These shared Book proofs remain required during the native pause.
 
 ## Independent literal acceptance and mutation plan
 
@@ -142,7 +226,7 @@ Leave→upstairs→bed Rest→refresh, repeated rental refusal and S1 control re
 Browser refresh does not certify native SQLite/background/Hermes; no owner-save
 or simulator operation is authorized by this plan.
 
-Stop for a missing B7 integration/review, incompatible quote/liquid/save producer,
+Stop for an unreviewed final scheduling predecessor, incompatible quote/liquid/save producer,
 unsafe arithmetic, arbitrary effect framework, required edible item/Eat policy,
 paid-only movement/corpse route, S1 first-eligible interference, rental-as-Rest,
 HP/physiology/time-skip expansion or governing/frozen-fixture conflict. Return

@@ -1,4 +1,5 @@
 // size: allow 315, independent retirement pairing joins precondition replay
+import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { patrolsHold } from './invariants_patrol.ts';
 import { escortsHold } from './invariants_escort.ts';
@@ -46,6 +47,7 @@ function link(op: Any): [Json | undefined, Json] {
     'choice.open': [undefined, 'pending'],
     'choice.resolve': ['pending', 'resolved'],
     'choice.close': ['pending', 'closed'],
+    'choice.attempt': ['pending', 'pending'],
   };
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];
@@ -154,6 +156,7 @@ function extra(
 const CHECKS: Record<string, (o: Any) => boolean> = {
   patrol_transitions_hold: ({ state, delta, result }) =>
     'fault' in result || patrolsHold(state, delta.ops, result),
+  liquid_rows_valid: ({ state, result }) => liquidRowsValid(state, result),
   one_container_per_item: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     const created = new Set(
@@ -197,8 +200,9 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   // size: allow 46, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
-    if (!retirementsHold(delta.ops)) return false;
+    if (!Number.isInteger(state.clock) || !retirementsHold(delta.ops)) return false;
+    if (!creationsHold(state, delta.ops, result) || !liquidsHold(state, delta.ops, result))
+      return false;
     if (
       !encountersHold(state, delta.ops, result) ||
       !escortsHold(state, delta.ops, result) ||
@@ -212,7 +216,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
-      if (op.op === 'escort.transition' || op.op === 'patrol.transition') continue;
+      if (op.op === 'escort.transition' || op.op === 'patrol.transition' || op.op === 'liquid.set')
+        continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
       const [need, give] = link(op);

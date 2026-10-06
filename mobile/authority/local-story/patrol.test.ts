@@ -42,6 +42,7 @@ function setup(path = ':memory:') {
     assert.ok(chosen, `${choice_id}: ${JSON.stringify(view().choice)}`);
     book.press(chosen, npc(fresh));
     assert.equal(game.pending(), false);
+    assert.equal(view().choice, undefined);
     return chosen;
   };
   const choose = (key: string) => {
@@ -374,4 +375,37 @@ test('final player join commits movement, terminal quest and trust together acro
         a.sql.close();
       }
     });
+});
+
+// Breaks: current patrol identity validation rejects lawful C1 payments/gift/dodge acquisition or S3 repeats those rewards.
+test('real original-Tobin C1 lessons reopen during patrol and completion grants trust alone', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-patrol-lessons-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const a = setup(join(dir, 'story.db'));
+  t.after(() => a.sql.close());
+  a.start();
+  a.ok('tobin_swords', [npc(fresh)]);
+  a.choice('learn');
+  a.reopen();
+  a.choose('continue');
+  a.move('west');
+  a.ok('tobin_dodge', [npc(fresh)]);
+  a.choice('learn');
+  a.reopen();
+  const pennies = a.rows('resources').filter((r) => JSON.parse(r.key).resource.key === 'pennies');
+  const skills = a.view().skills;
+  const sword = a.view().inventory.find((i) => i.name === 'item.rusty_sword.short');
+  assert.ok(sword);
+  for (const direction of ['south', 'east', 'west', 'north', 'east']) {
+    a.choose('continue');
+    a.move(direction);
+  }
+  a.reopen();
+  assert.equal(a.patrol().value.status, 'completed');
+  assert.deepEqual(
+    a.rows('resources').filter((r) => JSON.parse(r.key).resource.key === 'pennies'),
+    pennies,
+  );
+  assert.deepEqual(a.view().skills, skills);
+  assert.equal(a.view().inventory.find((i) => i.name === 'item.rusty_sword.short')!.id, sword.id);
 });

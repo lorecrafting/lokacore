@@ -1,3 +1,4 @@
+import { validAttempts } from '../../../kernel/ts/src/mechanics/dialogue/behavior.ts';
 // Protected nonterminal receipts retain the only authority for subsequent item custody.
 import type { EntityId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
@@ -83,7 +84,9 @@ export function checkRow(world: World, id: string, row: ChoiceRow) {
     row.actor_id !== world.character ||
     !Number.isSafeInteger(row.opened_revision) ||
     row.opened_revision < 0 ||
-    !['pending', 'resolved', 'closed'].includes(row.status)
+    !['pending', 'resolved', 'closed'].includes(row.status) ||
+    !Array.isArray(row.roles) ||
+    row.roles.some((r) => validate('RoleBinding', r).length)
   )
     invalid();
   const d = world.cartridge.dialogues?.[refString(row.source)];
@@ -100,6 +103,7 @@ export function checkRow(world: World, id: string, row: ChoiceRow) {
       bind(world, d),
     ) ||
     !same(row.choice_ids, choiceIds(d)) ||
+    !validAttempts(row, d) ||
     (row.status === 'resolved'
       ? !row.choice_id || !d.choices[row.choice_id]
       : row.choice_id !== undefined)

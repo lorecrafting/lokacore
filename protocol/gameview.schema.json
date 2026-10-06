@@ -414,34 +414,28 @@
       ]
     },
     "EntityView": {
-      "description": "A visible entity (04 \u00a714): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 \u00a76). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
-      "type": "object",
       "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "kind": {
-          "$ref": "action.schema.json#/$defs/Key"
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/AdvertisedAction"
-          }
-        },
-        "state": {
-          "$ref": "room.schema.json#/$defs/BarrierState"
-        },
         "contents": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/ContentView"
           }
         },
-        "description": {
+        "skill_requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "kind": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "shop": {
@@ -450,34 +444,43 @@
             "$ref": "gameview.schema.json#/$defs/ShopItemView"
           }
         },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
         "fuel": {
           "$ref": "#/$defs/FuelView"
         },
-        "slot": {
-          "$ref": "entity.schema.json#/$defs/SlotKey"
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
         },
         "weapon": {
           "$ref": "entity.schema.json#/$defs/WeaponProfile"
         },
-        "block_chance": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "skill_label": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "skill_requirement": {
-          "$ref": "text.schema.json#/$defs/TextKey"
+        "liquid": {
+          "$ref": "liquid.schema.json#/$defs/LiquidView"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "id",
         "name",
         "kind",
         "actions"
       ],
-      "additionalProperties": false,
+      "description": "A visible entity (04 \u00a714): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 \u00a76). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "examples": [
         {
           "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
@@ -550,23 +553,41 @@
       ]
     },
     "ContentView": {
-      "description": "An item inside a container of an EntityView's contents (04 \u00a715 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
-      "type": "object",
       "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
+        "skill_requirement": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "kind": {
           "$ref": "action.schema.json#/$defs/Key"
         },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "container_id": {
           "$ref": "identity.schema.json#/$defs/EntityId"
         },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
         "state": {
           "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "fuel": {
+          "$ref": "#/$defs/FuelView"
         },
         "actions": {
           "type": "array",
@@ -574,30 +595,15 @@
             "$ref": "#/$defs/AdvertisedAction"
           }
         },
-        "description": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "fuel": {
-          "$ref": "#/$defs/FuelView"
-        },
-        "slot": {
-          "$ref": "entity.schema.json#/$defs/SlotKey"
-        },
         "weapon": {
           "$ref": "entity.schema.json#/$defs/WeaponProfile"
         },
-        "block_chance": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "skill_label": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "skill_requirement": {
-          "$ref": "text.schema.json#/$defs/TextKey"
+        "liquid": {
+          "$ref": "liquid.schema.json#/$defs/LiquidView"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "id",
         "name",
@@ -605,7 +611,7 @@
         "container_id",
         "actions"
       ],
-      "additionalProperties": false,
+      "description": "An item inside a container of an EntityView's contents (04 \u00a715 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "examples": [
         {
           "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
@@ -717,6 +723,9 @@
               },
               "minItems": 1,
               "maxItems": 32
+            },
+            "attempts": {
+              "$ref": "delta.schema.json#/$defs/ChoiceAttempts"
             }
           },
           "required": [
@@ -1094,6 +1103,25 @@
           "type": "array",
           "items": {
             "$ref": "gameview.schema.json#/$defs/AttributeView"
+          }
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
+            },
+            "required": [
+              "topic",
+              "label"
+            ],
+            "additionalProperties": false
           }
         }
       },
