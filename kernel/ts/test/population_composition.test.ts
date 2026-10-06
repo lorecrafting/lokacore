@@ -20,6 +20,8 @@ test('population control and slot composition match independent literal rows', (
     assert.deepEqual(validate('StateDelta', delta), [], c.id);
     const result = compose(c.state, delta);
     assert.deepEqual(result, c.expected, c.id);
+    if (c.prefix_expected)
+      assert.deepEqual(compose(c.state, delta, false), c.prefix_expected, c.id);
     assert.equal(check('delta_preconditions_hold', { state: c.state, delta, result }), true, c.id);
   }
 });

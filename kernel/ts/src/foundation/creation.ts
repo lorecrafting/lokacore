@@ -140,13 +140,14 @@ function birthSlotsMatch(
     (s) =>
       s.value.member_id === null ||
       s.value.replacement_due !== null ||
-      !hounds.some((h) => h.writer_group === s.writer_group) ||
       hounds.some(
         (h) =>
           h.writer_group === s.writer_group &&
           h.identity.id === s.value.member_id &&
           h.identity.origin.kind === 'spawned' &&
-          h.identity.origin.slot === s.slot,
+          key(h.identity.origin.by) === key(s.plan) &&
+          h.identity.origin.slot === s.slot &&
+          h.identity.origin.generation === s.value.generation,
       ),
   );
 }

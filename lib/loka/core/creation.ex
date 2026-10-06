@@ -112,11 +112,13 @@ defmodule Loka.Core.Creation do
       Enum.all?(ops, fn op ->
         op["op"] != "population.slot" or get_in(op, ["value", "member_id"]) == nil or
           get_in(op, ["value", "replacement_due"]) != nil or
-          not Enum.any?(hounds, &(&1["writer_group"] == op["writer_group"])) or
           Enum.any?(hounds, fn h ->
             h["writer_group"] == op["writer_group"] and
               h["identity"]["id"] == get_in(op, ["value", "member_id"]) and
-              get_in(h, ["identity", "origin", "slot"]) == op["slot"]
+              get_in(h, ["identity", "origin", "by"]) == op["plan"] and
+              get_in(h, ["identity", "origin", "slot"]) == op["slot"] and
+              get_in(h, ["identity", "origin", "generation"]) ==
+                get_in(op, ["value", "generation"])
           end)
       end) and
       Enum.all?(pelts, fn p ->

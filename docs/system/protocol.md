@@ -810,6 +810,10 @@ mistaking a temporarily unfinished pair for a corrupt complete state. Generic
 source/cycle/capacity guards and one-container proof stay in force.
 The additive `spawned_bundle.json` fixture pins a complete accepted pair, final
 bundle refusals and a composable paired prefix in both portable kernels.
+At final admission, every occupied slot with no replacement due binds a fresh
+same-group hound by full plan, slot, generation and member ID. Row-only occupied
+slot examples exercise transition algebra only in explicit nonfinal composition;
+they do not establish a complete birth.
 
 Derived dynamic entities/resource specs/capacity and known-victim observations
 include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the

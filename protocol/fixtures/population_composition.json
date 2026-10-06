@@ -82,6 +82,15 @@
         }
       ],
       "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      },
+      "prefix_expected": {
         "changes": [
           {
             "target": {
@@ -235,6 +244,15 @@
         }
       ],
       "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      },
+      "prefix_expected": {
         "changes": [
           {
             "target": {

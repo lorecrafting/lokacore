@@ -78,3 +78,62 @@ test('paired spawned prefix remains composable for intermediate reads', () => {
   const result = compose(state, { ops: full.slice(0, 4) }, false);
   assert.ok('changes' in result, JSON.stringify(result));
 });
+
+// Breaks: an extra slot under another full plan ref claims the same newborn/group/ordinal.
+test('a newborn cannot also occupy a foreign plan slot', () => {
+  const extra = { ...full[5], plan: { ...full[5]!.plan, key: 'foreign_hounds' } };
+  const ops = [...full, extra];
+  assert.deepEqual(compose(state, { ops }), {
+    fault: { kind: 'fault', code: 'precondition_failed', target: { kind: 'clock' } },
+  });
+  const accepted = compose(state, { ops: full });
+  assert.ok('changes' in accepted);
+  if (!('changes' in accepted)) return;
+  const forged = {
+    changes: [
+      ...accepted.changes,
+      {
+        target: { kind: 'population_slot', plan: extra.plan, slot: extra.slot },
+        value: extra.value,
+      },
+    ],
+  };
+  assert.equal(check('delta_preconditions_hold', { state, delta: { ops }, result: forged }), false);
+});
+
+// Breaks: another writer group claims the same newborn in a second slot, or an occupied slot
+// assigns an existing hound without creating its next generation.
+test('each final occupied slot binds its own same-group newborn', () => {
+  const fault = {
+    fault: { kind: 'fault', code: 'precondition_failed', target: { kind: 'clock' } },
+  };
+  const extra = { ...full[5], writer_group: 1, slot: 2 };
+  const ops = [...full, extra];
+  assert.deepEqual(compose(state, { ops }), fault);
+  const accepted = compose(state, { ops: full });
+  assert.ok('changes' in accepted);
+  if (!('changes' in accepted)) return;
+  const target = { kind: 'population_slot', plan: extra.plan, slot: extra.slot };
+  const forged = { changes: [...accepted.changes, { target, value: extra.value }] };
+  assert.equal(check('delta_preconditions_hold', { state, delta: { ops }, result: forged }), false);
+
+  const slot1 = { ...target, slot: 1 };
+  const empty = { generation: 0, member_id: null, replacement_due: null };
+  const member = literal.expected_rows.member;
+  const prior = {
+    ...state,
+    created: { [member]: literal.expected_rows.hound },
+    containers: { [member]: literal.expected_rows.room },
+    population_slots: { [key(slot1)]: literal.expected_rows.slot, [key(target)]: empty },
+  };
+  const lone = { ...full[5], slot: 2, expected: empty };
+  assert.deepEqual(compose(prior, { ops: [lone] }), fault);
+  assert.equal(
+    check('delta_preconditions_hold', {
+      state: prior,
+      delta: { ops: [lone] },
+      result: { changes: [{ target, value: lone.value }] },
+    }),
+    false,
+  );
+});

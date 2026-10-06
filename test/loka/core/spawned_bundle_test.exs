@@ -68,6 +68,97 @@ defmodule Loka.Core.SpawnedBundleTest do
              Compose.compose(@literal["state"], %{"ops" => Enum.take(@literal["ops"], 4)}, false)
   end
 
+  # Breaks: an extra slot under another full plan ref claims the same newborn/group/ordinal.
+  test "a newborn cannot also occupy a foreign plan slot" do
+    state = @literal["state"]
+    full = @literal["ops"]
+    extra = put_in(List.last(full), ["plan", "key"], "foreign_hounds")
+    ops = full ++ [extra]
+
+    assert Compose.compose(state, %{"ops" => ops}) == %{
+             "fault" => %{
+               "kind" => "fault",
+               "code" => "precondition_failed",
+               "target" => %{"kind" => "clock"}
+             }
+           }
+
+    accepted = Compose.compose(state, %{"ops" => full})
+
+    forged = %{
+      "changes" =>
+        accepted["changes"] ++
+          [
+            %{
+              "target" => %{
+                "kind" => "population_slot",
+                "plan" => extra["plan"],
+                "slot" => extra["slot"]
+              },
+              "value" => extra["value"]
+            }
+          ]
+    }
+
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => state,
+             "delta" => %{"ops" => ops},
+             "result" => forged
+           })
+  end
+
+  # Breaks: another writer group claims the newborn in a second slot, or assigns an existing hound without a birth.
+  test "each final occupied slot binds its own same-group newborn" do
+    state = @literal["state"]
+    full = @literal["ops"]
+
+    fault = %{
+      "fault" => %{
+        "kind" => "fault",
+        "code" => "precondition_failed",
+        "target" => %{"kind" => "clock"}
+      }
+    }
+
+    extra = List.last(full) |> Map.put("writer_group", 1) |> Map.put("slot", 2)
+    ops = full ++ [extra]
+    assert Compose.compose(state, %{"ops" => ops}) == fault
+    accepted = Compose.compose(state, %{"ops" => full})
+    target = %{"kind" => "population_slot", "plan" => extra["plan"], "slot" => 2}
+
+    forged = %{
+      "changes" => accepted["changes"] ++ [%{"target" => target, "value" => extra["value"]}]
+    }
+
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => state,
+             "delta" => %{"ops" => ops},
+             "result" => forged
+           })
+
+    slot1 = Map.put(target, "slot", 1)
+    empty = %{"generation" => 0, "member_id" => nil, "replacement_due" => nil}
+    member = @literal["expected_rows"]["member"]
+
+    prior =
+      state
+      |> Map.put("created", %{member => @literal["expected_rows"]["hound"]})
+      |> Map.put("containers", %{member => @literal["expected_rows"]["room"]})
+      |> Map.put("population_slots", %{
+        Compose.key(slot1) => @literal["expected_rows"]["slot"],
+        Compose.key(target) => empty
+      })
+
+    lone = List.last(full) |> Map.put("slot", 2) |> Map.put("expected", empty)
+    assert Compose.compose(prior, %{"ops" => [lone]}) == fault
+
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => prior,
+             "delta" => %{"ops" => [lone]},
+             "result" => %{"changes" => [%{"target" => target, "value" => lone["value"]}]}
+           })
+  end
+
   # Breaks: the two portable kernels diverge on an accepted bundle or missing-HP refusal.
   @tag :tmp_dir
   test "spawned bundle answers agree after their literal checks", %{tmp_dir: dir} do

@@ -10,6 +10,9 @@ defmodule Loka.Core.PopulationCompositionTest do
       assert Contracts.validate("StateDelta", delta) == :ok, c["id"]
       assert Compose.compose(c["state"], delta) == c["expected"], c["id"]
 
+      if c["prefix_expected"],
+        do: assert(Compose.compose(c["state"], delta, false) == c["prefix_expected"], c["id"])
+
       assert Invariants.check("delta_preconditions_hold", %{
                "state" => c["state"],
                "delta" => delta,
