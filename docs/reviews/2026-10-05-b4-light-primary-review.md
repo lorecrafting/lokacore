@@ -127,3 +127,46 @@ Full accumulated publication checks, schema mutant sweep, hosted CI and browser/
 native acceptance are not claimed by this review. The separate portable/save
 opinion remains its own requirement. Source approval requires closure of
 B4-01, B4-02 and B4-03 at an exact fix head; no merge or push was performed.
+
+
+## Scoped fix round 1 — APPROVE
+
+**Exact source reviewed:** `a3f9897643b01f53707d04a62f51b4073eadcc25`.
+**Verdict:** APPROVE. B4-01, B4-02 and B4-03 are closed; no new finding.
+The initial review and its historical findings above remain intact.
+
+Scope was the actual fixes since `909082b08680cba197839e0a83696f5606af3e35`,
+their direct callers and the corresponding authored-action, wire and API-floor
+requirements. The [fix evidence](../evidence/2026-10-05-b4-light/README.md#scoped-review-fix-round)
+and [developer red controls](../evidence/2026-10-05-b4-light/review-fix-red-controls.json)
+were read separately from the independent checks below.
+
+- **B4-01 closed.** Light projection supplies its resolved semantic `command` while retaining the authored invocation identity. Book reuses `detail_id` to give Refuel one source owner and uses that command for “from” wording. An independently constructed, loaded `top_up` alias now belongs only to the torch page, has label `Refuel a torch from a flask of lamp oil`, and retains `[torch, oil]`. Passing its actual button through invocation identification/resolution and keyed execution accepts it and leaves literal fuel rows 7200/7197. Existing Book model callers pass.
+- **B4-02 closed.** The exact candidate now passes keyed ordinary `refusal` before the pure light transition. The immutable supply lookup adds no transition or alternate admission logic. Loaded targetless, room-only and unused-input aliases are unavailable on held and worn sources; targetless light controls are also excluded from World. Existing engine-key worn Douse/Refuel and darkness/corpse paths remain green. Target/input narrowing agrees with execution, including the direct callers of the new helper.
+- **B4-03 closed.** Both compiler and loader impose 1.19 only on actual fuel/darkness fields, independently covering fuel-only, darkness-only and neither. API1.18 returns the literal lower-bound diagnostic path for actual light fields; the unused reserved light lock still succeeds. Elixir takes the standard maximum with its prior feature floor, preserving a higher requirement. The original independently run low-API artifact probe now returns `KERNEL_API_RANGE_INVALID` at `.cartridge.manifest.requires.kernel_api.at_least`.
+
+Independent passing commands, all under pinned mise:
+
+- `node --no-warnings --test --test-reporter=spec` over kernel light, fuel composition and light contracts; authority light and light Book; Book model: **30/30**, exit 0.
+- `mix test test/loka/content_light_test.exs test/loka/core/fuel_test.exs test/loka/core/light_contracts_test.exs`: **6/6**, exit 0.
+- Kernel typecheck, generated contracts check and touched kernel-source size check: exit 0. No source-size allowance was added or raised.
+
+Three independent disposable mutations were run at this exact fix head:
+
+1. Restore authored-key checks for Refuel ownership/wording: the engine-key Book test passes, while the new loaded alias test fails, exit 1.
+2. Skip only keyed light admission: seven existing light tests pass, while the new narrowed target/input test fails, exit 1.
+3. Lower the loader's actual-light API floor to 1.18: the wire-literal test passes, while the new feature-floor test fails, exit 1.
+
+All mutations were exactly restored; the combined affected suites passed 12/12
+and the disposable source diff was empty. The mutation worktree was removed.
+The reviewer introduced no source or test change. The independent Elixir
+fuel-guard extension from the separate opinion was inspected and exercised in
+the passing core suite; that opinion owns B4-S1's scoped disposition.
+
+The optional semantic command crosses no saved mutable row or invocation identity.
+Its shared valid/invalid wire cases, generated types and direct Book consumer agree.
+The fix reuses ordinary admission and existing UI ownership metadata; **Ponytail
+Review: no complexity finding, no new framework or alias catalogue**. No new
+regression was found within the fix scope. Accumulated publication checks,
+separate portable/save approval and hosted/browser/native gates remain separate;
+this is exact-source primary approval, with no merge or push performed.
