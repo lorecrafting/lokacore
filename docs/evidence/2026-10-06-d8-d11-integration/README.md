@@ -150,3 +150,39 @@ fixture and removed it; tracked source remained clean. No gate result is claimed
 past that failure. Resume with a full gate from this cleaned checkpoint.
 
 Schema sweep, crow 30-day proof, browser and independent review remain pending.
+
+## Uninterrupted full gate after residue cleanup
+
+`mise exec -- bin/check_all.sh` on source `6b02eeda`: **exit1**. Elixir393 tests,
+Credo, Elixir size, contracts/features, lint/docs/Beads and planted controls,
+TypeScript typecheck, full TypeScript tests (including headless simulation) and
+kernel admission red controls passed. First concrete failure is TypeScript size:
+`kernel/ts/src/foundation/compose.ts`, 329 lines against limit300. All failures:
+
+- `kernel/ts/src/foundation/compose.ts:1: file, 329 lines, limit 300`
+- `kernel/ts/src/foundation/compose.ts:134: function applyWorld, 42 lines, limit 40`
+- `kernel/ts/src/foundation/compose.ts:187: function crowTransition, 42 lines, limit 40`
+- `kernel/ts/src/foundation/compose_job.ts:48: function bindingValid, 56 lines, limit 40`
+- `kernel/ts/src/foundation/compose_rows.ts:14: function read, 42 lines, limit 40`
+- `kernel/ts/src/mechanics/combat/rule.ts:10: function decide, 41 lines, limit 40`
+- `kernel/ts/src/mechanics/crow/behavior.ts:1: file, 560 lines, limit 300`
+- `kernel/ts/src/mechanics/crow/behavior.ts:89: function dropped, 72 lines, limit 40`
+- `kernel/ts/src/mechanics/crow/behavior.ts:314: function shoo, 49 lines, limit 40`
+- `kernel/ts/src/mechanics/crow/behavior.ts:420: function runCrow, 141 lines, limit 40`
+- `kernel/ts/src/runtime/created.ts:97: function houndValid, 41 lines, limit 40`
+- `kernel/ts/src/runtime/decision.ts:1: file, 306 lines, limit 300`
+- `kernel/ts/src/runtime/invariants.ts:1: file, 301 lines, limit 300`
+- `kernel/ts/src/runtime/invariants.ts:199: function delta_preconditions_hold, 47 lines, limit 46`
+- `kernel/ts/src/runtime/invariants_encounter.ts:144: function job, 46 lines, limit 40`
+- `kernel/ts/src/runtime/invariants_encounter.ts:191: function bindingValid, 45 lines, limit 40`
+- `kernel/ts/src/runtime/proposal.ts:1: file, 321 lines, limit 300`
+- `kernel/ts/src/runtime/proposal.ts:217: function react, 64 lines, limit 45`
+- `kernel/ts/src/view/action_lists.ts:1: file, 333 lines, limit 325`
+- `kernel/ts/test/deer.test.ts:1: file, 527 lines, limit 525`
+
+The gate ran to completion without interruption and cleaned its temporary files.
+No source fix is claimed for these size failures. Final formatting stages remain
+unrun. Resume by splitting existing cohesive crow composition/job/behavior/reaction
+and invariant logic into the established modules; retain all limits and safety
+checks. D8-specific schema sweep, crow30-day conservation, isolated browser proof,
+independent reviews and PR remain pending because the gate is not green.
