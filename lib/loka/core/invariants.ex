@@ -1,14 +1,11 @@
 # size: allow 330, independent patrol and retirement pairing joins precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
-  Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
-  (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
-  twin runs the same portable composition invariant fixtures.
-  - `"state"`, `"delta"`, `"result"`: a base state, a StateDelta and its
-    `Loka.Core.Compose.compose/2` result;
-  - `"resolution"`: a TargetResolution;
-  - `"decision"`, `"commit"`, `"published"`: a DecisionResult, the host's commit outcome
-    (committed, failed or unknown) and the host's publication. An unknown id raises.
+  Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is
+  `kernel/ts/src/runtime/invariants.ts`, checked by the same composition fixtures.
+  Inputs: state/delta/result (`Compose.compose/2`), resolution (`TargetResolution`),
+  and decision/commit/published (committed, failed or unknown host outcome).
+  Unknown invariant ids raise.
   """
   alias Loka.Core.Compose
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
