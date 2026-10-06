@@ -284,9 +284,12 @@ D2 public Priory rooms and held-book Ward/Bell topics have an
 [independent plan approval](reviews/2026-10-05-d2-priory-books-plan-review.md).
 A1, B5 and B6 are published; D2 source implementation is active in an isolated
 branch from published main. Final successor pins, source reviews and proof remain
-ahead. D1 paid ferry, Mother Sedge and safe isle return has a provisional
-[brief](briefs/chapter-one/d1-ferry-isle-brief-2026-10-05.md); its updated PM
-planning is in independent review, with no source implementation or player proof.
+ahead. D1 paid ferry, Mother Sedge and safe isle return has an
+[adopted PM contract](decisions/pm-decision-d1-ferry-isle-2026-10-05.md),
+[source brief](briefs/chapter-one/d1-ferry-isle-brief-2026-10-05.md) and
+[independent plan approval](reviews/2026-10-05-d1-ferry-plan-review.md),
+published in [#217](https://github.com/lorecrafting/lokacore/pull/217).
+D1 source implementation and player proof remain ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
