@@ -15,3 +15,13 @@ The selected C5 mechanics, protocol, cartridge, save and Book clauses require ac
 ## Checks and simplicity
 
 The focused C5 suite passed 9/9 on the unchanged provisional head. A separate `now >= ends_at` to `now > ends_at` expiry mutant failed the exclusive-end test, confirming that guard works. The broadened `perform` mutant passed the three focused suites, as above. Mutations lived only in a throwaway detached worktree, which was removed. The diff reuses existing jobs, resource/death flow and consumed holder; Ponytail review found no independent abstraction or dependency to cut (`Lean already. Ship.` for complexity alone). The provisional source pins `0.0.35`; final integration must derive and verify the successor of published D6/D7 before publication.
+
+## Scoped fix recheck — APPROVE WITH NOTES
+
+**Fix head:** `97b5b94e`. C5-P1, P2 and P3 are closed for provisional scope; no new finding in their direct callers. Final predecessor pin, full gate, hosted browser and exact-head publication review remain pending.
+
+- **P1 closed.** The active-row path in both portable composers now distinguishes a pending refresh from a completed due occurrence: refresh retains effect, source, job and `next_tick_at` while it may extend the end; a due successor advances the tick and changes its job after completion. Re-running the original replacement/delay probe now returns `precondition_failed`. Literal portable fixtures cover the pending replacement refusal, due successor and shortened-end refusal. Removing the TypeScript cadence guard makes `refresh-cannot-replace-pending-cadence` fail. Focused Elixir tests pass with the equivalent overlay rule.
+- **P2 closed.** The GameView carries authored `hp_loss` and `tick_every`; Combat and Status render remaining seconds from current view time. Actual hound apply/refresh and bleed tick/expiry produce authored narration; ordinary and pack round callers retain their notes. The saved tick's confirmed narration reopens through the real SQLite receipt, and the exact controlled line is asserted. Removing tick narration makes the exclusive-end C5 test fail.
+- **P3 closed.** A controlled authored `study_tracks` recipe is present during a hound fight but absent from the resolved combat ActionSet while Bandage remains. Adding `perform` to the combat allowlist makes the new test fail.
+
+Checks on unchanged `97b5b94e`: focused TypeScript C5/composition/combat 14/14, Elixir bleed content/core 3/3, real SQLite catch-up plus failed/absent/lost COMMIT and replay 2/2. The disposable mutation worktree was removed; only this review record was changed by the reviewer.
