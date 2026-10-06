@@ -1,7 +1,8 @@
 # D5 — Oak canopy, pool edge, deep fox den and shallows
 
 > **Adopted planning:** [PM decision](../../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
-> Docs-only; independent exact-head plan review and implementation remain ahead.
+> The adopted plan is approved. [Provisional local source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
+> records implementation; final integrated pins, independent source review and browser proof remain ahead.
 
 Proposed source branch: `chapter1/d5-deep-fen` (not created by this planning task).
 

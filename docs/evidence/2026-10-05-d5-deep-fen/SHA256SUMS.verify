@@ -1,0 +1,9 @@
+behavior-mutants.json: OK
+behavior-mutants.py: OK
+capture.py: OK
+compiler.log: OK
+existing-authority.log: OK
+focused.log: OK
+full-check.log: OK
+initial-full-check-red.log: OK
+synthetic-fatal-refused.log: OK
