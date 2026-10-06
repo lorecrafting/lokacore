@@ -25,6 +25,12 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "patrol.transition", "quest_instance_id" => q}),
     do: %{"kind" => "patrol", "quest_instance_id" => q}
 
+  def target(%{"op" => "population.control", "plan" => p}),
+    do: %{"kind" => "population_plan", "plan" => p}
+
+  def target(%{"op" => "population.slot", "plan" => p, "slot" => s}),
+    do: %{"kind" => "population_slot", "plan" => p, "slot" => s}
+
   def target(%{"op" => "escort.transition", "actor_id" => a}),
     do: %{"kind" => "escort", "actor_id" => a}
 
@@ -36,6 +42,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "fuel.set", "item_id" => i}), do: %{"kind" => "fuel", "item_id" => i}
 
   def target(%{"op" => "resource.adjust"} = op),
+    do: Map.put(Map.take(op, ~w(resource entity_id)), "kind", "resource")
+
+  def target(%{"op" => "resource.initialize"} = op),
     do: Map.put(Map.take(op, ~w(resource entity_id)), "kind", "resource")
 
   def target(%{"op" => "cooldown.start"} = op),

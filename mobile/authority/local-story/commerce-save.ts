@@ -176,6 +176,15 @@ function shopReceipt(
 
 function dialoguePayment(world: World, command: Command, currency: DefinitionRef) {
   const p = command.payload;
+  if (p.type === 'use_transport') {
+    const route = world.cartridge.transports?.[refString(p.route)];
+    if (!route || !same(route.currency, currency) || p.quoted_fare !== route.fare) invalid();
+    return {
+      payer: world.body,
+      recipient: world.entityIds[refString(route.recipient)],
+      amount: route.fare,
+    };
+  }
   if (p.type === 'use_service') {
     const service = world.cartridge.services?.[refString(p.service)];
     if (

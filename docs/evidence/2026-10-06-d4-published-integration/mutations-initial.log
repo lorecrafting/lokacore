@@ -1,0 +1,19 @@
+ts-terminal: old GREEN / new RED
+ex-terminal: old GREEN / new RED
+ts-independent: old GREEN / new RED
+ex-independent: old GREEN / new RED
+missing-terminal-write: old GREEN / new RED
+missing-cap: old GREEN / new RED
+indirect-food: old GREEN / new RED
+full-mv: old GREEN / new RED
+unkeyed-offer: old GREEN / new RED
+food-only-save: old GREEN / new RED
+eat-narration-binding: old GREEN / new RED
+book-world-route: old GREEN / new RED
+book-eat-history: old GREEN / new RED
+Traceback (most recent call last):
+  File "[worktree]/docs/evidence/2026-10-06-d4-published-integration/mutants.py", line 34, in <module>
+    if mutated==original:raise RuntimeError('No mutation: '+name)
+RuntimeError: No mutation: loader-food
+
+EXIT 1

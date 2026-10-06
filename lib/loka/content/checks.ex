@@ -1,8 +1,7 @@
-# size: allow 380, patrol refs and bounded topics join the shared checked expansion boundary
+# size: allow 392, transport, population and dream refs join the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
-
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
@@ -27,6 +26,9 @@ defmodule Loka.Content.Checks do
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
+  def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
+    do: Loka.Content.Population.expand(value, m)
+
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
 
@@ -35,6 +37,16 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
+
+  def expand(%{"reverse" => _, "destination" => _, "recipient" => _} = t, m),
+    do: Loka.Content.Transports.expand(t, m)
+
+  def expand(%{"transport" => t} = d, m),
+    do:
+      d
+      |> Map.delete("transport")
+      |> expand(m)
+      |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
 

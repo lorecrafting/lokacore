@@ -1,0 +1,6 @@
+loader-food: old GREEN / new RED
+compiler-food: old GREEN / new RED
+holder-row-hydration: old GREEN / new RED
+MV-only-food-binding: old GREEN / new RED
+
+EXIT 0

@@ -1,0 +1,14 @@
+✔ loader rejects impossible held-food declarations while retaining capped food (576.497417ms)
+✔ three conserved apples share Take/Drop/Forage stock and exact Eat benefit (119.426166ms)
+✔ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (156.801209ms)
+✔ independent fresh IDs include consumed custody before published population births (63.738667ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 816.361
+
+EXIT 0

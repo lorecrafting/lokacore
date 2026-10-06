@@ -114,9 +114,11 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
     (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].weapon.skill = ref('skill', 'missing')),
     (c) => delete c.world.combat.narration.block,
     (c) => delete c.npcs['ashmere_sampler@0.0.9:npc/teacher'].resource_starts,
-    (c) =>
-      delete c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn
-        .lesson_payment,
+    (c) => {
+      const lesson = c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'];
+      delete lesson.choices.learn.lesson_payment;
+      lesson.roles = {};
+    },
     (c) =>
       (c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn.sequence = [
         { op: 'fact.assign', fact: ref('fact', 'skill_swords'), value: true },

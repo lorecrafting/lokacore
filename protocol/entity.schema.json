@@ -341,6 +341,9 @@
           ],
           "additionalProperties": false
         },
+        "spawn_template": {
+          "const": true
+        },
         "services": {
           "type": "array",
           "items": {

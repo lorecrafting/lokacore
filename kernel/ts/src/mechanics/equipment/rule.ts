@@ -13,6 +13,7 @@ import {
   values,
   type World,
 } from '../../runtime/decision.ts';
+import { movable } from '../../runtime/created.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];
@@ -44,7 +45,7 @@ export function transfer(
 ): ErrorCode | [EntityId, EntityId] {
   const body = bodyOf(world, actor);
   if (!body || !has(world.entities, item)) return 'not_found';
-  if (world.state.created?.[item]) return 'invalid_target';
+  if (!movable(world, item)) return 'invalid_target';
   const e = world.entities[item];
   if (e.kind !== 'item') return 'invalid_target';
   const at = world.state.containers[item];

@@ -1,12 +1,10 @@
 import { foodTransferValid } from './invariants_food.ts';
-// size: allow 315, independent retirement pairing joins precondition replay
-import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
+import { liquidRowsValid } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { patrolsHold } from './invariants_patrol.ts';
-import { escortsHold } from './invariants_escort.ts';
 // Pure checks by id, twin of lib/loka/core/invariants.ex; step checks are TypeScript only.
-import { encountersHold } from './invariants_encounter.ts';
 import { creationsHold } from './invariants_creation.ts';
+import { gate } from './invariants_gate.ts';
 import { resourceAfter } from './invariants_resource.ts';
 import type { Json } from '../foundation/canonical.ts';
 import { key, same, target, type Result } from '../foundation/compose.ts';
@@ -199,12 +197,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   // size: allow 46, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (!Number.isInteger(state.clock) || !retirementsHold(delta.ops)) return false;
-    if (!creationsHold(state, delta.ops, result) || !liquidsHold(state, delta.ops, result))
-      return false;
-    if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
-      return false;
-    if (!patrolsHold(state, delta.ops, result)) return false;
+    if (!gate(state, delta.ops, result)) return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
@@ -212,7 +205,13 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
-      if (op.op === 'escort.transition' || op.op === 'patrol.transition' || op.op === 'liquid.set')
+      if (
+        op.op === 'escort.transition' ||
+        op.op === 'patrol.transition' ||
+        op.op.startsWith('population.') ||
+        op.op === 'liquid.set' ||
+        op.op === 'resource.initialize'
+      )
         continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
@@ -297,18 +296,4 @@ export function check(id: string, observation: { [field: string]: unknown }): bo
   const f = CHECKS[id];
   if (!f) throw new Error(`unknown invariant ${id}`);
   return f(observation);
-}
-
-function retirementsHold(ops: readonly DeltaOp[]): boolean {
-  return ops.every((op, i) => {
-    if (op.op !== 'quest.retire') return true;
-    const next = ops[i + 1];
-    return (
-      next?.op === 'quest.activate' &&
-      next.writer_group === op.writer_group &&
-      next.instance_id !== op.instance_id &&
-      same(next.quest, op.quest) &&
-      same(next.scope, op.scope)
-    );
-  });
 }

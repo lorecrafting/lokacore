@@ -295,6 +295,8 @@ rat R; production IDs remain null until allocation is independently checked.
 
 ## Checks, review and stop trigger
 
+The provisional developer run is recorded in [C3 local evidence](../../evidence/2026-10-05-c3-living-hounds/README.md); independent source review and publication remain separate gates.
+
 Run focused compiler/loader/short-ref/schema, both creation/composition twins and
 population/clock/combat/death/target tests, changed Book tests and real SQLite
 reopen/fault/replay suites. Run generated-contract and docs checks; schema changes

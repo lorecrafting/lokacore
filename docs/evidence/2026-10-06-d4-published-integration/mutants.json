@@ -1,0 +1,87 @@
+[
+  {
+    "control": "ts-terminal",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "ex-terminal",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "ts-independent",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "ex-independent",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "missing-terminal-write",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "missing-cap",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "indirect-food",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "full-mv",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "unkeyed-offer",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "food-only-save",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "eat-narration-binding",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "book-world-route",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "book-eat-history",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "loader-food",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "compiler-food",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "holder-row-hydration",
+    "old": "GREEN",
+    "new": "RED"
+  },
+  {
+    "control": "MV-only-food-binding",
+    "old": "GREEN",
+    "new": "RED"
+  }
+]

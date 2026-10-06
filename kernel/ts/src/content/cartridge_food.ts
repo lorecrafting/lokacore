@@ -13,7 +13,7 @@ export function food(c: Obj): Diagnostic[] {
     check.named(e.resource, 'resource', `${at}.resource`);
     const recovery = c.resources?.[refString(e.resource)];
     const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (major < 1 || (major === 1 && minor < 26))
+    if (major < 1 || (major === 1 && minor < 27))
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );

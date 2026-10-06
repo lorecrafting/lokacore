@@ -6,6 +6,7 @@ import { add, mul } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 import { refString } from '../../runtime/decision.ts';
+import { movable } from '../../runtime/created.ts';
 
 type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
 type Context = {
@@ -175,7 +176,7 @@ export function putRefused(
     world.entities[item].kind !== 'item' ||
     world.entities[destination].kind !== 'item' ||
     world.entities[destination].container !== true ||
-    world.state.created?.[item]
+    !movable(world, item)
   )
     return 'invalid_target' as const;
   if (world.state.containers[item] !== body) return 'not_owned' as const;

@@ -1,0 +1,15 @@
+{
+  "title": "room.isle_hut.title",
+  "description": "room.isle_hut.description",
+  "exits": {
+    "west": {
+      "to": "fen_isle_landing"
+    },
+    "east": {
+      "to": "herb_garden"
+    },
+    "up": {
+      "to": "hut_loft"
+    }
+  }
+}

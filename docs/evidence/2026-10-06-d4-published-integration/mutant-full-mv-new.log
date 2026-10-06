@@ -1,0 +1,72 @@
+✔ three conserved apples share Take/Drop/Forage stock and exact Eat benefit (99.675708ms)
+✖ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (55.672708ms)
+✔ independent fresh IDs include consumed custody before published population births (46.846ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 359.239084
+
+✖ failing tests:
+
+test at kernel/ts/test/food.test.ts:67:1
+✖ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (55.672708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   edible: [Object: null prototype] {
+  +     amount: 6,
+  +     label: 'action.eat',
+  +     narration: 'narration.eat_apple',
+  +     resource: [Object: null prototype] {
+  +       cartridge_id: 'ashmere_missing_child',
+  +       cartridge_version: '0.0.31',
+  +       key: 'mv',
+  +       kind: 'resource'
+  +     }
+  +   },
+  +   ops: [
+  +     {
+  +       destination_id: '4eec3894-027a-8584-9797-f7fdcd3641e5',
+  +       entity_id: 'e3d910f1-e91f-81c4-b647-6b5590597af2',
+  +       op: 'entity.transfer',
+  +       source_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +       writer_group: 0
+  +     },
+  +     {
+  +       entity_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +       from: 100,
+  +       op: 'resource.adjust',
+  +       resource: [Object: null prototype] {
+  +         cartridge_id: 'ashmere_missing_child',
+  +         cartridge_version: '0.0.31',
+  +         key: 'mv',
+  +         kind: 'resource'
+  +       },
+  +       to: 100,
+  +       writer_group: 0
+  +     }
+  +   ]
+  -   code: 'invalid_state'
+    }
+  
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/food.test.ts:129:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { edible: { amount: 6, label: 'action.eat', narration: 'narration.eat_apple', resource: [Object] }, ops: [ [Object], [Object] ] },
+    expected: { code: 'invalid_state' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+EXIT 1

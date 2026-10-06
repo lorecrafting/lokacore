@@ -1,4 +1,4 @@
-# size: allow 330, typed patrol and terminal quest replacement joins portable composition
+# size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of `kernel/ts/src/foundation/compose.ts`.
@@ -50,11 +50,20 @@ defmodule Loka.Core.Compose do
   # A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec compose(map(), map()) :: %{String.t() => term()}
-  def compose(state, %{"ops" => ops}) do
+  def compose(state, %{"ops" => ops}, final \\ true) do
     cond do
-      not is_integer(state["clock"]) -> fault("precondition_failed", %{"kind" => "clock"})
-      over_budget?(state, ops) -> fault("budget_exceeded", nil)
-      true -> apply_all(state, ops)
+      not is_integer(state["clock"]) ->
+        fault("precondition_failed", %{"kind" => "clock"})
+
+      over_budget?(state, ops) ->
+        fault("budget_exceeded", nil)
+
+      true ->
+        result = apply_all(state, ops)
+
+        if final and Map.has_key?(result, "changes") and not Creation.complete?(ops),
+          do: fault("precondition_failed", %{"kind" => "clock"}),
+          else: result
     end
   end
 
@@ -234,6 +243,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
+    do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
+
   defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
     do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
 
@@ -248,6 +260,9 @@ defmodule Loka.Core.Compose do
 
   defp apply_op(%{"op" => "resource.adjust"} = op, t, {state, horizon, _} = ctx),
     do: Loka.Core.Resource.compose_adjustment(op, read(t, ctx), state, horizon)
+
+  defp apply_op(%{"op" => "resource.initialize"} = op, t, ctx),
+    do: Loka.Core.ComposePopulation.initialize(op, read(t, ctx), ctx)
 
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
@@ -278,6 +293,9 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
+
+  defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
+
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
   defp base(%{"kind" => "liquid", "item_id" => i}, s), do: section(s, "liquids")[i]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]

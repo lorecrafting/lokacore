@@ -14,7 +14,7 @@ defmodule Loka.Content.Food do
       |> Enum.map(&String.to_integer/1)
 
     api =
-      if foods != [] and minimum < [1, 26],
+      if foods != [] and minimum < [1, 27],
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 

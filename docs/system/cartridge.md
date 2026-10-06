@@ -984,6 +984,13 @@ dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
 
+The narrow `transports/<key>.json` endpoint declares `room`, keyed `detail`,
+`destination`, reciprocal `reverse` transport reference, `recipient`, `currency`,
+integer `fare`, `recovery_rooms`, exact `action`, `label` and `narration`. Each
+boarding detail declares `transport: {route, title}`. The outbound recovery room
+list names the four isle rooms plus Fen Isle Landing; the free return declares
+an empty list. These paired routes add no ordinary compass connection.
+
 Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
 wrong fare/recipient reference, unbounded recipient balance, forged transport
 action, or ordinary exit that bypasses the declared ferry. The final bundled
@@ -1153,12 +1160,13 @@ narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
 partial fruit. Full MV refuses without consuming. No restock or promised future
 nutrition model is required; the finite B8 meal remains a separate optional supply.
 
-Compiler and loader require `food@1` plus the successor API for edible fields,
+Compiler and loader require `food@1` plus API1.27 for edible fields,
 local declared MV recovery-pool references, positive safe-integer amount and valid
 catalog keys, and reject edible containers, equipment (slot, weapon or block metadata), fuel or liquid vessels.
 Expand source short references at the real new field. Edibility belongs to an
 immutable item definition; the terminal holder is generated metadata, never
-cartridge-authored. Successor release/API/hash/IDs remain null until source exists.
+cartridge-authored. The integrated v031/API1.27 answers are independently derived over
+published C3/D1 in the [D4 integration evidence](../evidence/2026-10-06-d4-published-integration/README.md).
 
 Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
 Green's installed terminal variants. Missing means the search is unfinished;

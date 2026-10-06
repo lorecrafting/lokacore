@@ -1,0 +1,22 @@
+{
+  "title": "room.boathouse.title",
+  "description": "room.boathouse.description",
+  "exits": {
+    "east": {
+      "to": "ferry_landing"
+    }
+  },
+  "details": {
+    "ferry": {
+      "aliases": [
+        "ferry",
+        "rope_ferry"
+      ],
+      "description": "detail.fen_outbound.description",
+      "transport": {
+        "route": "fen_outbound",
+        "title": "detail.ferry.title"
+      }
+    }
+  }
+}

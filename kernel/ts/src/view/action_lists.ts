@@ -25,13 +25,14 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
-const HIDDEN = ['eat', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = ['eat', 'buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -219,7 +220,7 @@ function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site
 function movable(world: World, a: Offered, id?: string): boolean {
   return (
     !id ||
-    !world.state.created?.[id] ||
+    movableItem(world, id as EntityId) ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
 }

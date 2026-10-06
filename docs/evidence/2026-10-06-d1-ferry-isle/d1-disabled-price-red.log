@@ -1,0 +1,3 @@
+GREEN: disabled owned-corpse recovery quote is 0, waived, unavailable
+RED: dropping quote metadata on refused offers yields wrong fare/waiver
+GREEN: source remains untouched at committed head

@@ -808,6 +808,12 @@ transition in one writer group. Bundle completeness is checked at the complete
 atomic group; valid paired prefixes must hydrate for later proposal reads without
 mistaking a temporarily unfinished pair for a corrupt complete state. Generic
 source/cycle/capacity guards and one-container proof stay in force.
+The additive `spawned_bundle.json` fixture pins a complete accepted pair, final
+bundle refusals and a composable paired prefix in both portable kernels.
+At final admission, every occupied slot with no replacement due binds a fresh
+same-group hound by full plan, slot, generation and member ID. Row-only occupied
+slot examples exercise transition algebra only in explicit nonfinal composition;
+they do not establish a complete birth.
 
 Derived dynamic entities/resource specs/capacity and known-victim observations
 include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the
@@ -902,6 +908,16 @@ receipt owner is allowed because published B8 `service@1` is bound to a present
 NPC and entitlement/meal/drink benefits. Do not widen that closed union into a
 generic effect interpreter. The exact command key, source-authored action keys,
 target order and input are frozen by the D1 source brief before implementation.
+
+The `use_transport` payload contains `actor_id`, `endpoint_id`, `route` and
+`quoted_fare`. Actions `board_ferry` and `return_ferry` target exactly one current
+boarding detail in `inspectable_details`; captured input contains `route` and
+`quoted_fare`. A `TransportOffer` on that notice projects the base `fare`,
+effective `charge`, `waived` status and shared admitted action. Transport composes
+resource transfer, movement room-entry evidence and escort travel; it introduces
+no new delta operation or save row. A present NPC may project `lessons` as
+original free-bound skill references; the Book reads their acquired/qualified
+status from the same actor's existing `SkillView` entries.
 
 Sedge's lesson stays a C1 dialogue Choose consequence with typed
 `skill.acquire`; it is not a transport benefit or remote grant. Existing
@@ -1039,7 +1055,8 @@ then lowers one ordinary conserved `entity.transfer` plus `resource.adjust` in
 one writer group. No new event, fact, food-count row, mint, removal operation or
 service benefit alternative is required. Add generated known-entity kind
 `consumed` and one immutable food-enabled-world holder mapping, appended after
-slot holders in fresh allocation. The terminal transfer guard must reject escape,
+slot holders and before initial population births in fresh allocation. This consumed
+subset requires API1.27. The terminal transfer guard must reject escape,
 nonfood entry and foreign-source entry; food is the sole new admission owner.
 Immutable composition context uses existing `known_entities`: the holder has
 `kind=consumed`, opted item entries have `edible=true`, and only known-body source

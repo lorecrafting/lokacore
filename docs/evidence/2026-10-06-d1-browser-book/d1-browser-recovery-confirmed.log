@@ -1,0 +1,42 @@
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --no-cache --retries 0 --grep controlled real browser
+
+
+ RUN  e2e v0.17.0 /private<redacted-path>
+      run 01a11173-1414-7c37-970c-18e320c2a7d3 · targets: web · CI
+
+ℹ trace: 'on-first-retry' records retries only, and 1 test runs with retries: 0, so no traces will be recorded for it; set retries, or trace: 'on'
+ ✓ target "web" command ready 1.22s
+ ❯ |web| tests/d1-recovery.e2e.ts (1 test | 1 failed) 40.83s
+   × controlled real browser dark-isle corpse recovery 40.83s
+     → locator matched no nodes within getByRole("button", name: "Marsh glow")
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| tests/d1-recovery.e2e.ts > controlled real browser dark-isle corpse recovery
+LOCATOR_NOT_FOUND: locator matched no nodes within getByRole("button", name: "Marsh glow")
+ ❯ tests/d1-recovery.e2e.ts:25:3
+     23|   await go('south', 'Mire Crossing');
+     24|   await go('east', 'Marsh Light');
+     25|   await screen.getByRole('button', 'Marsh glow').tap();
+       |   ^
+     26|   await screen.getByRole('button', 'Seek Wisp').tap();
+     27|   await screen.getByRole('button', 'Leave').tap();
+ ❯ at http://127.0.0.1:19216/
+ ❯ on screen #n23 button "Look, Marsh Light"
+ ❯ screen .e2e/artifacts/web/tests_d1-recovery.e2e.ts__controlled_20real_20browser_20dark-isle_20corpse_20recovery-8ded3a81/default/attempt-0/failure/screen.txt
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 0 passed (1)
+      Tests  1 failed | 0 passed (1)
+   Start at  03:41:57
+   Duration  42.52s (startup 1.22s)
+     Report  .e2e/report.json
+

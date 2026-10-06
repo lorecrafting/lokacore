@@ -70,7 +70,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5 | 0.6–0.8 |
 | **D9 Reactive village:** hear the bell where it carries and see distinct cast responses to child and allegiance outcomes. | A3, B2, C3, D1, D2, D4 | 0.7–0.9 |
 | **D10 Finding the way:** discover the full map, ask where and knock on a real accessible door. | all 57 rooms | 0.6–0.8 |
-| **D11 Character choice:** choose the reconciled ancestry/attributes once and use them in existing checks. | B2, B6, C1 | 0.6–0.8 |
+| **D11 Character choice:** choose the reconciled ancestry/attributes once and use inherited skills in real swim/shop consumers. | B2, B4, B6, C1, D6, D12 | 0.6–0.8 |
 | **D12 Practical skills:** train herbalism and haggle, then use them on herbs and a shop price. | B3, B5, C1, D1 | 0.6–0.8 |
 
 The 41 planned additions are disjoint: A1 +2; B2 +2; B4 +1; B5 +2; B6 +3;

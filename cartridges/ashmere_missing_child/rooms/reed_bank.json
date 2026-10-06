@@ -4,7 +4,8 @@
   "exits": {
     "north": { "to": "reed_path" },
     "west": { "to": "willow_shade" },
-    "south": { "to": "mire_crossing" }
+    "south": { "to": "mire_crossing" },
+    "east": { "to": "hound_run" }
   },
   "details": {
     "tracks": {

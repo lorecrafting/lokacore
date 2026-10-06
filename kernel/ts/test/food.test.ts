@@ -204,9 +204,11 @@ test('Eat alias binds advertised item and refuses full, foreign, nested, spent a
 });
 
 // Breaks: terminal holder allocation shifts before existing slot holders or grows a mutable holder row.
-test('provisional independent fresh IDs include one roomless consumed holder after slots', () => {
-  const w = fresh(),
-    ids = read('protocol/fixtures/missing_child_d4_ids.json');
+test('independent fresh IDs include consumed custody before published population births', () => {
+  const w = fresh((c) => {
+      c.calendar.start = 64800;
+    }),
+    ids = read('protocol/fixtures/missing_child_v031_ids.json');
   const actual: Record<string, string> = {
     character: w.character,
     body: w.body,
@@ -215,8 +217,17 @@ test('provisional independent fresh IDs include one roomless consumed holder aft
   for (const [id, room] of Object.entries(w.rooms)) actual[`room/${room.key}`] = id;
   for (const [id, detail] of Object.entries(w.details))
     actual[`detail/${w.rooms[detail.room].key}/${detail.key}`] = id;
-  for (const [id, item] of Object.entries(w.entities)) actual[`${item.kind}/${item.key}`] = id;
-  for (const [id, job] of Object.entries(w.state.jobs ?? {})) actual[`job/${job.job.key}`] = id;
+  for (const [id, item] of Object.entries(w.entities)) {
+    const origin = w.state.created?.[id]?.origin;
+    if (origin?.kind === 'spawned')
+      actual[
+        `population/${origin.by.key}/slot${origin.slot}/${origin.role === 'hound' ? 'member' : 'pelt'}`
+      ] = id;
+    else actual[`${item.kind}/${item.key}`] = id;
+  }
+  for (const [id, job] of Object.entries(w.state.jobs ?? {}))
+    actual[job.job.kind === 'population' ? `population/${job.job.key}/job` : `job/${job.job.key}`] =
+      id;
   for (const [slot, id] of Object.entries(w.slots)) actual[`slot/${slot}`] = id;
   assert.deepEqual(actual, ids);
   assert.equal(w.consumed, ids.consumed);

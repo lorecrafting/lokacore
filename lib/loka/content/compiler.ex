@@ -43,8 +43,10 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Commerce.check(manifest, defs),
       Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Liquids.check(manifest, defs, v2),
+      Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Food.check(manifest, defs, v2),
+      Loka.Content.Transports.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -65,7 +67,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -148,7 +150,10 @@ defmodule Loka.Content.Compiler do
     {"skill", :skill, "SkillDefinition"},
     {"topic", :topic, "TopicDefinition"},
     {"liquid", :liquid, "LiquidDefinition"},
-    {"service", :service, "ServiceDefinition"}
+    {"population", :population, "PopulationPlan"},
+    {"population_bundle", :population_bundle, "PopulationBundle"},
+    {"service", :service, "ServiceDefinition"},
+    {"transport", :transport, "TransportDefinition"}
   ]
 
   defp definitions(files, m) do

@@ -940,6 +940,116 @@
             "to"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population.control"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "$ref": "relation.schema.json#/$defs/PopulationControl"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "relation.schema.json#/$defs/PopulationControl"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "plan",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population.slot"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "$ref": "relation.schema.json#/$defs/PopulationSlot"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "relation.schema.json#/$defs/PopulationSlot"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "plan",
+            "slot",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Initialize a newly created spawned hound's exact HP row in its birth group.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "resource.initialize"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "value": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            },
+            "at": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "resource",
+            "entity_id",
+            "value",
+            "at"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -1382,6 +1492,44 @@
           "required": [
             "kind",
             "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "population_plan"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "kind",
+            "plan"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "population_slot"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "slot": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            }
+          },
+          "required": [
+            "kind",
+            "plan",
+            "slot"
           ],
           "additionalProperties": false
         }

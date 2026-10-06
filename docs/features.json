@@ -699,6 +699,40 @@
     ],
     "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
   },
+  "population": {
+    "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md C3 spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot",
+    "contracts": [
+      "PopulationPlan",
+      "PopulationBundle",
+      "PopulationControl",
+      "PopulationSlot",
+      "EntityOrigin",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/population/shared.ts",
+      "kernel/ts/src/mechanics/population/birth.ts",
+      "kernel/ts/src/foundation/compose_population.ts",
+      "kernel/ts/src/runtime/created.ts",
+      "kernel/ts/src/runtime/invariants_population.ts",
+      "lib/loka/core/compose_population.ex",
+      "lib/loka/core/invariants_population.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/population_composition.json",
+      "protocol/fixtures/missing_child_c3_b8_hash.json",
+      "protocol/fixtures/missing_child_c3_b8_ids.json",
+      "protocol/fixtures/missing_child_c3_provisional_hash.json",
+      "protocol/fixtures/missing_child_c3_provisional_ids.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "one_container_per_item",
+      "containment_acyclic"
+    ],
+    "implemented_in": "C3 Living hounds: TypeScript story semantics and portable Elixir/TypeScript composition"
+  },
   "topics": {
     "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md B6 composition",
     "contracts": [
@@ -775,6 +809,32 @@
     ],
     "implemented_in": "B8 exact Maud room, meal and finite B7 ale services"
   },
+  "transport": {
+    "spec": "docs/system/mechanics.md D1; docs/system/protocol.md D1 ferry transport composition",
+    "contracts": [
+      "TransportDefinition",
+      "TransportOffer",
+      "CommandPayload",
+      "ActionInput",
+      "InspectableDetail"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/transport/shared.ts",
+      "kernel/ts/src/view/transports.ts",
+      "kernel/ts/src/content/cartridge_transports.ts",
+      "lib/loka/content/transports.ex",
+      "mobile/authority/local-story/receipt-history.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/transport_contracts.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
+  },
   "food": {
     "spec": "docs/system/mechanics.md D4; docs/system/protocol.md D4 held-food composition",
     "contracts": [
@@ -796,14 +856,14 @@
     "fixtures": [
       "protocol/fixtures/food_composition.json",
       "protocol/fixtures/food_contracts.json",
-      "protocol/fixtures/missing_child_d4_hash.json",
-      "protocol/fixtures/missing_child_d4_ids.json"
+      "protocol/fixtures/missing_child_v031_hash.json",
+      "protocol/fixtures/missing_child_v031_ids.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "fault_discards_whole_proposal",
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "D4 finite held-food Eat with terminal custody (provisional successor)"
+    "implemented_in": "D4 finite held-food Eat with terminal custody over published C3/D1"
   }
 }

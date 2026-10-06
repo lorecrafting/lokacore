@@ -1,0 +1,23 @@
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --no-cache --retries 0 --grep controlled real browser
+
+
+ RUN  e2e v0.17.0 /private<redacted-path>
+      run 01a1117a-96a9-78a9-8d2d-dcaf7399af54 · targets: web · CI
+
+ℹ trace: 'on-first-retry' records retries only, and 1 test runs with retries: 0, so no traces will be recorded for it; set retries, or trace: 'on'
+ ✓ target "web" command ready 2.81s
+ ✓ |web| tests/d1-recovery.e2e.ts (1 test) 65.81s
+   ✓ controlled real browser dark-isle corpse recovery 65.81s
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:50:10
+   Duration  70.20s (1m 10s, startup 2.81s)
+     Report  .e2e/report.json
+

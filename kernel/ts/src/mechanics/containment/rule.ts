@@ -24,6 +24,7 @@ import {
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { carrying, giveRefused, putRefused } from './shared.ts';
+import { movable } from '../../runtime/created.ts';
 
 // size: allow 52, finite Harvest joins the existing conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps) => {
@@ -32,7 +33,7 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
     return decideHarvest(world, { ...command, payload: p }, mint, steps ?? { n: 0 });
   const body = bodyOf(world, p.actor_id);
   if (!body || !has(world.entities, p.item_id)) return rejected('not_found');
-  if (world.state.created?.[p.item_id] || world.entities[p.item_id].kind !== 'item')
+  if (!movable(world, p.item_id) || world.entities[p.item_id].kind !== 'item')
     return rejected('invalid_target');
   const [here, at] = [world.state.containers[body], world.state.containers[p.item_id]];
   const move = (destination_id: EntityId) => [

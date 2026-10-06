@@ -12,3 +12,10 @@ export function openChestBundle() {
   c.barriers['ashmere_missing_child@0.0.27:barrier/storage_chest_lid'].initial = 'open';
   return { value: c, canonical: encode(c), sha256: hash(c) };
 }
+
+export function darkMarshBundle() {
+  const c = structuredClone(bundle.value);
+  c.entry.key = 'marsh_light';
+  c.calendar.start = 0;
+  return { canonical: encode(c), sha256: hash(c) };
+}
