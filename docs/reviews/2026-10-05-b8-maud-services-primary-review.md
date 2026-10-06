@@ -146,3 +146,39 @@ both literal examples and reject each after removing its required fact/benefit.
 Ponytail Review: lean; existing global contract coverage consumes the examples,
 with no new helper, dependency or test framework. **No findings.** Review-only
 record; no source edit, push, merge or owner-save/native operation.
+
+
+## Authoring-validator refactor recheck — APPROVE
+
+Exact frozen source `b411507bda18569f22dbbd10cb8baf2c863a9d10`, parent `56d40a22`.
+The record is based on `8fad8501`, which differs from that frozen source only in
+this review record and its index, preserving the earlier example-only approval.
+The actual source delta is solely `lib/loka/content/services.ex`: the existing
+API, provider, binding, text, benefit/stock and bed checks become private helpers.
+No validation predicate is removed, no diagnostic code/path or output ordering
+changes, and valid-input short-circuit behavior is preserved at the compiler's
+schema-validated boundary. No allowance, suppression, dependency or pin changes.
+
+Focused service/current-chapter/global-contract/service-contract tests:
+**15 pass** with `mise exec -- mix test --force`. Four applicable Credo checks
+(ABC size, cyclomatic complexity, nesting and arity) report no issues;
+source size, format and warnings-as-errors compilation pass.
+
+An independent comparison loads the approved parent checker under a separate
+module name and supplies 16 controlled cases to both versions: valid content;
+missing funding, stock, resource, provider, vessel, liquid, action or fact;
+regenerating stock/currency; duplicate provider references; wrong recovery,
+serving or fact scope; and simultaneous text/API/provider/bed failures.
+The complete ordered diagnostic lists are identical; valid content is accepted
+and every malformed control is refused. The parent comparison supplements the
+existing literal invalid-input tests, not their expected answers.
+
+Independent throwaway mutation replaces the finite-stock predicate with true.
+`mise exec -- mix test --force test/loka/content_services_test.exs` exits 2:
+`service declarations refuse unsafe funding, consequences and provider identity`
+fails when unsafe stock is compiled successfully. The unchanged focused suite
+exits 0. Mutated source is restored and the temporary worktree removed.
+Ponytail Review: cohesive private helpers satisfy existing complexity ceilings;
+no extra machinery. **No findings.** Prior source/example approvals stand;
+developer's full publication gate remains separate. No push, merge, owner-save
+or native operation was performed.
