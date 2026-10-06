@@ -933,8 +933,8 @@ reopen never renews the deadline. Canceled jobs cannot kill a surfaced or later
 re-entered body. Unknown COMMIT fences later input/elapsed delivery until the
 committed or absent branch is reconciled.
 
-Recovery receipt binds original actor/actual corpse, existing roots and their
-source/destination custody. Replay transfers nothing twice. Later movement or
+Recovery receipt binds original actor/actual corpse, its eligible underwater
+room location at acceptance, existing roots and their source/destination custody. Replay transfers nothing twice. Later movement or
 another death cannot invalidate valid historical custody; emptied corpse remains.
 Malformed occupancy/deadline/job/cause/ownership yields typed `save_corrupt` with
 in-place Start over, no reset/repair/deletion. Prove cold reopen at every committed

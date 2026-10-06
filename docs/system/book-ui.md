@@ -794,7 +794,8 @@ authority settles expiry before Up; an old view never promises rescue. Confirmed
 entry/surface has one room change/current MV, without an unconfirmed safety claim.
 Sedge remains the existing free pre-S27 lesson; no second training control.
 
-At Chapel, list actual owned nonempty corpses and bind the chosen ID; show actual
+At Chapel, list actual owned nonempty corpses currently in either underwater
+bottom room and bind the chosen ID; show actual
 corpse location and confirmed returned items once, retaining empty corpse. Held
 recovery may overload Carrying. Pending/stale/refused/replayed actions claim no
 extra transfer. Drowning shows one actual death/same-body return and recoverable

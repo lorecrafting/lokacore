@@ -1450,9 +1450,10 @@ credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinar
 elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
 No second clock, wetness, drift, ghost mode or global movement rewrite.
 
-At Chapel, use `recover_corpse` for any actual nonempty actor-owned corpse,
-including remote non-water corpses. Transfer its actual direct corpse roots to
+At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
+currently in `well_bottom` or `pool_bottom`. Transfer its actual direct corpse roots to
 held body custody in one proposal; preserve descendants and empty corpse
 identity, allow forced overload, never auto-equip/copy or restore rewards/
-deadlines. Foreign/forged/empty corpses cannot yield belongings. Ordinary corpse
-recovery remains available. No general remote Take or replacement-gear system.
+deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings at Chapel.
+Ordinary physical corpse recovery remains available, including D1's fare-waived
+isle return. No general remote Take or replacement-gear system.

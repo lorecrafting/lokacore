@@ -43,13 +43,14 @@ then positive-to-zero HP and existing same-body corpse/Chapel return commit once
 Null killer/credit, no fake NPC/loot. Ordinary recovery remains unchanged. Prior
 5 MV/150-second timing is rejected: MV 10 entry can drown after three real seconds.
 
-At Chapel, use `recover_corpse`: actual selected owned nonempty corpse,
+At Chapel, use `recover_corpse`: actual selected owned nonempty corpse
+currently in `well_bottom` or `pool_bottom`,
 `target_ids: [corpse_id]`, `input: {}`; transfer its direct roots to held body
 custody once, preserve descendants and empty corpse, permit forced overload,
 no auto-equip or restored rewards/deadlines. Refuse foreign/forged/empty corpses.
-Apply to any owned corpse; prove that emptied isle corpses cease granting D1's
-fare waiver. Both dark bottoms have known Up; ordinary loot uses actual B4 light.
-The PM decision adopts duration, item values and the general shrine action;
+Isle corpses are ineligible: preserve D1's fare-waived physical return
+and prove an owned nonempty isle corpse offers no Chapel recovery. Both dark bottoms have known Up; ordinary loot uses actual B4 light.
+The PM decision adopts duration, item values and the underwater-only Chapel fallback;
 copy follows the selected Book contract.
 Show remaining time and free Up on every underwater page, including details.
 
@@ -84,9 +85,10 @@ suite; add a new case only for a distinct missing regression.
   stale/canceled/re-entry generations, unchanged non-standing recovery, elapsed
   catch-up/reopen and exactly one current expiry. Drowning creates one corpse/
   actual roots, same body/Chapel and no credit; all deaths invalidate water.
-- Custody: remote actual owned corpse, nested light/fare/key, original roots,
-  held return, mass>12000g forced overload, multiple owned corpse selection,
-  foreign/forged/empty refusal, and D1 waiver disappearing after recovery.
+- Custody: actual owned underwater corpse, nested light/fare/key, original roots,
+  held return, mass>12000g forced overload, multiple eligible corpse selection,
+  foreign/forged/empty/isle refusal, and D1 waiver still available for an owned
+  nonempty isle corpse.
 - Real SQLite: cold reopen after each committed entry/surface/expiry/recovery;
   failed COMMIT, uncertain committed and absent branches, lost acknowledgment,
   replay, later item movement/second death and malformed new rows yielding typed

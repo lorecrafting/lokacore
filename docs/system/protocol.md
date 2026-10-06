@@ -1093,7 +1093,7 @@ must define the narrow occupancy/job/cause types before use.
 
 Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
 `target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at
-actual shrine, selected death-origin ownership and nonempty direct roots, even
-for a remote corpse. Containment transfers existing roots once in one accepted
+actual shrine, selected death-origin ownership, nonempty direct roots and
+current corpse location in `well_bottom` or `pool_bottom`. Containment transfers existing roots once in one accepted
 writer group/receipt. Preserve descendants/empty corpse, forced overload, no
 rewearing and no general remote Take. Malformed custody never creates an offer.

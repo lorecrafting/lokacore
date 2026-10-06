@@ -29,7 +29,7 @@ D6 release is independently pinned; no historic fixture is regenerated.
 | Dependency | Actual source inspected | Consequence for D6 |
 |---|---|---|
 | D1 lesson | `skills/swim.json`, `dialogues/sedge_swim.json`, `npcs/sedge.json` in the chapter; `kernel/ts/src/mechanics/skills.ts` | Reserved Boolean acquisition, vacuous `all: []` qualification, free immediate Sedge lesson; D6 neither teaches nor introduces CON. |
-| D1 recovery | `kernel/ts/src/mechanics/transport/shared.ts`, `transports/fen_outbound.json` | Waiver is for an actual owned nonempty isle corpse, not a client flag. Chapel recovery must preserve this provenance; emptying an isle corpse removes its waiver. |
+| D1 recovery | `kernel/ts/src/mechanics/transport/shared.ts`, `transports/fen_outbound.json` | Waiver is for an actual owned nonempty isle corpse, not a client flag. D6 Chapel recovery excludes isle corpses, so the physical fare-waived return remains the actual recovery route. |
 | C1 attributes | Chapter `attributes.json`, skills status owner | STR10/DEX10/PER5 are installed; CON is absent. New attribute qualification would widen D6 and D11. |
 | B4/D5 route | Chapter `rooms/well_shaft.json`, `rooms/black_pool.json` | Shaft currently has only Up; Black Pool is a dry bank with three dry exits. Add reciprocal Down/Up to exactly two bottoms. |
 | Movement/view | `kernel/ts/src/mechanics/movement/sequence.ts`, `kernel/ts/src/view/view.ts` | Existing execution requires standing/fare; view checks those separately. Free Up requires a shared exact-edge admission used by both. |
@@ -51,9 +51,10 @@ Up and refuses following Wren. No attribute floor or extra lesson is needed.
 One deadline replaces periodic drain; MV 0 alone is never fatal. Typed drowning
 composes the actual HP fatal transition, conserved corpse and same-body return.
 
-Select the narrow Chapel action for any actual owned nonempty corpse,
-including remote non-water deaths, under the linked custody contract. This
-provides the selected Legend recovery fallback without a general remote Take,
+Select the narrow Chapel action only for an actual actor-owned nonempty corpse
+currently in `well_bottom` or `pool_bottom`, under the linked custody contract.
+This recovers inaccessible underwater gear while D1 isle corpses still require
+the fare-waived physical return. There is no general remote Take,
 replacement gear or recovery ledger. Deadline equality and historical-receipt
 validation require source proof, not a global scheduler redesign by assumption.
 
@@ -98,7 +99,7 @@ or wet-fuel system. Both bottoms are dark with known Up and ordinary light rules
 
 - Occupancy/job/save/projection wire shape, capability/API successor, release/hash/
   IDs, source head and PR are **null** until source design and independent
-  derivation. Historical-custody receipt validation and remote owned-corpse
+  derivation. Historical-custody receipt validation and underwater owned-corpse
   projection require typed contracts/negatives and real SQLite intermediate/
   fault/replay proof before implementation is accepted.
 - Remaining-time/warning wording follows PM-delegated copy: show authority-owned
