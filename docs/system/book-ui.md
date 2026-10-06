@@ -685,6 +685,10 @@ After chapter Continue on cold reopen, recover the latest committed Read to its
 original book history and currently reachable item route, including the projected
 open held-container parents. If custody no longer permits that route, retain exact
 history identity without opening an obsolete detail or copying text to World.
+The confirmed-route requirement also applies when uncertain Read settles after Book
+mounts: restore its exact target once beneath chapter Continue with scene/combat
+precedence. The actual component regression is traced in the
+[D2-P1 review](../reviews/2026-10-05-d2-priory-books-primary-review.md).
 Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
 separate touch cards at the declared overlap; a departed novice's pending context
 retains its original identity and follows normal refusal/Leave rules.

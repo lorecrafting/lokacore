@@ -1039,7 +1039,7 @@ full gate and independent pin recheck. B8 publication remains pending.
 
 ## D2 public Priory and book authoring
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
+[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
 `prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
 rooms. Every row below is reciprocal and ungated; preserve existing exits.
 

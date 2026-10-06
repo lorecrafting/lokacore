@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): original CHANGES REQUIRED; scoped fix source `c838cac423c037572f298f0fa920789fb115983c`, evidence `c7927528`, independent APPROVE, D2-P1/D2-H1 closed. Actual Book pulse/title retry red/green, 40 focused checks, exact history/route refusal and unchanged integrated pins verified; headless proof only.
 - [Corpse-loot Take detail](2026-10-06-corpse-loot-take-detail-review.md): exact docs head `44fbff3bb4c9480d4f48093ea5ec62a5ed7cd5ca`, independent APPROVE; no findings, no runtime proof claimed.
 - [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 
@@ -365,6 +366,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
 
+- [D2 public Priory books save/protocol opinion](2026-10-05-d2-priory-books-save-second-review.md): exact source `de1ea634`, independent CHANGES REQUIRED; D2-S1 readable-only history red-control gap. Sixteen focused TS/Book/SQLite and five compiler cases pass; existing 497-test mobile suite survives gate removal, controlled forged-history cases fail and restore green. Provisional v026 pin/121 IDs and evidence hashes verified.
 - [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; scoped fix round 1 `99f757a0`, APPROVE, RKT-01 closed by retained verbatim owner statement and labeled interpretation.
 
 - [D5 dry Deep Fen independent planning review](2026-10-05-d5-deep-fen-plan-review.md): exact planning head `2b0d5a6b29fdaa1573525f1dd404dc03d03c815c`, APPROVE; naturally lit original-Wren recovery, literal reciprocal route, unique message, ordinary no-credit Read and D2/B6 cross-reference verified. No findings; source and gameplay proof remain ahead.
@@ -373,3 +375,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Chapter 1 Beads Rust expansion](2026-10-06-beads-33-review.md): independent initial CHANGES REQUIRED found a reserved Wisp ID silently omitted from Git JSONL; safe ID, complete-export guard and red controls fixed it. Scoped recheck APPROVE; 33 tasks and dependencies verified from a fresh checkout.
 - [PR222 Beads viewer instructions and D5 status](2026-10-06-beads-viewer-d5-status-review.md): initial docs head `28016f56` CHANGES REQUIRED for a committed scratch-worktree path; scoped fix `37e8cd3b` APPROVE. PR221 merge, six green hosted checks, independent approval and the 33-row path-clean export verified.
 - [D5 dry Deep Fen independent primary source review](2026-10-05-d5-deep-fen-primary-review.md): exact local head `550d0027`, source `b680e435`, APPROVE; reciprocal dry rooms, naturally lit original-Wren recovery, fixed no-credit stone Read and protected-message identity verified. Independent five-test baseline/restoration pass; reciprocal-edge and darkness mutants fail. Provisional source only; browser proof and integrated pins pending. No findings.
+
+- [D2 public Priory books save/protocol scoped fix recheck](2026-10-05-d2-priory-books-save-second-review.md#scoped-fix-round-1--approve): corrected source `de756710`, evidence `c7139a67`, independent APPROVE; D2-S1 closed. Readable-only gate deletion independently fails the retained narration case and an unheld-history probe; restoration passes. Integrated kernel/D2/D5/SQLite 21, Book/App 7 and compiler 7 cases pass; v027 hash/127 IDs and evidence hashes verify. No open save/protocol finding.

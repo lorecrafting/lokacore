@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "bell_rites",
+    "book"
+  ],
+  "short": "item.bell_rites.short",
+  "room_line": "item.bell_rites.room",
+  "description": "item.bell_rites.description",
+  "location": {
+    "in": "room",
+    "room": "scriptorium"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.bell_rites",
+    "topic": "bell"
+  }
+}

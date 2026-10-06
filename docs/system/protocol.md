@@ -948,13 +948,16 @@ local projection emits ordinary targetless Rest and never changes raw Rest admis
 
 ## D2 held-readable composition
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
+[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
 existing Read targeting to authored readable items, retaining exact actor, item ID,
 pinned definition and ActionSet resolution. Shared held-reach admission governs
 item/contents offers and raw commands. Expose the authored Read label on each
 eligible item detail; closed ancestors hide unreachable contents and leave no raw
 ID bypass. Use current Item/ContentView and offered-action shapes where sufficient;
 add only consumed readable metadata, never a generic document hierarchy.
+The item-readable extension requires API1.24 and `readable@1`; its optional
+`topic` requires `topics@1`. Item Read offers retain the resolved command while
+preserving the authored action key.
 
 Topic grants lower to the B6 Boolean owner; no new portable delta, event writer,
 reading cursor or continuation is needed. Accepted receipt binds the exact Read

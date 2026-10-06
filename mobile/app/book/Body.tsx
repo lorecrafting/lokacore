@@ -24,6 +24,7 @@ type BodyProps = {
   startOver: () => void;
   chapterDone: () => void;
   world: () => void;
+  back?: () => void;
 };
 
 export function Body(p: BodyProps) {

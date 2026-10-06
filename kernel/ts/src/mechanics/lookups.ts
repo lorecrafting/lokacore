@@ -31,7 +31,13 @@ export const barrierState = (world: World, barrier: DefinitionRef): BarrierState
  * `id` reaches `body` or its room through open containers only (`opened`), so an NPC, a slot
  * holder or a closed or locked lid on the way fails it.
  */
-export function reach(world: World, body: EntityId, id: EntityId, steps: Steps = { n: 0 }) {
+export function reach(
+  world: World,
+  body: EntityId,
+  id: EntityId,
+  steps: Steps = { n: 0 },
+  heldOnly = false,
+) {
   const room = world.state.containers[body];
   const seen = new Set<string>();
   let at: string = id;
@@ -40,7 +46,8 @@ export function reach(world: World, body: EntityId, id: EntityId, steps: Steps =
     if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
     seen.add(at);
     const parent = world.state.containers[at];
-    if (parent === body || parent === room) return true;
+    if (parent === body) return true;
+    if (parent === room) return !heldOnly;
     if (!opened(world, parent, body)) return false;
     at = parent;
   }

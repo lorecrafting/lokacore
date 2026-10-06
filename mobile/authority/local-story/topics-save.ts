@@ -126,6 +126,15 @@ function grantSource(
       invalidRiddle();
     checkRow(world, p.continuation_id, row);
     committedDialogue(world, db, scope, p.continuation_id);
+  } else if (p.type === 'read') {
+    const item = world.entities[p.target_id];
+    if (
+      item?.kind !== 'item' ||
+      !item.readable?.topic ||
+      !same(world.cartridge.topics?.[refString(item.readable.topic)]?.fact, fact)
+    )
+      invalidRiddle();
+    // Historical held custody and exact response are checked by receiptHistory, never today's lid or room.
   } else if (p.type === 'perform') seekProof(world, command, d, fact);
   else invalidRiddle();
 }
