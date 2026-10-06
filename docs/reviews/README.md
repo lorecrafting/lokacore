@@ -329,3 +329,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Authored action alias guard](2026-10-05-alias-action-guard-review.md): exact source `f0b94db9`, independent docs-only APPROVE; B4 and B7 alias failures establish the need, and the deterministic existing-path proof adds no redundant test layer.
 
 - [B7 waterskins and liquid actions primary review](2026-10-05-b7-waterskin-primary-review.md): original source `d31b47d8`, CHANGES REQUIRED; scoped fix `d24b6f89`, APPROVE, B7-01/B7-02/B7-03 closed. Authored-key admission, source-owned Pour, live/recovered quantity and freshness verified; 121 focused checks and 12 independent loaded probes pass; keyed-admission, ownership and live-formatter mutations fail.
+
+- [B7 waterskins and liquid actions save/protocol second opinion](2026-10-05-b7-waterskin-save-second-review.md): initial source `d31b47d8` APPROVE; scoped Book fix `d24b6f8` APPROVE, no findings, 49 focused tests and live-quantity red control pass. Current API/hash/all 96 IDs independently verified; save/protocol/pins unchanged by the fix. Headless proof only; primary review and publication gates remain separate.
