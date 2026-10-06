@@ -1,45 +1,109 @@
 # D6 — Real underwater access, qualified swim and recoverable drowning
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+> **Unadopted D1-base draft, 2026-10-06.** The [draft PM decision](../../decisions/pm-decision-d6-water-depths-2026-10-06.md) identifies recommended contract choices and the recommended replacement deadline. Historical local review approves only its named prior heads. This branch authorizes no source work and certifies no player proof.
 
-Proposed branch: `chapter1/d6-water-depths`.
+Proposed source branch: `chapter1/d6-water-depths` (not created by this task).
 
-## Goal, dependencies and governing clauses
+## Goal and exact dependencies
 
-Add `well_bottom` and `pool_bottom`, making all 57 planned rooms genuinely accessible. Re-pin B4 well shaft/light, D5 pool edge, D1 Sedge/ferry, C1 skill acquisition/qualification, carrying and current death/corpse contracts. C6 may reward already-learned swim later; it is **not** the only way to learn the skill required to start its own route. Governors: archived00a §§2/5/7/11 and 00 §§4.1/4.3; active movement/resource/containment/death/save, release TOPOLOGY/TRANSACTION, no-wait and Legend-reconciliation recovery gate.
+Add real optional `well_bottom` and `pool_bottom`, with reciprocal shaft/bank
+Down and free Up. D6's two rooms do not complete unmerged D3/D4 room work or
+certify all 57 rooms. C6/S27 is never the first way to acquire its required swim.
+Governors: [draft mechanics](../../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-draft-pending-pm-adoption),
+[cartridge](../../system/cartridge.md#d6-bottom-rooms-and-water-tuning-draft-pending-pm-adoption),
+[protocol](../../system/protocol.md#d6-water-movement-and-corpse-selection),
+[save](../../system/save.md#d6-water-and-owned-corpse-recovery),
+[Book](../../system/book-ui.md#d6-water-exits-and-chapel-recovery), archived00a
+§§2/5/7/11, no-wait and Legend's reachable-death-recovery gate.
 
-## Bounded PM policy to adopt
+Re-pinned published main **815f66f9039ca22f80d44112a1ff966eadb8381e** includes D1
+[#231](https://github.com/lorecrafting/lokacore/pull/231), merge **c20addb0**,
+chapter **0.0.30/API1.26**, hash **dbff57ba20305dffa4a0679ab58d480574fbc3fd93fddeb3bf08d48d78e057b9**,
+**149 starting IDs**. Actual Sedge free lesson and cold reopen are proved;
+B4/D5/C1/carrying/death/transport source findings and consumers are in the
+[draft re-pin](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#published-dependency-re-pin).
+Do not regenerate frozen v030 fixtures. Re-pin again after intervening D4/C4
+publication before assignment. D6 source/successor/API/hash/IDs/PR are **null**.
 
-Select optional swimming for these two depths; the main rescue/bell remains a dry all-hours path. The planned D1 slice offers immediate **free Learn swim** at Sedge’s hut before S27; D6 consumes that persisted acquisition using C1’s acquired/current-qualification distinction. Re-pin the actual D1 lesson and do not add a second teaching gate or grant. Swimmers qualify with selected content CON≥10 (or C1's equivalent verified attribute vocabulary), carried mass≤**6000g**, standing/alive/out of encounter and MV≥**10** at admission. Entry costs **10 MV**; a known-but-unqualified actor cannot enter. Returning up to the surface costs **0** and is always offered to a living actor already below, independent of current skill/load/MV/light. No tide or calendar gate.
+## Contract proposed for PM adoption
 
-While below, a generation-bound due job drains **5 MV per150 logical seconds**; upon reaching MV minimum it requests the same-body registered death sequence with a typed **drowning** cause, no NPC killer/rat credit/loot. Surfacing cancels that generation; prior jobs are harmless. Retain fractional regeneration ordering under B1/M2; no separate clock or random swim roll. Dark perception follows B4. Choose these literals explicitly in the PM record rather than importing a historic swim formula.
+Use D1's acquired swim and current vacuous qualification; no new CON/DEX gate,
+percentage or teaching action. Entry requires living/standing/no encounter/no
+following NPC, load≤6000g and MV≥10; debit 10 MV replaces ordinary move fare.
+A living actor below surfaces free regardless of skill/load/MV/posture/light.
+Both invoke `action_key: "move"`, `target_ids: []`, input direction `down`/`up`.
+One read-only exact-edge admission serves GameView and direct execution, including
+an actual captured Up invocation after eligibility changes.
 
-Select the documented **single owned-corpse shrine recovery action** at chapel: the actor chooses an actual corpse it owns; atomically transfer its existing held/worn roots into the body, preserving descendants and allowing forced overload. It creates no copies, restores no deadlines/rewards, leaves the existing empty corpse identity and is refused for foreign/forged corpses. This applies to any owned corpse under the adopted recovery contract, so later study/isle closures have the same fallback, rather than a separate water rescue system.
+One generation/absolute deadline/one due occurrence owns danger; surface and
+every death invalidate it. The [draft deadline selection](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#deadline-recommendation-and-rejected-timer-options)
+is 6000 logical seconds (120 real seconds at rate 50), with no periodic drain and
+no drowning from MV 0 alone. Expiry settles before equal-time input, including Up,
+then positive-to-zero HP and existing same-body corpse/Chapel return commit once.
+Null killer/credit, no fake NPC/loot. Ordinary recovery remains unchanged. Prior
+5 MV/150-second timing is rejected: MV 10 entry can drown after three real seconds.
+
+Recommend Chapel `recover_corpse`: actual selected owned nonempty corpse,
+`target_ids: [corpse_id]`, `input: {}`; transfer its direct roots to held body
+custody once, preserve descendants and empty corpse, permit forced overload,
+no auto-equip or restored rewards/deadlines. Refuse foreign/forged/empty corpses.
+Apply to any owned corpse; prove that emptied isle corpses cease granting D1's
+fare waiver. Both dark bottoms have known Up; ordinary loot uses actual B4 light.
+The draft's duration, loot values/warning and general shrine action await PM adoption.
+Show remaining time and free Up on every underwater page, including details.
 
 ## Composition and scope
 
-Movement owns room transfer and entered events; skill owner reads acquired/current qualification; carrying query counts every nested/worn mass once; resource owns debit/drain; water occupancy/job generation owns only its narrow pending drain; death owns corpse creation/body return; containment owns shrine root transfers. Reuse changed-row proposals/receipts and shared return admission. A new drowning cause is not a fake combat victim or direct HP teleport. Re-read current occupancy/job generation before each due consequence; canceled/stale jobs cannot drown a surfaced body.
+Movement owns transfer/entry; skills reads usable acquisition; containment owns
+all nested/worn mass and existing root transfers; resources owns debit/recovery/
+HP loss; water owns only occupancy/deadline/current occurrence; death owns corpse
+and same-body return; host commits changed rows plus receipt before adoption.
+Keep budget/structural-sharing discipline and ordinary elapsed/job ordering;
+water expiry must settle before equal-time input as specified above.
+Inspect actual current job and save owners before choosing their new typed shape.
 
-In scope: two rooms/reciprocal shaft/pool edges, D1 learned-swim admission, coin/sunken chest/ring source with real container eligibility/capacity/100% mass declaration and ch2 descriptive initials; water settings/actions/jobs, typed death cause and selected shrine action, necessary protocol/compiler/loader/save/projection/Book seams. Out: tidal rescue gate, boat framework, wet/chill physiology, swimming rescue escort, ghost walk, next-day drift, XP/proficiency/levels and global terrain cost rewrite.
+In: two bottoms, real old coin/chest/ring/initials, ordinary dark item/container
+interactions, water declaration/admission/jobs, typed drowning and narrow Chapel
+recovery, necessary compiler/loader/protocol/save/projection/Book seams. Out: new
+sunken lantern, wet/chill/drift/ghost physics, tides, swim escort, percentages/XP,
+ancestry stats, fishing, sale/chapter-two effects, global terrain rewrite.
 
-## Acceptance, red controls and UI/save proof
+## Required source proof after adoption
 
-Hand-pinned cases: unlearned, learned-CON9, qualifying-CON10/load6001, load6000/MV9 all refuse with no changes; qualifying/load6000/MV10 enters and leaves MV0. Up immediately succeeds without charge; remaining below until a due drain at zero produces one actual corpse and chapel return. With production standing recovery18/3600, zero fractional remainder, start clock64800 and MV20, entry leaves10; the150-second drain leaves5, the300-second drain leaves1 (one accrued MV), and the450-second drain reaches0 and kills unless surface/cancel happened. Independently hand-check those fractional boundaries against the actual re-pinned B1/M2 source; a no-regeneration controlled oracle may supplement them but must not silently become production policy. Pin clock/resource remainder explicitly so expected values are independent.
+Name each realistic break; expected answers are literal, fixture or hand-checked,
+never derived by the implementation. First apply mutants to existing focused
+suite; add a new case only for a distinct missing regression.
 
-Cold-open just after entry, one drain, surfacing, canceled job, drowning, shrine selection and root recovery. A corpse containing actual nested/worn light, fare, key and mass>12000g remains recoverable at zero money/gear. Foreign corpse never yields belongings. Shrine replay has one transfer; failed/uncertain COMMIT cannot split custody. Malformed occupancy/job/corpse ownership JSON gives typed corruption.
+- Admission: unlearned, load 6001g, MV 9, seated/encounter/following Wren refuse;
+  learned/load 6000g/MV 10 enters at MV 0. Failed admission changes nothing. Captured
+  Up works at MV 0, overload, missing swim, altered posture and darkness; no second
+  ordinary movement debit. Main rescue remains dry/all-hours.
+- Timing: duration 6000/rate 50, clock 64800→deadline 70800; at 70799 Up succeeds,
+  at 70800 expiry wins. Zero MV with time remaining is safe to surface. Prove
+  stale/canceled/re-entry generations, unchanged non-standing recovery, elapsed
+  catch-up/reopen and exactly one current expiry. Drowning creates one corpse/
+  actual roots, same body/Chapel and no credit; all deaths invalidate water.
+- Custody: remote actual owned corpse, nested light/fare/key, original roots,
+  held return, mass>12000g forced overload, multiple owned corpse selection,
+  foreign/forged/empty refusal, and D1 waiver disappearing after recovery.
+- Real SQLite: cold reopen after each committed entry/surface/expiry/recovery;
+  failed COMMIT, uncertain committed and absent branches, lost acknowledgment,
+  replay, later item movement/second death and malformed new rows yielding typed
+  `save_corrupt` without reset/repair. No duplicate roots or split custody.
+- Red controls: over-load entry, ordinary fare/posture blocking Up, stale drowning,
+  wrong corpse owner, copy instead of transfer and malformed typed state. Restore
+  green after each real mutation; run schema mutant sweep for changed contracts.
+- Later isolated browser Book: free lesson before S27, each bottom, real chest/coin,
+  free surface, remaining time on every bottom detail, controlled expiry, Chapel
+  selection/original belongings and cold refresh. Existing status/exit warnings, pending/refusal/history/Back controls;
+  actual SQLite fault proof is separate. No preview is authorized by this draft.
 
-Plant over-capacity admission, paid/blocked return, stale-generation drowning, wrong corpse owner or copy-instead-of-transfer; each must die in a behavior test. Browser: use the free D1 lesson before S27→enter each depth→inspect actual chest/coin→surface, independent controlled drowning→chapel→recover actual belongings and reopen. Re-learning at Sedge remains idempotent; D6 does not grant swim. Stop for incompatible C1 attribute/skill vocabulary, unsupported noncombat death ownership, unsafe dark/fare/corpse recovery or workload larger than rescue; split only at a complete safe consumer, never ship inaccessible bottom placeholders.
+Use `mise exec --`, relevant mechanics/storage/contracts lessons, normal focused
+kernel/host/compiler/Book checks and one final full gate with exact-head CI. Fresh
+primary plus required save/protocol/foundation opinion; Ponytail and correctness
+self-review before handoff. Native/mobile/simulator/owner saves stay paused.
 
-## Shared delivery and proof contract
-
-This is a **provisional, source-unbuilt PM recommendation**, not a specification amendment, source GO, review approval or completed check. Parent PM must adopt its policy and re-pin the actual merged prerequisites before assigning source work. Initial inspected baseline was clean PM `0fbd2847`/chapter v011/API1.10. Revalidated during final planning: clean PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` records PR190 merged as `05b0cb6f`, chapter `ashmere_missing_child@0.0.12`/API1.11 with the typed escort/fatal-separation/return contract. This is a provisional baseline only; each future A–D prerequisite still needs its own exact merged-source re-pin. Target main/source SHA, release/API version, content hash, allocation oracle and PR number are **null** until that source exists. The branch below is proposed, not created.
-
-Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
-
-For each new test name the distinct realistic break, use literal expected values independent of the code, and reuse an existing test if it already kills that mutant. Actually plant the named mutation, observe red, restore and observe green. No source-text or registry-count tests. New state must pass real SQLite cold reopen at **every legal committed intermediate**, genuinely failed COMMIT, uncertain COMMIT in both committed and absent branches, lost acknowledgement and same-invocation replay; malformed new rows/evidence must yield typed `save_corrupt` with in-place Start over, never an untyped exception or repair. Memory adopts only confirmed changed rows plus receipt, preserving structural sharing.
-
-Use `mise exec --` and the existing focused kernel/host/Book/compiler harnesses; finish with the normal `bin/check_all.sh`/pre-push gate once and exact-head shared CI, retaining the headless TypeScript `sim` engine checks. Browser Book interaction and refresh/persistence are distinct from Node/real-SQLite host proof. Browser-first iteration is the owner's newer direction in the complete map; publish that workflow routing before source work. Native Android/iOS build, Hermes/device lifecycle and physical harness rows remain deferred to prelaunch tightening. Do not start previews/devices or touch owner saves during this planning task; later browser proof uses an isolated run once authorized.
-
-Developer self-reviews correctness and runs Ponytail Review before handoff. Each source PR needs a fresh primary reviewer; add the workflow's independent save/protocol opinion when those contracts change, and Astra for proposal/foundation changes. Fixes return to the same developer/reviewer. PM verifies all started checks on the exact final head, merges a record-bearing PR with a merge commit, updates ROADMAP status only, and preserves the Claude/Codex handoff. Scope growth past one reviewable complete player outcome, a frozen-fixture conflict, owner-save/destructive work, paid services, weakened recovery/no-wait rules, or a new architecture/spec conflict returns to PM before implementation.
-
-Planning audit: Ponytail review found no new framework or dependency needed; each added semantic surface has the named first consumer above. Correctness review retained exact identity, no-wait, actual route, safe corpse recovery and new-shape save/admission proof. These are design checks only; **no implementation tests, mutations, browser/native proof or independent source approval were run or claimed by this planning task**.
+Stop before source for unadopted PM deadline/loot/shrine/admission choices, missing
+scoped draft approval, absent typed state/cause/custody contract, unsafe return,
+frozen-fixture conflict, incompatible latest published dependencies or broader
+framework/scope. Split at a complete safe player outcome, never bottom placeholders.

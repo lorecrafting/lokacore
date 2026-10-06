@@ -978,8 +978,9 @@ payment. Source definitions own fares, room links, text and balances. D1 adds
 `swim` to the C1 skill definitions with a vacuous `all: []` qualification
 policy: D1 has no water action or new attribute to qualify. Sedge's direct
 free dialogue choice uses `skill.acquire` and does not issue D6 water access
-early. D6 must re-pin its provisional CON threshold against the installed
-attribute vocabulary before implementing underwater admission. The optional
+early. D1 defines no underwater admission. [D6's draft replacement](mechanics.md#d6-water-depths-and-owned-corpse-recovery-draft-pending-pm-adoption)
+proposes acquired swim plus current load/MV, without an attribute floor;
+PM adoption and scoped review remain required before source. The optional
 dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
@@ -1211,3 +1212,26 @@ crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
 D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
 current location. Release/hash/IDs advance independently when source exists;
 this plan assigns no successor pin or API increment.
+
+## D6 bottom rooms and water tuning (draft, pending PM adoption)
+
+**Unadopted D1-base draft; no source authorization.** Proposed reciprocal exits:
+`well_shaft` down ↔ `well_bottom` up and `black_pool` down ↔ `pool_bottom` up.
+Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
+loot needs B4 light. Well Bottom owns one actual old coin and carved initials;
+Pool Bottom owns one actual sunken chest containing one silver ring. No extra
+sunken lantern, wet-fuel system, swim lesson, Wren route, fish or tide.
+
+Proposed world values: entry maximum 6000g, entry 10 MV, surface 0 MV and submersion
+duration 6000 logical seconds, **120 real seconds** at current real-elapsed rate 50.
+No periodic drain or regeneration override. The deadline is entry clock plus
+duration; do not renew it through actions, movement refusal, posture or reopen.
+D1's `swim` declaration remains vacuous `all: []`; no new attribute. The
+[draft item table](../decisions/pm-decision-d6-water-depths-2026-10-06.md#remaining-pm-judgments-and-unknowns)
+proposes mass/capacity; chest capacity uses direct-item count, not grams, and
+ordinary container eligibility preserves 100% descendant mass.
+
+Current source is the [published D1 v030/API1.26 baseline](../decisions/pm-decision-d6-water-depths-2026-10-06.md#published-dependency-re-pin).
+Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
+shape remain null until actual source and independent derivation. Chapel Nave
+remains the death shrine; Isle Shrine is descriptive only.
