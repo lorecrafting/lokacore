@@ -1,10 +1,10 @@
 # C4 hound response — reviewed source and D4 integration evidence
 
-The scoped review-fix source head is `251b0bff4f90b7e89cf327f11effe60282791574` with evidence head `7b38aa1428eef28068b96b7e2e6e770ca3d8829c`; primary, save/protocol and foundation scoped rechecks each approved it. Their record-only commits retain separate authorship. The D1-integrated provisional successor source is `1cbbe571` on published ferry main `c20addb09431f1ab75b56402d422cc9a29cb8360`. Its independent `v031` / API `1.27` / 149-ID pin hashes to `cb85b32d7c71709ae761faf30fd860ce57fc0ff1b9796724dabfaf24e64362b2`. Published D4 `536c80bc` is integrated into the C4 branch. Its frozen `v031` / API `1.27` hash is `57e2943395340908161b6535a46fd55e4e982bc969ceb765c02ffc505c4e000b` with 167 genesis IDs. The independently derived C4 successor `v032` / API `1.28` hashes to `b8e7b783483c598e6a455d8c117674bd01b96aaab5edc80b6be8df9e3b8db2bd`, also with 167 genesis IDs. The final accumulated gate and scoped integrated carryover remain pending.
+The scoped review-fix source head is `251b0bff4f90b7e89cf327f11effe60282791574` with evidence head `7b38aa1428eef28068b96b7e2e6e770ca3d8829c`; primary, save/protocol and foundation scoped rechecks each approved it. Their record-only commits retain separate authorship. The D1-integrated provisional successor source is `1cbbe571` on published ferry main `c20addb09431f1ab75b56402d422cc9a29cb8360`. Its independent `v031` / API `1.27` / 149-ID pin hashes to `cb85b32d7c71709ae761faf30fd860ce57fc0ff1b9796724dabfaf24e64362b2`. Published D4 `536c80bc` is integrated into the C4 branch. Its frozen `v031` / API `1.27` hash is `57e2943395340908161b6535a46fd55e4e982bc969ceb765c02ffc505c4e000b` with 167 genesis IDs. The independently derived C4 successor `v032` / API `1.28` hashes to `b8e7b783483c598e6a455d8c117674bd01b96aaab5edc80b6be8df9e3b8db2bd`, also with 167 genesis IDs. The accumulated gate passed at the review-round-1 source head; scoped integrated carryover recheck remains pending.
 
-The final integrated source head is `68be0345` on published D4 main
+The review-round-1 source head is `749a1705d41ddd86273231ac8661793b7f5a19ce` on published D4 main
 `536c80bc`. The source-head `mise exec -- bin/check_all.sh` exited **0**:
-367 ExUnit tests, strict Credo, planted controls, kernel TypeScript tests and
+368 ExUnit tests, strict Credo, planted controls, kernel TypeScript tests and
 typechecks, size and formatting. The separate current headless simulator exited
 **0**: 18 tests, 503 sequences and 16,744 steps. The exact compiler pin test,
 focused C4/Book/real-SQLite line and mobile app TypeScript check also passed.
@@ -19,8 +19,29 @@ The old origin-scoped browser save was left untouched after its correct
 The first D4-integrated gate failed only because the combined `compose.ts`
 exceeded its 300-line source limit; `d4-integrated-size-red.log` retains that
 failure. A narrow size reduction restored the gate. `SHA256SUMS` hashes all
-25 retained `.log` files and `SHA256SUMS.verify` records successful verification.
+29 retained `.log` files and `SHA256SUMS.verify` records successful verification.
 A fresh scoped carryover review remains required before publication.
+
+Review round 1 found one C4 schema-contract gap: deleting the flight-threshold
+minimum and regenerating contracts left the old focused suite green.
+`flight-threshold-minimum-red.log` retains the new Elixir source/compile test
+failing under that mutation; the intact test passes. The reviewer broadened the
+check to every C4-added required/bound keyword. `d4_schema_sweep.py` deletes
+one guard at a time, regenerates contracts, runs the new literal TypeScript
+contract cases when generation succeeds, and restores every modified file.
+`d4-schema-sweep.log` records **23/23 red**: six generation refusals (zero fare
+const, enemy-exit direction pattern/value, closed pack/narration/view-member
+keys) and seventeen named contract assertion failures (threshold min/max;
+seven pack/narration required fields; three encounter roster caps; four
+CombatView roster/member guards; flight-clock minimum). All 23 guards remain:
+each protects an authored, proposed, projected or persisted trust boundary.
+The independent valid/invalid inputs come from the frozen C4 fixture and literal
+rows; no expected result is computed by the validator. The restored focused line
+in `d4-schema-focused-green.log` exits zero for contract drift, TypeScript
+checking, C4/combat contract tests and Elixir compiler/composition tests.
+`d4-schema-full.log` is the full `bin/check_all.sh` run at the new source head,
+exit zero. C4 behavior, D4 fixture bytes, v032/API1.28/hash and genesis IDs
+are unchanged. A scoped save/protocol reviewer recheck remains open.
 
 Deliberate Attack admits the selected living hound and bounded same-plan, co-present helpers. The repaired cursor picks one living member per round. An injured selected hound can take one legal exit, retain its injury and slot, and leave the fixed roster. On an even round, the player still gets the scheduled opportunity against a remaining hound. A flight stamp requires the selected member's actual same-group departure and the round's due time, even when elapsed advances farther. Final admission requires the complete group; partial prefix composition remains lawful. SQLite COMMIT failure leaves the old memory and disk state, and retry saves one flight and receipt.
 

@@ -3,10 +3,14 @@ d4-browser-roster-red.log: OK
 d4-integrated-full.log: OK
 d4-integrated-sim.log: OK
 d4-integrated-size-red.log: OK
+d4-schema-focused-green.log: OK
+d4-schema-full.log: OK
+d4-schema-sweep.log: OK
 dead-cursor-ex-red.log: OK
 dead-cursor-ts-red.log: OK
 even-flight-red.log: OK
 flight-commit-red.log: OK
+flight-threshold-minimum-red.log: OK
 helper-identity-red.log: OK
 integrated-full-credo-red.log: OK
 integrated-full-cycle-red.log: OK
