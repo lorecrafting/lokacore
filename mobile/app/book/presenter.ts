@@ -3,7 +3,7 @@
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
 import type { Game, GameView, Reply, GameSubscription } from '../../packages/game-view/session.ts';
-import { comings, replyLine } from './words.ts';
+import { comings, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf, things } from './model.ts';
 
 /**
@@ -23,18 +23,6 @@ export type Button = {
 };
 
 type Say = (key: string) => string;
-
-// A text key's words, and an action label's. ponytail: the cartridge has no text for most action
-// labels yet, so a label shows the key's last word, capitalised as the texted labels are.
-const sayers = (g: Game): { text: Say; label: Say } => ({
-  text: (key) => g.text(key) ?? key,
-  label: (key) =>
-    g.text(key) ??
-    key
-      .replace(/^actions?\./, '')
-      .replaceAll('_', ' ')
-      .replace(/^./, (a) => a.toUpperCase()),
-});
 
 export type { DetailLine } from './logs.ts';
 import {
@@ -94,6 +82,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const detail =
     readableDetail ??
     (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail);
+  s.confirmedRead = accepted?.outcome === 'read' ? detail : undefined;
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
@@ -207,6 +196,7 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
+  s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
   const item = ['take', 'drop'].includes(b.action_key)
@@ -275,6 +265,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,
     returnWorld: s.returnWorld,
+    confirmedRead: s.confirmedRead,
   };
 }
 

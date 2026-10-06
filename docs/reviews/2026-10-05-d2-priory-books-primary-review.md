@@ -112,3 +112,15 @@ Independent bounded verification, using `mise exec --`:
 Ponytail Review: lean already; no complexity finding. Full publication checks,
 save/protocol opinion, hosted CI and publication remain separate gates. Browser,
 native and owner-save proof remain null; this verdict claims headless proof only.
+
+## Hosted Sol review — PR223 exact head 59899fcb
+
+Verbatim read-only response on `59899fcbd2e37dee177569f467540acfb7ede338`:
+
+```text
+VERDICT: CHANGES REQUIRED
+
+- **D2-H1 — blocker — mobile/app/book/Book.tsx:61** (also :94): Remount Book during a held Ward Read with lost COMMIT acknowledgement, Continue to World, then tap the Scriptorium title before the next pulse. The press retries and confirms the retained Read, but its exact book route is never restored. Recovery handles only subscription `completion`; synchronous retries through `pressBook` bypass it.
+  
+  **Evidence:** Read-only probe using actual Book hooks and real in-memory SQLite at this head produced `pending=false`, `stack=[]`, and the confirmed Ward text in its exact item history. A subsequent pulse still left `stack=[]`. This violates `docs/system/book-ui.md`’s D2 confirmed-route requirement. The retained regression exercises pulse settlement only, so it misses this path.
+```

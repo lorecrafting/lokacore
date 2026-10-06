@@ -86,12 +86,26 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
 }
 
 function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+  const restoring =
+    s.restoreInvocation.current === p.game.pendingInvocation()
+      ? s.restoreInvocation.current
+      : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
   let next = pagesAfter(before.stack, before.view, after.view);
+  if (
+    restoring &&
+    s.restoreInvocation.current === restoring &&
+    !p.game.pending() &&
+    pr.recovered()
+  ) {
+    s.restoreInvocation.current = undefined;
+    if (after.confirmedRead)
+      next = [...restoredItemPages(after.view, after.detail, after.confirmedRead), ...next];
+  }
   if (after.returnWorld && !after.view.combat) next = [];
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);

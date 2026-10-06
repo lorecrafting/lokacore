@@ -142,92 +142,107 @@ test('actual nested book Item opens locally and Read stays between description a
   );
 });
 
-// Break: mounting the actual Book during uncertain Read strands confirmed history on World after Continue.
-test('Book restores the exact settled Ward or Bell through its parents once, beneath chapter Continue', (t) => {
-  for (const key of ['ward_of_the_fen', 'bell_rites']) {
-    const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, openChestBundle());
-    t.after(() => a.sql.close());
-    const p = presenter(a.game);
-    a.game.subscribe(p.update);
-    const book = ids[`item/${key}`],
-      chest = ids['item/storage_chest'];
-    for (const label of [
-      'Go north',
-      'Go north',
-      'Go north',
-      'Go north',
-      'Go north',
-      'Go north',
-      'Go west',
-      `Take ${key === 'bell_rites' ? 'Bell Rites' : 'The Ward of the Fen'}`,
-      'Take a storage chest',
-    ])
-      p.press(p.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
-    p.press(
-      p
-        .screen()
-        .buttons.find(
-          (b) => b.action_key === 'put' && b.target_ids[0] === book && b.target_ids[1] === chest,
-        )!,
-    );
-    a.fault.kind = 'lost';
-    a.fault.armed = true;
-    p.press(
-      p.screen().buttons.find((b) => b.command === 'read' && b.target_ids[0] === book)!,
-      book,
-    );
-    assert.equal(a.game.pending(), true);
-    const slots: any[] = [],
-      cleanups: (() => void)[] = [];
-    let at = 0;
-    (globalThis as any).d2Hooks = {
-      state(v: any) {
-        const i = at++;
-        if (!(i in slots)) slots[i] = typeof v === 'function' ? v() : v;
-        return [
-          slots[i],
-          (next: any) => {
-            slots[i] = typeof next === 'function' ? next(slots[i]) : next;
-          },
-        ];
-      },
-      ref(v: any) {
-        const i = at++;
-        return (slots[i] ??= { current: v });
-      },
-      effect(f: () => () => void) {
-        const i = at++;
-        if (!(i in slots)) {
-          slots[i] = true;
-          cleanups.push(f());
-        }
-      },
-    };
-    const draw = () => {
-      at = 0;
-      return Book({
-        game: a.game,
-        shell: { confirm: (go) => go(), learned: { seen: () => true, see: () => {} } },
-        startOver: () => undefined,
-      });
-    };
-    assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
-    a.fault.reads = false;
-    assert.equal(a.game.pulse('active').kind, 'ready');
-    const settled = draw();
-    assert.equal(settled.props.screen.detail(book).length, 1);
-    assert.equal(settled.props.stack.at(-1).kind, 'chapter');
-    const chapter = BookView(settled.props).props.children[0].props.children;
-    chapter.props.chapterDone();
-    assert.deepEqual(draw().props.stack, [
-      { kind: 'carrying' },
-      { kind: 'thing', id: chest },
-      { kind: 'thing', id: book },
-    ]);
-    draw().props.go([], -1);
-    a.game.pulse('active');
-    assert.deepEqual(draw().props.stack, []);
-    cleanups.forEach((f) => f());
-  }
-  delete (globalThis as any).d2Hooks;
-});
+// Break: pulse settlement or a World title retry after mounting hides the confirmed original book route.
+for (const settlement of ['pulse', 'title press'])
+  test(`Book restores Ward or Bell once through ${settlement} after remount during uncertain Read`, (t) => {
+    for (const key of ['ward_of_the_fen', 'bell_rites']) {
+      const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, openChestBundle());
+      t.after(() => a.sql.close());
+      const p = presenter(a.game);
+      a.game.subscribe(p.update);
+      const book = ids[`item/${key}`],
+        chest = ids['item/storage_chest'];
+      for (const label of [
+        'Go north',
+        'Go north',
+        'Go north',
+        'Go north',
+        'Go north',
+        'Go north',
+        'Go west',
+        `Take ${key === 'bell_rites' ? 'Bell Rites' : 'The Ward of the Fen'}`,
+        'Take a storage chest',
+      ])
+        p.press(p.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
+      p.press(
+        p
+          .screen()
+          .buttons.find(
+            (b) => b.action_key === 'put' && b.target_ids[0] === book && b.target_ids[1] === chest,
+          )!,
+      );
+      a.fault.kind = 'lost';
+      a.fault.armed = true;
+      p.press(
+        p.screen().buttons.find((b) => b.command === 'read' && b.target_ids[0] === book)!,
+        book,
+      );
+      assert.equal(a.game.pending(), true);
+      const slots: any[] = [],
+        cleanups: (() => void)[] = [];
+      let at = 0;
+      (globalThis as any).d2Hooks = {
+        state(v: any) {
+          const i = at++;
+          if (!(i in slots)) slots[i] = typeof v === 'function' ? v() : v;
+          return [
+            slots[i],
+            (next: any) => {
+              slots[i] = typeof next === 'function' ? next(slots[i]) : next;
+            },
+          ];
+        },
+        ref(v: any) {
+          const i = at++;
+          return (slots[i] ??= { current: v });
+        },
+        effect(f: () => () => void) {
+          const i = at++;
+          if (!(i in slots)) {
+            slots[i] = true;
+            cleanups.push(f());
+          }
+        },
+      };
+      const draw = () => {
+        at = 0;
+        return Book({
+          game: a.game,
+          shell: { confirm: (go) => go(), learned: { seen: () => true, see: () => {} } },
+          startOver: () => undefined,
+        });
+      };
+      assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
+      if (settlement === 'title press') {
+        const chapter = BookView(draw().props).props.children[0].props.children;
+        chapter.props.chapterDone();
+        assert.deepEqual(draw().props.stack, []);
+        a.fault.reads = false;
+        const world = BookView(draw().props).props.children[0].props.children;
+        nodes(world)
+          .find(
+            (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Look, Scriptorium',
+          )!
+          .props.onPress();
+        assert.equal(a.game.pending(), false);
+      } else {
+        a.fault.reads = false;
+        assert.equal(a.game.pulse('active').kind, 'ready');
+        const settled = draw();
+        assert.equal(settled.props.stack.at(-1).kind, 'chapter');
+        const chapter = BookView(settled.props).props.children[0].props.children;
+        chapter.props.chapterDone();
+      }
+      assert.equal(draw().props.screen.detail(book).length, 1);
+      assert.deepEqual(draw().props.stack, [
+        { kind: 'carrying' },
+        { kind: 'thing', id: chest },
+        { kind: 'thing', id: book },
+      ]);
+      draw().props.go([], -1);
+      a.game.pulse('active');
+      assert.deepEqual(draw().props.stack, []);
+      cleanups.forEach((f) => f());
+    }
+    delete (globalThis as any).d2Hooks;
+  });
