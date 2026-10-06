@@ -150,9 +150,11 @@ combat precedence, visibility and Take carrying/custody. No new population verb.
 
 One loaded alias case must run the advertised view→ActionInvocation→command and
 observe the literal admitted/refused result; reuse existing same-layer checks when
-they catch it. Combat owns hit/fatal history; item detail owns confirmed Take history.
+they catch it. Combat owns hit/fatal history; the corpse detail owns confirmed pelt Take history.
 A departing/dead generation prunes its exact route; a new same-named hound cannot
-inherit the old target. Pelt Back returns to its corpse, then World; combat closure
+inherit the old target. Opening the pelt may show its child detail; confirmed Take
+returns to the corpse detail with Back to World, not to World or a stale pelt child.
+Combat closure
 restores World. Walk this complete browser interaction with two same-named hounds,
 actual pelt Take and refresh, plus lost-ack/refused controls. Fix misleading results,
 stale targeting and dead-end nested returns in this slice; the later chapter polish

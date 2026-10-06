@@ -52,7 +52,7 @@ function requirements(c: Obj, out: Diagnostic[], bad: (field: string) => void) {
   ])
     if (c.lock.capabilities[cap] !== 1) bad('.on.rest');
   const api = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (api[0] < 1 || (api[0] === 1 && api[1] < 24))
+  if (api[0] < 1 || (api[0] === 1 && api[1] < 25))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
 }
 

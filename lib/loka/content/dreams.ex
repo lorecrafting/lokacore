@@ -45,7 +45,7 @@ defmodule Loka.Content.Dreams do
       |> Enum.map(&String.to_integer/1)
 
     missing ++
-      if(api < [1, 24],
+      if(api < [1, 25],
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
       )

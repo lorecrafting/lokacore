@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "hale",
+    "novice_hale",
+    "novice"
+  ],
+  "short": "npc.hale.short",
+  "room_line": "npc.hale.room",
+  "description": "npc.hale.description",
+  "room": "cloister",
+  "daily_schedule": {
+    "6": "kitchen_garden",
+    "18": "cloister"
+  }
+}

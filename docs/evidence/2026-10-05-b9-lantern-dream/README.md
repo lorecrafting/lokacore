@@ -4,7 +4,9 @@ B9 is local source on `slice/b9-lantern-dream`, with published B8 prerequisite
 `594b8ae1b6c790891e49d160ff4d023c9db1e9f1` integrated. Corrected provisional source checkpoint: `667347ac14c36e996e6c71048dae99e87db4a322`.
 Initial source `8b9e5b52` has independent [primary CHANGES REQUIRED](../../reviews/2026-10-05-b9-lantern-dream-primary-review.md)
 for B9-P1 and [save/protocol APPROVE](../../reviews/2026-10-05-b9-lantern-dream-save-review.md).
-Corrected-source scoped verdicts: **null**, pending independent rechecks. Publication
+Corrected-source primary scoped verdict: **APPROVE**, merge-preserved in its record.
+PM confirmed save/protocol bounded carryover **APPROVE**, with no separate record commit;
+the original independent save record remains durable. Final integrated rechecks remain pending. Publication
 PR/merge: **null**. No owner save, native preview, browser or device proof is claimed.
 
 The independently derived local candidate is `ashmere_missing_child@0.0.26`,
@@ -98,3 +100,27 @@ after these scoped fix reviews, then independently derive B9's final successor p
 
 The original 349-test source gate remains in `full-gate-frozen.log` as historical
 evidence. The corrected-source full gate and all nine focused jobs are green.
+
+
+## Published predecessor integration
+
+Published source predecessor `4bcb2eafd0a984c611b71c3e4dc1e0d26defd533` includes D5,
+D2 and PR224. Its v027/API1.24 release is advanced independently to B9 v028/API1.25:
+SHA-256 `424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e`,
+127 initial IDs. The separate `generate_missing_child_v028.py` starts from the
+published predecessor literal, adds the exact B9 sources and hand-checked cursor
+maximum, then derives canonical JSON/SHA-256/UUID answers with Python's standard
+library. Complete compiler bytes and all 127 allocations match. Both original
+B9 provisional fixtures and their generator are byte-unchanged.
+
+Conflict resolution preserves D2's item-pages, exact uncertain Read/remount and
+tap-retry recovery; B9 adds only its dream Page, owner/context and local child.
+The shared Body receives the already-supplied Back callback, keeping dream Close
+at its bed parent. Existing D2 topic/Read rules and their API1.24 floor stay unchanged;
+B9's new wire subset and installed host advance to API1.25. Initial combined
+failures were obsolete literal B9 refs/bed IDs and the app's chapter hash; those
+expectations now use the independent current answers. Browser setup initially
+failed before gameplay because Metro cannot consume the borrowed dependency
+symlink; an isolated pinned app dependency install corrects that setup. Historical
+failures are retained in `pre-integration-*` logs. Final integrated source/check
+head and fresh integrated verdicts remain null until their records exist.

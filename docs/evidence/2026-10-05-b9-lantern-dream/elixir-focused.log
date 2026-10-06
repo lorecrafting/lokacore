@@ -2,9 +2,9 @@ command: mise exec -- mix test --force test/loka/content_dreams_test.exs test/lo
 exit: 0
 Compiling 63 files (.ex)
 Generated loka app
-Running ExUnit with seed: 336708, max_cases: 16
+Running ExUnit with seed: 842945, max_cases: 16
 
 ...............
-Finished in 10.5 seconds (10.5s async, 0.00s sync)
+Finished in 9.3 seconds (9.3s async, 0.00s sync)
 
 Result: 15 passed

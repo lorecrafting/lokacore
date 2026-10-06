@@ -1,0 +1,18 @@
+(node:32951) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of [redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (1220.125ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (632.895208ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (624.244334ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (164.931667ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (103.451584ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (109.79525ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3170.1545

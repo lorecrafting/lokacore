@@ -317,7 +317,8 @@
       "kernel/ts/src/mechanics/schedule/rule.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_ferry_hash.json"
+      "protocol/fixtures/cartridge_ferry_hash.json",
+      "protocol/fixtures/missing_child_v026_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -575,19 +576,21 @@
     "implemented_in": "M6-A first live cellar fight: deliberate Attack, timed rounds, Stand/Flee, death and exact preacceptance rat credit"
   },
   "readable": {
-    "spec": "system/mechanics.md readable@1; system/protocol.md GameView; system/cartridge.md Source layout",
+    "spec": "system/mechanics.md readable@1; system/protocol.md GameView; system/cartridge.md Source layout; docs/system/mechanics.md#d2-held-books-and-public-priory-selected-contract",
     "contracts": [
       "InspectableDetail",
       "CommandPayload",
-      "TargetSpec"
+      "TargetSpec",
+      "ItemReadable"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v002_hash.json"
+      "protocol/fixtures/missing_child_v002_hash.json",
+      "protocol/fixtures/missing_child_v026_hash.json"
     ],
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "M12-A fixed current-room written details; authored narration, no gameplay writes"
+    "implemented_in": "M12-A ordinary notice Read; D2 exact held-item writing and idempotent topic lowering"
   },
   "escort": {
     "spec": "docs/system/mechanics.md escort@1; docs/system/protocol.md Typed escort relation",
@@ -708,12 +711,13 @@
     ],
     "fixtures": [
       "protocol/fixtures/wisp_contracts.json",
-      "protocol/fixtures/missing_child_v023_hash.json"
+      "protocol/fixtures/missing_child_v023_hash.json",
+      "protocol/fixtures/missing_child_v026_hash.json"
     ],
     "invariants": [
       "facts_typed"
     ],
-    "implemented_in": "B6 declared Ward knowledge and exact public Aldric consumer (local implementation; independent review pending)"
+    "implemented_in": "B6 declared Ward knowledge and public Aldric consumer; D2 held books compose Ward and Bell"
   },
   "liquid": {
     "spec": "docs/system/mechanics.md B7; docs/system/protocol.md B7 liquid composition",

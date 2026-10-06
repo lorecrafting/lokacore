@@ -1,7 +1,9 @@
 // Exact command, primary target, scope and captured input binding.
 import type { CharacterId, CommandPayload, EntityId } from '../contracts.gen.ts';
 import { same } from '../foundation/compose.ts';
-import { bodyOf, refString, type World } from '../runtime/decision.ts';
+import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
+import { KernelError } from '../foundation/error.ts';
+import { reach } from '../mechanics/lookups.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
 
@@ -28,6 +30,7 @@ export function accepts(
   actor: CharacterId,
   a: Offered,
   payload: CommandPayload,
+  steps: Steps = { n: 0 },
 ): boolean {
   if (a.command !== payload.type) return false;
   if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
@@ -54,12 +57,27 @@ export function accepts(
     self: id !== undefined && id === body,
     inspectable_details:
       id !== undefined && world.details[id]?.room === world.state.containers[body!],
-    inventory:
-      at !== undefined && (at === body || (a.command === 'remove' && wornIn(world, at, body))),
+    inventory: at !== undefined && inventory(world, body, id!, at, a.command, steps),
     room_contents: kind === 'item' && at === world.state.containers[body!],
     room_occupants: kind === 'npc' && at === world.state.containers[body!],
   };
   return a.target.scopes.some((s) => scope[s]);
+}
+
+function inventory(
+  world: World,
+  body: EntityId | undefined,
+  id: EntityId,
+  at: EntityId,
+  command: string,
+  steps: Steps,
+) {
+  if (at === body) return true;
+  if (command === 'remove') return wornIn(world, at, body);
+  if (command !== 'read' || !body) return false;
+  const reached = reach(world, body, id, steps, true);
+  if (typeof reached === 'string') throw new KernelError(reached);
+  return reached;
 }
 
 export function primaryTarget(payload: CommandPayload): EntityId | undefined {

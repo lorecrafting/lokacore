@@ -1,0 +1,55 @@
+(node:75572) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.906708ms)
+✔ journal cues belong only to changed NPC histories (0.313208ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.157666ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.2105ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.149166ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.151625ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.089ms)
+✔ the log stops growing in one room, its last line the latest answer (2.581875ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.154625ms)
+✔ a narration recovery fault holds combat results while their line routing is unavailable (0.349292ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.325209ms)
+(node:75573) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual nested book Item opens locally and Read stays between description and options with local Back (351.577792ms)
+✔ Book restores the exact settled Ward or Bell through its parents once, beneath chapter Continue (406.978333ms)
+✔ lantern-carry plays as its frozen trace; its story point reaches the run's account once (123.7615ms)
+✔ lantern-leave plays as its frozen trace; its story point reaches the run's account once (84.938875ms)
+✔ an old run's view token is stale after a new game, at the same revision (12.471167ms)
+✔ adverse early-possession (46.299375ms)
+✔ adverse drop-after-choice-opened (38.191ms)
+✔ adverse walked-away-rejects-new-choice (41.026541ms)
+✔ adverse walked-away-keeps-receipt (57.544083ms)
+✔ adverse altered-choice (38.510584ms)
+✔ adverse choice-rollback (33.081583ms)
+✔ adverse choice-unknown-commit-absent (49.338042ms)
+✔ adverse choice-unknown-commit-committed (44.889416ms)
+✔ adverse commit-before-display (337.472208ms)
+✔ adverse reading-has-no-effect (48.068625ms)
+✔ adverse stale-choice-and-blocked-exit (38.652375ms)
+✔ a choice committed with its acknowledgement lost recovers to its receipt, reported once (32.679167ms)
+(node:75575) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (1579.460583ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (575.668375ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (499.79725ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (155.529125ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (99.148834ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (104.998542ms)
+✔ readable-only SQLite recovery rejects forged narration without another history consumer (16.410667ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3592.218041

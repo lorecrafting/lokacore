@@ -90,6 +90,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     of: (scope: string, id: string, nested = false) =>
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
+        readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(

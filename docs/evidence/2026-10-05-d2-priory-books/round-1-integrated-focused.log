@@ -1,0 +1,52 @@
+(node:80633) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ fresh dry exploration traverses every reciprocal edge and reopens all five new rooms (1647.483541ms)
+✔ D5 movement and stone Read reconcile committed and absent COMMIT outcomes and replay exactly (644.824916ms)
+✔ actual fatal separation in the den reopens and permits gear-free original-Wren Rejoin and rescue (1314.214084ms)
+✔ fixed stone preserves original-message custody before and after stays and preserves lost (977.441542ms)
+✔ the current chapter refuses a lookalike item substituted into the original-message role (186.321916ms)
+✔ literal public Priory route returns safely under both child/bell outcomes at day and night (265.368542ms)
+✔ only deliberate exact held Read teaches its declared topic and keeps time RNG and other membership (52.532083ms)
+✔ open held ancestors admit exactly the original book; closed ground foreign worn and departed children refuse (9.529125ms)
+✔ literal novice schedules keep distinct cards and exact departure contexts (23.245084ms)
+✔ one 100g book fills a 11900g held load and the second Take refuses unchanged (4.455542ms)
+✔ Wisp completion and held Ward Read compose in both acquisition orders (73.688625ms)
+✔ ordinary notice Read remains eventless and teaches no topic in the active book cartridge (2.732542ms)
+✔ item writing, topic refs, text and unique player Boolean mappings fail closed (1059.836583ms)
+✔ loaded consult alias projects the Read command and resolves the exact nested book invocation (152.932584ms)
+(node:80640) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual nested book Item opens locally and Read stays between description and options with local Back (405.318583ms)
+✔ Book restores the exact settled Ward or Bell through its parents once, beneath chapter Continue (690.235792ms)
+(node:80643) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves (509.171333ms)
+✔ the 0.0.9 chapter save is refused intact until explicit Start over (101.8215ms)
+✔ actual App pause and resume preserve 9ms plus 11ms as exactly one logical unit (144.024041ms)
+✔ actual App stops unknown storage wakeups and resumes after confirmed user recovery (138.556833ms)
+✔ old App wakeups cannot mutate the same remounted Game or a replacement save (146.754792ms)
+(node:80645) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (2201.240084ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (1512.929292ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (1037.302792ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (309.168292ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (248.341666ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (213.351959ms)
+✔ readable-only SQLite recovery rejects forged narration without another history consumer (29.544708ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6486.149833

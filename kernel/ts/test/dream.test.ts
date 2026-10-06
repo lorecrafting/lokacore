@@ -46,8 +46,8 @@ test('only a new actual paid Rest starts one checkpoint without giving its end c
   assert.deepEqual(phase(a.world), started);
   const unpaid = fresh((c) => {
     c.entry.key = 'inn_rooms';
-    c.npcs['ashmere_missing_child@0.0.26:npc/maud'].room = ref('room', 'inn_rooms');
-    c.resources['ashmere_missing_child@0.0.26:resource/mv'].start = 50;
+    c.npcs['ashmere_missing_child@0.0.28:npc/maud'].room = ref('room', 'inn_rooms');
+    c.resources['ashmere_missing_child@0.0.28:resource/mv'].start = 50;
   });
   const rested = step(unpaid, command(unpaid, 1, { type: 'rest' }), 1, 'rest' as Key);
   assert.equal(rested.decision.kind, 'accepted');
@@ -198,7 +198,7 @@ test('both exact branches keep World usable and award memory only after shown fi
 // Breaks: pending ordinary choice suppresses first credit or a dormant scene choice blocks real dialogue/elapsed/travel.
 test('first credit defers presentation behind the unchanged ordinary choice', () => {
   let w = fresh((c) => {
-    c.npcs['ashmere_missing_child@0.0.26:npc/peg'].room = ref('room', 'drowned_lantern');
+    c.npcs['ashmere_missing_child@0.0.28:npc/peg'].room = ref('room', 'drowned_lantern');
   });
   const talk = step(w, command(w, 1, { type: 'talk', target_id: entity(w, 'npc', 'peg') }), 1);
   assert.equal(talk.decision.kind, 'accepted', JSON.stringify(talk.decision));
@@ -288,7 +288,7 @@ test('captured scene choices and exact keyed availability reject foreign and sta
     o = c.choices[0];
   for (const input of [
     { ...o.dream, body_id: entity(a.world, 'npc', 'maud') },
-    { ...o.dream, room_id: a.world.roomIds['ashmere_missing_child@0.0.26:room/village_green'] },
+    { ...o.dream, room_id: a.world.roomIds['ashmere_missing_child@0.0.28:room/village_green'] },
     { ...o.dream, expected_revision: o.dream!.expected_revision + 1 },
     { ...o.dream, scene: ref('scene', 'bell_rung') },
     undefined,
@@ -310,7 +310,7 @@ test('captured scene choices and exact keyed availability reject foreign and sta
   const blocked = route(
     fresh((c) => {
       for (const k of ['dream_next', 'dream_choose'])
-        c.actions[`ashmere_missing_child@0.0.26:action/${k}`].policy.root = {
+        c.actions[`ashmere_missing_child@0.0.28:action/${k}`].policy.root = {
           op: 'fact_compare',
           fact: ref('fact', 'dream_seen'),
           equals: true,

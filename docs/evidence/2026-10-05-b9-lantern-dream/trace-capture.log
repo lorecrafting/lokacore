@@ -40,7 +40,7 @@ exit: 0
                   "op": "resource.adjust",
                   "resource": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "mv",
                     "kind": "resource"
                   },
@@ -51,7 +51,7 @@ exit: 0
                   "expected": "standing",
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "position",
                     "kind": "fact"
                   },
@@ -67,7 +67,7 @@ exit: 0
                   "expected": false,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "slept_at_lantern",
                     "kind": "fact"
                   },
@@ -84,7 +84,7 @@ exit: 0
                   "op": "quest.activate",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },
@@ -98,7 +98,7 @@ exit: 0
                   "expected": 0,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -123,7 +123,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "position",
                     "kind": "fact"
                   },
@@ -146,7 +146,7 @@ exit: 0
                 "logical_time": 0,
                 "payload": {
                   "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
-                  "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                  "room_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                   "type": "rested"
                 },
                 "position": 2,
@@ -164,7 +164,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "slept_at_lantern",
                     "kind": "fact"
                   },
@@ -189,7 +189,7 @@ exit: 0
                   "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },
@@ -210,7 +210,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -254,7 +254,7 @@ exit: 0
               "line": 1,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -269,7 +269,7 @@ exit: 0
                   "expected": 1,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -294,7 +294,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -343,7 +343,7 @@ exit: 0
               "line": 2,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -358,7 +358,7 @@ exit: 0
                   "expected": 2,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -383,7 +383,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -432,7 +432,7 @@ exit: 0
               "line": 3,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -447,7 +447,7 @@ exit: 0
                   "expected": 3,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -475,13 +475,13 @@ exit: 0
                       "role": "body"
                     },
                     {
-                      "entity_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                      "entity_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                       "role": "anchor"
                     }
                   ],
                   "source": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_of_the_fen",
                     "kind": "scene"
                   },
@@ -500,7 +500,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -569,10 +569,10 @@ exit: 0
                 "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
                 "expected_revision": 6,
                 "line": 4,
-                "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                "room_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                 "scene": {
                   "cartridge_id": "ashmere_missing_child",
-                  "cartridge_version": "0.0.26",
+                  "cartridge_version": "0.0.28",
                   "key": "dream_of_the_fen",
                   "kind": "scene"
                 }
@@ -595,7 +595,7 @@ exit: 0
                   "expected": 4,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -620,7 +620,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -687,7 +687,7 @@ exit: 0
               "line": 5,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -702,7 +702,7 @@ exit: 0
                   "expected": 5,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -718,7 +718,7 @@ exit: 0
                   "expected": false,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_seen",
                     "kind": "fact"
                   },
@@ -758,7 +758,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -782,7 +782,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_seen",
                     "kind": "fact"
                   },
@@ -806,7 +806,7 @@ exit: 0
                 "payload": {
                   "scene": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_of_the_fen",
                     "kind": "scene"
                   },
@@ -830,7 +830,7 @@ exit: 0
                   "outcome": "acknowledged",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },
@@ -894,7 +894,7 @@ exit: 0
                   "op": "resource.adjust",
                   "resource": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "mv",
                     "kind": "resource"
                   },
@@ -905,7 +905,7 @@ exit: 0
                   "expected": "standing",
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "position",
                     "kind": "fact"
                   },
@@ -921,7 +921,7 @@ exit: 0
                   "expected": false,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "slept_at_lantern",
                     "kind": "fact"
                   },
@@ -938,7 +938,7 @@ exit: 0
                   "op": "quest.activate",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },
@@ -952,7 +952,7 @@ exit: 0
                   "expected": 0,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -977,7 +977,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "position",
                     "kind": "fact"
                   },
@@ -1000,7 +1000,7 @@ exit: 0
                 "logical_time": 0,
                 "payload": {
                   "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
-                  "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                  "room_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                   "type": "rested"
                 },
                 "position": 2,
@@ -1018,7 +1018,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "slept_at_lantern",
                     "kind": "fact"
                   },
@@ -1043,7 +1043,7 @@ exit: 0
                   "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },
@@ -1064,7 +1064,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1108,7 +1108,7 @@ exit: 0
               "line": 1,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -1123,7 +1123,7 @@ exit: 0
                   "expected": 1,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1148,7 +1148,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1197,7 +1197,7 @@ exit: 0
               "line": 2,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -1212,7 +1212,7 @@ exit: 0
                   "expected": 2,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1237,7 +1237,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1286,7 +1286,7 @@ exit: 0
               "line": 3,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -1301,7 +1301,7 @@ exit: 0
                   "expected": 3,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1329,13 +1329,13 @@ exit: 0
                       "role": "body"
                     },
                     {
-                      "entity_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                      "entity_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                       "role": "anchor"
                     }
                   ],
                   "source": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_of_the_fen",
                     "kind": "scene"
                   },
@@ -1354,7 +1354,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1423,10 +1423,10 @@ exit: 0
                 "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
                 "expected_revision": 6,
                 "line": 4,
-                "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                "room_id": "19785203-d373-8973-8e64-1a9d8e50be82",
                 "scene": {
                   "cartridge_id": "ashmere_missing_child",
-                  "cartridge_version": "0.0.26",
+                  "cartridge_version": "0.0.28",
                   "key": "dream_of_the_fen",
                   "kind": "scene"
                 }
@@ -1449,7 +1449,7 @@ exit: 0
                   "expected": 4,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1474,7 +1474,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1541,7 +1541,7 @@ exit: 0
               "line": 5,
               "scene": {
                 "cartridge_id": "ashmere_missing_child",
-                "cartridge_version": "0.0.26",
+                "cartridge_version": "0.0.28",
                 "key": "dream_of_the_fen",
                 "kind": "scene"
               },
@@ -1556,7 +1556,7 @@ exit: 0
                   "expected": 5,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1572,7 +1572,7 @@ exit: 0
                   "expected": false,
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_seen",
                     "kind": "fact"
                   },
@@ -1612,7 +1612,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "scene_dream_of_the_fen",
                     "kind": "fact"
                   },
@@ -1636,7 +1636,7 @@ exit: 0
                 "payload": {
                   "fact": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_seen",
                     "kind": "fact"
                   },
@@ -1660,7 +1660,7 @@ exit: 0
                 "payload": {
                   "scene": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "dream_of_the_fen",
                     "kind": "scene"
                   },
@@ -1684,7 +1684,7 @@ exit: 0
                   "outcome": "acknowledged",
                   "quest": {
                     "cartridge_id": "ashmere_missing_child",
-                    "cartridge_version": "0.0.26",
+                    "cartridge_version": "0.0.28",
                     "key": "a_room_at_the_lantern",
                     "kind": "quest"
                   },

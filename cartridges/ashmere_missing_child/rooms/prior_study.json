@@ -1,0 +1,9 @@
+{
+  "title": "room.prior_study.title",
+  "description": "room.prior_study.description",
+  "exits": {
+    "east": {
+      "to": "chapel_nave"
+    }
+  }
+}

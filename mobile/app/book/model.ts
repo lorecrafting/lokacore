@@ -10,6 +10,8 @@ import type {
 import type { Button } from './presenter.ts';
 import { serviceButtons, shopButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
+import { things } from './item-pages.ts';
+export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
@@ -37,13 +39,6 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
-
-export const things = (v: GameView): Thing[] =>
-  [
-    ...v.entities,
-    ...v.inventory,
-    ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
-  ].flatMap((e) => [e, ...(e.contents ?? [])]);
 
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
@@ -231,7 +226,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });

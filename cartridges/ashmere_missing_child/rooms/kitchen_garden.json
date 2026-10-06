@@ -1,0 +1,9 @@
+{
+  "title": "room.kitchen_garden.title",
+  "description": "room.kitchen_garden.description",
+  "exits": {
+    "east": {
+      "to": "scriptorium"
+    }
+  }
+}

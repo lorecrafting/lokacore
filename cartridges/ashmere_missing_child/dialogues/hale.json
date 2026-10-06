@@ -1,0 +1,23 @@
+{
+  "prompt": "dialogue.hale.prompt",
+  "choices": {
+    "leave": {
+      "label": "dialogue.hale.leave",
+      "narration": "dialogue.hale.prompt"
+    }
+  },
+  "npc": "hale",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "roles": {
+    "hale": {
+      "role": "npc",
+      "npc": "hale"
+    }
+  }
+}

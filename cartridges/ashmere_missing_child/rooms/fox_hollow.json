@@ -2,11 +2,21 @@
   "title": "room.fox_hollow.title",
   "description": "room.fox_hollow.description",
   "exits": {
-    "north": { "to": "mire_crossing" }
+    "north": {
+      "to": "mire_crossing"
+    },
+    "west": {
+      "to": "black_pool"
+    },
+    "down": {
+      "to": "fox_den_deep"
+    }
   },
   "details": {
     "hollow": {
-      "aliases": ["hollow"],
+      "aliases": [
+        "hollow"
+      ],
       "description": "detail.hollow.description",
       "readable": {
         "label": "actions.read_hollow",

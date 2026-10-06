@@ -1,4 +1,4 @@
 command: mise exec -- node docs/evidence/2026-10-05-b9-lantern-dream/pins.mjs
 exit: 0
-Provisional candidate v026/API1.24: 1f4ab337de228080fd3f95fca6493a7525b7bc0b1f5c4212e4eee6d750fde0bc; complete compiler bytes and all 111 independent initial IDs match.
-Published B8 predecessor 594b8ae1; D2/C3 integration order and final successor pins remain conditional. Publication null.
+Integrated successor v028/API1.25: 424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e; complete compiler bytes and all 127 independent initial IDs match.
+Published D5/D2 predecessor 4bcb2eaf; B9 publication null.

@@ -59,7 +59,7 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
         if (index === 4)
           assert.equal(
             a.story.narration()!.detail_id,
-            'dream:7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0',
+            'dream:41f5d4b9-8494-82cd-b350-2650f8a9efd4',
           );
       }
       assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 0);

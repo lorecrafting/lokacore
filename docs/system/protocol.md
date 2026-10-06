@@ -880,6 +880,34 @@ narration binds actual runtime IDs and committed room/membership changes. Stale 
 cancelled round occurrences never move, hit, draw or revive membership. No new
 per-hound job, whole-state copy, receipt ledger or actor assumption is introduced.
 
+## D1 ferry transport composition
+
+The Boathouse and Fen Isle Landing boarding details offer exact keyed outbound
+and return actions. A bound transport invocation carries actor, endpoint detail,
+authored route reference and displayed base fare; the authority derives the
+destination and recipient. GameView and direct execution share one
+admission query after ordinary elapsed, scene, combat, posture, life and freshness
+checks. The query checks current endpoint room, authored route, Sedge's exact
+recipient identity and balance, and the owned-corpse recovery exception. A
+captured offer cannot substitute another endpoint or quote.
+
+Transport lowers positive payment through B3's existing conserved two-party
+resource transfer, then transfers the body and any eligible Wren through the
+existing movement/escort consequence in one proposal/writer group. The outbound
+base quote remains 2p when an owned-corpse waiver makes the charge zero.
+Zero-fare crossings omit payment operations. Emit the normal accepted room-entry evidence
+for the body; do not call Move as a second command, add a clock jump, or credit
+Q2 return merely for crossing. A new narrow transport command/action/offer and
+receipt owner is allowed because published B8 `service@1` is bound to a present
+NPC and entitlement/meal/drink benefits. Do not widen that closed union into a
+generic effect interpreter. The exact command key, source-authored action keys,
+target order and input are frozen by the D1 source brief before implementation.
+
+Sedge's lesson stays a C1 dialogue Choose consequence with typed
+`skill.acquire`; it is not a transport benefit or remote grant. Existing
+reserved skill facts, dialogue binding, service/payment histories and movement
+admission keep their separate writers.
+
 ## B8 immediate service composition
 
 **Implemented locally, publication pending.** A service invocation binds actor, exact
@@ -920,13 +948,16 @@ local projection emits ordinary targetless Rest and never changes raw Rest admis
 
 ## D2 held-readable composition
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
+[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
 existing Read targeting to authored readable items, retaining exact actor, item ID,
 pinned definition and ActionSet resolution. Shared held-reach admission governs
 item/contents offers and raw commands. Expose the authored Read label on each
 eligible item detail; closed ancestors hide unreachable contents and leave no raw
 ID bypass. Use current Item/ContentView and offered-action shapes where sufficient;
 add only consumed readable metadata, never a generic document hierarchy.
+The item-readable extension requires API1.24 and `readable@1`; its optional
+`topic` requires `topics@1`. Item Read offers retain the resolved command while
+preserving the authored action key.
 
 Topic grants lower to the B6 Boolean owner; no new portable delta, event writer,
 reading cursor or continuation is needed. Accepted receipt binds the exact Read
@@ -988,5 +1019,36 @@ is mandatory only for scene-owned choices and must match the saved occurrence.
 The real bed's optional `DreamView` carries current saved text, safe availability,
 selected branch and exact Continue/choice offers. These controls preserve action
 keys and captured inputs; scene-owned choices never enter ordinary dialogue
-pending selection. This consumed subset requires API1.24; bundled release/hash/ID
-answers remain conditional on the actual integration order with parallel work.
+pending selection. This consumed subset requires API1.25; current integrated release/
+hash/ID answers are recorded in the [B9 evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
+Publication remains pending the normal gates.
+## D4 held-food composition
+
+**Selected plan; not an installed schema.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
+accepted outcome `eaten {item_id: EntityId}` and immutable optional item metadata
+`edible {resource: DefinitionRef(resource), amount: positive safe integer,
+label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
+exact directly held edible item with no input. Its GameView inventory action
+uses the same pure keyed admission query as execution. Harvest remains the
+installed containment invocation; only its orchard label says Forage.
+
+Food reads actual custody, life, settled recovery/headroom and immutable metadata,
+then lowers one ordinary conserved `entity.transfer` plus `resource.adjust` in
+one writer group. No new event, fact, food-count row, mint, removal operation or
+service benefit alternative is required. Add generated known-entity kind
+`consumed` and one immutable food-enabled-world holder mapping, appended after
+slot holders in fresh allocation. The terminal transfer guard must reject escape,
+nonfood entry and foreign-source entry; food is the sole new admission owner.
+Containment, carry and reach account for this terminal holder explicitly rather
+than treating it as a room/body/container. Derive consumed status from custody.
+Eat's accepted reply supplies its exact command ID for existing narration
+recovery despite having no event. Its receipt-derived narration record is a
+World result with no detail ID; live result routing must not fall back to the
+submitted apple page after that identity leaves the projected inventory.
+
+Keep shared query budget, structural sharing, exact replay and whole-proposal
+rollback. Compiler/loader, ActionSet/verb, outcome/generated contracts, world/save
+projection and both generic delta validators must agree on this consumed subset.
+No frozen fixture is rewritten; add independent literal terminal-transfer cases
+and applicable two-kernel differential cases if the foundation changes.

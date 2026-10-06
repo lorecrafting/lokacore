@@ -8,11 +8,11 @@ defmodule Loka.ContentDreamsTest do
   } do
     assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
     c = JSON.decode!(bytes)["cartridge"]
-    s = c["scenes"]["ashmere_missing_child@0.0.26:scene/dream_of_the_fen"]
+    s = c["scenes"]["ashmere_missing_child@0.0.28:scene/dream_of_the_fen"]
 
     assert s["on"]["rest"]["room"] == %{
              "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.26",
+             "cartridge_version" => "0.0.28",
              "kind" => "room",
              "key" => "inn_rooms"
            }
@@ -21,7 +21,7 @@ defmodule Loka.ContentDreamsTest do
              %{
                "fact" => %{
                  "cartridge_id" => "ashmere_missing_child",
-                 "cartridge_version" => "0.0.26",
+                 "cartridge_version" => "0.0.28",
                  "kind" => "fact",
                  "key" => "dream_seen"
                },
@@ -30,7 +30,7 @@ defmodule Loka.ContentDreamsTest do
            ]
 
     changes = [
-      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.23")},
+      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.24")},
       {"cartridge.json",
        &update_in(&1, ["requires", "capabilities"], fn x -> Map.delete(x, "death") end)},
       {"scenes/dream_of_the_fen.json", &put_in(&1, ["on", "rest", "room"], "village_green")},

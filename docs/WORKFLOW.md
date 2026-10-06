@@ -134,6 +134,56 @@ Report at the end of the slice, not at every step.
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
+### Review knowledge trail
+
+At each reviewed merge, retain the finding, fix disposition and exact source head
+in the review record. Link a lasting interaction rule from its owning active spec
+(including [Book UI](system/book-ui.md)), a recurring implementation hazard from
+the relevant [area lesson](../AGENTS.md#hard-won-lessons), and an enforceable
+invariant from its red-controlled check. Link unfinished work back to the finding
+from the roadmap or adopted task tracker. The review record stays the evidence;
+other records state only the reusable rule or next action, avoiding copied findings
+and speculative generalizations ([owner decision](decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+
+### Beads Rust pilot
+
+The [owner-approved pilot](decisions/owner-decision-beads-rust-pilot-2026-10-06.md)
+tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`. The PM, whether using
+Codex or Claude Code, owns tracker writes; builders and reviewers report through
+the usual brief and review record. `docs/ROADMAP.md` remains the published status
+and completion count, briefs own scope, reviews own findings, and this workflow
+owns merge gates. Beads holds short current status, links and dependencies only.
+
+Install `br` (pilot version 0.7.4) with
+`brew tap dicklesworthstone/tap && brew install dicklesworthstone/tap/br`,
+then use `br ready --brief --json`,
+`br show <id> --json` and `br blocked --json`. Install the optional viewer with
+`brew install dicklesworthstone/tap/bv`; run `bv` from a checkout with current
+`.beads` data, then press `b` for the board or `g` for the dependency graph.
+`bv` views the data on that checkout's branch, so use the main integration
+checkout for the latest merged status. From another checkout, set
+`LOKA_INTEGRATION_CHECKOUT` to the main integration checkout directory and run
+`bv --db "$LOKA_INTEGRATION_CHECKOUT/.beads"`. This is read-only; it does not
+change the branch or move tracker data. Agents can add `--robot-triage`; human
+readers can use
+the interactive board and graph. `br` mutates local
+SQLite and exports Git-tracked JSONL; after a pull use `br sync --import-only`,
+and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
+and verify it contains no local machine path; the installed release writes
+`source_repo_path` on creation, so clear it with
+`br update <id> --source-repo lokacore --source-repo-path ''` before committing.
+Avoid `-wisp-` in an issue ID: Beads Rust reserves it for ephemeral records,
+even when the task itself is durable.
+The [export check](CHECKS.md) rejects path, ID and completeness errors in the
+staged commit and CI.
+Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
+Do not install Beads hooks or let the tracker rewrite `AGENTS.md`.
+
+At the next two source merges, check whether ready/blocked work and Claude/Codex
+handoff remain accurate without duplicating the roadmap. Retire the pilot through
+a reviewed change if it does not help; the existing Git plans and reviews survive.
+No source merge or CI gate depends on `br` during the pilot.
+
 ## Local edit loop
 
 ### Local draft-PR cadence

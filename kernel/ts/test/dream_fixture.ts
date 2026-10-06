@@ -14,15 +14,15 @@ import {
   type Cartridge,
 } from '../src/index.ts';
 import type { Command, DefinitionRef, Key } from '../src/contracts.gen.ts';
-export const prefix = 'ashmere_missing_child@0.0.26';
+export const prefix = 'ashmere_missing_child@0.0.28';
 export const ref = (kind: string, key: string): DefinitionRef => ({
   cartridge_id: 'ashmere_missing_child' as never,
-  cartridge_version: '0.0.26' as never,
+  cartridge_version: '0.0.28' as never,
   kind,
   key: key as never,
 });
 export function bundle(change: (c: any) => void = () => {}) {
-  const c = structuredClone(read('protocol/fixtures/missing_child_b9_hash.json').value);
+  const c = structuredClone(read('protocol/fixtures/missing_child_v028_hash.json').value);
   c.entry.key = 'drowned_lantern';
   c.calendar.start = 0;
   c.resources[`${prefix}:resource/mv`].start = 51;

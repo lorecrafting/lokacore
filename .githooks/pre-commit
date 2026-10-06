@@ -12,3 +12,4 @@ js=$(printf '%s\n' "$staged" | grep -E '\.(ts|tsx|mjs|js|json)$' || true)
 [ -z "$js" ] || mise exec -- node_modules/.bin/prettier --check $js || { echo "run: npm ci; npx prettier --write <files>"; exit 1; }
 [ -z "$staged" ] || mise exec -- ast-grep scan --error $staged
 if git -c core.quotePath=false diff --cached --name-only | grep -q '\.md$'; then mise exec -- elixir bin/check_docs.exs; fi
+if printf '%s\n' "$staged" | grep -qx '.beads/issues.jsonl'; then python3 bin/check_beads_export.py --staged; fi

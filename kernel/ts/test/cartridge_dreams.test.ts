@@ -14,7 +14,7 @@ test('loader refuses impossible Rest, graph and exclusive end bindings', () => {
   assert.equal(load().ok, true);
   const scene = (c: any) => c.scenes[`${prefix}:scene/dream_of_the_fen`];
   for (const [name, change] of [
-    ['old API', (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23')],
+    ['old API', (c: any) => (c.manifest.requires.kernel_api.at_least = '1.24')],
     [
       'missing dependency',
       (c: any) => {

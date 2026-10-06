@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { redact } from '../../../kernel/ts/play/obs.ts';
 import { INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
 const read = (name) => JSON.parse(readFileSync(`protocol/fixtures/${name}.json`, 'utf8'));
-const pin = read('missing_child_b9_hash'), answers = read('missing_child_b9_ids');
+const pin = read('missing_child_v028_hash'), answers = read('missing_child_v028_ids');
 const dir = mkdtempSync(join(tmpdir(), 'loka-b9-pins-'));
 try {
   const path = join(dir, 'artifact.json');
@@ -18,7 +18,7 @@ try {
   const loaded = loadCartridge(new TextEncoder().encode(bytes), INSTALLED);
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const w = newWorld(loaded.cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f', [1, 2, 3, 4]);
-  const prefix = 'ashmere_missing_child@0.0.26';
+  const prefix = 'ashmere_missing_child@0.0.28';
   for (const [label, expected] of Object.entries(answers)) {
     const [kind, name, detail] = label.split('/');
     const actual = kind === 'character' ? w.character : kind === 'body' ? w.body :
@@ -28,7 +28,7 @@ try {
       kind === 'job' ? Object.entries(w.state.jobs ?? {}).find(([, j]) => j.job.key === name)?.[0] : w.entityIds[`${prefix}:${kind}/${name}`];
     assert.equal(actual, expected, label);
   }
-  assert.equal(Object.keys(answers).length, 111);
-  console.log(redact(`Provisional candidate v026/API1.24: ${pin.sha256}; complete compiler bytes and all 111 independent initial IDs match.`));
-  console.log('Published B8 predecessor 594b8ae1; D2/C3 integration order and final successor pins remain conditional. Publication null.');
+  assert.equal(Object.keys(answers).length, 127);
+  console.log(redact(`Integrated successor v028/API1.25: ${pin.sha256}; complete compiler bytes and all 127 independent initial IDs match.`));
+  console.log('Published D5/D2 predecessor 4bcb2eaf; B9 publication null.');
 } finally { rmSync(dir, { recursive: true }); }

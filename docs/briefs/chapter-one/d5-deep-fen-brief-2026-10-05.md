@@ -1,43 +1,127 @@
 # D5 — Oak canopy, pool edge, deep fox den and shallows
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+> **Adopted planning:** [PM decision](../../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
+> The adopted plan is approved. [Local source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
+> records implementation, final pins and independent approval; source publication and browser proof remain ahead.
 
-Proposed branch: `chapter1/d5-deep-fen`.
+Proposed source branch: `chapter1/d5-deep-fen` (not created by this planning task).
 
-## Goal, dependencies and governing clauses
+## Goal and governing clauses
 
-Add `oak_branches`, `oak_crown`, `black_pool`, `fox_den_deep`, `fishing_shallows`. Re-pin B4 light/recovery, B6 marsh/causeway, reviewed Q2 returns and their unique message/escort guards; D2 topics only if reused deliberately. Governors: archived00a §§2/5/8/11, active movement/sight (adjacent only), containment/protected Give, description/readable, Book pages, owner no-wait and real chapter source contracts.
+Explore five optional rooms using existing reciprocal movement, ordinary details
+and Read. Governing clauses:
+[D5 mechanics](../../system/mechanics.md#d5-dry-deep-fen-exploration-selected-contract),
+[route/detail authoring](../../system/cartridge.md#d5-deep-fen-route-and-details),
+[Book](../../system/book-ui.md#d5-deep-fen-detail-pages),
+[save](../../system/save.md#d5-route-and-read-recovery).
+The adoption reconciles archived00a §§2/5/8/11 before source work.
 
-## PM content selection and composition
+## Revalidated dependencies and false provisional premises
 
-Drowned Oak u↔branches d; branches u↔crown d; Oak s↔pool n; pool e↔Hollow w, s↔shallows n; Hollow d↔den u. Pool d↔pool bottom waits for D6. This adds dry/edge terrain only: Black Pool and shallows do **not** quietly require swim or expose underwater chest contents. Existing plank and every legal Wren return/rejoin route remain usable at all hours.
+Inspected published main is `c2cf8938a30a65335edc6e5c139c65c61e5105d5`, chapter `ashmere_missing_child@0.0.25`,
+minimum API1.23. Current independent hash is
+`c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a`,
+allocation oracle has 111 IDs (`protocol/fixtures/missing_child_v025_{hash,ids}.json`).
+This was the planning dependency baseline. [Source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
+owns the integrated successor pins, independent source review and controlled proof.
 
-The fox den contains a ward-stone inscription as an ordinary readable detail, not a second `vesper_message` entity. Its prose acknowledges the hollow's original message custody/selected return branch. Read/Examine adds no Q2 credit, topic, relationship or alternate turn-in. Bell/ward knowledge comes from already declared consumers unless PM explicitly selects a typed deliberate grant here. Wren/Vesper retain original actual locations and schedules; there is no archived day-only Vesper relocation.
+| Installed slice / publication | Source revalidation |
+|---|---|
+| B4 real torch/oil and dark-well recovery, [#206](https://github.com/lorecrafting/lokacore/pull/206), merge `b268658f` | `light/shared.ts:77` derives darkness from `dark_description`; `:85` reveals actual owned corpse ancestry, not ordinary Wren. No D5 darkness exception is available. |
+| B6 all-hours Wisp/ward and causeway, [#210](https://github.com/lorecrafting/lokacore/pull/210), merge `c9121345` | Actual room JSON has Mire east↔Marsh west, Marsh south↔Causeway north and Causeway east↔Tide west. Preserve those edges and the narrow glow; no far sight or tide gate exists. |
+| Q2 stays unique message, [#189](https://github.com/lorecrafting/lokacore/pull/189), merge `64b611dd` | `items/vesper_message.json` starts the single protected 20g item inside original Vesper. `dialogues/a_elspeth_return.json` binds its custody and exact stays branch. It is not an ordinary readable item. |
+| Q2 rescue and actual Rejoin, [#190](https://github.com/lorecrafting/lokacore/pull/190), merge `05b0cb6f` | `escort/shared.ts:122` transfers following Wren on movement; `:143` leaves him in the death room. `dialogues/b_wren_rejoin.json` requires the original separated relation and active rescue branch. Wren/Vesper start in Fox Hollow with no relocation schedule. |
+| Current B8 release, [#215](https://github.com/lorecrafting/lokacore/pull/215), merge `594b8ae1` | Manifest, independent v025 hash and 111-ID oracle agree on current bundled source. |
 
-Canopy/spire flavor can describe the landscape without a working far Scan claim. Use current adjacent-sight output only. Keep next-day water item drift deferred; a dropped item uses ordinary custody at its actual present location. Crow nest gameplay is reserved for D8; describe branches/droppings without creating an unavailable holder or fake scavenge action. Underwater coin/ring/chest belongs to D6, not a visible shallow duplicate.
+Kernel pointers above are under `kernel/ts/src/mechanics/`; JSON paths under
+`cartridges/ashmere_missing_child/`. Ordinary `readable/rule.ts:6` accepts an
+in-room readable detail; `:14` returns authored narration without semantic ops.
+Fox Hollow's existing `hollow` detail is the exact source shape to reuse.
+D2 held-topic books are selected but unimplemented on this baseline; D5 does
+not depend on them. The provisional dark-den recovery claim and branch-aware
+stone prose are replaced by naturally lit den and fixed inscription. Readable
+item/message duplication, far Scan, forced waiting and archived Vesper relocation
+are not installed capabilities to reuse.
 
-## Source scope
+## Minimal source scope and composition
 
-Five room files plus reciprocals on Oak/Hollow, exact descriptive/readable details, text and current release pin/bundle/oracle. Reuse existing description_variant/readable source formats and B4 tags. No protocol, water, topic, AI or scene framework should be required. Out: far Scan, tide closures, unique-message duplicate, fish population/fishing skill, item drift, new Wren/Vesper instance, bottom-room placeholder exit and dark-sight implementation.
+Five new room files, reciprocal Oak/Hollow additions, their text and existing
+release/bundle/hash/allocation updates. The active cartridge route table owns
+exact edges and aliases. All five rooms remain naturally lit at all hours;
+pool/shallows describe dry footing. The fixed stone has ordinary no-credit Read.
+No new item, fact, topic, writer, schedule, protocol, water, scene or AI framework.
+Reuse movement→escort transfer; death→separation; dialogue→original Rejoin;
+readable→narration receipt. Authority keeps commit-before-adopt and changed rows.
+No whole-state copy or new timed job. Cartridge keeps the existing movement cost.
+Out: bottom access before D6, underwater loot, fishing, crow nest before D8,
+next-day drift, far Scan, conditional stone text and new message or cast instance.
 
-## Acceptance, mutants and UI/save proof
+## Acceptance and realistic mutation proof
 
-Walk the two canopy levels, pool loop/Hollow/den and shallows from an actual fresh chapter route and back. Every active edge resolves and has its reciprocal; no bottom exit/action exists before D6. Reading ward stone produces only its authored detail narration. Before message selection, while original message is held, after its recovery and after stays/rescued/lost, the **single** original message and Q2 evidence remain unchanged by these rooms. A player cannot manufacture a second message or get false rescue credit by visiting the den. Deeper dry route remains a legal reciprocal Rejoin path for the original separated Wren after actual death.
+From fresh Ferry Landing walk south Reed Path → south Reed Bank → south Mire
+Crossing → west Drowned Oak. Walk up Branches → up Crown → down Branches → down
+Oak. Walk south Pool → east Hollow → down Den → up Hollow → west Pool → south
+Shallows → north Pool → north Oak → east Mire. Every edge resolves and has its
+literal reciprocal. No Pool down exit/action or bottom placeholder exists.
+Ordinary Scan describes adjacent sight only; no Wisp at distant Crown is claimed.
 
-Plant missing pool↔Hollow edge or false bottom access; a duplicated message source must be caught by the actual custody/turn-in consumer check, not only item counts. Preserve closed/nested/unique-message admission and current save receipt guards. Dark den corpse recovery must be real under B4; retain forced overload and zero-gear proof.
+Open the stone's exact detail, receive its fixed confirmed Read narration and
+return locally to World. Before branch selection, while the original message is
+held, after corpse recovery and after stays/rescued/lost, Read/Examine changes no
+Q2 facts, custody, branch, topic or return evidence. Use the existing custody
+consumer with controlled states; counts alone do not prove unique identity.
+Preserve the closed/nested/protected-message admission checks and actual Elspeth
+turn-in. A ground/nested copy cannot substitute for the bound original.
 
-Browser: traverse vertical canopy and dry pool loop, open every noun/inscription and return, exercise actual Wren Rejoin through the loop, confirm no misleading underwater/far Scan control; refresh in den and canopy. Real SQLite opens every new location and Read receipt under the new source pin. Stop if the archived prose requires unavailable far perception, duplicates the already-bound letter or implies impassable swim/tide on the mandatory route.
+For actual Wren recovery, select rescue through existing Q2, escort the original
+Wren via Hollow → west Pool → east Hollow → down Den, then induce real fatal
+player death through the existing controlled host fault/combat harness without
+adding a chapter enemy. Assert the same Wren remains in Den with status separated.
+Cold reopen at that intermediate. With zero light/gear, walk from Chapel Nave:
+south Steps → south North Gate → south Green → south Well Lane → south Ferry
+Landing → south Reed Path → south Reed Bank → south Mire → south Hollow → down
+Den. Talk/Rejoin must be projected and accepted for the same Wren, then walk up
+Hollow → north Mire and the inverse shrine route through Green as travel only; turn in at Elspeth's
+installed Ferry Landing residence.
+Assert rescued only after the actual eligible turn-in; reaching Den grants none.
+Recover the actual corpse through ordinary Take, respecting load/locked contents;
+forced overload never becomes a recovery bypass.
 
-## Shared delivery and proof contract
+Candidate mutants: omit Pool↔Hollow edge; add false bottom access; add den dark
+metadata; let Read grant a topic/Q2 fact; duplicate/substitute the original
+message. First apply each to existing focused tests in the same layer. Add only
+missing distinct regression coverage, with literal expected route/identity and
+outcome independent of implementation. Actually observe each applicable mutant
+red, restore and observe green. No source-text or registry-count assertions.
 
-This is a **provisional, source-unbuilt PM recommendation**, not a specification amendment, source GO, review approval or completed check. Parent PM must adopt its policy and re-pin the actual merged prerequisites before assigning source work. Initial inspected baseline was clean PM `0fbd2847`/chapter v011/API1.10. Revalidated during final planning: clean PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` records PR190 merged as `05b0cb6f`, chapter `ashmere_missing_child@0.0.12`/API1.11 with the typed escort/fatal-separation/return contract. This is a provisional baseline only; each future A–D prerequisite still needs its own exact merged-source re-pin. Target main/source SHA, release/API version, content hash, allocation oracle and PR number are **null** until that source exists. The branch below is proposed, not created.
+## Save, Book and delivery proof
 
-Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
+Use existing real-SQLite tests for every new legal current-room intermediate,
+stone Read receipt and fatal separated-Wren location. Exercise genuinely failed
+COMMIT, uncertain committed/absent branches, lost acknowledgement and exact replay
+for changed movement/Read paths. Preserve typed refusal of unavailable source
+pins and malformed existing custody/escort evidence; no new schema/corruption
+machinery is warranted unless implementation changes that scope.
 
-For each new test name the distinct realistic break, use literal expected values independent of the code, and reuse an existing test if it already kills that mutant. Actually plant the named mutation, observe red, restore and observe green. No source-text or registry-count tests. New state must pass real SQLite cold reopen at **every legal committed intermediate**, genuinely failed COMMIT, uncertain COMMIT in both committed and absent branches, lost acknowledgement and same-invocation replay; malformed new rows/evidence must yield typed `save_corrupt` with in-place Start over, never an untyped exception or repair. Memory adopts only confirmed changed rows plus receipt, preserving structural sharing.
+Later isolated browser proof traverses canopy/loop/den/shallows, opens the stone
+and refreshes in Den/Crown; confirm exact receipt history, ordinary original-Wren
+Rejoin and no unavailable bottom/far/fishing/nest controls. Browser proof remains
+distinct from controlled host fatality and real SQLite proof. The
+[web-first workflow](../../WORKFLOW.md#local-edit-loop) defers mobile/device work.
+This planning task starts no preview and touches no owner save.
 
-Use `mise exec --` and the existing focused kernel/host/Book/compiler harnesses; finish with the normal `bin/check_all.sh`/pre-push gate once and exact-head shared CI, retaining the headless TypeScript `sim` engine checks. Browser Book interaction and refresh/persistence are distinct from Node/real-SQLite host proof. Browser-first iteration is the owner's newer direction in the complete map; publish that workflow routing before source work. Native Android/iOS build, Hermes/device lifecycle and physical harness rows remain deferred to prelaunch tightening. Do not start previews/devices or touch owner saves during this planning task; later browser proof uses an isolated run once authorized.
+Follow `AGENTS.md`, `docs/WORKFLOW.md` and the composition record. Read relevant
+mechanics/storage/contracts/mobile/evidence lessons before touching those source
+surfaces. Use `mise exec --`, existing focused kernel/host/Book/compiler harnesses,
+and normal `bin/check_all.sh`/pre-push once with exact-head CI at source delivery.
+Preserve frozen fixtures and independently derive successor hash/IDs. Stop for
+new protocol/schema/visibility machinery, frozen-fixture/spec conflict, failed
+gear-free Rejoin, dark-den requirement, owner-save/destructive work or scope beyond
+one complete player outcome. Developer self-reviews correctness and Ponytail;
+a fresh reviewer applies the workflow's extra-review triggers if scope changes.
 
-Developer self-reviews correctness and runs Ponytail Review before handoff. Each source PR needs a fresh primary reviewer; add the workflow's independent save/protocol opinion when those contracts change, and Astra for proposal/foundation changes. Fixes return to the same developer/reviewer. PM verifies all started checks on the exact final head, merges a record-bearing PR with a merge commit, updates ROADMAP status only, and preserves the Claude/Codex handoff. Scope growth past one reviewable complete player outcome, a frozen-fixture conflict, owner-save/destructive work, paid services, weakened recovery/no-wait rules, or a new architecture/spec conflict returns to PM before implementation.
-
-Planning audit: Ponytail review found no new framework or dependency needed; each added semantic surface has the named first consumer above. Correctness review retained exact identity, no-wait, actual route, safe corpse recovery and new-shape save/admission proof. These are design checks only; **no implementation tests, mutations, browser/native proof or independent source approval were run or claimed by this planning task**.
+Planning self-review removed the false dark-NPC recovery assumption and optional
+branch-aware prose, and corrected B6's stale D2/D5 grant attribution to link
+D2's real Ward grant and D5's descriptive stone. No framework/dependency or broad future proof scaffolding is
+needed. Only documentation/diff checks were run for planning; no implementation,
+mutation, browser/native proof or independent approval is claimed.

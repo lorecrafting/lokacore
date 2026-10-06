@@ -10,6 +10,9 @@
     },
     "north": {
       "to": "cloister"
+    },
+    "west": {
+      "to": "prior_study"
     }
   },
   "sanctuary": true

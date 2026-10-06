@@ -143,8 +143,8 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   ui.tap('Bed');
   ui.tap('Rest');
   assert.deepEqual(ui.stack(), [
-    { kind: 'notice', id: '7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0' },
-    { kind: 'dream', id: '7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0' },
+    { kind: 'notice', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
+    { kind: 'dream', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
   ]);
   assert.ok(ui.text().includes('The Fen Dream'));
   assert.ok(
@@ -241,8 +241,8 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   cold.draw();
   assert.equal(a.game.pending(), false);
   assert.deepEqual(cold.stack(), [
-    { kind: 'notice', id: '7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0' },
-    { kind: 'dream', id: '7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0' },
+    { kind: 'notice', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
+    { kind: 'dream', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
   ]);
   assert.equal(receipts(a.sql), 3);
   assert.ok(cold.text().includes('The Fen Dream'));

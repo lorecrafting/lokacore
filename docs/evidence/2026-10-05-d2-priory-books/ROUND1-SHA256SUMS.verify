@@ -1,0 +1,11 @@
+round-1-book-red.log: OK
+round-1-capture.py: OK
+round-1-compiler.log: OK
+round-1-focused.log: OK
+round-1-full.log: OK
+round-1-integrated-focused.log: OK
+round-1-mobile-full.log: OK
+round-1-pins.log: OK
+round-1-restored.log: OK
+round-1-save-red.log: OK
+round-1-tsc.log: OK

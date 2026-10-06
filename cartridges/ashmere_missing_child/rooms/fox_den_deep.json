@@ -1,0 +1,24 @@
+{
+  "title": "room.fox_den_deep.title",
+  "description": "room.fox_den_deep.description",
+  "exits": {
+    "up": {
+      "to": "fox_hollow"
+    }
+  },
+  "details": {
+    "ward_stone": {
+      "aliases": [
+        "stone",
+        "ward",
+        "ward_stone"
+      ],
+      "description": "detail.ward_stone.description",
+      "readable": {
+        "label": "actions.read_ward_stone",
+        "text": "readable.ward_stone",
+        "title": "detail.ward_stone.title"
+      }
+    }
+  }
+}

@@ -13,7 +13,7 @@ original={f:(root/f).read_text() for f in files}
 current={f:json.loads(v) for f,v in original.items()}
 old={}
 for f in files:
- prior=subprocess.run(['git','show','594b8ae1:'+f],cwd=root,capture_output=True,text=True)
+ prior=subprocess.run(['git','show','4bcb2eaf:'+f],cwd=root,capture_output=True,text=True)
  old[f]=json.loads(prior.stdout) if prior.returncode==0 else {}
 targets=[]
 keys={'minimum','maximum','minItems','maxItems','const','enum','pattern','minLength','maxLength','additionalProperties'}
