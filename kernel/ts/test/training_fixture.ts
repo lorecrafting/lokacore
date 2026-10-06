@@ -146,7 +146,7 @@ export function productionBundle() {
   if (!process.env.C1_ARTIFACT) {
     const fixture = JSON.parse(
       readFileSync(
-        new URL('../../../protocol/fixtures/missing_child_v020_hash.json', import.meta.url),
+        new URL('../../../protocol/fixtures/missing_child_v021_hash.json', import.meta.url),
         'utf8',
       ),
     );

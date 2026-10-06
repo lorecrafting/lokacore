@@ -28,6 +28,11 @@ test('Book binds the exact oil bottle and keeps worn torch controls on the item'
   );
   const on = group(buttons as never).on(torch);
   assert.deepEqual(on.find((b) => b.action_key === 'refuel')?.target_ids, [torch, oil]);
+  assert.ok(
+    !group(buttons as never)
+      .on(oil)
+      .some((b) => b.action_key === 'refuel'),
+  );
   assert.equal(
     on.find((b) => b.action_key === 'refuel')?.label,
     'Refuel a torch from a flask of lamp oil',

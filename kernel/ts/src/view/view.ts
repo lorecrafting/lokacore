@@ -1,3 +1,6 @@
+// size: allow 335, shared fuel and equipment projections retain existing view shape
+import { KernelError } from '../foundation/error.ts';
+import { LIMITS } from '../contracts.gen.ts';
 import { visible, fuelView } from '../mechanics/light/shared.ts';
 import { skillViews } from './skills.ts';
 import { noticeViews } from './notice_boards.ts';
@@ -21,7 +24,7 @@ import type {
 } from '../contracts.gen.ts';
 import { lists } from './action_lists.ts';
 import { refusal, resolved } from '../commands/actions.ts';
-import { COMPASS, refString, type Entity, type World } from '../runtime/decision.ts';
+import { COMPASS, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened, questOf } from '../mechanics/lookups.ts';
 import { choiceView, definition } from '../mechanics/dialogue/shared.ts';
 import { level, resourceRef } from '../mechanics/resource.ts';
@@ -57,26 +60,26 @@ import { status as calendarStatus } from '../mechanics/calendar.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 45, current snapshot composes optional notice metadata with existing projections
+// size: allow 50, one query budget spans skills, light and existing projections
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
   const equipment = Object.entries(world.slots).map(([slot, holder]) => {
-    const [item] = within(world, actions, holder, actions.worn);
+    const [item] = within(world, actions, holder, actions.worn, steps);
     return { slot: slot as SlotKey, ...(item && { item }) };
   });
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
-  const description = text(description_variant.describe(world, world.character, room));
+  const description = text(description_variant.describe(world, world.character, room, steps));
   const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
-  return {
+  const view: GameView = {
     actor_id: world.character,
     ...skillViews(world, steps),
     ...(fight && {
@@ -87,11 +90,11 @@ export function gameView(world: World): GameView {
       },
     }),
     place: { id: here, title: text(room.title), description },
-    exits: exits(world, actions.door),
+    exits: exits(world, actions.door, steps),
     actions: actions.place,
-    ...noticeViews(world, here, actions.notice),
-    entities: within(world, actions, here),
-    inventory: within(world, actions, world.body),
+    ...noticeViews(world, here, actions.notice, steps),
+    entities: within(world, actions, here, undefined, steps),
+    inventory: within(world, actions, world.body, undefined, steps),
     ...(equipment.length > 0 && { equipment }),
     ...(at !== undefined && { position: at }),
     journal: journal(world),
@@ -102,6 +105,8 @@ export function gameView(world: World): GameView {
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
   };
+  if (steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
+  return view;
 }
 
 // The entities directly in `holder` (the room, the body or a slot holder), each with its short
@@ -113,17 +118,18 @@ function within(
   actions: Lists,
   holder: EntityId,
   worn?: (id: string) => AdvertisedAction[],
+  steps: Steps = { n: 0 },
 ): EntityView[] {
   return Object.entries(world.entities)
     .filter(
       ([id]) =>
         world.state.containers[id] === holder &&
         living(world, id) &&
-        visible(world, world.character, id),
+        visible(world, world.character, id, steps),
     )
     .map(([id, e]) => {
       const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
-      const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope) : [];
+      const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope, steps) : [];
       return {
         ...viewOf(world, id, e, worn ? worn(id) : actions.of(scope, id)),
         ...(contents.length > 0 && { contents }),
@@ -136,7 +142,13 @@ const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 // What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
 // at any depth, in DefinitionRefString order, each with its direct container and only take and
 // its container verbs (ContentView; c1-locks).
-function inside(world: World, actions: Lists, box: string, scope: string): ContentView[] {
+function inside(
+  world: World,
+  actions: Lists,
+  box: string,
+  scope: string,
+  steps: Steps,
+): ContentView[] {
   const under = (id: string) => {
     for (
       let c = world.state.containers[id];
@@ -147,7 +159,7 @@ function inside(world: World, actions: Lists, box: string, scope: string): Conte
     return false;
   };
   return Object.entries(world.entities)
-    .filter(([id]) => under(id))
+    .filter(([id]) => under(id) && visible(world, world.character, id, steps))
     .map(([id, e]) => ({
       ...viewOf(world, id, e, actions.of(scope, id, true)),
       container_id: world.state.containers[id],
@@ -179,13 +191,17 @@ type Lists = ReturnType<typeof lists>;
 // The exits of the body's room in compass order (movement.sight's): each unavailable with the
 // code movement would refuse it with, with its barrier's door, and with what is seen through it
 // unless that barrier bars the way.
-function exits(world: World, door: (direction: Key) => AdvertisedAction[]): ExitView[] {
+function exits(
+  world: World,
+  door: (direction: Key) => AdvertisedAction[],
+  steps: Steps,
+): ExitView[] {
   const actor_id = world.character;
   const room = world.rooms[world.state.containers[world.body]];
   const set = resolved(world, actor_id);
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const seated = !!engaged(world, world.body) || !position.standing(world, world.character); // position@1, after the barrier
-  return movement.sight(world, world.body).map((seen) => {
+  return movement.sight(world, world.body, steps).map((seen) => {
     const { direction } = seen;
     const barrier = exitOf(room, direction)!.barrier;
     const shown = {

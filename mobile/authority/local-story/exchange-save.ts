@@ -18,7 +18,8 @@ export function exchangeSave(
 ): boolean {
   if (
     !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
-    !Object.keys(fresh.fuelSpecs).length
+    !Object.keys(fresh.fuelSpecs).length &&
+    saved.state.fuel === undefined
   )
     return false;
   const invalid = (): never => {

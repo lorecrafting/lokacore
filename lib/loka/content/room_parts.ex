@@ -12,14 +12,17 @@ defmodule Loka.Content.RoomParts do
 
   def variant_texts(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, t} <-
-          for({s, v} <- variants(r), do: {s ++ ["description"], v["description"]}) ++
-            if(r["dark_description"],
-              do: [{["dark_description"], r["dark_description"]}],
-              else: []
-            ),
+        {steps, t} <- description_keys(r),
         not is_map_key(text, t),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => t})
+  end
+
+  defp description_keys(r) do
+    variants = for {s, v} <- variants(r), do: {s ++ ["description"], v["description"]}
+
+    if r["dark_description"],
+      do: [{["dark_description"], r["dark_description"]} | variants],
+      else: variants
   end
 
   @doc "Each description variant of room `r` and of its details, with its steps in the room file."

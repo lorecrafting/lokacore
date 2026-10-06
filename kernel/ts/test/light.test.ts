@@ -243,3 +243,27 @@ test('real lethal combat leaves reachable owner-only corpse roots and nested goo
   assert.equal(w.state.containers[torch], w.body);
   assert.equal(fuelView(w, torch)!.remaining, 7050);
 });
+import { holds } from '../src/mechanics/policy.ts';
+// Break: target-present starts a new illumination budget after its caller has nearly exhausted query work.
+test('illumination shares the target policy caller query budget', () => {
+  const w = accept(run(small(), 'ignite', { item_id: torch }));
+  const masonry = Object.keys(w.details).find((id) => w.details[id].room === room('well_shaft'))!;
+  const steps = { n: 32767 };
+  assert.equal(
+    holds(w, w.character, { op: 'target_present' }, { target: masonry as never, steps }),
+    false,
+  );
+  assert.ok(steps.n > 32768);
+});
+import { answers } from './light_fixture.ts';
+// Break: adding a room/detail shifts runtime allocations while the independent release pin still names different objects.
+test('successor identity pin names the actual fresh rooms, subjects, jobs and equipment holders', () => {
+  const actual: Record<string, string> = { character: fresh.character, body: fresh.body };
+  for (const [id, r] of Object.entries(fresh.rooms)) actual[`room/${r.key}`] = id;
+  for (const [id, d] of Object.entries(fresh.details))
+    actual[`detail/${fresh.rooms[d.room].key}/${d.key}`] = id;
+  for (const [id, e] of Object.entries(fresh.entities)) actual[`${e.kind}/${e.key}`] = id;
+  for (const [id, j] of Object.entries(fresh.state.jobs ?? {})) actual[`job/${j.job.key}`] = id;
+  for (const [slot, id] of Object.entries(fresh.slots)) actual[`slot/${slot}`] = id;
+  assert.deepEqual(actual, answers);
+});

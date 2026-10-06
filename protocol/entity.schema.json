@@ -584,7 +584,31 @@
           "additionalProperties": false
         }
       ],
-      "description": "Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys."
+      "description": "Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys.",
+      "examples": [
+        {
+          "kind": "source",
+          "capacity": 8,
+          "initial": 2,
+          "rate": 1,
+          "unit": "oil",
+          "supply": {
+            "cartridge_id": "test",
+            "cartridge_version": "0.1.0",
+            "kind": "item",
+            "key": "oil"
+          },
+          "ignited": "light.ignited",
+          "doused": "light.doused",
+          "refueled": "light.refueled"
+        },
+        {
+          "kind": "supply",
+          "capacity": 6,
+          "initial": 6,
+          "unit": "oil"
+        }
+      ]
     },
     "WeaponProfile": {
       "type": "object",

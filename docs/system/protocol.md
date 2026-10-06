@@ -591,7 +591,7 @@ readiness and lowering; detail-authored `harvest` supplies conserved stock IDs.
 
 ## B4 fuel composition
 
-[B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
+**API1.19.** [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
 with `ignite {actor_id, item_id}`, `douse {actor_id, item_id}` and
 `refuel {actor_id, item_id, supply_id}`. Invocation targets are source then supply
 for Refuel, and source for Ignite/Douse. The amount is derived from confirmed
@@ -622,8 +622,8 @@ Do not encode engine history as untyped cartridge facts or generalize the new op
 into arbitrary item-state assignment. Because a new delta target crosses portable
 composition, both kernels require independently pinned valid/invalid/precondition
 fixtures and differential coverage; the light story rule remains TypeScript-only.
-The next API/release pins and exact generated shape are assigned from the actual
-implementation base, not assumed by this planning contract. Existing error codes,
+The [current successor pin](cartridge.md#b4-well-and-fuel) is independently derived
+from the actual C1/B5 base. Existing error codes,
 writer groups, checked arithmetic and query budgets apply.
 
 ## B7 liquid composition

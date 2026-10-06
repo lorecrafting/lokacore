@@ -103,7 +103,12 @@ export function group(buttons: Button[]) {
         !OWN.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
-    on: (id: string) => buttons.filter((b) => b.detail_id === id || b.target_ids.includes(id)),
+    on: (id: string) =>
+      buttons.filter(
+        (b) =>
+          b.detail_id === id ||
+          (b.action_key === 'refuel' ? b.target_ids[0] === id : b.target_ids.includes(id)),
+      ),
   };
 }
 

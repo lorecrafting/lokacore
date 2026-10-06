@@ -4,13 +4,16 @@ defmodule Loka.Core.Fuel do
   @spec valid?(term(), map() | nil, integer()) :: boolean()
   def valid?(%{"remaining" => remaining, "at" => at, "lit" => lit} = row, spec, now)
       when is_map(spec) do
-    spec["kind"] in ~w(source supply) and is_integer(spec["capacity"]) and
-      spec["capacity"] > 0 and spec["capacity"] <= @max and
-      map_size(row) == 3 and is_integer(remaining) and remaining >= 0 and
-      remaining <= spec["capacity"] and remaining <= @max and is_integer(at) and
-      at >= 0 and at <= now and at <= @max and is_boolean(lit) and
-      (spec["kind"] == "source" or not lit)
+    declared?(spec) and map_size(row) == 3 and bounded?(remaining, spec["capacity"]) and
+      bounded?(at, now) and is_boolean(lit) and (spec["kind"] == "source" or not lit)
   end
 
   def valid?(_, _, _), do: false
+
+  defp declared?(spec),
+    do:
+      spec["kind"] in ~w(source supply) and bounded?(spec["capacity"], @max) and
+        spec["capacity"] > 0
+
+  defp bounded?(n, max), do: is_integer(n) and n >= 0 and n <= max and n <= @max
 end

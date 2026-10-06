@@ -1,6 +1,6 @@
 # B4 — useful light, fuel/refill and safe recovery: adopted developer brief
 
-**Branch:** `chapter-1/b4-light-fuel` in an isolated developer worktree.
+**Branch:** `chapter-one/b4-light` in an isolated developer worktree.
 **Inspected base:** provisional B3 integration `340025a0ef5d3644e84ac23634b74dfa6d20d459`,
 chapter `ashmere_missing_child@0.0.18`, API1.16. B3 source is present and its focused
 checks are recorded in the [B3 check note](../../evidence/2026-10-05-b3-shop/README.md).
@@ -8,13 +8,15 @@ Its independent primary/save reviews remain pending; review has identified curre
 ID-fixture/schema-example issues. The [v018 release answer](../../../protocol/fixtures/missing_child_v018_hash.json)
 and [IDs](../../../protocol/fixtures/missing_child_v018_ids.json) are provisional,
 not final dependency proof. Before building, incorporate B3 fixes and re-pin the
-actual source/release independently. B4 successor release, API, hash, generated
-IDs, implementation/review head and PR: null. This brief authorizes the selected
+actual source/release independently. B4 successor release is `ashmere_missing_child@0.0.21`, API1.19;
+its independent hash/94-ID answer is linked in the [source evidence](../../evidence/2026-10-05-b4-light/README.md).
+Independent B4 review head and remote PR remain null. This brief authorizes the selected
 local source outcome under PM adoption; it does not authorize remote publication.
 
-Local [source checkpoint](../../evidence/2026-10-05-b4-light/README.md) implements
-focused light/fuel/recovery behavior on corrected B5 base. Final successor pins and
-independent reviews remain pending C1 integration; this is not publication proof.
+Local [source evidence](../../evidence/2026-10-05-b4-light/README.md) and
+[draft PR](b4-light-local-pr-2026-10-05.md) record the successor on corrected B5 and
+provisional C1 source. B4 independent reviews and C1 scoped fixes remain pending;
+this is not publication proof.
 
 ## Goal and player path
 

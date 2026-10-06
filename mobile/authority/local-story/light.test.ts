@@ -223,7 +223,7 @@ test('corrupt fuel and forged refills refuse without repairing SQLite', () => {
     }
   }
 });
-import { gameView } from '../../../kernel/ts/src/index.ts';
+import { gameView, newWorld } from '../../../kernel/ts/src/index.ts';
 // Break: the real fatal clock/corpse rows fail cold recovery, or loss of the sole light blocks its roots.
 test('dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-light-corpse-'));
@@ -300,6 +300,36 @@ test('a light-only cartridge reopens lawful refill history and rejects a bounded
       'save_corrupt',
     );
     assert.deepEqual(disk(p), before);
+  } finally {
+    p.sql.close();
+  }
+});
+
+// Break: orphan fuel rows are ignored when the pinned cartridge declares no fuel items or repeat exchange.
+test('undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched', () => {
+  const p = elapsedHost();
+  try {
+    const base = newWorld(JSON.parse(p.bundle.canonical), fresh.context, [1, 2, 3, 4]);
+    p.sql
+      .prepare('INSERT INTO state_row VALUES (?,?,?)')
+      .run(
+        'fuel',
+        '11111111-0000-4000-8000-000000000001',
+        JSON.stringify({ remaining: 1, at: 64800, lit: false }),
+      );
+    const before = ['state_row', 'head', 'receipt', 'elapsed'].map((t) =>
+      p.sql.prepare(`SELECT * FROM ${t} ORDER BY 1,2`).all(),
+    );
+    assert.equal(
+      openStory(p.db, [{ fresh: base, content_hash: p.bundle.sha256 }], p.host).kind,
+      'save_corrupt',
+    );
+    assert.deepEqual(
+      ['state_row', 'head', 'receipt', 'elapsed'].map((t) =>
+        p.sql.prepare(`SELECT * FROM ${t} ORDER BY 1,2`).all(),
+      ),
+      before,
+    );
   } finally {
     p.sql.close();
   }

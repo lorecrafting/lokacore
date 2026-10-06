@@ -1860,7 +1860,19 @@
         "lit"
       ],
       "additionalProperties": false,
-      "description": "Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn."
+      "description": "Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn.",
+      "examples": [
+        {
+          "remaining": 7,
+          "capacity": 10,
+          "lit": true
+        },
+        {
+          "remaining": 0,
+          "capacity": 10,
+          "lit": false
+        }
+      ]
     },
     "SkillView": {
       "type": "object",

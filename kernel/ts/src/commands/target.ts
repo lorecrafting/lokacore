@@ -10,7 +10,7 @@ import {
   type Key,
   type TargetResolution,
 } from '../contracts.gen.ts';
-import { bodyOf, COMPASS, refString, type World } from '../runtime/decision.ts';
+import { bodyOf, COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
 import { exitOf } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 
@@ -58,9 +58,14 @@ export function resolve(world: World, actor: CharacterId, text: string): TargetR
  * Whether `id` is in reach of `actor` (resolve's scopes; target_resolution@1's target_present): a
  * detail of its room, or an entity in its room or held directly by its body.
  */
-export function present(world: World, actor: CharacterId, id: string): boolean {
+export function present(
+  world: World,
+  actor: CharacterId,
+  id: string,
+  steps: Steps = { n: 0 },
+): boolean {
   const body = bodyOf(world, actor);
-  if (body === undefined || !living(world, id) || !visible(world, actor, id)) return false;
+  if (body === undefined || !living(world, id) || !visible(world, actor, id, steps)) return false;
   const here = world.state.containers[body];
   const d = world.details[id];
   return d ? d.room === here : [here, body].includes(world.state.containers[id]);

@@ -452,7 +452,7 @@ control is exposed before its later real consumer lands.
 
 ## B4 light details
 
-[B4](mechanics.md#b4-light-and-darkness-selected-contract) uses the existing
+**API1.19 interaction contract.** [B4](mechanics.md#b4-light-and-darkness-selected-contract) uses the existing
 inventory and item detail pages. The confirmed item view supplies remaining fuel,
 capacity and effective lit state; the detail displays `Fuel <remaining> of
 <capacity>, lit/unlit`. Ignite, Douse and Refuel occupy the ordinary item action
@@ -461,7 +461,9 @@ fuel arithmetic, automatic ignition or clock.
 
 Refuel names the exact directly held compatible bottle on its button (`Refuel
 <source> from <supply>`) and sends ordered targets `[source_id, supply_id]`, with
-no amount input or extra selector. No eligible supply means no Refuel button.
+no amount input or extra selector. The source item owns the control and its committed
+detail history; the bottle is a bound participant, so its own page does not list
+another item's Refuel. No eligible supply means no Refuel button.
 Wear/Remove and Put/Take retain their existing places. Confirmed receipts refresh
 source, supply and World; stale/refused/fenced results never narrate success.
 
