@@ -29,18 +29,18 @@ defmodule Loka.Content.Population do
   def check(nil, _, _, _), do: []
   def check(_, _, nil, _), do: []
 
-  def check(manifest, defs, _, {_, settings}) do
+  def check(manifest, defs, v2, {_, settings}) do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
     for {_key, {rel, steps, plan}} <- plans,
         is_map(plan),
-        error <- plan_errors(manifest, defs, calendar, plan),
+        error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
         do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
   end
 
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp plan_errors(manifest, defs, calendar, p) do
+  defp plan_errors(manifest, defs, calendar, text, p) do
     bundle = value(Refs.resolve(p["bundle"], "population_bundle", manifest, defs))
     rooms = Enum.map(p["area"], &value(Refs.resolve(&1, "room", manifest, defs)))
     home = value(Refs.resolve(p["home"], "room", manifest, defs))
@@ -61,12 +61,30 @@ defmodule Loka.Content.Population do
         Enum.all?(rooms, &is_map/1) && reciprocal?(rooms, p["area"])
 
     bundle_ok = is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"])
+    pack = p["pack"]
+
+    flight_directions =
+      for room <- rooms,
+          is_map(room),
+          {direction, edge} <- room["exits"] || %{},
+          edge["to"] in p["area"],
+          do: direction
+
+    pack_ok =
+      pack == nil or
+        (Enum.all?(flight_directions, &Map.has_key?(pack["narration"]["enemy_fled"], &1)) and
+           Enum.all?(
+             Map.values(Map.delete(pack["narration"], "enemy_fled")) ++
+               Map.values(pack["narration"]["enemy_fled"]),
+             &Map.has_key?(text, &1)
+           ))
 
     []
     |> add(not targets, ["day_target"])
     |> add(not valid_time, ["wander_interval"])
     |> add(not connected, ["area"])
     |> add(not bundle_ok, ["bundle"])
+    |> add(not pack_ok, ["pack", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
   end
 

@@ -8,18 +8,22 @@ import type {
   EncounterRow,
   EntityId,
   JobId,
+  Text,
 } from '../../contracts.gen.ts';
 import { accepted, bodyOf, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
 import { add, mul } from '../../foundation/int.ts';
+import { encode } from '../../foundation/canonical.ts';
 import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted, type RngState } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
+import { living } from '../death/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import { npcRef, participantsPresent } from './shared.ts';
+import { eligible, flight, next, packPlan } from './behavior.ts';
 
 type CombatEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'attack_result' | 'entity_died' }>;
@@ -32,6 +36,7 @@ type Round = {
   position: number;
   steps: { n: number };
   due_time: number;
+  notes: Text[];
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -59,10 +64,18 @@ export function roundSequence(
     position: 0,
     steps,
     due_time: job.due_time,
+    notes: [],
   };
   if (bodyOf(world, row.character_id) !== row.body_id || !same(npcRef(world, row.npc_id), job.job))
     throw new KernelError('precondition_failed');
-  const close: DeltaOp = { op: 'encounter.close', writer_group: 0, encounter_id, job_id };
+  const close: DeltaOp = {
+    op: 'encounter.close',
+    writer_group: 0,
+    encounter_id,
+    job_id,
+    ...(row.active_ids && { expected: row }),
+  };
+  if (row.active_ids) return packRound(world, command, job, row, encounter_id, r, close, mint);
   if (!participantsPresent(world, row)) r.ops.push(close);
   else {
     const order = row.round % 2 ? [row.body_id, row.npc_id] : [row.npc_id, row.body_id];
@@ -81,7 +94,108 @@ export function roundSequence(
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);
 }
 
-function successor(world: World, row: EncounterRow, job: JobRow, mint: Mint): DeltaOp[] {
+function packRound(
+  world: World,
+  command: Pick<Command, 'id'>,
+  job: JobRow,
+  row: EncounterRow,
+  encounter_id: EncounterId,
+  r: Round,
+  close: DeltaOp,
+  mint: Mint,
+) {
+  const present = row.active_ids!.filter((id) => eligible(world, row, id));
+  const selected = present.includes(row.next_opponent_id!)
+    ? row.next_opponent_id!
+    : present.length
+      ? next(present, row.next_opponent_id!)
+      : undefined;
+  const primary = present.includes(row.npc_id) ? row.npc_id : present[0];
+  const current = { ...row, npc_id: primary };
+  if (!selected) {
+    r.ops.push(close);
+    const settings = packPlan(world, row.npc_id);
+    if (settings) r.notes.push({ key: settings.narration.pack_withdrew });
+  } else if (!participantsPresent(world, { ...current, npc_id: selected })) {
+    r.ops.push(close);
+  } else {
+    const settings = packPlan(world, selected);
+    if (primary !== row.npc_id)
+      r.notes.push({ key: settings!.narration.primary_changed, participants: { enemy: primary } });
+    const order = row.round % 2 ? [row.body_id, selected] : [selected, row.body_id];
+    for (const attacker of order) {
+      const at = prefix(world, r.ops);
+      if (
+        at.state.encounters![encounter_id].status !== 'open' ||
+        !eligible(at, row, selected) ||
+        !living(at, row.body_id)
+      )
+        break;
+      if (attacker === row.body_id && !standing(at, row.character_id)) continue;
+      if (attacker === selected) {
+        const origin = at.state.created?.[selected]?.origin;
+        const maximum =
+          origin?.kind === 'spawned'
+            ? at.populationSpecs[encode(origin.by)]?.hp.maximum
+            : undefined;
+        const current = level(at, selected, resourceRef(at, 'hp'))!;
+        const leaving =
+          settings &&
+          maximum !== undefined &&
+          mul(current, 100) < mul(maximum, settings.flight_below_percent)
+            ? flight(at, selected, job.due_time, r.steps)
+            : undefined;
+        if (leaving) {
+          r.ops.push(...leaving.ops);
+          r.notes.push({
+            key: settings!.narration.enemy_fled[leaving.direction]!,
+            participants: { enemy: selected },
+          });
+          break;
+        }
+      }
+      attack(at, command, mint, encounter_id, current, attacker, r, close);
+    }
+    const at = prefix(world, r.ops);
+    if (at.state.encounters![encounter_id].status === 'open') {
+      const active = row.active_ids!.filter((id) => eligible(at, row, id));
+      if (!active.length) {
+        r.ops.push(close);
+        r.notes.push({ key: settings!.narration.pack_withdrew });
+      } else {
+        const primary = active.includes(current.npc_id) ? current.npc_id : active[0];
+        const cursor = next(active, selected);
+        r.ops.push(...successor(world, row, job, mint, active, primary, cursor));
+        if (active.length !== row.active_ids!.length) {
+          if (primary !== current.npc_id)
+            r.notes.push({
+              key: settings!.narration.primary_changed,
+              participants: { enemy: primary },
+            });
+        }
+      }
+    } else if (living(at, row.body_id)) r.notes.push({ key: settings!.narration.pack_withdrew });
+  }
+  const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
+  return accepted(
+    world,
+    'job_ran',
+    timed,
+    r.events,
+    [...narrate(world, row, r.events), ...r.notes],
+    r.rng,
+  );
+}
+
+function successor(
+  world: World,
+  row: EncounterRow,
+  job: JobRow,
+  mint: Mint,
+  active?: readonly EntityId[],
+  primary?: EntityId,
+  cursor?: EntityId,
+): DeltaOp[] {
   const next_job_id = mint() as JobId;
   const encounter_id = job.encounter_id!;
   return [
@@ -92,12 +206,18 @@ function successor(world: World, row: EncounterRow, job: JobRow, mint: Mint): De
       job_id: row.job_id,
       round: row.round,
       next_job_id,
+      ...(active && {
+        expected: row,
+        active_ids: active,
+        npc_id: primary!,
+        next_opponent_id: cursor!,
+      }),
     },
     {
       op: 'job.schedule',
       writer_group: 0,
       job_id: next_job_id,
-      job: job.job,
+      job: primary ? npcRef(world, primary)! : job.job,
       encounter_id,
       due_time: add(job.due_time, world.cartridge.world!.combat!.interval),
     },
@@ -150,7 +270,7 @@ function attack(
   const player = attacker_id === row.body_id;
   const target_id = player ? row.npc_id : row.body_id;
   const settings = world.cartridge.world!.combat!;
-  const profile = attackProfile(world, row, player, r);
+  const profile = attackProfile(world, row, attacker_id, player, r);
   const accurate = draw(r, 100) < profile.chance;
   const prevented_by = accurate && !player ? defend(world, row, r) : undefined;
   const hit = accurate && !prevented_by;
@@ -221,9 +341,10 @@ function injure(
   const fatalLoss = { ...adjust(world, target_id, hp, -loss, {}).op, at: r.due_time };
   r.ops.push(fatalLoss);
   if (fatalLoss.to === 0) {
-    r.ops.push(close);
+    const closing = target_id === row.body_id || !row.active_ids || row.active_ids.length === 1;
+    if (closing) r.ops.push(close);
     const died = deathSequence(
-      prefix(world, [fatalLoss, close]),
+      prefix(world, closing ? [fatalLoss, close] : [fatalLoss]),
       command,
       {
         loss: fatalLoss,
@@ -257,8 +378,14 @@ function equipped(world: World, body: EntityId, slot: string) {
   return item && item.kind === 'item' ? item : undefined;
 }
 
-function attackProfile(world: World, row: EncounterRow, player: boolean, r: Round) {
-  const npc = world.entities[row.npc_id];
+function attackProfile(
+  world: World,
+  row: EncounterRow,
+  attacker_id: EntityId,
+  player: boolean,
+  r: Round,
+) {
+  const npc = world.entities[player ? row.npc_id : attacker_id];
   if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
   if (!player) return npc.attack;
   const weapon = equipped(world, row.body_id, 'wield')?.weapon;

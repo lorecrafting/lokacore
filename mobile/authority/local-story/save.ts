@@ -160,8 +160,16 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const keys = d.events.some((e) => e.payload.type === 'attack_result')
       ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
       : [];
+    const packKeys = Object.values(s.world.cartridge.populations ?? {}).flatMap((plan) => {
+      const n = plan.pack?.narration;
+      return n
+        ? [n.helper_joined, n.primary_changed, n.pack_withdrew, ...Object.values(n.enemy_fled)]
+        : [];
+    });
     const lines = d.narration ?? [];
-    const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
+    const combat_lines = lines.flatMap((line, i) =>
+      root || keys.includes(line?.key) || packKeys.includes(line?.key) ? [i] : [],
+    );
     const pickup = corpsePickup(s, r, d);
     if (!lines.length && !pickup) {
       if (command_id) return undefined;

@@ -3,6 +3,7 @@ import { accepted, bodyOf, rejected, type Rule } from '../../runtime/decision.ts
 import { add } from '../../foundation/int.ts';
 import { attackRefused, npcRef, encounterId } from './shared.ts';
 import { flee } from './flee.ts';
+import { admission, packPlan } from './behavior.ts';
 
 export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) => {
   const { payload } = command;
@@ -12,6 +13,8 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
   const body_id = bodyOf(world, payload.actor_id)!;
   const job = npcRef(world, payload.target_id);
   if (!job) return rejected('invalid_target');
+  const roster = admission(world, payload.target_id, steps);
+  if (roster && !roster.includes(payload.target_id)) return rejected('invalid_state');
   const encounter_id = encounterId(mint);
   const job_id = jobId(mint);
   return accepted(
@@ -27,6 +30,7 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
         npc_id: payload.target_id,
         room_id: world.state.containers[body_id],
         job_id,
+        ...(roster && { active_ids: roster, next_opponent_id: payload.target_id }),
       },
       {
         op: 'job.schedule',
@@ -38,5 +42,11 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
       },
     ],
     [],
+    roster
+      ?.filter((id) => id !== payload.target_id)
+      .map((id) => ({
+        key: packPlan(world, payload.target_id)!.narration.helper_joined,
+        participants: { enemy: id },
+      })),
   );
 };

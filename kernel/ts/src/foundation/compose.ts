@@ -72,7 +72,7 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  if (final && !completeBirths(ops)) return fault('precondition_failed', { kind: 'clock' });
+  if (final && !completeBirths(ops, state)) return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
@@ -170,7 +170,13 @@ function encounter(
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
-  if (op.op !== 'encounter.open') return changeEncounter(op, row);
+  if (op.op !== 'encounter.open')
+    return changeEncounter(
+      op,
+      row,
+      (id, room) => packMemberRemains(id, room, op.writer_group, ctx),
+      (id, room) => packMemberInitiallyPresent(id, room, ctx.state),
+    );
   return openEncounter(
     op,
     row,
@@ -178,6 +184,60 @@ function encounter(
     read(containment(op.body_id), ctx),
     read(containment(op.npc_id), ctx),
     rows('encounter', 'encounters', 'encounter_id', ctx),
+  );
+}
+
+function packMemberRemains(id: string, room: string, group: number, ctx: Ctx): boolean {
+  const origin = get(section(ctx.state, 'created')[id], 'origin') as Obj | undefined;
+  if (origin?.kind !== 'spawned' || !packMemberInitiallyPresent(id, room, ctx.state)) return false;
+  const target = {
+    kind: 'population_slot',
+    plan: origin.by as never,
+    slot: origin.slot as number,
+  } as const;
+  const before = populationRow(target, ctx.state);
+  const slot = read(target, ctx);
+  const current =
+    read(containment(id), ctx) === room &&
+    get(slot, 'member_id') === id &&
+    get(slot, 'generation') === origin.generation &&
+    get(slot, 'replacement_due') === null;
+  if (current) return true;
+  const slotWrite = ctx.overlay.get(key(target));
+  const moved = ctx.overlay.get(key(containment(id)));
+  const hp = ctx.overlay.get(
+    key({
+      kind: 'resource',
+      entity_id: id,
+      resource: { ...(origin.by as Obj), kind: 'resource', key: 'hp' },
+    }),
+  );
+  const flew =
+    moved?.group === group &&
+    slotWrite?.group === group &&
+    get(slot, 'last_flight_at') === ctx.horizon &&
+    get(before, 'last_flight_at') !== ctx.horizon &&
+    get(slot, 'replacement_due') === null;
+  const died =
+    slotWrite?.group === group &&
+    hp?.group === group &&
+    get(slot, 'replacement_due') !== null &&
+    get(hp.value, 'value') === 0;
+  return !(flew || died);
+}
+
+function packMemberInitiallyPresent(id: string, room: string, state: State): boolean {
+  const origin = get(section(state, 'created')[id], 'origin') as Obj | undefined;
+  if (origin?.kind !== 'spawned') return false;
+  const slot = populationRow(
+    { kind: 'population_slot', plan: origin.by as never, slot: origin.slot as number },
+    state,
+  );
+  return (
+    section(state, 'containers')[id] === room &&
+    get(slot, 'member_id') === id &&
+    get(slot, 'generation') === origin.generation &&
+    get(slot, 'replacement_due') === null
   );
 }
 

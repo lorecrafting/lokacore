@@ -1674,6 +1674,55 @@
         "wander_interval": {
           "type": "integer",
           "minimum": 1
+        },
+        "pack": {
+          "type": "object",
+          "properties": {
+            "flight_below_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "flight_fare": {
+              "const": 0
+            },
+            "narration": {
+              "type": "object",
+              "properties": {
+                "helper_joined": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "enemy_fled": {
+                  "type": "object",
+                  "propertyNames": {
+                    "pattern": "^(north|south|east|west|up|down)$"
+                  },
+                  "additionalProperties": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  }
+                },
+                "primary_changed": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "pack_withdrew": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "helper_joined",
+                "enemy_fled",
+                "primary_changed",
+                "pack_withdrew"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "flight_below_percent",
+            "flight_fare",
+            "narration"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

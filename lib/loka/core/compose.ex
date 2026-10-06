@@ -61,7 +61,7 @@ defmodule Loka.Core.Compose do
       true ->
         result = apply_all(state, ops)
 
-        if final and Map.has_key?(result, "changes") and not Creation.complete?(ops),
+        if final and Map.has_key?(result, "changes") and not Creation.complete?(ops, state),
           do: fault("precondition_failed", %{"kind" => "clock"}),
           else: result
     end
@@ -235,7 +235,13 @@ defmodule Loka.Core.Compose do
       )
 
   defp apply_op(%{"op" => "encounter." <> _} = op, t, ctx),
-    do: Loka.Core.ComposeEncounter.change(op, read(t, ctx))
+    do:
+      Loka.Core.ComposeEncounter.change(
+        op,
+        read(t, ctx),
+        fn id, room -> pack_member_remains?(id, room, op["writer_group"], ctx) end,
+        fn id, room -> pack_member_initially_present?(id, room, elem(ctx, 0)) end
+      )
 
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
@@ -333,4 +339,69 @@ defmodule Loka.Core.Compose do
 
   defp fault(code, target),
     do: %{"fault" => %{"kind" => "fault", "code" => code, "target" => target}}
+
+  defp pack_member_remains?(id, room, group, {state, _, _} = ctx) do
+    origin = get_in(state, ["created", id, "origin"])
+
+    if is_map(origin) and origin["kind"] == "spawned" and
+         pack_member_initially_present?(id, room, state),
+       do: begin_pack_member(id, room, group, origin, ctx),
+       else: false
+  end
+
+  defp pack_member_initially_present?(id, room, state) do
+    origin = get_in(state, ["created", id, "origin"])
+
+    if is_map(origin) and origin["kind"] == "spawned" do
+      target = %{"kind" => "population_slot", "plan" => origin["by"], "slot" => origin["slot"]}
+      slot = get_in(state, ["population_slots", key(target)])
+
+      get_in(state, ["containers", id]) == room and is_map(slot) and
+        slot["member_id"] == id and slot["generation"] == origin["generation"] and
+        slot["replacement_due"] == nil
+    else
+      false
+    end
+  end
+
+  defp begin_pack_member(id, room, group, origin, {state, horizon, overlay} = ctx) do
+    target = %{"kind" => "population_slot", "plan" => origin["by"], "slot" => origin["slot"]}
+    before = get_in(state, ["population_slots", key(target)])
+    slot = read(target, ctx)
+
+    if current_pack_member?(id, room, origin, slot, ctx),
+      do: true,
+      else:
+        not (flight_proven?(id, group, target, before, slot, {horizon, overlay}) or
+               death_proven?(id, group, origin, target, slot, overlay))
+  end
+
+  defp current_pack_member?(id, room, origin, slot, ctx),
+    do:
+      read(containment(id), ctx) == room and is_map(slot) and
+        slot["member_id"] == id and slot["generation"] == origin["generation"] and
+        slot["replacement_due"] == nil
+
+  defp flight_proven?(id, group, target, before, slot, {horizon, overlay}) do
+    {slot_group, _, _} = overlay[key(target)] || {nil, nil, nil}
+    {move_group, _, _} = overlay[key(containment(id))] || {nil, nil, nil}
+
+    move_group == group and slot_group == group and slot["last_flight_at"] == horizon and
+      before["last_flight_at"] != horizon and slot["replacement_due"] == nil
+  end
+
+  defp death_proven?(id, group, origin, target, slot, overlay) do
+    {slot_group, _, _} = overlay[key(target)] || {nil, nil, nil}
+
+    hp_target = %{
+      "kind" => "resource",
+      "entity_id" => id,
+      "resource" => Map.merge(origin["by"], %{"kind" => "resource", "key" => "hp"})
+    }
+
+    {hp_group, _, hp} = overlay[key(hp_target)] || {nil, nil, nil}
+
+    slot_group == group and hp_group == group and slot["replacement_due"] != nil and
+      hp["value"] == 0
+  end
 end

@@ -78,7 +78,7 @@ export function initialPlacement(
 
 /** A final proposal must bind each spawned pair, HP and membership in its birth group. */
 // size: allow 60, one final guard checks pair, HP and slot membership together
-export function completeBirths(ops: readonly DeltaOp[]): boolean {
+export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
   const made = ops.filter(
     (op): op is Extract<DeltaOp, { op: 'entity.create' }> =>
       op.op === 'entity.create' && op.identity.origin.kind === 'spawned',
@@ -120,7 +120,7 @@ export function completeBirths(ops: readonly DeltaOp[]): boolean {
     if (related.length !== 1 || slot.length !== 1 || hp.length !== 1) return false;
   }
   return (
-    birthSlotsMatch(slots, hounds) &&
+    birthSlotsMatch(slots, hounds, ops, state) &&
     pelts.every((p) =>
       hounds.some(
         (h) =>
@@ -135,6 +135,8 @@ export function completeBirths(ops: readonly DeltaOp[]): boolean {
 function birthSlotsMatch(
   slots: Extract<DeltaOp, { op: 'population.slot' }>[],
   hounds: Extract<DeltaOp, { op: 'entity.create' }>[],
+  ops: readonly DeltaOp[],
+  state: State,
 ) {
   return slots.every(
     (s) =>
@@ -148,6 +150,43 @@ function birthSlotsMatch(
           key(h.identity.origin.by) === key(s.plan) &&
           h.identity.origin.slot === s.slot &&
           h.identity.origin.generation === s.value.generation,
-      ),
+      ) ||
+      flightSlot(s, ops, state),
+  );
+}
+
+function flightSlot(
+  s: Extract<DeltaOp, { op: 'population.slot' }>,
+  ops: readonly DeltaOp[],
+  state: State,
+) {
+  const id = s.value.member_id;
+  const prior = s.expected;
+  const origin =
+    id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
+  const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
+  const horizon = ops.reduce((at, op) => (op.op === 'time.advance' ? op.to : at), state.clock);
+  return (
+    id !== null &&
+    prior?.member_id === id &&
+    prior.generation === s.value.generation &&
+    prior.replacement_due === null &&
+    s.value.replacement_due === null &&
+    s.value.last_flight_at === horizon &&
+    prior.last_flight_at !== horizon &&
+    origin?.kind === 'spawned' &&
+    origin.role === 'hound' &&
+    origin.member_id === id &&
+    key(origin.by) === key(s.plan as Json) &&
+    origin.slot === s.slot &&
+    origin.generation === s.value.generation &&
+    (spec?.plan as Obj | undefined)?.pack !== undefined &&
+    ops.filter(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.entity_id === id &&
+        op.source_id !== null,
+    ).length === 1
   );
 }

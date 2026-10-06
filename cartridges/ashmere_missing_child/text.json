@@ -553,5 +553,10 @@
   "dream.wake.final": "You turn toward the warmth of the Lantern. The fox slips between the reeds as the window brightens.",
   "quest.lantern.title": "A Room at the Lantern",
   "quest.lantern.active": "You have rested at the Lantern. A dream waits at the Inn Rooms bed; return there to resume it.",
-  "quest.lantern.resolved": "You rested at the Lantern and acknowledged the fen dream."
+  "quest.lantern.resolved": "You rested at the Lantern and acknowledged the fen dream.",
+  "combat.hound_helper_joined": "Another fen hound turns to defend its pack.",
+  "combat.hound_fled_east": "A wounded fen hound bolts east into Adder Nest.",
+  "combat.hound_fled_west": "A wounded fen hound bolts west into Hound Run.",
+  "combat.hound_primary_changed": "Another fen hound becomes your immediate opponent.",
+  "combat.hound_pack_withdrew": "No hound remains in this fight."
 }

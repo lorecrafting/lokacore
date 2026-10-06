@@ -76,7 +76,7 @@ defmodule Loka.Core.Creation do
   end
 
   # size: allow 55, one final birth-group guard; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  def complete?(ops) do
+  def complete?(ops, state) do
     made =
       Enum.filter(
         ops,
@@ -119,7 +119,7 @@ defmodule Loka.Core.Creation do
               get_in(h, ["identity", "origin", "slot"]) == op["slot"] and
               get_in(h, ["identity", "origin", "generation"]) ==
                 get_in(op, ["value", "generation"])
-          end)
+          end) or flight_slot?(op, ops, state)
       end) and
       Enum.all?(pelts, fn p ->
         Enum.any?(
@@ -129,6 +129,45 @@ defmodule Loka.Core.Creation do
         )
       end)
   end
+
+  defp flight_slot?(op, ops, state) do
+    id = get_in(op, ["value", "member_id"])
+
+    horizon =
+      Enum.reduce(ops, state["clock"], fn row, at ->
+        if row["op"] == "time.advance", do: row["to"], else: at
+      end)
+
+    flight_transition?(op, id, horizon) and flight_origin?(op, id, state) and
+      one_flight_transfer?(ops, op, id)
+  end
+
+  defp flight_transition?(op, id, horizon),
+    do:
+      id != nil and get_in(op, ["expected", "member_id"]) == id and
+        get_in(op, ["expected", "generation"]) == get_in(op, ["value", "generation"]) and
+        get_in(op, ["expected", "replacement_due"]) == nil and
+        get_in(op, ["value", "replacement_due"]) == nil and
+        get_in(op, ["value", "last_flight_at"]) == horizon and
+        get_in(op, ["expected", "last_flight_at"]) != horizon
+
+  defp flight_origin?(op, id, state) do
+    origin = get_in(state, ["created", id, "origin"])
+    spec = get_in(state, ["population_specs", key(op["plan"])])
+
+    is_map(origin) and origin["kind"] == "spawned" and origin["role"] == "hound" and
+      origin["member_id"] == id and origin["by"] == op["plan"] and
+      origin["slot"] == op["slot"] and
+      origin["generation"] == get_in(op, ["value", "generation"]) and
+      is_map(get_in(spec || %{}, ["plan", "pack"]))
+  end
+
+  defp one_flight_transfer?(ops, op, id),
+    do:
+      Enum.count(ops, fn row ->
+        row["op"] == "entity.transfer" and row["writer_group"] == op["writer_group"] and
+          row["entity_id"] == id and row["source_id"] != nil
+      end) == 1
 
   defp section(state, name), do: Map.get(state, name, %{})
 

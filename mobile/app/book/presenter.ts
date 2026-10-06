@@ -107,7 +107,9 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
         : undefined;
   const routed = retained ? narrationLines(retained, now, text) : undefined;
   const taken = pickupLine(retained, text);
-  const line = repeated ? '' : taken || routed?.[0] || replyLine(reply, text, now, fallback);
+  const line = repeated
+    ? ''
+    : taken || routed?.[0] || (routed?.[1] ? '' : replyLine(reply, text, now, fallback));
   if (line) lines.push(line);
   if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
   s.log.push(...comings(s.projection.view, now, text));

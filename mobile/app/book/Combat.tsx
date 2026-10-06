@@ -18,6 +18,12 @@ export function Combat(p: {
         Combat
       </Text>
       <Text style={prose}>{text(view.combat.name)}</Text>
+      {view.combat.active_opponents?.map((opponent) => (
+        <Text key={opponent.id} style={prose}>
+          {text(opponent.name)}
+          {opponent.id === view.combat!.opponent_id ? ' (your target)' : ''}
+        </Text>
+      ))}
       {combatLog.map((line, i) => (
         <Text key={i} style={prose}>
           {line}
