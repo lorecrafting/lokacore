@@ -33,6 +33,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 ## Post-R3
 
 - [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
+- [Review knowledge trail](owner-decision-review-knowledge-trail-2026-10-05.md): retain findings and dispositions; link promoted spec rules, lessons, deterministic checks and deferred tasks to their evidence.
 
 - [C2 staged browser proof](owner-decision-c2-staged-browser-proof-2026-10-05.md): focused fresh Book route and cold reopen, distinct real-host fatal recovery proof, browser fatal/Restart due by E3 and terminal Web timeout open pending a separate fix.
 
