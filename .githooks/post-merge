@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3 bin/beads_after_git.py

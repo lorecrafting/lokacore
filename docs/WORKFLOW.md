@@ -167,8 +167,10 @@ checkout for the latest merged status. From another checkout, set
 change the branch or move tracker data. Agents can add `--robot-triage`; human
 readers can use
 the interactive board and graph. `br` mutates local
-SQLite and exports Git-tracked JSONL; after a pull use `br sync --import-only`,
-and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
+SQLite and exports Git-tracked JSONL. Beads Rust 0.7.4 auto-flushes mutations
+and auto-imports newer JSONL on commands by default; use `br sync --status --json`
+to inspect drift, `br sync --import-only` to recover an out-of-date index, and
+`br sync --flush-only` before a tracker commit if the index is dirty. Review the JSONL diff
 and verify it contains no local machine path; the installed release writes
 `source_repo_path` on creation, so clear it with
 `br update <id> --source-repo lokacore --source-repo-path ''` before committing.
@@ -177,7 +179,16 @@ even when the task itself is durable.
 The [export check](CHECKS.md) rejects path, ID and completeness errors in the
 staged commit and CI.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
-Do not install Beads hooks or let the tracker rewrite `AGENTS.md`.
+The [hook comparison](evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
+`post-merge` and `post-checkout` imports only in the main integration checkout.
+After `git config core.hooksPath .githooks`, opt in there with
+`git config --local loka.beads.integrationRoot "$(pwd -P)"`; remove that setting
+with `git config --local --unset loka.beads.integrationRoot`. The hook checks for
+unexported local changes before importing and never stages, commits, pushes or
+closes an issue. A failed import prints a recovery instruction; Git's completed
+merge/checkout cannot be rolled back by a post-hook. These Git hooks run with
+either Codex or Claude Code in that checkout. Do not install Beads-provided hooks
+or let the tracker rewrite `AGENTS.md`.
 
 At the next two source merges, check whether ready/blocked work and Claude/Codex
 handoff remain accurate without duplicating the roadmap. Retire the pilot through
