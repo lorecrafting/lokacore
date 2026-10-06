@@ -64,3 +64,31 @@ actual frozen-v030 kernel load and acquired/qualified/usable swim query.
 No source tests, mutations, fixtures, devices, browser preview or owner save changed.
 Ponytail Review: existing movement, skills, resources, one job, fatal sequence
 and custody suffice; the general recovery breadth is D6-R1's only scope finding.
+
+## Scoped D6-R1 fix recheck — APPROVE
+
+Corrected contract head `705e78a4244741b4d274f068ac307a3d54f89677`,
+with the initial review record at `9cb01201c83455bd1e29f7fb249e46bb8d799bd6`.
+**APPROVE — selected documentation only. D6-R1 is closed; no open findings.**
+
+Reviewed only the six-file fix and its direct contract consumers. Decision,
+brief and mechanics now restrict Chapel recovery to an actual actor-owned
+nonempty corpse currently in `well_bottom` or `pool_bottom`. Protocol requires
+the same current-location admission, Book lists only eligible underwater corpses,
+and the recovery receipt binds the eligible room at acceptance without comparing
+historical item custody to later lawful custody. No active general-corpse
+eligibility claim remains in these clauses.
+
+An owned nonempty isle corpse is ineligible at Chapel, so its original roots
+remain on the isle and D1's existing fare-waived physical recovery trip retains
+its purpose. The brief explicitly requires both no Chapel offer for that corpse
+and the retained D1 waiver. The fix preserves exact selected corpse targeting,
+root transfer, descendant/empty-corpse identity, forced overload and replay rules.
+Water deadline and other settled contract terms are unchanged.
+
+`mise exec -- elixir bin/check_docs.exs` passes: 650 documents, zero broken links,
+zero unreachable. Fix and review-record whitespace checks pass. Ponytail Review:
+lean scope restriction using the same custody owner; no new machinery.
+No source, fixtures, runtime tests, preview, devices or owner save changed.
+Publication, latest dependency re-pin, typed source contracts and implementation
+proof remain the brief's later gates; this approval supplies no source proof.

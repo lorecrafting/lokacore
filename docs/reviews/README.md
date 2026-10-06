@@ -410,4 +410,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D6 independent Astra pacing advice](2026-10-06-d6-water-pacing-astra-advice.md): advice only; PM adopts separate replacement tuning; fresh scoped approval remains pending.
 
-- [D6 selected contract independent review](2026-10-06-d6-water-depths-selected-review.md): exact head `0ff5f75e`, CHANGES REQUIRED for D6-R1; general Chapel recovery bypasses D1's physical isle recovery, awaiting the underwater-only fix and scoped recheck.
+- [D6 selected contract independent review](2026-10-06-d6-water-depths-selected-review.md): initial head `0ff5f75e`, CHANGES REQUIRED for D6-R1; [scoped recheck](2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) APPROVE at corrected contract `705e78a4`, preserving D1 recovery through underwater-only Chapel eligibility. Documentation only; source proof remains pending.
