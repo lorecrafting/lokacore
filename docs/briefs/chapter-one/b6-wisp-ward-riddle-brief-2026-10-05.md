@@ -1,14 +1,16 @@
 # B6 — S4 Wisp: adopted developer brief
 
 **Branch:** `chapter-1/b6-wisp-ward`, not created by planning.
-**Inspected base:** local main `98cc60b1647d031eed790ca085681bbe62af9d73`,
-chapter `ashmere_missing_child@0.0.18`, API1.16; current independent hash/IDs
-are `protocol/fixtures/missing_child_v018_hash.json` and `missing_child_v018_ids.json`.
-Q2's reviewed ASCII riddle is installed. B4 and B5 have approved plans, not source;
-retain their existing null implementation/successor pins. B6 dependency source heads,
-release, API, artifact hash, generated IDs, implementation/review head, PR and proof:
-null. Re-pin actually merged B4/B5/Q2 before source assignment; this brief selects
-behavior and does not authorize a premature source GO or remote publication.
+**Planning base:** local main `98cc60b1647d031eed790ca085681bbe62af9d73`,
+chapter v018/API1.16. Source assignment began from reviewed local main
+`fe25fe07702a957e4731eb4254ea4385e09b1e4b`, containing B4 light and B5 herbs.
+B4 source/fix `a3f98976`, v021/API1.19: [proof](../../evidence/2026-10-05-b4-light/README.md).
+B5 source `802edd92`, v019/API1.17: [draft and independent pins](b5-infirmary-herbs-local-pr-2026-10-05.md).
+The final B6 predecessor is published B7 main
+`547f809ccdd587498dee86cb14822f564efee642`, v022/API1.20:
+[proof and reviewed pins](../../evidence/2026-10-05-b7-waterskin/README.md).
+B6 source advances to v023/API1.21; the [local draft](b6-wisp-local-pr-2026-10-05.md)
+records its independent pins and proof. Hosted B6 PR/CI and source reviews remain null.
 PM adoption: Codex Sol medium; source implementation: Sol high.
 
 ## Player outcome and governing clauses

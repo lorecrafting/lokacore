@@ -207,6 +207,9 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `buy`
   - `sell`
   - `harvest`
+  - `fill`
+  - `pour`
+  - `drink`
   - `ignite`
   - `douse`
   - `refuel`
@@ -251,6 +254,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `quest.retire`: API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only.
   - `fuel.set`: Replace one declared item fuel history with exact whole-row precondition at the authoritative clock.
   - `choice.attempt`
+  - `liquid.set`
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
@@ -268,6 +272,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `entity`
   - `encounter`
   - `escort`
+  - `liquid`
   - `fuel`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
@@ -353,6 +358,9 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `scene_ended`: The last continue ends a scene; causal position 2 leaves fact_changed at 1. No scene_started in the modal subset.
   - `entity_died`
   - `attack_result`
+  - `filled`
+  - `poured`
+  - `drank`
 
 ## Fact contracts (`protocol/fact.schema.json`)
 
@@ -434,6 +442,15 @@ Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id i
 Registered invariants (docs/archive/ROADMAP.md, verification harness): stable id, spec citation, statement, and where a check by that id runs today.
 
 - **InvariantEntry**: One entry of protocol/invariants.json. citation names a docs/archive/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is where a check by this id runs today (test/loka/core/registries_test.exs holds it to the code): elixir_and_typescript, Loka.Core.Invariants.check/2 and its twin kernel/ts/src/invariants.ts check, on composition and commit observations (protocol/fixtures/composition.json); typescript, only the TypeScript kernel (TypeScript-first rules, ADR-074), kernel/ts/src/world.ts holds on a world or kernel/ts/src/invariants.ts check on one step's observation, run by the simulator (kernel/ts/test/sim.ts); none, no check by id yet, whatever the code and tests enforce (the slice that adds one sets the value; docs/ROADMAP.md plans it).
+
+## Finite liquid contracts (`protocol/liquid.schema.json`)
+
+B7 exact item contents and authored mass/serving metadata; no clock or resource effects.
+
+- **LiquidDefinition**: Cartridge-owned mass, integer serving and unit labels for a declared liquid.
+- **LiquidRow**: Exact vessel contents: null iff zero, positive declared kind bounded by immutable capacity.
+- **LiquidView**: Confirmed vessel contents and authored capacity/labels, never an optimistic amount.
+- **VesselSpec**: Opted finite vessel shell with authored positive capacity and initial contents.
 
 ## Manifest contracts (`protocol/manifest.schema.json`)
 

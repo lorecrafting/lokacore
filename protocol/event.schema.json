@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DomainEvent contracts",
-  "description": "The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1, §8, §11; 14 §R3A).",
+  "description": "The DomainEvent envelope and registry, proposed versus committed (04 \u00a71, \u00a75.1, \u00a78, \u00a711; 14 \u00a7R3A).",
   "$defs": {
     "EventId": {
       "description": "A DomainEvent, created from IdSource (01 A8). Lowercase hyphenated UUID, any version.",
@@ -12,7 +12,7 @@
       ]
     },
     "CorrelationId": {
-      "description": "Shared by every event, effect and message derived from one command (04 §11). Lowercase hyphenated UUID, any version.",
+      "description": "Shared by every event, effect and message derived from one command (04 \u00a711). Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -20,7 +20,7 @@
       ]
     },
     "CausationId": {
-      "description": "The CommandId or EventId that caused this value (04 §11). Lowercase hyphenated UUID, any version.",
+      "description": "The CommandId or EventId that caused this value (04 \u00a711). Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -28,7 +28,7 @@
       ]
     },
     "DomainEvent": {
-      "description": "A typed fact from deterministic evaluation (04 §8). Inside a decision it is PROPOSED: it may drive in-decision reducers but MUST NOT be published, projected or sent anywhere (04 §5.1). It becomes observable only as a CommittedEvent. scope is semantic, not a broadcast audience (04 §8). position is the monotonic causal position in the decision (04 §5.2). 04 §8's subject_id lives in each typed payload that has a subject, where it is required.",
+      "description": "A typed fact from deterministic evaluation (04 \u00a78). Inside a decision it is PROPOSED: it may drive in-decision reducers but MUST NOT be published, projected or sent anywhere (04 \u00a75.1). It becomes observable only as a CommittedEvent. scope is semantic, not a broadcast audience (04 \u00a78). position is the monotonic causal position in the decision (04 \u00a75.2). 04 \u00a78's subject_id lives in each typed payload that has a subject, where it is required.",
       "type": "object",
       "properties": {
         "id": {
@@ -116,7 +116,7 @@
       ]
     },
     "CommittedEvent": {
-      "description": "A DomainEvent after its enclosing commit succeeded (04 §5.1): the same value, with the committed revision. Only this form may be traced, projected or fanned out.",
+      "description": "A DomainEvent after its enclosing commit succeeded (04 \u00a75.1): the same value, with the committed revision. Only this form may be traced, projected or fanned out.",
       "type": "object",
       "properties": {
         "committed_revision": {
@@ -155,7 +155,7 @@
       ]
     },
     "EventPayload": {
-      "description": "The registered event types (04 §8) the R6P proof uses (pre-release-proof.md). A cartridge's custom events are one type, custom_event, named by a DefinitionRef in the cartridge's namespace, so content never emits an engine-owned type (05 §28).",
+      "description": "The registered event types (04 \u00a78) the R6P proof uses (pre-release-proof.md). A cartridge's custom events are one type, custom_event, named by a DefinitionRef in the cartridge's namespace, so content never emits an engine-owned type (05 \u00a728).",
       "oneOf": [
         {
           "description": "entity_id entered room_id.",
@@ -305,7 +305,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A story point the cartridge declares (cartridge.schema.json StoryPointDefinition) reached with one of its outcomes (23 §3), following choice_resolved in the root sequence of the decision that reached it; the host commits its pending report with that decision (23 §4, 03 §26).",
+          "description": "A story point the cartridge declares (cartridge.schema.json StoryPointDefinition) reached with one of its outcomes (23 \u00a73), following choice_resolved in the root sequence of the decision that reached it; the host commits its pending report with that decision (23 \u00a74, 03 \u00a726).",
           "type": "object",
           "properties": {
             "type": {
@@ -326,7 +326,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A fact changed from old to new (03 §7). subject_id is present exactly when the fact.assign that changed it had one.",
+          "description": "A fact changed from old to new (03 \u00a77). subject_id is present exactly when the fact.assign that changed it had one.",
           "type": "object",
           "properties": {
             "type": {
@@ -354,7 +354,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A cartridge's custom event (06 §20 custom DomainEvents; 04 §5.3 event emission), emitted by an ActionRecipe's event.emit step: event is the DefinitionRef of kind event, the cartridge's id and version and the step's key; subject_id is the recipe's target.",
+          "description": "A cartridge's custom event (06 \u00a720 custom DomainEvents; 04 \u00a75.3 event emission), emitted by an ActionRecipe's event.emit step: event is the DefinitionRef of kind event, the cartridge's id and version and the step's key; subject_id is the recipe's target.",
           "type": "object",
           "properties": {
             "type": {
@@ -375,7 +375,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A performed ActionRecipe completed (06 §20; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the outcome's sequence on every accepted perform whose outcome is performed (no check) or success; a failed attempt emits its check_failed and no action_completed (R5 S6a), and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
+          "description": "A performed ActionRecipe completed (06 \u00a720; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the outcome's sequence on every accepted perform whose outcome is performed (no check) or success; a failed attempt emits its check_failed and no action_completed (R5 S6a), and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
           "type": "object",
           "properties": {
             "type": {
@@ -396,7 +396,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A Check passed (check@1; 21 §7 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
+          "description": "A Check passed (check@1; 21 \u00a77 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
           "type": "object",
           "properties": {
             "type": {
@@ -417,7 +417,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A Check failed (check@1; 21 §7 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
+          "description": "A Check failed (check@1; 21 \u00a77 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
           "type": "object",
           "properties": {
             "type": {
@@ -438,7 +438,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A barrier changed state from `from` to `to` (barrier@1; 21 §5 Barrier): opened (closed to open), closed (open to closed), locked (closed to locked) or unlocked (locked to closed). Engine-owned: barrier@1 emits it at position 1 of every accepted open, close, lock and unlock.",
+          "description": "A barrier changed state from `from` to `to` (barrier@1; 21 \u00a75 Barrier): opened (closed to open), closed (open to closed), locked (closed to locked) or unlocked (locked to closed). Engine-owned: barrier@1 emits it at position 1 of every accepted open, close, lock and unlock.",
           "type": "object",
           "properties": {
             "type": {
@@ -576,6 +576,92 @@
               "loss": 1
             }
           ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "filled"
+            },
+            "source_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "vessel_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "kind": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "source_id",
+            "vessel_id",
+            "kind",
+            "quantity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "poured"
+            },
+            "source_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "receiver_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "kind": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "source_id",
+            "receiver_id",
+            "kind",
+            "quantity"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "drank"
+            },
+            "vessel_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "kind": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "vessel_id",
+            "kind",
+            "quantity"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

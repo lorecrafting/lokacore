@@ -1588,5 +1588,283 @@
       "extra": true
     },
     "valid": false
+  },
+  {
+    "name": "declared topic projection",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "place": {
+        "id": "22222222-3333-4444-8555-666666666666",
+        "title": {
+          "key": "room.marsh_light.title"
+        },
+        "description": {
+          "key": "room.marsh_light.dark"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "topics": [
+        {
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          },
+          "label": "topic.ward"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "topic projection missing topic",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "place": {
+        "id": "22222222-3333-4444-8555-666666666666",
+        "title": {
+          "key": "room.marsh_light.title"
+        },
+        "description": {
+          "key": "room.marsh_light.dark"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "topics": [
+        {
+          "label": "topic.ward"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic projection missing label",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "place": {
+        "id": "22222222-3333-4444-8555-666666666666",
+        "title": {
+          "key": "room.marsh_light.title"
+        },
+        "description": {
+          "key": "room.marsh_light.dark"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "topics": [
+        {
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic projection extra field",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "place": {
+        "id": "22222222-3333-4444-8555-666666666666",
+        "title": {
+          "key": "room.marsh_light.title"
+        },
+        "description": {
+          "key": "room.marsh_light.dark"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "topics": [
+        {
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          },
+          "label": "topic.ward",
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic map rejects wrong reference kind",
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "manifest": {
+        "api_version": "loka/v3",
+        "id": "ashmere_rooms",
+        "version": "0.0.1",
+        "title": "Ashmere — Rooms",
+        "requires": {
+          "kernel_api": {
+            "at_least": "1.0",
+            "below": "2.0"
+          },
+          "content_schema": 1,
+          "rule_ir": 1,
+          "capabilities": {
+            "movement": 1,
+            "description_variant": 1,
+            "resource": 1,
+            "schedule": 1
+          },
+          "client_features": []
+        },
+        "supported_profiles": [
+          "offline_private"
+        ]
+      },
+      "lock": {
+        "format": "loka-capability-lock-v1",
+        "capabilities": {
+          "movement": 1,
+          "description_variant": 1,
+          "resource": 1,
+          "schedule": 1
+        }
+      },
+      "facts": {},
+      "policies": {},
+      "actions": {},
+      "rooms": {
+        "ashmere_rooms@0.0.1:room/boathouse": {
+          "key": "boathouse",
+          "title": "room.boathouse.title",
+          "description": "room.boathouse.description",
+          "exits": {
+            "east": {
+              "to": {
+                "cartridge_id": "ashmere_rooms",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "ferry_landing"
+              }
+            }
+          }
+        },
+        "ashmere_rooms@0.0.1:room/ferry_landing": {
+          "key": "ferry_landing",
+          "title": "room.ferry_landing.title",
+          "description": "room.ferry_landing.description",
+          "exits": {
+            "north": {
+              "to": {
+                "cartridge_id": "ashmere_rooms",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "well_lane"
+              }
+            },
+            "west": {
+              "to": {
+                "cartridge_id": "ashmere_rooms",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "boathouse"
+              }
+            }
+          }
+        },
+        "ashmere_rooms@0.0.1:room/well_lane": {
+          "key": "well_lane",
+          "title": "room.well_lane.title",
+          "description": "room.well_lane.description",
+          "exits": {
+            "south": {
+              "to": {
+                "cartridge_id": "ashmere_rooms",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "ferry_landing"
+              }
+            }
+          }
+        }
+      },
+      "entry": {
+        "cartridge_id": "ashmere_rooms",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      },
+      "text": {
+        "room.ferry_landing.title": "Ferry Landing",
+        "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+        "room.boathouse.title": "Boathouse",
+        "room.boathouse.description": "Oars and nets hang from the rafters above Bram's ferry.",
+        "room.well_lane.title": "Well Lane",
+        "room.well_lane.description": "Worn steps lead to the village well. A bucket hangs from its chain."
+      },
+      "resources": {
+        "ashmere_rooms@0.0.1:resource/hp": {
+          "key": "hp",
+          "minimum": 0,
+          "maximum": 20,
+          "start": 20,
+          "gain": 5
+        },
+        "ashmere_rooms@0.0.1:resource/ma": {
+          "key": "ma",
+          "minimum": 0,
+          "maximum": 100,
+          "start": 100,
+          "gain": 4
+        },
+        "ashmere_rooms@0.0.1:resource/mv": {
+          "key": "mv",
+          "minimum": 0,
+          "maximum": 82,
+          "start": 82,
+          "gain": 18
+        }
+      },
+      "topics": {
+        "ashmere_missing_child@0.0.23:skill/ward": {
+          "key": "ward",
+          "label": "topic.ward",
+          "fact": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "fact",
+            "key": "topic_ward_known"
+          }
+        }
+      }
+    },
+    "valid": false
   }
 ]

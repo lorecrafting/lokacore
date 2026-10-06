@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StateDelta contracts",
-  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 \u00a71, \u00a75.1, \u00a75.3; 14 \u00a7R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.",
+  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.",
   "$defs": {
     "QuestInstanceId": {
-      "description": "A QuestInstance (03 \u00a712; 06 \u00a71), created at activation from IdSource. Lowercase hyphenated UUID, any version.",
+      "description": "A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -12,7 +12,7 @@
       ]
     },
     "ContinuationId": {
-      "description": "A pending choice/continuation (04 \u00a75.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "description": "A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -20,7 +20,7 @@
       ]
     },
     "JobId": {
-      "description": "A same-authority scheduled job (03 \u00a713; 04 \u00a75.4), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "description": "A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -28,7 +28,7 @@
       ]
     },
     "FactValue": {
-      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 \u00a77). Which one a fact takes is its FactType, which the compiler checks.",
+      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.",
       "anyOf": [
         {
           "$ref": "action.schema.json#/$defs/Key"
@@ -50,7 +50,7 @@
       ]
     },
     "RoleBinding": {
-      "description": "One role a continuation bound when it opened (04 \u00a75.3 'bound roles'), for example the NPC the choice is made with.",
+      "description": "One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.",
       "type": "object",
       "properties": {
         "role": {
@@ -73,7 +73,7 @@
       ]
     },
     "WriterGroup": {
-      "description": "Coordinator-assigned writer-group identity of one explicit sequence (04 \u00a75.3): the root sequence or one reaction delivery. Content never chooses it.",
+      "description": "Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.",
       "type": "integer",
       "minimum": 0,
       "examples": [
@@ -82,7 +82,7 @@
       ]
     },
     "StateDelta": {
-      "description": "A non-committed proposal of authoritative changes (04 \u00a71). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 \u00a75.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 \u00a75.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.",
+      "description": "A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.",
       "type": "object",
       "properties": {
         "ops": {
@@ -130,7 +130,7 @@
       ]
     },
     "DeltaOp": {
-      "description": "One registered delta operation (04 \u00a75.3 families). Each description names the op's target and precondition.",
+      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition.",
       "oneOf": [
         {
           "description": "Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).",
@@ -189,7 +189,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Conserved transfer. Target: containment (entity_id). Preconditions: the entity is in source_id; destination_id is not the entity or inside it; destination capacity holds (03 \u00a723: one container per entity).",
+          "description": "Conserved transfer. Target: containment (entity_id). Preconditions: the entity is in source_id; destination_id is not the entity or inside it; destination capacity holds (03 §23: one container per entity).",
           "type": "object",
           "properties": {
             "op": {
@@ -260,7 +260,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Target: quest (instance_id). Preconditions: current state is `from`; from -> to is a legal 06 \u00a71 transition; `outcome` is present exactly when `to` is resolved or failed with an outcome.",
+          "description": "Target: quest (instance_id). Preconditions: current state is `from`; from -> to is a legal 06 §1 transition; `outcome` is present exactly when `to` is resolved or failed with an outcome.",
           "type": "object",
           "properties": {
             "op": {
@@ -292,7 +292,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Open a durable continuation (04 \u00a75.3 'Choice/continuation resolution') with everything needed to resume it after a restart: the character who may choose, the owning definition and beat, the bound roles and the offered choices. Target: choice (continuation_id). Precondition: the continuation does not exist.",
+          "description": "Open a durable continuation (04 §5.3 'Choice/continuation resolution') with everything needed to resume it after a restart: the character who may choose, the owning definition and beat, the bound roles and the offered choices. Target: choice (continuation_id). Precondition: the continuation does not exist.",
           "type": "object",
           "properties": {
             "op": {
@@ -346,7 +346,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Target: choice (continuation_id). Preconditions: the continuation is pending, offers choice_id, and opened at committed revision expected_revision (04 \u00a75.3 'expected revision').",
+          "description": "Target: choice (continuation_id). Preconditions: the continuation is pending, offers choice_id, and opened at committed revision expected_revision (04 §5.3 'expected revision').",
           "type": "object",
           "properties": {
             "op": {
@@ -397,7 +397,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Target: job (job_id). Preconditions: the job does not exist; due_time is strictly later than the current logical time, and during an explicit advance later than its target (04 \u00a75.4).",
+          "description": "Target: job (job_id). Preconditions: the job does not exist; due_time is strictly later than the current logical time, and during an explicit advance later than its target (04 §5.4).",
           "type": "object",
           "properties": {
             "op": {
@@ -435,7 +435,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Consume a due job occurrence when its run_job commits, so it is never selected again (04 \u00a75.4). Target: job (job_id). Preconditions: the job is pending and its due_time is not later than the visited logical time (the clock at ordinary admission, or the job's visited due time during an explicit advance; 04 \u00a75.4). It is proposed only by the job's own run_job at its visited due time.",
+          "description": "Consume a due job occurrence when its run_job commits, so it is never selected again (04 §5.4). Target: job (job_id). Preconditions: the job is pending and its due_time is not later than the visited logical time (the clock at ordinary admission, or the job's visited due time during an explicit advance; 04 §5.4). It is proposed only by the job's own run_job at its visited due time.",
           "type": "object",
           "properties": {
             "op": {
@@ -456,7 +456,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Target: clock. Preconditions: current logical time equals `from`; `to` is later than `from` (04 \u00a75.4).",
+          "description": "Target: clock. Preconditions: current logical time equals `from`; `to` is later than `from` (04 §5.4).",
           "type": "object",
           "properties": {
             "op": {
@@ -481,7 +481,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Resource adjustment (04 \u00a75.3). Target: resource (resource, entity_id). Preconditions: the resource has a spec (ResourceSpec); its current value equals `from`; `to` is within the spec's bounds; never clamped. The current value is derived: the stored value (start, stored at time 0, when unset) plus gain for each hour boundary (floor(time / 3600)) the base clock has crossed since it was stored, stopping at maximum (regeneration). Writes {value: to, at: the base clock}, so a write stores the derived value. The rule does the arithmetic; a same-group sequence chains (each op's `from` the previous op's `to`). Opted recovery requires valid {value,at,rate,remainder} metadata and settles the old rate at the committed base clock. Optional next_rate must belong to its authored table. Writes the settled remainder and retained/new rate, clearing remainder when to equals maximum. Optional at is authoritative due-job settlement time: base clock <= at <= advance horizon. Omission retains frozen base-clock settlement. Not cartridge-authored.",
+          "description": "Resource adjustment (04 §5.3). Target: resource (resource, entity_id). Preconditions: the resource has a spec (ResourceSpec); its current value equals `from`; `to` is within the spec's bounds; never clamped. The current value is derived: the stored value (start, stored at time 0, when unset) plus gain for each hour boundary (floor(time / 3600)) the base clock has crossed since it was stored, stopping at maximum (regeneration). Writes {value: to, at: the base clock}, so a write stores the derived value. The rule does the arithmetic; a same-group sequence chains (each op's `from` the previous op's `to`). Opted recovery requires valid {value,at,rate,remainder} metadata and settles the old rate at the committed base clock. Optional next_rate must belong to its authored table. Writes the settled remainder and retained/new rate, clearing remainder when to equals maximum. Optional at is authoritative due-job settlement time: base clock <= at <= advance horizon. Omission retains frozen base-clock settlement. Not cartridge-authored.",
           "type": "object",
           "properties": {
             "op": {
@@ -523,7 +523,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Start an actor's cooldown of an action at the attempt's admission time (21 \u00a74 Time, \u00a77 Cost). Target: cooldown (actor_id, action). Preconditions: the stored start equals `from` (both absent when it never started); `at` equals the base clock. Writes `at`. Whether the action is still cooling down is derived by the rule that owns it (rules/action_recipe.ts), not by composition.",
+          "description": "Start an actor's cooldown of an action at the attempt's admission time (21 §4 Time, §7 Cost). Target: cooldown (actor_id, action). Preconditions: the stored start equals `from` (both absent when it never started); `at` equals the base clock. Writes `at`. Whether the action is still cooling down is derived by the rule that owns it (rules/action_recipe.ts), not by composition.",
           "type": "object",
           "properties": {
             "op": {
@@ -555,7 +555,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Lifecycle transition of a barrier (04 \u00a75.3; 21 \u00a75 Barrier), proposed only by barrier@1. Target: barrier (barrier). Preconditions: its current state (the barrier's initial state when unset) is `from`, and from -> to is legal: closed -> open, open -> closed, closed -> locked, locked -> closed (room.schema.json BarrierState). A same-group sequence may chain (unlock then open); a second writer group conflicts.",
+          "description": "Lifecycle transition of a barrier (04 §5.3; 21 §5 Barrier), proposed only by barrier@1. Target: barrier (barrier). Preconditions: its current state (the barrier's initial state when unset) is `from`, and from -> to is legal: closed -> open, open -> closed, closed -> locked, locked -> closed (room.schema.json BarrierState). A same-group sequence may chain (unlock then open); a second writer group conflicts.",
           "type": "object",
           "properties": {
             "op": {
@@ -776,7 +776,7 @@
             "value"
           ],
           "additionalProperties": false,
-          "description": "Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null\u2192following, following\u2192separated, separated\u2192following, following\u2192completed."
+          "description": "Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed."
         },
         {
           "type": "object",
@@ -875,6 +875,34 @@
             "quest_instance_id",
             "expected_revision",
             "prior_count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "liquid.set"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "from": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            },
+            "to": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "item_id",
+            "from",
+            "to"
           ],
           "additionalProperties": false
         }
@@ -1054,7 +1082,68 @@
       ]
     },
     "MutationTarget": {
-      "description": "Canonical mutation-target identity (04 \u00a75.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 \u00a75.5).",
+      "examples": [
+        {
+          "kind": "fact",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          }
+        },
+        {
+          "kind": "containment",
+          "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "kind": "quest",
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "kind": "choice",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "kind": "job",
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        },
+        {
+          "kind": "clock"
+        },
+        {
+          "kind": "resource",
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "kind": "cooldown",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock"
+        },
+        {
+          "kind": "barrier",
+          "barrier": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "barrier",
+            "key": "cell_door"
+          }
+        },
+        {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555"
+        }
+      ],
       "oneOf": [
         {
           "description": "A scoped fact.",
@@ -1278,6 +1367,22 @@
           "type": "object",
           "properties": {
             "kind": {
+              "const": "liquid"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
               "const": "fuel"
             },
             "item_id": {
@@ -1291,68 +1396,7 @@
           "additionalProperties": false
         }
       ],
-      "examples": [
-        {
-          "kind": "fact",
-          "fact": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "fact",
-            "key": "search_plan"
-          },
-          "scope": {
-            "kind": "player",
-            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
-          }
-        },
-        {
-          "kind": "containment",
-          "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
-        },
-        {
-          "kind": "quest",
-          "instance_id": "55555555-6666-8777-8888-999999999999"
-        },
-        {
-          "kind": "choice",
-          "continuation_id": "44444444-5555-8666-8777-888888888888"
-        },
-        {
-          "kind": "job",
-          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
-        },
-        {
-          "kind": "clock"
-        },
-        {
-          "kind": "resource",
-          "resource": {
-            "cartridge_id": "ashmere_dusk",
-            "cartridge_version": "0.0.1",
-            "kind": "resource",
-            "key": "mv"
-          },
-          "entity_id": "11111111-2222-4333-8444-555555555555"
-        },
-        {
-          "kind": "cooldown",
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "action": "pick_lock"
-        },
-        {
-          "kind": "barrier",
-          "barrier": {
-            "cartridge_id": "ashmere_gate",
-            "cartridge_version": "0.0.1",
-            "kind": "barrier",
-            "key": "cell_door"
-          }
-        },
-        {
-          "kind": "escort",
-          "actor_id": "11111111-2222-4333-8444-555555555555"
-        }
-      ]
+      "description": "Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5)."
     },
     "EncounterId": {
       "description": "One finite combat encounter, minted from the Attack command IdSource.",

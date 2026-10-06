@@ -90,12 +90,14 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
           ...talk,
           command: 'talk' as Key,
           speaker,
-          dialogue: {
-            cartridge_id: world.cartridge.manifest.id,
-            cartridge_version: world.cartridge.manifest.version,
-            kind: 'dialogue',
-            key,
-          },
+          ...(label && {
+            dialogue: {
+              cartridge_id: world.cartridge.manifest.id,
+              cartridge_version: world.cartridge.manifest.version,
+              kind: 'dialogue',
+              key,
+            },
+          }),
         },
       ],
     ];

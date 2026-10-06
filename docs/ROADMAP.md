@@ -162,9 +162,11 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **9 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B4, B5, C1).
-GitHub `main` has all eight through [#205](https://github.com/lorecrafting/lokacore/pull/205)
-(A1, B1, A2, B2, A3, B3, B5, C1).
+Local `main` has completed **10 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B7, C1). GitHub `main` has the first nine;
+the latest source publication is [#206](https://github.com/lorecrafting/lokacore/pull/206),
+B4 refillable light and safe dark-well recovery. B7 Well Lane waterskins and
+liquid actions await their publication PR.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -187,7 +189,7 @@ safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-20
 [save/protocol second opinion](reviews/2026-10-05-b4-light-save-second-review.md).
 All source findings closed on local `main` at chapter 0.0.21/API1.19, hash
 `a274bb1c6b22306718648bbcb1b967ee017e0420b62589afe10e1009434dbbfa`
-and 94 IDs. The accumulated local check passed; GitHub publication remains ahead.
+and 94 IDs. The accumulated local and six hosted checks passed; it is published in #206.
 
 B5 Infirmary Herbs is implemented on local `main` at chapter 0.0.19/API1.17.
 Its finite fenwort harvest, four bandage exchanges and bounded Priory contribution
@@ -201,13 +203,18 @@ B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6
 and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 on local base `98cc60b1`. The route finding was fixed and its
 [independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
-B4 source dependency, implementation and successor release/proof pins remain ahead.
+B4 source is published in #206; B6 implementation is active in an isolated worktree,
+with final shared release/proof pins to follow B7 integration.
 
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
-against local B3 integration at `4bfe252e`. Its
-[independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md) approved;
-source implementation, successor release pins and proof remain ahead.
+with an [independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md).
+Its [primary source review](reviews/2026-10-05-b7-waterskin-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-b7-waterskin-save-second-review.md)
+approved after the authored-alias, Pour ownership and live-quantity findings were
+fixed. Local `main` carries chapter 0.0.22/API1.20, hash
+`0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`
+and 96 IDs. Accumulated local checks passed; hosted publication remains ahead.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
@@ -224,6 +231,16 @@ approved after all findings were fixed. Local `main` carries chapter 0.0.20/API1
 the independently pinned hash `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e`
 and 92 IDs. The accumulated local check and all six hosted checks passed;
 C1 is published in #205.
+
+C2 Watchman's Rounds has an [adopted finite-patrol contract](decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md),
+[focused source brief](briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
+re-pinned to current GitHub main `cc43d018`, and
+[independent plan approval](reviews/2026-10-05-c2-watchmans-rounds-plan-review.md).
+B1, Q2-C-rescue and reviewed C1 are integrated. C2 source work is active in an
+isolated worktree. It found a shared exact-Talk selector need also implemented
+by B6; final C2 integration now waits for that reviewed selector. Shared
+cartridge, protocol and generated edits require serialization and a final
+predecessor re-pin. C2 successor pins, source reviews and playable proof remain ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)

@@ -1,17 +1,14 @@
 # size: allow 320, typed terminal quest replacement joins portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
-  StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
-  TypeScript twin; both run the portable composition fixtures.
-
-  Takes a committed base state and a contract-valid StateDelta. Ops apply in their semantic
-  order to a proposal overlay; each op's precondition reads the overlay over the base. An op
-  on a target another writer group wrote faults `conflicting_write`; the base is never copied.
+  StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of `kernel/ts/src/foundation/compose.ts`.
+  Both run the portable composition fixtures. Contract-valid ops apply in semantic order to
+  an overlay; preconditions read overlay over base. Different writer groups sharing a target
+  fault `conflicting_write`. The committed base is never copied.
 
   Base state, a JSON object (absent sections are empty):
 
-  - `"clock"`: the committed logical time, required: without an integer clock every delta
-    faults `precondition_failed` on the clock target (fail closed);
+  - `"clock"`: required integer logical time; otherwise faults `precondition_failed` on clock;
   - `"facts"`: canonical fact MutationTarget text => FactValue (compared as opaque values);
   - `"fact_defaults"`: canonical DefinitionRef text => FactValue for unset facts;
   - `"containers"`: EntityId => its one container (03 §23); `"capacities"`: EntityId =>
@@ -21,19 +18,19 @@ defmodule Loka.Core.Compose do
     host-assigned `opened_revision`;
   - `"jobs"`: JobId => `job`, `due_time`, `status`, optional `encounter_id`;
   - `"encounters"`: EncounterId => EncounterRow (participants, room, status, round and job);
-  - `"resource_specs"`: canonical DefinitionRef text => ResourceSpec (`minimum`, `maximum`,
-    `start`, `gain`, optional `regen`); `"resources"`: canonical resource MutationTarget text =>
-    `value`, `at`, with required `rate`, `remainder` for opted recovery; a resource's current
-    value is `current/3`;
+  - `"resource_specs"`: canonical DefinitionRef => ResourceSpec (`minimum`, `maximum`, `start`,
+    `gain`, optional `regen`); `"resources"`: canonical resource target => `value`, `at`, plus
+    required `rate`, `remainder` for opted recovery; `current/3` reads its current value;
   - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started;
   - `"barrier_initial"`: canonical DefinitionRef text => BarrierState for unset barriers;
-    `"barriers"`: canonical barrier MutationTarget text => BarrierState.
+    `"barriers"`: canonical barrier MutationTarget text => BarrierState;
+  - `"liquid_specs"`: ItemId => immutable `capacity`, declared `kinds`;
+    `"liquids"`: ItemId => exact `kind`, `quantity` row.
 
-  Result: `%{"changes" => rows}`, one `%{"target", "value"}` per written MutationTarget,
-  sorted by canonical target text (the rows the host commits, ADR-072; a new continuation
-  lacks `opened_revision` until the host commits it), or `%{"fault" => fault}`, a fault
-  DecisionResult naming the op's target when there is one. Budgets from the composition
-  profile are checked first, then ops in order: conflict before precondition.
+  Result: `%{"changes" => rows}` sorted by canonical target text, one `%{"target", "value"}`
+  per target (ADR-072), or `%{"fault" => fault}` naming the failed op's target when present.
+  Continuations lack `opened_revision` until commit. Budgets precede ops, conflicts precede
+  preconditions. An overlay failure discards the whole proposal.
 
   An explicit advance is a delta with `time.advance`; its target (the last `to`) is the
   visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
@@ -234,6 +231,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
     do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "liquid.set"} = op, t, {state, _, _} = ctx),
+    do: Loka.Core.Liquid.compose(op, read(t, ctx), state)
+
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
@@ -256,7 +256,6 @@ defmodule Loka.Core.Compose do
   defp check(true, value), do: {:ok, value}
   defp check(false, _), do: {:error, "precondition_failed"}
 
-  # The overlay's value for a target, else the base's.
   defp read(t, {state, _, overlay}) do
     case Map.fetch(overlay, key(t)) do
       {:ok, {_, _, value}} -> value
@@ -273,6 +272,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
+  defp base(%{"kind" => "liquid", "item_id" => i}, s), do: section(s, "liquids")[i]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]
   defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
   defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]

@@ -76,6 +76,7 @@
           "additionalProperties": false
         },
         "label": {
+          "description": "A distinct named Talk label opts that authored control into exact dialogue selection; omission retains first-eligible Talk.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },

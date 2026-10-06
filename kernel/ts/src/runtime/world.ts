@@ -21,6 +21,7 @@ import { invariants as factInvariants } from '../mechanics/fact.ts';
 import { refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
+import * as liquid from '../mechanics/liquid/rule.ts';
 import * as commerce from '../mechanics/commerce/rule.ts';
 import * as containment from '../mechanics/containment/rule.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
@@ -44,6 +45,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   description_variant: description_variant.decide,
   containment: containment.decide,
   commerce: commerce.decide,
+  liquid: liquid.decide,
   action_recipe: action_recipe.decide,
   schedule: schedule.decide,
   barrier: barrier.decide,

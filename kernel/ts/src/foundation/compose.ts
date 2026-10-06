@@ -1,4 +1,5 @@
 import { choice, pendingAtLimit } from './compose_choice.ts';
+import { composeLiquid } from './compose_liquid.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionEscort } from './compose_escort.ts';
@@ -105,6 +106,7 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
+  if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign':
       return assign(op, row, ctx);
@@ -212,6 +214,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
+    case 'liquid':
+      return get(section(s, 'liquids'), t.item_id);
     case 'clock':
       return s.clock;
     case 'fuel':

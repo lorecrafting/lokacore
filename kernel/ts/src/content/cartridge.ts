@@ -24,6 +24,7 @@ import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
+import { liquids } from './cartridge_liquids.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
 export interface Installed {
@@ -77,7 +78,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => refStage(c),
+    () => [...refStage(c), ...liquids(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -128,8 +129,8 @@ const DEFINITION_MAPS = [
   'scenes',
   'skills',
   'topics',
+  'liquids',
 ];
-
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const map of DEFINITION_MAPS) {

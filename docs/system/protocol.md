@@ -645,6 +645,13 @@ admission share current custody, reach, compatibility, capacity and load checks.
 Use structured filled/poured/drank outcomes containing bound participant IDs,
 kind and actual quantity; no consumer reads success from narration.
 
+The concrete metadata is `LiquidDefinition {key, label, unit_label, grams_per_unit,
+drink_amount}`, optional `ItemDefinition.vessel {capacity, unit_label, initial}`,
+optional detail `liquid_source` and optional `CompiledCartridge.liquids`. Initial
+and stored rows use a full liquid DefinitionRef or null. Immutable `liquid_specs`
+observations bind each vessel to capacity and declared kinds; `liquid_rows_valid`
+checks these specifications in both foundation kernels.
+
 The missing primitive is a typed exact-instance liquid row and
 `liquid.set {item_id, from, to}` with whole-row equality precondition and one
 writer target per item. Quantity is a bounded nonnegative integer; null kind iff
@@ -718,8 +725,10 @@ ActionSet. Shared visibility/light/discovery/quest/participant policies govern
 both offered controls and raw-command admission. For the real Aldric consumer,
 Talk gains an optional exact dialogue DefinitionRef;
 when supplied it must belong to the target speaker and resolve through the actor's
-ActionSet with its own eligibility rechecked. Omission keeps first-eligible-key
-behavior. This is a bounded selector, not a conversation graph. GameView reveals
+ActionSet with its own eligibility rechecked. An authored dialogue `label` opts
+its named Talk control into exact selection and supplies its distinct player label;
+unlabelled Talk controls omit the selector and keep first-eligible-key behavior.
+A raw Talk without the selector also keeps first-eligible-key behavior. This is a bounded selector, not a conversation graph. GameView reveals
 bank and committed attempts/limit for an opted sitting, never the canonical answer.
 The marker declares `perception: {self_luminous: true, title: TextKey}`;
 the NPC declares `perception: {discovered: DefinitionRef}` to a player Boolean.

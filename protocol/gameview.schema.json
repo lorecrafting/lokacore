@@ -1,10 +1,452 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GameView contracts",
-  "description": "The portable GameView envelope and its freshness (04 \u00a714-\u00a716; 00 \u00a74.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 \u00a715).",
   "$defs": {
+    "GameViewSnapshot": {
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "loka-gameview-v1"
+        },
+        "projection_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "view_freshness_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "view": {
+          "$ref": "#/$defs/GameView"
+        },
+        "narration": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NarrationRecord"
+          }
+        }
+      },
+      "required": [
+        "format",
+        "projection_sequence",
+        "view"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "format": "loka-gameview-v1",
+          "projection_sequence": 0,
+          "view_freshness_token": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+          "view": {
+            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "place": {
+              "id": "12121212-3434-4565-8787-909090909090",
+              "title": {
+                "key": "room.ferry_landing.title"
+              },
+              "description": {
+                "key": "room.ferry_landing.description",
+                "bindings": {
+                  "time": "clock.dusk"
+                }
+              }
+            },
+            "exits": [
+              {
+                "available": true,
+                "direction": "north"
+              },
+              {
+                "available": false,
+                "direction": "west",
+                "reason": {
+                  "code": "exit_locked",
+                  "message": {
+                    "key": "reason.causeway_flooded"
+                  }
+                }
+              }
+            ],
+            "actions": [
+              {
+                "available": true,
+                "action_key": "look",
+                "label": "action.look",
+                "target": {
+                  "kind": "none"
+                },
+                "input": []
+              },
+              {
+                "available": false,
+                "action_key": "wait",
+                "label": "action.wait",
+                "reason": {
+                  "code": "invalid_state"
+                },
+                "target": {
+                  "kind": "none"
+                },
+                "input": [
+                  "until"
+                ]
+              }
+            ],
+            "entities": [
+              {
+                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+                "name": "npc.wren.name",
+                "kind": "npc",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "talk",
+                    "label": "action.talk",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "room_occupants"
+                      ]
+                    },
+                    "input": []
+                  }
+                ]
+              }
+            ],
+            "inventory": [
+              {
+                "id": "11111111-2222-4333-8444-555555555555",
+                "name": "item.lantern.name",
+                "kind": "item",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "drop",
+                    "label": "action.drop",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "inventory"
+                      ]
+                    },
+                    "input": []
+                  }
+                ]
+              }
+            ],
+            "journal": [
+              {
+                "quest": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find_the_child"
+                },
+                "state": "active",
+                "title": "quest.find_the_child.title"
+              }
+            ],
+            "time": 18
+          },
+          "narration": [
+            {
+              "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+              "lines": [
+                {
+                  "key": "narration.move",
+                  "bindings": {
+                    "direction": "north",
+                    "destination": "room.village_green.title"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "format": "loka-gameview-v1",
+          "projection_sequence": 9007199254740991,
+          "view": {
+            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+            "place": {
+              "id": "12121212-3434-4565-8787-909090909090",
+              "title": {
+                "key": "room.ferry_landing.title"
+              },
+              "description": {
+                "key": "room.ferry_landing.description",
+                "bindings": {
+                  "time": "clock.dusk"
+                }
+              }
+            },
+            "exits": [
+              {
+                "available": true,
+                "direction": "north"
+              },
+              {
+                "available": false,
+                "direction": "west",
+                "reason": {
+                  "code": "exit_locked",
+                  "message": {
+                    "key": "reason.causeway_flooded"
+                  }
+                }
+              }
+            ],
+            "actions": [
+              {
+                "available": true,
+                "action_key": "look",
+                "label": "action.look",
+                "target": {
+                  "kind": "none"
+                },
+                "input": []
+              },
+              {
+                "available": false,
+                "action_key": "wait",
+                "label": "action.wait",
+                "reason": {
+                  "code": "invalid_state"
+                },
+                "target": {
+                  "kind": "none"
+                },
+                "input": [
+                  "until"
+                ]
+              }
+            ],
+            "entities": [
+              {
+                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+                "name": "npc.wren.name",
+                "kind": "npc",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "talk",
+                    "label": "action.talk",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "room_occupants"
+                      ]
+                    },
+                    "input": []
+                  }
+                ]
+              }
+            ],
+            "inventory": [
+              {
+                "id": "11111111-2222-4333-8444-555555555555",
+                "name": "item.lantern.name",
+                "kind": "item",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "drop",
+                    "label": "action.drop",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "inventory"
+                      ]
+                    },
+                    "input": []
+                  }
+                ]
+              }
+            ],
+            "journal": [
+              {
+                "quest": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "quest",
+                  "key": "find_the_child"
+                },
+                "state": "active",
+                "title": "quest.find_the_child.title"
+              }
+            ],
+            "time": 18
+          }
+        }
+      ]
+    },
+    "ChapterView": {
+      "description": "The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "index",
+        "title"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "index": 0,
+          "title": "chapter.landing"
+        },
+        {
+          "index": 2,
+          "title": "chapter.reeds"
+        }
+      ]
+    },
+    "SceneView": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "scene",
+        "line",
+        "index",
+        "count"
+      ],
+      "additionalProperties": false,
+      "description": "Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.",
+      "examples": [
+        {
+          "scene": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "scene",
+            "key": "bell_rung"
+          },
+          "line": "scene.bell_rung.bell",
+          "index": 1,
+          "count": 3
+        }
+      ]
+    },
+    "SkillView": {
+      "type": "object",
+      "properties": {
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "acquired": {
+          "type": "boolean"
+        },
+        "qualified": {
+          "type": "boolean"
+        },
+        "usable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "skill",
+        "label",
+        "requirement",
+        "acquired",
+        "qualified",
+        "usable"
+      ],
+      "additionalProperties": false,
+      "description": "A skill's permanent acquisition and current qualification as projected for the actor.",
+      "examples": [
+        {
+          "skill": {
+            "cartridge_id": "training",
+            "cartridge_version": "1.0.0",
+            "kind": "skill",
+            "key": "swords"
+          },
+          "label": "skill.swords",
+          "requirement": "skill.swords_requirement",
+          "acquired": true,
+          "qualified": false,
+          "usable": false
+        }
+      ]
+    },
+    "QuestView": {
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
+      "type": "object",
+      "properties": {
+        "quest": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "state": {
+          "$ref": "policy.schema.json#/$defs/QuestState"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "journal": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "quest",
+        "state",
+        "title"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title"
+        },
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title",
+          "journal": "quest.find_the_child.active"
+        }
+      ]
+    },
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 \u00a719), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 \u00a72, \u00a717) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 \u00a74.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
+      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -48,7 +490,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Shown but not legal now, with the typed reason (00 \u00a74.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
           "type": "object",
           "properties": {
             "available": {
@@ -143,71 +585,350 @@
         }
       ]
     },
-    "ChoiceOption": {
-      "description": "One option of a pending choice: choosing it invokes choose with this choice_id.",
-      "oneOf": [
-        {
-          "description": "Offered and currently legal.",
-          "type": "object",
-          "properties": {
-            "available": {
-              "const": true
-            },
-            "choice_id": {
-              "$ref": "action.schema.json#/$defs/Key"
-            },
-            "label": {
-              "$ref": "text.schema.json#/$defs/TextKey"
-            }
-          },
-          "required": [
-            "available",
-            "choice_id",
-            "label"
-          ],
-          "additionalProperties": false
+    "EntityView": {
+      "properties": {
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentView"
+          }
         },
-        {
-          "description": "Shown but not legal now, with the typed reason (00 \u00a74.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
-          "type": "object",
-          "properties": {
-            "available": {
-              "const": false
-            },
-            "choice_id": {
-              "$ref": "action.schema.json#/$defs/Key"
-            },
-            "label": {
-              "$ref": "text.schema.json#/$defs/TextKey"
-            },
-            "reason": {
-              "$ref": "#/$defs/UnavailableReason"
-            }
-          },
-          "required": [
-            "available",
-            "choice_id",
-            "label",
-            "reason"
-          ],
-          "additionalProperties": false
+        "skill_requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "kind": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "shop": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/ShopItemView"
+          }
+        },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "fuel": {
+          "$ref": "#/$defs/FuelView"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        },
+        "weapon": {
+          "$ref": "entity.schema.json#/$defs/WeaponProfile"
+        },
+        "liquid": {
+          "$ref": "liquid.schema.json#/$defs/LiquidView"
         }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "actions"
       ],
+      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "examples": [
         {
-          "available": true,
-          "choice_id": "carry",
-          "label": "choice.carry"
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "talk",
+              "label": "action.talk",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_occupants"
+                ]
+              },
+              "input": []
+            }
+          ]
         },
         {
-          "available": true,
-          "choice_id": "leave",
-          "label": "choice.leave"
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+          "name": "item.sewing_box.short",
+          "kind": "item",
+          "state": "open",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "close",
+              "label": "action.close",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_contents"
+                ]
+              },
+              "input": []
+            }
+          ],
+          "contents": [
+            {
+              "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
+              "name": "item.brass_key.short",
+              "kind": "item",
+              "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+              "actions": [
+                {
+                  "available": true,
+                  "action_key": "take",
+                  "label": "action.take",
+                  "target": {
+                    "kind": "entity",
+                    "scopes": [
+                      "room_contents"
+                    ]
+                  },
+                  "input": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "description": "portrait.wren",
+          "actions": []
         }
       ]
     },
+    "ContentView": {
+      "properties": {
+        "skill_requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "kind": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "container_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "fuel": {
+          "$ref": "#/$defs/FuelView"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        },
+        "weapon": {
+          "$ref": "entity.schema.json#/$defs/WeaponProfile"
+        },
+        "liquid": {
+          "$ref": "liquid.schema.json#/$defs/LiquidView"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "container_id",
+        "actions"
+      ],
+      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
+      "examples": [
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
+          "name": "item.brass_key.short",
+          "kind": "item",
+          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "take",
+              "label": "action.take",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_contents"
+                ]
+              },
+              "input": []
+            }
+          ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "item.brass_key.short",
+          "kind": "item",
+          "description": "item.brass_key.description",
+          "actions": [],
+          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"
+        }
+      ]
+    },
+    "PlaceView": {
+      "description": "The current place (04 §14 room).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/Text"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/Text"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "12121212-3434-4565-8787-909090909090",
+          "title": {
+            "key": "room.ferry_landing.title"
+          },
+          "description": {
+            "key": "room.ferry_landing.description",
+            "bindings": {
+              "time": "clock.dusk"
+            }
+          }
+        }
+      ]
+    },
+    "FuelView": {
+      "type": "object",
+      "properties": {
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "lit": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "remaining",
+        "capacity",
+        "lit"
+      ],
+      "additionalProperties": false,
+      "description": "Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn.",
+      "examples": [
+        {
+          "remaining": 7,
+          "capacity": 10,
+          "lit": true
+        },
+        {
+          "remaining": 0,
+          "capacity": 10,
+          "lit": false
+        }
+      ]
+    },
+    "ShopItemView": {
+      "examples": [
+        {
+          "item_id": "3f7be222-cc48-8fb0-b007-f6d17119bd7f",
+          "name": "item.torch.short",
+          "buy": {
+            "price": 3,
+            "available": true
+          },
+          "sell": {
+            "price": 1,
+            "available": false,
+            "reason": "not_owned"
+          }
+        }
+      ],
+      "description": "An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).",
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "buy": {
+          "$ref": "gameview.schema.json#/$defs/ShopAction"
+        },
+        "sell": {
+          "$ref": "gameview.schema.json#/$defs/ShopAction"
+        }
+      },
+      "required": [
+        "item_id",
+        "name",
+        "buy",
+        "sell"
+      ],
+      "additionalProperties": false
+    },
     "ExitView": {
-      "description": "One exit of the current place (04 \u00a714, \u00a715 as amended by c1-doors; 00 \u00a74.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.",
+      "description": "One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.",
       "oneOf": [
         {
           "description": "Moving through it is legal now.",
@@ -310,51 +1031,197 @@
         }
       ]
     },
-    "DoorView": {
-      "description": "The door (barrier@1) an exit passes through (04 \u00a715 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.",
+    "ShopAction": {
+      "examples": [
+        {
+          "price": 3,
+          "available": true
+        }
+      ],
+      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
       "type": "object",
       "properties": {
-        "name": {
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "error.schema.json#/$defs/ErrorCode"
+        }
+      },
+      "required": [
+        "price",
+        "available"
+      ],
+      "additionalProperties": false
+    },
+    "WornSlotView": {
+      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
+      "type": "object",
+      "properties": {
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityView"
+        }
+      },
+      "required": [
+        "slot"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "slot": "head",
+          "item": {
+            "id": "22222222-3333-4444-8555-666666666666",
+            "name": "item.leather_cap.short",
+            "kind": "item",
+            "actions": [
+              {
+                "available": true,
+                "action_key": "remove",
+                "label": "action.remove",
+                "target": {
+                  "kind": "entity",
+                  "scopes": [
+                    "inventory"
+                  ]
+                },
+                "input": []
+              }
+            ]
+          }
+        },
+        {
+          "slot": "light"
+        }
+      ]
+    },
+    "UnavailableReason": {
+      "description": "Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "error.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "$ref": "text.schema.json#/$defs/Text"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "code": "exit_locked"
+        },
+        {
+          "code": "exit_locked",
+          "message": {
+            "key": "reason.causeway_flooded"
+          }
+        }
+      ]
+    },
+    "NarrationRecord": {
+      "description": "The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 §43; 03 §14).",
+      "type": "object",
+      "properties": {
+        "command_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/Text"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "command_id",
+        "lines"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+          "lines": [
+            {
+              "key": "narration.move",
+              "bindings": {
+                "direction": "north",
+                "destination": "room.village_green.title"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "NoticeView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "state": {
-          "$ref": "room.schema.json#/$defs/BarrierState"
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         },
         "actions": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/AdvertisedAction"
           }
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
         }
       },
       "required": [
-        "name",
-        "state",
-        "actions"
+        "id",
+        "title",
+        "description"
       ],
       "additionalProperties": false,
+      "description": "Current-room readable detail identity, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
       "examples": [
         {
-          "name": "barrier.cell_door.short",
-          "state": "locked",
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.notice.title",
+          "description": "detail.notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.tracks.title",
+          "description": "detail.tracks.description",
           "actions": [
             {
-              "available": true,
-              "action_key": "unlock",
-              "label": "action.unlock",
+              "action_key": "study_tracks",
+              "label": "actions.study_tracks",
               "target": {
                 "kind": "none"
               },
-              "input": [
-                "direction"
-              ]
+              "input": [],
+              "available": true
             }
           ]
         }
       ]
     },
     "SightView": {
-      "description": "What is seen through an exit whose door does not bar the way (04 \u00a715 as amended by c1-doors; 00 \u00a74.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.",
+      "description": "What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.",
       "type": "object",
       "properties": {
         "room": {
@@ -407,275 +1274,8 @@
         }
       ]
     },
-    "EntityView": {
-      "description": "A visible entity (04 \u00a714): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 \u00a76). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "kind": {
-          "$ref": "action.schema.json#/$defs/Key"
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/AdvertisedAction"
-          }
-        },
-        "state": {
-          "$ref": "room.schema.json#/$defs/BarrierState"
-        },
-        "contents": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ContentView"
-          }
-        },
-        "description": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "shop": {
-          "type": "array",
-          "items": {
-            "$ref": "gameview.schema.json#/$defs/ShopItemView"
-          }
-        },
-        "fuel": {
-          "$ref": "#/$defs/FuelView"
-        },
-        "slot": {
-          "$ref": "entity.schema.json#/$defs/SlotKey"
-        },
-        "weapon": {
-          "$ref": "entity.schema.json#/$defs/WeaponProfile"
-        },
-        "block_chance": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "skill_label": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "skill_requirement": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "kind",
-        "actions"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-          "name": "npc.wren.name",
-          "kind": "npc",
-          "actions": [
-            {
-              "available": true,
-              "action_key": "talk",
-              "label": "action.talk",
-              "target": {
-                "kind": "entity",
-                "scopes": [
-                  "room_occupants"
-                ]
-              },
-              "input": []
-            }
-          ]
-        },
-        {
-          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
-          "name": "item.sewing_box.short",
-          "kind": "item",
-          "state": "open",
-          "actions": [
-            {
-              "available": true,
-              "action_key": "close",
-              "label": "action.close",
-              "target": {
-                "kind": "entity",
-                "scopes": [
-                  "room_contents"
-                ]
-              },
-              "input": []
-            }
-          ],
-          "contents": [
-            {
-              "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
-              "name": "item.brass_key.short",
-              "kind": "item",
-              "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
-              "actions": [
-                {
-                  "available": true,
-                  "action_key": "take",
-                  "label": "action.take",
-                  "target": {
-                    "kind": "entity",
-                    "scopes": [
-                      "room_contents"
-                    ]
-                  },
-                  "input": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-          "name": "npc.wren.name",
-          "kind": "npc",
-          "description": "portrait.wren",
-          "actions": []
-        }
-      ]
-    },
-    "ContentView": {
-      "description": "An item inside a container of an EntityView's contents (04 \u00a715 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "kind": {
-          "$ref": "action.schema.json#/$defs/Key"
-        },
-        "container_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "state": {
-          "$ref": "room.schema.json#/$defs/BarrierState"
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/AdvertisedAction"
-          }
-        },
-        "description": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "fuel": {
-          "$ref": "#/$defs/FuelView"
-        },
-        "slot": {
-          "$ref": "entity.schema.json#/$defs/SlotKey"
-        },
-        "weapon": {
-          "$ref": "entity.schema.json#/$defs/WeaponProfile"
-        },
-        "block_chance": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 100
-        },
-        "skill_label": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "skill_requirement": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "kind",
-        "container_id",
-        "actions"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
-          "name": "item.brass_key.short",
-          "kind": "item",
-          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
-          "actions": [
-            {
-              "available": true,
-              "action_key": "take",
-              "label": "action.take",
-              "target": {
-                "kind": "entity",
-                "scopes": [
-                  "room_contents"
-                ]
-              },
-              "input": []
-            }
-          ]
-        },
-        {
-          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-          "name": "item.brass_key.short",
-          "kind": "item",
-          "description": "item.brass_key.description",
-          "actions": [],
-          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"
-        }
-      ]
-    },
-    "WornSlotView": {
-      "description": "One equipment slot holder of the actor's body (equipment@1; 04 \u00a714 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
-      "type": "object",
-      "properties": {
-        "slot": {
-          "$ref": "entity.schema.json#/$defs/SlotKey"
-        },
-        "item": {
-          "$ref": "#/$defs/EntityView"
-        }
-      },
-      "required": [
-        "slot"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "slot": "head",
-          "item": {
-            "id": "22222222-3333-4444-8555-666666666666",
-            "name": "item.leather_cap.short",
-            "kind": "item",
-            "actions": [
-              {
-                "available": true,
-                "action_key": "remove",
-                "label": "action.remove",
-                "target": {
-                  "kind": "entity",
-                  "scopes": [
-                    "inventory"
-                  ]
-                },
-                "input": []
-              }
-            ]
-          }
-        },
-        {
-          "slot": "light"
-        }
-      ]
-    },
     "PendingChoice": {
-      "description": "The actor's open choice (04 \u00a715 'dialogue choices currently available'; 06 \u00a743): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 \u00a743: never trapped in a modal screen, and closing does not change the outcome).",
+      "description": "The actor's open choice (04 §15 'dialogue choices currently available'; 06 §43): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 §43: never trapped in a modal screen, and closing does not change the outcome).",
       "type": "object",
       "properties": {
         "continuation_id": {
@@ -772,131 +1372,6 @@
         }
       ]
     },
-    "QuestView": {
-      "description": "A journal entry (04 \u00a715 'quest journal state'; 00 \u00a74.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
-      "type": "object",
-      "properties": {
-        "quest": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "state": {
-          "$ref": "policy.schema.json#/$defs/QuestState"
-        },
-        "title": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "journal": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "quest",
-        "state",
-        "title"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "quest": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "quest",
-            "key": "find_the_child"
-          },
-          "state": "active",
-          "title": "quest.find_the_child.title"
-        },
-        {
-          "quest": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "quest",
-            "key": "find_the_child"
-          },
-          "state": "active",
-          "title": "quest.find_the_child.title",
-          "journal": "quest.find_the_child.active"
-        }
-      ]
-    },
-    "ResourceView": {
-      "description": "One of the viewer's body's resources (04 \u00a715 as amended 2026-10-01 and 2026-10-02; 21 \u00a74 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 \u00a715 default table); the UI never computes a threshold (00 \u00a74.10).",
-      "type": "object",
-      "properties": {
-        "resource": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "current": {
-          "$ref": "resource.schema.json#/$defs/ResourceInt"
-        },
-        "maximum": {
-          "$ref": "resource.schema.json#/$defs/ResourceInt"
-        },
-        "band": {
-          "$ref": "action.schema.json#/$defs/Key"
-        },
-        "tone": {
-          "$ref": "resource.schema.json#/$defs/BandTone"
-        }
-      },
-      "required": [
-        "resource",
-        "current",
-        "maximum",
-        "band",
-        "tone"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "resource": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "resource",
-            "key": "mv"
-          },
-          "current": 81,
-          "maximum": 82,
-          "band": "slightly_scratched",
-          "tone": "normal"
-        }
-      ]
-    },
-    "PlaceView": {
-      "description": "The current place (04 \u00a714 room).",
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "title": {
-          "$ref": "text.schema.json#/$defs/Text"
-        },
-        "description": {
-          "$ref": "text.schema.json#/$defs/Text"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "description"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "id": "12121212-3434-4565-8787-909090909090",
-          "title": {
-            "key": "room.ferry_landing.title"
-          },
-          "description": {
-            "key": "room.ferry_landing.description",
-            "bindings": {
-              "time": "clock.dusk"
-            }
-          }
-        }
-      ]
-    },
     "CalendarStatus": {
       "description": "Confirmed cartridge calendar projection. Phase fields appear only when authored.",
       "type": "object",
@@ -938,8 +1413,214 @@
         }
       ]
     },
+    "ChoiceOption": {
+      "description": "One option of a pending choice: choosing it invokes choose with this choice_id.",
+      "oneOf": [
+        {
+          "description": "Offered and currently legal.",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": true
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "available",
+            "choice_id",
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "type": "object",
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableReason"
+            }
+          },
+          "required": [
+            "available",
+            "choice_id",
+            "label",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ]
+    },
+    "DoorView": {
+      "description": "The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "state",
+        "actions"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "name": "barrier.cell_door.short",
+          "state": "locked",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "unlock",
+              "label": "action.unlock",
+              "target": {
+                "kind": "none"
+              },
+              "input": [
+                "direction"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "NoticeBoardView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NoticeView"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "notices"
+      ],
+      "additionalProperties": false,
+      "description": "Current-room board identity, title, selected description and ordered notice membership; no bodies.",
+      "examples": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.notice.title",
+          "description": "detail.notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "detail.notice.title",
+              "description": "detail.notice.description"
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeView": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "value": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attribute",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An authored attribute reference and the actor's current value.",
+      "examples": [
+        {
+          "attribute": {
+            "cartridge_id": "training",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "value": 9
+        }
+      ]
+    },
+    "CombatView": {
+      "type": "object",
+      "properties": {
+        "encounter_id": {
+          "$ref": "delta.schema.json#/$defs/EncounterId"
+        },
+        "opponent_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "encounter_id",
+        "opponent_id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "encounter_id": "11111111-2222-4333-8444-555555555555",
+          "opponent_id": "11111111-2222-4333-8444-555555555555",
+          "name": "npc.rat"
+        }
+      ],
+      "description": "The current encounter and visible opponent presented to the player."
+    },
     "GameView": {
-      "description": "One actor's semantic view (04 \u00a714, \u00a715): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 \u00a74.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -1259,725 +1940,50 @@
         }
       ]
     },
-    "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 \u00a716). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 \u00a716). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.",
+    "ResourceView": {
+      "description": "One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).",
       "type": "object",
       "properties": {
-        "format": {
-          "type": "string",
-          "const": "loka-gameview-v1"
-        },
-        "projection_sequence": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "view_freshness_token": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128
-        },
-        "view": {
-          "$ref": "#/$defs/GameView"
-        },
-        "narration": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/NarrationRecord"
-          }
-        }
-      },
-      "required": [
-        "format",
-        "projection_sequence",
-        "view"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "format": "loka-gameview-v1",
-          "projection_sequence": 0,
-          "view_freshness_token": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
-          "view": {
-            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-            "place": {
-              "id": "12121212-3434-4565-8787-909090909090",
-              "title": {
-                "key": "room.ferry_landing.title"
-              },
-              "description": {
-                "key": "room.ferry_landing.description",
-                "bindings": {
-                  "time": "clock.dusk"
-                }
-              }
-            },
-            "exits": [
-              {
-                "available": true,
-                "direction": "north"
-              },
-              {
-                "available": false,
-                "direction": "west",
-                "reason": {
-                  "code": "exit_locked",
-                  "message": {
-                    "key": "reason.causeway_flooded"
-                  }
-                }
-              }
-            ],
-            "actions": [
-              {
-                "available": true,
-                "action_key": "look",
-                "label": "action.look",
-                "target": {
-                  "kind": "none"
-                },
-                "input": []
-              },
-              {
-                "available": false,
-                "action_key": "wait",
-                "label": "action.wait",
-                "reason": {
-                  "code": "invalid_state"
-                },
-                "target": {
-                  "kind": "none"
-                },
-                "input": [
-                  "until"
-                ]
-              }
-            ],
-            "entities": [
-              {
-                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-                "name": "npc.wren.name",
-                "kind": "npc",
-                "actions": [
-                  {
-                    "available": true,
-                    "action_key": "talk",
-                    "label": "action.talk",
-                    "target": {
-                      "kind": "entity",
-                      "scopes": [
-                        "room_occupants"
-                      ]
-                    },
-                    "input": []
-                  }
-                ]
-              }
-            ],
-            "inventory": [
-              {
-                "id": "11111111-2222-4333-8444-555555555555",
-                "name": "item.lantern.name",
-                "kind": "item",
-                "actions": [
-                  {
-                    "available": true,
-                    "action_key": "drop",
-                    "label": "action.drop",
-                    "target": {
-                      "kind": "entity",
-                      "scopes": [
-                        "inventory"
-                      ]
-                    },
-                    "input": []
-                  }
-                ]
-              }
-            ],
-            "journal": [
-              {
-                "quest": {
-                  "cartridge_id": "ferrymans_lantern",
-                  "cartridge_version": "0.1.0",
-                  "kind": "quest",
-                  "key": "find_the_child"
-                },
-                "state": "active",
-                "title": "quest.find_the_child.title"
-              }
-            ],
-            "time": 18
-          },
-          "narration": [
-            {
-              "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
-              "lines": [
-                {
-                  "key": "narration.move",
-                  "bindings": {
-                    "direction": "north",
-                    "destination": "room.village_green.title"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "format": "loka-gameview-v1",
-          "projection_sequence": 9007199254740991,
-          "view": {
-            "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-            "place": {
-              "id": "12121212-3434-4565-8787-909090909090",
-              "title": {
-                "key": "room.ferry_landing.title"
-              },
-              "description": {
-                "key": "room.ferry_landing.description",
-                "bindings": {
-                  "time": "clock.dusk"
-                }
-              }
-            },
-            "exits": [
-              {
-                "available": true,
-                "direction": "north"
-              },
-              {
-                "available": false,
-                "direction": "west",
-                "reason": {
-                  "code": "exit_locked",
-                  "message": {
-                    "key": "reason.causeway_flooded"
-                  }
-                }
-              }
-            ],
-            "actions": [
-              {
-                "available": true,
-                "action_key": "look",
-                "label": "action.look",
-                "target": {
-                  "kind": "none"
-                },
-                "input": []
-              },
-              {
-                "available": false,
-                "action_key": "wait",
-                "label": "action.wait",
-                "reason": {
-                  "code": "invalid_state"
-                },
-                "target": {
-                  "kind": "none"
-                },
-                "input": [
-                  "until"
-                ]
-              }
-            ],
-            "entities": [
-              {
-                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-                "name": "npc.wren.name",
-                "kind": "npc",
-                "actions": [
-                  {
-                    "available": true,
-                    "action_key": "talk",
-                    "label": "action.talk",
-                    "target": {
-                      "kind": "entity",
-                      "scopes": [
-                        "room_occupants"
-                      ]
-                    },
-                    "input": []
-                  }
-                ]
-              }
-            ],
-            "inventory": [
-              {
-                "id": "11111111-2222-4333-8444-555555555555",
-                "name": "item.lantern.name",
-                "kind": "item",
-                "actions": [
-                  {
-                    "available": true,
-                    "action_key": "drop",
-                    "label": "action.drop",
-                    "target": {
-                      "kind": "entity",
-                      "scopes": [
-                        "inventory"
-                      ]
-                    },
-                    "input": []
-                  }
-                ]
-              }
-            ],
-            "journal": [
-              {
-                "quest": {
-                  "cartridge_id": "ferrymans_lantern",
-                  "cartridge_version": "0.1.0",
-                  "kind": "quest",
-                  "key": "find_the_child"
-                },
-                "state": "active",
-                "title": "quest.find_the_child.title"
-              }
-            ],
-            "time": 18
-          }
-        }
-      ]
-    },
-    "UnavailableReason": {
-      "description": "Why an action, choice or exit is shown but not legal now (00 \u00a74.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
-      "type": "object",
-      "properties": {
-        "code": {
-          "$ref": "error.schema.json#/$defs/ErrorCode"
-        },
-        "message": {
-          "$ref": "text.schema.json#/$defs/Text"
-        }
-      },
-      "required": [
-        "code"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "code": "exit_locked"
-        },
-        {
-          "code": "exit_locked",
-          "message": {
-            "key": "reason.causeway_flooded"
-          }
-        }
-      ]
-    },
-    "NarrationRecord": {
-      "description": "The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 \u00a743: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 \u00a75.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 \u00a743; 03 \u00a714).",
-      "type": "object",
-      "properties": {
-        "command_id": {
-          "$ref": "identity.schema.json#/$defs/CommandId"
-        },
-        "lines": {
-          "type": "array",
-          "items": {
-            "$ref": "text.schema.json#/$defs/Text"
-          },
-          "minItems": 1,
-          "maxItems": 64
-        }
-      },
-      "required": [
-        "command_id",
-        "lines"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
-          "lines": [
-            {
-              "key": "narration.move",
-              "bindings": {
-                "direction": "north",
-                "destination": "room.village_green.title"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    "ChapterView": {
-      "description": "The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.",
-      "type": "object",
-      "properties": {
-        "index": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "title": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "index",
-        "title"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "index": 0,
-          "title": "chapter.landing"
-        },
-        {
-          "index": 2,
-          "title": "chapter.reeds"
-        }
-      ]
-    },
-    "SceneView": {
-      "type": "object",
-      "properties": {
-        "scene": {
+        "resource": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "line": {
-          "$ref": "text.schema.json#/$defs/TextKey"
+        "current": {
+          "$ref": "resource.schema.json#/$defs/ResourceInt"
         },
-        "index": {
-          "type": "integer",
-          "minimum": 1
+        "maximum": {
+          "$ref": "resource.schema.json#/$defs/ResourceInt"
         },
-        "count": {
-          "type": "integer",
-          "minimum": 1
+        "band": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "tone": {
+          "$ref": "resource.schema.json#/$defs/BandTone"
         }
       },
       "required": [
-        "scene",
-        "line",
-        "index",
-        "count"
+        "resource",
+        "current",
+        "maximum",
+        "band",
+        "tone"
       ],
       "additionalProperties": false,
-      "description": "Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.",
       "examples": [
         {
-          "scene": {
-            "cartridge_id": "ashmere_scene",
-            "cartridge_version": "0.0.1",
-            "kind": "scene",
-            "key": "bell_rung"
+          "resource": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
           },
-          "line": "scene.bell_rung.bell",
-          "index": 1,
-          "count": 3
-        }
-      ]
-    },
-    "CombatView": {
-      "type": "object",
-      "properties": {
-        "encounter_id": {
-          "$ref": "delta.schema.json#/$defs/EncounterId"
-        },
-        "opponent_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        }
-      },
-      "required": [
-        "encounter_id",
-        "opponent_id",
-        "name"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "encounter_id": "11111111-2222-4333-8444-555555555555",
-          "opponent_id": "11111111-2222-4333-8444-555555555555",
-          "name": "npc.rat"
-        }
-      ],
-      "description": "The current encounter and visible opponent presented to the player."
-    },
-    "NoticeView": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "title": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "description": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/AdvertisedAction"
-          }
-        },
-        "remaining": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 64
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "description"
-      ],
-      "additionalProperties": false,
-      "description": "Current-room readable detail identity, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
-      "examples": [
-        {
-          "id": "aaaaaaaa-0000-4000-8000-000000000001",
-          "title": "detail.notice.title",
-          "description": "detail.notice.description"
-        },
-        {
-          "id": "aaaaaaaa-0000-4000-8000-000000000001",
-          "title": "detail.tracks.title",
-          "description": "detail.tracks.description",
-          "actions": [
-            {
-              "action_key": "study_tracks",
-              "label": "actions.study_tracks",
-              "target": {
-                "kind": "none"
-              },
-              "input": [],
-              "available": true
-            }
-          ]
-        }
-      ]
-    },
-    "NoticeBoardView": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "title": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "description": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "notices": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/NoticeView"
-          },
-          "minItems": 1,
-          "maxItems": 64
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "description",
-        "notices"
-      ],
-      "additionalProperties": false,
-      "description": "Current-room board identity, title, selected description and ordered notice membership; no bodies.",
-      "examples": [
-        {
-          "id": "aaaaaaaa-0000-4000-8000-000000000001",
-          "title": "detail.notice.title",
-          "description": "detail.notice.description",
-          "notices": [
-            {
-              "id": "aaaaaaaa-0000-4000-8000-000000000001",
-              "title": "detail.notice.title",
-              "description": "detail.notice.description"
-            }
-          ]
-        }
-      ]
-    },
-    "ShopAction": {
-      "examples": [
-        {
-          "price": 3,
-          "available": true
-        }
-      ],
-      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
-      "type": "object",
-      "properties": {
-        "price": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 2147483647
-        },
-        "available": {
-          "type": "boolean"
-        },
-        "reason": {
-          "$ref": "error.schema.json#/$defs/ErrorCode"
-        }
-      },
-      "required": [
-        "price",
-        "available"
-      ],
-      "additionalProperties": false
-    },
-    "ShopItemView": {
-      "examples": [
-        {
-          "item_id": "3f7be222-cc48-8fb0-b007-f6d17119bd7f",
-          "name": "item.torch.short",
-          "buy": {
-            "price": 3,
-            "available": true
-          },
-          "sell": {
-            "price": 1,
-            "available": false,
-            "reason": "not_owned"
-          }
-        }
-      ],
-      "description": "An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).",
-      "type": "object",
-      "properties": {
-        "item_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "name": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "buy": {
-          "$ref": "gameview.schema.json#/$defs/ShopAction"
-        },
-        "sell": {
-          "$ref": "gameview.schema.json#/$defs/ShopAction"
-        }
-      },
-      "required": [
-        "item_id",
-        "name",
-        "buy",
-        "sell"
-      ],
-      "additionalProperties": false
-    },
-    "FuelView": {
-      "type": "object",
-      "properties": {
-        "remaining": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 9007199254740991
-        },
-        "capacity": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9007199254740991
-        },
-        "lit": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "remaining",
-        "capacity",
-        "lit"
-      ],
-      "additionalProperties": false,
-      "description": "Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn.",
-      "examples": [
-        {
-          "remaining": 7,
-          "capacity": 10,
-          "lit": true
-        },
-        {
-          "remaining": 0,
-          "capacity": 10,
-          "lit": false
-        }
-      ]
-    },
-    "SkillView": {
-      "type": "object",
-      "properties": {
-        "skill": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "label": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "requirement": {
-          "$ref": "text.schema.json#/$defs/TextKey"
-        },
-        "acquired": {
-          "type": "boolean"
-        },
-        "qualified": {
-          "type": "boolean"
-        },
-        "usable": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "skill",
-        "label",
-        "requirement",
-        "acquired",
-        "qualified",
-        "usable"
-      ],
-      "additionalProperties": false,
-      "description": "A skill's permanent acquisition and current qualification as projected for the actor.",
-      "examples": [
-        {
-          "skill": {
-            "cartridge_id": "training",
-            "cartridge_version": "1.0.0",
-            "kind": "skill",
-            "key": "swords"
-          },
-          "label": "skill.swords",
-          "requirement": "skill.swords_requirement",
-          "acquired": true,
-          "qualified": false,
-          "usable": false
-        }
-      ]
-    },
-    "AttributeView": {
-      "type": "object",
-      "properties": {
-        "attribute": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "value": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "attribute",
-        "value"
-      ],
-      "additionalProperties": false,
-      "description": "An authored attribute reference and the actor's current value.",
-      "examples": [
-        {
-          "attribute": {
-            "cartridge_id": "training",
-            "cartridge_version": "1.0.0",
-            "kind": "attribute",
-            "key": "str"
-          },
-          "value": 9
+          "current": 81,
+          "maximum": 82,
+          "band": "slightly_scratched",
+          "tone": "normal"
         }
       ]
     }
-  }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15)."
 }

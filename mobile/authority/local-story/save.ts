@@ -159,7 +159,6 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
 }
 
 // Routing belongs to this receipt's committed command/evidence, never text or current room.
-// size: allow 55, one receipt trust boundary dispatches dialogue and validates Read/recipe identity
 function receiptDetail(
   s: Story,
   r: { command_id: string; command: string },
@@ -173,50 +172,20 @@ function receiptDetail(
     d.events.some((e) => e.causation_id === r.command_id && e.payload.type === 'choice_resolved')
   )
     return dialogueDetail(s, r.command_id, command!, d);
-  if (command?.payload.type === 'buy' || command?.payload.type === 'sell') {
+  if (command?.payload?.type === 'buy' || command?.payload?.type === 'sell') {
     if (validate('Command', command).length || command.id !== r.command_id)
       throw new Error('malformed JSON: invalid committed shop exchange');
     return command.payload.provider_id;
   }
-  if (d.outcome === 'harvested' && command?.payload.type === 'harvest')
+  if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
-  if (!['read', 'performed', 'success'].includes(d.outcome)) return;
-  if (d.outcome === 'read') {
-    if (
-      validate('Command', command).length ||
-      command?.id !== r.command_id ||
-      command.payload.type !== 'read'
-    )
-      throw new Error('malformed JSON: invalid committed Read');
-    return command.payload.target_id;
+  const p = command?.payload;
+  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'drink') {
+    if (validate('Command', command).length || command?.id !== r.command_id)
+      throw new Error('malformed JSON: invalid committed liquid action');
+    return p.type === 'drink' ? p.vessel_id : p.source_id;
   }
-  const completed = d.events.filter(
-    (e) => e.payload.type === 'action_completed' && e.causation_id === r.command_id,
-  );
-  const action = command?.payload?.type === 'perform' ? command.payload.action : undefined;
-  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((r) => r.key === action);
-  const subject = recipe && detailOf(s.world, recipe.target);
-  const readable = subject && s.world.details[subject]?.readable;
-  const readableEvidence = completed.some(
-    (e) => e.payload.type === 'action_completed' && s.world.details[e.payload.subject_id]?.readable,
-  );
-  if (!readable && !readableEvidence) return;
-  const event = completed[0];
-  if (
-    validate('Command', command).length ||
-    command?.id !== r.command_id ||
-    !readable ||
-    completed.length !== 1 ||
-    event.payload.type !== 'action_completed' ||
-    event.payload.action !== action ||
-    event.payload.subject_id !== subject ||
-    (command?.payload.type === 'perform' && event.actor_id !== command.payload.actor_id) ||
-    (command?.payload.type === 'perform' &&
-      command.payload.target_id !== undefined &&
-      command.payload.target_id !== subject)
-  )
-    throw new Error('malformed JSON: invalid readable recipe receipt');
-  return subject;
+  return readableDetail(s, r, command, d);
 }
 
 // The run is in it, so an old run's token is never current again after newGame.
@@ -243,4 +212,58 @@ export function block(s: Story, e: ElapsedRecoveryError): never {
   s.blocked = e;
   s.fence = undefined;
   throw e;
+}
+
+function readableDetail(
+  s: Story,
+  r: { command_id: string },
+  command: Command | null,
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
+  if (!['read', 'performed', 'success'].includes(d.outcome)) return;
+  if (d.outcome === 'read') {
+    if (
+      validate('Command', command).length ||
+      command?.id !== r.command_id ||
+      command.payload.type !== 'read'
+    )
+      throw new Error('malformed JSON: invalid committed Read');
+    return command.payload.target_id;
+  }
+  return recipeDetail(s, r, command, d);
+}
+
+function recipeDetail(
+  s: Story,
+  r: { command_id: string },
+  command: Command | null,
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
+  const completed = d.events.filter(
+    (e) => e.payload.type === 'action_completed' && e.causation_id === r.command_id,
+  );
+  const action = command?.payload?.type === 'perform' ? command.payload.action : undefined;
+  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((r) => r.key === action);
+  const subject = recipe && detailOf(s.world, recipe.target);
+  const readable = subject && s.world.details[subject]?.readable;
+  const readableEvidence = completed.some(
+    (e) => e.payload.type === 'action_completed' && s.world.details[e.payload.subject_id]?.readable,
+  );
+  if (!readable && !readableEvidence) return;
+  const event = completed[0];
+  if (
+    validate('Command', command).length ||
+    command?.id !== r.command_id ||
+    !readable ||
+    completed.length !== 1 ||
+    event.payload.type !== 'action_completed' ||
+    event.payload.action !== action ||
+    event.payload.subject_id !== subject ||
+    (command?.payload?.type === 'perform' && event.actor_id !== command.payload.actor_id) ||
+    (command?.payload?.type === 'perform' &&
+      command.payload.target_id !== undefined &&
+      command.payload.target_id !== subject)
+  )
+    throw new Error('malformed JSON: invalid readable recipe receipt');
+  return subject;
 }

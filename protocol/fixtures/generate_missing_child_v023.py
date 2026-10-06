@@ -1,6 +1,6 @@
 """Independent B6 answer from prior reviewed payload and authored additions.
 Python JSON, SHA-256 and UUID only; no compiler/kernel expected-result helpers.
-Re-pin predecessor to the actual B7 v022 answer before publication.
+Reviewed predecessor: B7 v022 independent known answer.
 """
 import hashlib
 import json
@@ -9,8 +9,8 @@ import uuid
 
 here = Path(__file__).parent
 source = here.parent.parent / 'cartridges/ashmere_missing_child'
-predecessor = '021'
-v = json.loads((here / f'missing_child_v{predecessor}_hash.json').read_text())['value']
+predecessor = '022'
+v = json.loads((here / 'missing_child_b7_hash.json').read_text())['value']
 v = json.loads(json.dumps(v).replace(f'0.0.{int(predecessor)}', '0.0.23'))
 v['manifest'] = {k: value for k, value in json.loads((source / 'cartridge.json').read_text()).items()
                  if k not in ['entry', 'calendar', 'world', 'chapters']}

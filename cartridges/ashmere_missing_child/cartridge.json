@@ -36,7 +36,8 @@
       "skills": 1,
       "attributes": 1,
       "check": 1,
-      "topics": 1
+      "topics": 1,
+      "liquid": 1
     },
     "client_features": []
   },

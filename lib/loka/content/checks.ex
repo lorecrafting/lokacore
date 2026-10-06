@@ -1,10 +1,6 @@
 # size: allow 360, finite stock and exchange refs join the checked expansion boundary
 defmodule Loka.Content.Checks do
-  @moduledoc """
-  Capability ownership, references and fact types (05 §4, §6;
-  06 §20–21). `registry` is a decoded capability registry (CapabilitySpec entries, like
-  protocol/capability_registry.json); ownership comes from its commands and policies.
-  """
+  @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
 
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
@@ -30,9 +26,7 @@ defmodule Loka.Content.Checks do
   }
   @enclosing 3
 
-  @doc """
-  Expands short source references to local DefinitionRefs (owner decision 2026-09-25).
-  """
+  @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
@@ -186,6 +180,17 @@ defmodule Loka.Content.Checks do
       |> Map.delete("death_credit")
       |> expand(m)
       |> Map.put("death_credit", Enum.map(credits, &Loka.Content.Combat.expand(&1, m)))
+
+  # Vessel initial rows and detail sources own only their precise liquid reference fields.
+  def expand(%{"kind" => k, "quantity" => _} = row, m) when is_binary(k),
+    do: Map.put(row, "kind", ref(k, "liquid", m))
+
+  def expand(%{"liquid_source" => k} = detail, m) when is_binary(k),
+    do:
+      detail
+      |> Map.delete("liquid_source")
+      |> expand(m)
+      |> Map.put("liquid_source", ref(k, "liquid", m))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))

@@ -712,11 +712,11 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-The current local successor is `ashmere_missing_child@0.0.21`, API1.19:
+B4 introduced `ashmere_missing_child@0.0.21`, API1.19:
 [independent payload](../../protocol/fixtures/missing_child_v021_hash.json),
 [94-ID answer](../../protocol/fixtures/missing_child_v021_ids.json),
 [derivation](../../protocol/fixtures/generate_missing_child_v021.py).
-Independent B4 review and final C1 dependency fixes remain pending.
+B4 is reviewed; its successor pins are retained as frozen answers.
 
 The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
 adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
@@ -767,6 +767,10 @@ inexhaustible source of the `water` reference; only Fill may introduce its units
 The B4 well-shaft plan is independent; preserve its exits if already merged.
 No new room or route is counted for B7. The well cannot be carried or targeted
 as a Pour receiver, and cannot be drunk from directly in this slice.
+
+Vessel metadata opts only authored initial item instances into B7. A template
+cannot be a vessel: no liquid-row creation writer exists for newly instantiated
+items. Ordinary non-vessel corpse templates remain unchanged.
 
 Source/compiler/loader validate positive integer opted vessel capacity, exact
 initial row, kind references, positive integer drink amount and grams/unit,
@@ -823,6 +827,14 @@ bound all validation/traversal. Target C2 release/API/hash/IDs remain null until
 reviewed C1/B5 integration is re-pinned and independently derived.
 
 ## B6 marsh route and tuning
+
+The current local source release is `ashmere_missing_child@0.0.23`, API1.21,
+with [independent payload](../../protocol/fixtures/missing_child_v023_hash.json),
+[103 initial IDs](../../protocol/fixtures/missing_child_v023_ids.json) and
+[derivation from reviewed B7 v022](../../protocol/fixtures/generate_missing_child_v023.py).
+Its SHA-256 is `e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`.
+Independent B6 source and save/protocol reviews remain pending.
+
 
 The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours

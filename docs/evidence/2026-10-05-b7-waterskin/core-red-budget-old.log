@@ -1,0 +1,17 @@
+✔ buy at the carrying ceiling, sell and buyback conserve forty pennies and one identity (5.762625ms)
+✔ projection and direct exchange refuse too-heavy, poor, absent and changed-quote purchases atomically (3.60025ms)
+✔ sell requires direct eligible custody and funded Peg (1.415334ms)
+✔ loader independently rejects malformed shop stock and funding (124.574417ms)
+✔ earned key unlocks the empty chest; Put/Close/Open/Take preserves the stored identity (12.228292ms)
+✔ capacity one accepts one deposit only; an unlimited own bag permits overloaded rearrangement (3.494541ms)
+✔ Put refuses worn/nonheld, missing/non-item, inaccessible, self and descendant destinations (2.711917ms)
+✔ Put enumeration and pair admission obey the shared query limit with no partial pair list (38.338167ms)
+✔ only authored receptacles accept Put pairs and conserved transfers (3.114542ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 361.347583

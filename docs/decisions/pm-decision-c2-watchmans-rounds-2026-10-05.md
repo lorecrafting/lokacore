@@ -8,7 +8,8 @@ route/content in [cartridge](../system/cartridge.md#c2-watch-route-and-trust),
 [save recovery](../system/save.md#c2-patrol-attempt-recovery),
 [Book](../system/book-ui.md#c2-watch-patrol-details) and the
 [implementation brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
-This is a selected planning contract, not source GO, independent approval or runtime proof.
+At adoption this was a selected planning contract, pending independent approval
+and source re-pin; it was not runtime proof.
 
 The PM amends the archived [00a §7 S3 row](../archive/spec/00a-chapter-one-content.md#7-quests)
 and provisional brief explicitly: all-hours Start replaces the night-only offer;
@@ -39,3 +40,10 @@ Inspected planning base: local main `4bfe252e` (approved C1 plan). B1 and Q2-C-r
 are installed there; C1 source and B5 source are concurrent and not dependencies proved
 by this record. Re-pin their reviewed integrated head and artifact before source GO;
 C2 successor release/API/hash/IDs, source head, PR and verdicts remain null.
+
+Source-assignment re-pin: [the implementation brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
+now records current GitHub main, the reviewed C1/B5 integration and chapter artifact.
+The [independent plan review](../reviews/2026-10-05-c2-watchmans-rounds-plan-review.md)
+approved the selected contract. C2 source may be assigned independently of B6/B7;
+an intervening merge requires a fresh source/artifact pin. Implementation and its
+independent reviews remain ahead.

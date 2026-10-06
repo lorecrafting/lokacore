@@ -1,4 +1,5 @@
 import { knownTopics } from '../mechanics/topics/shared.ts';
+import { liquidView } from './liquid.ts';
 import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
@@ -171,6 +172,7 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  ...liquidView(world, id),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });
