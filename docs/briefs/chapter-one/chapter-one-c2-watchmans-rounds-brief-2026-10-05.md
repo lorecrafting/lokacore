@@ -160,8 +160,9 @@ shared Start/departure/join, pause/Rejoin, committed success narration and resol
 Journal, plus a fresh-save cold reopen. Keep actual real-host fatal/Restart proof
 distinct from unproved browser fatal/Restart, which must close in the Chapter 1 E3
 browser walk or sooner if practical. Native UI remains deferred under the mobile
-pause; the preserved terminal Web startup timeout remains open pending its separate
-Web SQLite fix. No native or
+pause. The preserved terminal save now has
+[twice-reopened proof after published PR213](../../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix);
+retain its earlier timeout as historical evidence. No native or
 owner-save operation is authorized by this assignment.
 
 Stop/escalate unreviewed dependency pins, a current-spec conflict, unsupported mortal

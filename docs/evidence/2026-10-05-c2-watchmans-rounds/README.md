@@ -63,11 +63,12 @@ return again required Rejoin. The remaining real paired joins reached
 [resolved 4/4 Journal](book-journal.png), with no payment or skill/item reward.
 The [retained DOM trace](browser-trace.log) records this observed route.
 
-**Preserved terminal browser reopen remains unproved and open pending the separate
-Web SQLite fix.** The first terminal reload, settled retry and fresh tab displayed
+**Historical terminal browser failure, retained.** Before the published Web fix,
+the first terminal reload, settled retry and fresh tab displayed
 [“Sync operation timeout”](book-reopen-failure.png) during web SQLite startup.
-The error was caught by startup; no exception stack was exposed. Parent has a
-separate published-main/C2 diagnosis. No save reset, deletion, worker patch or
+The error was caught by startup; no exception stack was exposed. The later
+[terminal reopen proof](#preserved-terminal-reopen-after-published-web-fix) closes
+this observed save's startup failure. No save reset, deletion, worker patch or
 platform change was performed here. Browser fatal/Restart is not claimed; real
 fatal/Restart and terminal cold reopen are proven by file-backed SQLite tests.
 
@@ -99,11 +100,43 @@ sooner if practical; it is not satisfied by this surviving-combat route.
 real-host fatal/Restart proof, the browser fatal/Restart gap, and native UI
 verification deferred under the mobile pause. Native/Hermes proof remains null.
 
-The earlier preserved terminal save was not opened, reset or repaired in this run.
-Its Web startup timeout remains open pending the separate Web SQLite fix; it is
-not skipped permanently. No SQLite infrastructure or C2 gameplay source changed.
-Parent retains the two independent approvals at source `74711349`; this later docs/evidence scope amendment
-requires its own fresh review before publication.
+The earlier preserved terminal save was not opened, reset or repaired during that
+fresh-origin run. Its then-open Web timeout was tracked for the separate fix;
+no SQLite infrastructure or C2 gameplay source changed in the fresh proof.
+Parent retains the two independent approvals at source `74711349`; the staged
+proof scope has its [independent docs review](../../reviews/2026-10-05-c2-watchmans-rounds-docs-scope-review.md).
+
+## Preserved terminal reopen after published Web fix
+
+Published Web SQLite predecessor:
+`d9a0595472e0c6d662cc2a43af084ed7bc16997e` ([PR213](https://github.com/lorecrafting/lokacore/pull/213)).
+Exact combined preview source:
+`65dabf5605bca7da3e0b6e35148986c3700d38ac`, containing the independently approved
+C2 source `74711349`, staged proof docs and the published bounded Web history reads.
+The chapter/API/hash/IDs remain 0.0.24/API1.22 and the original C2 candidate pins.
+
+The **same preserved isolated terminal save** now cold opens successfully, without
+reset, replacement, repair or manual file editing. Chapter Continue restores
+[Watch Post and the original completion narration](terminal-reopen/world-first.png);
+[Journal is resolved/completed, 4 of 4](terminal-reopen/journal-first.png), with
+original Tobin at Watch Post and pennies20. Original Tobin still offers legacy Talk
+and the exact labelled Watchman’s Rounds. That named patrol dialogue shows
+[Start/Continue/Rejoin/Restart all unavailable, with usable Leave](terminal-reopen/controls.png).
+No movement, lesson payment, patrol progression or reward was requested.
+
+After ordinary Talk/Leave, an **explicit second cold reload passed** and restored
+[the same World completion narration](terminal-reopen/world-second.png) and
+[resolved 4-of-4 Journal](terminal-reopen/journal-second.png). Normal elapsed time
+advanced; preserved quest completion, leader location and pennies stayed unchanged.
+[Exact DOM witnesses](terminal-reopen/trace.log) and
+[checks](terminal-reopen/checks.json) record both opens. The old timeout screenshot
+and failure narrative remain retained as historical evidence; this result proves
+recovery of this observed save, not every possible Web history.
+
+**Browser fatal/Restart remains the separate E3 gap.** Terminal reopening does not
+supply a death or Restart route. Existing real-host fatal/Restart proof remains
+distinct, and native/Hermes UI verification remains unclaimed. This follow-up changes
+only C2 docs/evidence, and requires its own quick independent evidence review.
 
 ## Integrity
 
