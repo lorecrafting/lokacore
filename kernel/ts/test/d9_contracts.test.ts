@@ -85,8 +85,8 @@ test('D9 typed control and cue reject missing evidence and malformed deadlines',
 });
 
 // Breaks: adding Bram or cue content shifts fresh identities without updating the release pin.
-test('independent v036 allocation pins all 191 starting identities', () => {
-  const pin = read('protocol/fixtures/missing_child_v036_hash.json');
+test('provisional v040 allocation pins starting identities', () => {
+  const pin = read('protocol/fixtures/missing_child_v040_hash.json');
   const loaded = loadCartridge(
     new TextEncoder().encode(
       JSON.stringify({
@@ -114,7 +114,7 @@ test('independent v036 allocation pins all 191 starting identities', () => {
     const origin = world.state.created?.[id]?.origin;
     if (origin?.kind === 'spawned')
       actual[
-        `population/${origin.by.key}/slot${origin.slot}/${origin.role === 'hound' ? 'member' : 'pelt'}`
+        `population/${origin.by.key}/slot${origin.slot}/${origin.role === 'hound' ? 'member' : origin.role}`
       ] = id;
     else actual[`${entity.kind}/${entity.key}`] = id;
   }
@@ -122,5 +122,5 @@ test('independent v036 allocation pins all 191 starting identities', () => {
     actual[job.job.kind === 'population' ? `population/${job.job.key}/job` : `job/${job.job.key}`] =
       id;
   for (const [slot, id] of Object.entries(world.slots)) actual[`slot/${slot}`] = id;
-  assert.deepEqual(actual, read('protocol/fixtures/missing_child_v036_ids.json'));
+  assert.deepEqual(actual, read('protocol/fixtures/missing_child_v040_ids.json'));
 });

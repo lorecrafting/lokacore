@@ -8,12 +8,14 @@ import { allocator } from '../src/runtime/decision.ts';
 import { activation } from '../src/mechanics/quest/lifecycle.ts';
 import { key } from '../src/foundation/compose.ts';
 import { bellCue } from '../src/mechanics/bell/cue.ts';
-import type { Command, FactValue } from '../src/contracts.gen.ts';
+import { deathSequence } from '../src/mechanics/death/sequence.ts';
+import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
+import type { Command, EntityId, FactValue } from '../src/contracts.gen.ts';
 
-function ready(): World {
+function ready(start = 64800): World {
   const base = fresh((c) => {
     c.entry = ref('room', 'belfry');
-    c.calendar.start = 64800;
+    c.calendar.start = start;
   });
   const command = {
     id: '00000000-0000-4000-8000-000000000090' as Command['id'],
@@ -91,7 +93,7 @@ test('accepted bell preserves hounds and schedules one cause-bound suppression d
   ).length;
   const result = run(base, { type: 'perform', action: 'ring_bell' }, 1);
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
-  const control = Object.values(result.world.state.population_plans ?? {})[0];
+  const control = result.world.state.population_plans![key(ref('population', 'fen_hounds'))]!;
   assert.deepEqual([control.suppression?.generation, control.suppression?.ends_at], [1, 237600]);
   assert.equal(result.world.state.jobs?.[control.suppression!.job_id!]?.due_time, 237600);
   assert.equal(
@@ -109,27 +111,53 @@ test('accepted bell preserves hounds and schedules one cause-bound suppression d
   );
 });
 
-// Breaks: a night population tick refills suppressed day-cap hounds early, or the exact deadline leaves suppression active.
+// Breaks: a population tick replaces a dead hound during suppression, or the exact deadline leaves suppression active.
 test('population ticks stay quiet until the exact two-day deadline', () => {
-  let world = run(ready(), { type: 'perform', action: 'ring_bell' }, 1).world;
-  world = advance(world, 72000);
-  assert.equal(
-    Object.values(world.state.population_slots ?? {}).filter((s) => s.member_id !== null).length,
-    4,
+  const base = ready(0);
+  const [hound] = Object.entries(base.state.created ?? {}).find(
+    ([, row]) =>
+      row.origin.kind === 'spawned' && row.origin.role === 'hound' && row.origin.slot === 1,
+  )!;
+  const member = hound as EntityId;
+  const hp = resourceRef(base, 'hp');
+  const loss = adjust(base, member, hp, -level(base, member, hp)!, {}).op;
+  const command = {
+    id: '00000000-0000-4000-8000-000000000091' as Command['id'],
+    world_context_id: base.context,
+    payload: { type: 'look', actor_id: base.character },
+  } as const satisfies Command;
+  const injured = apply(base, [loss]);
+  assert.ok('world' in injured);
+  const death = deathSequence(
+    injured.world,
+    command,
+    { loss, owner_id: null, killer_id: null, credited_character_id: null },
+    allocator(base, command),
   );
+  const buried = apply(injured.world, death.ops);
+  assert.ok('world' in buried);
+  let world = run(advance(buried.world, 64800), { type: 'perform', action: 'ring_bell' }, 1).world;
+  const generation = () =>
+    world.state.population_slots![
+      key({ kind: 'population_slot', plan: ref('population', 'fen_hounds'), slot: 1 })
+    ]!.generation;
+  world = advance(world, 72000);
+  assert.equal(generation(), 1);
+  world = advance(world, 172800);
+  assert.equal(generation(), 1);
   world = advance(world, 237599);
-  const atDeadline = Object.values(world.state.population_plans ?? {})[0];
+  const atDeadline = world.state.population_plans![key(ref('population', 'fen_hounds'))]!;
   assert.equal(atDeadline.suppression?.ends_at, 237600);
   assert.equal(world.state.jobs?.[atDeadline.job_id]?.due_time, 237600);
   world = advance(world, 237600);
-  assert.equal(Object.values(world.state.population_plans ?? {})[0].suppression?.ends_at, null);
   assert.equal(
-    Object.values(world.state.population_slots ?? {}).filter((s) => s.member_id !== null).length,
-    4,
+    world.state.population_plans![key(ref('population', 'fen_hounds'))]!.suppression?.ends_at,
+    null,
   );
+  assert.equal(generation(), 2);
   assert.equal(
     Object.values(world.state.jobs ?? {}).filter(
-      (j) => j.status === 'pending' && j.job.kind === 'population',
+      (j) => j.status === 'pending' && j.job.key === 'fen_hounds',
     ).length,
     1,
   );

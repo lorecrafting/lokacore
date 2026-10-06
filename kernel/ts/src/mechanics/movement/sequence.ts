@@ -16,6 +16,7 @@ import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { travel } from '../escort/shared.ts';
+import { entrySight } from '../population/behavior.ts';
 import { fare, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
@@ -47,6 +48,7 @@ export function moveSequence(
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeEncounter(world, body),
+    ...entrySight(world, here, there, command.id, mint, steps),
   ];
   const entered = event(world, command, mint, 1, {
     type: 'entity_entered_room',

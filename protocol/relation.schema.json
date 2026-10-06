@@ -205,7 +205,9 @@
             "role": {
               "enum": [
                 "hound",
-                "pelt"
+                "pelt",
+                "deer",
+                "hide"
               ]
             }
           },
@@ -566,6 +568,12 @@
             {
               "type": "null"
             }
+          ]
+        },
+        "sight_job_id": {
+          "anyOf": [
+            { "$ref": "delta.schema.json#/$defs/JobId" },
+            { "type": "null" }
           ]
         }
       },

@@ -1,0 +1,22 @@
+{
+  "bundle": "willow_deer",
+  "home": "willow_shade",
+  "area": [
+    "willow_shade",
+    "drowned_oak"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 172800,
+  "wander_interval": 3600,
+  "sight": {
+    "delay": 300,
+    "narration": {
+      "south": "combat.deer_fled_south",
+      "north": "combat.deer_fled_north"
+    }
+  }
+}
