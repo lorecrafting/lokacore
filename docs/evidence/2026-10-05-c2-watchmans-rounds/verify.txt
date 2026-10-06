@@ -11,6 +11,13 @@ browser-trace.log: OK
 checks.json: OK
 elixir-focused.log: OK
 focused.log: OK
+fresh-book/before-combat.png: OK
+fresh-book/checks.json: OK
+fresh-book/completed.png: OK
+fresh-book/journal.png: OK
+fresh-book/paused-rejoin.png: OK
+fresh-book/survived-combat.png: OK
+fresh-book/trace.log: OK
 kernel-types.log: OK
 ownership-controls.log: OK
 ownership-mutants.py: OK

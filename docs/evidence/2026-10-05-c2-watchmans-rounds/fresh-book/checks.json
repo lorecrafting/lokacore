@@ -1,0 +1,26 @@
+{
+  "source": "747113496572892a01224c47cddc0bf4f63d0fdc",
+  "browser_bundle_head": "d9bc278e66db24af004c050670e59a354ebb1ae1",
+  "docs_predecessor": "e15c420b6fc3357a85f5c42abf7af48ac1ffc774",
+  "candidate": {
+    "chapter": "0.0.24",
+    "api": "1.22",
+    "sha256": "62f10e30e226c67627628c0017091284bbf1485a473222883fce92b44947b008",
+    "initial_ids": 109
+  },
+  "browser": {
+    "origin": "separate disposable origin; preserved terminal save untouched",
+    "cold_reopen": "passed explicit reload after Start, then Continue reopened Watch Post and original Tobin",
+    "shared_route": "Start; leader-only departure;player join; chapel detour;paused return;explicit Rejoin;second joined checkpoint;actual surviving combat;return/Rejoin;paired remaining joins;committed success narration;resolved4/4Journal",
+    "before_combat": "active;together;2of4;originalTobin at Village Green",
+    "combat": "all five actual cellar rats killed;player survived at6/10HP",
+    "fatal_restart": null,
+    "return": "active;paused;2of4;Rejoin available;Restart unavailable",
+    "success": "resolved;completed;4of4;originalTobin at Watch Post;20pennies;no paid lesson or item/skill grant",
+    "preserved_terminal_reopen": "not attempted;prior Sync operation timeout remains unresolved/deferred"
+  },
+  "real_host_fatal_restart": "retained34passingTS/SQLitechecks plus literal portable/EXproof;browser/native not inferred",
+  "native": null,
+  "web_sqlite_changes": null,
+  "source_changes": null
+}

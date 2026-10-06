@@ -513,7 +513,7 @@ the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
 saved state. Book owns neither liquid math nor a consumption effect producer.
 ## C2 watch patrol details
 
-**Local source implemented; independent review pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source independently approved; publication pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
 page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
 current state; C1 lessons remain available at his actual location. The journal names
@@ -527,9 +527,14 @@ Capture the exact attempt/cursor/status with each drawn control under existing l
 action freshness. Pending, refused, stale and faulted results claim no movement,
 credit or trust. Only committed narration appears, once, including after lost reply
 and reopen. No new watch page, immunity while reading, countdown, nighttime wait,
-optimistic follow or timer-driven movement is added. Browser proof must walk the
-real start→leader departure→player join→pause/rejoin→death/restart→success route;
-native verification remains paused under the owner decision.
+optimistic follow or timer-driven movement is added. Browser proof covers
+shared Start→leader departure→player join→pause/Rejoin→success controls, committed
+narration, resolved checkpoint Journal and a fresh-save cold reopen under the
+[mobile-focused C2 proof decision](../decisions/owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md).
+Actual fatal/Restart remains proved by real-host SQLite; native fatal/Restart UI
+verification is deferred under the mobile pause. Browser fatal/Restart and the
+preserved terminal save’s web-only startup timeout remain explicit evidence gaps;
+no native verification or web worker fix is claimed.
 
 ## B6 Seek, retry and ward details
 

@@ -185,6 +185,8 @@ and not repeated here.
 
 ## Process
 
+- Prioritize work that helps mobile: C2 uses shared Book interaction plus fresh-save cold reopen and real-host fatal recovery proof; native fatal/Restart UI and the preserved terminal web-only startup timeout remain deferred ([record](../decisions/owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md)).
+
 - Update canonical Book interaction rules in the same mechanic slice that changes them, reuse the component language, and fix obvious navigation/UI correctness defects before that slice completes; use E3 for the larger visual consistency pass ([owner decision](../decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 
 - Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).

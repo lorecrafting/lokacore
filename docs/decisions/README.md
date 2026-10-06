@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Mobile-focused C2 UI proof](owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md): shared Book route and fresh cold reopen, distinct real-host fatal recovery proof, deferred native fatal/Restart UI and preserved terminal web timeout.
+
 - [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
 
 - [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.

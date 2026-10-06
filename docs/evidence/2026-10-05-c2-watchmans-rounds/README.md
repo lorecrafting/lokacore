@@ -63,13 +63,45 @@ return again required Rejoin. The remaining real paired joins reached
 [resolved 4/4 Journal](book-journal.png), with no payment or skill/item reward.
 The [retained DOM trace](browser-trace.log) records this observed route.
 
-**Terminal browser reopen remains unproved.** The first terminal reload, settled
+**Preserved terminal browser reopen remains unproved and deferred.** The first terminal reload, settled
 retry and fresh tab displayed
 [“Sync operation timeout”](book-reopen-failure.png) during web SQLite startup.
 The error was caught by startup; no exception stack was exposed. Parent has a
 separate published-main/C2 diagnosis. No save reset, deletion, worker patch or
 platform change was performed here. Browser fatal/Restart is not claimed; real
 fatal/Restart and terminal cold reopen are proven by file-backed SQLite tests.
+
+## Fresh shared Book proof and scoped deferrals
+
+A subsequent fresh disposable origin used the same frozen C2 source, with browser
+bundle head `d9bc278e` (evidence-only successor). **Explicit cold reload after Start
+passed**: chapter Continue returned to Watch Post and original Tobin with the saved
+Start narration. The [fresh DOM trace](fresh-book/trace.log) records that reload,
+real leader-only departure and join, chapel detour/paused return,
+[explicit Rejoin](fresh-book/paused-rejoin.png), and
+[active/together 2-of-4 Journal](fresh-book/before-combat.png).
+
+All five actual cellar rats were then attacked promptly through Book controls.
+The player [survived at 6/10 HP with five dead rats](fresh-book/survived-combat.png).
+**Browser death/Restart remains unproved.** Ordinary return kept S3 active,
+paused and 2-of-4; Rejoin was available and Restart unavailable. No synthetic death,
+hidden state/clock manipulation, source tuning or further fatal setup was used.
+
+Explicit Rejoin followed by East Gate→Green→North Gate→Watch Post produced
+[committed success narration](fresh-book/completed.png) and
+[resolved/completed 4-of-4 Journal](fresh-book/journal.png). Pennies stayed20;
+no lesson, equipment or skill grant was requested. These shared browser interactions
+and fresh-save cold reopen satisfy the narrowly amended
+[mobile-focused C2 UI gate](../../decisions/owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md).
+[Fresh checks](fresh-book/checks.json) keep this result separate from the retained
+real-host fatal/Restart proof, the browser fatal/Restart gap, and native UI
+verification deferred under the mobile pause. Native/Hermes proof remains null.
+
+The earlier preserved terminal save was not opened, reset or repaired in this run.
+Its web-only startup timeout is still unresolved/deferred; no SQLite infrastructure,
+worker overflow/stress fix or C2 gameplay source changed. Parent retains the two
+independent approvals at source `74711349`; this later docs/evidence scope amendment
+requires its own fresh review before publication.
 
 ## Integrity
 
