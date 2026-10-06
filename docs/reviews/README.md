@@ -497,3 +497,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 second opinion on fix round 2](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-fix-round-2): verbatim CHANGES REQUIRED at `0fab0216`; raises SO7 early-delivery cadence enforcement and SO8 missing committed SQLite handoff regression. Primary scoped approval remains as recorded pending evaluation of these new findings.
 
 - [C5 owner-approved scoped fix round 3](2026-10-06-c5-final-primary-review.md#owner-approved-scoped-fix-round-3--approve): source `0e7bbfe8`, APPROVE; SO7 future-cadence skip refused in both kernels and SO8 committed SQLite reopen/receipt/later-tick regression verified. TS/SQLite21/21, Elixir3/3, three mutation controls red; no open primary finding.
+
+- [C5 second opinion on owner-approved fix round 3](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-owner-approved-fix-round-3): verbatim APPROVE on corrected exact source `0e7bbfe8`; SO7/SO8 closed, no open findings. Both independent reviews approve; exact-head hosted CI remains the merge gate.

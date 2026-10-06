@@ -222,3 +222,53 @@ comments posted; working tree remains clean.
 Verification: **21/21 focused TypeScript/kernel/real-SQLite tests and 3/3 focused Elixir tests pass**. Three independent mutation runs fail as expected. The prior fixed-command27 same-time path and due-tick refusal remain green. Changes preserve the existing occurrence/source/end checks and generic receipt/changed-row authority; no source or test edits remain from this review. No browser/native runtime or owner save was used.
 
 Ponytail Review: the correction replaces a permissive disjunction with the two required cases in the existing composers; the SQLite test covers a distinct durable continuation. No added framework, dependency or complexity finding. **APPROVE** for the exact source above; the PM retains the exact-head hosted CI and merge gates.
+
+## Independent second opinion on owner-approved fix round 3
+
+The following answer is retained verbatim. Its APPROVE applies to the corrected exact source `0e7bbfe854ce137d039b48f468c2756c6b6b2b4a`; SO7/SO8 are closed with no open findings.
+
+```text
+APPROVE
+Head reviewed: 0e7bbfe854ce137d039b48f468c2756c6b6b2b4a
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+Scope: changes after ff462201 and direct callers.
+
+Head discrepancy: the supplied identifier
+0e7bbfe854ce137d039b48f468c2756c6b2b4a
+does not resolve. Approval applies only to the preserved branch
+head stated above.
+
+Findings: none open.
+
+C5-SO7 | closed | kernel/ts/src/foundation/compose_bleed.ts:19;
+lib/loka/core/compose_bleed.ex:52
+Completed expiry due200 with retained tick250/end400 now refuses
+successor cadence350. Preserving250 succeeds; completion at250
+requires advancement. Controlled inputs agree in both runtimes.
+
+C5-SO8 | closed | mobile/authority/local-story/c5_bleed.test.ts:141
+Committed real SQLite regression closes/reopens before expiry65425
+and after its nondamaging handoff. Independent literals assert
+end65700, retained cadence65450 and HP3, then cadence65550/HP2
+after the later tick. Receipt counts advance once per settlement.
+Cold loading reconstructs stored rows and validates revision-ordered
+receipts by replay against the reconstructed state. Inspected
+recorded red control fails at the handoff pulse; restored run passes.
+
+Checks:
+- 17 focused TypeScript tests passed.
+- All 15 literal Elixir composition cases passed with the changed
+  module freshly compiled in memory.
+- Six additional cadence boundary cases passed in each runtime.
+- Independent in-memory SO7 mutations in both runtimes changed
+  refusal to acceptance, confirming the regression check detects it.
+- Direct caller and neighboring boundary review found no new defect.
+- Diff whitespace check passed; Ponytail Review found no excess machinery.
+
+Limits:
+Disk-backed SQLite was inspected with its recorded green/red evidence,
+not rerun under the read-only filesystem. Elixir checks used existing
+dependency beams with freshly compiled changed source. No broad gates,
+hosted CI, browser/native tests or owner-save operations were run.
+No files edited or comments posted.
+```
