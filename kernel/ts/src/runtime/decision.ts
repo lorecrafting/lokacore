@@ -1,4 +1,3 @@
-// size: allow 320, exact fuel rows join the runtime decision model
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -26,7 +25,6 @@ import {
   type InspectableDetail,
   type ItemDefinition,
   type Key,
-  type MutationTarget,
   type NpcDefinition,
   type Owned,
   type QuestState,
@@ -92,63 +90,7 @@ export type JobRow = {
   readonly actor_id?: CharacterId;
 };
 
-// The State section each written MutationTarget kind lives in (the clock is State.clock).
-const SECTIONS: Readonly<
-  Record<
-    string,
-    | 'fuel'
-    | 'containers'
-    | 'facts'
-    | 'resources'
-    | 'cooldowns'
-    | 'barriers'
-    | 'quests'
-    | 'jobs'
-    | 'choices'
-    | 'created'
-    | 'encounters'
-    | 'escorts'
-  >
-> = {
-  fuel: 'fuel',
-  encounter: 'encounters',
-  escort: 'escorts',
-  entity: 'created',
-  containment: 'containers',
-  fact: 'facts',
-  resource: 'resources',
-  cooldown: 'cooldowns',
-  barrier: 'barriers',
-  quest: 'quests',
-  job: 'jobs',
-  choice: 'choices',
-};
-
-/**
- * Where adopt() keeps a written MutationTarget: its State section and row (not the clock), as
- * foundation/compose.ts reads it: an entity's container by its id, a quest instance, job or continuation by
- * its id, else by canonical target text.
- */
-export const row = (t: MutationTarget) =>
-  SECTIONS[t.kind] &&
-  ([
-    SECTIONS[t.kind]!,
-    t.kind === 'fuel'
-      ? t.item_id
-      : t.kind === 'containment' || t.kind === 'entity'
-        ? t.entity_id
-        : t.kind === 'escort'
-          ? t.actor_id
-          : t.kind === 'encounter'
-            ? t.encounter_id
-            : t.kind === 'quest'
-              ? t.instance_id
-              : t.kind === 'job'
-                ? t.job_id
-                : t.kind === 'choice'
-                  ? t.continuation_id
-                  : key(t),
-  ] as const);
+export { row } from './rows.ts';
 
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
 export type QuestRow = {

@@ -2,11 +2,10 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
 /** The MutationTarget an op writes (04 §5.1). */
 export function target(op: DeltaOp): MutationTarget {
   switch (op.op) {
-    case 'fact.assign': {
+    case 'fact.assign':
       const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
       if (op.subject_id !== undefined) t.subject_id = op.subject_id;
       return t as MutationTarget;
-    }
     case 'entity.create':
       return { kind: 'entity', entity_id: op.identity.id };
     case 'entity.transfer':

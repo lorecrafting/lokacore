@@ -24,6 +24,10 @@ controls. Ponytail Review removed duplicate fuel receipt replay and a supply sca
 C1's shared item-detail component also renders confirmed fuel.
 
 Provisional source handoff: independent B4 primary and save/protocol opinions remain
-required. C1's reviewed fixes must merge and affected checks rerun before
-publication; rederive the successor only if cartridge bytes change. Full active
+required. C1's final source corrections and approved B3 compiler/shop cleanup are integrated.
+Final checks pass: 582 kernel tests, 167 Elixir core/compiler tests, 46 authority/Book
+tests, literal/seeded portable differential, generation, typecheck, pure lint,
+Elixir/active TypeScript size and strict Credo. B4's source size allowances were removed
+or restored to inherited values through small concrete splits; all affected
+checks, 13 TS red controls and the Elixir prior-row control reran after that cleanup. Full active
 checks/schema sweep/exact-head hosted CI and browser/native gates are unclaimed.

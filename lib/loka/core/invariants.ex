@@ -1,4 +1,4 @@
-# size: allow 355, independent fuel rows join retirement and precondition replay
+# size: allow 320, independent retirement pairing joins precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
@@ -177,14 +177,8 @@ defmodule Loka.Core.Invariants do
     end
   end
 
-  defp extra?(%{"op" => "fuel.set"} = op, s, _, _) do
-    spec = get_in(s, ["fuel_specs", op["item_id"]])
-
-    is_map(spec) and spec["kind"] in ~w(source supply) and
-      fuel_integer?(spec["capacity"], 9_007_199_254_740_991) and spec["capacity"] > 0 and
-      fuel_row?(op["from"], spec, s["clock"]) and fuel_row?(op["to"], spec, s["clock"]) and
-      op["to"]["at"] == s["clock"]
-  end
+  defp extra?(%{"op" => "fuel.set"} = op, s, _, _),
+    do: Loka.Core.InvariantsFuel.valid?(op, s)
 
   defp extra?(%{"op" => "entity.transfer"} = op, s, containers, _) do
     d = op["destination_id"]
@@ -320,13 +314,4 @@ defmodule Loka.Core.Invariants do
         true
     end)
   end
-
-  defp fuel_row?(r, spec, clock) do
-    is_map(r) and map_size(r) == 3 and fuel_integer?(r["remaining"], spec["capacity"]) and
-      fuel_integer?(r["at"], clock) and is_boolean(r["lit"]) and
-      (spec["kind"] == "source" or not r["lit"])
-  end
-
-  defp fuel_integer?(n, max),
-    do: is_integer(n) and n >= 0 and n <= max and n <= 9_007_199_254_740_991
 end

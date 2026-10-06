@@ -1,4 +1,4 @@
-// size: allow 325, exact light offers join existing item action projection
+import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
 import { harvest } from '../mechanics/containment/harvest.ts';
 import { escapeDirections } from '../mechanics/combat/flee.ts';
@@ -23,8 +23,6 @@ import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
-import { readRefused } from '../mechanics/readable/rule.ts';
-import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 /**
@@ -41,7 +39,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-// size: allow 60, one ActionSet projects item, worn light and exact-subject Notice offers
+// size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
@@ -134,7 +132,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 52, exact detail harvest and refuel targets share action projection
+// size: allow 50, exact detail harvest joins shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -146,18 +144,16 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
+  const target_ids =
+    id && light.VERBS.includes(a.command)
+      ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
+      : undefined;
   const shown = {
     action_key: a.key,
     label: a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
-    ...(id &&
-      light.VERBS.includes(a.command) && {
-        target_ids: [
-          id as EntityId,
-          ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : []),
-        ],
-      }),
+    ...(target_ids && { target_ids }),
     ...(patch && { label: patch.label, target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
@@ -253,44 +249,6 @@ function putPairs(
     if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
   }
   return pairs;
-}
-
-// ponytail: reuse the flat detail table used by target resolution; index only if measured.
-function readActions(
-  world: World,
-  actor: CharacterId,
-  set: ReturnType<typeof resolved>,
-  steps: { n: number },
-): AdvertisedAction[] {
-  const actions = Object.values(set).filter(
-    (a) =>
-      a.command === 'read' &&
-      a.target.kind === 'entity' &&
-      a.target.scopes.includes('inspectable_details'),
-  );
-  if (!actions.length) return [];
-  const result: AdvertisedAction[] = [];
-  for (const id in world.details) {
-    if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
-    const target_id = id as EntityId;
-    if (readRefused(world, actor, target_id) || !light.visible(world, actor, target_id, steps))
-      continue;
-    for (const a of actions) {
-      if (result.length >= LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
-      const code = refusal(world, { type: 'read', actor_id: actor, target_id }, steps, a.key, set);
-      const shown = {
-        action_key: a.key,
-        label: world.details[id].readable!.label,
-        target: a.target,
-        input: a.input,
-        target_ids: [target_id],
-      };
-      result.push(
-        code ? { ...shown, available: false, reason: { code } } : { ...shown, available: true },
-      );
-    }
-  }
-  return result;
 }
 
 function noticeOffer(world: World, a: Offered, id: string) {

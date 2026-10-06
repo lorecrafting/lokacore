@@ -1,4 +1,4 @@
-# size: allow 365, exact fuel supplies join the checked reference expansion boundary
+# size: allow 360, finite stock and exchange refs join the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;

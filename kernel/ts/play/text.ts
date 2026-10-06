@@ -11,8 +11,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { status as calendarStatus } from '../src/mechanics/calendar.ts';
 
 /**
- * A Command's payload without its actor, a lookup (the player's words after the verb, which
- * the authority resolves before any Command: they never enter one) for look, take, drop or give
+ * A Command's payload without its actor, or words resolved before a Command for look, take, drop or give
  * (`to` the recipient's words), a wait of whole hours (the caller adds them to the clock),
  * 'inventory', 'quit', a message for the player, or null.
  */

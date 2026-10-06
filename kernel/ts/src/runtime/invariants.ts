@@ -1,4 +1,5 @@
-// size: allow 335, independent fuel preconditions join retirement and row replay
+// size: allow 315, independent retirement pairing joins precondition replay
+import { fuelValid } from './invariants_fuel.ts';
 import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
@@ -190,15 +191,11 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   },
   // Replay the contract preconditions on independent overlays; never use compose's result to
   // compute the expected answer. A fault vacuously holds this success-only invariant.
-  // size: allow 46, fuel row evidence joins independent ordered precondition replay
+  // size: allow 45, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (
-      !Number.isInteger(state.clock) ||
-      !creationsHold(state, delta.ops, result) ||
-      !retirementsHold(delta.ops)
-    )
-      return false;
+    if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
+    if (!retirementsHold(delta.ops)) return false;
     if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
       return false;
     const seen = new Map<string, Json | undefined>();
@@ -306,24 +303,4 @@ function retirementsHold(ops: readonly DeltaOp[]): boolean {
       same(next.scope, op.scope)
     );
   });
-}
-
-function fuelValid(op: Any, s: Any): boolean {
-  const spec = s.fuel_specs?.[op.item_id];
-  const valid = (r: Any) =>
-    !!spec &&
-    ['source', 'supply'].includes(spec.kind) &&
-    Number.isSafeInteger(spec.capacity) &&
-    spec.capacity > 0 &&
-    !!r &&
-    Object.keys(r).length === 3 &&
-    Number.isSafeInteger(r.remaining) &&
-    r.remaining >= 0 &&
-    r.remaining <= spec.capacity &&
-    Number.isSafeInteger(r.at) &&
-    r.at >= 0 &&
-    r.at <= s.clock &&
-    typeof r.lit === 'boolean' &&
-    (spec.kind === 'source' || !r.lit);
-  return valid(op.from) && valid(op.to) && op.to.at === s.clock;
 }

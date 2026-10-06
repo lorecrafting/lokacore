@@ -37,4 +37,10 @@ defmodule Loka.Core.ComposeTarget do
 
   def target(%{"op" => "barrier.transition", "barrier" => b}),
     do: %{"kind" => "barrier", "barrier" => b}
+
+  @doc "Canonical text of a mutation target or DefinitionRef."
+  def key(value) do
+    {:ok, text} = Loka.Core.Canonical.encode(value)
+    text
+  end
 end

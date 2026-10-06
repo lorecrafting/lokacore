@@ -3,7 +3,9 @@
 Local branch `chapter-one/b4-light`; source checkpoint `86201ab5` retained the
 corrected B5 base. Successor finalization merges C1 source
 `e8bf456ece3ca07df37b8014082d1a8174cb9186` and the reviewed Book guide source
-`aa988906468258a6b92cbe262474b33c1b6d5fa4`. This is source/focused-check evidence,
+`aa988906468258a6b92cbe262474b33c1b6d5fa4`. Final source also merges C1 corrections through `277925bb3fd8c9eb4ffc561e4ecf9ac907c8e2a0`
+and approved B3 compiler/shop cleanup `0e0a0105f19ee60196de5aacd183a09d0d75a8b9`.
+This is source/focused-check evidence,
 not independent B4 review or publication proof.
 
 Current successor is `ashmere_missing_child@0.0.21`, API1.19, hash
@@ -15,9 +17,10 @@ matches the independent [payload](../../../protocol/fixtures/missing_child_v021_
 byte for byte. The test helper consumes that pin directly; the temporary v019
 source overlay is removed. The light transcript now uses this successor.
 
-C1's source is still under independent review. Its pending schema-example and
-shared-validation fixes must merge before publication, followed by affected
-checks; if cartridge bytes change, independently rederive this successor.
+C1's corrected schemas, historical lesson/gift receipt checks and size cleanup are
+integrated. Source compilation still matches the independent successor byte for
+byte; no successor re-pin was needed. Independent B4 primary and save/protocol
+reviews remain required.
 
 Composes with confirmed elapsed time, exact B3 commerce/custody, equipment, ordinary
 containment/lid/load checks, combat/death identities and accepted-receipt replay.
@@ -31,18 +34,26 @@ Focused commands (pinned mise; writable task-local tool state and
 
 - `mise exec -- mix compile --warnings-as-errors` — pass.
 - `mise exec -- npm --prefix kernel/ts run typecheck` — pass.
-- `mise exec -- mix test test/loka/content_light_test.exs test/loka/core/fuel_test.exs test/loka/core/light_contracts_test.exs test/loka/content_missing_child_test.exs` — 9 passing compiler/wire/portable literal checks, including 200 seeded differential inputs after both kernels match the independent literals.
-- `mise exec -- node --test kernel/ts/test/light.test.ts kernel/ts/test/light_contracts.test.ts kernel/ts/test/fuel_composition.test.ts mobile/authority/local-story/light_book.test.ts mobile/authority/local-story/light.test.ts mobile/authority/local-story/commerce.test.ts mobile/authority/local-story/infirmary.test.ts mobile/authority/local-story/death.test.ts` — successor kernel, Book and real rollback-journal SQLite checks; the combined B4/B3/B5/C1 run passes 40 tests.
+- `mise exec -- mix test test/loka/core test/loka/content_light_test.exs test/loka/content_missing_child_test.exs test/loka/content_training_test.exs test/loka/content_commerce_test.exs` — 167 passing core/compiler tests, including independent wire/fuel literals and 200 seeded differential inputs after both kernels match the literals.
+- `mise exec -- node --test --test-reporter=dot 'kernel/ts/test/**/*.test.ts'` — all 582 kernel tests pass, including contracts, source loading, current and historical transcripts and the headless simulator (18 simulator tests, 503 sequences and 16,186 steps).
+- `mise exec -- node --test mobile/authority/local-story/light_book.test.ts mobile/authority/local-story/light.test.ts mobile/authority/local-story/commerce.test.ts mobile/authority/local-story/infirmary.test.ts mobile/authority/local-story/training.test.ts mobile/app/book/training.test.ts mobile/app/book/infirmary.test.ts mobile/app/book/model.test.ts mobile/app/book/shop.test.ts` — 46 authority/Book checks pass on current successor inputs.
 - `mise exec -- elixir bin/contracts.exs --check`, `mise exec -- elixir bin/features.exs --check` — generated outputs checked at successor finalization.
+- `mise exec -- mix credo --strict` — no findings after the approved C1/B3 fixes integrate.
+- Elixir size plus active non-mobile TypeScript size enumeration through `bin/check_ts_size.mjs` and pure-kernel `ast-grep scan --error` pass. Typecheck and warnings-as-errors compilation pass.
 
-Additional successor checks: `node --test kernel/ts/test/transcripts.test.ts` passes
-all example replays, including B4's 12-command Buy→Ignite→shaft→elapsed→Douse→Refuel
-trace. `node --test kernel/ts/test/sim.test.ts` passes 18 tests, 503 sequences and
-16,186 steps. Type/size/lint checks pass for B4-owned edits. Full validator tests
-currently reproduce inherited C1 `AttributeView has no examples`; full Credo reports
-nine remaining C1/shared-validator opportunities. B4's own fuel/invariant/text
-enumeration/random-input complexity findings were fixed. These inherited failures
-are tracked dependency work, not a claim that accumulated publication checks pass.
+Final self-review caught missed v020 literals in Infirmary contracts, Wick's
+mapping-drift control and the Book scenario; all now consume the current v021
+fixture. It also caught B4-introduced/raised source size allowances. Resource
+validation, portable quest composition, mutation-row addressing, independent fuel
+validation, projected Read actions and resource bands now have concrete small
+modules. Elixir fuel composition stays in the existing Fuel module, independent fuel
+evidence has its own module, and ComposeTarget owns the shared canonical target key.
+Fresh initialization and GameView retain private helpers; inherited
+allowance values are preserved, and B4 adds or raises none. Existing validation,
+overlay reads, projection order and identity allocation remain unchanged. The
+full kernel/core and relevant SQLite/Book checks were rerun after these splits.
+Full accumulated publication checks, schema mutant sweep and hosted CI are
+unclaimed.
 
 SQLite covers lawful unlit/lit/doused/refilled/nested/sold/bought-back history,
 conserved 15/25/10 purchase balances, real failed COMMIT and both unknown outcomes,
@@ -58,6 +69,9 @@ exemption, foreign-corpse exemption, custody-triggered refill, ignored prior row
 and omitted light-only replay. Old focused same-layer suites pass each mutant;
 the new focused behavior test fails. The [Elixir prior-row control](elixir-red-control.json)
 runs old/new composer tests with `mix test --force`. All mutations were restored.
+The nine TS controls and four successor controls were rerun against the final
+module layout after the size cleanup; the Elixir prior-row control was rerun
+after its fuel composition moved to the existing Fuel module.
 [Successor controls](final-red-controls.json) additionally kill missing runtime room
 allocation ordering, a reset illumination query budget, orphan fuel without metadata, and dropped rendered fuel;
 each selected existing focused check is green before the new check turns red.
@@ -74,7 +88,8 @@ redundant verifier was deleted. Existing replay now activates for exchange, actu
 section requiring corruption validation. This save activation requires B4's independent save/protocol
 opinion.
 
-Ponytail Review: duplicate replay deleted; exact authored supply reference replaces
+Ponytail Review: final module splits are concrete operations required by source
+limits; no speculative abstraction was introduced. Duplicate replay deleted; exact authored supply reference replaces
 a scan. No liquid/light framework, dependency, expiry job, timer or alternate writer.
 Correctness self-review fixed the light registry placeholder in place, preserved
 whole-row equality/bounds in both composers, and kept dark target/admission and

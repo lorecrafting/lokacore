@@ -1,4 +1,4 @@
-// size: allow 335, shared fuel and equipment projections retain existing view shape
+import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { visible, fuelView } from '../mechanics/light/shared.ts';
@@ -9,7 +9,6 @@ import { living } from '../mechanics/death/shared.ts';
 // The player's GameView (04 §14; 00 §4.10), read from a World.
 import type {
   AdvertisedAction,
-  BandTable,
   ContentView,
   ChapterView,
   EntityId,
@@ -18,7 +17,6 @@ import type {
   GameView,
   Key,
   QuestView,
-  ResourceView,
   SlotKey,
   TextKey,
 } from '../contracts.gen.ts';
@@ -27,7 +25,6 @@ import { refusal, resolved } from '../commands/actions.ts';
 import { COMPASS, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened, questOf } from '../mechanics/lookups.ts';
 import { choiceView, definition } from '../mechanics/dialogue/shared.ts';
-import { level, resourceRef } from '../mechanics/resource.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
@@ -60,16 +57,12 @@ import { status as calendarStatus } from '../mechanics/calendar.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 50, one query budget spans skills, light and existing projections
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
-  const equipment = Object.entries(world.slots).map(([slot, holder]) => {
-    const [item] = within(world, actions, holder, actions.worn, steps);
-    return { slot: slot as SlotKey, ...(item && { item }) };
-  });
+  const equipment = equipmentViews(world, actions, steps);
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room, steps));
@@ -82,13 +75,7 @@ export function gameView(world: World): GameView {
   const view: GameView = {
     actor_id: world.character,
     ...skillViews(world, steps),
-    ...(fight && {
-      combat: {
-        encounter_id: fight.id,
-        opponent_id: fight.row.npc_id,
-        name: world.entities[fight.row.npc_id].short,
-      },
-    }),
+    ...(fight && { combat: combatView(world, fight) }),
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door, steps),
     actions: actions.place,
@@ -286,36 +273,17 @@ function journal(world: World): QuestView[] {
     .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
 }
 
-// The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
-// cut first, with their tones; a pool's own bands, else the cartridge's world.bands, replace it.
-const BANDS: BandTable = (
-  [
-    [100, 'perfect_health', 'normal'],
-    [90, 'slightly_scratched', 'normal'],
-    [80, 'few_bruises', 'normal'],
-    [70, 'some_cuts', 'warning'],
-    [60, 'several_wounds', 'warning'],
-    [50, 'many_nasty_wounds', 'warning'],
-    [40, 'bleeding_freely', 'warning'],
-    [30, 'covered_in_blood', 'danger'],
-    [20, 'leaking_guts', 'danger'],
-    [10, 'almost_dead', 'danger'],
-    [0, 'dying', 'danger'],
-  ] as const
-).map(([at_percent, key, tone]) => ({ at_percent, key: key as Key, tone }));
+function equipmentViews(world: World, actions: Lists, steps: Steps) {
+  return Object.entries(world.slots).map(([slot, holder]) => {
+    const [item] = within(world, actions, holder, actions.worn, steps);
+    return { slot: slot as SlotKey, ...(item && { item }) };
+  });
+}
 
-// The body's resources at the clock (mechanics/resource.ts level), in DefinitionRefString order, each with
-// the first band of its table whose cut p reaches, compared in integers (p measured from the
-// minimum; maximum = minimum gives the top row; 32-bit ResourceInts keep every product exact).
-function resources(world: World): ResourceView[] {
-  return Object.values(world.resourceSpecs)
-    .map(({ key: k, minimum, maximum, bands }) => {
-      const resource = resourceRef(world, k);
-      const current = level(world, world.body, resource)!;
-      const { key: band, tone } = (bands ?? world.cartridge.world?.bands ?? BANDS).find(
-        (b) => 100 * (current - minimum) >= b.at_percent * (maximum - minimum),
-      )!;
-      return { resource, current, maximum, band, tone };
-    })
-    .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
+function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>) {
+  return {
+    encounter_id: fight.id,
+    opponent_id: fight.row.npc_id,
+    name: world.entities[fight.row.npc_id].short,
+  };
 }
