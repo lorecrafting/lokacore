@@ -42,3 +42,22 @@ sandbox cannot write Git worktree index locks; no bypass is used.
 
 Correctness review: claims and completion count agree with actual merged evidence.
 Ponytail Review: Lean already. Ship. No unrelated source or tracker machinery added.
+
+## Final hosted source-head Sol review
+
+The PM ran a read-only independent `codex exec` review after all six hosted checks
+passed on PR #230 at `94b909db84f8072a8c9f3703c268cc481af042ae`.
+The output below is reproduced verbatim:
+APPROVE
+
+Reviewed exact head `94b909db84f8072a8c9f3703c268cc481af042ae` against base `689afe70528240c77900f19714a5a580b17d2008`.
+
+Findings: none.
+
+Correctness: PR #229 merged at the stated base. Release 0.0.29/API1.25, SHA-256 `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e` and all 140 unique starting IDs match independent reconstruction. Primary/save/Astra findings are closed; source-head and record-only hosted-check claims are accurate. All six PR #230 head checks succeeded.
+
+The 33 complete, path-clean tracker rows form an acyclic graph. Only C3 transitions from in_progress to closed; other fields and dependencies remain unchanged except its closure metadata. Exactly 17 slices are closed: A1–A3, B1–B9, C1–C3, D2 and D5. Roadmap population, conserved corpse-loot and confirmed corpse-detail Take/Back wording matches the bounded contract; C4 remains separate.
+
+Export completeness and diff whitespace checks pass. No edits or broad suites ran.
+
+Ponytail assessment: Lean already. Ship. No unnecessary machinery or scope expansion.
