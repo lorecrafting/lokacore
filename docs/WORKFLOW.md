@@ -163,6 +163,7 @@ and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
 and verify it contains no local machine path; the installed release writes
 `source_repo_path` on creation, so clear it with
 `br update <id> --source-repo lokacore --source-repo-path ''` before committing.
+The [export check](CHECKS.md) rejects a missed path in the staged commit and CI.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
 Do not install Beads hooks or let the tracker rewrite `AGENTS.md`.
 
