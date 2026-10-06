@@ -318,4 +318,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [C1 local completion status](2026-10-05-c1-local-completion-review.md): exact local status head `befceefd4d34830110bf67c205130b69ad7cbaf6`, independent APPROVE; closed primary/save findings, current release/hash/92-ID pins and accumulated local-check evidence verified; GitHub publication remains ahead, no findings.
 
-- [B7 waterskins and liquid actions primary review](2026-10-05-b7-waterskin-primary-review.md): exact source `d31b47d8`, CHANGES REQUIRED; B7-01 authored liquid keys lack offers, B7-02 Pour receiver-page ownership, B7-03 missing live committed quantity. Focused 23/23 pass; independent missing-debit mutation fails and restored case passes.
+- [B7 waterskins and liquid actions primary review](2026-10-05-b7-waterskin-primary-review.md): original source `d31b47d8`, CHANGES REQUIRED; scoped fix `d24b6f89`, APPROVE, B7-01/B7-02/B7-03 closed. Authored-key admission, source-owned Pour, live/recovered quantity and freshness verified; 121 focused checks and 12 independent loaded probes pass; keyed-admission, ownership and live-formatter mutations fail.

@@ -102,3 +102,60 @@ or dependency is warranted. The direct-base absence of later B4 review records
 is inherited branch history, not a B7 source deletion; final integration must
 retain those published records. Separate save/protocol approval, final source
 fix review and publication/browser gates remain required. No merge or push.
+
+## Scoped fix round 1 — APPROVE
+
+**Exact source reviewed:** `d24b6f8917fa46e171fbf1791e3ed2c3bd848109`.
+**Verdict: APPROVE.** B7-01, B7-02 and B7-03 are closed; no new finding
+within the fixes and their direct callers. The original review above remains
+historical. Scope: source diff from `d31b47d8` through this fix head, including
+GameView admission invariants, Book buttons/freshness, live narration and their
+changed regressions. No broader source review was reopened.
+
+- **B7-01 closed.** Projection selects resolved actions by semantic command,
+  passes each actual key through ordinary admission, and retains key/command
+  separately. The invariant accepts the corresponding exact key and handles
+  unkeyed admission across matching offers. Independent loaded-cartridge probes
+  replace the room set with `draw_water`, `decant`, `sip`: all three offer exact
+  participants, reach actual Book presses and commit their typed commands.
+  Target/input narrowing and denied policy refuse with literal expected codes
+  and unchanged3/2 rows. Semantic commands also reach Book wording, ownership
+  and quantity-aware freshness; the existing intent carries the authored key.
+- **B7-02 closed.** Pour receives source `detail_id`, including authored aliases.
+  The independent real Book probe confirms the original's Pour is absent from
+  the receiver page. The affected production test also exercises an original
+  skin nested in the bought satchel: its source history receives the result,
+  the receiver receives none, and the nested page stack remains intact.
+- **B7-03 closed.** Live replies format retained committed narration through
+  the same helper as restoration. Independent real Book presses show amounts
+  Fill1, Pour2 and Drink1 from controlled initial3/2 rows, with literal final
+  quantities4/2,1/4,2/2 respectively. Cold reopening restores the same detail
+  history. The new loaded consumer regression also exercises lost acknowledgement
+  and retry for each verb without duplicate history. The old helper-only test
+  was replaced with the live consumer proof.
+
+Independent passing checks under pinned mise:
+
+- Kernel liquid, all Book tests, authority liquid, light Book and aliased Read
+  Book: **121/121**, exit0. The initial broad run lacked the new worktree's
+  TypeScript dependency; after installing the pinned app dependencies, the same
+  group passed. No source or dependency declaration was changed.
+- Separate loaded GameView→Book→receipt→cold-reopen probes: **12/12**
+  allowed/target/input/policy cases across all three authored liquid keys, exit0.
+
+Three independent disposable mutations at the exact fix head each fail, exit1:
+
+1. Bypass only keyed `refusal` in liquid projection: the narrowed-action
+   regression sees actual available=true instead of false.
+2. Remove only Pour's source ownership metadata: the exact-pair/nested Book
+   regression sees undefined `detail_id` instead of the literal original ID.
+3. Restore combat-only live narration formatting: the loaded Book regression
+   fails its required committed quantity assertion.
+
+All three were exactly restored; the affected kernel/Book liquid group passes
+**13/13**, exit0, with an empty source diff. The disposable worktree was removed.
+**Ponytail Review:** no additional complexity finding; the fixes reuse existing
+semantic display metadata, detail ownership, keyed admission and narration
+formatting. No source/test edit is included in this review-only record commit.
+Separate save/protocol approval and accumulated publication/CI/browser gates
+remain their own requirements. No merge or push was performed.
