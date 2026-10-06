@@ -82,3 +82,39 @@ the contract lessons. The current guards themselves correctly reject all four in
 Ponytail Review: **Lean already. Ship.** No complexity finding or deletion proposed.
 Full accumulated-head publication, hosted CI, browser and native proof were not run
 by this second opinion. C1-S1/S2/S3 remain open.
+
+## Scoped fix re-review — 2026-10-05
+
+**Scoped verdict: APPROVE WITH NOTES.** Exact fix head
+`caca4033d24fdd9b5a24efaff28d8bad09b64de2`, compared with original
+`e8bf456ece3ca07df37b8014082d1a8174cb9186`. C1-S1/S2/S3 are closed; no new
+save/protocol finding. Reviewed the changed validators, schema/generated contracts,
+compiler refactors and direct dialogue-recovery/narration callers.
+
+- **C1-S1 closed:** shared event identity now binds correlation, world and player
+  scope; causal-root filtering remains at both callers. All six independently
+  repeated foreign choice/gift field probes refuse file-backed cold reopen as
+  `save_corrupt`, preserving exact file bytes after lawful Wear. Restoring the old
+  incomplete identity check in memory makes the new named regression fail
+  (`choice_resolved/correlation_id`: actual `open`, expected `save_corrupt`), exit1.
+- **C1-S2 closed:** all four named schemas now carry independent examples. The
+  shared TypeScript examples/invalid-fixture suite passes 10/10. Shared Elixir
+  contract/combat plus source training/chapter tests pass 16/16, exit0.
+- **C1-S3 closed:** the shared invalid corpus includes literal missing-skill,
+  missing-chance, -1 and 101 answers; valid dodge 0/100 examples also pass. Removing
+  each matching guard in memory makes the actual invalid-fixture test fail under
+  both validators: **eight observed red controls**, exit1 each. Each failure is
+  the missing expected error for its controlled dodge input, rather than a loader
+  or setup error. Normal restored fixture/identity tests pass 3/3.
+- Focused training, Infirmary/reward-storage and shared TypeScript contract checks
+  pass 29/29; direct message, escort, riddle and bell caller checks pass 76/76.
+  Existing lesson/COMMIT/death and historical payment/custody checks remain green.
+  Generated-contract check exits 0. Newly compiled source retains
+  `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e` and all 92
+  independently rederived IDs, also compared with actual hydrated runtime IDs.
+
+Ponytail Review: no added complexity finding. Checked-out production source was
+unchanged; mutations existed only in isolated runtime loading/compilation.
+The known `lib/loka/content/skills.ex:137` clause-grouping warning is reproduced
+at this head and remains a separate PM-tracked publication fix. This scoped verdict
+does not claim a green accumulated publication head, hosted CI or UI/native proof.
