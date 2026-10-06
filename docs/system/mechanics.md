@@ -1542,6 +1542,14 @@ The existing Willow Shade patch opts into careful Harvest. Read current acquired
 
 Peg's opted Buy quote uses current usable haggle after normal elapsed settlement. The effective quote is `max(minimum, floor(base_buy × numerator / denominator))` when usable, otherwise the authored base; Sell stays authored. The existing shared shelf/admission query supplies the effective price for display, exact invocation and execution. `quoted_price` must equal that current effective price before conserved currency/item transfer; stale cheap or dear quotes refuse without silently changing the charge. Recheck all B3 provider, item, custody, balance/overflow and carrying admission. No RNG, daily counter, reserved price, token, extra ledger or stock replacement is added. Qualification is derived at use and never stored; failed qualification never erases acquired membership.
 
+## D7 bounded deer and delayed sight flight (planning contract)
+
+**PM-selected proposal; independent plan review and source proof pending.** [D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-planning-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+
+The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition-planning-contract). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
+
+The plan's ordinary wander still skips engaged members and the member transferred by sight flight at that same clock, using C4's last-flight guard. At equal sight/combat/population deadlines preserve normal `(due_time, job_id)` order and distinct writer groups: a fatal round cancels its bound sight job; sight first moves the deer and makes a later round harmless; a surviving round first can hand off its exact successor for sight flight; an intervening population job sees engagement and may skip. Only the checked matching encounter closure and successor cancellation use the preceding round group in that handoff. Other same-target conflicts still fault atomically. No priority override, global sight scan or per-hound job is added.
+
 ## C5 hound bleeding and bandage (selected contract)
 
 **PM-selected planning contract; source pending.** [C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#c5-bleeding-and-bandage-details) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. No generic status interpreter is selected.
@@ -1553,6 +1561,49 @@ At a current tick strictly before `ends_at`, lose the authored fixed HP amount, 
 Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is permanent, while use requires current qualification. Exact held bandage treatment is immediate, costs no HP/MA/MV or clock, spends no combat round/opportunity and gives no HP. It atomically transfers that one item to D4's terminal consumed holder, removes the current bleed and cancels its job, then returns a typed result. Refuse without any change if the actor is dead, unlearned/unqualified, another body/effect/generation is targeted, the bandage is not directly held and opted in, or the selected bleed is absent. Normal prerequisite due settlement can cause that last refusal. No remote, nested, worn or corpse-held treatment; retrieve the bandage through ordinary custody first.
 
 Amend the focused combat ActionSet for this exact bandage command after shared ordinary action composition. It may be offered and admitted during an open encounter together with Flee, Stand, Look and Scan. Other item actions, recipes, movement and equipment remain excluded; a raw command or alias cannot widen the exception. Treatment leaves the encounter and pending initiative intact. Flee remains immediate under its existing prerequisites. No required story path, death recovery or owner save depends on teaching, stock, waiting or UI polish.
+
+## D10 discovered places, observations and Knock (selected, pending implementation)
+
+Map knowledge belongs to the character. A new character knows only the entry room. An
+accepted body entry adds the destination room once, in the same proposal as its real
+transfer; this includes a paid ferry, a water surface move and a death respawn. Looking,
+adjacent sight, a refused or stale move and opening Map do not visit a room. The visited
+relation is monotone for that character and never grants an exit, changes a barrier or
+teleports an actor. The view joins visited room identities with static cartridge map
+positions and actual exits; it shows a connection only when both ends are visited. A
+visited connection outside the actor's current room is only a known static link, not a
+promise of current traversal. Only exits from the actor's current room show live
+availability from ordinary Move admission, including the D9 Study ingress rule. No
+remote admission simulation or automatic travel is selected.
+
+`where {target_id}` resolves an exact currently **visible and present** NPC or a previously
+observed exact NPC ID belonging to this character. `Here` requires the same current
+visibility gate as Look and direct target admission, whether the request arrived as a
+raw ID, alias or touch selection. A co-located NPC hidden by darkness or another
+visibility rule is not `here`: use the actor's saved last observation, or `unknown`
+when there is none. A prior observation reports its **last observed** room and logical
+time, never its live location. The observation is recorded only at a successful body
+entry or an accepted `look` in the actor's current room, for NPCs actually visible
+to that actor at that point; `look {target_id}` also observes its actual visible target.
+Recording an unchanged observation need not write a row. An unobserved, ambiguous or
+unresolvable name reveals no remote identity or location. Observation does not imply
+current presence, route availability or room visitation beyond the actor's own entry.
+An NPC hidden by darkness or another visibility rule cannot be observed.
+`where` itself is read only. It uses existing exact keyword/alias and ambiguity rules,
+extended to the actor's remembered IDs without leaking unknown candidates; touch passes
+the chosen ID. No schedule prediction or global tracker is selected.
+
+`knock {direction}` is offered only for a physical barrier on an exit from the actor's
+current room whose content declares a response. It resolves the same exact exit/barrier
+identity as the existing door verbs. A knock produces the authored local response as
+an accepted, receipt-bound narration with no barrier transition, actor movement,
+payment, quest or fact mutation. It remains usable whether the physical door is open
+or closed. A missing, remote or undeclared door refuses. The response cannot bypass
+the D9 Prior Study ingress predicate, which is not a physical barrier. The chapter's
+first selected door is the Chapel Steps north / Chapel Nave south pair, initially open;
+Knock is declared on the Steps north face only. Its response comes from the Nave
+only while the actual Aldric is present there.
+An absent Aldric yields the authored no-answer response, without asserting his location.
 
 ## C6 S27 Night in the Marsh (selected planning contract)
 

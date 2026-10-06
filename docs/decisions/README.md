@@ -40,6 +40,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Room interactibles](owner-decision-room-interactables-2026-10-06.md): inline, immovable fixture links in room prose; separate actor and loose-item paragraphs with detail routes.
 
 - [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; selected-docs review approved, source proof pending.
+- [D7 bounded deer PM proposal](pm-decision-d7-deer-2026-10-06.md): three one-slot local populations, delayed sight job and conserved hides; independent plan review and source pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
 - [Beads import hook retention](pm-decision-beads-hooks-retain-2026-10-06.md): retain the opt-in Chapter 1 integration hook after two observed source merges; no measured speed claim.
@@ -259,4 +260,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Pre-production CI scope, 2026-10-06](owner-decision-preproduction-ci-scope-2026-10-06.md): metadata and Book-only changes use narrower local and hosted check lanes, with conservative full fallback.
 
 - [C5 real bleeding and bandage](pm-decision-c5-bleeding-bandage-2026-10-06.md): one hound-produced timed bleed, Wick's skill lesson and exact held-bandage treatment during combat.
+- [D10 Finding the Way](pm-decision-d10-finding-way-2026-10-06.md): character-owned visited map, truthful last-observed Where and a local Chapel-door Knock; planning draft pending independent review.
 - [C6 Night in the Marsh](pm-decision-c6-night-marsh-2026-10-06.md): immediate five-entry survival attempt, optional shelter, bounded hound danger and one completion reward; source waits for C5.

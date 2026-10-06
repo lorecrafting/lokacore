@@ -290,7 +290,7 @@ test('loader independently refuses invalid authored ancestry bindings', () => {
       'UNRESOLVED_REFERENCE',
     ],
   ] as const) {
-    const c = structuredClone(read('protocol/fixtures/missing_child_v036_hash.json').value);
+    const c = structuredClone(read('protocol/fixtures/missing_child_v038_hash.json').value);
     edit(c);
     const canonical = encode(c),
       hash = createHash('sha256').update(canonical).digest('hex');

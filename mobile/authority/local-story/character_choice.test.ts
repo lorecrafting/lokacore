@@ -15,7 +15,7 @@ import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
 function chapter(path: string) {
-  const bundle = read('protocol/fixtures/missing_child_v036_hash.json');
+  const bundle = read('protocol/fixtures/missing_child_v038_hash.json');
   const loaded = loadCartridge(
     new TextEncoder().encode(
       JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

@@ -982,6 +982,12 @@ Extend revision-ordered skill/payment reconciliation for the exact original Sedg
 
 Cold reopen covers each legal Talk/Choose, learned-but-unqualified, careful two-item transfer, ordinary stock-one Harvest, shop exchange, storage/drop/death/recovery and later S9 state. Missing or duplicated herb transfer/event, false acquisition/payment evidence, stale or forged discounted price, unexplained balance or invalid current rows is typed `save_corrupt` with in-place Start over, leaving bytes intact. Prove real failed COMMIT, uncertain absent/committed outcomes, lost acknowledgement and same-invocation replay at all three new boundaries: all prior or all next truth, fenced input/elapsed until reconciliation, no second fee, transfer, grant or narration. Pin mismatch remains explicit refusal with no silent reset; frozen fixture histories remain unchanged.
 
+## D7 deer recovery (planning contract)
+
+**PM-selected proposal; independent plan review and source proof pending.** Persist each of the three plan controls and one-slot rows, immutable deer/hide origins, current sight binding/job, ordinary location/HP/encounter/corpse/custody, last-flight clock, head and receipt with changed rows in one transaction. Validate exact current generation/role/parent, player-entry or population-transfer cause (including the completed historical population control job named by that receipt’s `population.control.expected.job_id`, never a sight-bearing job), and current sight occurrence/due; do not require a historically fled deer to remain in its departure room. Reopen every lawful committed prefix, including pending sight while combat is open, an expired harmless sight job with successor still pending, a surviving round's checked equal-due handoff to flight, death canceling sight, a living fled member, dead slot before/at replacement and old owned hides after replacement.
+
+A forged/duplicate sight binding, wrong role/parent, stale member, illegal transfer, fabricated death/loot, unmatched round-to-sight group/encounter/predecessor/successor/equal-due evidence or missing job/receipt evidence is typed `save_corrupt` without rewriting bytes. Only the matching closure and exact successor cancellation may retain the preceding round writer group; receipt replay cannot widen that exception. Genuine failed COMMIT, unknown committed and absent COMMIT, lost acknowledgement and same-invocation replay resolve the complete prior or next state with no duplicate animal, hide, transfer or job. Preserve explicit release-pin refusal and in-place Start over; do not migrate or delete an owner save silently. Browser refresh is separate evidence from real SQLite fault proof.
+
 ## C5 bleed and bandage recovery
 
 **Selected planning contract; source pending.** Persist the typed C5 status row, HP, current job, exact item custody, skill fact and receipt with the normal changed-row transaction before memory adoption/reply. Reconstruct the current release's inactive generation tombstone or active instance from revision-ordered accepted producers, refreshes, ticks, cure, expiry and deaths. Require actual positive nonfatal C3 hound loss for an application, monotone generation, preserved next due on refresh, one matching live job, ordered tick/expiry and same-body death cleanup. An old hound may have died or fled after applying a valid bleed. Null/malformed fields, impossible time/job/producer/body, unexplained HP loss or active postdeath bleed are typed `save_corrupt`; no silent repair.
@@ -989,6 +995,19 @@ Cold reopen covers each legal Talk/Choose, learned-but-unqualified, careful two-
 Extend D4 terminal-holder recovery for the exact C5 bandage path. A historical accepted `bandaged` must bind its saved command ID/actor, the directly held opted item at that revision, acquired and then-current qualification, active matching effect generation, same-item transfer to the existing consumed holder, status/job removal and authored narration. Later qualifications, HP or item custody do not retroactively invalidate that accepted history. No unrelated item can enter or leave the holder. Cold reopen routes the confirmed bandage line once to Combat if the same encounter remains open, otherwise the World log; neither an inaccessible item page nor unrelated latest receipt may supply success. Pending/refused/faulted commands add none.
 
 Cold reopen after application, refresh, each tick, expiry, cure and fatal return, then exercise a later real consumer. Reopen both canonical same-due bleed/round orders after Flee and re-engagement, including round-first refresh of a former expiry and tick-first fatal cleanup. A forged paired occurrence, second bleed successor or missing current round/bleed job is corrupt; a foreign same-target job retains ordinary conflict refusal. Real SQLite failed COMMIT leaves all prior HP/status/job/item/encounter truth; uncertain absent/committed COMMIT fences input and elapsed until reconciliation. Lost acknowledgment and exact invocation replay consume the bandage once and never rerun cure. Unsupported release/API/hash refuses explicitly; preserve bytes and in-place Start over. Browser refresh and headless simulation supplement, not replace, this durability proof. Owner-save access and native testing remain paused.
+
+## D10 discovered-place and observation recovery
+
+A fresh save records its entry-room visit for the starting character. Each new visit
+and visible NPC observation commits changed knowledge rows with the body-entry or accepted
+Look receipt, before memory adopts the proposal. Reopen derives immutable map positions
+from the pinned release, never from saved coordinates. An unvisited current room,
+malformed rows, wrong actor ownership, impossible room/NPC references, duplicate IDs and
+invalid logical times are typed `save_corrupt` with in-place Start over; no row is
+silently repaired. Failed COMMIT keeps prior knowledge, both uncertain COMMIT outcomes
+reconcile to exactly prior or next knowledge, and lost acknowledgement/retry creates no
+second visit or newer invented observation. Pinned-release mismatch remains explicit
+refusal with no silent deletion or migration.
 
 ## C6 expedition recovery
 

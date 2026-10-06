@@ -3,10 +3,10 @@ import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
 
 const actor = '11111111-2222-4333-8444-555555555555';
-const attribute = 'ashmere_missing_child@0.0.36:attribute/per';
+const attribute = 'ashmere_missing_child@0.0.38:attribute/per';
 const ref = {
   cartridge_id: 'ashmere_missing_child',
-  cartridge_version: '0.0.36',
+  cartridge_version: '0.0.38',
   kind: 'attribute',
   key: 'per',
 };

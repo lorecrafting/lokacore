@@ -1,4 +1,4 @@
-// size: allow 315, immutable character selection joins the closed delta composer
+// size: allow 310, water transitions join the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { quest, repeatPair } from './compose_quest.ts';
@@ -14,6 +14,8 @@ import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
+import { sightHandoffValid } from './compose_sight.ts';
+import { sightRebindValid } from './compose_sight_rebind.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -23,19 +25,15 @@ import {
   type MutationTarget,
   type StateDelta,
 } from '../contracts.gen.ts';
-
 import { transitionWater } from './compose_water.ts';
-
 export type Obj = { readonly [key: string]: Json };
 export type State = { readonly clock: number } & { readonly [section: string]: Json };
 export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
-
 export type Written = { group: number; target: MutationTarget; value: Json };
 export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
-
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
   open: ['closed'],
@@ -50,7 +48,6 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
 const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
-
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 export function compose(state: State, delta: StateDelta, final = true): Result {
@@ -66,7 +63,12 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
       return fault('precondition_failed', t);
     const k = key(t);
     const prior = ctx.overlay.get(k);
-    if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
+    if (
+      prior &&
+      prior.group !== op.writer_group &&
+      !sightRebindValid(state, ops, index, prior.group)
+    )
+      return fault('conflicting_write', t);
     const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
@@ -74,11 +76,11 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  if (final && !completeBirths(ops, state)) return fault('precondition_failed', { kind: 'clock' });
+  if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
+    return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
-
 export function counts(state: State, ops: readonly DeltaOp[]) {
   const count = (name: string) => ops.filter((o) => o.op === name).length;
   const jobs = Object.values(section(state, 'jobs'));
@@ -99,14 +101,12 @@ export const LIMIT_ORDER = (
 
 export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined =>
   LIMIT_ORDER.find((k) => counts[k]! > LIMITS[k]);
-
 const fault = (code: ErrorCode, t: MutationTarget): Result => ({
   fault: { kind: 'fault', code, target: t },
 });
 export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
-
 // size: allow 48, exhaustive dispatch includes once-only character selection
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
@@ -154,7 +154,6 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return barrier(op, row, ctx);
   }
 }
-
 function createEntity(
   op: Extract<DeltaOp, { op: 'entity.create' }>,
   row: Json | undefined,

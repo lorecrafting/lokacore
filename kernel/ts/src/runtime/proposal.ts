@@ -1,7 +1,5 @@
 // size: allow 315, typed quest reactions join the existing FIFO admission/causation path
-// The proposal of one admitted decision (04 §5.1-§5.4): admission of a rule's result, its whole
-// proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
-// order), composition and adoption. runtime/world.ts routes each command here.
+// Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
 import { counts, over, target, type Limit } from '../foundation/compose.ts';
@@ -24,6 +22,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
+import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -283,14 +282,17 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: p.group + 1 }));
+    const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
+    const own = ran.delta.ops.map((o) => ({
+      ...o,
+      writer_group: handoffGroup(o, handoff, p.group + 1),
+    }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
 }
 
-// The capability owning a command or event type; own keys only, so `constructor` names none.
 export const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>
   Object.hasOwn(owners, type) ? owners[type]!.split('@')[0] : undefined;
 

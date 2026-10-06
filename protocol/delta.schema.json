@@ -131,7 +131,7 @@
     },
     "CharacterChoice": {
       "description": "The once-only character identity and its complete saved attribute values.",
-      "examples": [{"ancestry":"fen_born","attributes":{"ashmere_missing_child@0.0.36:attribute/con":10,"ashmere_missing_child@0.0.36:attribute/dex":10,"ashmere_missing_child@0.0.36:attribute/int":10,"ashmere_missing_child@0.0.36:attribute/per":6,"ashmere_missing_child@0.0.36:attribute/spi":10,"ashmere_missing_child@0.0.36:attribute/str":10}}],
+      "examples": [{"ancestry":"fen_born","attributes":{"ashmere_missing_child@0.0.38:attribute/con":10,"ashmere_missing_child@0.0.38:attribute/dex":10,"ashmere_missing_child@0.0.38:attribute/int":10,"ashmere_missing_child@0.0.38:attribute/per":6,"ashmere_missing_child@0.0.38:attribute/spi":10,"ashmere_missing_child@0.0.38:attribute/str":10}}],
       "type": "object",
       "properties": {
         "ancestry": { "$ref": "action.schema.json#/$defs/Key" },
@@ -452,6 +452,22 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "sight": {
+              "type": "object",
+              "properties": {
+                "member_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+                "player_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+                "slot": { "type": "integer", "minimum": 1, "maximum": 64 },
+                "generation": { "type": "integer", "minimum": 1 },
+                "seen_at": { "type": "integer", "minimum": 0 },
+                "cause_kind": { "enum": ["player_entry", "population_transfer"] },
+                "cause_id": { "$ref": "identity.schema.json#/$defs/CommandId" },
+                "source_id": { "anyOf": [{ "$ref": "identity.schema.json#/$defs/EntityId" }, { "type": "null" }] },
+                "destination_id": { "$ref": "identity.schema.json#/$defs/EntityId" }
+              },
+              "required": ["member_id", "player_id", "slot", "generation", "seen_at", "cause_kind", "cause_id", "source_id", "destination_id"],
+              "additionalProperties": false
             },
             "water_generation": {
               "type": "integer",
@@ -790,6 +806,9 @@
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
             },
+            "sight_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
             "water_generation": {
               "type": "integer",
               "minimum": 1
@@ -804,9 +823,8 @@
             "job_id"
           ],
           "requiredUnless": {
-            "water_generation": [
-              "encounter_id"
-            ]
+            "sight_member_id": ["encounter_id"],
+            "water_generation": ["encounter_id"]
           },
           "additionalProperties": false,
           "examples": [

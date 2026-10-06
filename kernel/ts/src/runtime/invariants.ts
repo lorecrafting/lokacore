@@ -1,4 +1,3 @@
-// size: allow 305, character selection joins the independent precondition replay
 import { foodTransferValid } from './invariants_food.ts';
 import { liquidRowsValid } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
@@ -15,7 +14,6 @@ import { validate } from '../foundation/validate.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
-
 const moved = (r: Result): [string, Json][] =>
   ('changes' in r ? r.changes : [])
     .filter((c) => c.target.kind === 'containment')

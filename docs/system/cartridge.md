@@ -1329,6 +1329,20 @@ Compiler and loader reject unknown fields, unresolved skill/action/narration ref
 
 D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
 
+## D7 deer planning declarations
+
+**PM-selected proposal; independent plan review and source proof pending.** The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+
+| Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
+|---|---|---|---|---|---|---|
+| Willow deer | Willow Shade | Willow Shade, Drowned Oak | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Oak deer | Drowned Oak | Drowned Oak, Willow Shade | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Orchard deer | Orchard | Orchard, Smithy | 1 / 1 day and night | 172800 | 3600 | 300 |
+
+The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
+
+Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
+
 ## C5 bleed and bandage declarations
 
 **Selected planning values, not installed source.** [C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1}` and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
@@ -1336,6 +1350,27 @@ D12 implementation head, final predecessor re-pin, successor release/API/hash/al
 Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
 
 Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
+## D10 map positions and Chapel door (selected, pending implementation)
+
+The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
+These integer drawing coordinates are content, not an engine inference from compass
+directions: the room graph contains ferry links and loops. Compilation and loading
+require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
+the rendered links still come only from real exits. Unknown map fields or duplicate
+positions fail before play. No coordinate changes movement cost, sight or reachability.
+
+The first chapter physical door is one barrier shared by Chapel Steps north and Chapel
+Nave south, starting open with no key. It admits ordinary existing Open/Close behavior
+and a declared Knock response on the Steps north face keyed to actual Aldric presence
+in the Nave. The public
+chapel remains reachable by opening a closed door. This differs from the archive's
+keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
+D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
+exact-edge predicate, not a barrier or Knock target. Wren's one boot is an actual
+recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
+Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
+and can be held together for real resolver ambiguity; touch selects an exact item ID.
+Neither replaces Q2 drawing or message credit.
 
 ## C6 S27 expedition declarations
 

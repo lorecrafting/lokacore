@@ -39,7 +39,7 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 - **D4 (adopted plan):** [D4 — Homes, the smithy, orchard food and truthful child-state prose](d4-homes-orchard-brief-2026-10-05.md)
 - **D5:** [D5 — Oak canopy, pool edge, deep fox den and shallows](d5-deep-fen-brief-2026-10-05.md)
 - **D6:** [D6 — Real underwater access, qualified swim and recoverable drowning](d6-water-depths-brief-2026-10-05.md)
-- **D7:** [D7 — Bounded deer, real flight and conserved hide loot](d7-deer-brief-2026-10-05.md)
+- **D7:** [D7 — Bounded deer, delayed sight flight and conserved hides](d7-deer-brief-2026-10-05.md)
 - **D8:** [D8 — Crows carry exact eligible items to a reachable bounded nest](d8-crow-scavenge-brief-2026-10-05.md)
 - **D9:** [D9 — Distinct village reactions, declared bell sound and safe consequence closure](d9-village-reactions-brief-2026-10-05.md)
 - **D10:** [D10 — Discovered map, truthful Where and a real Knock response](d10-map-where-knock-brief-2026-10-05.md)

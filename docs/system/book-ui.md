@@ -127,6 +127,21 @@ Map is a scrolling current-room projection, distinct from the enlarged joystick.
 exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
 currently offered door/place actions. It invents no discovered multiroom coordinate map.
 
+The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
+replaces this current-room-only Map after D10 source is installed. Then Map draws only
+visited rooms at their authored level/position and links whose two endpoints were visited.
+Remote visited links are drawn as known static connections without a current traversal
+claim; only exits from the actor's current room show live availability/refusal from
+ordinary Move admission, including D9's Study ingress rule.
+The current-room marker and a level stepper are visible; a room detail names that known
+room and its known exits. An unvisited endpoint, NPC or item is never drawn merely because
+the cartridge contains it or adjacent sight names it. Existing current-room exit and door
+controls retain live admission. Where labels distinguish currently visible `here`,
+`last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
+become `here`, and a stale observation is never phrased as a current location.
+Knock appears on the actual local door's context card and uses its exact direction and
+freshness token. It leaves that card and Map reachable after its reply.
+
 In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
 Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
 exit, refusal and freshness path as the footer. A missing exit does nothing. Keys act only
@@ -883,6 +898,12 @@ not an optimistic display callback.
 The Willow Shade patch shows current derived finite supply and its ordinary one-item Harvest. A usable opted skill also supplies the authored careful offer and item count through the same pure method-aware admission as execution; insufficient stock/combined carrying has an honest typed refusal and retains ordinary Harvest where legal. The control sends the [exact alias input](protocol.md#d12-harvest-method-and-buy-quote-composition), without presenter-created herbs or skill gating inferred from names. Peg's rows show the effective Buy price and actual Sell price/availability from the shared current query, and bind the displayed Buy number to invocation. Qualification/stock changes refresh or refuse the stale offer before charge.
 
 Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.
+
+## D7 deer sight and hide details (planning contract)
+
+**PM-selected proposal; independent plan review and source proof pending.** Project each co-present living deer as its own exact runtime NPC detail and Attack target through ordinary GameView/admission. The 300-unit pending sight job does not hide a present target; successful sight flight removes that exact deer from the room/detail and closes its Combat page when no opponent remains, including after a surviving equal-due round. If the encounter remains live, stale or blocked sight leaves Combat and its next round intact. Narrate only confirmed departure, with its actual adjacent direction; a stale pending or refused job claims none. Flight reveals no corpse or hide.
+
+A true combat death exposes that deer's real public corpse and exact conserved hide through ordinary Contents/Take/Carrying, including after refresh. A stale target never binds a new generation; render/entry alone gives no item or credit. Demonstrate a legal +150 attack-before-flight kill, an unengaged live sight departure, and a controlled missed attack whose surviving equal-due round hands off to +300 flight, with confirmed receipt routing and refresh. Native device work remains paused; this clause does not promise a Sell/use action for a hide without an admitted consumer.
 
 ## C5 bleeding and bandage details
 
