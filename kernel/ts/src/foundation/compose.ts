@@ -1,22 +1,20 @@
-// size: allow 310, water transitions join the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
+import { transitionBleed } from './compose_bleed.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
-import {
-  populationTransition,
-  initializePopulationResource,
-  populationRow,
-} from './compose_population.ts';
+import { populationTransition, initializePopulationResource } from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
-import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
+import { openEncounter, changeEncounter } from './compose_encounter.ts';
+import { composeJob } from './compose_job.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { sightHandoffValid } from './compose_sight.ts';
 import { sightRebindValid } from './compose_sight_rebind.ts';
-import { encode, type Json } from './canonical.ts';
+import type { Json } from './canonical.ts';
+import { key, get, section, containment, read, rows } from './compose_rows.ts';
 import { composeAdjustment } from './resource.ts';
 import {
   LIMITS,
@@ -39,15 +37,8 @@ const DOOR: Record<string, string[]> = {
   open: ['closed'],
   locked: ['closed'],
 };
-export const key = (value: unknown): string => encode(value as Json);
+export { key, get } from './compose_rows.ts';
 export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
-export const get = (o: Json | undefined, k: string): Json | undefined =>
-  o !== null && typeof o === 'object' && !Array.isArray(o) && Object.hasOwn(o, k)
-    ? (o as Obj)[k]
-    : undefined;
-const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
-const containment = (e: string): MutationTarget =>
-  ({ kind: 'containment', entity_id: e }) as MutationTarget;
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 export function compose(state: State, delta: StateDelta, final = true): Result {
@@ -107,13 +98,14 @@ const fault = (code: ErrorCode, t: MutationTarget): Result => ({
 export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
-// size: allow 48, exhaustive dispatch includes once-only character selection
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
   if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
+  if (op.op === 'bleed.transition')
+    return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
   switch (op.op) {
     case 'character.select':
       return check(row === undefined, op.value);
@@ -135,6 +127,30 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);
+  }
+  return applyWorld(op, row, ctx);
+}
+
+function applyWorld(
+  op: Extract<
+    DeltaOp,
+    {
+      op:
+        | 'population.control'
+        | 'population.slot'
+        | 'water.transition'
+        | 'escort.transition'
+        | 'time.advance'
+        | 'resource.adjust'
+        | 'resource.initialize'
+        | 'cooldown.start'
+        | 'barrier.transition';
+    }
+  >,
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  switch (op.op) {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
@@ -199,8 +215,7 @@ function transferOp(
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
-  if (op.source_id !== null)
-    return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
+  if (op.source_id !== null) return transfer(op, row, ctx);
   const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
   const parent = ctx.overlay.get(key({ kind: 'entity', entity_id: op.destination_id }));
   return check(
@@ -209,13 +224,24 @@ function transferOp(
   );
 }
 
-function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
+function transfer(
+  op: Extract<DeltaOp, { op: 'entity.transfer' }>,
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  const { entity_id: e, source_id: source, destination_id: d } = op;
+  if (source === null) return { code: 'precondition_failed' };
   const known = section(ctx.state, 'known_entities') as Record<string, Obj>;
   if (
     known[e]?.kind === 'consumed' ||
     known[source]?.kind === 'consumed' ||
     (known[d]?.kind === 'consumed' &&
-      (known[e]?.kind !== 'item' || known[e]?.edible !== true || known[source]?.kind !== 'body'))
+      (known[e]?.kind !== 'item' ||
+        known[source]?.kind !== 'body' ||
+        (op.consumption === 'bandaged'
+          ? known[e]?.bandage !== true
+          : known[e]?.edible !== true))) ||
+    (op.consumption === 'bandaged' && known[d]?.kind !== 'consumed')
   )
     return { code: 'precondition_failed' };
   if (row !== source) return { code: 'precondition_failed' };
@@ -237,59 +263,6 @@ function inside(d: string, e: string, ctx: Ctx): boolean {
     seen.add(at);
   }
   return false;
-}
-
-// size: allow 44, one read dispatch covers the closed changed-row target union
-function read(t: MutationTarget, ctx: Ctx): Json | undefined {
-  const w = ctx.overlay.get(key(t));
-  if (w) return w.value;
-  const s = ctx.state;
-  if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
-  switch (t.kind) {
-    case 'character':
-      return get(section(s, 'characters'), t.character_id);
-    case 'fact':
-      return get(section(s, 'facts'), key(t));
-    case 'entity':
-      return get(section(s, 'created'), t.entity_id);
-    case 'containment':
-      return get(section(s, 'containers'), t.entity_id);
-    case 'quest':
-      return get(section(s, 'quests'), t.instance_id);
-    case 'choice':
-      return get(section(s, 'choices'), t.continuation_id);
-    case 'job':
-      return get(section(s, 'jobs'), t.job_id);
-    case 'encounter':
-      return get(section(s, 'encounters'), t.encounter_id);
-    case 'patrol':
-      return get(section(s, 'patrols'), t.quest_instance_id);
-    case 'water':
-      return get(section(s, 'water'), t.actor_id);
-    case 'escort':
-      return get(section(s, 'escorts'), t.actor_id);
-    case 'liquid':
-      return get(section(s, 'liquids'), t.item_id);
-    case 'clock':
-      return s.clock;
-    case 'fuel':
-      return get(section(s, 'fuel'), t.item_id);
-    case 'resource':
-      return get(section(s, 'resources'), key(t));
-    case 'cooldown':
-      return get(section(s, 'cooldowns'), key(t));
-    case 'barrier':
-      return get(section(s, 'barriers'), key(t));
-  }
-}
-
-// ponytail: scans the whole section; add a contents/scope index when a cartridge has many rows.
-function rows(kind: string, name: string, id: string, ctx: Ctx): [string, Json][] {
-  const changed = new Map<string, Json>();
-  for (const w of ctx.overlay.values())
-    if (w.target.kind === kind) changed.set(get(w.target as Json, id) as string, w.value);
-  const base = Object.entries(section(ctx.state, name)).filter(([k]) => !changed.has(k));
-  return [...base, ...changed];
 }
 
 function barrier(

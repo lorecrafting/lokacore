@@ -1,14 +1,14 @@
-"""Provisional D11 answer over published D7 v036; re-pin after C5 publication."""
+"""Hand-curated D11 delta over frozen published C5 v037."""
 import hashlib
 import json
 import uuid
 from pathlib import Path
 
 here = Path(__file__).parent
-source = here.parent.parent / 'cartridges' / 'ashmere_missing_child'
 version = '0.0.38'
-v = json.loads((here / 'missing_child_v036_hash.json').read_text())['value']
-v = json.loads(json.dumps(v).replace('0.0.36', version))
+base = json.loads((here / 'missing_child_v037_hash.json').read_text())
+assert base['sha256'] == 'd995ec92f0e7dcfd45d495504cd008176c04a3fa6c822e4a194b0b127be7fc65'
+v = json.loads(json.dumps(base['value']).replace('0.0.37', version))
 v['manifest']['requires']['kernel_api']['at_least'] = '1.33'
 
 def ref(kind, key):
@@ -18,26 +18,6 @@ def ref(kind, key):
 def named(kind, key):
     return f'ashmere_missing_child@{version}:{kind}/{key}'
 
-for key in ('deer_corpse', 'deer_hide'):
-    value = json.loads((source / 'items' / f'{key}.json').read_text())
-    v['items'][named('item', key)] = {'key': key, **value}
-for key in ('oak_deer', 'orchard_deer', 'willow_deer'):
-    npc = json.loads((source / 'npcs' / f'{key}.json').read_text())
-    npc['room'] = ref('room', npc['room'])
-    v['npcs'][named('npc', key)] = {'key': key, **npc}
-    b = json.loads((source / 'population_bundles' / f'{key}.json').read_text())
-    v['population_bundles'][named('population_bundle', key)] = {
-        'key': key, 'npc': ref('npc', b['npc']), 'item': ref('item', b['item']),
-        'corpse': ref('item', b['corpse']), 'member_role': b['member_role'],
-        'loot_role': b['loot_role'],
-    }
-    plan = json.loads((source / 'populations' / f'{key}.json').read_text())
-    plan['home'] = ref('room', plan['home'])
-    plan['area'] = [ref('room', room) for room in plan['area']]
-    plan['bundle'] = ref('population_bundle', plan['bundle'])
-    v['populations'][named('population', key)] = {'key': key, **plan}
-text = json.loads((source / 'text.json').read_text())
-v['text'].update({key: value for key, value in text.items() if 'deer' in key})
 for name, start in [('con', 10), ('spi', 10)]:
     v['attributes'][named('attribute', name)] = {'key': name, 'start': start}
 
@@ -74,7 +54,7 @@ v['text'].update({
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 digest = hashlib.sha256(canonical.encode()).hexdigest()
 (here / 'missing_child_v038_hash.json').write_text(json.dumps({
-    'description': 'Provisional D11 character choice over published D7 v036; final C5 successor pin pending.',
+    'description': 'D11 character choice over frozen published C5 v037.',
     'value': v, 'canonical': canonical, 'sha256': digest,
 }, indent=2, ensure_ascii=False) + '\n')
 
@@ -101,4 +81,4 @@ for ordinal, label in enumerate(labels):
     raw[8] = (raw[8] & 63) | 128
     answers[label] = str(uuid.UUID(bytes=bytes(raw)))
 (here / 'missing_child_v038_ids.json').write_text(json.dumps(answers, indent=2) + '\n')
-print(f'Provisional D11 successor {version}/API1.33: {digest}, {len(answers)} initial IDs.')
+print(f'D11 successor {version}/API1.33: {digest}, {len(answers)} initial IDs.')

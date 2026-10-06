@@ -36,6 +36,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
+import { currentBleed } from '../mechanics/bleed/shared.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -64,22 +65,22 @@ export function gameView(world: World): GameView {
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
   const equipment = equipmentViews(world, actions, steps);
-  const room = world.rooms[here];
-  const text = (key: TextKey) => ({ key });
-  const description = text(description_variant.describe(world, world.character, room, steps));
+  const place = placeView(world, here, steps);
   const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
+  const bleed = currentBleed(world, world.body);
   const view: GameView = {
     actor_id: world.character,
     ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
-    place: { id: here, title: text(room.title), description },
+    ...(bleed && { bleeding: bleedingView(world, bleed) }),
+    place,
     exits: exits(world, actions.door, steps),
     actions: actions.place,
     ...noticeViews(world, here, actions.notice, steps),
@@ -97,6 +98,28 @@ export function gameView(world: World): GameView {
   };
   if (steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
   return view;
+}
+
+function placeView(world: World, here: EntityId, steps: Steps) {
+  const room = world.rooms[here];
+  const text = (key: TextKey) => ({ key });
+  return {
+    id: here,
+    title: text(room.title),
+    description: text(description_variant.describe(world, world.character, room, steps)),
+  };
+}
+
+function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof currentBleed>>) {
+  const spec = world.cartridge.bleeds![refString(bleed.effect!)];
+  return {
+    label: 'condition.bleeding' as TextKey,
+    generation: bleed.generation,
+    ends_at: bleed.ends_at!,
+    next_tick_at: bleed.next_tick_at!,
+    hp_loss: spec.hp_loss,
+    tick_every: spec.tick_every,
+  };
 }
 
 // The entities directly in `holder` (the room, the body or a slot holder), each with its short

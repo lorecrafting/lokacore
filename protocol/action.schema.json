@@ -68,6 +68,11 @@
           "enum": [
             "careful"
           ]
+        },
+        "effect_generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
         }
       },
       "required": [],
@@ -324,7 +329,8 @@
         "route",
         "quoted_fare",
         "dream",
-        "method"
+        "method",
+        "effect_generation"
       ],
       "examples": [
         "until"

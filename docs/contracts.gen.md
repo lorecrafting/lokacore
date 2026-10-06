@@ -50,6 +50,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | patrol@1 | portable | portable_capability |  |
 | transport@1 | portable | portable_capability |  |
 | food@1 | portable | portable_capability |  |
+| bleed@1 | portable | portable_capability |  |
 | water@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
@@ -157,6 +158,7 @@ The compiled cartridge, its artifact file and the compiler and loader diagnostic
 - **AncestrySpec**: One authored character choice and its bounded initial effects.
 - **ArtifactSize**: The byte length of a cartridge artifact file, checked before decoding: at most 4 MiB (owner decision, docs/archive/decisions/owner-decisions-r4-2026-09-25.md, item 2). bin/contracts.exs emits the maximum into kernel/ts/src/contracts.gen.ts as ARTIFACT_MAX_BYTES; Elixir reads it here.
 - **AttributeSpec**: attributes@1 (00 §4.3 and 06 §21 amendments 2026-10-03): an attribute and its starting value, content and never an engine default. Every actor's value is start while nothing writes attributes (no state). In source, attributes.json's {"attributes": {key: {start}}}, the key taken from the map (an authored key is UNKNOWN_FIELD).
+- **BleedDefinition**: An authored body bleed duration, tick cadence and HP loss.
 - **Calendar**: calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours.
 - **CalendarCut**: An inclusive phase start within one authored solar day or lunar period.
 - **CartridgeArtifact**: The compiled artifact file: one canonical JSON document, built and never committed (05 §20). content_hash is the cartridge hash (CartridgeRelease.cartridge_hash): SHA-256 of the canonical bytes (loka-numeric-v1) of cartridge. It hashes cartridge only, never itself, so it can sit beside it (CAR-10); the loader recomputes it and rejects a mismatch.
@@ -224,6 +226,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `use_service`
   - `use_transport`
   - `eat`: Eat one directly held opted edible item; its identity enters terminal custody.
+  - `bandage`
   - `recover_corpse`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
@@ -241,6 +244,9 @@ The decision result (04 §5, §5.0, §5.2).
 
 The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.
 
+- **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
+  - `true`
+  - `false`
 - **CharacterChoice**: The once-only character identity and its complete saved attribute values.
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
@@ -273,6 +279,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `population.control`
   - `population.slot`
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
+  - `bleed.transition`: Checked transition of one body bleed generation.
   - `water.transition`
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
@@ -297,6 +304,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `liquid`
   - `population_plan`
   - `population_slot`
+  - `bleed`
   - `water`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
@@ -335,6 +343,7 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
 - **FuelSpec**: Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys.
   - `source`
   - `supply`
+- **ItemBandage**: A directly held item opted into exact bleed treatment.
 - **ItemDefinition**: A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.
 - **ItemEdible**: D4 held-food metadata; a complete original item grants capped recovery when Eat commits.
 - **ItemLocation**: Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).
@@ -416,6 +425,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **AttributeView**: An authored attribute reference and the actor's current value.
+- **BleedingView**: Current body bleed condition and exact generation for a held bandage invocation.
 - **CalendarStatus**: Confirmed cartridge calendar projection. Phase fields appear only when authored.
 - **ChapterView**: The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.
 - **ChoiceOption**: One option of a pending choice: choosing it invokes choose with this choice_id.

@@ -13,6 +13,8 @@ import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
+export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
+  `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
@@ -76,6 +78,7 @@ export function group(buttons: Button[]) {
     door: (direction: string) =>
       buttons.filter((b) => !['move', 'flee'].includes(b.action_key) && dir(b) === direction),
     flee: buttons.filter((b) => b.action_key === 'flee'),
+    bandage: buttons.filter((b) => b.action_key === 'bandage'),
     continue: buttons.find((b) => b.action_key === 'continue'),
     position: buttons.filter(
       (b) => !b.detail_id && ['stand', 'sit', 'rest', 'sleep'].includes(commandOf(b)),
@@ -248,11 +251,14 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        return button(
+        const offered = button(
           a,
           ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
+        return a.action_key === 'bandage' && v.bleeding
+          ? { ...offered, input: { effect_generation: v.bleeding.generation } }
+          : offered;
       }),
   );
   const placed = place.map((a) => ({

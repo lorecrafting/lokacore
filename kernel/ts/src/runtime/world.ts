@@ -24,6 +24,7 @@ import * as attributes from '../mechanics/attributes/rule.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
+import * as bleed from '../mechanics/bleed/rule.ts';
 import * as transport from '../mechanics/transport/rule.ts';
 import * as service from '../mechanics/service/rule.ts';
 import * as liquid from '../mechanics/liquid/rule.ts';
@@ -54,6 +55,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   liquid: liquid.decide,
   service: service.decide,
   food: food.decide,
+  bleed: bleed.decide,
   transport: transport.decide,
   action_recipe: action_recipe.decide,
   schedule: schedule.decide,

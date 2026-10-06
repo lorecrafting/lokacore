@@ -1136,6 +1136,32 @@
           "type": "object",
           "properties": {
             "type": {
+              "const": "bandage"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "effect_generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id",
+            "effect_generation"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
               "const": "recover_corpse"
             },
             "actor_id": {

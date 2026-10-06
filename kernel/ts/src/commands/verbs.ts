@@ -18,6 +18,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   fill: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],
   pour: [entity('inventory'), []],
   eat: [entity('inventory'), []],
+  bandage: [entity('inventory'), ['effect_generation']],
   drink: [entity('inventory'), []],
   look: [{ kind: 'none' }, []],
   read: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],

@@ -195,6 +195,7 @@ export function CharacterPage(
       {!known && <Text style={note}>Nothing is known about you yet.</Text>}
       {position && <Text style={prose}>{cap(position)}</Text>}
       {p.view?.ancestry && <Text style={prose}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>}
+      {p.view?.bleeding && <Text style={prose}>{p.text(p.view.bleeding.label)}</Text>}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>

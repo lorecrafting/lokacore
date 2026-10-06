@@ -156,7 +156,7 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
   return fighting(world, actor)
     ? Object.fromEntries(
         Object.entries(set).filter(([, a]) =>
-          ['flee', 'stand', 'look', 'scan'].includes(a.command),
+          ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command),
         ),
       )
     : set;

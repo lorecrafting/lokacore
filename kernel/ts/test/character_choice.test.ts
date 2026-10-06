@@ -94,7 +94,8 @@ test('trusted elapsed drains a due job before ancestry choice without admitting 
   const movement = step(
     advanced.world,
     {
-      ...command(advanced.world, 'move'),
+      id: '11111111-2222-4333-8444-555555555555',
+      world_context_id: advanced.world.context,
       payload: { type: 'move', actor_id: w.character, direction: 'north' },
     } as never,
     2,
