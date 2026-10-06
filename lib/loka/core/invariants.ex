@@ -3,14 +3,13 @@ defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
   (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
-  twin; both run the `"invariants"` cases of
-  `protocol/fixtures/composition.json`.
+  twin; both run the portable composition invariant fixtures.
   `check(id, observation)` is true when the invariant holds. Observation fields:
   - `"state"`, `"delta"`, `"result"`: a base state, a StateDelta and its
     `Loka.Core.Compose.compose/2` result;
   - `"resolution"`: a TargetResolution;
   - `"decision"`, `"commit"`, `"published"`: a DecisionResult, the host's commit outcome
-    (`%{"status" => "committed", "revision" => n}`, `"failed"` or `"unknown"`) and what the
+    (committed, failed or unknown) and what the
     host published. An unknown id raises.
   """
   alias Loka.Core.Compose

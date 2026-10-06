@@ -7,10 +7,9 @@ import hashlib
 import json
 from pathlib import Path
 import uuid
-import sys
 here = Path(__file__).parent
 source = here.parent.parent / 'cartridges/ashmere_missing_child'
-prior = sys.argv[1] if len(sys.argv) > 1 else 'missing_child_v020_hash.json'
+prior = 'missing_child_v021_hash.json'
 v = json.loads((here / prior).read_text())['value']
 manifest = json.loads((source / 'cartridge.json').read_text())
 version = manifest['version']

@@ -118,7 +118,6 @@ defmodule Loka.Content.Compiler do
     )
   end
 
-  # cartridge.json's calendar, world and chapters, short references expanded.
   defp settings(extra, m), do: Checks.expand(Map.delete(extra, "entry"), m)
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
