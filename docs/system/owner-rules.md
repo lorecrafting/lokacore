@@ -74,7 +74,8 @@ and not repeated here.
 - NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
 - The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
-- NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
+- NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and ordinary confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
+- Confirmed Take from a corpse's Contents stays on that corpse detail with Back to World and one local pickup line ([record](../decisions/owner-decision-corpse-loot-take-detail-2026-10-06.md)).
 - C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
 
 - The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); descriptions, action text and other in-game copy are now PM-delegated without per-batch owner approval ([superseding decision](../decisions/owner-decision-copy-delegation-2026-10-04.md)).
