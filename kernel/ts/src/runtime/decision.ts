@@ -77,6 +77,7 @@ export type ChoiceRow = {
   readonly status: 'pending' | 'resolved' | 'closed';
   readonly opened_revision: number;
   readonly choice_id?: Key;
+  readonly attempts?: { readonly count: number; readonly limit: number };
   readonly quest_instance_id?: QuestInstanceId;
 };
 

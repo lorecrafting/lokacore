@@ -20,6 +20,7 @@ defmodule Loka.Content.Checks do
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
     "skill.acquire" => "skill",
+    "topic.grant" => "topic",
     "quest.activate" => "quest",
     "quest.resolve" => "quest",
     "quest.fail" => "quest",
@@ -83,6 +84,9 @@ defmodule Loka.Content.Checks do
     |> Map.delete("shop")
     |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
+    |> Map.merge(
+      if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
+    )
     |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
   end
 
@@ -113,6 +117,14 @@ defmodule Loka.Content.Checks do
 
   # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
   # map may have a detail keyed resource, whose value is a map).
+  def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
+    do: Map.put(n, "attribute", ref(a, "attribute", m))
+
+  def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
+
+  def expand(%{"label" => _, "fact" => f} = n, m),
+    do: Map.put(n, "fact", ref(f, "fact", m))
+
   def expand(%{"skill" => s} = n, m) when is_binary(s),
     do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
 

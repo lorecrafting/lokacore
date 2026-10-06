@@ -711,7 +711,7 @@ update generated contracts and current release pins in the implementation PR.
 
 ## B6 bounded sitting and topic composition
 
-Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) extends only
+[B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) extends only
 attribute-threshold checks, opted bounded riddle continuations and declared topic
 projection/grant. Use the existing Perform/Talk/Choose/Close invocations and actor
 ActionSet. Shared visibility/light/discovery/quest/participant policies govern
@@ -721,11 +721,17 @@ when supplied it must belong to the target speaker and resolve through the actor
 ActionSet with its own eligibility rechecked. Omission keeps first-eligible-key
 behavior. This is a bounded selector, not a conversation graph. GameView reveals
 bank and committed attempts/limit for an opted sitting, never the canonical answer.
+The marker declares `perception: {self_luminous: true, title: TextKey}`;
+the NPC declares `perception: {discovered: DefinitionRef}` to a player Boolean.
+The shared visible-target query consumes both metadata forms; Book reuses the
+existing detail view for the marker.
 Known topics project as key-sorted `{topic: DefinitionRef, label: TextKey}` entries;
 the ward consumer reads the same declared Boolean membership as its admission.
 
 Dialogue owns a typed continuation attempt supplement and `choice.attempt` operation:
-bind continuation ID, actor, opening revision and exact prior count; increment by
+`choice.open` pins `attempts: {count: 0, limit}` and the active quest occurrence.
+`choice.attempt` binds continuation ID, actor, source DefinitionRef, quest occurrence,
+opening revision and exact `prior_count`; increment by
 one only for a pending bounded sitting, within its pinned authored limit. Conflicts,
 wrong ownership and out-of-range rows fail closed. At the limit, increment and
 ordinary choice close share one writer group; no intervening count-at-limit pending

@@ -319,6 +319,18 @@
         },
         "shop": {
           "$ref": "entity.schema.json#/$defs/Shop"
+        },
+        "perception": {
+          "type": "object",
+          "properties": {
+            "discovered": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "discovered"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

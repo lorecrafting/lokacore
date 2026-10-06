@@ -110,26 +110,29 @@ const schemaStage = (doc: Json) =>
 
 // Each map key's cartridge_id, cartridge_version and key against the manifest and definition.
 // The schema's propertyNames pattern already holds the key's shape and kind.
+const DEFINITION_MAPS = [
+  'facts',
+  'policies',
+  'actions',
+  'rooms',
+  'npcs',
+  'items',
+  'recipes',
+  'resources',
+  'attributes',
+  'barriers',
+  'quests',
+  'reactions',
+  'dialogues',
+  'story_points',
+  'scenes',
+  'skills',
+  'topics',
+];
+
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of [
-    'facts',
-    'policies',
-    'actions',
-    'rooms',
-    'npcs',
-    'items',
-    'recipes',
-    'resources',
-    'attributes',
-    'barriers',
-    'quests',
-    'reactions',
-    'dialogues',
-    'story_points',
-    'scenes',
-    'skills',
-  ]) {
+  for (const map of DEFINITION_MAPS) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
@@ -220,7 +223,7 @@ function lockStage(c: Obj): Diagnostic[] {
           use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
-  for (const kind of ['resource', 'attribute', 'scene', 'skill'])
+  for (const kind of ['resource', 'attribute', 'scene', 'skill', 'topic'])
     for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))

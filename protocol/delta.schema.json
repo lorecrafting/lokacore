@@ -328,6 +328,9 @@
             },
             "quest_instance_id": {
               "$ref": "#/$defs/QuestInstanceId"
+            },
+            "attempts": {
+              "$ref": "delta.schema.json#/$defs/ChoiceAttempts"
             }
           },
           "required": [
@@ -832,6 +835,48 @@
           ],
           "additionalProperties": false,
           "description": "Replace one declared item fuel history with exact whole-row precondition at the authoritative clock."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice.attempt"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "source": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prior_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "continuation_id",
+            "actor_id",
+            "source",
+            "quest_instance_id",
+            "expected_revision",
+            "prior_count"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -1368,6 +1413,31 @@
         }
       ],
       "description": "Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job."
+    },
+    "ChoiceAttempts": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "count",
+        "limit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "count": 0,
+          "limit": 3
+        }
+      ],
+      "description": "Pinned wrong-answer count and authored positive limit for one conversational sitting."
     }
   }
 }

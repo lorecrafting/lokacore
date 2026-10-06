@@ -95,11 +95,13 @@ export function resolve(
   // A target past the Command's slots lands under an unknown key, which validate rejects.
   const slots = TARGETS[a.command] ?? [];
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
-  const named = a.recipe
-    ? { action: a.key }
-    : a.quest
-      ? { quest: a.quest }
-      : a.continuation && { continuation_id: a.continuation };
+  const named = a.dialogue
+    ? { dialogue: a.dialogue }
+    : a.recipe
+      ? { action: a.key }
+      : a.quest
+        ? { quest: a.quest }
+        : a.continuation && { continuation_id: a.continuation };
   const payload = { type: a.command, actor_id: i.actor_id, ...named, ...i.input, ...targets };
   const command = { id: command_id, world_context_id: world.context, payload };
   return validate('Command', command).length

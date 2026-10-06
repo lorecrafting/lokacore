@@ -45,6 +45,7 @@ function link(op: Any): [Json | undefined, Json] {
     'choice.open': [undefined, 'pending'],
     'choice.resolve': ['pending', 'resolved'],
     'choice.close': ['pending', 'closed'],
+    'choice.attempt': ['pending', 'pending'],
   };
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];

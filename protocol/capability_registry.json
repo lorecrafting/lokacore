@@ -358,6 +358,9 @@
     "definitions": [
       "fuel",
       "darkness"
+    ],
+    "policies": [
+      "light_off"
     ]
   },
   {
@@ -382,7 +385,10 @@
     "key": "topics",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "topic"
+    ]
   },
   {
     "key": "relationship",

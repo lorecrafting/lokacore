@@ -1,6 +1,7 @@
 import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
 /** The MutationTarget an op writes (04 §5.1). */
 export function target(op: DeltaOp): MutationTarget {
+  if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
   switch (op.op) {
     case 'fact.assign':
       const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
@@ -14,10 +15,6 @@ export function target(op: DeltaOp): MutationTarget {
     case 'quest.retire':
     case 'quest.transition':
       return { kind: 'quest', instance_id: op.instance_id };
-    case 'choice.open':
-    case 'choice.resolve':
-    case 'choice.close':
-      return { kind: 'choice', continuation_id: op.continuation_id };
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':

@@ -61,6 +61,10 @@
             },
             "wrong": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "wrong_limit": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
@@ -70,6 +74,9 @@
             "wrong"
           ],
           "additionalProperties": false
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -246,6 +253,22 @@
                 "required": [
                   "op",
                   "skill"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "topic.grant"
+                  },
+                  "topic": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "required": [
+                  "op",
+                  "topic"
                 ],
                 "additionalProperties": false
               }

@@ -410,6 +410,9 @@
             },
             "target_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "dialogue": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
           "required": [

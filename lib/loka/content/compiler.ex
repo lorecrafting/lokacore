@@ -45,6 +45,7 @@ defmodule Loka.Content.Compiler do
       Entities.carry(manifest, defs, located),
       Loka.Content.Fuel.check(manifest, defs),
       Loka.Content.Commerce.check(manifest, defs),
+      Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -147,7 +148,8 @@ defmodule Loka.Content.Compiler do
     {"dialogue", :dialogue, "DialogueDefinition"},
     {"story_point", :story_point, "StoryPointDefinition"},
     {"scene", :scene, "SceneDefinition"},
-    {"skill", :skill, "SkillDefinition"}
+    {"skill", :skill, "SkillDefinition"},
+    {"topic", :topic, "TopicDefinition"}
   ]
 
   defp definitions(files, m) do

@@ -1,0 +1,30 @@
+{
+  "npc": "aldric",
+  "label": "actions.ask_ward",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "topic_ward_known",
+          "equals": true
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.aldric.ward",
+  "roles": {
+    "aldric": {
+      "role": "npc",
+      "npc": "aldric"
+    }
+  },
+  "choices": {
+    "ward": {
+      "label": "dialogue.aldric.ward.ask",
+      "narration": "narration.aldric.ward"
+    }
+  }
+}

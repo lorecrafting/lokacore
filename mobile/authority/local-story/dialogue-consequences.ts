@@ -2,7 +2,7 @@ import type { DialogueChoice, DeltaOp, DomainEvent } from '../../../kernel/ts/sr
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { acquisition } from '../../../kernel/ts/src/mechanics/skills.ts';
 import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
-import { bodyOf, type ChoiceRow } from '../../../kernel/ts/src/runtime/decision.ts';
+import { bodyOf, refString, type ChoiceRow } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Story } from './save.ts';
 
 export function paymentEvidence(
@@ -41,37 +41,59 @@ export function assignmentEvidence(
 ) {
   for (const step of option.sequence ?? []) {
     if (step.op === 'fact.adjust') continue;
-    const assignment =
-      step.op === 'skill.acquire' ? { fact: acquisition(step.skill), value: true } : step;
+    const assignment = assignmentOf(s, step);
+    if (!assignment) return false;
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));
     const op = matching[0];
+    if (!matching.length && step.op === 'topic.grant') continue;
     if (
       matching.length !== 1 ||
       op.op !== 'fact.assign' ||
       !same(op.value, assignment.value) ||
-      (step.op === 'skill.acquire' && op.expected !== false) ||
+      (['skill.acquire', 'topic.grant'].includes(step.op) && op.expected !== false) ||
       !same(op.scope, scopeOf(s.world, row.actor_id, assignment.fact))
     )
       return false;
-    const changed = events.filter(
-      (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, assignment.fact),
-    );
-    if (same(op.expected, op.value)) {
-      if (changed.length) return false;
-    } else if (
-      changed.length !== 1 ||
-      changed[0].actor_id !== row.actor_id ||
-      changed[0].world_context_id !== s.world.context ||
-      String(changed[0].correlation_id) !== String(changed[0].causation_id) ||
-      !same(changed[0].scope, op.scope) ||
-      !same(changed[0].payload, {
-        type: 'fact_changed',
-        fact: assignment.fact,
-        old: op.expected,
-        new: assignment.value,
-      })
-    )
-      return false;
+    if (!changedEvidence(s, row, op, assignment, events)) return false;
   }
+  return true;
+}
+
+function assignmentOf(s: Story, step: NonNullable<DialogueChoice['sequence']>[number]) {
+  if (step.op === 'fact.adjust') return undefined;
+  if (step.op === 'skill.acquire') return { fact: acquisition(step.skill), value: true };
+  if (step.op === 'topic.grant') {
+    const fact = s.world.cartridge.topics?.[refString(step.topic)]?.fact;
+    return fact && { fact, value: true };
+  }
+  return step;
+}
+
+function changedEvidence(
+  s: Story,
+  row: ChoiceRow,
+  op: Extract<DeltaOp, { op: 'fact.assign' }>,
+  assignment: { fact: Extract<DeltaOp, { op: 'fact.assign' }>['fact']; value: unknown },
+  events: readonly DomainEvent[],
+) {
+  const changed = events.filter(
+    (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, assignment.fact),
+  );
+  if (same(op.expected, op.value)) {
+    if (changed.length) return false;
+  } else if (
+    changed.length !== 1 ||
+    changed[0].actor_id !== row.actor_id ||
+    changed[0].world_context_id !== s.world.context ||
+    String(changed[0].correlation_id) !== String(changed[0].causation_id) ||
+    !same(changed[0].scope, op.scope) ||
+    !same(changed[0].payload, {
+      type: 'fact_changed',
+      fact: assignment.fact,
+      old: op.expected,
+      new: assignment.value,
+    })
+  )
+    return false;
   return true;
 }

@@ -711,6 +711,9 @@
               },
               "minItems": 1,
               "maxItems": 32
+            },
+            "attempts": {
+              "$ref": "delta.schema.json#/$defs/ChoiceAttempts"
             }
           },
           "required": [
@@ -1036,6 +1039,25 @@
           "type": "array",
           "items": {
             "$ref": "gameview.schema.json#/$defs/AttributeView"
+          }
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "topic": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
+            },
+            "required": [
+              "topic",
+              "label"
+            ],
+            "additionalProperties": false
           }
         }
       },

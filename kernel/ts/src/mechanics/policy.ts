@@ -1,3 +1,4 @@
+import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare; 21 §3.2, §4 Policy; 06
@@ -49,9 +50,10 @@ export function holds(
     }
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
+    case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
-      return atLeast(world, actor, p);
+      return atLeast(world, actor, p, ctx.steps);
     default:
       throw new Error(`policy op ${(p as Policy).op} is not installed`);
   }
@@ -63,8 +65,10 @@ export function holds(
 function atLeast(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' }>,
+  p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
+  steps: { n: number },
 ): boolean {
+  if (p.op === 'light_off') return !illuminated(world, actor, steps);
   if (p.op === 'stat_compare') return world.attributes[key(p.attribute)] >= p.at_least;
   const body = bodyOf(world, actor);
   return body !== undefined && level(world, body, p.resource)! >= p.at_least;

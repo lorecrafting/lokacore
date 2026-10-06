@@ -159,6 +159,22 @@
             "title"
           ],
           "additionalProperties": false
+        },
+        "perception": {
+          "type": "object",
+          "properties": {
+            "self_luminous": {
+              "const": true
+            },
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "self_luminous",
+            "title"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

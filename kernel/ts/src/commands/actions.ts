@@ -45,6 +45,7 @@ export type Offered = {
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
   readonly speaker?: EntityId;
+  readonly dialogue?: DefinitionRef;
   readonly continuation?: ContinuationId;
   readonly engine?: true;
 };
@@ -241,6 +242,8 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
   if (a.command !== payload.type) return false;
   if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
   if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
+  if (payload.type === 'talk' && payload.dialogue && !same(a.dialogue, payload.dialogue))
+    return false;
   if (a.engine) return true;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const id = p.target_id ?? p.item_id;

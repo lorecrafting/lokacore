@@ -1,0 +1,1592 @@
+[
+  {
+    "name": "attempt count",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 0,
+      "limit": 3
+    },
+    "valid": true
+  },
+  {
+    "name": "attempt count missing count",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "limit": 3
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count missing limit",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count invalid count -1",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": -1,
+      "limit": 3
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count invalid count 9007199254740992",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 9007199254740992,
+      "limit": 3
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count invalid limit 0",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 0,
+      "limit": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count invalid limit 9007199254740992",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 0,
+      "limit": 9007199254740992
+    },
+    "valid": false
+  },
+  {
+    "name": "attempt count invalid extra True",
+    "contract": "ChoiceAttempts",
+    "value": {
+      "count": 0,
+      "limit": 3,
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": true
+  },
+  {
+    "name": "choice attempt missing op",
+    "contract": "DeltaOp",
+    "value": {
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing writer_group",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing continuation_id",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing actor_id",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing source",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing quest_instance_id",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing expected_revision",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt missing prior_count",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid op choice.bad",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.bad",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid expected_revision -1",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": -1,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid expected_revision 9007199254740992",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 9007199254740992,
+      "prior_count": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid prior_count -1",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": -1
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid prior_count 9007199254740992",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 9007199254740992
+    },
+    "valid": false
+  },
+  {
+    "name": "choice attempt invalid extra True",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "choice.attempt",
+      "writer_group": 0,
+      "continuation_id": "11111111-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "source": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "dialogue",
+        "key": "b_wisp_riddle"
+      },
+      "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+      "expected_revision": 4,
+      "prior_count": 0,
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "topic",
+    "contract": "TopicDefinition",
+    "value": {
+      "key": "ward",
+      "label": "topic.ward",
+      "fact": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "fact",
+        "key": "topic_ward_known"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "topic missing key",
+    "contract": "TopicDefinition",
+    "value": {
+      "label": "topic.ward",
+      "fact": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "fact",
+        "key": "topic_ward_known"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "topic missing label",
+    "contract": "TopicDefinition",
+    "value": {
+      "key": "ward",
+      "fact": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "fact",
+        "key": "topic_ward_known"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "topic missing fact",
+    "contract": "TopicDefinition",
+    "value": {
+      "key": "ward",
+      "label": "topic.ward"
+    },
+    "valid": false
+  },
+  {
+    "name": "topic invalid extra True",
+    "contract": "TopicDefinition",
+    "value": {
+      "key": "ward",
+      "label": "topic.ward",
+      "fact": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "fact",
+        "key": "topic_ward_known"
+      },
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 5
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "attribute check missing check.key",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 5
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check missing check.kind",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 5
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check missing check.attribute",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "difficulty": 5
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check missing check.difficulty",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check invalid check.kind attribute_wrong",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_wrong",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 5
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check invalid check.difficulty -9007199254740992",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": -9007199254740992
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check invalid check.difficulty 9007199254740992",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 9007199254740992
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "attribute check invalid check.extra True",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "aliases": [
+        "seek"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "room",
+          "key": "marsh_light"
+        },
+        "detail": "glow"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "light_off"
+        }
+      },
+      "check": {
+        "key": "wisp_perception",
+        "kind": "attribute_threshold",
+        "attribute": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "attribute",
+          "key": "per"
+        },
+        "difficulty": 5,
+        "extra": true
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.seek"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.seek_failed"
+          }
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "marker",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "glow"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "self_luminous": true,
+        "title": "detail.glow.title"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "marker missing perception.self_luminous",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "glow"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "title": "detail.glow.title"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "marker missing perception.title",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "glow"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "self_luminous": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "marker invalid perception.self_luminous False",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "glow"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "self_luminous": false,
+        "title": "detail.glow.title"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "marker invalid perception.extra True",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "glow"
+      ],
+      "description": "detail.glow.description",
+      "perception": {
+        "self_luminous": true,
+        "title": "detail.glow.title",
+        "extra": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "opted npc",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "wisp",
+      "keywords": [
+        "wisp"
+      ],
+      "short": "npc.wisp.short",
+      "room_line": "npc.wisp.room",
+      "description": "npc.wisp.description",
+      "room": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "room",
+        "key": "marsh_light"
+      },
+      "perception": {
+        "discovered": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "fact",
+          "key": "fen_wisp_discovered"
+        }
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "opted npc missing perception.discovered",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "wisp",
+      "keywords": [
+        "wisp"
+      ],
+      "short": "npc.wisp.short",
+      "room_line": "npc.wisp.room",
+      "description": "npc.wisp.description",
+      "room": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "room",
+        "key": "marsh_light"
+      },
+      "perception": {}
+    },
+    "valid": false
+  },
+  {
+    "name": "opted npc invalid perception.extra True",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "wisp",
+      "keywords": [
+        "wisp"
+      ],
+      "short": "npc.wisp.short",
+      "room_line": "npc.wisp.room",
+      "description": "npc.wisp.description",
+      "room": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "room",
+        "key": "marsh_light"
+      },
+      "perception": {
+        "discovered": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "fact",
+          "key": "fen_wisp_discovered"
+        },
+        "extra": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "bounded riddle",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "b_wisp_riddle",
+      "npc": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "npc",
+        "key": "wisp"
+      },
+      "label": "actions.ask_wisp",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "light_off"
+            },
+            {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "equals": true
+            },
+            {
+              "op": "quest_state",
+              "quest": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "quest",
+                "key": "wisp_ward"
+              },
+              "state": "active"
+            }
+          ]
+        }
+      },
+      "prompt": "dialogue.wisp.riddle",
+      "roles": {
+        "wisp": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "npc",
+            "key": "wisp"
+          }
+        }
+      },
+      "quest": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "quest",
+        "key": "wisp_ward"
+      },
+      "choices": {
+        "answer": {
+          "label": "dialogue.wisp.answer",
+          "narration": "narration.wisp.correct",
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_answered"
+              },
+              "value": true
+            },
+            {
+              "op": "topic.grant",
+              "topic": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "topic",
+                "key": "ward"
+              }
+            }
+          ]
+        }
+      },
+      "riddle": {
+        "choice_id": "answer",
+        "answer": "tide",
+        "bank": [
+          "T",
+          "I",
+          "D",
+          "E"
+        ],
+        "wrong": "narration.wisp.wrong",
+        "wrong_limit": 3
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "bounded riddle invalid riddle.wrong_limit 0",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "b_wisp_riddle",
+      "npc": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "npc",
+        "key": "wisp"
+      },
+      "label": "actions.ask_wisp",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "light_off"
+            },
+            {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "equals": true
+            },
+            {
+              "op": "quest_state",
+              "quest": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "quest",
+                "key": "wisp_ward"
+              },
+              "state": "active"
+            }
+          ]
+        }
+      },
+      "prompt": "dialogue.wisp.riddle",
+      "roles": {
+        "wisp": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "npc",
+            "key": "wisp"
+          }
+        }
+      },
+      "quest": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "quest",
+        "key": "wisp_ward"
+      },
+      "choices": {
+        "answer": {
+          "label": "dialogue.wisp.answer",
+          "narration": "narration.wisp.correct",
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_answered"
+              },
+              "value": true
+            },
+            {
+              "op": "topic.grant",
+              "topic": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "topic",
+                "key": "ward"
+              }
+            }
+          ]
+        }
+      },
+      "riddle": {
+        "choice_id": "answer",
+        "answer": "tide",
+        "bank": [
+          "T",
+          "I",
+          "D",
+          "E"
+        ],
+        "wrong": "narration.wisp.wrong",
+        "wrong_limit": 0
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "bounded riddle invalid riddle.wrong_limit 9007199254740992",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "b_wisp_riddle",
+      "npc": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "npc",
+        "key": "wisp"
+      },
+      "label": "actions.ask_wisp",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "light_off"
+            },
+            {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_discovered"
+              },
+              "equals": true
+            },
+            {
+              "op": "quest_state",
+              "quest": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "quest",
+                "key": "wisp_ward"
+              },
+              "state": "active"
+            }
+          ]
+        }
+      },
+      "prompt": "dialogue.wisp.riddle",
+      "roles": {
+        "wisp": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "npc",
+            "key": "wisp"
+          }
+        }
+      },
+      "quest": {
+        "cartridge_id": "ashmere_missing_child",
+        "cartridge_version": "0.0.23",
+        "kind": "quest",
+        "key": "wisp_ward"
+      },
+      "choices": {
+        "answer": {
+          "label": "dialogue.wisp.answer",
+          "narration": "narration.wisp.correct",
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "fact",
+                "key": "fen_wisp_answered"
+              },
+              "value": true
+            },
+            {
+              "op": "topic.grant",
+              "topic": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.23",
+                "kind": "topic",
+                "key": "ward"
+              }
+            }
+          ]
+        }
+      },
+      "riddle": {
+        "choice_id": "answer",
+        "answer": "tide",
+        "bank": [
+          "T",
+          "I",
+          "D",
+          "E"
+        ],
+        "wrong": "narration.wisp.wrong",
+        "wrong_limit": 9007199254740992
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "topic grant",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.answer",
+      "narration": "narration.answer",
+      "sequence": [
+        {
+          "op": "topic.grant",
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          }
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "topic grant missing sequence.0.op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.answer",
+      "narration": "narration.answer",
+      "sequence": [
+        {
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic grant missing sequence.0.topic",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.answer",
+      "narration": "narration.answer",
+      "sequence": [
+        {
+          "op": "topic.grant"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic grant invalid sequence.0.op topic.bad",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.answer",
+      "narration": "narration.answer",
+      "sequence": [
+        {
+          "op": "topic.bad",
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "topic grant invalid sequence.0.extra True",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.answer",
+      "narration": "narration.answer",
+      "sequence": [
+        {
+          "op": "topic.grant",
+          "topic": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "topic",
+            "key": "ward"
+          },
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "light policy",
+    "contract": "Policy",
+    "value": {
+      "op": "light_off"
+    },
+    "valid": true
+  },
+  {
+    "name": "light policy missing op",
+    "contract": "Policy",
+    "value": {},
+    "valid": false
+  },
+  {
+    "name": "light policy invalid op light_bad",
+    "contract": "Policy",
+    "value": {
+      "op": "light_bad"
+    },
+    "valid": false
+  },
+  {
+    "name": "light policy invalid extra True",
+    "contract": "Policy",
+    "value": {
+      "op": "light_off",
+      "extra": true
+    },
+    "valid": false
+  }
+]

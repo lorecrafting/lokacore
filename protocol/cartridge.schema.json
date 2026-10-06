@@ -254,6 +254,16 @@
               "additionalProperties": {
                 "$ref": "#/$defs/SkillDefinition"
               }
+            },
+            "topics": {
+              "description": "skills@1 definitions; acquisition uses the reserved skill_<key> player fact.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):topic/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/TopicDefinition"
+              }
             }
           },
           "required": [
@@ -1496,6 +1506,39 @@
           }
         }
       ]
+    },
+    "TopicDefinition": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "fact": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "fact"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "ward",
+          "label": "topic.ward",
+          "fact": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "fact",
+            "key": "topic_ward_known"
+          }
+        }
+      ],
+      "description": "A declared localized topic mapped to its player Boolean knowledge fact."
     }
   }
 }

@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "wisp"
+  ],
+  "short": "npc.wisp.short",
+  "room_line": "npc.wisp.room",
+  "description": "npc.wisp.description",
+  "room": "marsh_light",
+  "perception": {
+    "discovered": "fen_wisp_discovered"
+  }
+}

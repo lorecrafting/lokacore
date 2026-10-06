@@ -824,7 +824,7 @@ reviewed C1/B5 integration is re-pinned and independently derived.
 
 ## B6 marsh route and tuning
 
-The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
 public path on existing firm footing; preserve the already always-passable mire
 and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway

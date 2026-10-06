@@ -1,0 +1,878 @@
+[
+  {
+    "name": "pending zero to one",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "changes": [
+        {
+          "target": {
+            "kind": "choice",
+            "continuation_id": "11111111-1111-4111-8111-111111111111"
+          },
+          "value": {
+            "actor_id": "22222222-2222-4222-8222-222222222222",
+            "source": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.23",
+              "kind": "dialogue",
+              "key": "b_wisp_riddle"
+            },
+            "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+            "beat": "b_wisp_riddle",
+            "roles": [],
+            "choice_ids": [
+              "answer"
+            ],
+            "opened_revision": 4,
+            "status": "pending",
+            "attempts": {
+              "count": 1,
+              "limit": 3
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "third closes in one writer group",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 2,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 2
+      },
+      {
+        "op": "choice.close",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111"
+      }
+    ],
+    "expected": {
+      "changes": [
+        {
+          "target": {
+            "kind": "choice",
+            "continuation_id": "11111111-1111-4111-8111-111111111111"
+          },
+          "value": {
+            "actor_id": "22222222-2222-4222-8222-222222222222",
+            "source": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.23",
+              "kind": "dialogue",
+              "key": "b_wisp_riddle"
+            },
+            "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+            "beat": "b_wisp_riddle",
+            "roles": [],
+            "choice_ids": [
+              "answer"
+            ],
+            "opened_revision": 4,
+            "status": "closed",
+            "attempts": {
+              "count": 3,
+              "limit": 3
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "third cannot remain pending",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 2,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 2
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "wrong prior",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 1
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "foreign actor",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "11111111-1111-4111-8111-111111111111",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "foreign source",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "other"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "foreign occurrence",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "11111111-1111-4111-8111-111111111111",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "wrong revision",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 3,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "nonpending closed",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "closed",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "nonpending resolved",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "resolved",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "invalid stored count",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": -1,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "duplicate prior increments",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      },
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "conflicting attempt writer",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      },
+      {
+        "op": "choice.attempt",
+        "writer_group": 1,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "conflicting_write",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  },
+  {
+    "name": "two sequential increments refuse",
+    "state": {
+      "clock": 0,
+      "choices": {
+        "11111111-1111-4111-8111-111111111111": {
+          "actor_id": "22222222-2222-4222-8222-222222222222",
+          "source": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.23",
+            "kind": "dialogue",
+            "key": "b_wisp_riddle"
+          },
+          "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+          "beat": "b_wisp_riddle",
+          "roles": [],
+          "choice_ids": [
+            "answer"
+          ],
+          "opened_revision": 4,
+          "status": "pending",
+          "attempts": {
+            "count": 0,
+            "limit": 3
+          }
+        }
+      }
+    },
+    "ops": [
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 0
+      },
+      {
+        "op": "choice.attempt",
+        "writer_group": 0,
+        "continuation_id": "11111111-1111-4111-8111-111111111111",
+        "actor_id": "22222222-2222-4222-8222-222222222222",
+        "source": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.23",
+          "kind": "dialogue",
+          "key": "b_wisp_riddle"
+        },
+        "quest_instance_id": "33333333-3333-4333-8333-333333333333",
+        "expected_revision": 4,
+        "prior_count": 1
+      }
+    ],
+    "expected": {
+      "fault": {
+        "kind": "fault",
+        "code": "precondition_failed",
+        "target": {
+          "kind": "choice",
+          "continuation_id": "11111111-1111-4111-8111-111111111111"
+        }
+      }
+    }
+  }
+]

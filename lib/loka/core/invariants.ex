@@ -264,6 +264,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "quest.transition"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "choice.open"}), do: {nil, "pending"}
   defp link(%{"op" => "choice.resolve"}), do: {"pending", "resolved"}
+  defp link(%{"op" => "choice.attempt"}), do: {"pending", "pending"}
   defp link(%{"op" => "choice.close"}), do: {"pending", "closed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "fuel.set"} = op), do: {op["from"], op["to"]}

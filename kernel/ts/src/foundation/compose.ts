@@ -1,3 +1,4 @@
+import { choice, pendingAtLimit } from './compose_choice.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionEscort } from './compose_escort.ts';
@@ -61,6 +62,9 @@ export function compose(state: State, delta: StateDelta): Result {
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
+  for (const w of ctx.overlay.values())
+    if (w.target.kind === 'choice' && pendingAtLimit(w.value))
+      return fault('precondition_failed', w.target);
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
@@ -97,9 +101,10 @@ export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-// size: allow 42, exhaustive dispatch over the closed delta-op contract
 function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
+  if ('continuation_id' in op)
+    return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   switch (op.op) {
     case 'fact.assign':
       return assign(op, row, ctx);
@@ -114,10 +119,6 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'quest.retire':
     case 'quest.transition':
       return quest(op, row, () => rows('quest', 'quests', 'instance_id', ctx));
-    case 'choice.open':
-    case 'choice.resolve':
-    case 'choice.close':
-      return choice(op, row);
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
@@ -155,26 +156,6 @@ function encounter(
     read(containment(op.npc_id), ctx),
     rows('encounter', 'encounters', 'encounter_id', ctx),
   );
-}
-
-function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined): Outcome {
-  switch (op.op) {
-    case 'choice.open': {
-      const { actor_id, source, beat, roles, choice_ids } = op;
-      const opened = { actor_id, source, beat, roles, choice_ids, status: 'pending' };
-      if (op.quest_instance_id) Object.assign(opened, { quest_instance_id: op.quest_instance_id });
-      return check(row === undefined, opened as unknown as Json);
-    }
-    case 'choice.resolve': {
-      const offered =
-        get(row, 'status') === 'pending' &&
-        (get(row, 'choice_ids') as string[]).includes(op.choice_id);
-      const ok = offered && get(row, 'opened_revision') === op.expected_revision;
-      return check(ok, put(row, { status: 'resolved', choice_id: op.choice_id }));
-    }
-    default:
-      return check(get(row, 'status') === 'pending', put(row, { status: 'closed' }));
-  }
 }
 
 function transferOp(

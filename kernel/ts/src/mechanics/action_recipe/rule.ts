@@ -44,6 +44,7 @@ import {
 import { assigned } from '../fact.ts';
 import { add } from '../../foundation/int.ts';
 import { adjust, level, type Levels } from '../resource.ts';
+import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint) => {
@@ -119,7 +120,9 @@ function resolve(
   const passed =
     check.kind === 'luck'
       ? n < check.chance
-      : level(world, body, check.resource)! >= check.difficulty;
+      : check.kind === 'attribute_threshold'
+        ? world.attributes[key(check.attribute)] >= check.difficulty
+        : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
     type: passed ? 'check_passed' : 'check_failed',
