@@ -249,3 +249,6 @@ no behavior engine, spawning duplicate, corpse-immunity mechanism or new depende
 Correctness self-review checked selected-member death, primary/cursor repair,
 same-clock flight/wander, strict threshold, pelt custody, whole-pack closure and
 lawful cold states. This is author review, not independent approval or executed proof.
+
+The provisional source run and outstanding release-pin dependency are recorded in
+[C4 local evidence](../../evidence/2026-10-06-c4-hound-behavior/README.md).
