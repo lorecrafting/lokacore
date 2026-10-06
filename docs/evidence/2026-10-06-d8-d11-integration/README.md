@@ -98,3 +98,22 @@ original transition map, exact expected-row/member/generation checks and shapes.
 Full gate has not been rerun after the final shape-clause fix. Resume with the
 required full gate, then resolve any later TS/lint/schema/headless proof failures.
 Browser, schema sweep, 30-day conservation and independent reviews remain pending.
+
+## Full gate on final population extraction
+
+`mise exec -- bin/check_all.sh` on source `05cdf719`: exit1. All393 Elixir tests,
+Credo, Elixir size, portable contract/feature generation, lint, docs, Beads planted
+controls and TypeScript typecheck passed. The full TypeScript suite ran (including
+headless simulation), with one reported failure:
+
+`kernel/ts/test/deer.test.ts:79`, “independent active genesis IDs include all three
+deer pairs and control jobs”: `oak_deer/deer` expected
+`639d7e64-e7d3-8a5f-b6eb-e5f1a4cd6afc`, actual
+`c3f1e7f3-1f5e-8f0f-906f-387e9fcd61ad`.
+
+The active genesis allocation moved when crow source was added; inspect the
+independent active ID answer and D8 v039 allocation oracle before updating that
+current-release test. Frozen predecessor fixtures must remain unchanged. Later
+kernel red controls, TypeScript size and final formatting did not execute because
+npm test failed. No D8-specific schema sweep/30-day proof was begun: the requested
+full-gate prerequisite was not green. No browser, PR or review was started.
