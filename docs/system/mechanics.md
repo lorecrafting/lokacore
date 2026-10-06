@@ -1448,6 +1448,10 @@ the current water producer lowers positive HP to 0 and invokes the existing
 same-body fatal sequence atomically. Death carries typed drowning, null killer/
 credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinary
 elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
+A captured underwater Up reservation binds its original occupancy generation.
+If elapsed preflight expires or invalidates that generation, return `stale_view`
+with the body at Chapel and one corpse; never reinterpret it as a Chapel exit.
+Ordinary time settlement that retains the same occupancy does not block Surface.
 No second clock, wetness, drift, ghost mode or global movement rewrite.
 
 At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
