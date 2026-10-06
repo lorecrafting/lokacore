@@ -1,8 +1,8 @@
 # B9 Lantern Rest/dream — shared source evidence
 
 B9 is local source on `slice/b9-lantern-dream`, with published B8 prerequisite
-`594b8ae1b6c790891e49d160ff4d023c9db1e9f1` integrated. Source checkpoint and fresh
-primary/save review verdicts: **null** until the checked source freezes. Publication
+`594b8ae1b6c790891e49d160ff4d023c9db1e9f1` integrated. Frozen provisional source checkpoint: `8b9e5b52fffdffd34569cb0f6aa837090a7478df`. Fresh
+primary/save review verdicts: **null**, pending independent records. Publication
 PR/merge: **null**. No owner save, native preview, browser or device proof is claimed.
 
 The independently derived local candidate is `ashmere_missing_child@0.0.26`,
@@ -81,3 +81,5 @@ these two additional obsolete expectations. No validator compatibility path was 
 The normal pre-commit boundary guard caught a direct kernel fixture import from the
 Book test. `pre-commit-boundary-red.log` retains that refusal; the test now obtains
 the same fixture through its authority test helper, preserving the production boundary.
+
+The [local draft PR description](local-draft-pr.md) records the reviewable source scope.

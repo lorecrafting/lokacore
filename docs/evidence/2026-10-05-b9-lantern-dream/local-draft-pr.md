@@ -1,0 +1,9 @@
+# Lantern paid Rest opens a resumable dream and acknowledged memory
+
+A new Rest after Maud’s room payment starts the one-time Fen dream at the actual bed. The player can Close and Resume, choose Follow the fox or Wake, and acknowledge the final narration to remember it and resolve S10. Cold SQLite reopen, elapsed time and same-body death/return retain the exact scene and selected branch; pending dialogue and Bell modal keep their own precedence.
+
+Implements the approved [B9 brief](../../briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md) and the amended [mechanics](../../system/mechanics.md), [protocol](../../system/protocol.md), [cartridge](../../system/cartridge.md), [save](../../system/save.md) and [Book UI](../../system/book-ui.md) declarations. Reuses existing Rest/payment, typed fact/quest/choice operations and accepted-history replay. No new portable operation, saved table, adapter or dependency.
+
+[Evidence](README.md): full local gate green; 106 focused TypeScript and 14 forced Elixir tests, both type checks, independent complete payload and all 111 initial IDs. Real SQLite close/reopen, retained corruption refusal and operation-based COMMIT faults; actual shared Book live/cold/uncertain Rest routing. Sixteen behavior controls are old-green/new-red, 73 schema controls red, and four import controls red. Native layout/device proof is null.
+
+[Correctness and Ponytail self-review](self-review.md): no unresolved developer findings; existing composition and source limits retained without new/raised allowances. Obsolete development `restricted` input still refuses with current literal `unknown_variant`; current Rest transcript evidence is independently re-pinned. Fresh primary and save/protocol reviews are pending. Source `8b9e5b52fffdffd34569cb0f6aa837090a7478df` is isolated on `slice/b9-lantern-dream`; publication is null and v026/API1.24 pins remain provisional until D5/PR224/published D2 integration.
