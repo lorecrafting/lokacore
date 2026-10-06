@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded underwater occupancy contracts",
+  "$defs": {
+    "WaterOccupancy": {
+      "type": "object",
+      "properties": {
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "room_id": {
+          "anyOf": [
+            {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entered_at": {
+          "anyOf": [
+            {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "generation",
+        "body_id",
+        "room_id",
+        "entered_at",
+        "deadline",
+        "job_id"
+      ],
+      "additionalProperties": false,
+      "description": "One actor-owned body and occupancy generation. Active rows bind bottom, entry clock, absolute deadline and one job. Cleared rows retain generation/body and null all occurrence fields."
+    },
+    "WaterSettings": {
+      "type": "object",
+      "properties": {
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "maximum_grams": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "entry_cost": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "warning": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "drowned": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "routes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "surface": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "bottom": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              }
+            },
+            "required": [
+              "surface",
+              "bottom"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "skill",
+        "maximum_grams",
+        "entry_cost",
+        "duration",
+        "warning",
+        "drowned",
+        "routes"
+      ],
+      "additionalProperties": false,
+      "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only."
+    },
+    "WaterView": {
+      "type": "object",
+      "properties": {
+        "deadline": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "remaining": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "remaining_seconds": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        }
+      },
+      "required": [
+        "deadline",
+        "remaining",
+        "remaining_seconds"
+      ],
+      "additionalProperties": false,
+      "description": "Confirmed deadline, logical time remaining and real seconds rounded up from the authored elapsed rate. Presentation never advances or renews the deadline."
+    },
+    "CorpseRecoveryView": {
+      "type": "object",
+      "properties": {
+        "corpse_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "room_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "room_title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "roots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "name": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "corpse_id",
+        "room_id",
+        "room_title",
+        "roots"
+      ],
+      "additionalProperties": false,
+      "description": "One actual owned nonempty underwater corpse currently eligible at the shrine, with its current bottom location and original direct-root identities/names."
+    },
+    "WaterJob": {
+      "type": "object",
+      "properties": {
+        "job": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "due_time": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed",
+            "cancelled"
+          ]
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "water_generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "water_body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        }
+      },
+      "required": [
+        "job",
+        "due_time",
+        "status",
+        "actor_id",
+        "water_generation",
+        "water_body_id"
+      ],
+      "additionalProperties": false,
+      "description": "One bound water occurrence: exact bottom DefinitionRef, due clock, actor/body/generation and pending, completed or cancelled status. Historical rows remain; only the current occurrence may drown."
+    }
+  }
+}

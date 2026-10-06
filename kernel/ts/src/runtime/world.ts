@@ -66,6 +66,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
 // them (mechanics/fact.ts, mechanics/policy.ts, mechanics/resource.ts, mechanics/reaction.ts; details in commands/target.ts and look; a recipe's
 // check in mechanics/action_recipe/rule.ts). Each has feature map cells.
 const RULELESS = [
+  'water',
   'fact',
   'policy',
   'inspectable_detail',

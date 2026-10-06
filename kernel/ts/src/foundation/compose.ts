@@ -23,6 +23,8 @@ import {
   type StateDelta,
 } from '../contracts.gen.ts';
 
+import { transitionWater } from './compose_water.ts';
+
 export type Obj = { readonly [key: string]: Json };
 export type State = { readonly clock: number } & { readonly [section: string]: Json };
 export type Change = { target: MutationTarget; value: Json };
@@ -114,6 +116,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
+  if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign':
@@ -137,12 +140,12 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
+    case 'water.transition':
+      return transitionWater(op, row, ctx.state, read(containment(op.value.body_id), ctx));
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
-    case 'fuel.set':
-      return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
     case 'resource.initialize':
@@ -240,6 +243,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'water':
+      return get(section(s, 'water'), t.actor_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
     case 'liquid':

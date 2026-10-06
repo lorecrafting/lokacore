@@ -8,7 +8,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { serviceButtons, shopButtons, transportButtons } from './offers.ts';
+import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
@@ -209,7 +209,7 @@ function travel(v: GameView): Press[] {
     : v.exits
         .filter((e) => e.available)
         .map((e) => ({
-          label: `Go ${e.direction}`,
+          label: v.water && e.direction === 'up' ? 'Surface (free)' : `Go ${e.direction}`,
           action_key: 'move',
           target_ids: [],
           input: { direction: e.direction },
@@ -267,6 +267,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const notices = noticeButtons(v, button, names, text);
   return [
     ...placed,
+    ...corpseButtons(v, text),
     ...notices,
     ...travel(v),
     ...doors,

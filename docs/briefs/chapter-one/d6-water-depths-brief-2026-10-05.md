@@ -110,3 +110,9 @@ Stop before source for missing fresh scoped adoption approval/publication,
 absent typed state/cause/custody contract, unsafe return,
 frozen-fixture conflict, incompatible latest published dependencies or broader
 framework/scope. Split at a complete safe player outcome, never bottom placeholders.
+
+## Provisional source handoff
+
+[Focused source/evidence](../../evidence/2026-10-06-d6-water-provisional/README.md)
+records the isolated developer candidate. It does not close publication, independent
+review, predecessor re-pin or final browser proof; successor API/release/hash/IDs remain null.

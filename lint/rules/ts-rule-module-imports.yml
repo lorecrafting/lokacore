@@ -9,5 +9,5 @@ rule:
   not:
     any:
       - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction|skills)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
-      - regex: "^['\"](\\./(sequence|flee|payment|exchange|harvest)\\.ts|\\.\\./combat/round\\.ts)['\"]$"
+      - regex: "^['\"](\\./(sequence|flee|payment|exchange|harvest|recovery)\\.ts|\\.\\./combat/round\\.ts|\\.\\./water/expiry\\.ts)['\"]$"
       - regex: "^['\"]\\.\\./(patrol|scene)/sequence\\.ts['\"]$"

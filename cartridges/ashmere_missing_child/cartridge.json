@@ -43,7 +43,8 @@
       "transport": 1,
       "behavior": 1,
       "population": 1,
-      "resource": 1
+      "resource": 1,
+      "water": 1
     },
     "client_features": []
   },
@@ -252,6 +253,24 @@
         "room": "lantern_cellar",
         "fact": "rat_5_killed"
       }
-    ]
+    ],
+    "water": {
+      "skill": "swim",
+      "maximum_grams": 6000,
+      "entry_cost": 10,
+      "duration": 6000,
+      "warning": "water.warning",
+      "drowned": "water.drowned",
+      "routes": [
+        {
+          "surface": "well_shaft",
+          "bottom": "well_bottom"
+        },
+        {
+          "surface": "black_pool",
+          "bottom": "pool_bottom"
+        }
+      ]
+    }
   }
 }

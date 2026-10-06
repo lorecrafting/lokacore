@@ -1094,6 +1094,26 @@
             "quoted_fare"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "recover_corpse"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "corpse_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "corpse_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "description": "The registered Command types; an unknown type fails before game rules (04 \u00a73). Invocation-derived types carry the actor; run_job is authority-internal (04 \u00a71) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md)."

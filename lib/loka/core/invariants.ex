@@ -103,6 +103,7 @@ defmodule Loka.Core.Invariants do
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
       Loka.Core.InvariantsPatrol.holds?(s, ops, result) and
+      Loka.Core.InvariantsWater.holds?(s, ops, result) and
       Loka.Core.InvariantsPopulation.holds?(s, ops, result) and
       Loka.Core.InvariantsLiquid.holds?(s, ops, result) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
@@ -133,6 +134,7 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "water.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "resource.initialize"}, _, _, ctx), do: {:cont, ctx}

@@ -1,0 +1,13 @@
+{
+  "status": "provisional_developer_candidate",
+  "branch": "provisional/d6-water-depths-source",
+  "selected_contract_head": "8d97deab1b300551b4b6fc00e8a186c68ba4085c",
+  "published_source_base": "815f66f9039ca22f80d44112a1ff966eadb8381e",
+  "occupancy_reservation_spec_head": "4892de1f",
+  "source_head": null,
+  "successor_release": null,
+  "successor_kernel_api": null,
+  "successor_content_hash": null,
+  "successor_starting_ids": null,
+  "browser_book_proof": null
+}

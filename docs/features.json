@@ -145,7 +145,8 @@
       "EventPayload",
       "Policy",
       "ContentView",
-      "WorldSettings"
+      "WorldSettings",
+      "CorpseRecoveryView"
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
@@ -153,12 +154,14 @@
       "kernel/ts/src/mechanics/lookups.ts",
       "kernel/ts/src/view/view.ts",
       "kernel/ts/src/mechanics/containment/shared.ts",
-      "kernel/ts/src/view/action_lists.ts"
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/mechanics/containment/recovery.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_items_hash.json",
       "protocol/fixtures/cartridge_locks_hash.json",
-      "protocol/fixtures/cartridge_sampler_hash.json"
+      "protocol/fixtures/cartridge_sampler_hash.json",
+      "protocol/fixtures/water_contracts.json"
     ],
     "invariants": [
       "one_container_per_item",
@@ -834,5 +837,37 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
+  },
+  "water": {
+    "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md D6 water movement and corpse selection",
+    "contracts": [
+      "WaterSettings",
+      "WaterOccupancy",
+      "WaterJob",
+      "WaterView",
+      "CorpseRecoveryView",
+      "DeltaOp",
+      "MutationTarget",
+      "EventPayload"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/water/shared.ts",
+      "kernel/ts/src/mechanics/water/expiry.ts",
+      "kernel/ts/src/mechanics/water/saved.ts",
+      "kernel/ts/src/foundation/compose_water.ts",
+      "kernel/ts/src/runtime/invariants_water.ts",
+      "lib/loka/core/compose_water.ex",
+      "lib/loka/core/invariants_water.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/water_contracts.json",
+      "protocol/fixtures/water_composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "one_container_per_item",
+      "containment_acyclic"
+    ],
+    "implemented_in": "D6 provisional TypeScript water semantics; portable Elixir/TypeScript occupancy and bound-job composition"
   }
 }

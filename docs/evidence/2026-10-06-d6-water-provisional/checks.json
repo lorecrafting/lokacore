@@ -1,0 +1,86 @@
+[
+  {
+    "command": "mise exec -- node --test kernel/ts/test/water*.test.ts mobile/authority/local-story/water.test.ts",
+    "exit_status": 0,
+    "result": "21 passed",
+    "log": "focused.log"
+  },
+  {
+    "command": "mise exec -- node --test kernel/ts/test/world.test.ts kernel/ts/test/combat_flee.test.ts kernel/ts/test/death.test.ts kernel/ts/test/transport.test.ts mobile/authority/local-story/transport.test.ts",
+    "exit_status": 0,
+    "result": "33 passed",
+    "log": "neighbors.log"
+  },
+  {
+    "command": "mise exec -- mix test --force test/loka/core/water_contracts_test.exs test/loka/core/water_composition_test.exs test/loka/content_water_test.exs",
+    "exit_status": 0,
+    "result": "5 passed; 13 literal vectors plus 200 randomized differential inputs",
+    "log": "elixir.log"
+  },
+  {
+    "command": "mise exec -- npm run typecheck (kernel/ts)",
+    "exit_status": 0,
+    "result": "passed",
+    "log": "kernel-types.log"
+  },
+  {
+    "command": "mise exec -- npx tsc --noEmit (mobile/app)",
+    "exit_status": 0,
+    "result": "passed",
+    "log": "app-types.log"
+  },
+  {
+    "command": "mise exec -- elixir bin/check_docs.exs",
+    "exit_status": 0,
+    "result": "651 documents, zero broken/unreachable",
+    "log": "docs.log"
+  },
+  {
+    "command": "mise exec -- elixir bin/contracts.exs --check",
+    "exit_status": 0,
+    "result": "passed",
+    "log": "contracts-generator.log"
+  },
+  {
+    "command": "mise exec -- elixir bin/features.exs --check",
+    "exit_status": 0,
+    "result": "passed",
+    "log": "features-generator.log"
+  },
+  {
+    "command": "mise exec -- node bin/check_ts_size.mjs <changed core/test TS files>",
+    "exit_status": 0,
+    "result": "passed without new or raised allowances",
+    "log": "ts-size.log"
+  },
+  {
+    "command": "mise exec -- elixir bin/check_size.exs <changed Elixir files>",
+    "exit_status": 0,
+    "result": "passed without new or raised allowances",
+    "log": "ex-size.log"
+  },
+  {
+    "command": "mise exec -- ast-grep test --filter '^ts-rule-module-imports$' --skip-snapshot-tests (before helper whitelist amendment)",
+    "exit_status": 4,
+    "result": "expected red: both new pure helper imports rejected",
+    "log": "helper-import-red.log"
+  },
+  {
+    "command": "mise exec -- ast-grep test --filter '^ts-rule-module-imports$' --skip-snapshot-tests",
+    "exit_status": 0,
+    "result": "passed, existing forbidden I/O/rule imports remain rejected",
+    "log": "helper-import-green.log"
+  },
+  {
+    "command": "mise exec -- ast-grep scan --error <changed containment/schedule/water helper files>",
+    "exit_status": 0,
+    "result": "passed",
+    "log": "helper-boundary.log"
+  },
+  {
+    "command": "shasum -a 256 -c SHA256SUMS (evidence folder)",
+    "exit_status": 0,
+    "result": "all retained-file hashes verified",
+    "log": "verify.txt"
+  }
+]

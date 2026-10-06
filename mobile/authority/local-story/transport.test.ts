@@ -416,6 +416,8 @@ function dieOnIsle(a: ReturnType<typeof setup>) {
     )![0];
   assert.equal(w.state.containers[w.body], room(w, 'chapel_nave'));
   assert.equal(w.state.containers[corpse], room(w, 'hut_loft'));
+  // D6 must leave this actual nonempty isle corpse to the fare-waived physical trip.
+  assert.equal(gameView(w).corpse_recovery, undefined);
   assert.equal(w.state.containers[bag], corpse);
   assert.equal(w.state.containers[torch], bag);
   assert.equal(w.state.fuel![torch].lit, true);
@@ -463,6 +465,8 @@ test('actual Chapel death return reaches the dark-loft corpse without gear and r
   assert.equal(w.state.containers[torch], w.body);
   assert.equal(w.state.containers[bag], w.body);
   assert.equal(w.state.containers[corpse], room(w, 'hut_loft'));
+  // D6 must leave this actual nonempty isle corpse to the fare-waived physical trip.
+  assert.equal(gameView(w).corpse_recovery, undefined);
   assert.deepEqual(pennies(w), [0, 2]);
   a.invoke('move', { direction: 'down' });
   a.invoke('move', { direction: 'west' });

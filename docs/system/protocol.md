@@ -1097,7 +1097,9 @@ occupancy does not invalidate the captured free Up. Global scheduler order stays
 
 Provisional source shape: [water contracts](../../protocol/water.schema.json)
 define content `WaterSettings`, actor-keyed `WaterOccupancy`, bound `WaterJob`,
-confirmed `WaterView` and selected `CorpseRecoveryView`. `water.transition`
+confirmed `WaterView` and selected `CorpseRecoveryView`. D6 content opts into
+`real_elapsed`; the view carries logical remaining time and confirmed real
+seconds derived from the cartridge rate, without a presenter clock. `water.transition`
 compares the full prior row and increments the generation on entry or clear.
 An active row binds body, bottom room, entry clock, absolute deadline and job;
 a cleared row retains generation/body and has null room/entry/deadline/job.

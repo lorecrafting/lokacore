@@ -242,6 +242,9 @@
             },
             "sight": {
               "$ref": "#/$defs/SightView"
+            },
+            "warning": {
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
@@ -268,6 +271,9 @@
             },
             "sight": {
               "$ref": "#/$defs/SightView"
+            },
+            "warning": {
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
@@ -1146,6 +1152,15 @@
               "label"
             ],
             "additionalProperties": false
+          }
+        },
+        "water": {
+          "$ref": "water.schema.json#/$defs/WaterView"
+        },
+        "corpse_recovery": {
+          "type": "array",
+          "items": {
+            "$ref": "water.schema.json#/$defs/CorpseRecoveryView"
           }
         }
       },

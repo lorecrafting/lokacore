@@ -783,7 +783,8 @@ original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
-water projection. Deadline and logical time belong to the authority; presentation
+water projection, with remaining real seconds derived by the authority from
+the cartridge elapsed rate. Deadline and logical time belong to the authority; presentation
 must not renew time or create its own gameplay clock. Extend the existing status
 language/controls rather than add a new timer framework.
 

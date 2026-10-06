@@ -9,6 +9,7 @@ import { living } from '../death/shared.ts';
 // out of the actor's reach (take; mechanics/lookups.ts reach, c1-locks custody) or a recipient elsewhere not_present;
 // an item the actor does not hold (drop, give) not_owned; an item already held (take) or a
 // recipient at its capacity invalid_state.
+import { recover } from './recovery.ts';
 import type { EntityId } from '../../contracts.gen.ts';
 import {
   accepted,
@@ -27,10 +28,10 @@ import { carrying, giveRefused, putRefused } from './shared.ts';
 import { movable } from '../../runtime/created.ts';
 
 // size: allow 52, finite Harvest joins the existing conserved-transfer decision
-export const decide: Rule<'containment'> = (world, command, mint, steps) => {
+export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
-  if (p.type === 'harvest')
-    return decideHarvest(world, { ...command, payload: p }, mint, steps ?? { n: 0 });
+  if (p.type === 'recover_corpse') return recover(world, p, steps);
+  if (p.type === 'harvest') return decideHarvest(world, { ...command, payload: p }, mint, steps);
   const body = bodyOf(world, p.actor_id);
   if (!body || !has(world.entities, p.item_id)) return rejected('not_found');
   if (!movable(world, p.item_id) || world.entities[p.item_id].kind !== 'item')
@@ -58,7 +59,7 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (p.type === 'put') {
-    const code = putRefused(world, body, p.item_id, p.container_id, steps ?? { n: 0 });
+    const code = putRefused(world, body, p.item_id, p.container_id, steps);
     if (code)
       return code === 'budget_exceeded' || code === 'containment_cycle'
         ? { kind: 'fault', code }

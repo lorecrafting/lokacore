@@ -27,7 +27,7 @@ export function escapeDirections(
     .filter(
       (direction) =>
         !refusal(world, { type: 'move', actor_id, direction }, steps, undefined, set) &&
-        typeof movementPlan(world, actor_id, direction) !== 'string',
+        typeof movementPlan(world, actor_id, direction, steps, true) !== 'string',
     );
 }
 

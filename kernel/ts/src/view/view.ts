@@ -1,3 +1,6 @@
+import { movementPlan } from '../mechanics/movement/sequence.ts';
+import { edge } from '../mechanics/water/shared.ts';
+import { waterViews } from './water.ts';
 import { chapter, journal } from './quest_journal.ts';
 import { knownTopics } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
@@ -72,6 +75,7 @@ export function gameView(world: World): GameView {
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   const view: GameView = {
     actor_id: world.character,
+    ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
@@ -194,13 +198,13 @@ function exits(
   const actor_id = world.character;
   const room = world.rooms[world.state.containers[world.body]];
   const set = resolved(world, actor_id);
-  const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
-  const seated = !!engaged(world, world.body) || !position.standing(world, world.character); // position@1, after the barrier
-  return movement.sight(world, world.body, steps).map((seen) => {
-    const { direction } = seen;
+  return movement.sight(world, world.body, steps).map(({ direction, ...seen }) => {
     const barrier = exitOf(room, direction)!.barrier;
+    const destination = world.roomIds[refString(exitOf(room, direction)!.to)];
+    const wet = edge(world, world.state.containers[world.body], destination, direction);
     const shown = {
       direction,
+      ...(wet?.entering && { warning: world.cartridge.world!.water!.warning }),
       ...(barrier && {
         door: {
           name: world.cartridge.barriers![refString(barrier)].short,
@@ -219,10 +223,10 @@ function exits(
         },
       }),
     };
-    const code =
-      refusal(world, { type: 'move', actor_id, direction }, { n: 0 }, undefined, set) ??
-      movement.passage(world, room, direction) ??
-      (seated ? 'invalid_state' : tired && 'insufficient_resource');
+    const command = { type: 'move', actor_id, direction } as const;
+    const refused = refusal(world, command, steps, 'move' as Key, set);
+    const plan = refused ? undefined : movementPlan(world, actor_id, direction, steps);
+    const code = refused ?? (typeof plan === 'string' ? plan : undefined);
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   });
 }
