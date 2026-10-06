@@ -32,3 +32,5 @@ Stop at PM for a re-pinned predecessor mismatch, spec conflict, unbound displaye
 Planning self-review: Ponytail finds no new framework, stock ledger, quote token, currency store or dependency. Correctness preserves acquire≠qualify≠use, literal alias input, current post-settlement pricing, combined carry and atomic finite-ID/payment custody. These are design checks only; no runtime tests, mutations or browser/native proof were run. Independent approval covers the prior policy draft only; this adoption amendment awaits scoped review.
 
 Provisional source/check checkpoint: [D12 local evidence](../../evidence/2026-10-06-d12-practical-skills/README.md). Independent source approval, final successor pins, browser proof and publication remain pending.
+
+Published-main integration remains provisional: [3ff6cdd4 merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-3ff6cdd4/README.md). Successor pins and browser proof await C4 publication.
