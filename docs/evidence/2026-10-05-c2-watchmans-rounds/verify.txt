@@ -28,6 +28,14 @@ runtime.json: OK
 schema-controls.log: OK
 schema-sweep.log: OK
 schema-sweep.py: OK
+sim-invariant-coverage/README.md: OK
+sim-invariant-coverage/baseline-red.log: OK
+sim-invariant-coverage/checks.json: OK
+sim-invariant-coverage/coverage-green.log: OK
+sim-invariant-coverage/deletion-red.log: OK
+sim-invariant-coverage/focused-green.log: OK
+sim-invariant-coverage/restored-green.log: OK
+sim-invariant-coverage/typecheck.log: OK
 terminal-reopen/checks.json: OK
 terminal-reopen/controls.png: OK
 terminal-reopen/journal-first.png: OK
