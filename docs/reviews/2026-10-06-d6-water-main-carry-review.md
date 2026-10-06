@@ -18,3 +18,9 @@ The [selected D6 brief](../briefs/chapter-one/d6-water-depths-brief-2026-10-05.m
 - Ponytail Review: lean already. The merge reuses the existing registry, generators and composition hooks; no new abstraction or dependency is warranted. The missing feature entries are a correctness finding, not complexity.
 
 This record approves no final D6 successor pin or publication. D3 reconciliation, independent final release/API/hash/ID derivation, isolated browser Book proof, accumulated active checks, hosted CI and the final exact-head review gate remain pending. The owner save and native/mobile pause were untouched.
+
+## Scoped D6-CARRY-R1 fix recheck — APPROVE
+
+Fix head `48e78441880ee02206b853111526aef2307a75f0`, parent `08810373` carrying this review record. **APPROVE — D6-CARRY-R1 closed; no open carryover finding.** The two-file fix restores exactly `CorpseRecoveryView`, `kernel/ts/src/mechanics/containment/recovery.ts` and `protocol/fixtures/water_contracts.json` to the containment feature source. That row now equals the previously reviewed provisional D6 row, and regenerated `docs/features.gen.md` includes all three alongside `recover_corpse`. No source, registry, schema or runtime file changed in the fix.
+
+Independent `elixir bin/features.exs --check`, `elixir bin/check_docs.exs` (688 documents, zero broken/unreachable) and fix diff whitespace check pass under `mise exec --` where applicable. Ponytail Review: lean already; the fix restores three existing feature references with no new machinery. Prior runtime checks and registry red control remain scoped to `e372ed80`; this docs-only fix does not replace D3 reconciliation, successor pins, browser proof, accumulated gate or exact-head hosted CI.
