@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D1 ferry/isle save/protocol second opinion](2026-10-06-d1-ferry-save-second-review.md): source `8aa63fa9`, evidence `b0767d2d`, independent APPROVE; no findings. Fifteen file-backed forged-evidence refusals preserve bytes, all twelve file-backed crossing/recovery/lesson COMMIT cases pass, both independent guard mutations are red/restored, and all 44 evidence hashes verify. Final publication pins and browser/native proof remain separate gates.
+- [D1 ferry/isle save/protocol second opinion](2026-10-06-d1-ferry-save-second-review.md): original provisional source `8aa63fa9` APPROVE; integrated C3 successor source `4e217f60`, evidence `8de184ee`, scoped APPROVE, no findings. 25 TS/SQLite and 15 Elixir checks, twelve file-backed COMMIT cases, 27 byte-preserving forgeries, unavailable-pin refusal and relevant Book combat control pass; v030/API1.26/hash/all 149 IDs and all 25 publication evidence hashes verify. Hosted publication remains separate.
 
 - [C3 living hounds save/protocol second opinion](2026-10-06-c3-hounds-save-second-review.md): original `a692a2b8` CHANGES REQUIRED; first fix `8e767434` retains residual S2; strict source `2dbf55b5` APPROVE closes S1/S2. Published-B9 carryover source `f96e0245`, evidence `33163a1b`, scoped APPROVE: 22 TS/SQLite and 13 Elixir checks pass; integrated dream/population cold recovery and fifteen byte-preserving forgeries pass, all 140 v029/API1.25 IDs/hash and thirteen evidence hashes verify. Separate Astra approval; hosted publication remains ahead.
 
