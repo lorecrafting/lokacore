@@ -8,5 +8,15 @@
   "night_start": 20,
   "night_end": 6,
   "replacement_delay": 86400,
-  "wander_interval": 3600
+  "wander_interval": 3600,
+  "pack": {
+    "flight_below_percent": 25,
+    "flight_fare": 0,
+    "narration": {
+      "helper_joined": "combat.hound_helper_joined",
+      "enemy_fled": { "east": "combat.hound_fled_east", "west": "combat.hound_fled_west" },
+      "primary_changed": "combat.hound_primary_changed",
+      "pack_withdrew": "combat.hound_pack_withdrew"
+    }
+  }
 }

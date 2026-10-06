@@ -13,7 +13,9 @@ import { running } from '../scene/shared.ts';
 /** One finite current encounter, shared by admission, escape, due jobs and projection. */
 export function engaged(world: World, body: EntityId) {
   const found = Object.entries(world.state.encounters ?? {}).find(
-    ([, row]) => row.status === 'open' && (row.body_id === body || row.npc_id === body),
+    ([, row]) =>
+      row.status === 'open' &&
+      (row.body_id === body || (row.active_ids ?? [row.npc_id]).includes(body)),
   );
   return found && { id: found[0] as EncounterId, row: found[1] };
 }
@@ -44,7 +46,13 @@ export function closeEncounter(world: World, body: EntityId): DeltaOp[] {
   if (!fight) return [];
   const { id: encounter_id, row } = fight;
   return [
-    { op: 'encounter.close', writer_group: 0, encounter_id, job_id: row.job_id },
+    {
+      op: 'encounter.close',
+      writer_group: 0,
+      encounter_id,
+      job_id: row.job_id,
+      ...(row.active_ids && { expected: row }),
+    },
     { op: 'job.cancel', writer_group: 0, encounter_id, job_id: row.job_id },
   ];
 }

@@ -51,29 +51,44 @@ defmodule Loka.Core.ComposePopulation do
     text
   end
 
-  defp slot?(nil, %{"generation" => 0, "member_id" => nil, "replacement_due" => nil}), do: true
+  defp slot?(nil, %{"generation" => 0, "member_id" => nil, "replacement_due" => nil} = next),
+    do: next["last_flight_at"] == nil
 
-  defp slot?(nil, %{"generation" => 1, "member_id" => member, "replacement_due" => nil}),
-    do: member != nil
-
-  defp slot?(%{"generation" => 0}, %{
-         "generation" => 1,
-         "member_id" => member,
-         "replacement_due" => nil
-       }),
-       do: member != nil
+  defp slot?(nil, %{"generation" => 1, "member_id" => member, "replacement_due" => nil} = next),
+    do: member != nil and next["last_flight_at"] == nil
 
   defp slot?(
-         %{"generation" => gen, "member_id" => member, "replacement_due" => nil},
-         %{"generation" => gen, "member_id" => member, "replacement_due" => due}
+         %{"generation" => 0},
+         %{
+           "generation" => 1,
+           "member_id" => member,
+           "replacement_due" => nil
+         } = next
        ),
-       do: member != nil and due != nil
+       do: member != nil and next["last_flight_at"] == nil
+
+  defp slot?(
+         %{"generation" => gen, "member_id" => member, "replacement_due" => nil} = prior,
+         %{"generation" => gen, "member_id" => member, "replacement_due" => due} = next
+       )
+       when not is_nil(due),
+       do: member != nil and next["last_flight_at"] == prior["last_flight_at"]
+
+  defp slot?(
+         %{"generation" => gen, "member_id" => member, "replacement_due" => nil} = prior,
+         %{"generation" => gen, "member_id" => member, "replacement_due" => nil} = next
+       ),
+       do:
+         member != nil and is_integer(next["last_flight_at"]) and
+           next["last_flight_at"] != prior["last_flight_at"]
 
   defp slot?(
          %{"generation" => gen, "member_id" => member, "replacement_due" => due},
-         %{"generation" => next_gen, "member_id" => next_member, "replacement_due" => nil}
+         %{"generation" => next_gen, "member_id" => next_member, "replacement_due" => nil} = next
        ),
-       do: due != nil and next_gen == gen + 1 and next_member != nil and next_member != member
+       do:
+         due != nil and next_gen == gen + 1 and next_member != nil and next_member != member and
+           next["last_flight_at"] == nil
 
   defp slot?(_, _), do: false
 end

@@ -154,7 +154,7 @@ uses focused checks first.
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
-- Skip rereading unchanged documents reached through links.
+- Follow [token hygiene](docs/WORKFLOW.md#token-hygiene); skip rereading unchanged documents.
 - Expected failing readiness probes need no fix.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.

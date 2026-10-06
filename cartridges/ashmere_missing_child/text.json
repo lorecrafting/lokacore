@@ -654,5 +654,10 @@
   "item.apple.description": "A small red apple, firm and sweet. Eating it restores up to six movement points.",
   "item.apple_01.room": "A ripe [apple](apple_01) lies in the grass.",
   "item.apple_02.room": "A ripe [apple](apple_02) lies in the grass.",
-  "item.apple_03.room": "A ripe [apple](apple_03) lies in the grass."
+  "item.apple_03.room": "A ripe [apple](apple_03) lies in the grass.",
+  "combat.hound_helper_joined": "Another fen hound turns to defend its pack.",
+  "combat.hound_fled_east": "A wounded fen hound bolts east into Adder Nest.",
+  "combat.hound_fled_west": "A wounded fen hound bolts west into Hound Run.",
+  "combat.hound_primary_changed": "Another fen hound becomes your immediate opponent.",
+  "combat.hound_pack_withdrew": "No hound remains in this fight."
 }

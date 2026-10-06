@@ -1063,7 +1063,7 @@ conversation graph or a promise of all historical topics.
 
 ## C3 bounded living hounds (selected contract)
 
-**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
+[PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
 owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
 Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and

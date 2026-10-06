@@ -64,23 +64,38 @@ function slotValid(
 ): boolean {
   if (row === undefined)
     return (
-      (next.generation === 0 && next.member_id === null && next.replacement_due === null) ||
-      (next.generation === 1 && next.member_id !== null && next.replacement_due === null)
+      (next.generation === 0 &&
+        next.member_id === null &&
+        next.replacement_due === null &&
+        next.last_flight_at == null) ||
+      born(next)
     );
   const prior = row as typeof next;
-  if (prior.generation === 0)
-    return next.generation === 1 && next.member_id !== null && next.replacement_due === null;
+  if (prior.generation === 0) return born(next);
   if (prior.replacement_due === null)
     return (
       prior.member_id !== null &&
       next.generation === prior.generation &&
       next.member_id === prior.member_id &&
-      next.replacement_due !== null
+      ((next.replacement_due !== null && next.last_flight_at === prior.last_flight_at) ||
+        (next.replacement_due === null &&
+          next.last_flight_at !== null &&
+          next.last_flight_at !== prior.last_flight_at))
     );
   return (
     next.generation === prior.generation + 1 &&
     next.member_id !== null &&
     next.member_id !== prior.member_id &&
-    next.replacement_due === null
+    next.replacement_due === null &&
+    next.last_flight_at == null
+  );
+}
+
+function born(row: Extract<DeltaOp, { op: 'population.slot' }>['value']) {
+  return (
+    row.generation === 1 &&
+    row.member_id !== null &&
+    row.replacement_due === null &&
+    row.last_flight_at == null
   );
 }

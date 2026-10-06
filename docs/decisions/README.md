@@ -32,6 +32,9 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Agent token hygiene](owner-decision-agent-token-hygiene-2026-10-06.md): shared read-once and compact evidence rules, with separate Codex and Claude Code agent/context handoffs.
+- [Room interactibles](owner-decision-room-interactables-2026-10-06.md): inline, immovable fixture links in room prose; separate actor and loose-item paragraphs with detail routes.
+
 - [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; selected-docs review approved, source proof pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
@@ -247,3 +250,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.
 
 - [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.
+
+- [Pre-production CI scope, 2026-10-06](owner-decision-preproduction-ci-scope-2026-10-06.md): metadata and Book-only changes use narrower local and hosted check lanes, with conservative full fallback.

@@ -37,22 +37,37 @@ function legal(kind: string, before: Any, after: Any): boolean {
     );
   if (before === null)
     return (
-      (after.generation === 0 && after.member_id === null && after.replacement_due === null) ||
-      (after.generation === 1 && after.member_id !== null && after.replacement_due === null)
+      (after.generation === 0 &&
+        after.member_id === null &&
+        after.replacement_due === null &&
+        after.last_flight_at == null) ||
+      born(after)
     );
-  if (before.generation === 0)
-    return after.generation === 1 && after.member_id !== null && after.replacement_due === null;
+  if (before.generation === 0) return born(after);
   if (before.replacement_due === null)
     return (
       after.generation === before.generation &&
       after.member_id === before.member_id &&
       after.member_id !== null &&
-      after.replacement_due !== null
+      ((after.replacement_due !== null && after.last_flight_at === before.last_flight_at) ||
+        (after.replacement_due === null &&
+          Number.isSafeInteger(after.last_flight_at) &&
+          after.last_flight_at !== before.last_flight_at))
     );
   return (
     after.generation === before.generation + 1 &&
     after.member_id !== null &&
     after.member_id !== before.member_id &&
-    after.replacement_due === null
+    after.replacement_due === null &&
+    after.last_flight_at == null
+  );
+}
+
+function born(row: Any) {
+  return (
+    row.generation === 1 &&
+    row.member_id !== null &&
+    row.replacement_due === null &&
+    row.last_flight_at == null
   );
 }

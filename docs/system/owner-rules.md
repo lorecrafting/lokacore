@@ -195,6 +195,8 @@ and not repeated here.
 
 ## Process
 
+- During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+
 - Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - Web stays active through game completion: C2 has focused fresh Book proof, browser fatal/Restart remains due by the E3 browser walk, and the preserved terminal save has twice-reopened evidence after the separate Web fix; native verification follows the existing pause ([record](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)).

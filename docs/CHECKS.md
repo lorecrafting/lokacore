@@ -1,6 +1,8 @@
 # Checks
 
-The active checks run in CI and locally through `bin/check_all.sh` (what pre-push runs).
+The active checks run in CI; pre-push runs the relevant local lane selected by
+[`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md).
+The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
 which every agent loads every session.
@@ -74,14 +76,14 @@ which every agent loads every session.
   `check_all` read the checkout.
   `bin/beads_red_controls.sh` plants both path classes, a missing slice and a
   reserved ID and observes refusal. The check needs no `br` binary.
-- `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
-  `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
-  `<base>` or an empty diff). The `changes` job of `ci.yml` passes (`bin/ci_base.sh`) the newest ancestor of a pull request
-  head whose `elixir`, `typescript` and `sim` jobs all passed (GitHub API; none found or an API error
-  means `run`) and skips those three jobs on `skip`; pushes to main never skip. `lint` (with the docs
-  link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh` (a
-  `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
-  non-ancestor `<base>` and an empty diff must say `run`; and a fake `gh` that fails on the run list or the job list must leave `ci_base.sh` with no base).
+- `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
+  (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
+  changes confined to `mobile/` plus metadata; the browser lane runs for those. All other
+  changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`.
+  `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
+  force `run`. PR and main pushes use the same classifier. `lint` always runs; browser jobs
+  skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
+  and unsafe-skip cases, including API errors.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled

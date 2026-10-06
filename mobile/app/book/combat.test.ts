@@ -107,6 +107,42 @@ const game = (current: GameView): Game => ({
   lastNarration: () => undefined,
 });
 
+// Breaks: Combat renders only the primary and hides actual helper presence behind identical template names.
+test('combat component shows the exact active pack and marks the current primary', () => {
+  const current = view({
+    combat: {
+      encounter_id: 'fight',
+      opponent_id: 'rat',
+      name: 'npc.rat',
+      active_opponents: [
+        { id: 'helper', name: 'npc.rat' },
+        { id: 'rat', name: 'npc.rat' },
+      ],
+    },
+  });
+  const screen = presenter(game(current)).screen();
+  const drawn = nodes(
+    BookView({
+      screen,
+      stack: [],
+      flip: { turn: 0, dir: 1 },
+      go: () => {},
+      press: () => {},
+      refused: () => {},
+      startOver: () => {},
+      shell: { confirm: (f) => f(), learned: { get: () => true } as never },
+    }),
+  );
+  const lines = drawn.filter((n) => n.type === 'Text').map(words);
+  assert.ok(lines.includes('a marsh rat (your target)'));
+  assert.equal(lines.filter((line) => line === 'a marsh rat').length, 2);
+  assert.ok(
+    !lines.some(
+      (line) => line.includes('helper') || (line.includes('rat') && line.includes('fight')),
+    ),
+  );
+});
+
 // Break: a menu/detail hides escape, Flee invents directions, or controls sit outside the narrative scroll.
 test('combat page lists offered controls vertically below history in one scroll', () => {
   const sent: Intent[] = [];
