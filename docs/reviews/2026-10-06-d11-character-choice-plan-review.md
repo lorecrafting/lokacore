@@ -15,3 +15,11 @@ Reviewed local planning head `80ce3885` against [attributes/checks and D11](../s
 3. **Should-fix — distinguish sight from illumination at all B4 call sites.** `docs/system/mechanics.md:278` and `docs/briefs/chapter-one/d11-character-choice-brief-2026-10-05.md:36` cover a dark room but do not mention Scan into an adjacent dark room. The installed `sight()` independently checks `!illuminated` for that destination (`kernel/ts/src/mechanics/movement/rule.ts:50`), while `light_off` is used by B6 Seek. A hill-folk actor could see locally but get a blank adjacent Scan, or a shortcut that reports them illuminated could suppress Seek. Specify the intended adjacent-room sight result and require proof that dark-sight does not change physical light state or B6's `light_off` result.
 
 Ponytail/correctness: the draft confines work to existing skill, faction, check and darkness paths and avoids a generic ancestry framework. The findings ask for exact existing consumers and one contradictory clause, not a new system. The chosen PER5, CON/SPI honesty, once-only receipt provenance and deferred effects otherwise align with the cited rules.
+
+## Scoped fix recheck — `627853a0`: APPROVE
+
+- **D11-P1 closed.** `mechanics.md` now names both `stat_compare` and B6's separate `attribute_threshold` arm. The brief requires a controlled difficulty6 case where saved PER5 fails and fen-born PER6 passes, after testing the stale-map mutant against existing focused tests. Production difficulty5 and no-RNG behavior remain intact.
+- **D11-P2 closed.** The active `attributes@1` clause distinguishes installed pre-D11 start-only behavior from selected character-owned values, with NPC and other cartridge starts retained. Exact row/op syntax remains a source-PR obligation.
+- **D11-P3 closed.** The B4 clause, brief and Book agree on current-room and legal adjacent dark Scan; barred passages and other perception checks still win. The effect leaves `illuminated` and B6 `light_off` physical-light tests unchanged, with a browser proof named.
+
+This recheck covers only the fix and its direct clauses. It approves the planning contract, not source, generated contracts, save behavior, browser evidence or publication.
