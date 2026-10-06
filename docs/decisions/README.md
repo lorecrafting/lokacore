@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; selected-docs review approved, source proof pending.
+
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
 - [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.
 - [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
@@ -243,3 +245,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [D5 dry Deep Fen PM decision](pm-decision-d5-deep-fen-2026-10-05.md): five safe reciprocal rooms, naturally lit den for actual Wren Rejoin and fixed no-credit ward Read; no second message, far Scan or bottom before D6.
 - [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.
+
+- [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.
