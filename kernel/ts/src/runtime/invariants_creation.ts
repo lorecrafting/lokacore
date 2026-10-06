@@ -116,15 +116,24 @@ function complete(state: Any, ops: Any[]): boolean {
 function flightSlot(state: Any, ops: Any[], s: Any) {
   const id = s.value.member_id;
   const origin = state.created?.[id]?.origin;
-  const horizon = ops.reduce((at, op) => (op.op === 'time.advance' ? op.to : at), state.clock);
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === s.writer_group &&
+      op.expected?.active_ids?.includes(id) &&
+      selectedFlight(state, op.expected, id) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
+  );
+  const due = round && state.jobs?.[round.job_id]?.due_time;
   return (
     id &&
     s.expected?.member_id === id &&
     s.expected.generation === s.value.generation &&
     s.expected.replacement_due === null &&
     s.value.replacement_due === null &&
-    s.value.last_flight_at === horizon &&
-    s.expected.last_flight_at !== horizon &&
+    Number.isSafeInteger(due) &&
+    s.value.last_flight_at === due &&
+    s.expected.last_flight_at !== due &&
     origin?.kind === 'spawned' &&
     origin.role === 'hound' &&
     origin.member_id === id &&
@@ -137,8 +146,35 @@ function flightSlot(state: Any, ops: Any[], s: Any) {
         op.op === 'entity.transfer' &&
         op.writer_group === s.writer_group &&
         op.entity_id === id &&
-        op.source_id !== null,
+        op.source_id === state.containers?.[id] &&
+        op.destination_id !== op.source_id,
     ).length === 1
+  );
+}
+
+function selectedFlight(state: Any, row: Any, id: string) {
+  const present = row.active_ids.filter((member: string) => {
+    const origin = state.created?.[member]?.origin;
+    const slot =
+      origin &&
+      state.population_slots?.[
+        key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })
+      ];
+    return (
+      state.containers?.[member] === row.room_id &&
+      origin?.kind === 'spawned' &&
+      origin.role === 'hound' &&
+      origin.member_id === member &&
+      slot?.member_id === member &&
+      slot.generation === origin.generation &&
+      slot.replacement_due === null
+    );
+  });
+  const cursor = row.next_opponent_id;
+  return (
+    (present.includes(cursor)
+      ? cursor
+      : (present.find((member: string) => member > cursor) ?? present[0])) === id
   );
 }
 

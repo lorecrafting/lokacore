@@ -18,7 +18,7 @@ function stateOf(name: string): any {
   return state;
 }
 
-// Breaks: pack admission accepts a foreign plan member or a roster beyond its plan cap.
+// Breaks: pack admission accepts a foreign member, or a flight stamp names the unselected hound.
 test('literal exact pack admission and refusals agree with both independent guards', () => {
   for (const c of fixture.cases) {
     const state = stateOf(c.state);
@@ -40,4 +40,12 @@ test('literal exact pack admission and refusals agree with both independent guar
         c.id,
       );
   }
+});
+
+// Breaks: final flight proof is applied to the runtime's in-progress prefix before encounter closure.
+test('a legal transfer and stamp remain composable before their round exit is appended', () => {
+  const c = fixture.cases.find(
+    (row: { id: string }) => row.id === 'flight-stamp-requires-same-group-encounter-exit',
+  );
+  assert.deepEqual(compose(stateOf(c.state), { ops: c.ops }, false), c.counterfeit);
 });

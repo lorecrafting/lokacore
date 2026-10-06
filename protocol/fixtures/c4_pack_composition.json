@@ -150,6 +150,14 @@
             ],
             "next_opponent_id": "00000004-0000-4000-8000-000000000000"
           }
+        },
+        {
+          "section": "jobs",
+          "key": "00000007-0000-4000-8000-000000000000",
+          "value": {
+            "due_time": 10,
+            "status": "pending"
+          }
         }
       ]
     },
@@ -162,6 +170,24 @@
           "value": {
             "kind": "room"
           }
+        },
+        {
+          "section": "encounters",
+          "key": "00000006-0000-4000-8000-000000000000",
+          "value": {
+            "character_id": "00000001-0000-4000-8000-000000000000",
+            "body_id": "00000002-0000-4000-8000-000000000000",
+            "npc_id": "00000004-0000-4000-8000-000000000000",
+            "room_id": "00000005-0000-4000-8000-000000000000",
+            "job_id": "00000007-0000-4000-8000-000000000000",
+            "status": "open",
+            "round": 1,
+            "active_ids": [
+              "00000003-0000-4000-8000-000000000000",
+              "00000004-0000-4000-8000-000000000000"
+            ],
+            "next_opponent_id": "00000003-0000-4000-8000-000000000000"
+          }
         }
       ]
     },
@@ -172,6 +198,44 @@
           "section": "containers",
           "key": "00000003-0000-4000-8000-000000000000",
           "value": "00000009-0000-4000-8000-000000000000"
+        }
+      ]
+    },
+    "unselected_flight": {
+      "extends": "flight_advance",
+      "edits": [
+        {
+          "section": "encounters",
+          "key": "00000006-0000-4000-8000-000000000000",
+          "value": {
+            "character_id": "00000001-0000-4000-8000-000000000000",
+            "body_id": "00000002-0000-4000-8000-000000000000",
+            "npc_id": "00000004-0000-4000-8000-000000000000",
+            "room_id": "00000005-0000-4000-8000-000000000000",
+            "job_id": "00000007-0000-4000-8000-000000000000",
+            "status": "open",
+            "round": 1,
+            "active_ids": [
+              "00000003-0000-4000-8000-000000000000",
+              "00000004-0000-4000-8000-000000000000"
+            ],
+            "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+          }
+        }
+      ]
+    },
+    "dead_cursor_flight": {
+      "extends": "unselected_flight",
+      "edits": [
+        {
+          "section": "population_slots",
+          "key": "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"wolves\",\"kind\":\"population\"},\"slot\":2}",
+          "value": {
+            "generation": 1,
+            "member_id": "00000004-0000-4000-8000-000000000000",
+            "replacement_due": 10,
+            "last_flight_at": null
+          }
         }
       ]
     }
@@ -451,7 +515,7 @@
               "00000003-0000-4000-8000-000000000000",
               "00000004-0000-4000-8000-000000000000"
             ],
-            "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+            "next_opponent_id": "00000003-0000-4000-8000-000000000000"
           },
           "active_ids": [
             "00000004-0000-4000-8000-000000000000"
@@ -539,7 +603,7 @@
               "00000003-0000-4000-8000-000000000000",
               "00000004-0000-4000-8000-000000000000"
             ],
-            "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+            "next_opponent_id": "00000003-0000-4000-8000-000000000000"
           },
           "active_ids": [
             "00000004-0000-4000-8000-000000000000"
@@ -802,6 +866,599 @@
                 "00000004-0000-4000-8000-000000000000"
               ],
               "next_opponent_id": "00000003-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pack-open-cannot-omit-roster",
+      "state": "base",
+      "ops": [
+        {
+          "op": "encounter.open",
+          "writer_group": 0,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "character_id": "00000001-0000-4000-8000-000000000000",
+          "body_id": "00000002-0000-4000-8000-000000000000",
+          "npc_id": "00000004-0000-4000-8000-000000000000",
+          "room_id": "00000005-0000-4000-8000-000000000000",
+          "job_id": "00000007-0000-4000-8000-000000000000"
+        }
+      ],
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "encounter",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "character_id": "00000001-0000-4000-8000-000000000000",
+              "body_id": "00000002-0000-4000-8000-000000000000",
+              "npc_id": "00000004-0000-4000-8000-000000000000",
+              "room_id": "00000005-0000-4000-8000-000000000000",
+              "job_id": "00000007-0000-4000-8000-000000000000",
+              "status": "open",
+              "round": 1
+            }
+          }
+        ]
+      },
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "encounter",
+            "encounter_id": "00000006-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "pack-open-cursor-must-start-at-attacked-hound",
+      "state": "base",
+      "ops": [
+        {
+          "op": "encounter.open",
+          "writer_group": 0,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "character_id": "00000001-0000-4000-8000-000000000000",
+          "body_id": "00000002-0000-4000-8000-000000000000",
+          "npc_id": "00000004-0000-4000-8000-000000000000",
+          "room_id": "00000005-0000-4000-8000-000000000000",
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "active_ids": [
+            "00000003-0000-4000-8000-000000000000",
+            "00000004-0000-4000-8000-000000000000"
+          ],
+          "next_opponent_id": "00000003-0000-4000-8000-000000000000"
+        }
+      ],
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "encounter",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "character_id": "00000001-0000-4000-8000-000000000000",
+              "body_id": "00000002-0000-4000-8000-000000000000",
+              "npc_id": "00000004-0000-4000-8000-000000000000",
+              "room_id": "00000005-0000-4000-8000-000000000000",
+              "job_id": "00000007-0000-4000-8000-000000000000",
+              "status": "open",
+              "round": 1,
+              "active_ids": [
+                "00000003-0000-4000-8000-000000000000",
+                "00000004-0000-4000-8000-000000000000"
+              ],
+              "next_opponent_id": "00000003-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      },
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "encounter",
+            "encounter_id": "00000006-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "flight-stamp-requires-actual-departure",
+      "state": "flight_advance",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000003-0000-4000-8000-000000000000",
+          "source_id": "00000005-0000-4000-8000-000000000000",
+          "destination_id": "00000005-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolves"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": 10
+          }
+        }
+      ],
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000003-0000-4000-8000-000000000000"
+            },
+            "value": "00000005-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolves"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "00000003-0000-4000-8000-000000000000",
+              "replacement_due": null,
+              "last_flight_at": 10
+            }
+          }
+        ]
+      },
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "flight-stamp-requires-same-group-encounter-exit",
+      "state": "flight_advance",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000003-0000-4000-8000-000000000000",
+          "source_id": "00000005-0000-4000-8000-000000000000",
+          "destination_id": "00000009-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolves"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": 10
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000003-0000-4000-8000-000000000000"
+            },
+            "value": "00000009-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolves"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "00000003-0000-4000-8000-000000000000",
+              "replacement_due": null,
+              "last_flight_at": 10
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "flight-at-due-before-later-elapsed-endpoint",
+      "state": "flight_advance",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000003-0000-4000-8000-000000000000",
+          "source_id": "00000005-0000-4000-8000-000000000000",
+          "destination_id": "00000009-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolves"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": 10
+          }
+        },
+        {
+          "op": "encounter.advance",
+          "writer_group": 0,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "round": 1,
+          "next_job_id": "00000008-0000-4000-8000-000000000000",
+          "expected": {
+            "character_id": "00000001-0000-4000-8000-000000000000",
+            "body_id": "00000002-0000-4000-8000-000000000000",
+            "npc_id": "00000004-0000-4000-8000-000000000000",
+            "room_id": "00000005-0000-4000-8000-000000000000",
+            "job_id": "00000007-0000-4000-8000-000000000000",
+            "status": "open",
+            "round": 1,
+            "active_ids": [
+              "00000003-0000-4000-8000-000000000000",
+              "00000004-0000-4000-8000-000000000000"
+            ],
+            "next_opponent_id": "00000003-0000-4000-8000-000000000000"
+          },
+          "active_ids": [
+            "00000004-0000-4000-8000-000000000000"
+          ],
+          "npc_id": "00000004-0000-4000-8000-000000000000",
+          "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 10,
+          "to": 11
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "encounter",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "character_id": "00000001-0000-4000-8000-000000000000",
+              "body_id": "00000002-0000-4000-8000-000000000000",
+              "npc_id": "00000004-0000-4000-8000-000000000000",
+              "room_id": "00000005-0000-4000-8000-000000000000",
+              "job_id": "00000008-0000-4000-8000-000000000000",
+              "status": "open",
+              "round": 2,
+              "active_ids": [
+                "00000004-0000-4000-8000-000000000000"
+              ],
+              "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+            }
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000003-0000-4000-8000-000000000000"
+            },
+            "value": "00000009-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 11
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolves"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "00000003-0000-4000-8000-000000000000",
+              "replacement_due": null,
+              "last_flight_at": 10
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "flight-stamp-cannot-name-unselected-member",
+      "state": "unselected_flight",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000003-0000-4000-8000-000000000000",
+          "source_id": "00000005-0000-4000-8000-000000000000",
+          "destination_id": "00000009-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolves"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": 10
+          }
+        },
+        {
+          "op": "encounter.advance",
+          "writer_group": 0,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "round": 1,
+          "next_job_id": "00000008-0000-4000-8000-000000000000",
+          "expected": {
+            "character_id": "00000001-0000-4000-8000-000000000000",
+            "body_id": "00000002-0000-4000-8000-000000000000",
+            "npc_id": "00000004-0000-4000-8000-000000000000",
+            "room_id": "00000005-0000-4000-8000-000000000000",
+            "job_id": "00000007-0000-4000-8000-000000000000",
+            "status": "open",
+            "round": 1,
+            "active_ids": [
+              "00000003-0000-4000-8000-000000000000",
+              "00000004-0000-4000-8000-000000000000"
+            ],
+            "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+          },
+          "active_ids": [
+            "00000004-0000-4000-8000-000000000000"
+          ],
+          "npc_id": "00000004-0000-4000-8000-000000000000",
+          "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+        }
+      ],
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "encounter",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "character_id": "00000001-0000-4000-8000-000000000000",
+              "body_id": "00000002-0000-4000-8000-000000000000",
+              "npc_id": "00000004-0000-4000-8000-000000000000",
+              "room_id": "00000005-0000-4000-8000-000000000000",
+              "job_id": "00000008-0000-4000-8000-000000000000",
+              "status": "open",
+              "round": 2,
+              "active_ids": [
+                "00000004-0000-4000-8000-000000000000"
+              ],
+              "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+            }
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000003-0000-4000-8000-000000000000"
+            },
+            "value": "00000009-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolves"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "00000003-0000-4000-8000-000000000000",
+              "replacement_due": null,
+              "last_flight_at": 10
+            }
+          }
+        ]
+      },
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "dead-cursor-repairs-to-living-flier",
+      "state": "dead_cursor_flight",
+      "ops": [
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000003-0000-4000-8000-000000000000",
+          "source_id": "00000005-0000-4000-8000-000000000000",
+          "destination_id": "00000009-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "population",
+            "key": "wolves"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "00000003-0000-4000-8000-000000000000",
+            "replacement_due": null,
+            "last_flight_at": 10
+          }
+        },
+        {
+          "op": "encounter.close",
+          "writer_group": 0,
+          "encounter_id": "00000006-0000-4000-8000-000000000000",
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "expected": {
+            "character_id": "00000001-0000-4000-8000-000000000000",
+            "body_id": "00000002-0000-4000-8000-000000000000",
+            "npc_id": "00000004-0000-4000-8000-000000000000",
+            "room_id": "00000005-0000-4000-8000-000000000000",
+            "job_id": "00000007-0000-4000-8000-000000000000",
+            "status": "open",
+            "round": 1,
+            "active_ids": [
+              "00000003-0000-4000-8000-000000000000",
+              "00000004-0000-4000-8000-000000000000"
+            ],
+            "next_opponent_id": "00000004-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "encounter",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "character_id": "00000001-0000-4000-8000-000000000000",
+              "body_id": "00000002-0000-4000-8000-000000000000",
+              "npc_id": "00000004-0000-4000-8000-000000000000",
+              "room_id": "00000005-0000-4000-8000-000000000000",
+              "job_id": "00000007-0000-4000-8000-000000000000",
+              "status": "closed",
+              "round": 1,
+              "active_ids": [],
+              "next_opponent_id": null
+            }
+          },
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000003-0000-4000-8000-000000000000"
+            },
+            "value": "00000009-0000-4000-8000-000000000000"
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "population",
+                "key": "wolves"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "00000003-0000-4000-8000-000000000000",
+              "replacement_due": null,
+              "last_flight_at": 10
             }
           }
         ]

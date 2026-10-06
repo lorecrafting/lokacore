@@ -239,7 +239,15 @@ defmodule Loka.Core.Compose do
       Loka.Core.ComposeEncounter.change(
         op,
         read(t, ctx),
-        fn id, room -> pack_member_remains?(id, room, op["writer_group"], ctx) end,
+        fn id, room ->
+          pack_member_remains?(
+            id,
+            room,
+            op["writer_group"],
+            get_in(elem(ctx, 0), ["jobs", op["job_id"], "due_time"]),
+            ctx
+          )
+        end,
         fn id, room -> pack_member_initially_present?(id, room, elem(ctx, 0)) end
       )
 
@@ -340,12 +348,12 @@ defmodule Loka.Core.Compose do
   defp fault(code, target),
     do: %{"fault" => %{"kind" => "fault", "code" => code, "target" => target}}
 
-  defp pack_member_remains?(id, room, group, {state, _, _} = ctx) do
+  defp pack_member_remains?(id, room, group, due, {state, _, _} = ctx) do
     origin = get_in(state, ["created", id, "origin"])
 
     if is_map(origin) and origin["kind"] == "spawned" and
          pack_member_initially_present?(id, room, state),
-       do: begin_pack_member(id, room, group, origin, ctx),
+       do: begin_pack_member(id, room, group, due, origin, ctx),
        else: false
   end
 
@@ -364,15 +372,14 @@ defmodule Loka.Core.Compose do
     end
   end
 
-  defp begin_pack_member(id, room, group, origin, {state, horizon, overlay} = ctx) do
+  defp begin_pack_member(id, room, group, due, origin, {_, _, overlay} = ctx) do
     target = %{"kind" => "population_slot", "plan" => origin["by"], "slot" => origin["slot"]}
-    before = get_in(state, ["population_slots", key(target)])
     slot = read(target, ctx)
 
     if current_pack_member?(id, room, origin, slot, ctx),
       do: true,
       else:
-        not (flight_proven?(id, group, target, before, slot, {horizon, overlay}) or
+        not (flight_proven?(id, group, due, target, ctx) or
                death_proven?(id, group, origin, target, slot, overlay))
   end
 
@@ -382,12 +389,19 @@ defmodule Loka.Core.Compose do
         slot["member_id"] == id and slot["generation"] == origin["generation"] and
         slot["replacement_due"] == nil
 
-  defp flight_proven?(id, group, target, before, slot, {horizon, overlay}) do
+  defp flight_proven?(id, group, due, target, {state, _, overlay} = ctx) do
+    before = get_in(state, ["population_slots", key(target)])
+    slot = read(target, ctx)
     {slot_group, _, _} = overlay[key(target)] || {nil, nil, nil}
-    {move_group, _, _} = overlay[key(containment(id))] || {nil, nil, nil}
 
-    move_group == group and slot_group == group and slot["last_flight_at"] == horizon and
-      before["last_flight_at"] != horizon and slot["replacement_due"] == nil
+    flight_move?(id, group, ctx) and slot_group == group and
+      is_integer(due) and slot["last_flight_at"] == due and
+      before["last_flight_at"] != due and slot["replacement_due"] == nil
+  end
+
+  defp flight_move?(id, group, {state, _, overlay} = ctx) do
+    {move_group, _, _} = overlay[key(containment(id))] || {nil, nil, nil}
+    move_group == group and read(containment(id), ctx) != get_in(state, ["containers", id])
   end
 
   defp death_proven?(id, group, origin, target, slot, overlay) do

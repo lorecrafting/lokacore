@@ -22,6 +22,13 @@ export function openEncounter(
   const known = (state.known_entities ?? {}) as Record<string, Row>;
   const roster = op.active_ids;
   const pack = roster !== undefined;
+  const origin = ((state.created ?? {}) as Record<string, Row>)[op.npc_id]?.origin as
+    Row | undefined;
+  const spec =
+    origin?.kind === 'spawned'
+      ? ((state.population_specs ?? {}) as Record<string, Row>)[encode(origin.by)]
+      : undefined;
+  const opted = !!(spec?.plan as Row | undefined)?.pack;
   const participants = pack ? roster : [op.npc_id];
   if (
     row !== undefined ||
@@ -32,6 +39,7 @@ export function openEncounter(
     op.body_id === op.npc_id ||
     bodyRoom !== op.room_id ||
     npcRoom !== op.room_id ||
+    pack !== opted ||
     pack !== (op.next_opponent_id !== undefined) ||
     (pack && !packMembers(state, roster!, op.npc_id, op.next_opponent_id!, op.room_id)) ||
     encounters.some(
@@ -69,7 +77,7 @@ function packMembers(
     !ids.length ||
     ids.length > 64 ||
     !ids.includes(primary) ||
-    !ids.includes(next) ||
+    next !== primary ||
     ids.some((id, i) => i > 0 && ids[i - 1] >= id)
   )
     return false;

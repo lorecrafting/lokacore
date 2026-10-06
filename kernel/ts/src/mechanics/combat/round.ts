@@ -80,13 +80,13 @@ export function roundSequence(
   else {
     const order = row.round % 2 ? [row.body_id, row.npc_id] : [row.npc_id, row.body_id];
     for (const attacker of order) {
-      const at = prefix(world, r.ops);
+      const at = prefix(world, r.ops, r.due_time);
       if (!participantsPresent(at, row) || at.state.encounters![encounter_id].status !== 'open')
         break;
       if (attacker === row.body_id && !standing(at, row.character_id)) continue;
       attack(at, command, mint, encounter_id, row, attacker, r, close);
     }
-    if (prefix(world, r.ops).state.encounters![encounter_id].status === 'open')
+    if (prefix(world, r.ops, r.due_time).state.encounters![encounter_id].status === 'open')
       r.ops.push(...successor(world, row, job, mint));
   }
   const narration = narrate(world, row, r.events);
@@ -124,10 +124,17 @@ function packRound(
       r.notes.push({ key: settings!.narration.primary_changed, participants: { enemy: primary } });
     const order = row.round % 2 ? [row.body_id, selected] : [selected, row.body_id];
     for (const attacker of order) {
-      const at = prefix(world, r.ops);
+      const at = prefix(world, r.ops, r.due_time);
+      const target =
+        attacker === row.body_id
+          ? eligible(at, row, current.npc_id)
+            ? current.npc_id
+            : row.active_ids!.find((id) => eligible(at, row, id))
+          : selected;
       if (
         at.state.encounters![encounter_id].status !== 'open' ||
-        !eligible(at, row, selected) ||
+        !target ||
+        !eligible(at, row, target) ||
         !living(at, row.body_id)
       )
         break;
@@ -151,12 +158,12 @@ function packRound(
             key: settings!.narration.enemy_fled[leaving.direction]!,
             participants: { enemy: selected },
           });
-          break;
+          continue;
         }
       }
-      attack(at, command, mint, encounter_id, current, attacker, r, close);
+      attack(at, command, mint, encounter_id, { ...current, npc_id: target }, attacker, r, close);
     }
-    const at = prefix(world, r.ops);
+    const at = prefix(world, r.ops, r.due_time);
     if (at.state.encounters![encounter_id].status === 'open') {
       const active = row.active_ids!.filter((id) => eligible(at, row, id));
       if (!active.length) {
@@ -244,8 +251,10 @@ function narrate(world: World, row: EncounterRow, events: readonly CombatEvent[]
   }));
 }
 
-function prefix(world: World, ops: readonly DeltaOp[]): World {
-  const result = apply(world, ops);
+function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
+  const during =
+    due === world.state.clock ? world : { ...world, state: { ...world.state, clock: due } };
+  const result = apply(during, ops, false);
   if ('fault' in result) throw new KernelError(result.fault.code);
   return result.world;
 }

@@ -107,8 +107,7 @@ defmodule Loka.Core.InvariantsEncounter do
        }) do
     if not Map.has_key?(encounters, op["encounter_id"]) and participants_free?(op, encounters) and
          participants?(op, containers, Map.get(state, "known_entities", %{})) and
-         ((op["active_ids"] == nil and op["next_opponent_id"] == nil) or
-            pack_members?(op, state, containers)),
+         admission_shape?(op, state, containers),
        do:
          Map.take(op, ~w(character_id body_id npc_id room_id job_id active_ids next_opponent_id))
          |> Map.merge(%{"status" => "open", "round" => 1})
@@ -137,6 +136,21 @@ defmodule Loka.Core.InvariantsEncounter do
       true ->
         advance_row(row, op)
     end
+  end
+
+  defp admission_shape?(op, state, containers) do
+    origin = get_in(state, ["created", op["npc_id"], "origin"])
+
+    spec =
+      if is_map(origin) and origin["kind"] == "spawned",
+        do: get_in(state, ["population_specs", Compose.key(origin["by"])])
+
+    opted = is_map(get_in(spec || %{}, ["plan", "pack"]))
+    roster = op["active_ids"]
+
+    roster != nil == opted and
+      ((roster == nil and op["next_opponent_id"] == nil) or
+         (roster != nil and pack_members?(op, state, containers)))
   end
 
   defp close_row(row),
@@ -178,6 +192,7 @@ defmodule Loka.Core.InvariantsEncounter do
 
   defp advance_pack?(op, row, %{state: state} = ctx) do
     ids = op["active_ids"]
+    ctx = Map.put(ctx, :due, get_in(state, ["jobs", op["job_id"], "due_time"]))
 
     is_list(ids) and ids != [] and ids == Enum.sort(Enum.uniq(ids)) and
       Enum.all?(ids, &(&1 in row["active_ids"])) and
@@ -255,18 +270,23 @@ defmodule Loka.Core.InvariantsEncounter do
       containers[id] == room and is_map(slot) and slot["member_id"] == id and
         slot["generation"] == origin["generation"] and slot["replacement_due"] == nil
 
-  defp flight_proven?(id, group, slot_key, before, slot, %{preceding: preceding, horizon: horizon}) do
+  defp flight_proven?(id, group, slot_key, before, slot, %{preceding: preceding, due: due}) do
     slot_op = latest_slot(preceding, slot_key)
 
+    departed?(id, group, preceding) and is_map(slot_op) and slot_op["writer_group"] == group and
+      is_integer(due) and slot["last_flight_at"] == due and
+      before["last_flight_at"] != due and slot["replacement_due"] == nil
+  end
+
+  defp departed?(id, group, preceding) do
     move =
       Enum.find(Enum.reverse(preceding), fn op ->
         op["op"] == "entity.transfer" and
           op["entity_id"] == id
       end)
 
-    is_map(move) and move["writer_group"] == group and is_map(slot_op) and
-      slot_op["writer_group"] == group and slot["last_flight_at"] == horizon and
-      before["last_flight_at"] != horizon and slot["replacement_due"] == nil
+    is_map(move) and move["writer_group"] == group and
+      move["destination_id"] != move["source_id"]
   end
 
   defp death_proven?(id, group, origin, slot_key, slot, %{preceding: preceding}) do
@@ -308,7 +328,7 @@ defmodule Loka.Core.InvariantsEncounter do
   defp roster_shape?(ids, op, cap) do
     is_list(ids) and ids != [] and length(ids) <= 64 and is_integer(cap) and
       length(ids) <= cap and ids == Enum.sort(Enum.uniq(ids)) and
-      op["npc_id"] in ids and op["next_opponent_id"] in ids
+      op["npc_id"] in ids and op["next_opponent_id"] == op["npc_id"]
   end
 
   defp pack_member?(id, room, plan, state, containers) do

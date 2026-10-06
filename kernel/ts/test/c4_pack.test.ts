@@ -192,6 +192,65 @@ test('one pack round rotates the cursor and keeps one current job', () => {
   assert.equal(due.world.state.jobs![row.job_id].due_time, 64810);
 });
 
+// Breaks: the cursor rotates but every opponent attack is silently substituted with the primary hound.
+test('two healthy rounds use the selected helper for its actual attack', () => {
+  const w = fixture();
+  const firstNpc = w.entities[h1];
+  const primaryNpc = w.entities[h2];
+  assert.equal(firstNpc.kind, 'npc');
+  assert.equal(primaryNpc.kind, 'npc');
+  if (firstNpc.kind !== 'npc' || primaryNpc.kind !== 'npc') return;
+  const attack = { chance: 100, damage_min: 1, damage_max: 1 };
+  const combat = w.cartridge.world!.combat!;
+  const controlled = {
+    ...w,
+    entities: {
+      ...w.entities,
+      [h1]: { ...firstNpc, attack },
+      [h2]: { ...primaryNpc, attack },
+    },
+    cartridge: {
+      ...w.cartridge,
+      world: {
+        ...w.cartridge.world!,
+        combat: { ...combat, player_attack: attack, dodge: undefined },
+      },
+    },
+  };
+  const first = due(begun(controlled));
+  assert.equal(first.decision.kind, 'accepted', JSON.stringify(first.decision));
+  const second = stepElapsed(
+    first.world,
+    {
+      id: elapsedCommandId(run, w.context, 64805, 64810) as never,
+      world_context_id: w.context,
+      payload: { type: 'elapsed', actor_id: w.character, run_id: run, from: 64805, until: 64810 },
+    },
+    3,
+  );
+  assert.equal(second.decision.kind, 'accepted', JSON.stringify(second.decision));
+  const attacks = (decision: typeof first.decision) =>
+    decision.kind === 'accepted'
+      ? decision.events.flatMap((event) =>
+          event.payload.type === 'attack_result'
+            ? [[event.payload.attacker_id, event.payload.target_id]]
+            : [],
+        )
+      : [];
+  assert.deepEqual(attacks(first.decision), [
+    [w.body, h2],
+    [h2, w.body],
+  ]);
+  assert.deepEqual(attacks(second.decision), [
+    [h1, w.body],
+    [w.body, h2],
+  ]);
+  assert.equal(level(second.world, w.body, resourceRef(w, 'hp')), 8);
+  assert.equal(level(second.world, h2, resourceRef(w, 'hp')), 6);
+  assert.equal(level(second.world, h1, resourceRef(w, 'hp')), 8);
+  assert.deepEqual(second.world.state.rng, [27274249, 25704967, 31982592, 12605441]);
+});
+
 // Breaks: a departed primary is still struck or keeps the attack cursor after due pruning.
 test('due pruning repairs a departed primary before the player opportunity', () => {
   const w = fixture();
@@ -373,6 +432,57 @@ test('a player-first hit can wound the selected hound into flight before its tur
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,
     1,
   );
+});
+
+// Breaks: an even-round selected helper flies before attacking and steals the player's remaining opportunity.
+test('even-round helper flight still gives the player one attack on the healthy primary', () => {
+  const w = fixture();
+  const first = due(begun(w));
+  assert.equal(first.decision.kind, 'accepted');
+  const hpKey = key({ kind: 'resource', entity_id: h1, resource: resourceRef(w, 'hp') });
+  const primaryHp = key({ kind: 'resource', entity_id: h2, resource: resourceRef(w, 'hp') });
+  const combat = first.world.cartridge.world!.combat!;
+  const controlled = {
+    ...first.world,
+    cartridge: {
+      ...first.world.cartridge,
+      world: {
+        ...first.world.cartridge.world!,
+        combat: { ...combat, player_attack: { chance: 100, damage_min: 1, damage_max: 1 } },
+      },
+    },
+    state: {
+      ...first.world.state,
+      resources: {
+        ...first.world.state.resources,
+        [hpKey]: { value: 1, at: 64805 },
+        [primaryHp]: { value: 7, at: 64805 },
+      },
+    },
+  };
+  const result = stepElapsed(
+    controlled,
+    {
+      id: elapsedCommandId(run, w.context, 64805, 64810) as never,
+      world_context_id: w.context,
+      payload: { type: 'elapsed', actor_id: w.character, run_id: run, from: 64805, until: 64810 },
+    },
+    3,
+  );
+  assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
+  assert.deepEqual(
+    result.decision.kind === 'accepted' &&
+      result.decision.events.flatMap((event) =>
+        event.payload.type === 'attack_result'
+          ? [[event.payload.attacker_id, event.payload.target_id]]
+          : [],
+      ),
+    [[w.body, h2]],
+  );
+  assert.equal(result.world.state.containers[h1], nest);
+  assert.equal(level(result.world, h2, resourceRef(w, 'hp')), 6);
+  const row = Object.values(result.world.state.encounters ?? {})[0]!;
+  assert.deepEqual(row.active_ids, [h2]);
 });
 
 // Breaks: a wounded hound invents a destination through a missing area exit.

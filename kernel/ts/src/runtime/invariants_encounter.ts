@@ -49,9 +49,13 @@ function encounter(
   const known = state.known_entities ?? {};
   const row = encounters.get(op.encounter_id);
   if (op.op === 'encounter.open') {
+    const origin = state.created?.[op.npc_id]?.origin;
+    const opted =
+      origin?.kind === 'spawned' && !!state.population_specs?.[key(origin.by)]?.plan?.pack;
     if (
       row !== undefined ||
       !participants(op, containers, known) ||
+      opted !== (op.active_ids !== undefined) ||
       (op.active_ids === undefined) !== (op.next_opponent_id === undefined) ||
       (op.active_ids !== undefined && !packMembers(op, state, containers))
     )
@@ -109,7 +113,7 @@ function encounter(
             containers,
             slots,
             preceding,
-            horizon,
+            state.jobs?.[op.job_id]?.due_time,
           ),
       ) ||
       !rotationHolds(op, row, state))
@@ -168,7 +172,7 @@ function memberRemains(
   containers: Map<string, Any>,
   slots: Map<string, Any>,
   preceding: Any[],
-  horizon: number,
+  due: number | undefined,
 ) {
   const origin = state.created?.[id]?.origin;
   if (origin?.kind !== 'spawned' || !memberInitiallyPresent(id, room, state)) return false;
@@ -197,9 +201,12 @@ function memberRemains(
   );
   const flew =
     move?.writer_group === group &&
+    move.destination_id !== move.source_id &&
+    containers.get(id) !== room &&
     slotOp?.writer_group === group &&
-    slot?.last_flight_at === horizon &&
-    before?.last_flight_at !== horizon &&
+    Number.isSafeInteger(due) &&
+    slot?.last_flight_at === due &&
+    before?.last_flight_at !== due &&
     slot?.replacement_due === null;
   const died =
     slotOp?.writer_group === group &&
@@ -216,7 +223,7 @@ function packMembers(op: Any, state: Any, containers: Map<string, Any>) {
     !ids.length ||
     ids.length > 64 ||
     !ids.includes(op.npc_id) ||
-    !ids.includes(op.next_opponent_id) ||
+    op.next_opponent_id !== op.npc_id ||
     ids.some((id: string, i: number) => i > 0 && ids[i - 1] >= id)
   )
     return false;

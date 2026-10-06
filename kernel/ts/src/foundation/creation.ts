@@ -1,6 +1,6 @@
 import { validate } from './validate.ts';
 import { encode, type Json } from './canonical.ts';
-import type { DeltaOp } from '../contracts.gen.ts';
+import type { DeltaOp, EncounterRow } from '../contracts.gen.ts';
 import type { State } from './compose.ts';
 type Obj = { readonly [key: string]: Json };
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
@@ -165,15 +165,27 @@ function flightSlot(
   const origin =
     id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
   const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
-  const horizon = ops.reduce((at, op) => (op.op === 'time.advance' ? op.to : at), state.clock);
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === s.writer_group &&
+      op.expected?.active_ids?.includes(id!) &&
+      selectedFlight(op.expected, id!, state) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id!)),
+  );
+  const due =
+    round && 'job_id' in round
+      ? ((state.jobs ?? {}) as Record<string, Obj>)[round.job_id]?.due_time
+      : undefined;
   return (
     id !== null &&
     prior?.member_id === id &&
     prior.generation === s.value.generation &&
     prior.replacement_due === null &&
     s.value.replacement_due === null &&
-    s.value.last_flight_at === horizon &&
-    prior.last_flight_at !== horizon &&
+    Number.isSafeInteger(due) &&
+    s.value.last_flight_at === due &&
+    prior.last_flight_at !== due &&
     origin?.kind === 'spawned' &&
     origin.role === 'hound' &&
     origin.member_id === id &&
@@ -186,7 +198,35 @@ function flightSlot(
         op.op === 'entity.transfer' &&
         op.writer_group === s.writer_group &&
         op.entity_id === id &&
-        op.source_id !== null,
+        op.source_id === ((state.containers ?? {}) as Record<string, Json>)[id] &&
+        op.destination_id !== op.source_id,
     ).length === 1
+  );
+}
+
+function selectedFlight(row: EncounterRow, id: string, state: State) {
+  const containers = (state.containers ?? {}) as Record<string, Json>;
+  const created = (state.created ?? {}) as Record<string, Obj>;
+  const slots = (state.population_slots ?? {}) as Record<string, Obj>;
+  const present =
+    row.active_ids?.filter((member) => {
+      const origin = created[member]?.origin as Obj | undefined;
+      const slot =
+        origin && slots[key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })];
+      return (
+        containers[member] === row.room_id &&
+        origin?.kind === 'spawned' &&
+        origin.role === 'hound' &&
+        origin.member_id === member &&
+        slot?.member_id === member &&
+        slot.generation === origin.generation &&
+        slot.replacement_due === null
+      );
+    }) ?? [];
+  const cursor = row.next_opponent_id!;
+  return (
+    (present.includes(cursor)
+      ? cursor
+      : (present.find((member) => member > cursor) ?? present[0])) === id
   );
 }

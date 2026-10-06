@@ -174,7 +174,14 @@ function encounter(
     return changeEncounter(
       op,
       row,
-      (id, room) => packMemberRemains(id, room, op.writer_group, ctx),
+      (id, room) =>
+        packMemberRemains(
+          id,
+          room,
+          op.writer_group,
+          get(section(ctx.state, 'jobs')[op.job_id], 'due_time'),
+          ctx,
+        ),
       (id, room) => packMemberInitiallyPresent(id, room, ctx.state),
     );
   return openEncounter(
@@ -187,7 +194,13 @@ function encounter(
   );
 }
 
-function packMemberRemains(id: string, room: string, group: number, ctx: Ctx): boolean {
+function packMemberRemains(
+  id: string,
+  room: string,
+  group: number,
+  due: Json | undefined,
+  ctx: Ctx,
+): boolean {
   const origin = get(section(ctx.state, 'created')[id], 'origin') as Obj | undefined;
   if (origin?.kind !== 'spawned' || !packMemberInitiallyPresent(id, room, ctx.state)) return false;
   const target = {
@@ -214,9 +227,11 @@ function packMemberRemains(id: string, room: string, group: number, ctx: Ctx): b
   );
   const flew =
     moved?.group === group &&
+    moved.value !== room &&
     slotWrite?.group === group &&
-    get(slot, 'last_flight_at') === ctx.horizon &&
-    get(before, 'last_flight_at') !== ctx.horizon &&
+    Number.isSafeInteger(due) &&
+    get(slot, 'last_flight_at') === due &&
+    get(before, 'last_flight_at') !== due &&
     get(slot, 'replacement_due') === null;
   const died =
     slotWrite?.group === group &&

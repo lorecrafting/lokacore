@@ -6,13 +6,10 @@ defmodule Loka.Core.ComposeEncounter do
   @spec open(map(), term(), map(), term(), term(), map()) :: {:ok, map()} | {:error, String.t()}
   def open(op, row, state, body_room, npc_room, encounters) do
     known = Map.get(state, "known_entities", %{})
-    roster = op["active_ids"]
 
     valid =
       row == nil and participants?(op, known, body_room, npc_room) and
-        participants_free?(op, encounters) and
-        ((roster == nil and op["next_opponent_id"] == nil) or
-           (roster != nil and pack_members?(op, state)))
+        participants_free?(op, encounters) and admission_shape?(op, state)
 
     if valid,
       do:
@@ -20,6 +17,21 @@ defmodule Loka.Core.ComposeEncounter do
          Map.take(op, ~w(character_id body_id npc_id room_id job_id active_ids next_opponent_id))
          |> Map.merge(%{"status" => "open", "round" => 1})},
       else: {:error, "precondition_failed"}
+  end
+
+  defp admission_shape?(op, state) do
+    origin = get_in(state, ["created", op["npc_id"], "origin"])
+
+    spec =
+      if is_map(origin) and origin["kind"] == "spawned",
+        do: get_in(state, ["population_specs", key(origin["by"])])
+
+    opted = is_map(get_in(spec || %{}, ["plan", "pack"]))
+    roster = op["active_ids"]
+
+    roster != nil == opted and
+      ((roster == nil and op["next_opponent_id"] == nil) or
+         (roster != nil and pack_members?(op, state)))
   end
 
   defp participants_free?(op, encounters) do
@@ -48,7 +60,7 @@ defmodule Loka.Core.ComposeEncounter do
   defp roster_shape?(ids, op, cap) do
     is_list(ids) and ids != [] and length(ids) <= 64 and is_integer(cap) and
       length(ids) <= cap and ids == Enum.sort(Enum.uniq(ids)) and
-      op["npc_id"] in ids and op["next_opponent_id"] in ids
+      op["npc_id"] in ids and op["next_opponent_id"] == op["npc_id"]
   end
 
   defp pack_member?(id, room, plan, state) do

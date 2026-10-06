@@ -116,14 +116,55 @@ defmodule Loka.Core.InvariantsCreation do
 
   defp flight_slot?(state, ops, op) do
     id = get_in(op, ["value", "member_id"])
+    due = flight_due(state, ops, op, id)
 
-    horizon =
-      Enum.reduce(ops, state["clock"], fn row, at ->
-        if row["op"] == "time.advance", do: row["to"], else: at
+    is_integer(due) and flight_transition?(op, id, due) and flight_origin?(op, id, state) and
+      one_flight_transfer?(ops, op, id, state)
+  end
+
+  defp flight_due(state, ops, op, id) do
+    round =
+      Enum.find(ops, fn row ->
+        row["op"] in ~w(encounter.advance encounter.close) and
+          row["writer_group"] == op["writer_group"] and
+          id in (get_in(row, ["expected", "active_ids"]) || []) and
+          selected_flight?(row["expected"], id, state) and
+          (row["op"] == "encounter.close" or id not in (row["active_ids"] || []))
       end)
 
-    flight_transition?(op, id, horizon) and flight_origin?(op, id, state) and
-      one_flight_transfer?(ops, op, id)
+    if round, do: get_in(state, ["jobs", round["job_id"], "due_time"])
+  end
+
+  defp selected_flight?(row, id, state) do
+    present =
+      Enum.filter(row["active_ids"] || [], &flight_member_present?(&1, row["room_id"], state))
+
+    cursor = row["next_opponent_id"]
+
+    selected =
+      if cursor in present,
+        do: cursor,
+        else: Enum.find(present, &(&1 > cursor)) || List.first(present)
+
+    selected == id
+  end
+
+  defp flight_member_present?(id, room, state) do
+    origin = get_in(state, ["created", id, "origin"])
+
+    target = %{
+      "kind" => "population_slot",
+      "plan" => origin && origin["by"],
+      "slot" => origin && origin["slot"]
+    }
+
+    slot = get_in(state, ["population_slots", Compose.key(target)])
+
+    get_in(state, ["containers", id]) == room and is_map(origin) and is_map(slot) and
+      Map.take(origin, ~w(kind role member_id)) ==
+        %{"kind" => "spawned", "role" => "hound", "member_id" => id} and
+      Map.take(slot, ~w(member_id generation replacement_due)) ==
+        %{"member_id" => id, "generation" => origin["generation"], "replacement_due" => nil}
   end
 
   defp flight_transition?(op, id, horizon),
@@ -146,11 +187,12 @@ defmodule Loka.Core.InvariantsCreation do
       is_map(get_in(spec || %{}, ["plan", "pack"]))
   end
 
-  defp one_flight_transfer?(ops, op, id),
+  defp one_flight_transfer?(ops, op, id, state),
     do:
       Enum.count(ops, fn row ->
         row["op"] == "entity.transfer" and row["writer_group"] == op["writer_group"] and
-          row["entity_id"] == id and row["source_id"] != nil
+          row["entity_id"] == id and row["source_id"] == get_in(state, ["containers", id]) and
+          row["destination_id"] != row["source_id"]
       end) == 1
 
   defp created_identity(ops, id) do

@@ -15,7 +15,7 @@ defmodule Loka.Core.C4PackCompositionTest do
     end
   end
 
-  # Breaks: pack admission accepts a foreign plan member or a roster beyond its plan cap.
+  # Breaks: pack admission accepts a foreign member, or a flight stamp names the unselected hound.
   test "literal exact pack admission and refusals agree with both independent guards" do
     for c <- @fixture["cases"] do
       state = state(c["state"])
@@ -38,5 +38,16 @@ defmodule Loka.Core.C4PackCompositionTest do
                c["id"]
       end
     end
+  end
+
+  # Breaks: final flight proof is applied to a lawful prefix before encounter closure.
+  test "a legal transfer and stamp compose before their round exit is appended" do
+    c =
+      Enum.find(
+        @fixture["cases"],
+        &(&1["id"] == "flight-stamp-requires-same-group-encounter-exit")
+      )
+
+    assert Compose.compose(state(c["state"]), %{"ops" => c["ops"]}, false) == c["counterfeit"]
   end
 end
