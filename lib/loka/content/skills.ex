@@ -125,6 +125,12 @@ defmodule Loka.Content.Skills do
       )
   end
 
+  defp lesson(rel, steps, o, _, _) do
+    if Enum.any?(o["sequence"] || [], &(&1["op"] == "skill.acquire")),
+      do: [bad(at(rel, steps ++ ["lesson_payment"]))],
+      else: []
+  end
+
   defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
     case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do
       {_, _, npc} -> is_map_key(npc["resource_starts"] || %{}, resource["key"])
@@ -133,12 +139,6 @@ defmodule Loka.Content.Skills do
   end
 
   defp funded?(_, _, _), do: false
-
-  defp lesson(rel, steps, o, _, _) do
-    if Enum.any?(o["sequence"] || [], &(&1["op"] == "skill.acquire")),
-      do: [bad(at(rel, steps ++ ["lesson_payment"]))],
-      else: []
-  end
 
   defp bad(path), do: diag("SCHEMA_VIOLATION", path, %{"error" => "invalid_value"})
 end
