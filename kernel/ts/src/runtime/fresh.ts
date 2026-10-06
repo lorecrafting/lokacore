@@ -11,7 +11,6 @@ import type { RngState } from '../foundation/rng.ts';
 import { cmp } from '../foundation/validate.ts';
 
 export const NIL = '00000000-0000-0000-0000-000000000000';
-
 /**
  * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
  * body entity, then each room in DefinitionRefString order, then each room's details in the same
@@ -31,7 +30,6 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const mint = () => id(context, NIL, ordinal++) as EntityId;
   return initialPopulation(baseWorld(cartridge, context, seed, mint), mint, NIL as never);
 }
-
 function baseWorld(
   cartridge: Cartridge,
   context: WorldContextId,
@@ -72,7 +70,6 @@ function baseWorld(
     state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel, liquids }) },
   };
 }
-
 function staticSpecs(
   cartridge: Cartridge,
   roomIds: World['roomIds'],

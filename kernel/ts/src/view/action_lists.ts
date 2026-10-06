@@ -227,7 +227,6 @@ const lidded = (world: World, id: string) => {
 };
 // Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
 const equip = (a: Offered) => equipment.VERBS.includes(a.command);
-
 // True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
 // then equipment@1's checks (equipment.transfer).
 function fits(world: World, actor: CharacterId, a: Offered, item: string) {

@@ -65,9 +65,7 @@ export function gameView(world: World): GameView {
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
   const equipment = equipmentViews(world, actions, steps);
-  const room = world.rooms[here];
-  const text = (key: TextKey) => ({ key });
-  const description = text(description_variant.describe(world, world.character, room, steps));
+  const place = placeView(world, here, steps);
   const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
@@ -81,17 +79,8 @@ export function gameView(world: World): GameView {
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
-    ...(bleed && {
-      bleeding: {
-        label: 'condition.bleeding' as TextKey,
-        generation: bleed.generation,
-        ends_at: bleed.ends_at!,
-        next_tick_at: bleed.next_tick_at!,
-        hp_loss: world.cartridge.bleeds![refString(bleed.effect!)].hp_loss,
-        tick_every: world.cartridge.bleeds![refString(bleed.effect!)].tick_every,
-      },
-    }),
-    place: { id: here, title: text(room.title), description },
+    ...(bleed && { bleeding: bleedingView(world, bleed) }),
+    place,
     exits: exits(world, actions.door, steps),
     actions: actions.place,
     ...noticeViews(world, here, actions.notice, steps),
@@ -109,6 +98,28 @@ export function gameView(world: World): GameView {
   };
   if (steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
   return view;
+}
+
+function placeView(world: World, here: EntityId, steps: Steps) {
+  const room = world.rooms[here];
+  const text = (key: TextKey) => ({ key });
+  return {
+    id: here,
+    title: text(room.title),
+    description: text(description_variant.describe(world, world.character, room, steps)),
+  };
+}
+
+function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof currentBleed>>) {
+  const spec = world.cartridge.bleeds![refString(bleed.effect!)];
+  return {
+    label: 'condition.bleeding' as TextKey,
+    generation: bleed.generation,
+    ends_at: bleed.ends_at!,
+    next_tick_at: bleed.next_tick_at!,
+    hp_loss: spec.hp_loss,
+    tick_every: spec.tick_every,
+  };
 }
 
 // The entities directly in `holder` (the room, the body or a slot holder), each with its short
