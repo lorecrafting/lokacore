@@ -11,6 +11,7 @@ import { admit, adopt } from '../../../kernel/ts/src/runtime/proposal.ts';
 import { adjust, level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { deathSequence } from '../../../kernel/ts/src/mechanics/death/sequence.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
 import type { Command, FactValue } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -219,8 +220,8 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
   }
 });
 
-// Breaks: a saved Study death loses the corpse on reopen or grants its item without physical Take.
-test('real SQLite Study corpse retains physical west pickup across cold reopen', (t) => {
+// Breaks: fox Study custody loses the corpse on reopen, grants its item without Take, or stays open after retrieval.
+test('real SQLite fox Study corpse permits pickup then closes ingress after cold reopen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-study-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const p = setup(join(dir, 'save.db'), studySource());
@@ -241,6 +242,50 @@ test('real SQLite Study corpse retains physical west pickup across cold reopen',
     if (result.kind === 'saved')
       assert.equal((result.decision as { kind: string }).kind, 'accepted');
   };
+  let n = 1;
+  const ok = (action: string, target_ids: string[] = [], input: object = {}) =>
+    invoke(n++, action, target_ids, input);
+  const move = (...directions: string[]) =>
+    directions.forEach((direction) => ok('move', [], { direction }));
+  const choose = (choice_id: string, extra: object = {}) =>
+    ok('choose', [], {
+      continuation_id: gameView(p.story.world()).choice!.continuation_id,
+      choice_id,
+      ...extra,
+    });
+  const talk = (action: string, npc: string) => ok(action, [entity(p.story.world(), 'npc', npc)]);
+  move('south', 'south', 'south', 'south', 'south');
+  talk('elspeth', 'elspeth');
+  choose('accept');
+  move('north', 'north');
+  ok('take', [entity(p.story.world(), 'item', 'fox_drawing')]);
+  move('south', 'south');
+  talk('a_elspeth_report', 'elspeth');
+  choose('report');
+  move('south', 'south');
+  ok('study_tracks');
+  move('south', 'south');
+  talk('a_vesper_meeting', 'vesper');
+  choose('meet_wren');
+  talk('b_vesper_riddle', 'vesper');
+  choose('answer', { answer: 'LANTERN' });
+  talk('c_vesper_answered', 'vesper');
+  choose('carry_message');
+  move('north', 'north', 'north', 'north');
+  talk('a_elspeth_return', 'elspeth');
+  choose('stays');
+  move('north', 'north', 'north', 'north', 'north');
+  talk('a_aldric_offer', 'aldric');
+  choose('accept');
+  move('up', 'up');
+  ok('silence_bell', [
+    Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0],
+  ]);
+  for (let line = 0; line < 2; line++) {
+    const scene = gameView(p.story.world()).scene!;
+    ok('continue', [], { scene: scene.scene, line: scene.index });
+  }
+  move('down', 'down');
   invoke(301, 'move', [], { direction: 'west' });
   assert.equal(
     p.story.world().state.containers[p.story.world().body],
@@ -265,5 +310,6 @@ test('real SQLite Study corpse retains physical west pickup across cold reopen',
     input: { direction: 'west' },
   });
   assert.equal(west.kind, 'saved');
-  if (west.kind === 'saved') assert.equal((west.decision as { kind: string }).kind, 'accepted');
+  if (west.kind === 'saved')
+    assert.deepEqual(west.decision, { kind: 'rejected', error: { code: 'exit_closed' } });
 });
