@@ -119,3 +119,43 @@ Verdict: **APPROVE**. **D11-P1 and D11-SP-01 closed; no open findings.**
 The developer reports the full/pre-push gate green. Hosted exact source-head CI
 and the independent scoped save/protocol recheck remain PM-owned. This metadata
 commit is held locally until the PM authorizes its push after hosted source CI.
+
+## Independent save/protocol fix-round opinion
+
+```text
+APPROVE
+PR: #257 — scoped D11 fix second opinion
+Head: 1cb0f6fb48df47cc2bfa4901cce9f284f2692419
+Base: 60f64a5b31c0b5c26842caf488c4b3fcb24ee463
+
+Findings:
+None open within scope.
+
+D11-P1 | blocker, resolved | mobile/authority/local-story/character_choice.test.ts:124
+Scenario: selected Fen-born dies and creates a corpse; reopened authority
+retains ancestry, six literal attributes, inherited Swim and faction −2,
+hides the picker, and refuses a different second choice.
+The added file-backed test covers close/reopen. Independently executed
+its in-memory SQLite variant: green. Character-row-loss mutation: red
+(save_corrupt during reopen). Unmodified variant rerun: green.
+
+D11-SP-01 | blocker, resolved | lib/loka/core/compose.ex:116
+Scenario: characters[character_id] exists with null.
+Elixir now refuses selection, matching TypeScript and the literal fixture.
+Exact-head probes in both kernels passed absent, present-null and
+already-selected cases. Restoring Elixir’s old nil guard broke the
+literal present-null assertion.
+
+Checks:
+Read AGENTS.md, D11 review record and governing system clauses.
+Inspected scoped diff, fixture, harness, composition/overlay handling,
+state adoption, changed-row persistence and receipt recovery callers.
+Ponytail review: no complexity finding.
+
+Limits:
+Read-only sandbox prevented independent file-backed cold reopen.
+SQLite execution used fresh authority instances on one real in-memory
+connection; disk close/reopen was inspected in the committed test.
+Mix xref was blocked by sandbox restrictions; syntax inspection substituted.
+No broad gate, native/browser work, file edits or posted comments.
+```
