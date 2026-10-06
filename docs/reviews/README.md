@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
+
 - [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
 - [D1 ferry/isle save/protocol second opinion](2026-10-06-d1-ferry-save-second-review.md): original provisional source `8aa63fa9` APPROVE; integrated C3 successor source `4e217f60`, evidence `8de184ee`, scoped APPROVE, no findings. 25 TS/SQLite and 15 Elixir checks, twelve file-backed COMMIT cases, 27 byte-preserving forgeries, unavailable-pin refusal and relevant Book combat control pass; v030/API1.26/hash/all 149 IDs and all 25 publication evidence hashes verify. Hosted publication remains separate.
 
