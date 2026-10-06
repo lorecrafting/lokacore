@@ -19,3 +19,7 @@ For each real import control, `br update <id> --title ...` generated the newer J
 No open findings. The real worktree creation failure found before the final candidate was fixed by the shell wrappers' helper-presence checks. Actual post-merge latency, operator intervention and viewer freshness remain pending the two source merges named in the comparison record; the record makes no speed claim.
 
 Ponytail Review: **Lean already. Ship.** The two small shell guards and one Python helper use existing Git and Beads commands without a new dependency or abstraction.
+
+## Scoped follow-up — `e8059087`
+
+Verdict: **APPROVE WITH NOTES**; no open findings. The import command now captures Beads output and prints a generic success line. In disposable repositories using real `br 0.7.4`, two successive newer JSONL generations each printed only `Beads index refreshed from reviewed JSONL.` and ended with `dirty_count: 0` and `jsonl_newer: false`. A dirty local index still skipped import. With malformed JSONL, the hook printed only its generic recovery instruction, returned without a path in stdout or stderr, and left the corrupt file for manual inspection. The evidence addendum accurately labels these as isolated functional controls; integration merge timing remains pending. Python compilation, the docs check and `git diff --check` passed at this source head. Ponytail recheck: no new complexity finding.
