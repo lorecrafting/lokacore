@@ -6,6 +6,7 @@ import { encountersHold } from './invariants_encounter.ts';
 import { escortsHold } from './invariants_escort.ts';
 import { patrolsHold } from './invariants_patrol.ts';
 import { populationsHold } from './invariants_population.ts';
+import { sightHandoffHolds } from './invariants_sight.ts';
 
 type Any = any;
 export function gate(state: Any, ops: DeltaOp[], result: Any): boolean {
@@ -17,7 +18,8 @@ export function gate(state: Any, ops: DeltaOp[], result: Any): boolean {
     encountersHold(state, ops, result) &&
     escortsHold(state, ops, result) &&
     patrolsHold(state, ops, result) &&
-    populationsHold(state, ops, result)
+    populationsHold(state, ops, result) &&
+    sightHandoffHolds(state, ops, result)
   );
 }
 

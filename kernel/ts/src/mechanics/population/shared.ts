@@ -14,6 +14,7 @@ import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { passage } from '../movement/shared.ts';
 import { birth } from './birth.ts';
+import { bindSight } from './behavior.ts';
 
 const planRef = (world: World, key: string): DefinitionRef => ({
   cartridge_id: world.cartridge.manifest.id,
@@ -77,7 +78,9 @@ function genesisSlots(
   mint: Mint,
 ): DeltaOp[] {
   const ops: DeltaOp[] = [];
-  const pack = !!world.populationSpecs[key(ref)]?.plan.pack;
+  const flight = !!(
+    world.populationSpecs[key(ref)]?.plan.pack || world.populationSpecs[key(ref)]?.plan.sight
+  );
   for (let slot = 1; slot <= cap; slot++) {
     const made =
       slot <= count ? birth(world, ref, slot, 1, occurrence_id, world.state.clock, mint) : [];
@@ -93,13 +96,15 @@ function genesisSlots(
               generation: 1,
               member_id: (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id,
               replacement_due: null,
-              ...(pack && { last_flight_at: null }),
+              ...(flight && { last_flight_at: null }),
+              ...(world.populationSpecs[key(ref)]?.plan.sight && { sight_job_id: null }),
             }
           : {
               generation: 0,
               member_id: null,
               replacement_due: null,
-              ...(pack && { last_flight_at: null }),
+              ...(flight && { last_flight_at: null }),
+              ...(world.populationSpecs[key(ref)]?.plan.sight && { sight_job_id: null }),
             },
     });
   }
@@ -133,7 +138,7 @@ export function runPopulation(
   const ops: DeltaOp[] = [
     { op: 'job.complete', writer_group: 0, job_id },
     ...born.ops,
-    ...wanders(world, plan, job, control, slots, born.ids),
+    ...wanders(world, command.id, job.job, plan, job, control, slots, born.ids, mint),
     ...successor(world, plan, job, control, target, slots, mint),
   ];
   return accepted<never>(world, 'job_ran', ops, []);
@@ -174,18 +179,38 @@ function births(
     const generation = row.generation + 1;
     const made = birth(world, job.job, slot, generation, occurrence_id, job.due_time, mint);
     const member_id = (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id;
-    ops.push(...made, {
+    const spec = world.populationSpecs[key(job.job)]!;
+    const value = {
+      generation,
+      member_id,
+      replacement_due: null,
+      ...((spec.plan.pack || spec.plan.sight) && { last_flight_at: null }),
+      ...(spec.plan.sight && { sight_job_id: null }),
+    };
+    const sight =
+      spec.plan.sight && world.state.containers[world.body] === spec.home
+        ? bindSight(
+            world,
+            job.job,
+            slot,
+            value,
+            member_id,
+            null,
+            spec.home,
+            occurrence_id,
+            'population_transfer',
+            job.due_time,
+            mint,
+          )
+        : [];
+    const binding = sight.find((op) => op.op === 'population.slot');
+    ops.push(...made, ...sight.filter((op) => op.op !== 'population.slot'), {
       op: 'population.slot',
       writer_group: 0,
       plan: job.job,
       slot,
       expected: row,
-      value: {
-        generation,
-        member_id,
-        replacement_due: null,
-        ...(world.populationSpecs[key(job.job)]?.plan.pack && { last_flight_at: null }),
-      },
+      value: binding?.op === 'population.slot' ? binding.value : value,
     });
     ids.add(member_id);
   }
@@ -193,11 +218,14 @@ function births(
 }
 function wanders(
   world: World,
+  occurrence_id: CommandId,
+  planRef: DefinitionRef,
   plan: Plan,
   job: JobRow,
   control: NonNullable<World['state']['population_plans']>[string],
   slots: Slots,
   born: Set<string>,
+  mint: Mint,
 ): DeltaOp[] {
   if (job.due_time !== control.next_wander_due) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
@@ -226,6 +254,25 @@ function wanders(
       source_id: from,
       destination_id: to,
     });
+    if (plan.sight && to === world.state.containers[world.body]) {
+      const origin = world.state.created?.[member]?.origin;
+      if (origin?.kind === 'spawned')
+        ops.push(
+          ...bindSight(
+            world,
+            planRef,
+            origin.slot,
+            row,
+            member as EntityId,
+            from,
+            to,
+            occurrence_id,
+            'population_transfer',
+            job.due_time,
+            mint,
+          ),
+        );
+    }
   }
   return ops;
 }

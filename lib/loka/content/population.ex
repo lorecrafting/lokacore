@@ -68,6 +68,7 @@ defmodule Loka.Content.Population do
     |> add(not connected, ["area"])
     |> add(not bundle_ok, ["bundle"])
     |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
+    |> add(not sight_valid?(p["sight"], p["area"], rooms, text), ["sight", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
   end
 
@@ -87,6 +88,21 @@ defmodule Loka.Content.Population do
       Enum.all?(narration_keys(narration), &Map.has_key?(text, &1))
   end
 
+  defp sight_valid?(nil, _, _, _), do: true
+
+  defp sight_valid?(sight, area, rooms, text) do
+    directions =
+      for room <- rooms,
+          is_map(room),
+          {direction, edge} <- room["exits"] || %{},
+          edge["to"] in area,
+          do: direction
+
+    is_integer(sight["delay"]) and sight["delay"] > 0 and
+      Enum.all?(directions, &Map.has_key?(sight["narration"], &1)) and
+      Enum.all?(Map.values(sight["narration"]), &Map.has_key?(text, &1))
+  end
+
   defp narration_keys(narration),
     do: Map.values(Map.delete(narration, "enemy_fled")) ++ Map.values(narration["enemy_fled"])
 
@@ -102,7 +118,11 @@ defmodule Loka.Content.Population do
     item = value(Refs.resolve(b["item"], "item", manifest, defs))
     corpse = value(Refs.resolve(b["corpse"], "item", manifest, defs))
 
-    npc && item && corpse &&
+    roles_ok =
+      (b["member_role"] == nil and b["loot_role"] == nil) or
+        (b["member_role"] == "deer" and b["loot_role"] == "hide")
+
+    roles_ok && npc && item && corpse &&
       npc["spawn_template"] == true && npc["room"] == home &&
       is_map(npc["hp"]) && is_map(npc["attack"]) &&
       item["location"] == %{"in" => "template"} && item["container"] == nil &&

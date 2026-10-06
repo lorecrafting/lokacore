@@ -480,6 +480,8 @@ test('a transport-only cartridge validates crossing receipts without another pro
     delete c.population_bundles;
     delete c.items[`${prefix}:item/hound_pelt`];
     delete c.items[`${prefix}:item/hound_corpse`];
+    delete c.items[`${prefix}:item/deer_hide`];
+    delete c.items[`${prefix}:item/deer_corpse`];
     c.scenes = Object.fromEntries(
       Object.entries(c.scenes).filter(([, scene]: any) => !scene.on?.rest),
     );

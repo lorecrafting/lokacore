@@ -18,7 +18,7 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
         previous.identity.id !== op.entity_id ||
         previous.writer_group !== op.writer_group ||
         ((state.known_entities?.[op.destination_id]?.kind !== 'room' ||
-          previous.identity.origin?.role === 'pelt' ||
+          ['pelt', 'hide'].includes(previous.identity.origin?.role) ||
           (previous.identity.origin?.kind === 'spawned' &&
             state.population_specs?.[key(previous.identity.origin.by)]?.home !==
               op.destination_id)) &&
@@ -56,13 +56,13 @@ function complete(state: Any, ops: Any[]): boolean {
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      op.identity.origin.role === 'hound',
+      ['hound', 'deer'].includes(op.identity.origin.role),
   );
   const pelts = ops.filter(
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      op.identity.origin.role === 'pelt',
+      ['pelt', 'hide'].includes(op.identity.origin.role),
   );
   const slots = ops.filter((op) => op.op === 'population.slot');
   if (hounds.length !== pelts.length) return false;
@@ -103,7 +103,8 @@ function complete(state: Any, ops: Any[]): boolean {
             h.identity.origin.slot === s.slot &&
             h.identity.origin.generation === s.value.generation,
         ) ||
-        flightSlot(state, ops, s),
+        flightSlot(state, ops, s) ||
+        sightSlot(state, ops, s),
     ) && peltsMatch(pelts, hounds)
   );
 }
@@ -113,6 +114,65 @@ function peltsMatch(pelts: Any[], hounds: Any[]) {
     hounds.some(
       (h) => h.writer_group === p.writer_group && p.identity.origin.member_id === h.identity.id,
     ),
+  );
+}
+
+function sightSlot(state: Any, ops: Any[], s: Any) {
+  const prior = s.expected,
+    id = s.value.member_id;
+  if (
+    !prior ||
+    !id ||
+    prior.member_id !== id ||
+    prior.generation !== s.value.generation ||
+    s.value.replacement_due !== null ||
+    s.value.last_flight_at !== prior.last_flight_at ||
+    s.value.sight_job_id === prior.sight_job_id
+  )
+    return false;
+  const scheduled = ops.find(
+    (op) =>
+      op.op === 'job.schedule' &&
+      op.writer_group === s.writer_group &&
+      op.job_id === s.value.sight_job_id,
+  );
+  const completed = ops.find(
+    (op) =>
+      op.op === 'job.complete' &&
+      op.writer_group === s.writer_group &&
+      op.job_id === prior.sight_job_id,
+  );
+  if (scheduled) {
+    const sight = scheduled.sight;
+    const plan = state.population_specs?.[key(s.plan)]?.plan;
+    const entered = ops.some(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.source_id === sight?.source_id &&
+        op.destination_id === sight?.destination_id &&
+        (op.entity_id === id || state.known_entities?.[op.entity_id]?.kind === 'body'),
+    );
+    return (
+      !!plan?.sight &&
+      !!sight &&
+      same(scheduled.job, s.plan) &&
+      sight.member_id === id &&
+      sight.slot === s.slot &&
+      sight.generation === s.value.generation &&
+      (prior.sight_job_id == null ||
+        ops.some(
+          (op) =>
+            op.op === 'job.cancel' &&
+            op.writer_group === s.writer_group &&
+            op.job_id === prior.sight_job_id &&
+            op.sight_member_id === id,
+        )) &&
+      entered
+    );
+  }
+  return (
+    s.value.sight_job_id == null && completed && state.jobs?.[completed.job_id]?.sight !== undefined
   );
 }
 
@@ -127,7 +187,17 @@ function flightSlot(state: Any, ops: Any[], s: Any) {
       selectedFlight(state, op.expected, id) &&
       (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
   );
-  const due = round && state.jobs?.[round.job_id]?.due_time;
+  const sight = s.expected?.sight_job_id && state.jobs?.[s.expected.sight_job_id];
+  const deerFlight =
+    origin?.role === 'deer' &&
+    sight?.sight &&
+    ops.some(
+      (op) =>
+        op.op === 'job.complete' &&
+        op.writer_group === s.writer_group &&
+        op.job_id === s.expected.sight_job_id,
+    );
+  const due = deerFlight ? sight.due_time : round && state.jobs?.[round.job_id]?.due_time;
   return (
     id &&
     s.expected?.member_id === id &&
@@ -138,12 +208,14 @@ function flightSlot(state: Any, ops: Any[], s: Any) {
     s.value.last_flight_at === due &&
     s.expected.last_flight_at !== due &&
     origin?.kind === 'spawned' &&
-    origin.role === 'hound' &&
+    ['hound', 'deer'].includes(origin.role) &&
     origin.member_id === id &&
     same(origin.by, s.plan) &&
     origin.slot === s.slot &&
     origin.generation === s.value.generation &&
-    state.population_specs?.[key(s.plan)]?.plan?.pack &&
+    (origin.role === 'deer'
+      ? state.population_specs?.[key(s.plan)]?.plan?.sight && s.value.sight_job_id == null
+      : state.population_specs?.[key(s.plan)]?.plan?.pack) &&
     ops.filter(
       (op) =>
         op.op === 'entity.transfer' &&
@@ -195,7 +267,7 @@ function initialized(
   const target = { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
   if (
     !i ||
-    origin.role !== 'hound' ||
+    !['hound', 'deer'].includes(origin.role) ||
     origin.member_id !== op.entity_id ||
     !spec ||
     op.writer_group !==
@@ -226,7 +298,9 @@ function provenance(state: Any, i: Any): boolean {
       same(i.origin.bundle, spec.bundle) &&
       i.origin.slot <= spec.cap &&
       same(i.definition, spec[i.origin.role]) &&
-      (i.origin.role === 'hound' ? i.origin.member_id === i.id : i.origin.member_id !== i.id)
+      (['hound', 'deer'].includes(i.origin.role)
+        ? i.origin.member_id === i.id
+        : i.origin.member_id !== i.id)
     );
   }
   const victim = state.known_entities?.[i.origin.victim_id];
@@ -244,9 +318,9 @@ function paired(parent: Any, child: Any): boolean {
     b = child?.origin;
   return (
     a?.kind === 'spawned' &&
-    a.role === 'hound' &&
+    ['hound', 'deer'].includes(a.role) &&
     b?.kind === 'spawned' &&
-    b.role === 'pelt' &&
+    ((a.role === 'hound' && b.role === 'pelt') || (a.role === 'deer' && b.role === 'hide')) &&
     parent.id === b.member_id &&
     ['by', 'bundle', 'slot', 'generation', 'occurrence_id', 'member_id'].every((field) =>
       same(a[field], b[field]),

@@ -147,7 +147,11 @@ function job(op: Any, row: Any, horizon: number): Any {
     if (
       (op.quest_instance_id === undefined) !== (op.actor_id === undefined) ||
       (op.quest_instance_id !== undefined &&
-        (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+        (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+      (op.sight !== undefined &&
+        (op.job.kind !== 'population' ||
+          op.encounter_id !== undefined ||
+          op.actor_id !== undefined))
     )
       return undefined;
     const next: Any = { job: op.job, due_time: op.due_time, status: 'pending' };
@@ -156,10 +160,18 @@ function job(op: Any, row: Any, horizon: number): Any {
       next.quest_instance_id = op.quest_instance_id;
       next.actor_id = op.actor_id;
     }
+    if (op.sight !== undefined) next.sight = op.sight;
     return next;
   }
   if (row?.status !== 'pending') return undefined;
   if (op.op === 'job.cancel')
-    return row.encounter_id === op.encounter_id ? { ...row, status: 'cancelled' } : undefined;
+    return (op.encounter_id !== undefined &&
+      op.sight_member_id === undefined &&
+      row.encounter_id === op.encounter_id) ||
+      (op.sight_member_id !== undefined &&
+        op.encounter_id === undefined &&
+        row.sight?.member_id === op.sight_member_id)
+      ? { ...row, status: 'cancelled' }
+      : undefined;
   return row.due_time <= horizon ? { ...row, status: 'completed' } : undefined;
 }

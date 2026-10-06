@@ -4,6 +4,7 @@
 // commit and GameView are in world.ts.
 import {
   DEFS,
+  type DeltaOp,
   type FuelRow,
   type FuelSpec,
   type BarrierState,
@@ -94,6 +95,7 @@ export type JobRow = {
   readonly encounter_id?: EncounterId;
   readonly quest_instance_id?: QuestInstanceId;
   readonly actor_id?: CharacterId;
+  readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
 };
 
 export { row } from './rows.ts';
@@ -128,8 +130,12 @@ export type World = {
       string,
       {
         readonly bundle: DefinitionRef;
-        readonly hound: DefinitionRef;
-        readonly pelt: DefinitionRef;
+        readonly hound?: DefinitionRef;
+        readonly pelt?: DefinitionRef;
+        readonly deer?: DefinitionRef;
+        readonly hide?: DefinitionRef;
+        readonly member_role: 'hound' | 'deer';
+        readonly loot_role: 'pelt' | 'hide';
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;

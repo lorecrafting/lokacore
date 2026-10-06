@@ -13,6 +13,7 @@ import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
+import { sightHandoffValid } from './compose_sight.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -71,7 +72,8 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  if (final && !completeBirths(ops, state)) return fault('precondition_failed', { kind: 'clock' });
+  if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
+    return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }

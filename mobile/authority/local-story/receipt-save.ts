@@ -9,6 +9,7 @@ import { dialogueSave } from './dialogue-save.ts';
 import { commerceSave } from './commerce-save.ts';
 import { deadlineSave } from './deadline-save.ts';
 import { finaleSave } from './finale-save.ts';
+import { deerSave } from './deer-save.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
@@ -25,4 +26,6 @@ export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, 
   commerceSave(world, db, meta, revision);
   deadlineSave(world, db, meta, exchanges);
   finaleSave(world, db, meta, revision);
+  if (Object.values(world.cartridge.populations ?? {}).some((p) => p.sight))
+    deerSave(world, db, meta);
 }

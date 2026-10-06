@@ -67,7 +67,7 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
   const settings = world.cartridge.world!.death!;
   const spawned = world.state.created?.[victim_id];
   const population =
-    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
+    spawned?.origin.kind === 'spawned' && ['hound', 'deer'].includes(spawned.origin.role)
       ? world.populationSpecs[key(spawned.origin.by)]
       : undefined;
   return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
@@ -75,7 +75,8 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
 
 function populationLoss(world: World, loss: Loss): DeltaOp[] {
   const spawned = world.state.created?.[loss.entity_id];
-  if (spawned?.origin.kind !== 'spawned' || spawned.origin.role !== 'hound') return [];
+  if (spawned?.origin.kind !== 'spawned' || !['hound', 'deer'].includes(spawned.origin.role))
+    return [];
   const plan = spawned.origin.by;
   const population = world.populationSpecs[key(plan)];
   const slot = spawned.origin.slot;
@@ -88,6 +89,16 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
   )
     throw new KernelError('precondition_failed');
   return [
+    ...(before.sight_job_id
+      ? [
+          {
+            op: 'job.cancel' as const,
+            writer_group: loss.writer_group,
+            job_id: before.sight_job_id,
+            sight_member_id: loss.entity_id,
+          },
+        ]
+      : []),
     {
       op: 'population.slot',
       writer_group: loss.writer_group,
@@ -97,6 +108,7 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
       value: {
         ...before,
         replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
+        ...(population.plan.sight && { sight_job_id: null }),
       },
     },
   ];

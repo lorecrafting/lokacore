@@ -26,7 +26,9 @@ export function creationValid(identity: Json, state: State): boolean {
         key(origin.bundle) === key(population.bundle) &&
         (origin.slot as number) <= (population.cap as number) &&
         key(i.definition) === key(population[origin.role as string]) &&
-        (origin.role === 'hound' ? origin.member_id === i.id : origin.member_id !== i.id)
+        (['hound', 'deer'].includes(origin.role as string)
+          ? origin.member_id === i.id
+          : origin.member_id !== i.id)
       : origin.kind === 'death' &&
         (template === 'player'
           ? victim?.kind === 'body' && origin.owner_id === victim.owner_id
@@ -58,14 +60,16 @@ export function initialPlacement(
     row === undefined &&
     group === op.writer_group &&
     (((section(state, 'known_entities')[op.destination_id] as Obj | undefined)?.kind === 'room' &&
-      !(child?.kind === 'spawned' && child.role === 'pelt') &&
+      !(child?.kind === 'spawned' && ['pelt', 'hide'].includes(child.role as string)) &&
       (child?.kind !== 'spawned' ||
         (section(state, 'population_specs')[key(child.by)] as Obj | undefined)?.home ===
           op.destination_id)) ||
       (child?.kind === 'spawned' &&
-        child.role === 'pelt' &&
+        ['pelt', 'hide'].includes(child.role as string) &&
         holder?.kind === 'spawned' &&
-        holder.role === 'hound' &&
+        ['hound', 'deer'].includes(holder.role as string) &&
+        ((holder.role === 'hound' && child.role === 'pelt') ||
+          (holder.role === 'deer' && child.role === 'hide')) &&
         op.destination_id === holder.member_id &&
         key(child.by) === key(holder.by) &&
         key(child.bundle) === key(holder.bundle) &&
@@ -84,10 +88,12 @@ export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
       op.op === 'entity.create' && op.identity.origin.kind === 'spawned',
   );
   const hounds = made.filter(
-    (op) => op.identity.origin.kind === 'spawned' && op.identity.origin.role === 'hound',
+    (op) =>
+      op.identity.origin.kind === 'spawned' && ['hound', 'deer'].includes(op.identity.origin.role),
   );
   const pelts = made.filter(
-    (op) => op.identity.origin.kind === 'spawned' && op.identity.origin.role === 'pelt',
+    (op) =>
+      op.identity.origin.kind === 'spawned' && ['pelt', 'hide'].includes(op.identity.origin.role),
   );
   const slots = ops.filter(
     (op): op is Extract<DeltaOp, { op: 'population.slot' }> => op.op === 'population.slot',
@@ -151,7 +157,76 @@ function birthSlotsMatch(
           h.identity.origin.slot === s.slot &&
           h.identity.origin.generation === s.value.generation,
       ) ||
-      flightSlot(s, ops, state),
+      flightSlot(s, ops, state) ||
+      sightSlot(s, ops, state),
+  );
+}
+
+function sightSlot(
+  s: Extract<DeltaOp, { op: 'population.slot' }>,
+  ops: readonly DeltaOp[],
+  state: State,
+) {
+  const prior = s.expected;
+  const id = s.value.member_id;
+  if (
+    !prior ||
+    !id ||
+    prior.member_id !== id ||
+    prior.generation !== s.value.generation ||
+    s.value.replacement_due !== null ||
+    s.value.last_flight_at !== prior.last_flight_at ||
+    s.value.sight_job_id === prior.sight_job_id
+  )
+    return false;
+  const scheduled = ops.find(
+    (op) =>
+      op.op === 'job.schedule' &&
+      op.writer_group === s.writer_group &&
+      op.job_id === s.value.sight_job_id,
+  );
+  const completed = ops.find(
+    (op) =>
+      op.op === 'job.complete' &&
+      op.writer_group === s.writer_group &&
+      op.job_id === prior?.sight_job_id,
+  );
+  if (scheduled?.op === 'job.schedule') {
+    const sight = scheduled.sight;
+    const plan = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)]
+      ?.plan as Obj | undefined;
+    const entered = ops.some(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.source_id === sight?.source_id &&
+        op.destination_id === sight?.destination_id &&
+        (op.entity_id === id ||
+          ((state.known_entities ?? {}) as Record<string, Obj>)[op.entity_id]?.kind === 'body'),
+    );
+    const old = prior.sight_job_id;
+    return (
+      !!plan?.sight &&
+      !!sight &&
+      key(scheduled.job) === key(s.plan as Json) &&
+      sight.member_id === id &&
+      sight.slot === s.slot &&
+      sight.generation === s.value.generation &&
+      (old == null ||
+        ops.some(
+          (op) =>
+            op.op === 'job.cancel' &&
+            op.writer_group === s.writer_group &&
+            op.job_id === old &&
+            op.sight_member_id === id,
+        )) &&
+      entered
+    );
+  }
+  return (
+    s.value.sight_job_id == null &&
+    completed?.op === 'job.complete' &&
+    ((state.jobs ?? {}) as Record<string, Obj>)[completed.job_id]?.sight !== undefined
   );
 }
 
@@ -165,7 +240,18 @@ function flightSlot(
   const origin =
     id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
   const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
-  const due = flightDue(ops, s.writer_group, id!, state);
+  const sight =
+    prior?.sight_job_id && ((state.jobs ?? {}) as Record<string, Obj>)[prior.sight_job_id];
+  const deerFlight =
+    origin?.role === 'deer' &&
+    sight?.sight &&
+    ops.some(
+      (op) =>
+        op.op === 'job.complete' &&
+        op.writer_group === s.writer_group &&
+        op.job_id === prior?.sight_job_id,
+    );
+  const due = deerFlight ? sight.due_time : flightDue(ops, s.writer_group, id!, state);
   return (
     id !== null &&
     prior?.member_id === id &&
@@ -176,12 +262,14 @@ function flightSlot(
     s.value.last_flight_at === due &&
     prior.last_flight_at !== due &&
     origin?.kind === 'spawned' &&
-    origin.role === 'hound' &&
+    ['hound', 'deer'].includes(origin.role as string) &&
     origin.member_id === id &&
     key(origin.by) === key(s.plan as Json) &&
     origin.slot === s.slot &&
     origin.generation === s.value.generation &&
-    (spec?.plan as Obj | undefined)?.pack !== undefined &&
+    (origin.role === 'deer'
+      ? !!(spec?.plan as Obj | undefined)?.sight && s.value.sight_job_id == null
+      : (spec?.plan as Obj | undefined)?.pack !== undefined) &&
     ops.filter(
       (op) =>
         op.op === 'entity.transfer' &&

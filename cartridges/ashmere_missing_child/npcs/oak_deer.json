@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "deer",
+    "oak_deer"
+  ],
+  "short": "npc.oak_deer.short",
+  "room_line": "npc.oak_deer.room",
+  "description": "npc.oak_deer.description",
+  "room": "drowned_oak",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

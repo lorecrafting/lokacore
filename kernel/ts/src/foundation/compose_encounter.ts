@@ -221,7 +221,11 @@ export function composeJob(
     if (
       (op.quest_instance_id === undefined) !== (op.actor_id === undefined) ||
       (op.quest_instance_id !== undefined &&
-        (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+        (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+      (op.sight !== undefined &&
+        (op.job.kind !== 'population' ||
+          op.encounter_id !== undefined ||
+          op.actor_id !== undefined))
     )
       return failed;
     return {
@@ -233,12 +237,18 @@ export function composeJob(
         ...(op.quest_instance_id === undefined
           ? {}
           : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
+        ...(op.sight === undefined ? {} : { sight: op.sight }),
       },
     };
   }
   if (row?.status !== 'pending') return failed;
   if (op.op === 'job.cancel')
-    return row.encounter_id === op.encounter_id
+    return (op.encounter_id !== undefined &&
+      op.sight_member_id === undefined &&
+      row.encounter_id === op.encounter_id) ||
+      (op.sight_member_id !== undefined &&
+        op.encounter_id === undefined &&
+        (row.sight as Row | undefined)?.member_id === op.sight_member_id)
       ? { value: { ...row, status: 'cancelled' } }
       : failed;
   return (row.due_time as number) <= horizon ? { value: { ...row, status: 'completed' } } : failed;
