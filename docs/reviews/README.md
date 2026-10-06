@@ -2,6 +2,8 @@
 
 - [C4 over published D4 integrated primary review](2026-10-06-c4-d4-integrated-primary-review.md): exact source `749a1705`, frozen evidence `d4597c4c`, independent APPROVE, no open primary finding. v032/API1.28/hash/all 167 IDs, current-artifact SQLite flight/retry, browser Combat roster red/green, 23/23 schema mutants, 368-ExUnit full gate, 503-sequence simulator and 31 evidence hashes verified.
 - [C4 portable foundation second opinion](2026-10-06-c4-foundation-second-review.md): initial provisional source `252eb456` CHANGES REQUIRED; corrected source `251b0bff`, evidence `7b38aa14`, scoped APPROVE closes C4-A1/A2. Independent 31 TS/SQLite and 13 Elixir checks pass; malformed final proposals refuse, selected-flight and dead/absent cursor repair agree across twins, all 12 evidence hashes verify. D1 integration/pins/full gate remain pending.
+- [Room interactibles specification](2026-10-06-room-interactables-review.md): exact source `0cc7b7cd` CHANGES REQUIRED; scoped fix `a4338896` and final guide clarification `27a5e929` APPROVE. Docs-only review.
+
 - [D9 dependency correction](2026-10-06-d9-dependency-correction-review.md): exact planning head `0a3673f9`, independent APPROVE; C4/D6 full-scope blockers, underwater-only D6 recovery and the separately pending Study barrier/retrieval rule align across plan, brief and Beads. Docs/export/graph checks pass; source remains gated.
 
 - [Foreign-world simulator envelope](2026-10-06-sim-foreign-world-envelope-review.md): source `381e1f61`, evidence `9731df92`, fresh independent **APPROVE**; no findings. Published seed71 false positive independently reproduced; fixed 200-seed workload, real Maud offer, three oracle mutants, fault/wrong-code controls and all ten evidence hashes verified.
