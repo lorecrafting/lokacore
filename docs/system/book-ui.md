@@ -610,6 +610,27 @@ targets revalidate after due settlement; a clock redraw cannot resurrect a dead,
 departed or replaced member. Prove real helper attacks, flight, whole-pack Flee,
 lethal loss/owned recovery and exact loot through Book; native work remains paused.
 
+## D1 ferry and Sedge details
+
+World opens the present boarding detail at Boathouse or Fen Isle Landing. Its
+canonical detail page places confirmed history before the current **Board** or
+**Return** offer, showing the exact fare or an actual owned-corpse waiver and
+unavailable reason from the shared transport admission. The control captures
+the endpoint, route and base quote; the authority derives destination and
+effective charge. Accepted crossing appends one bound result,
+returns to World in the destination and refreshes confirmed money, room and
+follower state. Pending, stale and refused attempts claim no crossing or charge;
+double tap/replay yields one move. The ordinary Book back/Leave path remains open.
+
+Sedge's present NPC detail offers her direct **Learn swim — free** dialogue choice
+before S27. It shows acquired and current qualification separately, and a
+confirmed grant once; repeat interaction cannot promise a new grant. History
+belongs to the original Sedge choice and survives cold reopen. The existing
+World, NPC detail, dialogue, Character skill and detail stack patterns suffice.
+The browser Book route covers boarding, lesson, exploration, return, refresh and
+safe corpse recovery. Browser refresh is separate from real SQLite fault proof;
+native builds/sessions remain paused.
+
 ## B8 Maud and bed details
 
 **Implemented locally, publication pending.** Original Maud's detail follows the canonical
@@ -688,3 +709,48 @@ uses the original invocation and context and shows save not confirmed. Confirmed
 final acknowledgement displays the once-only memory and truthful resolved S10
 journal, also after lost reply/replay/reopen. There is no optimistic dream_seen,
 clock pause, body/map switch, second event transcript or presenter gameplay writer.
+
+## D4 home details and carried-food Eat
+
+**Selected plan; not implemented.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
+use ordinary exits, inspectable details and NPC dialogue. Orchard trees expose
+Forage only through the existing exact Harvest offer; Carrying's actual apple
+detail exposes its declared Eat action and capped MV benefit only when admitted.
+No apple or benefit appears from menu opening or pending save. Confirmed Eat
+removes that identity from Carrying/load, closes the consumed item/Carrying route
+and returns to World. Route its confirmed narration to the existing World log,
+not to the now-inaccessible item history: `eaten` overrides the submitted item
+page as a live result destination. Resolve narration by the reply's exact
+`command_id` even though Eat emits no event; never substitute the latest unrelated
+receipt. Append the committed line once, deduplicating by that command ID across
+lost acknowledgement and exact replay. Pending/refused/faulted Eat adds no success
+line or forced World return; full-MV or stale-custody refusal redraws saved truth.
+Depleted orchard feedback reflects actual custody, including ordinary Take/Drop.
+
+Cold reopen with Eat as the latest saved narratable result restores that exact
+receipt line in the World log after the ordinary chapter entry, while the apple
+remains absent. Validate its original command/actor/item/terminal transfer and
+narration binding through [Eat receipt recovery](save.md#d4-finite-food-and-terminal-custody-recovery).
+The recovered record deliberately has no `detail_id`; never reopen a consumed
+item page or reroute to orchard trees, another item or NPC. Replay restores this
+same World result without another log append, benefit or custody transition.
+Use existing receipt selection and log lifetime; no new transcript/table or
+persistent page route is introduced.
+
+Refresh/reopen renders truthful cottage/cot and Green variants without moving
+Elspeth or Wren. Scheduled absence never becomes a required wait. Browser proof
+traverses all three additions, meets Gareth/Ada on controlled schedule states,
+Forages, stores/retrieves, Eats, exhausts stock and refreshes after each boundary.
+Use an isolated current-build browser save under the web-first policy; Node and
+real-SQLite proof are separate. Native/owner-save proof remains paused.
+
+## D5 Deep Fen detail pages
+
+[D5](mechanics.md#d5-dry-deep-fen-exploration-selected-contract) uses the existing
+World exits, adjacent sight, NPC details and [notice-detail flow](#notice-board-details).
+The ward stone opens its exact ordinary Read offer; only confirmed narration
+appears in its detail history, and local Back returns to World. Examine/Read
+never claims message custody, topic learning or child return credit. Landscape
+text describes dry footing and natural den light, without a bottom, far Scan,
+fishing, drift or nest action that the actual projection cannot offer. The
+original separated Wren exposes ordinary Talk/Rejoin in the den without gear.

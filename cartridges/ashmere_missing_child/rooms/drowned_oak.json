@@ -2,7 +2,17 @@
   "title": "room.drowned_oak.title",
   "description": "room.drowned_oak.description",
   "exits": {
-    "north": { "to": "willow_shade" },
-    "east": { "to": "mire_crossing" }
+    "north": {
+      "to": "willow_shade"
+    },
+    "east": {
+      "to": "mire_crossing"
+    },
+    "up": {
+      "to": "oak_branches"
+    },
+    "south": {
+      "to": "black_pool"
+    }
   }
 }

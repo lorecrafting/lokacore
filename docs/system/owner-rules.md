@@ -8,10 +8,17 @@ and not repeated here.
 
 ## Product and scope
 
+- D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
+
+- D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
+  waiver; Sedge teaches swim immediately for free while the Chapel remains the
+  death destination ([PM adoption](../decisions/pm-decision-d1-ferry-isle-2026-10-05.md)).
+
 - B9 credits only the first accepted paid Inn Rooms Rest, preserves a closable anchored dream/branch, and commits S10 plus its once-only local memory only on final acknowledgement ([PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)).
 
 - B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).
 
+- D5 adds five dry reciprocal Deep Fen rooms, a naturally lit den for gear-free original-Wren Rejoin and fixed ward-stone Read without topic/Q2 credit; preserve the sole message and defer bottom access to D6 ([PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md)).
 - D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
 
 - B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
@@ -184,6 +191,8 @@ and not repeated here.
   [owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md); the first Realm activity, unchanged-cartridge hosting and formal ADR-074 route remain open.
 
 ## Process
+
+- Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - Web stays active through game completion: C2 has focused fresh Book proof, browser fatal/Restart remains due by the E3 browser walk, and the preserved terminal save has twice-reopened evidence after the separate Web fix; native verification follows the existing pause ([record](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)).
 

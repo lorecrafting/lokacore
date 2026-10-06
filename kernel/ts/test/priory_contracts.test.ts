@@ -11,31 +11,31 @@ import { bundle, ref, ids, fresh } from './priory_fixture.ts';
 test('item writing, topic refs, text and unique player Boolean mappings fail closed', () => {
   for (const mutate of [
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.26:item/ward_of_the_fen'].readable.topic = ref(
+      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.topic = ref(
         'topic',
         'missing',
       );
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.26:item/ward_of_the_fen'].readable.topic = ref(
+      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.topic = ref(
         'fact',
         'topic_ward_known',
       );
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.26:item/ward_of_the_fen'].readable.text = 'missing';
+      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.text = 'missing';
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.26:item/ward_of_the_fen'].readable.label = 'missing';
+      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.label = 'missing';
     },
     (c: any) => {
-      delete c.items['ashmere_missing_child@0.0.26:item/ward_of_the_fen'].mass_grams;
+      delete c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].mass_grams;
     },
     (c: any) => {
-      c.facts['ashmere_missing_child@0.0.26:fact/topic_bell_known'].scopes = ['instance'];
+      c.facts['ashmere_missing_child@0.0.27:fact/topic_bell_known'].scopes = ['instance'];
     },
     (c: any) => {
-      c.facts['ashmere_missing_child@0.0.26:fact/topic_bell_known'].value_type = {
+      c.facts['ashmere_missing_child@0.0.27:fact/topic_bell_known'].value_type = {
         type: 'int',
         minimum: 0,
         maximum: 1,
@@ -43,7 +43,7 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
       };
     },
     (c: any) => {
-      c.topics['ashmere_missing_child@0.0.26:topic/bell'].fact = ref('fact', 'topic_ward_known');
+      c.topics['ashmere_missing_child@0.0.27:topic/bell'].fact = ref('fact', 'topic_ward_known');
     },
     (c: any) => {
       c.manifest.requires.kernel_api.at_least = '1.23';
@@ -82,7 +82,7 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
 // Break: a loaded Read alias loses its command/target binding or rejects an open held child.
 test('loaded consult alias projects the Read command and resolves the exact nested book invocation', () => {
   const c = structuredClone(bundle.value);
-  c.actions['ashmere_missing_child@0.0.26:action/consult'] = {
+  c.actions['ashmere_missing_child@0.0.27:action/consult'] = {
     key: 'consult',
     command: 'read',
     label: 'actions.read_book',

@@ -1,0 +1,9 @@
+{
+  "title": "room.fishing_shallows.title",
+  "description": "room.fishing_shallows.description",
+  "exits": {
+    "north": {
+      "to": "black_pool"
+    }
+  }
+}

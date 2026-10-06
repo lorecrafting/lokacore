@@ -1,6 +1,9 @@
 # Independent reviews
 
 - [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`, evidence `d5c2ea2f0da85f6474f281f10e2145c3f25368d8`, independent CHANGES REQUIRED; D2-P1 pending Read remount confirms history without recovering the actual Book route.
+- [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
+
+- [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.
 
 - [C2 preserved terminal reopen evidence](2026-10-05-c2-terminal-reopen-evidence-review.md): exact local docs/evidence head `e29014d54d7e3534838d77ba650301c3f19fb7f7`, independent APPROVE; same preserved terminal save opens twice after published PR213, historical timeout retained, browser fatal/Restart still due by E3; no findings.
 
@@ -363,3 +366,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
 
 - [D2 public Priory books save/protocol opinion](2026-10-05-d2-priory-books-save-second-review.md): exact source `de1ea634`, independent CHANGES REQUIRED; D2-S1 readable-only history red-control gap. Sixteen focused TS/Book/SQLite and five compiler cases pass; existing 497-test mobile suite survives gate removal, controlled forged-history cases fail and restore green. Provisional v026 pin/121 IDs and evidence hashes verified.
+- [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; scoped fix round 1 `99f757a0`, APPROVE, RKT-01 closed by retained verbatim owner statement and labeled interpretation.
+
+- [D5 dry Deep Fen independent planning review](2026-10-05-d5-deep-fen-plan-review.md): exact planning head `2b0d5a6b29fdaa1573525f1dd404dc03d03c815c`, APPROVE; naturally lit original-Wren recovery, literal reciprocal route, unique message, ordinary no-credit Read and D2/B6 cross-reference verified. No findings; source and gameplay proof remain ahead.
+- [D4 homes, finite apples and first held-food Eat plan](2026-10-05-d4-homes-orchard-plan-review.md): initial planning head `7779c0fe` CHANGES REQUIRED; scoped fix `f376e317` APPROVE, D4-P1 closed by explicit World Eat confirmation and exact receipt-bound live/replay/reopen recovery after the apple disappears. Terminal custody, finite Harvest, cartridge numbers, child truth, schedules and null source proof checked; docs-only, no open findings.
+
+- [Chapter 1 Beads Rust expansion](2026-10-06-beads-33-review.md): independent initial CHANGES REQUIRED found a reserved Wisp ID silently omitted from Git JSONL; safe ID, complete-export guard and red controls fixed it. Scoped recheck APPROVE; 33 tasks and dependencies verified from a fresh checkout.
+- [D5 dry Deep Fen independent primary source review](2026-10-05-d5-deep-fen-primary-review.md): exact local head `550d0027`, source `b680e435`, APPROVE; reciprocal dry rooms, naturally lit original-Wren recovery, fixed no-credit stone Read and protected-message identity verified. Independent five-test baseline/restoration pass; reciprocal-edge and darkness mutants fail. Provisional source only; browser proof and integrated pins pending. No findings.

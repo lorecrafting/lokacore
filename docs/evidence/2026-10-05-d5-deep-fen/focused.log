@@ -1,0 +1,17 @@
+(node:93181) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ fresh dry exploration traverses every reciprocal edge and reopens all five new rooms (974.529792ms)
+✔ D5 movement and stone Read reconcile committed and absent COMMIT outcomes and replay exactly (499.130042ms)
+✔ actual fatal separation in the den reopens and permits gear-free original-Wren Rejoin and rescue (446.550583ms)
+✔ fixed stone preserves original-message custody before and after stays and preserves lost (370.976833ms)
+✔ the current chapter refuses a lookalike item substituted into the original-message role (87.003583ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2790.423292

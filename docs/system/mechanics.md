@@ -1182,6 +1182,41 @@ ordinary prerequisites hold, not an unconditional free escape. Outside combat,
 all hounds are passive, so gear-free corpse recovery and immediate deliberate
 retry of a surviving hound need no time gate. No behavior framework is required.
 
+## D1 paid ferry and Sedge lesson (selected contract)
+
+The first chapter ferry is an unattended rope ferry operated from an inspectable
+boarding detail at the Boathouse and Fen Isle Landing. A successful outbound
+crossing moves the living standing actor body from Boathouse to Fen Isle Landing
+once, charges **2 pennies** to Mother Sedge's declared balance, and carries a
+valid co-present following Wren at no extra charge. The return moves body and
+eligible follower from Fen Isle Landing to Boathouse for **0 pennies**. This is a
+transport action, not an ordinary compass exit or a B8 `service@1` benefit:
+that published command requires a co-located living NPC and its closed benefit
+union has no movement case. The transport admission binds the exact endpoint,
+destination, quoted fare and declared recipient. It reuses B3's exact two-party
+resource transfer for the positive fare and the existing movement/escort transfer
+consequences in one writer group. No MV charge or time jump is added; normal
+authority elapsed preflight still applies. Crossing is not Elspeth rescue credit.
+
+The outbound fare is waived only when the actor owns an actual nonempty corpse
+on the isle. Its current room custody and contained roots, including nested
+descendants, are checked through the existing corpse/containment owner. An empty
+corpse, someone else's corpse, a mainland corpse or client assertion cannot waive
+payment. The recovery passage remains available at zero balance and with no
+gear. A refused, stale or blocked crossing moves and charges nothing. Exact
+receipt replay moves and charges once; unknown commits fence input until resolved.
+Known exits and owned-corpse visibility in a dark Hut Loft obey B4; the isle
+route must permit gear-free recovery of actual belongings from the Chapel Nave
+death return. D1 does not move the shrine destination to Isle Shrine.
+
+Mother Sedge stays reachable in Isle Hut at every hour. Her co-located, free
+**Learn swim** dialogue choice uses C1's reserved `skills@1` acquisition owner.
+It grants learned swim once, refuses an already learned new choice without
+grant or charge, and survives death/reopen. Learning does not itself assert
+current water qualification or open D6 bottom rooms. S27 may acknowledge this
+existing lesson; it cannot gate it. No quest, discount, herbalism lesson, token,
+schedule or island enemy is part of D1.
+
 ## B8 Maud's immediate services (selected contract)
 
 **Implemented locally, publication pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
@@ -1323,3 +1358,69 @@ Boolean is the durable local memory `player.dream_seen`; no second export marker
 `prologue_completed` point/report, account transfer or numerical reward is added.
 Exact accepted replay retains its receipt before current-state admission; new
 stale controls cannot skip a beat, change the branch or repeat the consequence.
+
+## D4 homes, finite apples and Eat (selected contract)
+
+**Planning only; not installed.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
+selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
+The orchard detail reuses B5 Harvest over three actual authored item identities.
+Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
+resource node, random roll, regrowth job or seasonal availability gate is added.
+Gareth and Ada use ordinary schedules and flavor dialogue, with no repair service
+or required waiting. Elspeth remains at Ferry Landing. Cottage and Green variants
+read the exact committed child enum; they do not move or create Wren, complete
+an escort, write a child outcome or claim that Wren is in the cottage.
+
+D4 is the first held-food consumer: B8 supplies resource recovery semantics,
+not an installed Eat verb. Add the narrow `food@1` capability with `eat
+{actor_id, item_id}` and accepted `eaten {item_id}`. Admission requires the exact
+opted edible item directly in the living actor's body and positive headroom in
+its declared recovery pool. An unknown item is `not_found`, a nonfood target is
+`invalid_target`, indirect/foreign/room/spent custody is `not_owned`, and no
+headroom is `invalid_state`. Existing scene/combat admission wins. At the admitted
+clock, settle recovery and use checked arithmetic to cap the authored positive
+increment at the current maximum; atomically transfer the same item to terminal consumed custody and
+adjust the pool in one writer group. D4 adds no currency, time skip, RNG, hunger, HP
+healing, acquisition event or new consumable issuance.
+
+Ordinary transfer alone cannot express consumption: existing destinations retain
+recoverable custody and permit a later transfer back. There is no installed item
+removal or spent-item pattern; erasing an authored identity would also weaken
+identity/receipt validation. Add terminal custody rather than weakening the
+existing one-container invariant. The missing primitive is one reserved
+roomless consumed holder per food-enabled world, minted after existing slot
+holders in the fresh allocation order and recorded as known kind `consumed`.
+It has no body/room parent, capacity limit, public entity definition or actions.
+Existing `entity.transfer` retains each food identity and one-container invariant;
+food alone admits direct-body to consumed transfer. No transfer out is lawful,
+and nonedible items cannot enter. Containment queries terminate there, deriving
+no inventory, room presence, reach or carried mass. Do not implement this as an
+invisible room, NPC, mutable narrative fact, deleted item or second stock ledger.
+The holder metadata and terminal transition invariant are new contracts; extend
+both foundation validators and their fixture/differential proof where applicable.
+Projection and execution share one budgeted pure admission query, including exact
+keyed-action admission. Ordinary uneaten food custody and death remain unchanged.
+
+## D5 dry Deep Fen exploration (selected contract)
+
+Selected under the [D5 PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
+Five optional rooms reuse ordinary reciprocal movement, detail Read and Q2 escort.
+[Cartridge authoring](cartridge.md#d5-deep-fen-route-and-details) declares the exact
+route. Every new room is dry traversable ground and naturally lit at all hours,
+including the shallow fox den; none declares `dark_description`. No swim, tide,
+light, time, topic, bell, faction or quest gate applies. The existing B4 dark-room
+rules and B6 glow exception remain unchanged elsewhere.
+
+A following original Wren travels on these ordinary edges. Fatal player death
+leaves that same Wren separated in the actual death room; the gear-free shrine
+route must expose ordinary Talk/Rejoin there, then permit the existing Elspeth
+rescue. A reachable owned corpse alone does not prove a reachable Wren: darkness
+would conceal the ordinary NPC even though B4 reveals the corpse. No new NPC
+visibility exception, escort teleport, replacement or schedule is selected.
+
+The ward stone is a fixed ordinary readable detail: Read narrates its authored
+inscription only and Examine describes the stone. Neither grants a Ward/Bell
+topic, Q2 credit, branch choice, relationship or item. The original protected
+`vesper_message` remains the sole Q2 message with its existing custody, transfer
+and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
+prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.

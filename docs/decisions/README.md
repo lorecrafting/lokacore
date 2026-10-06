@@ -32,6 +32,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.
+- [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
+- [Review knowledge trail](owner-decision-review-knowledge-trail-2026-10-05.md): retain findings and dispositions; link promoted spec rules, lessons, deterministic checks and deferred tasks to their evidence.
+
 - [C2 staged browser proof](owner-decision-c2-staged-browser-proof-2026-10-05.md): focused fresh Book route and cold reopen, distinct real-host fatal recovery proof, browser fatal/Restart due by E3 and terminal Web timeout open pending a separate fix.
 
 - [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
@@ -235,3 +239,6 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [D2 public Priory and held books](pm-decision-d2-priory-books-2026-10-05.md): ten public rooms, exact held/open-container Read, idempotent Ward/Bell and ordinary custody recovery.
 - [C4 hound response, pack help and flight](pm-decision-c4-hound-behavior-2026-10-05.md): deliberate Attack admission, one rotating enemy opportunity, same-clock wander protection and conserved wounded retreat.
+
+- [D5 dry Deep Fen PM decision](pm-decision-d5-deep-fen-2026-10-05.md): five safe reciprocal rooms, naturally lit den for actual Wren Rejoin and fixed no-credit ward Read; no second message, far Scan or bottom before D6.
+- [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.

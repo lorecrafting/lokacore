@@ -854,7 +854,9 @@ His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
 Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
 self-luminous Seek marker and discovered wisp have explicit visibility metadata;
 other details have no exemption. Old Causeway's carved fox is flavor in B6 and
-must not silently grant ward before the riddle; D2/D5 own later discoveries.
+must not silently grant ward before the riddle;
+[D2 held books](#d2-public-priory-and-book-authoring) own the later Ward grant.
+[D5's stone](#d5-deep-fen-route-and-details) remains descriptive.
 Bind one actual authored wisp, resident at every hour, not a timed population.
 
 | Chapter setting | Selected value |
@@ -957,6 +959,36 @@ without crossing the strict below25% live flight threshold; misses/defenses reta
 their actual resolver semantics. No weapon/loot is required by the main story.
 C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
 and intervening shared release edits are reviewed and independently re-pinned.
+
+## D1 ferry and Isle declarations
+
+Add exactly six chapter rooms: Boathouse, Fen Isle Landing, Isle Hut, Hut Loft,
+Herb Garden and Isle Shrine. Ferry Landing west/east connects to Boathouse;
+Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
+Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
+Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
+transport endpoints, never as a free compass exit. Do not expose the future
+Boathouse–Old Mill edge. Isle Shrine is descriptive sanctuary/foreshadow;
+`chapel_nave` remains the actual death shrine.
+
+The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
+the exact destination and Mother Sedge as the conserved fare recipient. Sedge is
+in Isle Hut at all hours and has an explicit bounded pennies balance to receive
+payment. Source definitions own fares, room links, text and balances. D1 adds
+`swim` to the C1 skill definitions with a vacuous `all: []` qualification
+policy: D1 has no water action or new attribute to qualify. Sedge's direct
+free dialogue choice uses `skill.acquire` and does not issue D6 water access
+early. D6 must re-pin its provisional CON threshold against the installed
+attribute vocabulary before implementing underwater admission. The optional
+dark Hut Loft retains B4's
+known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
+herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
+
+Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
+wrong fare/recipient reference, unbounded recipient balance, forged transport
+action, or ordinary exit that bypasses the declared ferry. The final bundled
+release/API/hash/ID answers must be independently derived after the actual
+source predecessor lands; D1 planning assigns no successor values.
 
 ## B8 Maud's service declarations
 
@@ -1086,3 +1118,86 @@ cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
 Future integrated release/API/hash/allocated IDs remain null until B8 source and
 review merge and independent current answers are derived.
+
+## D4 homes and orchard declarations
+
+**Selected plan; source pending.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+uses these three public reciprocal additions from archived
+[00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
+
+| Existing/new room and exit | Reciprocal destination and exit |
+|---|---|
+| Village Green / west | Smithy / east |
+| Smithy / west | Orchard / east |
+| North Gate / west | Elspeth Cottage / east |
+
+Forge/anvil/tools, apple trees/beehive and cot/hearth are inspectable details.
+The forge is cold; no repair, honey, property, seasonal system or extra quest is
+advertised. Cottage adds no lantern: B4's actual torch/oil source remains the
+only adopted light supply. Elspeth's Q1/Q2 conversations stay at Ferry Landing.
+Gareth follows smithy 08–18, Drowned Lantern 18–22, smithy 22–08; Ada follows
+orchard 07–17 and cottage 17–07. At the current 64800 dusk start, initialize
+Gareth at Drowned Lantern and Ada at the cottage, then use existing next-hour
+schedule jobs. Neither actor controls orchard food or a required story action.
+
+Author `apple_01`, `apple_02`, `apple_03` initially directly in orchard, each
+**100g**, noncontainer, nonwearable and edible. These three apples are the only
+opted food in this slice; B8 meals remain immediate services. The trees' Harvest label is
+**Forage** and binds exactly these three IDs; it transfers one lowest eligible
+EntityId as B5 does. Ordinary Take shares their supply. Each apple declares
+`edible {resource: mv, amount: 6, label: action.eat,
+narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
+partial fruit. Full MV refuses without consuming. No restock or promised future
+nutrition model is required; the finite B8 meal remains a separate optional supply.
+
+Compiler and loader require `food@1` plus the successor API for edible fields,
+local declared recovery-pool references, positive safe-integer amount and valid
+catalog keys, and reject edible containers, equipment, fuel or liquid vessels.
+Expand source short references at the real new field. Edibility belongs to an
+immutable item definition; the terminal holder is generated metadata, never
+cartridge-authored. Successor release/API/hash/IDs remain null until source exists.
+
+Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
+Green's installed terminal variants. Missing means the search is unfinished;
+rescued acknowledges return to Elspeth at the landing; stays acknowledges the
+living child's choice with Vesper and delivered message; lost acknowledges grief.
+Cot prose never asserts current bodily presence. Q2/A1 alone own outcome/location:
+rescued Wren remains at Ferry Landing, stays Wren remains at Fox Hollow, and lost
+neither deletes nor relocates the original Fox Hollow actor. Missing can include
+following/separated escort intermediates anywhere on the route. Do not teleport
+Wren on cottage arrival or turn an unfinished escort into a returned child.
+
+## D5 Deep Fen route and details
+
+The [D5 contract](mechanics.md#d5-dry-deep-fen-exploration-selected-contract)
+selects these additions; preserve all installed Oak/Hollow/Mire/B6 exits.
+
+| Room / outward direction | Neighbor / return direction |
+|---|---|
+| Drowned Oak / up | Oak Branches / down |
+| Oak Branches / up | Oak Crown / down |
+| Drowned Oak / south | Black Pool / north |
+| Black Pool / east | Fox Hollow / west |
+| Black Pool / south | Fishing Shallows / north |
+| Fox Hollow / down | Fox Den Deep / up |
+
+New keys are `oak_branches`, `oak_crown`, `black_pool`, `fox_den_deep`,
+`fishing_shallows`. Pool and shallows mean the dry bank and reed edge; prose makes
+that footing explicit. The shallow den admits natural light at all hours and has
+no dark metadata. This deliberately supersedes archived 00a §§2/5/8/11 darkness,
+Vesper relocation, duplicate readable message, stone topic, far Scan, crow nest
+and next-day water-drift candidates for D5. Wren/Vesper retain their original
+instances and installed locations except for existing legal Wren escort travel.
+
+Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward_stone`
+(the existing target normalization resolves player words `ward stone` to that
+last key), a noun title, description and ordinary readable label/text/title. Its fixed
+inscription describes the worn carving without asserting who holds the message,
+which return was selected or what Wren has done. Use the installed Fox Hollow
+readable detail shape, not an item-readable/topic extension or conditional page.
+Other landscape details are descriptive and advertise only projected actions.
+Do not add a bottom exit, room placeholder, underwater loot, fishing operation,
+crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
+D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
+current location. Release/hash/IDs advance independently when source exists;
+this plan assigns no successor pin or API increment.

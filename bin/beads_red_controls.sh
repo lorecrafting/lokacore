@@ -1,0 +1,53 @@
+#!/bin/sh
+# A bad exported path must fail the same checker used by the hook and CI.
+set -eu
+case_file=$(mktemp)
+trap 'rm -f "$case_file"' EXIT
+printf '%s\n' '{"id":"loka-example","source_repo_path":null,"description":"docs/ROADMAP.md"}' > "$case_file"
+python3 bin/check_beads_export.py "$case_file"
+printf '%s\n' '{"id":"loka-example","source_repo_path":"relative/path"}' > "$case_file"
+if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
+  echo 'Beads path control failed: source_repo_path was accepted' >&2
+  exit 1
+fi
+printf '%s\n' '{"id":"loka-example","source_repo_path":null,"description":"/Users/example/secret"}' > "$case_file"
+if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
+  echo 'Beads path control failed: machine path was accepted' >&2
+  exit 1
+fi
+python3 bin/check_beads_export.py
+python3 - "$case_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
+rows = [row for row in rows if not row['title'].startswith('B6 ')]
+Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
+PY
+if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
+  echo 'Beads completeness control failed: a missing slice was accepted' >&2
+  exit 1
+fi
+python3 - "$case_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
+old = next(row['id'] for row in rows if row['title'].startswith('B6 '))
+new = old.replace('-marsh-riddle-', '-wisp-')
+for row in rows:
+    if row['id'] == old:
+        row['id'] = new
+    for dependency in row.get('dependencies', []):
+        for key in ('issue_id', 'depends_on_id'):
+            if dependency[key] == old:
+                dependency[key] = new
+Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
+PY
+if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
+  echo 'Beads ID control failed: a reserved wisp ID was accepted' >&2
+  exit 1
+fi
+echo 'ok   beads: local paths, missing slices and reserved IDs refused'
