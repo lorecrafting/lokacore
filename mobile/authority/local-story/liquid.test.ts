@@ -20,7 +20,7 @@ import { openStory } from './authority.ts';
 const production = read('protocol/fixtures/missing_child_b7_hash.json');
 const water = {
   cartridge_id: 'ashmere_missing_child',
-  cartridge_version: '0.0.21',
+  cartridge_version: production.value.manifest.version,
   kind: 'liquid',
   key: 'water',
 } as DefinitionRef;
@@ -54,7 +54,7 @@ function setup(bundle = production, path = ':memory:') {
   let story = open(),
     ordinal = 0;
   const entity = (kind: string, key: string) =>
-    fresh.entityIds[`ashmere_missing_child@0.0.21:${kind}/${key}`];
+    fresh.entityIds[`ashmere_missing_child@0.0.22:${kind}/${key}`];
   const attempt = (action_key: string, target_ids: string[] = [], input: object = {}) => ({
     invocation_id: `cccccccc-0000-4000-8000-${String(++ordinal).padStart(12, '0')}`,
     actor_id: fresh.character,
@@ -289,12 +289,12 @@ test('Pour failed COMMIT and lost acknowledgement fence liquid then reconcile an
   for (const kind of ['failed', 'lost'] as const) {
     const a = setup(
       controlledBundle((value) => {
-        value.items['ashmere_missing_child@0.0.21:item/waterskin'].vessel = {
+        value.items['ashmere_missing_child@0.0.22:item/waterskin'].vessel = {
           capacity: 5,
           unit_label: 'liquid.units',
           initial: wet(5),
         };
-        value.items['ashmere_missing_child@0.0.21:item/spare_waterskin'].vessel = {
+        value.items['ashmere_missing_child@0.0.22:item/spare_waterskin'].vessel = {
           capacity: 7,
           unit_label: 'liquid.units',
           initial: wet(4),
@@ -356,8 +356,8 @@ test('actual fatal combat cold reopens the filled shell on its corpse then ordin
   t.after(() => rmSync(dir, { recursive: true }));
   const a = setup(
     controlledBundle((value) => {
-      value.resources['ashmere_missing_child@0.0.21:resource/hp'].start = 1;
-      value.npcs['ashmere_missing_child@0.0.21:npc/cellar_rat_1'].attack = {
+      value.resources['ashmere_missing_child@0.0.22:resource/hp'].start = 1;
+      value.npcs['ashmere_missing_child@0.0.22:npc/cellar_rat_1'].attack = {
         chance: 100,
         damage_min: 10,
         damage_max: 10,

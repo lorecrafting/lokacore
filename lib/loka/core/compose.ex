@@ -35,7 +35,7 @@ defmodule Loka.Core.Compose do
   An explicit advance is a delta with `time.advance`; its target (the last `to`) is the
   visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
   """
-  alias Loka.Core.{Canonical, Creation}
+  alias Loka.Core.Creation
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -49,7 +49,6 @@ defmodule Loka.Core.Compose do
 
   # A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
-
   @spec compose(map(), map()) :: %{String.t() => term()}
   def compose(state, %{"ops" => ops}) do
     cond do
@@ -92,10 +91,7 @@ defmodule Loka.Core.Compose do
 
   @doc "Canonical text of a JSON value: the identity of a target or DefinitionRef."
   @spec key(term()) :: binary()
-  def key(value) do
-    {:ok, text} = Canonical.encode(value)
-    text
-  end
+  defdelegate key(value), to: Loka.Core.ComposeTarget
 
   defp over_budget?(state, ops) do
     count = fn name -> Enum.count(ops, &(&1["op"] == name)) end
@@ -247,6 +243,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
+  defp apply_op(%{"op" => "fuel.set"} = op, t, {state, _, _} = ctx),
+    do: Loka.Core.Fuel.compose(op, read(t, ctx), state)
+
   defp apply_op(%{"op" => "resource.adjust"} = op, t, {state, horizon, _} = ctx),
     do: Loka.Core.Resource.compose_adjustment(op, read(t, ctx), state, horizon)
 
@@ -270,6 +269,7 @@ defmodule Loka.Core.Compose do
     end
   end
 
+  defp base(%{"kind" => "fuel", "item_id" => i}, s), do: section(s, "fuel")[i]
   defp base(%{"kind" => "fact"} = t, s), do: section(s, "facts")[key(t)]
   defp base(%{"kind" => "entity", "entity_id" => e}, s), do: section(s, "created")[e]
   defp base(%{"kind" => "containment", "entity_id" => e}, s), do: section(s, "containers")[e]

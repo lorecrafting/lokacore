@@ -1,10 +1,11 @@
-// size: allow 310, bound quest, job and scene rows join the runtime decision model
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
 // commit and GameView are in world.ts.
 import {
   DEFS,
+  type FuelRow,
+  type FuelSpec,
   type BarrierState,
   type CharacterId,
   type Command,
@@ -25,7 +26,6 @@ import {
   type ItemDefinition,
   type Key,
   type LiquidRow,
-  type MutationTarget,
   type NpcDefinition,
   type Owned,
   type QuestState,
@@ -46,6 +46,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 export type State = {
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
+  readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
@@ -87,58 +88,7 @@ export type JobRow = {
   readonly actor_id?: CharacterId;
 };
 
-// The State section each written MutationTarget kind lives in (the clock is State.clock).
-const SECTIONS: Readonly<
-  Record<
-    string,
-    | 'containers'
-    | 'facts'
-    | 'resources'
-    | 'cooldowns'
-    | 'barriers'
-    | 'quests'
-    | 'jobs'
-    | 'choices'
-    | 'created'
-    | 'encounters'
-    | 'escorts'
-    | 'liquids'
-  >
-> = {
-  liquid: 'liquids',
-  encounter: 'encounters',
-  escort: 'escorts',
-  entity: 'created',
-  containment: 'containers',
-  fact: 'facts',
-  resource: 'resources',
-  cooldown: 'cooldowns',
-  barrier: 'barriers',
-  quest: 'quests',
-  job: 'jobs',
-  choice: 'choices',
-};
-
-export const row = (t: MutationTarget) =>
-  SECTIONS[t.kind] &&
-  ([
-    SECTIONS[t.kind]!,
-    t.kind === 'liquid'
-      ? t.item_id
-      : t.kind === 'containment' || t.kind === 'entity'
-        ? t.entity_id
-        : t.kind === 'escort'
-          ? t.actor_id
-          : t.kind === 'encounter'
-            ? t.encounter_id
-            : t.kind === 'quest'
-              ? t.instance_id
-              : t.kind === 'job'
-                ? t.job_id
-                : t.kind === 'choice'
-                  ? t.continuation_id
-                  : key(t),
-  ] as const);
+export { row } from './rows.ts';
 
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
 export type QuestRow = {
@@ -151,6 +101,7 @@ export type QuestRow = {
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
 export type World = {
+  readonly fuelSpecs: Readonly<Record<string, FuelSpec>>;
   readonly cartridge: Cartridge;
   readonly context: WorldContextId;
   readonly character: CharacterId;

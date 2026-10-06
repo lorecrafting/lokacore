@@ -158,7 +158,7 @@ defmodule Loka.Core.Invariants do
     if before == need and extra?(op, s, containers, quests) do
       {:cont,
        {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests),
-        resources}}
+        if(op["op"] == "fuel.set", do: Map.put(resources, k, give), else: resources)}}
     else
       {:halt, false}
     end
@@ -181,6 +181,9 @@ defmodule Loka.Core.Invariants do
       true -> walk(final[e], final, done, MapSet.put(path, e))
     end
   end
+
+  defp extra?(%{"op" => "fuel.set"} = op, s, _, _),
+    do: Loka.Core.InvariantsFuel.valid?(op, s)
 
   defp extra?(%{"op" => "entity.transfer"} = op, s, containers, _) do
     d = op["destination_id"]
@@ -268,6 +271,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "choice.resolve"}), do: {"pending", "resolved"}
   defp link(%{"op" => "choice.close"}), do: {"pending", "closed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
+  defp link(%{"op" => "fuel.set"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "resource.adjust"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "cooldown.start"} = op), do: {op["from"], op["at"]}
   defp link(%{"op" => "barrier.transition"} = op), do: {op["from"], op["to"]}
@@ -289,6 +293,7 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "choice." <> _, "continuation_id" => c}, s),
     do: get_in(s, ["choices", c, "status"])
 
+  defp initial(%{"op" => "fuel.set", "item_id" => i}, s), do: get_in(s, ["fuel", i])
   defp initial(%{"op" => "time.advance"}, s), do: s["clock"]
 
   defp initial(%{"op" => "cooldown.start"} = op, s),

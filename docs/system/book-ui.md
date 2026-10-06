@@ -452,20 +452,40 @@ control is exposed before its later real consumer lands.
 
 ## B4 light details
 
-Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) uses ordinary
-inventory/item detail for confirmed fuel and Ignite/Douse/Refuel. Refuel identifies
-the exact directly held compatible bottle; Wear/Remove and Put/Take retain their
-existing places. The presenter emits ordinary ActionInvocation and owns no fuel
-arithmetic, automatic ignition or clock. Confirmed receipts refresh light, supply
-and World; stale/refused/fenced results never narrate success.
+**API1.19 interaction contract.** [B4](mechanics.md#b4-light-and-darkness-selected-contract) uses the existing
+inventory and item detail pages. The confirmed item view supplies remaining fuel,
+capacity and effective lit state; the detail displays `Fuel <remaining> of
+<capacity>, lit/unlit`. Ignite, Douse and Refuel occupy the ordinary item action
+list. Worn torches keep these controls alongside Remove. The presenter owns no
+fuel arithmetic, automatic ignition or clock.
+
+Refuel names the exact directly held compatible bottle on its button (`Refuel
+<source> from <supply>`) and sends ordered targets `[source_id, supply_id]`, with
+no amount input or extra selector. The source item owns the control and its committed
+detail history; the bottle is a bound participant, so its own page does not list
+another item's Refuel. Authored aliases follow the projected semantic `command`,
+while their `action_key` remains the invocation identity. Narrowed target or
+input contracts are checked by keyed authority admission before a light control
+is offered as available. No eligible supply means no Refuel button.
+Wear/Remove and Put/Take retain their existing places. Confirmed receipts refresh
+source, supply and World; stale/refused/fenced results never narrate success.
 
 The dark World description keeps traversable compass/stair exits, inventory and
-recovery controls usable. It displays no hidden detail links or Scan identities.
-Owner-corpse detail and ordinary accessible belongings remain usable in darkness.
-After the same torch is lit directly held or worn, the authored masonry detail is
-visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
-view. Existing freshness handles a control selected before elapsed exhaustion.
-No required waiting, darkness modal, new native control or unfinished lantern UI.
+recovery controls usable. It displays no hidden detail links, readable entries or
+Scan identities. Owner-corpse detail and ordinary accessible belongings remain
+usable in darkness. After the same torch is lit directly held or worn, the authored
+masonry detail is visible; Douse, exhaustion or Put into the satchel removes it on
+the next confirmed view. Existing freshness handles a control selected before
+elapsed exhaustion. No required waiting, darkness modal or new native control.
+
+The focused Book interaction scenario buys the source and supply at Peg, selects
+Ignite on the torch, enters the optional shaft and opens masonry, then Douses and
+returns up. The same item detail selects Refuel from its named bottle. Put into the
+satchel removes the masonry link; Take restores only remaining illumination.
+Cold owner-corpse recovery follows the ordinary World/item pages and Take controls.
+The headless [Book check](../../mobile/authority/local-story/light_book.test.ts) pins the ordered
+participants, worn controls and confirmed fuel display contract; physical/browser
+interaction evidence belongs to the release's later verification record.
 
 ## B7 water details
 

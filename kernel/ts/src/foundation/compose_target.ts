@@ -3,11 +3,10 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
 export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'liquid.set') return { kind: 'liquid', item_id: op.item_id };
   switch (op.op) {
-    case 'fact.assign': {
+    case 'fact.assign':
       const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
       if (op.subject_id !== undefined) t.subject_id = op.subject_id;
       return t as MutationTarget;
-    }
     case 'entity.create':
       return { kind: 'entity', entity_id: op.identity.id };
     case 'entity.transfer':
@@ -32,6 +31,8 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
+    case 'fuel.set':
+      return { kind: 'fuel', item_id: op.item_id };
     case 'resource.adjust':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':

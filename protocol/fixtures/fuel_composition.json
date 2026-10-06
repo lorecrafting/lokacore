@@ -1,0 +1,995 @@
+{
+  "cases": [
+    {
+      "id": "atomic-source-and-supply-rows",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        },
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000002",
+          "from": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 0,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "fuel",
+              "item_id": "11111111-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "remaining": 8,
+              "at": 100,
+              "lit": false
+            }
+          },
+          {
+            "target": {
+              "kind": "fuel",
+              "item_id": "11111111-0000-4000-8000-000000000002"
+            },
+            "value": {
+              "remaining": 0,
+              "at": 100,
+              "lit": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong-prior",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 1,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "excess-charge",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 9,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "negative-charge",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": -1,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "future-time",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 101,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "unsettled-time",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 99,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed-lit",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-lit",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "extra-row-field",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false,
+            "extra": 0
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "lit-supply",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000002",
+          "from": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 0,
+            "at": 100,
+            "lit": true
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000002"
+          }
+        }
+      }
+    },
+    {
+      "id": "undeclared-item",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-prior-row",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "future-prior",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 101,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 101,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflicting-writer",
+      "state": {
+        "clock": 100,
+        "fuel_specs": {
+          "11111111-0000-4000-8000-000000000001": {
+            "kind": "source",
+            "capacity": 8,
+            "initial": 2,
+            "rate": 1,
+            "unit": "oil",
+            "supply": {
+              "cartridge_id": "test",
+              "cartridge_version": "0.1.0",
+              "kind": "item",
+              "key": "oil"
+            },
+            "ignited": "light.ignited",
+            "doused": "light.doused",
+            "refueled": "light.refueled"
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "kind": "supply",
+            "capacity": 6,
+            "initial": 6,
+            "unit": "oil"
+          }
+        },
+        "fuel": {
+          "11111111-0000-4000-8000-000000000001": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "11111111-0000-4000-8000-000000000002": {
+            "remaining": 6,
+            "at": 100,
+            "lit": false
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "fuel.set",
+          "writer_group": 0,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 2,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          }
+        },
+        {
+          "op": "fuel.set",
+          "writer_group": 1,
+          "item_id": "11111111-0000-4000-8000-000000000001",
+          "from": {
+            "remaining": 8,
+            "at": 100,
+            "lit": false
+          },
+          "to": {
+            "remaining": 7,
+            "at": 100,
+            "lit": false
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "fuel",
+            "item_id": "11111111-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    }
+  ]
+}

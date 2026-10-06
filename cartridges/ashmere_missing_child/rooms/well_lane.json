@@ -13,6 +13,9 @@
     },
     "west": {
       "to": "chandler"
+    },
+    "down": {
+      "to": "well_shaft"
     }
   },
   "details": {

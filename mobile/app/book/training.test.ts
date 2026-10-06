@@ -126,13 +126,13 @@ function nodes(element: any): any[] {
 test('Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once', (t) => {
   const pin = JSON.parse(
     readFileSync(
-      new URL('../../../protocol/fixtures/missing_child_v020_hash.json', import.meta.url),
+      new URL('../../../protocol/fixtures/missing_child_v021_hash.json', import.meta.url),
       'utf8',
     ),
   );
   const ids = JSON.parse(
     readFileSync(
-      new URL('../../../protocol/fixtures/missing_child_v020_ids.json', import.meta.url),
+      new URL('../../../protocol/fixtures/missing_child_v021_ids.json', import.meta.url),
       'utf8',
     ),
   );
@@ -198,5 +198,18 @@ test('Book interaction teaches swords then dodge in Tobin detail and recovers ea
     words(CharacterPage({ view: book.screen().view, text: book.screen().text })).includes(
       'Dodge — qualified; DEX at least 10',
     ),
+  );
+});
+// Breaks: moving to the shared item detail component silently drops confirmed fuel or invents ignition.
+test('shared item detail draws confirmed fuel for lit and exhausted items', () => {
+  assert.deepEqual(
+    words(ItemDetails({ thing: { fuel: { remaining: 7, capacity: 10, lit: true } } as any, text })),
+    ['Fuel 7 of 10, lit'],
+  );
+  assert.deepEqual(
+    words(
+      ItemDetails({ thing: { fuel: { remaining: 0, capacity: 10, lit: false } } as any, text }),
+    ),
+    ['Fuel 0 of 10, unlit'],
   );
 });

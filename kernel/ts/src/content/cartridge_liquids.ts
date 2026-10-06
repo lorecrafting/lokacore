@@ -56,7 +56,7 @@ function vessel(
 
 function requirements(c: Obj, out: Diagnostic[]) {
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (major < 1 || (major === 1 && minor < 19))
+  if (major < 1 || (major === 1 && minor < 20))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   if (c.lock.capabilities.liquid !== 1)
     out.push(

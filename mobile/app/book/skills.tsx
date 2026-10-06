@@ -34,6 +34,12 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
           {p.text(item.liquid.unit_label)}
         </Text>
       )}
+      {item?.fuel && (
+        <Text style={note}>
+          Fuel {item.fuel.remaining} of {item.fuel.capacity}
+          {item.fuel.lit ? ', lit' : ', unlit'}
+        </Text>
+      )}
       {item?.state && <Text style={note}>{cap(item.state)}</Text>}
       {item?.slot && (item.weapon || item.block_chance !== undefined) && (
         <Text style={note}>Slot: {item.slot}</Text>

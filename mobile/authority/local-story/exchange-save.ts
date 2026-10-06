@@ -12,7 +12,12 @@ export function exchangeSave(
   revision: number,
   historyChecked: boolean,
 ): boolean {
-  if (!Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange)) return false;
+  if (
+    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
+    !Object.keys(fresh.fuelSpecs).length &&
+    saved.state.fuel === undefined
+  )
+    return false;
   if (!historyChecked) receiptHistory(fresh, saved, db, meta, revision);
   return true;
 }

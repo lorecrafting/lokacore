@@ -11,8 +11,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { status as calendarStatus } from '../src/mechanics/calendar.ts';
 
 /**
- * A Command's payload without its actor, a lookup (the player's words after the verb, which
- * the authority resolves before any Command: they never enter one) for look, take, drop or give
+ * A Command's payload without its actor, or words resolved before a Command for look, take, drop or give
  * (`to` the recipient's words), a wait of whole hours (the caller adds them to the clock),
  * 'inventory', 'quit', a message for the player, or null.
  */
@@ -159,10 +158,11 @@ const BARRED: Record<string, string> = { exit_closed: ' (closed)', exit_locked: 
  */
 export function scan(cartridge: Cartridge, world: World): string {
   const lines = sight(world, world.body).map((s) => {
+    if (!s.entities && !s.code) return `${s.direction}: darkness.`;
     if (!s.entities)
       return `${s.direction}: ${door(cartridge, world, s.direction)}${BARRED[s.code]}.`;
     const seen = s.entities.map((id) => say(cartridge, world.entities[id].short)).join(', ');
-    return `${s.direction} (${say(cartridge, world.rooms[s.room].title)})${seen && `: ${seen}`}.`;
+    return `${s.direction} (${say(cartridge, world.rooms[s.room!].title)})${seen && `: ${seen}`}.`;
   });
   return lines.length ? `${lines.join('\n')}\n` : 'You see no exits.\n';
 }

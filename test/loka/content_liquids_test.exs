@@ -7,7 +7,7 @@ defmodule Loka.ContentLiquidsTest do
 
     update(dir, "cartridge.json", fn m ->
       m
-      |> put_in(["requires", "kernel_api", "at_least"], "1.19")
+      |> put_in(["requires", "kernel_api", "at_least"], "1.20")
       |> put_in(["requires", "capabilities", "liquid"], 1)
     end)
 
@@ -137,7 +137,7 @@ defmodule Loka.ContentLiquidsTest do
           {"item source", "items/lantern.json", &Map.put(&1, "liquid_source", "water"),
            "UNKNOWN_FIELD"},
           {"old API", "cartridge.json",
-           &put_in(&1, ["requires", "kernel_api", "at_least"], "1.18"),
+           &put_in(&1, ["requires", "kernel_api", "at_least"], "1.19"),
            "KERNEL_API_RANGE_INVALID"},
           {"missing capability", "cartridge.json",
            &update_in(&1, ["requires", "capabilities"], fn caps -> Map.delete(caps, "liquid") end),

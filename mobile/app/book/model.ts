@@ -97,7 +97,8 @@ export function group(buttons: Button[]) {
         !OWN.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
-    on: (id: string) => buttons.filter((b) => b.detail_id === id || b.target_ids.includes(id)),
+    on: (id: string) =>
+      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
   };
 }
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
@@ -122,7 +123,6 @@ export const absent = (v: GameView) =>
     : v.choice.speaker_id
       ? 'They are not here to answer. Find them, or close this.'
       : 'No one is here to answer.';
-
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Pool = NonNullable<GameView['resources']>[number];
@@ -221,12 +221,13 @@ function travel(v: GameView): Press[] {
 // size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
-    a: { action_key: string; label: string; target_ids?: readonly string[] },
+    a: { action_key: string; label: string; target_ids?: readonly string[]; command?: string },
     name: string,
     id?: string,
   ) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
+    ...(a.command === 'refuel' && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -250,7 +251,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         return button(
           a,
-          ` ${text(e.name)}${destination ? ` ${a.action_key === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
+          ` ${text(e.name)}${destination ? ` ${a.command === 'refuel' ? 'from' : a.action_key === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
       }),
@@ -310,7 +311,6 @@ function noticeButtons(
   );
 }
 
-// Capture the interaction and bound liquid contents, never the whole GameView.
 export function actionContext(
   view: GameView,
   b: Pick<Button, 'action_key' | 'target_ids' | 'input' | 'detail_id'>,

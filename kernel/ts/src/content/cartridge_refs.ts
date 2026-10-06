@@ -1,4 +1,5 @@
-// size: allow 345, NPC explicit resource starts join the existing reference stage
+import { pools } from './cartridge_pools.ts';
+import { fuel } from './cartridge_fuel.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
@@ -64,6 +65,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   };
   for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
     add('room', r, `.cartridge.rooms${step(ref)}`);
+    if (r.dark_description)
+      out.push(['darkness', {}, `.cartridge.rooms${step(ref)}.dark_description`]);
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
       add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }
@@ -74,6 +77,7 @@ export function parts(c: Obj): [string, Obj, string][] {
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
+    if (i.fuel) out.push(['fuel', i.fuel, `.cartridge.items${step(ref)}.fuel`]);
     add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
     if (i.slot) out.push(['slot', i.slot, `.cartridge.items${step(ref)}.slot`]);
   }
@@ -117,7 +121,7 @@ export function nodes(c: Obj): [Obj, string][] {
 }
 
 const TEXT: Readonly<Record<string, string[]>> = {
-  room: ['title', 'description'],
+  room: ['title', 'description', 'dark_description'],
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
@@ -172,7 +176,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
-  out.push(...exchanges(c, check));
+  out.push(...exchanges(c, check), ...fuel(c, check));
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
@@ -212,87 +216,6 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
-  return out;
-}
-
-// Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
-// the world's) is well formed (bands), and the world's move cost names a resource of this
-// cartridge.
-// size: allow 45, NPC resource starts share the resource bounds pass
-function pools(c: Obj, named: Checks['named']): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
-    const at = `.cartridge.resources${step(ref)}`;
-    if (!(s.minimum <= s.start && s.start <= s.maximum))
-      out.push(diag('RESOURCE_SPEC_INVALID', at));
-    if (s.regen) {
-      const { every, by_position } = s.regen;
-      if (
-        every >
-        Math.floor(
-          Number.MAX_SAFE_INTEGER / (Math.max(...(Object.values(by_position) as number[])) + 1),
-        )
-      )
-        out.push(diag('RESOURCE_SPEC_INVALID', `${at}.regen`));
-      if (c.lock.capabilities.position !== 1)
-        out.push(
-          diag('UNDECLARED_CAPABILITY', `${at}.regen`, { capability: 'position' }, ['position@1']),
-        );
-      if (c.manifest.time_policy?.profile !== 'real_elapsed')
-        out.push(diag('INVALID_TIME_POLICY', `${at}.regen`));
-      const api = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-      if (api[0] < 1 || (api[0] === 1 && api[1] < 2))
-        out.push(
-          diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-        );
-    }
-    if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
-  }
-  out.push(...npcHp(c));
-  for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj))
-    for (const [name, value] of Object.entries((npc.resource_starts ?? {}) as Obj)) {
-      const spec = Object.values((c.resources ?? {}) as Obj).find((r) => r.key === name);
-      if (!spec || (value as number) < spec.minimum || (value as number) > spec.maximum)
-        out.push(
-          diag('RESOURCE_SPEC_INVALID', `.cartridge.npcs${step(ref)}.resource_starts${step(name)}`),
-        );
-    }
-  if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
-  const cost = c.world?.movement?.cost;
-  if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
-  return out;
-}
-
-function npcHp(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  for (const [ref, npc] of Object.entries(c.npcs ?? {}) as [string, Obj][]) {
-    if (!npc.hp) continue;
-    const at = `.cartridge.npcs${step(ref)}.hp`;
-    if (!(npc.hp.minimum <= npc.hp.start && npc.hp.start <= npc.hp.maximum))
-      out.push(diag('RESOURCE_SPEC_INVALID', at));
-    const api = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (api[0] < 1 || (api[0] === 1 && api[1] < 4))
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-    if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
-      out.push(diag('RESOURCE_SPEC_INVALID', at));
-  }
-  return out;
-}
-
-// A condition band table (resource.schema.json BandTable) at `at`: cuts strictly descending to a
-// last 0 and keys unique (RESOURCE_SPEC_INVALID at the table), each key's band.<key> text in the
-// catalog (UNRESOLVED_REFERENCE at the key).
-function bands(c: Obj, table: Obj[], at: string): Diagnostic[] {
-  const sorted = table.every((b, i) => i === 0 || b.at_percent < table[i - 1].at_percent);
-  const unique = new Set(table.map((b) => b.key)).size === table.length;
-  const out =
-    sorted && unique && table.at(-1)!.at_percent === 0 ? [] : [diag('RESOURCE_SPEC_INVALID', at)];
-  table.forEach(({ key }, i) => {
-    if (!Object.hasOwn(c.text, `band.${key}`))
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}[${i}].key`, { target: `band.${key}` }));
-  });
   return out;
 }
 

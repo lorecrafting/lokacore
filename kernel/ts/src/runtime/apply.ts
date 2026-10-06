@@ -39,6 +39,7 @@ export function apply(
 export const base = (world: World) =>
   ({
     ...world.state,
+    fuel_specs: world.fuelSpecs,
     known_entities: world.knownEntities,
     corpse_templates: world.corpseTemplates,
     fact_defaults: world.factDefaults,

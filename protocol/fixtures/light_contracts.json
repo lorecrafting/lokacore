@@ -1,0 +1,854 @@
+[
+  {
+    "name": "FuelRow valid",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 100,
+      "lit": false
+    },
+    "valid": true
+  },
+  {
+    "name": "FuelRow missing remaining",
+    "contract": "FuelRow",
+    "value": {
+      "at": 100,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow missing at",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow missing lit",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 100
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow extra",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 100,
+      "lit": false,
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec valid",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": true
+  },
+  {
+    "name": "FuelSpec missing kind",
+    "contract": "FuelSpec",
+    "value": {
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing capacity",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing initial",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing rate",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing unit",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing supply",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing ignited",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing doused",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing refueled",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec extra",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled",
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView valid",
+    "contract": "FuelView",
+    "value": {
+      "remaining": 2,
+      "capacity": 8,
+      "lit": false
+    },
+    "valid": true
+  },
+  {
+    "name": "FuelView missing remaining",
+    "contract": "FuelView",
+    "value": {
+      "capacity": 8,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView missing capacity",
+    "contract": "FuelView",
+    "value": {
+      "remaining": 2,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView missing lit",
+    "contract": "FuelView",
+    "value": {
+      "remaining": 2,
+      "capacity": 8
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView extra",
+    "contract": "FuelView",
+    "value": {
+      "remaining": 2,
+      "capacity": 8,
+      "lit": false,
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp valid",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "writer_group": 0,
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      },
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "DeltaOp missing op",
+    "contract": "DeltaOp",
+    "value": {
+      "writer_group": 0,
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      },
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp missing writer_group",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      },
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp missing item_id",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "writer_group": 0,
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      },
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp missing from",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "writer_group": 0,
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp missing to",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "writer_group": 0,
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DeltaOp extra",
+    "contract": "DeltaOp",
+    "value": {
+      "op": "fuel.set",
+      "writer_group": 0,
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "from": {
+        "remaining": 2,
+        "at": 100,
+        "lit": false
+      },
+      "to": {
+        "remaining": 8,
+        "at": 100,
+        "lit": false
+      },
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "MutationTarget valid",
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "fuel",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": true
+  },
+  {
+    "name": "MutationTarget missing kind",
+    "contract": "MutationTarget",
+    "value": {
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "MutationTarget missing item_id",
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "fuel"
+    },
+    "valid": false
+  },
+  {
+    "name": "MutationTarget extra",
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "fuel",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload valid",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "refuel",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "supply_id": "11111111-0000-4000-8000-000000000002"
+    },
+    "valid": true
+  },
+  {
+    "name": "CommandPayload missing type",
+    "contract": "CommandPayload",
+    "value": {
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "supply_id": "11111111-0000-4000-8000-000000000002"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing actor_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "refuel",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "supply_id": "11111111-0000-4000-8000-000000000002"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing item_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "refuel",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "supply_id": "11111111-0000-4000-8000-000000000002"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing supply_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "refuel",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload extra",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "refuel",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001",
+      "supply_id": "11111111-0000-4000-8000-000000000002",
+      "extra": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec supply",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "supply",
+      "capacity": 6,
+      "initial": 6,
+      "unit": "oil"
+    },
+    "valid": true
+  },
+  {
+    "name": "FuelSpec missing kind",
+    "contract": "FuelSpec",
+    "value": {
+      "capacity": 6,
+      "initial": 6,
+      "unit": "oil"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing capacity",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "supply",
+      "initial": 6,
+      "unit": "oil"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing initial",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "supply",
+      "capacity": 6,
+      "unit": "oil"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec missing unit",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "supply",
+      "capacity": 6,
+      "initial": 6
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload ignite",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "ignite",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": true
+  },
+  {
+    "name": "CommandPayload missing type",
+    "contract": "CommandPayload",
+    "value": {
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing actor_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "ignite",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing item_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "ignite",
+      "actor_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload douse",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "douse",
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": true
+  },
+  {
+    "name": "CommandPayload missing type",
+    "contract": "CommandPayload",
+    "value": {
+      "actor_id": "11111111-0000-4000-8000-000000000001",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing actor_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "douse",
+      "item_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "CommandPayload missing item_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "douse",
+      "actor_id": "11111111-0000-4000-8000-000000000001"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid remaining-1",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": -1,
+      "at": 100,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid remaining9007199254740992",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 9007199254740992,
+      "at": 100,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid at-1",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": -1,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid at9007199254740992",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 9007199254740992,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid lit0",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 100,
+      "lit": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelRow invalid litNone",
+    "contract": "FuelRow",
+    "value": {
+      "remaining": 2,
+      "at": 100,
+      "lit": null
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView invalid capacity0",
+    "contract": "FuelView",
+    "value": {
+      "remaining": 2,
+      "capacity": 0,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelView invalid remaining-1",
+    "contract": "FuelView",
+    "value": {
+      "remaining": -1,
+      "capacity": 8,
+      "lit": false
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec invalid capacity0",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 0,
+      "initial": 2,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec invalid initial-1",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": -1,
+      "rate": 1,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "FuelSpec invalid rate0",
+    "contract": "FuelSpec",
+    "value": {
+      "kind": "source",
+      "capacity": 8,
+      "initial": 2,
+      "rate": 0,
+      "unit": "oil",
+      "supply": {
+        "cartridge_id": "test",
+        "cartridge_version": "0.1.0",
+        "kind": "item",
+        "key": "oil"
+      },
+      "ignited": "light.ignited",
+      "doused": "light.doused",
+      "refueled": "light.refueled"
+    },
+    "valid": false
+  },
+  {
+    "name": "authored_refuel_semantic_command",
+    "contract": "AdvertisedAction",
+    "value": {
+      "available": true,
+      "action_key": "top_up",
+      "command": "refuel",
+      "label": "action.refuel",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "target_ids": [
+        "bbbbbbbb-0000-4000-8000-000000000001",
+        "bbbbbbbb-0000-4000-8000-000000000002"
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "malformed_semantic_command",
+    "contract": "AdvertisedAction",
+    "value": {
+      "available": true,
+      "action_key": "top_up",
+      "command": 42,
+      "label": "action.refuel",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "target_ids": [
+        "bbbbbbbb-0000-4000-8000-000000000001",
+        "bbbbbbbb-0000-4000-8000-000000000002"
+      ]
+    },
+    "valid": false
+  }
+]

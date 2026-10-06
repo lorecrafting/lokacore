@@ -92,7 +92,7 @@ defmodule Loka.Content.Liquids do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if(version < [1, 19],
+    if(version < [1, 20],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
     ) ++

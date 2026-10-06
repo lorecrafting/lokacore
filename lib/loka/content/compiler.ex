@@ -42,6 +42,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs),
       Resources.check(manifest, defs, v2, located, registry),
       Entities.carry(manifest, defs, located),
+      Loka.Content.Fuel.check(manifest, defs),
       Loka.Content.Commerce.check(manifest, defs),
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),

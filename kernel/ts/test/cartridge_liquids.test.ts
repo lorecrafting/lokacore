@@ -24,7 +24,7 @@ const sorted = (v: any): any =>
       : v;
 const load = (change: (c: any) => void = () => {}) => {
   const c = structuredClone(read('protocol/fixtures/containers_cartridge_items_hash.json').value);
-  c.manifest.requires.kernel_api.at_least = '1.19';
+  c.manifest.requires.kernel_api.at_least = '1.20';
   c.manifest.requires.capabilities.liquid = c.lock.capabilities.liquid = 1;
   c.liquids = {
     [`${ID}:liquid/water`]: {
@@ -108,7 +108,7 @@ test('loader validates opted liquid metadata and accepts exact maximum mass', ()
     ['map key', (c: any) => (liquid(c).key = 'oil'), 'ARTIFACT_DEFINITION_KEY_MISMATCH'],
     [
       'old API',
-      (c: any) => (c.manifest.requires.kernel_api.at_least = '1.18'),
+      (c: any) => (c.manifest.requires.kernel_api.at_least = '1.19'),
       'KERNEL_API_RANGE_INVALID',
     ],
     [

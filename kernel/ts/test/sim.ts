@@ -212,6 +212,7 @@ export const base = (w: World) => ({
   fact_defaults: w.factDefaults,
   capacities: w.capacities,
   liquid_specs: w.liquidSpecs,
+  fuel_specs: w.fuelSpecs,
   resource_specs: w.resourceSpecs,
   entity_resource_specs: w.entityResourceSpecs,
   barrier_initial: w.barrierInitial,

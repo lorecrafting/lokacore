@@ -853,8 +853,8 @@ bandages must adopt an immediate recovery/supply route before it is exposed.
 
 ## B4 light and darkness (selected contract)
 
-Planned under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md),
-not installed source or proof. The first consumer is the optional Well Shaft detail,
+Selected under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md),
+the first consumer is the optional Well Shaft detail,
 using the real B3 torch and oil; no chapter-required route gains a light gate.
 The torch is a reusable oil-soaked wick on a handle, with unchanged B3 identity,
 prices, mass and light slot. [Cartridge tuning](cartridge.md#b4-well-and-fuel)
