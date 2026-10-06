@@ -36,3 +36,5 @@ Provisional source/check checkpoint: [D12 local evidence](../../evidence/2026-10
 Published-main integration remains provisional: [3ff6cdd4 merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-3ff6cdd4/README.md). Successor pins and browser proof await C4 publication.
 
 C4 carryover remains provisional: [e9db5bdf merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-e9db5bdf/README.md). Successor pins and browser proof await D3 publication and final integration.
+
+Final local integration checkpoint: [v034 proof](../../evidence/2026-10-06-d12-practical-skills/final-v034/README.md) supersedes the provisional release/API/hash/ID nulls above. Source is on local `chapter1/d12-practical-skills-provisional` after D3 and Beads-main merges; fresh exact-head reviews, hosted CI and publication are pending.

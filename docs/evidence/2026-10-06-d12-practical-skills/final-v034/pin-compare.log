@@ -1,0 +1,5 @@
+check: pin-compare
+exit_status: 0
+Independent D12 successor 0.0.34/API1.29: e2ad69a89f007881eba3ebec925abd63bcb563060dc60b8725d87da13c12a390, 184 initial IDs.
+Compiling 1 file (.ex)
+compiler value/canonical/hash match independent v034; 184 starting IDs

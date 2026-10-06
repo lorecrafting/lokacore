@@ -76,3 +76,5 @@ provisional.
 Outputs redact home/worktree/scratch paths; no device/provisioning/account identifiers
 were captured. [SHA256SUMS](SHA256SUMS) hashes retained files;
 [verification](SHA256SUMS.verify.log) is separate.
+
+Final local D3 integration, active v034 pins, isolated browser, current-source mismatch refusal and full lane are recorded in the [v034 proof](final-v034/README.md). Earlier provisional nulls and no-browser statements above remain historical checkpoints.
