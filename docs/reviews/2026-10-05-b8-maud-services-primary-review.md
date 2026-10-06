@@ -125,3 +125,24 @@ remove limit inflation without adding a framework or dependency. **No open
 primary findings.** Save/protocol opinion, publication checks and any separately
 required browser proof remain separate. No push, merge, native simulator or
 owner-save operation was performed.
+
+
+## Final integration example-only recheck — APPROVE
+
+Exact source `56d40a22dc1134bd173c94ac5e43df98593edd0a` against its parent
+`1aebd943`; prior gameplay/source approval at `552717d5` remains recorded above.
+The entire four-file delta is one literal valid example each for `ServiceBenefit`
+and `ServiceOffer`, the corresponding two generated DEFS entries, and the
+[governing protocol note](../system/protocol.md#b8-immediate-service-composition).
+Removing the new `examples` metadata makes both schema definitions identical to
+the parent; every other generated line is identical. No rule, gameplay, save,
+validation constraint, cartridge or known-answer pin changes are included.
+
+`mise exec -- elixir bin/contracts.exs --check` passes. The global contract-example
+gate plus service fixtures (`mix test --force test/loka/core/contracts_test.exs
+ test/loka/core/service_contracts_test.exs`) passes **10 tests**; the TypeScript
+service-contract suite passes **1 test**. Independent TypeScript controls validate
+both literal examples and reject each after removing its required fact/benefit.
+Ponytail Review: lean; existing global contract coverage consumes the examples,
+with no new helper, dependency or test framework. **No findings.** Review-only
+record; no source edit, push, merge or owner-save/native operation.
