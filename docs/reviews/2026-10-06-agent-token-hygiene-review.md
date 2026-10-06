@@ -1,0 +1,7 @@
+# Agent token hygiene — APPROVE
+
+Independent docs review of exact source `07e68cd717dc189f10e20f09c3db720e029d16e0` against `3ff6cdd4106664f6352a502c11e2eb667cd01539`. The reviewer authored none of the change and used a separate worktree.
+
+The required contract was a durable, linked directive for both Codex and Claude Code; a fresh independent reviewer for each slice; preservation of exact heads, open findings and failing evidence across context changes; and a handoff only at a stable publication checkpoint. The [workflow](../WORKFLOW.md#token-hygiene), [review rules](../WORKFLOW.md#loop) and [owner decision](../decisions/owner-decision-agent-token-hygiene-2026-10-06.md) agree on those points. The Codex and Claude Code paragraphs give each route concrete fresh-agent and log-output instructions without weakening the existing review gate.
+
+No findings. The shared handoff's current location and a copyable continuation prompt must be supplied at the actual checkpoint, as the new rule directs; this review does not claim that checkpoint has occurred. Ponytail Review: Lean already. Ship. `mise exec -- elixir bin/check_docs.exs` passed (667 docs, zero broken or unreachable links); `AGENTS.md` has 1,391 words against its 1,400-word budget; `git diff 3ff6cdd4..07e68cd7 --check` passed. Approval covers the docs change only.
