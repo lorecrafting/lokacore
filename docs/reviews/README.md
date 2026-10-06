@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [Room interactibles specification](2026-10-06-room-interactables-review.md): exact source `0cc7b7cd`, independent CHANGES REQUIRED; fixture projection/detail authority and absolute fixture custody need clarification. Docs-only review.
+- [Room interactibles specification](2026-10-06-room-interactables-review.md): exact source `0cc7b7cd` CHANGES REQUIRED; scoped fix `a4338896` APPROVE closes fixture projection/detail authority and absolute custody. Docs-only review.
 
 - [D9 dependency correction](2026-10-06-d9-dependency-correction-review.md): exact planning head `0a3673f9`, independent APPROVE; C4/D6 full-scope blockers, underwater-only D6 recovery and the separately pending Study barrier/retrieval rule align across plan, brief and Beads. Docs/export/graph checks pass; source remains gated.
 

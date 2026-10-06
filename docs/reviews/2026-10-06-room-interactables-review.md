@@ -11,3 +11,7 @@ Requirements derived from the owner's [room decision](../decisions/owner-decisio
 - **RI-2, should-fix**, `docs/system/book-ui.md:31`: “never offers Take or Drop merely because it is linked” permits an offered Take for the linked fixture for another reason. The owner decision says fixtures cannot be taken or removed. A developer could model a door or scenery as a room item with a Take offer and leave it inline as a fixture. Make the canonical custody rule unconditional and say that any movable object belongs in the loose-item group instead.
 
 The actor and loose-item grouping, detail intent, empty-group omission and future player projection match the owner rule. No implementation or tests changed. Ponytail Review: no excess machinery introduced.
+
+## Scoped fix recheck
+
+**APPROVE** at exact source head `a4338896bdf248af44ba66dc31c3dc8198ecdc7e`. RI-1 is closed: a link requires a visible current-room identity and detail route from GameView; prose cannot infer one, and a selected description variant must omit concealed text. General scenery links are explicitly future-facing until projection and admission supply a real consumer. RI-2 is closed: fixtures are unconditionally immovable and cannot be taken, dropped, stored or removed; removable objects use the loose-item group. The changed decision record agrees with the canonical Book spec. No other source changed in this fix.
