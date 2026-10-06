@@ -1,4 +1,11 @@
-import type { CommandPayload, DeltaOp, ErrorCode, Key, TextKey } from '../../contracts.gen.ts';
+import type {
+  CommandPayload,
+  DeltaOp,
+  EntityId,
+  ErrorCode,
+  Key,
+  TextKey,
+} from '../../contracts.gen.ts';
 import { refusal } from '../../commands/actions.ts';
 import {
   accepted,
@@ -14,6 +21,38 @@ import { engaged } from '../combat/shared.ts';
 import { matching } from './shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'bandage' }>;
+
+function bandageOps(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  row: NonNullable<ReturnType<typeof matching>>,
+): DeltaOp[] {
+  return [
+    {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: p.item_id,
+      source_id: body,
+      destination_id: world.consumed!,
+      consumption: 'bandaged',
+    },
+    {
+      op: 'bleed.transition',
+      writer_group: 0,
+      body_id: body,
+      expected: row,
+      value: { active: false, generation: row.generation },
+    },
+    {
+      op: 'job.cancel',
+      writer_group: 0,
+      job_id: row.job_id!,
+      bleed_body_id: body,
+      bleed_generation: row.generation,
+    },
+  ];
+}
 
 /** Shared keyed/raw/Book availability for the exact current item and generation. */
 export function availability(world: World, p: Payload, steps: Steps, action?: Key) {
@@ -38,31 +77,7 @@ export function transition(
     return { code: 'invalid_state' };
   const row = matching(world, body, item.bandage.effect, p.effect_generation);
   if (!row) return { code: 'invalid_state' };
-  const ops: DeltaOp[] = [
-    {
-      op: 'entity.transfer',
-      writer_group: 0,
-      entity_id: p.item_id,
-      source_id: body,
-      destination_id: world.consumed,
-      consumption: 'bandaged',
-    },
-    {
-      op: 'bleed.transition',
-      writer_group: 0,
-      body_id: body,
-      expected: row,
-      value: { active: false, generation: row.generation },
-    },
-    {
-      op: 'job.cancel',
-      writer_group: 0,
-      job_id: row.job_id!,
-      bleed_body_id: body,
-      bleed_generation: row.generation,
-    },
-  ];
-  return { ops, narration: item.bandage.narration };
+  return { ops: bandageOps(world, p, body, row), narration: item.bandage.narration };
 }
 
 export const decide: Rule<'bleed'> = (world, command, _mint, steps = { n: 0 }) => {

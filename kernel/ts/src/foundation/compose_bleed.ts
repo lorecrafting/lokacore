@@ -4,6 +4,26 @@ import { key, same, type State, type Written } from './compose.ts';
 
 type Op = Extract<DeltaOp, { op: 'bleed.transition' }>;
 
+function cadence(prior: Op['value'] | undefined, next: Op['value'], overlay: Map<string, Written>) {
+  if (!prior?.active || !next.active) return true;
+  const oldJob = prior.job_id!;
+  const completed =
+    oldJob &&
+    (overlay.get(key({ kind: 'job', job_id: oldJob }))?.value as { status?: string } | undefined)
+      ?.status === 'completed';
+  return (
+    same(next.effect, prior.effect) &&
+    next.source_id === prior.source_id &&
+    (completed
+      ? next.job_id !== oldJob &&
+        next.next_tick_at! > prior.next_tick_at! &&
+        next.ends_at === prior.ends_at
+      : next.job_id === oldJob &&
+        next.next_tick_at === prior.next_tick_at &&
+        next.ends_at! >= prior.ends_at)
+  );
+}
+
 /** One checked body generation; no status framework or independent state writer. */
 export function transitionBleed(
   op: Op,
@@ -31,29 +51,12 @@ export function transitionBleed(
   const generation = prior?.active
     ? next.generation === prior.generation
     : next.generation === (prior?.generation ?? 0) + (next.active ? 1 : 0);
-  const oldJob = prior?.active ? prior.job_id : undefined;
-  const completed =
-    oldJob &&
-    (overlay.get(key({ kind: 'job', job_id: oldJob }))?.value as { status?: string } | undefined)
-      ?.status === 'completed';
-  const cadence =
-    !prior?.active ||
-    !next.active ||
-    (same(next.effect, prior.effect) &&
-      next.source_id === prior.source_id &&
-      (completed
-        ? next.job_id !== prior.job_id &&
-          next.next_tick_at! > prior.next_tick_at! &&
-          next.ends_at === prior.ends_at
-        : next.job_id === prior.job_id &&
-          next.next_tick_at === prior.next_tick_at &&
-          next.ends_at! >= prior.ends_at));
   if (
     known[op.body_id]?.kind !== 'body' ||
     !same(row ?? null, op.expected) ||
     !shape ||
     !generation ||
-    !cadence ||
+    !cadence(prior, next, overlay) ||
     (!prior?.active && !next.active)
   )
     return { code: 'precondition_failed' as const };
