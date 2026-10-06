@@ -14,6 +14,9 @@
   "exits": {
     "up": {
       "to": "well_lane"
+    },
+    "down": {
+      "to": "well_bottom"
     }
   }
 }

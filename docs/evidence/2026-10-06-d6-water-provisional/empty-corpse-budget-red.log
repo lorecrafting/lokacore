@@ -1,0 +1,34 @@
+✔ water exact-edge admission is atomic at learned 6000g/MV10 boundary (127.305583ms)
+✔ captured free Up survives changed eligibility and old generations cannot drown reentry (127.843875ms)
+✔ deadline 70800 drowns once with actual nested possessions and same-body Chapel return (87.720458ms)
+✔ Chapel recovery selects only actual owned bottom corpses and permits forced overload (68.298709ms)
+✔ both real bottoms retain darkness, actual chest descendants and free lit-loot return (62.2125ms)
+✖ empty corpse history stays bounded by one holder scan and creates no recovery offers (77.840916ms)
+✔ water exit projection checks its exact move key despite a differently keyed allowed alias (59.96375ms)
+✔ ordinary combat death below also invalidates the original water occurrence (62.995083ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1762.711667
+
+✖ failing tests:
+
+test at kernel/ts/test/water.test.ts:329:1
+✖ empty corpse history stays bounded by one holder scan and creates no recovery offers (77.840916ms)
+  Error: budget_exceeded
+      at corpseViews (file://[workspace]/kernel/ts/src/view/water.ts:17:47)
+      at waterViews (file://[workspace]/kernel/ts/src/view/water.ts:47:23)
+      at gameView (file://[workspace]/kernel/ts/src/view/view.ts:78:8)
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/water.test.ts:351:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    code: 'budget_exceeded'
+  }

@@ -11,11 +11,14 @@ import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { key } from '../../foundation/compose.ts';
 
+import { leave } from '../water/shared.ts';
+
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
 };
 type Loss = Extract<DeltaOp, { op: 'resource.adjust' }>;
 export type Fatal = {
+  cause?: 'drowning';
   loss: Loss;
   owner_id: CharacterId | null;
   killer_id: EntityId | null;
@@ -156,6 +159,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const writer_group = fatal.loss.writer_group;
   const room_id = world.state.containers[victim_id];
   const ops: DeltaOp[] = [
+    ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),
   ];
@@ -222,7 +226,7 @@ function deathEvent(
         kind: 'npc' as const,
         key: npc.key,
       };
-  const died: DeathEvent = {
+  return {
     id,
     world_context_id: world.context,
     scope: { kind: 'instance', world_context_id: world.context },
@@ -232,6 +236,7 @@ function deathEvent(
     correlation_id: command.id as string as DomainEvent['correlation_id'],
     payload: {
       type: 'entity_died',
+      ...(fatal.cause && { cause: fatal.cause }),
       victim_id,
       room_id,
       killer_id,
@@ -240,5 +245,4 @@ function deathEvent(
       ...(victim_definition && { victim_definition }),
     },
   };
-  return died;
 }

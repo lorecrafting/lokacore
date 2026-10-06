@@ -1,0 +1,213 @@
+[
+  {
+    "mutation": "overload-entry",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 water exact-edge admission is atomic at learned 6000g/MV10 boundary (87.7665ms)",
+      "\u2716 failing tests:",
+      "\u2716 water exact-edge admission is atomic at learned 6000g/MV10 boundary (87.7665ms)"
+    ]
+  },
+  {
+    "mutation": "posture-blocks-up",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (49.836292ms)",
+      "\u2716 failing tests:",
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (49.836292ms)"
+    ]
+  },
+  {
+    "mutation": "fare-blocks-up",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (74.817ms)",
+      "\u2716 both real bottoms retain darkness, actual chest descendants and free lit-loot return (64.321458ms)",
+      "\u2716 failing tests:",
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (74.817ms)",
+      "\u2716 both real bottoms retain darkness, actual chest descendants and free lit-loot return (64.321458ms)"
+    ]
+  },
+  {
+    "mutation": "stale-drowns",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (101.287ms)",
+      "\u2716 failing tests:",
+      "\u2716 captured free Up survives changed eligibility and old generations cannot drown reentry (101.287ms)"
+    ]
+  },
+  {
+    "mutation": "wrong-corpse-owner",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 Chapel recovery selects only actual owned bottom corpses and permits forced overload (69.388833ms)",
+      "\u2716 failing tests:",
+      "\u2716 Chapel recovery selects only actual owned bottom corpses and permits forced overload (69.388833ms)"
+    ]
+  },
+  {
+    "mutation": "roots-stay-in-corpse",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 deadline 70800 drowns once with actual nested possessions and same-body Chapel return (58.910875ms)",
+      "\u2716 Chapel recovery selects only actual owned bottom corpses and permits forced overload (48.825959ms)",
+      "\u2716 failing tests:",
+      "\u2716 deadline 70800 drowns once with actual nested possessions and same-body Chapel return (58.910875ms)",
+      "\u2716 Chapel recovery selects only actual owned bottom corpses and permits forced overload (48.825959ms)"
+    ]
+  },
+  {
+    "mutation": "malformed-job-typed-refusal",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 malformed water and historical recovery rows refuse save_corrupt without rewriting progress (458.065ms)",
+      "\u2716 failing tests:",
+      "\u2716 malformed water and historical recovery rows refuse save_corrupt without rewriting progress (458.065ms)"
+    ]
+  },
+  {
+    "mutation": "expired-up-becomes-chapel-up",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 water entry/surface/expiry/recovery reopen with original deadline and custody, then replay once (701.766708ms)",
+      "\u2716 failing tests:",
+      "\u2716 water entry/surface/expiry/recovery reopen with original deadline and custody, then replay once (701.766708ms)"
+    ]
+  },
+  {
+    "mutation": "empty-corpse-budget",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 empty corpse history stays bounded by one holder scan and creates no recovery offers (77.840916ms)",
+      "\u2716 failing tests:",
+      "\u2716 empty corpse history stays bounded by one holder scan and creates no recovery offers (77.840916ms)"
+    ]
+  },
+  {
+    "mutation": "wrong-move-key",
+    "old_command": [
+      "node",
+      "--test",
+      "kernel/ts/test/world.test.ts",
+      "kernel/ts/test/combat_flee.test.ts",
+      "kernel/ts/test/death.test.ts",
+      "kernel/ts/test/transport.test.ts",
+      "mobile/authority/local-story/transport.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 water exit projection checks its exact move key despite a differently keyed allowed alias (62.296167ms)",
+      "\u2716 failing tests:",
+      "\u2716 water exit projection checks its exact move key despite a differently keyed allowed alias (62.296167ms)"
+    ]
+  },
+  {
+    "mutation": "other-death-invalidation",
+    "old_command": [
+      "node",
+      "--test",
+      "--test-name-pattern",
+      "water exact-edge|captured free|deadline 70800|Chapel recovery|both real bottoms|empty corpse history|water exit projection",
+      "kernel/ts/test/water.test.ts"
+    ],
+    "old_exit": 0,
+    "focused_exit": 1,
+    "failing_tests": [
+      "\u2716 ordinary combat death below also invalidates the original water occurrence (65.23975ms)",
+      "\u2716 failing tests:",
+      "\u2716 ordinary combat death below also invalidates the original water occurrence (65.23975ms)"
+    ]
+  }
+]

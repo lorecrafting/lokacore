@@ -1,0 +1,10 @@
+{
+  "title": "room.pool_bottom.title",
+  "description": "room.pool_bottom.description",
+  "dark_description": "room.pool_bottom.dark",
+  "exits": {
+    "up": {
+      "to": "black_pool"
+    }
+  }
+}

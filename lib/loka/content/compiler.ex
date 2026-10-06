@@ -47,6 +47,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Food.check(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
+      Loka.Content.Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -120,7 +121,8 @@ defmodule Loka.Content.Compiler do
     )
   end
 
-  defp settings(extra, m), do: Checks.expand(Map.delete(extra, "entry"), m)
+  defp settings(extra, m),
+    do: extra |> Map.delete("entry") |> Loka.Content.Water.settings(m) |> Checks.expand(m)
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
   # not resolved against it).

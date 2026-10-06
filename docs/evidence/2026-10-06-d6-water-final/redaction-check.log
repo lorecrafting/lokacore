@@ -1,0 +1,8 @@
+current-worktree: PASS
+home: PASS
+scratch: PASS
+alternate-worktree: PASS
+file-url: PASS
+contract-pointer: PASS
+web-url: PASS
+remove-generic-path-red-control: FAILS AS EXPECTED

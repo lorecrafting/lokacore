@@ -1,0 +1,45 @@
+✔ two-exit Flee selects canonical north/west using independent seeded answers (50.636625ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (6.671708ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (4.584042ms)
+✔ random Flee candidate policies share the command query budget and fault atomically (11.835958ms)
+✔ one fatal sequence preserves custody and returns the same body with exact restoration (8.121917ms)
+✔ owners recover roots through ordinary Take while corpses remain fixed and private (14.674708ms)
+✔ HP-zero NPC retains identity but leaves living projection and admission (9.830667ms)
+✔ new API gate and narrow hydration reject invalid provenance/custody (13.045167ms)
+✔ living projection refuses a missing required NPC HP row (1.424542ms)
+✔ fatal transfer delta orders unsorted roots between initial placement and return (1.5565ms)
+✔ paid outbound and free return join exact conserved balances and body entry (128.782833ms)
+✔ unaffordable and forged endpoint offers refuse atomically (171.862292ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (82.080625ms)
+✔ Sedge teaches swim once freely through the original present dialogue (77.423458ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (367.837709ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (52.791958ms)
+✔ a fresh world mints IdSource ids and puts the player in the entry room (4.603125ms)
+✔ a body out of mv waits an hour and moves again (56.181708ms)
+✔ move north proposes one transfer and entity_entered_room, and commits it (1.824458ms)
+✔ a scripted walk visits the expected rooms and rejects the known bad moves (4.283209ms)
+✔ look is accepted with an empty delta and leaves the state unchanged (0.517583ms)
+✔ unknown capabilities and other actors are rejected before any rule (0.811375ms)
+✔ the movement invariants fail on a broken world (1.585291ms)
+✔ the delta digest construction matches the Python known answer (1.170666ms)
+✔ a foreign event faults unowned_event, and a rule mutating the world throws (2.04ms)
+✔ INSTALLED is each rule module and each implemented ruleless capability (5.2055ms)
+(node:25921) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (783.557042ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (727.149833ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (1301.9955ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (110.066875ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (238.120375ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (707.454ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (80.990583ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5452.910083

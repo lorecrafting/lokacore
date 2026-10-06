@@ -1,0 +1,622 @@
+{
+  "cases": [
+    {
+      "id": "first-current-dive",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "water",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "generation": 1,
+              "body_id": "22222222-3333-4444-8555-666666666666",
+              "room_id": "33333333-4444-4555-8666-777777777777",
+              "entered_at": 64800,
+              "deadline": 70800,
+              "job_id": "44444444-5555-4666-8777-888888888888"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-generation",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "generation": 2,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "water",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "wrong-body-owner",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "22222222-3333-4444-8555-666666666666",
+          "expected": null,
+          "value": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "water",
+            "actor_id": "22222222-3333-4444-8555-666666666666"
+          }
+        }
+      }
+    },
+    {
+      "id": "wrong-bottom-custody",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "22222222-3333-4444-8555-666666666666",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "water",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "nonfuture-deadline",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 64800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "water",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "clear-current-occupancy",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        },
+        "water": {
+          "11111111-2222-4333-8444-555555555555": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          },
+          "value": {
+            "generation": 2,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": null,
+            "entered_at": null,
+            "deadline": null,
+            "job_id": null
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "water",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "generation": 2,
+              "body_id": "22222222-3333-4444-8555-666666666666",
+              "room_id": null,
+              "entered_at": null,
+              "deadline": null,
+              "job_id": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "clear-stale-prior",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        },
+        "water": {
+          "11111111-2222-4333-8444-555555555555": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70801,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          },
+          "value": {
+            "generation": 2,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": null,
+            "entered_at": null,
+            "deadline": null,
+            "job_id": null
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "water",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "separate-writer-cannot-replace-dive",
+      "state": {
+        "clock": 64800,
+        "known_entities": {
+          "22222222-3333-4444-8555-666666666666": {
+            "kind": "body",
+            "owner_id": "11111111-2222-4333-8444-555555555555"
+          },
+          "33333333-4444-4555-8666-777777777777": {
+            "kind": "room"
+          }
+        },
+        "containers": {
+          "22222222-3333-4444-8555-666666666666": "33333333-4444-4555-8666-777777777777"
+        }
+      },
+      "ops": [
+        {
+          "op": "water.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        },
+        {
+          "op": "water.transition",
+          "writer_group": 1,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "generation": 1,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": "33333333-4444-4555-8666-777777777777",
+            "entered_at": 64800,
+            "deadline": 70800,
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          },
+          "value": {
+            "generation": 2,
+            "body_id": "22222222-3333-4444-8555-666666666666",
+            "room_id": null,
+            "entered_at": null,
+            "deadline": null,
+            "job_id": null
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "water",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "bound-expiry-occurrence",
+      "state": {
+        "clock": 64800
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "44444444-5555-4666-8777-888888888888",
+          "job": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          },
+          "due_time": 70800,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "water_generation": 1,
+          "water_body_id": "22222222-3333-4444-8555-666666666666"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "44444444-5555-4666-8777-888888888888"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "water_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "bottom"
+              },
+              "due_time": 70800,
+              "status": "pending",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "water_generation": 1,
+              "water_body_id": "22222222-3333-4444-8555-666666666666"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cancel-bound-occurrence",
+      "state": {
+        "clock": 64800,
+        "jobs": {
+          "44444444-5555-4666-8777-888888888888": {
+            "job": {
+              "cartridge_id": "water_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "bottom"
+            },
+            "due_time": 70800,
+            "status": "pending",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "water_generation": 1,
+            "water_body_id": "22222222-3333-4444-8555-666666666666"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "job.cancel",
+          "writer_group": 0,
+          "job_id": "44444444-5555-4666-8777-888888888888",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "water_generation": 1
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "44444444-5555-4666-8777-888888888888"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "water_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "bottom"
+              },
+              "due_time": 70800,
+              "status": "cancelled",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "water_generation": 1,
+              "water_body_id": "22222222-3333-4444-8555-666666666666"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-job-binding-water_body_id",
+      "state": {
+        "clock": 64800
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "44444444-5555-4666-8777-888888888888",
+          "job": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          },
+          "due_time": 70800,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "water_generation": 1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-job-binding-water_generation",
+      "state": {
+        "clock": 64800
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "44444444-5555-4666-8777-888888888888",
+          "job": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          },
+          "due_time": 70800,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "water_body_id": "22222222-3333-4444-8555-666666666666"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-job-binding-actor_id",
+      "state": {
+        "clock": 64800
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "44444444-5555-4666-8777-888888888888",
+          "job": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          },
+          "due_time": 70800,
+          "water_generation": 1,
+          "water_body_id": "22222222-3333-4444-8555-666666666666"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "44444444-5555-4666-8777-888888888888"
+          }
+        }
+      }
+    }
+  ]
+}
