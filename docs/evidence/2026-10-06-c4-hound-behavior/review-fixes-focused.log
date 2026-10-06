@@ -1,0 +1,59 @@
+$ mise exec -- npm --prefix kernel/ts run typecheck
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+
+
+EXIT 0
+
+$ mise exec -- ./mobile/app/node_modules/.bin/tsc -p mobile/app/tsconfig.json --noEmit
+
+EXIT 0
+
+$ mise exec -- node --test --test-reporter=dot kernel/ts/test/encounter_composition.test.ts kernel/ts/test/population_composition.test.ts kernel/ts/test/combat.test.ts kernel/ts/test/c4_pack.test.ts kernel/ts/test/c4_pack_composition.test.ts mobile/authority/local-story/c4_pack.test.ts mobile/app/book/combat.test.ts
+....................
+....................
+...
+
+EXIT 0
+
+$ mise exec -- mix test test/loka/core/c4_pack_composition_test.exs test/loka/core/encounter_composition_test.exs --force
+Compiling 66 files (.ex)
+Generated loka app
+Running ExUnit with seed: 402082, max_cases: 16
+
+........
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 8 passed
+
+EXIT 0
+
+$ mise exec -- mix credo --strict
+Checking 139 source files (this might take a while) ...
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.1 seconds (0.06s to load, 0.06s running 4 checks on 139 files)
+1505 mods/funs, found no issues.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+
+EXIT 0
+
+$ mise exec -- mix format --check-formatted
+
+EXIT 0
+
+$ mise exec -- elixir bin/contracts.exs
+
+EXIT 0
+
+$ mise exec -- elixir bin/check_docs.exs
+641 docs, 0 broken link(s), 0 unreachable
+
+EXIT 0
+
+$ git diff --check
+
+EXIT 0

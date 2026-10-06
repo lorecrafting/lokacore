@@ -1,38 +1,23 @@
 # C4 hound response — provisional source evidence
 
-Source head `252eb45624a27d5eb90c89a2eff7159e09f9b613` builds from the independently reviewed C4 plan and published C3 main. The chapter still carries published `v029` / API `1.25` / 140 genesis IDs. C4 changes authored content, so that release pin is intentionally provisional until the published D1 predecessor is integrated and an independent successor answer is derived. This head is for fresh primary, save and proposal review; it is not a publication candidate yet.
+The review-fix source head is `251b0bff4f90b7e89cf327f11effe60282791574`. It builds from the independently reviewed C4 plan and published C3 main. Its `v029` / API `1.25` / 140-ID content pin is deliberately provisional while D1 is pending. The C4 successor pin, full gate, and integrated carryover review follow D1 publication; this head is for scoped primary, save, and foundation rechecks.
 
-Deliberate Attack admits the selected living hound and bounded same-plan, co-present helpers from exact population slots. One deterministic hound has the opponent opportunity each round. A wounded selected hound chooses a legal area exit, transfers with its same-group flight stamp, retains its injury and slot, and leaves the fixed roster. No helper refills mid-fight. Flee, death, stale jobs and an empty due roster close the encounter. Book renders the roster and target; local Story classifies pack narration in Combat history. A real rollback-journal SQLite test covers attack, rotation, cold reopen, flight, and byte-preserving refusal of a forged roster.
+Deliberate Attack admits the selected living hound and bounded same-plan, co-present helpers. The repaired cursor picks one living member per round. An injured selected hound can take one legal exit, retain its injury and slot, and leave the fixed roster. On an even round, the player still gets the scheduled opportunity against a remaining hound. A flight stamp requires the selected member's actual same-group departure and the round's due time, even when elapsed advances farther. Final admission requires the complete group; partial prefix composition remains lawful. SQLite COMMIT failure leaves the old memory and disk state, and retry saves one flight and receipt.
 
-## Checks on the provisional source
+`review-fixes-focused.log` retains the review-fix green commands and raw outputs: kernel and app TypeScript checks, 43 focused Node tests, 8 focused Elixir tests, strict Credo with zero findings, formatting, contracts, docs, and diff whitespace. All exited zero. `SHA256SUMS` lists every retained raw log and its adjacent `SHA256SUMS.verify` records a successful verification. Paths in logs are redacted; no device or owner-save data was used.
 
-| Command | Result |
+Retained red controls each failed on a planted source mutation that was restored:
+
+| Raw log | Distinct break caught |
 | --- | --- |
-| `mise exec -- npm --prefix kernel/ts run typecheck` | Exit 0, including tests and play. |
-| `mise exec -- ./mobile/app/node_modules/.bin/tsc -p mobile/app/tsconfig.json --noEmit` | Exit 0. |
-| `mise exec -- node --test --test-reporter=dot kernel/ts/test/encounter_composition.test.ts kernel/ts/test/population_composition.test.ts kernel/ts/test/combat.test.ts kernel/ts/test/c4_pack.test.ts kernel/ts/test/c4_pack_composition.test.ts mobile/authority/local-story/c4_pack.test.ts mobile/app/book/combat.test.ts` | Exit 0 after the source commit; 39 tests. |
-| `mise exec -- mix test test/loka/core/c4_pack_composition_test.exs test/loka/core/encounter_composition_test.exs --force` | Exit 0; 7 tests after the final Elixir guard cleanup. |
-| `mise exec -- mix credo --strict` | Exit 0; 0 findings and no new metric exceptions. |
-| `mise exec -- elixir bin/contracts.exs` | Exit 0. |
-| `mise exec -- elixir bin/check_docs.exs` | Exit 0; 637 documents, 0 broken or unreachable links. |
-| `mise exec -- mix format --check-formatted`, normal commit hook, `git diff --check` | Exit 0, including Prettier and architecture scan. |
+| `even-flight-red.log` | Fleeing selected helper skips the player's even-round attack. |
+| `helper-identity-red.log` | The primary attacks in place of the selected helper despite cursor rotation. |
+| `flight-commit-red.log` | Memory adopts a flight before a failed SQLite COMMIT; recovery/retry diverges. |
+| `pack-shape-ts-red.log`, `pack-shape-ex-red.log` | An opted pack opens without its required roster. |
+| `selected-flight-ts-red.log`, `selected-flight-ex-red.log` | A flight stamp names an unselected member. |
+| `dead-cursor-ts-red.log`, `dead-cursor-ex-red.log` | A dead cursor still wins selection over the living flier. |
+| `late-endpoint-ts-red.log`, `late-endpoint-ex-red.log` | A legal flight is compared to the later elapsed endpoint instead of its round due time. |
 
-A provisional `mise exec -- bin/check_all.sh` run reached 360/361 passing ExUnit tests, then stopped at the compiled Missing Child content pin: the source adds C4 chapter content while the pin still names published C3 `v029`. The final successor pin and a complete broad gate wait for D1 publication. The failed gate result is retained as a dependency, not counted as a passing check. The final import-only helper rename was followed by a green TypeScript typecheck and focused suite.
+The literal proposal fixture also refuses a healthy/no-encounter stamp, a stationary transfer, a missing same-group exit, a wrong plan/roster/cursor, and a mismatched final stamp; it accepts a legal flight when the elapsed endpoint exceeds the round due time. The corresponding TypeScript and Elixir composers and independent invariants match these literal answers. Earlier provisional mutants and a 360/361 ExUnit full-gate run were observed but their raw output was **not captured**; they are not part of the retained evidence or a passing final gate. The one failing full-gate check was the known stale compiled content pin.
 
-## Red controls observed and restored
-
-| Planted break | Focused failure |
-| --- | --- |
-| Treat HP equal to the flight threshold as eligible (`<` to `<=`) | Strict wounded-flight boundary test failed. |
-| Remove the same-time flight stamp exclusion from the population job | Both controlled equal-time order outcomes failed. |
-| Remove full-plan admission proof in the TypeScript and Elixir composers | The literal foreign-plan roster fixture failed in each kernel; older encounter cases remained green. |
-| Admit an already engaged helper | Bounded admission test failed. |
-| Remove roster rendering from the actual Book Combat component | Component test failed. |
-| Omit pack narration keys from local Story's Combat classification | Real SQLite Combat-history assertion failed. |
-| Scan one fewer population slot at admission | Six-slot night admission test failed. |
-
-Literal proposal cases also went red against the original permissive composition before the guards were added: dropping a live helper, transferring without a flight stamp, writing a wrong cursor and rejoining a stale member. Both portable kernels now agree with the independent fixture answers. Every source mutation was restored.
-
-Ponytail Review: the implementation uses the existing combat resolver, C3 slots, delta algebra, local Story and Book paths. No dependency, generic pack framework, compatibility adapter or metric suppression was added. The 811-line literal proposal fixture is the largest single addition because it pins full row states across both kernels; shared fixture state and named row edits removed repetitive copies. Correctness self-review checked deterministic selection, full-plan slot provenance, death and flight closure, bounded work, final save validation and prefix composition. No additional substantive finding remains at this provisional head. Fresh independent review is required.
-
-The Book Flee narration fallback in this source overlaps the same correction in D1 PR231. Drop the duplicate when merging published D1; then derive the C4 successor release/hash/IDs and rerun the full gate before carryover review. No native build, simulator, owner save, browser preview, push or PR was used for this provisional source.
+Ponytail Review and correctness self-review: the fix reuses the existing encounter roster, population slot, delta composition, round resolver, and SQLite transaction path. No new dependency, compatibility adapter, or metric suppression was added. The larger fixture addition pins complete literal row combinations for both kernels. Reviewed selected-ID repair over absent/dead members, same-group departure, occurrence time, even-round opportunity, final versus prefix admission, and failed-COMMIT retry. Remaining work is independent scoped recheck and D1 successor integration/re-pin/full gate; no native build, simulator, owner save, preview, push, or PR was used.
