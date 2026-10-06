@@ -1,0 +1,47 @@
+X.
+
+Failed tests:
+
+✖ literal exact pack admission and refusals agree with both independent guards (5.297792ms)
+  AssertionError [ERR_ASSERTION]: pack-open-cannot-omit-roster
+  + actual - expected
+  
+    {
+  +   changes: [
+  +     {
+  +       target: {
+  +         encounter_id: '00000006-0000-4000-8000-000000000000',
+  +         kind: 'encounter'
+  +       },
+  +       value: {
+  +         body_id: '00000002-0000-4000-8000-000000000000',
+  +         character_id: '00000001-0000-4000-8000-000000000000',
+  +         job_id: '00000007-0000-4000-8000-000000000000',
+  +         npc_id: '00000004-0000-4000-8000-000000000000',
+  +         room_id: '00000005-0000-4000-8000-000000000000',
+  +         round: 1,
+  +         status: 'open'
+  +       }
+  -   fault: {
+  -     code: 'precondition_failed',
+  -     kind: 'fault',
+  -     target: {
+  -       encounter_id: '00000006-0000-4000-8000-000000000000',
+  -       kind: 'encounter'
+        }
+  +   ]
+  -   }
+    }
+  
+      at TestContext.<anonymous> (repo/kernel/ts/test/c4_pack_composition.test.ts:26:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { changes: [ [Object] ] },
+    expected: { fault: { kind: 'fault', code: 'precondition_failed', target: [Object] } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

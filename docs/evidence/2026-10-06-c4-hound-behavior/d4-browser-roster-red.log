@@ -1,0 +1,45 @@
+$ browser roster omission mutant; C4 e2e
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run tests/c4_pack.e2e.ts
+
+
+ RUN  e2e v0.17.0 <WORKTREE>/mobile/app
+      run 01a111e6-f6c2-716a-b7f8-0fb01a2d07e4 · targets: web
+
+ ✓ target "web" command ready 1.18s
+ ❯ |web| tests/c4_pack.e2e.ts (1 test | 1 failed) 9.44s
+   × hound Attack shows admitted helpers on the Combat page 9.44s
+     → expect.toBeVisible failed
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| tests/c4_pack.e2e.ts > hound Attack shows admitted helpers on the Combat page
+ASSERTION_FAILED: expect.toBeVisible failed
+locator: getByText("a fen hound (your target)")
+expected: visible
+observed: no node (match count 0)
+ ❯ tests/c4_pack.e2e.ts:19:3
+     17|   await screen.getByRole('button', /Attack/).tap();
+     18|   await expect(screen.getByText('Combat')).toBeVisible();
+     19|   await expect(screen.getByText('a fen hound (your target)')).toBeVis…
+       |   ^
+     20|   await expect(screen.getByText(/Another fen hound turns to defend it…
+     21| });
+ ❯ at http://127.0.0.1:19106/
+ ❯ screen .e2e/artifacts/web/tests_c4_pack.e2e.ts__hound_20Attack_20shows_20admitted_20helpers_20on_20the_20Combat_20page-f02c001d/default/attempt-0/failure/screen.txt
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 0 passed (1)
+      Tests  1 failed | 0 passed (1)
+   Start at  05:48:31
+   Duration  11.09s (startup 1.18s)
+     Report  .e2e/report.json
+
+EXIT_STATUS=1

@@ -13,7 +13,31 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      skip: ${{ steps.scope.outputs.skip }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: scope
+        run: |
+          base=$(bin/ci_base.sh "$HEAD" browser)
+          echo "skip=$([ "$(bin/ci_scope.sh "$base" "$HEAD" browser)" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
   browser:
+    needs: changes
+    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:

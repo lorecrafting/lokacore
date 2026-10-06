@@ -556,6 +556,17 @@
               "type": "null"
             }
           ]
+        },
+        "last_flight_at": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

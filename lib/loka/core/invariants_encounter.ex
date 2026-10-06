@@ -1,6 +1,6 @@
 defmodule Loka.Core.InvariantsEncounter do
   @moduledoc "Independent encounter/job guard and final-row proof; never invokes composition."
-  alias Loka.Core.Compose
+  alias Loka.Core.{Compose, InvariantsPack}
   import Loka.Core.Canonical, only: [is_safe_integer: 1]
 
   @spec holds?(map(), [map()], map()) :: boolean()
@@ -12,82 +12,181 @@ defmodule Loka.Core.InvariantsEncounter do
 
     initial =
       {Map.get(state, "encounters", %{}), Map.get(state, "jobs", %{}),
-       Map.get(state, "containers", %{}), %{}}
+       Map.get(state, "containers", %{}), Map.get(state, "population_slots", %{}), %{}}
 
-    case Enum.reduce_while(ops, initial, &replay(&1, &2, state, horizon)) do
+    case Enum.reduce_while(Enum.with_index(ops), initial, fn {op, index}, rows ->
+           replay(op, rows, state, horizon, Enum.take(ops, index))
+         end) do
       false ->
         false
 
-      {_, _, _, written} ->
+      {_, _, _, _, written} ->
         Enum.all?(written, fn {_, expected} -> expected in result["changes"] end)
     end
   end
 
-  defp replay(%{"op" => "entity.transfer"} = op, {encounters, jobs, containers, written}, _, _) do
+  defp replay(
+         %{"op" => "entity.transfer"} = op,
+         {encounters, jobs, containers, slots, written},
+         _,
+         _,
+         _
+       ) do
     {:cont,
-     {encounters, jobs, Map.put(containers, op["entity_id"], op["destination_id"]), written}}
+     {encounters, jobs, Map.put(containers, op["entity_id"], op["destination_id"]), slots,
+      written}}
+  end
+
+  defp replay(
+         %{"op" => "population.slot"} = op,
+         {encounters, jobs, containers, slots, written},
+         _,
+         _,
+         _
+       ) do
+    target = %{"kind" => "population_slot", "plan" => op["plan"], "slot" => op["slot"]}
+
+    {:cont,
+     {encounters, jobs, containers, Map.put(slots, Compose.key(target), op["value"]), written}}
   end
 
   defp replay(
          %{"op" => "encounter." <> _} = op,
-         {encounters, jobs, containers, written},
+         {encounters, jobs, containers, slots, written},
          state,
-         _
+         horizon,
+         preceding
        ) do
-    case encounter(op, encounters, containers, Map.get(state, "known_entities", %{})) do
+    ctx = %{
+      state: state,
+      containers: containers,
+      slots: slots,
+      preceding: preceding,
+      horizon: horizon
+    }
+
+    case encounter(op, encounters, ctx) do
       nil ->
         {:halt, false}
 
       row ->
         {:cont,
-         {Map.put(encounters, op["encounter_id"], row), jobs, containers,
+         {Map.put(encounters, op["encounter_id"], row), jobs, containers, slots,
           record(written, op, row)}}
     end
   end
 
-  defp replay(%{"op" => "job." <> _} = op, {encounters, jobs, containers, written}, _, horizon) do
+  defp replay(
+         %{"op" => "job." <> _} = op,
+         {encounters, jobs, containers, slots, written},
+         _,
+         horizon,
+         _
+       ) do
     case job(op, jobs[op["job_id"]], horizon) do
       nil ->
         {:halt, false}
 
       row ->
         {:cont,
-         {encounters, Map.put(jobs, op["job_id"], row), containers, record(written, op, row)}}
+         {encounters, Map.put(jobs, op["job_id"], row), containers, slots,
+          record(written, op, row)}}
     end
   end
 
-  defp replay(_, rows, _, _), do: {:cont, rows}
+  defp replay(_, rows, _, _, _), do: {:cont, rows}
 
   defp record(written, op, row) do
     target = Compose.target(op)
     Map.put(written, Compose.key(target), %{"target" => target, "value" => row})
   end
 
-  defp encounter(%{"op" => "encounter.open"} = op, encounters, containers, known) do
+  defp encounter(%{"op" => "encounter.open"} = op, encounters, %{
+         state: state,
+         containers: containers
+       }) do
     if not Map.has_key?(encounters, op["encounter_id"]) and participants_free?(op, encounters) and
-         participants?(op, containers, known),
+         participants?(op, containers, Map.get(state, "known_entities", %{})) and
+         admission_shape?(op, state, containers),
        do:
-         Map.take(op, ~w(character_id body_id npc_id room_id job_id))
+         Map.take(op, ~w(character_id body_id npc_id room_id job_id active_ids next_opponent_id))
          |> Map.merge(%{"status" => "open", "round" => 1})
   end
 
-  defp encounter(op, encounters, _, _) do
+  defp encounter(op, encounters, ctx) do
     row = encounters[op["encounter_id"]]
 
     cond do
-      row["status"] != "open" or row["job_id"] != op["job_id"] -> nil
-      op["op"] == "encounter.close" -> Map.put(row, "status", "closed")
-      row["round"] != op["round"] or op["job_id"] == op["next_job_id"] -> nil
-      not is_safe_integer(op["round"] + 1) -> nil
-      true -> Map.merge(row, %{"round" => op["round"] + 1, "job_id" => op["next_job_id"]})
+      not current_encounter?(op, row) ->
+        nil
+
+      op["op"] == "encounter.close" ->
+        close_row(row)
+
+      row["round"] != op["round"] or op["job_id"] == op["next_job_id"] ->
+        nil
+
+      not is_safe_integer(op["round"] + 1) ->
+        nil
+
+      row["active_ids"] != nil and
+          not InvariantsPack.advance?(op, row, ctx) ->
+        nil
+
+      true ->
+        advance_row(row, op)
     end
   end
 
+  defp admission_shape?(op, state, containers) do
+    origin = get_in(state, ["created", op["npc_id"], "origin"])
+
+    spec =
+      if is_map(origin) and origin["kind"] == "spawned",
+        do: get_in(state, ["population_specs", Compose.key(origin["by"])])
+
+    opted = is_map(get_in(spec || %{}, ["plan", "pack"]))
+    roster = op["active_ids"]
+
+    roster != nil == opted and
+      ((roster == nil and op["next_opponent_id"] == nil) or
+         (roster != nil and InvariantsPack.members?(op, state, containers)))
+  end
+
+  defp close_row(row),
+    do:
+      Map.merge(
+        row,
+        if(row["active_ids"] == nil,
+          do: %{"status" => "closed"},
+          else: %{"status" => "closed", "active_ids" => [], "next_opponent_id" => nil}
+        )
+      )
+
+  defp advance_row(row, op),
+    do:
+      Map.merge(row, %{"round" => op["round"] + 1, "job_id" => op["next_job_id"]})
+      |> Map.merge(
+        if(row["active_ids"] == nil,
+          do: %{},
+          else: Map.take(op, ~w(active_ids npc_id next_opponent_id))
+        )
+      )
+
+  defp current_encounter?(op, row),
+    do:
+      row["status"] == "open" and row["job_id"] == op["job_id"] and
+        (row["active_ids"] == nil or row == op["expected"])
+
   defp participants_free?(op, encounters) do
+    ids = [op["body_id"] | op["active_ids"] || [op["npc_id"]]]
+
     Enum.all?(encounters, fn {_, row} ->
       row["status"] != "open" or
-        (row["body_id"] not in [op["body_id"], op["npc_id"]] and
-           row["npc_id"] not in [op["body_id"], op["npc_id"]])
+        Enum.all?(
+          [row["body_id"] | row["active_ids"] || [row["npc_id"]]],
+          &(&1 not in ids)
+        )
     end)
   end
 

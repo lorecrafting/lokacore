@@ -47,40 +47,66 @@ defmodule Loka.Core.InvariantsPopulation do
       after_row["next_wander_due"] >= before["next_wander_due"] and
         after_row["job_id"] != before["job_id"]
 
-  defp legal?("population.slot", nil, %{
-         "generation" => 0,
-         "member_id" => nil,
-         "replacement_due" => nil
-       }),
-       do: true
-
-  defp legal?("population.slot", nil, %{
-         "generation" => 1,
-         "member_id" => id,
-         "replacement_due" => nil
-       }),
-       do: id != nil
-
-  defp legal?("population.slot", %{"generation" => 0}, %{
-         "generation" => 1,
-         "member_id" => id,
-         "replacement_due" => nil
-       }),
-       do: id != nil
+  defp legal?(
+         "population.slot",
+         nil,
+         %{
+           "generation" => 0,
+           "member_id" => nil,
+           "replacement_due" => nil
+         } = next
+       ),
+       do: next["last_flight_at"] == nil
 
   defp legal?(
          "population.slot",
-         %{"generation" => gen, "member_id" => id, "replacement_due" => nil},
-         %{"generation" => gen2, "member_id" => id2, "replacement_due" => due}
+         nil,
+         %{
+           "generation" => 1,
+           "member_id" => id,
+           "replacement_due" => nil
+         } = next
        ),
-       do: gen2 == gen and id2 == id and id != nil and due != nil
+       do: id != nil and next["last_flight_at"] == nil
+
+  defp legal?(
+         "population.slot",
+         %{"generation" => 0},
+         %{
+           "generation" => 1,
+           "member_id" => id,
+           "replacement_due" => nil
+         } = next
+       ),
+       do: id != nil and next["last_flight_at"] == nil
+
+  defp legal?(
+         "population.slot",
+         %{"generation" => gen, "member_id" => id, "replacement_due" => nil} = before,
+         %{"generation" => gen2, "member_id" => id2, "replacement_due" => due} = after_row
+       )
+       when not is_nil(due),
+       do:
+         gen2 == gen and id2 == id and id != nil and
+           after_row["last_flight_at"] == before["last_flight_at"]
+
+  defp legal?(
+         "population.slot",
+         %{"generation" => gen, "member_id" => id, "replacement_due" => nil} = before,
+         %{"generation" => gen, "member_id" => id, "replacement_due" => nil} = after_row
+       ),
+       do:
+         id != nil and is_integer(after_row["last_flight_at"]) and
+           after_row["last_flight_at"] != before["last_flight_at"]
 
   defp legal?(
          "population.slot",
          %{"generation" => gen, "member_id" => id, "replacement_due" => due},
-         %{"generation" => gen2, "member_id" => id2, "replacement_due" => nil}
+         %{"generation" => gen2, "member_id" => id2, "replacement_due" => nil} = after_row
        ),
-       do: due != nil and gen2 == gen + 1 and id2 != nil and id2 != id
+       do:
+         due != nil and gen2 == gen + 1 and id2 != nil and id2 != id and
+           after_row["last_flight_at"] == nil
 
   defp legal?(_, _, _), do: false
 end
