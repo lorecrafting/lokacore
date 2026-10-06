@@ -27,7 +27,22 @@
         "quantity"
       ],
       "additionalProperties": false,
-      "description": "Exact vessel contents: null iff zero, positive declared kind bounded by immutable capacity."
+      "description": "Exact vessel contents: null iff zero, positive declared kind bounded by immutable capacity.",
+      "examples": [
+        {
+          "kind": {
+            "cartridge_id": "liquid_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "liquid",
+            "key": "water"
+          },
+          "quantity": 4
+        },
+        {
+          "kind": null,
+          "quantity": 0
+        }
+      ]
     },
     "VesselSpec": {
       "type": "object",
@@ -50,7 +65,17 @@
         "initial"
       ],
       "additionalProperties": false,
-      "description": "Opted finite vessel shell with authored positive capacity and initial contents."
+      "description": "Opted finite vessel shell with authored positive capacity and initial contents.",
+      "examples": [
+        {
+          "capacity": 4,
+          "unit_label": "liquid.units",
+          "initial": {
+            "kind": null,
+            "quantity": 0
+          }
+        }
+      ]
     },
     "LiquidDefinition": {
       "type": "object",
@@ -83,7 +108,16 @@
         "drink_amount"
       ],
       "additionalProperties": false,
-      "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid."
+      "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid.",
+      "examples": [
+        {
+          "key": "water",
+          "label": "liquid.water",
+          "unit_label": "liquid.units",
+          "grams_per_unit": 250,
+          "drink_amount": 1
+        }
+      ]
     },
     "LiquidView": {
       "type": "object",
@@ -123,7 +157,21 @@
         "label"
       ],
       "additionalProperties": false,
-      "description": "Confirmed vessel contents and authored capacity/labels, never an optimistic amount."
+      "description": "Confirmed vessel contents and authored capacity/labels, never an optimistic amount.",
+      "examples": [
+        {
+          "kind": {
+            "cartridge_id": "liquid_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "liquid",
+            "key": "water"
+          },
+          "quantity": 4,
+          "capacity": 4,
+          "unit_label": "liquid.units",
+          "label": "liquid.water"
+        }
+      ]
     }
   }
 }
