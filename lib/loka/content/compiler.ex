@@ -1,6 +1,18 @@
+# size: allow 315, ancestry source manifest wiring joins the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
-  alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
+  alias Loka.Content.{
+    Ancestries,
+    Artifact,
+    Checks,
+    Dialogues,
+    Links,
+    Quests,
+    Reactions,
+    Recipes,
+    Requires
+  }
+
   alias Loka.Content.{Entities, Position, Resources, Scenes}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
@@ -58,12 +70,15 @@ defmodule Loka.Content.Compiler do
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
       Links.check(defs, v2),
-      final_checks(manifest, defs, v2, registry)
+      final_checks(manifest, defs, v2, located, registry)
     ])
   end
 
-  defp final_checks(manifest, defs, v2, registry),
-    do: Position.check(manifest, defs) ++ Scenes.check(manifest, defs, v2, registry)
+  defp final_checks(manifest, defs, v2, located, registry),
+    do:
+      Position.check(manifest, defs) ++
+        Scenes.check(manifest, defs, v2, registry) ++
+        Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{}))
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
@@ -99,7 +114,7 @@ defmodule Loka.Content.Compiler do
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
-        {extra, manifest} = Map.split(m, ["entry", "calendar", "world", "chapters"])
+        {extra, manifest} = Map.split(m, ["entry", "calendar", "world", "chapters", "ancestries"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
         manifest = manifest |> Position.requires() |> Scenes.requires()
@@ -118,6 +133,10 @@ defmodule Loka.Content.Compiler do
     |> put_in(
       ["properties", "chapters"],
       get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "chapters"])
+    )
+    |> put_in(
+      ["properties", "ancestries"],
+      get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "ancestries"])
     )
   end
 

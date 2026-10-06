@@ -106,6 +106,17 @@ test('composition known answers', () => {
   }
 });
 
+// Breaks: the new character row overwrites an existing selection or is omitted from changed rows.
+test('character selection has the same one-row portable composition answer', () => {
+  const c = read('protocol/fixtures/character_composition.json');
+  assert.equal(encode(compose(c.state, c.delta) as Json), encode(c.expected));
+  const selected = {
+    ...c.state,
+    characters: { [c.delta.ops[0].character_id]: c.delta.ops[0].value },
+  };
+  assert.equal(encode(compose(selected, c.delta) as Json), encode(c.repeat));
+});
+
 test('invariant checks known answers, a holding and a violated case per invariant checked in both kernels', () => {
   const covered = new Set<string>();
   for (const c of [

@@ -1,4 +1,4 @@
-// size: allow 310, water transitions join the closed delta composer
+// size: allow 315, immutable character selection joins the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { quest, repeatPair } from './compose_quest.ts';
@@ -107,7 +107,7 @@ export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-// size: allow 44, exhaustive dispatch over closed liquid, choice and patrol operations
+// size: allow 48, exhaustive dispatch includes once-only character selection
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
@@ -115,6 +115,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   switch (op.op) {
+    case 'character.select':
+      return check(row === undefined, op.value);
     case 'fact.assign':
       return assign(op, row, ctx);
     case 'entity.transfer':
@@ -238,12 +240,15 @@ function inside(d: string, e: string, ctx: Ctx): boolean {
   return false;
 }
 
+// size: allow 44, one read dispatch covers the closed changed-row target union
 function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
   const s = ctx.state;
   if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
   switch (t.kind) {
+    case 'character':
+      return get(section(s, 'characters'), t.character_id);
     case 'fact':
       return get(section(s, 'facts'), key(t));
     case 'entity':

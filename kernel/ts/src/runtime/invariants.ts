@@ -1,3 +1,4 @@
+// size: allow 305, character selection joins the independent precondition replay
 import { foodTransferValid } from './invariants_food.ts';
 import { liquidRowsValid } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
@@ -47,6 +48,7 @@ function link(op: Any): [Json | undefined, Json] {
     'choice.attempt': ['pending', 'pending'],
   };
   if (fixed[op.op]) return fixed[op.op]!;
+  if (op.op === 'character.select') return [undefined, op.value];
   if (op.op === 'fact.assign') return [op.expected, op.value];
   if (op.op === 'entity.create') return [undefined, op.identity];
   if (op.op === 'entity.transfer') return [op.source_id, op.destination_id];
@@ -56,6 +58,7 @@ function link(op: Any): [Json | undefined, Json] {
 
 function initial(op: Any, s: Any): Json | undefined {
   const [family] = op.op.split('.');
+  if (op.op === 'character.select') return s.characters?.[op.character_id];
   if (op.op === 'fact.assign') return s.facts?.[key(target(op))] ?? s.fact_defaults?.[key(op.fact)];
   if (op.op === 'fuel.set') return s.fuel?.[op.item_id];
   if (op.op === 'entity.create') return s.created?.[op.identity.id];

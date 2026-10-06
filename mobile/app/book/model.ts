@@ -264,6 +264,12 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   if (scene && next)
     placed.push({ ...button(next, ''), input: { scene: scene.scene, line: scene.index } });
   return [
+    ...(v.ancestry_choices ?? []).map((a) => ({
+      label: label(a.label),
+      action_key: 'choose_ancestry',
+      target_ids: [],
+      input: { ancestry: a.key },
+    })),
     ...placed,
     ...corpseButtons(v, text),
     ...noticeButtons(v, button, names, text),

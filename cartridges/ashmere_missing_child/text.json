@@ -1,4 +1,12 @@
 {
+  "ancestry.fen_born.label": "Fen-born",
+  "ancestry.fen_born.description": "+1 PER, Swim learned, Fen standing +2.",
+  "ancestry.road_born.label": "Road-born",
+  "ancestry.road_born.description": "+1 DEX, Haggle learned. Crown standing comes in a later chapter.",
+  "ancestry.hill_folk.label": "Hill-folk",
+  "ancestry.hill_folk.description": "+1 CON, sight in dark places. Mining comes in a later chapter.",
+  "ancestry.fey_touched.label": "Fey-touched",
+  "ancestry.fey_touched.description": "+1 SPI, Fen standing +2. Spell words come in chapter two.",
   "room.drowned_lantern.title": "The Drowned Lantern",
   "room.drowned_lantern.description": "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The [rumor board](rumor_board) is thick with pinned notes, and Maud’s bar runs along the back wall.",
   "room.ferry_landing.title": "Ferry Landing",

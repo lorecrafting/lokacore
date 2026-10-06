@@ -1,4 +1,4 @@
-# size: allow 335, patrol, retirement, and water pairing join precondition replay
+# size: allow 340, character selection joins portable precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is
@@ -271,6 +271,7 @@ defmodule Loka.Core.Invariants do
   # Each op reads one value of its target and leaves another: the fact value, the container,
   # the quest state, the continuation or job status, the clock.
   defp link(%{"op" => "fact.assign"} = op), do: {op["expected"], op["value"]}
+  defp link(%{"op" => "character.select"} = op), do: {nil, op["value"]}
   defp link(%{"op" => "entity.create", "identity" => i}), do: {nil, i}
   defp link(%{"op" => "entity.transfer"} = op), do: {op["source_id"], op["destination_id"]}
   defp link(%{"op" => "quest.retire"}), do: {"resolved", nil}
@@ -290,6 +291,9 @@ defmodule Loka.Core.Invariants do
     with nil <- get_in(s, ["facts", Compose.key(Compose.target(op))]),
          do: get_in(s, ["fact_defaults", Compose.key(op["fact"])])
   end
+
+  defp initial(%{"op" => "character.select", "character_id" => id}, s),
+    do: get_in(s, ["characters", id])
 
   defp initial(%{"op" => "entity.create", "identity" => i}, s),
     do: get_in(s, ["created", i["id"]])

@@ -114,6 +114,9 @@ defmodule Loka.Core.Compose do
     check(now == op["expected"], op["value"])
   end
 
+  defp apply_op(%{"op" => "character.select", "value" => value}, t, ctx),
+    do: check(read(t, ctx) == nil, value)
+
   defp apply_op(%{"op" => "entity.create", "identity" => identity}, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == nil and Creation.valid?(identity, state), identity)
 
@@ -274,6 +277,7 @@ defmodule Loka.Core.Compose do
 
   defp base(%{"kind" => "fuel", "item_id" => i}, s), do: section(s, "fuel")[i]
   defp base(%{"kind" => "fact"} = t, s), do: section(s, "facts")[key(t)]
+  defp base(%{"kind" => "character", "character_id" => id}, s), do: section(s, "characters")[id]
   defp base(%{"kind" => "entity", "entity_id" => e}, s), do: section(s, "created")[e]
   defp base(%{"kind" => "containment", "entity_id" => e}, s), do: section(s, "containers")[e]
   defp base(%{"kind" => "quest", "instance_id" => i}, s), do: section(s, "quests")[i]

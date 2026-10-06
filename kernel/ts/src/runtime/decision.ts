@@ -8,6 +8,7 @@ import {
   type FuelSpec,
   type BarrierState,
   type CharacterId,
+  type CharacterChoice,
   type Command,
   type CommandPayload,
   type CompiledCartridge,
@@ -59,6 +60,7 @@ export type State = {
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
+  readonly characters?: Readonly<Record<string, CharacterChoice>>;
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;

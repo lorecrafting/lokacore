@@ -1,12 +1,33 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v035_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v036_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward/message custody, return guards or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile("cartridges/ashmere_missing_child") == {:ok, expected, []}
+  end
+
+  # Breaks: a source ancestry points at a missing attribute or an unowned starting faction fact.
+  test "ancestry source rejects unresolved values and non-player faction", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "cartridge.json")
+    source = path |> File.read!() |> JSON.decode!()
+
+    for changed <- [
+          put_in(source, ["ancestries", "fen_born", "attribute"], "missing"),
+          put_in(source, ["ancestries", "fen_born", "faction", "fact"], "mill_key_known")
+        ] do
+      File.write!(path, JSON.encode!(changed))
+      assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+      assert Enum.any?(
+               diagnostics,
+               &(&1["path"] == "cartridge.ancestries.fen_born.attribute" or
+                   &1["path"] == "cartridge.ancestries.fen_born.faction.fact")
+             )
+    end
   end
 
   # Breaks: an action-started scene can bind a different Green detail than its Begin recipe.

@@ -253,7 +253,8 @@ function Bottom(p: BottomProps) {
   const notice = p.page?.kind === 'notice' ? p.page.id : undefined;
   return (
     <View style={{ padding: 8 }}>
-      {!view.scene &&
+      {!view.ancestry_choices &&
+        !view.scene &&
         !view.combat &&
         (p.page ? (
           p.page.kind === 'thing' ||
@@ -276,17 +277,19 @@ function Bottom(p: BottomProps) {
             openMap={() => p.open({ kind: 'map' })}
           />
         ))}
-      <Status
-        time={view.time}
-        calendar={view.calendar_status}
-        resources={view.resources}
-        position={view.position}
-        text={text}
-        locked={!!view.scene || !!view.combat}
-        openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
-        pending={pending}
-        open={() => p.open({ kind: 'contents' })}
-      />
+      {!view.ancestry_choices && (
+        <Status
+          time={view.time}
+          calendar={view.calendar_status}
+          resources={view.resources}
+          position={view.position}
+          text={text}
+          locked={!!view.scene || !!view.combat}
+          openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
+          pending={pending}
+          open={() => p.open({ kind: 'contents' })}
+        />
+      )}
       {p.screen.catchingUp && <Text style={{ ...small, color: paper.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>

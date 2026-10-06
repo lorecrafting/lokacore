@@ -183,6 +183,17 @@
       ],
       "oneOf": [
         {
+          "description": "Select one authored ancestry for this character before ordinary play (attributes@1).",
+          "type": "object",
+          "properties": {
+            "type": { "const": "choose_ancestry" },
+            "actor_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+            "ancestry": { "$ref": "action.schema.json#/$defs/Key" }
+          },
+          "required": ["type", "actor_id", "ancestry"],
+          "additionalProperties": false
+        },
+        {
           "description": "Move through a connection.",
           "type": "object",
           "properties": {

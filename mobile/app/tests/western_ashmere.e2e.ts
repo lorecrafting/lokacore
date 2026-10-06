@@ -17,6 +17,7 @@ test('Western Ashmere documents and all dark stairs persist through browser relo
     await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
   };
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('west', 'Boathouse');
   await go('south', 'Old Mill');
@@ -81,6 +82,7 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
   });
   await app.clearState();
   await browser.reload();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   const go = async (direction: string, room: string) => {
     await screen.getByRole('button', 'Map').tap();

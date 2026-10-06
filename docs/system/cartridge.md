@@ -1268,7 +1268,7 @@ remains the death shrine; Isle Shrine is descriptive only.
 
 ## D11 ancestry declarations (selected contract)
 
-**PM-selected chapter values; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
+**PM-selected chapter values; source pending publication.** Source `cartridge.json.ancestries` is a closed choice map with label, description, attribute/modifier and optional skill, faction and dark-sight effects. The compiler expands short refs and the loader validates them independently. The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
 
 | Ancestry | Selected attribute | Actual Chapter 1 effect |
 |---|---|---|

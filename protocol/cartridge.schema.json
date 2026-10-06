@@ -164,6 +164,12 @@
                 "$ref": "#/$defs/AttributeSpec"
               }
             },
+            "ancestries": {
+              "description": "Authored once-only character choices (attributes@1), keyed by choice Key.",
+              "type": "object",
+              "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+              "additionalProperties": { "$ref": "#/$defs/AncestrySpec" }
+            },
             "entry": {
               "description": "The room a new run's player starts in (00a \u00a712 manifest entry); a room of this cartridge.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -840,6 +846,30 @@
           }
         }
       ]
+    },
+    "AncestrySpec": {
+      "description": "One authored character choice and its bounded initial effects.",
+      "examples": [{"label":"ancestry.fen_born.label","description":"ancestry.fen_born.description","attribute":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.36","kind":"attribute","key":"per"},"modifier":1}],
+      "type": "object",
+      "properties": {
+        "label": { "$ref": "text.schema.json#/$defs/TextKey" },
+        "description": { "$ref": "text.schema.json#/$defs/TextKey" },
+        "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "modifier": { "type": "integer", "minimum": 1 },
+        "skill": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "faction": {
+          "type": "object",
+          "properties": {
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "value": { "type": "integer" }
+          },
+          "required": ["fact", "value"],
+          "additionalProperties": false
+        },
+        "dark_sight": { "const": true }
+      },
+      "required": ["label", "description", "attribute", "modifier"],
+      "additionalProperties": false
     },
     "AttributeSpec": {
       "description": "attributes@1 (00 \u00a74.3 and 06 \u00a721 amendments 2026-10-03): an attribute and its starting value, content and never an engine default. Every actor's value is start while nothing writes attributes (no state). In source, attributes.json's {\"attributes\": {key: {start}}}, the key taken from the map (an authored key is UNKNOWN_FIELD).",

@@ -282,6 +282,8 @@ Fresh play requires one selected key from the pinned chapter's four declarations
 
 Source must select a minimal typed declaration/command/changed-row shape, amend the protocol clause before code, and reject unknown choices, partial or contradictory effects, malformed values and attempts to change identity. The new shape requires compiler/loader negatives, a planted failed guard, real SQLite fault/replay/reopen proof and exact-head independent reviews. Frozen old fixtures stay frozen; preproduction pin mismatch refuses explicitly without deleting a save.
 
+The source shape is `choose_ancestry {actor_id, ancestry}` under `attributes@1`. An authored, closed `ancestries` map gives each key its label, one attribute modifier, optional acquired skill, optional faction starting value and optional dark sight. The accepted decision writes one `character.select` row keyed by CharacterId containing the ancestry key and complete attribute values, with any acquired-skill and faction facts in the same decision and receipt. Composition admits this row only when absent. No ordinary player command is admitted before selection. The saved row is immutable and survives body replacement; the selected attribute lookup reads it for the player and falls back to definition starts for actors without a selected character row.
+
 ## check@1 (`mechanics/action_recipe/rule.ts:109`)
 
 Ruleless, resolved inside `perform`: a `luck` check draws one uniform integer in [0, 100) from

@@ -1,4 +1,4 @@
-# size: allow 400, careful and discounted skill refs join the shared checked expansion boundary
+# size: allow 405, ancestry dispatch joins the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -31,6 +31,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
+
+  def expand(%{"attribute" => _, "modifier" => _} = ancestry, m),
+    do: Loka.Content.Ancestries.expand(ancestry, m)
 
   def expand(%{"kind" => "source", "capacity" => _, "supply" => supply} = f, m),
     do: Map.put(f, "supply", ref(supply, "item", m))

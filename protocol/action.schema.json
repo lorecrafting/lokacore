@@ -18,6 +18,7 @@
       "description": "The validated input of an ActionInvocation (04 §1). Closed: each field is a registered input parameter, and the ActionDefinition's `input` lists which ones the action requires (06 §20). The parameters are those the R6P proof uses (pre-release-proof.md).",
       "type": "object",
       "properties": {
+        "ancestry": { "$ref": "#/$defs/Key" },
         "direction": {
           "$ref": "#/$defs/Key"
         },
@@ -309,6 +310,7 @@
     "ActionInputParameter": {
       "description": "An input parameter an action requires (06 §20), one of the ActionInput fields.",
       "enum": [
+        "ancestry",
         "direction",
         "choice_id",
         "continuation_id",

@@ -129,9 +129,38 @@
         }
       ]
     },
+    "CharacterChoice": {
+      "description": "The once-only character identity and its complete saved attribute values.",
+      "examples": [{"ancestry":"fen_born","attributes":{"ashmere_missing_child@0.0.36:attribute/con":10,"ashmere_missing_child@0.0.36:attribute/dex":10,"ashmere_missing_child@0.0.36:attribute/int":10,"ashmere_missing_child@0.0.36:attribute/per":6,"ashmere_missing_child@0.0.36:attribute/spi":10,"ashmere_missing_child@0.0.36:attribute/str":10}}],
+      "type": "object",
+      "properties": {
+        "ancestry": { "$ref": "action.schema.json#/$defs/Key" },
+        "attributes": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "required": ["ancestry", "attributes"],
+      "additionalProperties": false
+    },
     "DeltaOp": {
       "description": "One registered delta operation (04 \u00a75.3 families). Each description names the op's target and precondition.",
       "oneOf": [
+        {
+          "description": "One immutable character-owned creation row. Precondition: no row for character_id.",
+          "type": "object",
+          "properties": {
+            "op": { "const": "character.select" },
+            "writer_group": { "$ref": "#/$defs/WriterGroup" },
+            "character_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+            "value": { "$ref": "#/$defs/CharacterChoice" }
+          },
+          "required": ["op", "writer_group", "character_id", "value"],
+          "additionalProperties": false
+        },
         {
           "description": "Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).",
           "type": "object",
@@ -1311,6 +1340,16 @@
     "MutationTarget": {
       "description": "Canonical mutation-target identity (04 \u00a75.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 \u00a75.5).",
       "oneOf": [
+        {
+          "description": "One character's immutable choice.",
+          "type": "object",
+          "properties": {
+            "kind": { "const": "character" },
+            "character_id": { "$ref": "identity.schema.json#/$defs/CharacterId" }
+          },
+          "required": ["kind", "character_id"],
+          "additionalProperties": false
+        },
         {
           "description": "A scoped fact.",
           "type": "object",

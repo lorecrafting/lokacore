@@ -12,6 +12,7 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
     await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
   };
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('west', 'Boathouse');
   await screen.getByRole('button', 'Rope ferry').tap();
@@ -41,6 +42,7 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
 // Break: Peg's learned Buy quote or paid result differs between shelf, action and reopened Book.
 test('Peg lesson discounts an actual purchase after browser reload', async ({ app, screen }) => {
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go north').tap();
