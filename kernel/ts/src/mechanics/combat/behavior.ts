@@ -1,4 +1,4 @@
-import type { DeltaOp, EntityId, EncounterRow, Key } from '../../contracts.gen.ts';
+import type { DefinitionRef, DeltaOp, EntityId, EncounterRow, Key } from '../../contracts.gen.ts';
 import { key, same } from '../../foundation/compose.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { COMPASS, refString, type Steps, type World } from '../../runtime/decision.ts';
@@ -65,47 +65,61 @@ export function flight(
   if (!plan?.pack) return;
   const here = world.state.containers[id];
   if (!plan.area.some((ref) => world.roomIds[refString(ref)] === here)) return;
+  const leaving = flightExit(world, here, plan.area, steps);
+  return leaving && flightWrite(world, id, at, here, origin, leaving);
+}
+
+function flightWrite(
+  world: World,
+  id: EntityId,
+  at: number,
+  here: EntityId,
+  origin: { by: DefinitionRef; slot: number; generation: number },
+  leaving: { direction: Key; there: EntityId },
+) {
+  const target = { kind: 'population_slot' as const, plan: origin.by, slot: origin.slot };
+  const prior = world.state.population_slots?.[key(target)];
+  if (
+    !prior ||
+    prior.member_id !== id ||
+    prior.generation !== origin.generation ||
+    prior.replacement_due !== null
+  )
+    return;
+  return {
+    ...leaving,
+    ops: [
+      {
+        op: 'entity.transfer' as const,
+        writer_group: 0,
+        entity_id: id,
+        source_id: here,
+        destination_id: leaving.there,
+      },
+      {
+        op: 'population.slot' as const,
+        writer_group: 0,
+        plan: origin.by,
+        slot: origin.slot,
+        expected: prior,
+        value: { ...prior, last_flight_at: at },
+      },
+    ],
+  };
+}
+
+function flightExit(world: World, here: EntityId, area: readonly DefinitionRef[], steps: Steps) {
   const room = world.rooms[here];
   for (const direction of [...COMPASS].sort(cmp)) {
     steps.n++;
     const exit = exitTo(room, direction);
     const there = exit && world.roomIds[refString(exit)];
     if (
-      !there ||
-      !plan.area.some((ref) => refString(ref) === refString(exit)) ||
-      passage(world, room, direction)
+      there &&
+      area.some((ref) => refString(ref) === refString(exit)) &&
+      !passage(world, room, direction)
     )
-      continue;
-    const target = { kind: 'population_slot' as const, plan: origin.by, slot: origin.slot };
-    const prior = world.state.population_slots?.[key(target)];
-    if (
-      !prior ||
-      prior.member_id !== id ||
-      prior.generation !== origin.generation ||
-      prior.replacement_due !== null
-    )
-      return;
-    return {
-      direction,
-      there,
-      ops: [
-        {
-          op: 'entity.transfer',
-          writer_group: 0,
-          entity_id: id,
-          source_id: here,
-          destination_id: there,
-        },
-        {
-          op: 'population.slot',
-          writer_group: 0,
-          plan: origin.by,
-          slot: origin.slot,
-          expected: prior,
-          value: { ...prior, last_flight_at: at },
-        },
-      ],
-    };
+      return { direction, there };
   }
 }
 

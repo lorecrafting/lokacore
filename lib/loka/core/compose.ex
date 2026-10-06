@@ -1,41 +1,12 @@
 # size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
-  StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of `kernel/ts/src/foundation/compose.ts`.
-  Both run the portable composition fixtures. Contract-valid ops apply in semantic order to
-  an overlay; preconditions read overlay over base. Different writer groups sharing a target
-  fault `conflicting_write`. The committed base is never copied.
-
-  Base state, a JSON object (absent sections are empty):
-
-  - `"clock"`: required integer logical time; otherwise faults `precondition_failed` on clock;
-  - `"facts"`: canonical fact MutationTarget text => FactValue (compared as opaque values);
-  - `"fact_defaults"`: canonical DefinitionRef text => FactValue for unset facts;
-  - `"containers"`: EntityId => its one container (03 §23); `"capacities"`: EntityId =>
-    the most entities it may contain;
-  - `"quests"`: QuestInstanceId => `quest`, `scope`, `state`, optional `outcome`;
-  - `"choices"`: ContinuationId => the `choice.open` fields plus `status` and the
-    host-assigned `opened_revision`;
-  - `"jobs"`: JobId => `job`, `due_time`, `status`, optional `encounter_id`;
-  - `"encounters"`: EncounterId => EncounterRow (participants, room, status, round and job);
-  - `"resource_specs"`: canonical DefinitionRef => ResourceSpec (`minimum`, `maximum`, `start`,
-    `gain`, optional `regen`); `"resources"`: canonical resource target => `value`, `at`, plus
-    required `rate`, `remainder` for opted recovery; `current/3` reads its current value;
-  - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started;
-  - `"barrier_initial"`: canonical DefinitionRef text => BarrierState for unset barriers;
-    `"barriers"`: canonical barrier MutationTarget text => BarrierState;
-  - `"liquid_specs"`: ItemId => immutable `capacity`, declared `kinds`;
-    `"liquids"`: ItemId => exact `kind`, `quantity` row.
-
-  Result: `%{"changes" => rows}` sorted by canonical target text, one `%{"target", "value"}`
-  per target (ADR-072), or `%{"fault" => fault}` naming the failed op's target when present.
-  Continuations lack `opened_revision` until commit. Budgets precede ops, conflicts precede
-  preconditions. An overlay failure discards the whole proposal.
-
-  An explicit advance is a delta with `time.advance`; its target (the last `to`) is the
-  visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
+  Portable StateDelta composition (04 §5.1-§5.4, 14 §R3A). Preconditions read
+  an overlay over the committed base; only changed rows are returned. Different
+  writer groups sharing a target fault atomically. Budgets precede operations,
+  and an explicit time.advance sets the visited time for jobs and resources.
   """
-  alias Loka.Core.Creation
+  alias Loka.Core.{ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -240,7 +211,7 @@ defmodule Loka.Core.Compose do
         op,
         read(t, ctx),
         fn id, room ->
-          pack_member_remains?(
+          ComposePack.remains?(
             id,
             room,
             op["writer_group"],
@@ -248,7 +219,7 @@ defmodule Loka.Core.Compose do
             ctx
           )
         end,
-        fn id, room -> pack_member_initially_present?(id, room, elem(ctx, 0)) end
+        fn id, room -> ComposePack.initially_present?(id, room, elem(ctx, 0)) end
       )
 
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
@@ -347,75 +318,4 @@ defmodule Loka.Core.Compose do
 
   defp fault(code, target),
     do: %{"fault" => %{"kind" => "fault", "code" => code, "target" => target}}
-
-  defp pack_member_remains?(id, room, group, due, {state, _, _} = ctx) do
-    origin = get_in(state, ["created", id, "origin"])
-
-    if is_map(origin) and origin["kind"] == "spawned" and
-         pack_member_initially_present?(id, room, state),
-       do: begin_pack_member(id, room, group, due, origin, ctx),
-       else: false
-  end
-
-  defp pack_member_initially_present?(id, room, state) do
-    origin = get_in(state, ["created", id, "origin"])
-
-    if is_map(origin) and origin["kind"] == "spawned" do
-      target = %{"kind" => "population_slot", "plan" => origin["by"], "slot" => origin["slot"]}
-      slot = get_in(state, ["population_slots", key(target)])
-
-      get_in(state, ["containers", id]) == room and is_map(slot) and
-        slot["member_id"] == id and slot["generation"] == origin["generation"] and
-        slot["replacement_due"] == nil
-    else
-      false
-    end
-  end
-
-  defp begin_pack_member(id, room, group, due, origin, {_, _, overlay} = ctx) do
-    target = %{"kind" => "population_slot", "plan" => origin["by"], "slot" => origin["slot"]}
-    slot = read(target, ctx)
-
-    if current_pack_member?(id, room, origin, slot, ctx),
-      do: true,
-      else:
-        not (flight_proven?(id, group, due, target, ctx) or
-               death_proven?(id, group, origin, target, slot, overlay))
-  end
-
-  defp current_pack_member?(id, room, origin, slot, ctx),
-    do:
-      read(containment(id), ctx) == room and is_map(slot) and
-        slot["member_id"] == id and slot["generation"] == origin["generation"] and
-        slot["replacement_due"] == nil
-
-  defp flight_proven?(id, group, due, target, {state, _, overlay} = ctx) do
-    before = get_in(state, ["population_slots", key(target)])
-    slot = read(target, ctx)
-    {slot_group, _, _} = overlay[key(target)] || {nil, nil, nil}
-
-    flight_move?(id, group, ctx) and slot_group == group and
-      is_integer(due) and slot["last_flight_at"] == due and
-      before["last_flight_at"] != due and slot["replacement_due"] == nil
-  end
-
-  defp flight_move?(id, group, {state, _, overlay} = ctx) do
-    {move_group, _, _} = overlay[key(containment(id))] || {nil, nil, nil}
-    move_group == group and read(containment(id), ctx) != get_in(state, ["containers", id])
-  end
-
-  defp death_proven?(id, group, origin, target, slot, overlay) do
-    {slot_group, _, _} = overlay[key(target)] || {nil, nil, nil}
-
-    hp_target = %{
-      "kind" => "resource",
-      "entity_id" => id,
-      "resource" => Map.merge(origin["by"], %{"kind" => "resource", "key" => "hp"})
-    }
-
-    {hp_group, _, hp} = overlay[key(hp_target)] || {nil, nil, nil}
-
-    slot_group == group and hp_group == group and slot["replacement_due"] != nil and
-      hp["value"] == 0
-  end
 end

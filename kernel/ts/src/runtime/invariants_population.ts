@@ -41,18 +41,9 @@ function legal(kind: string, before: Any, after: Any): boolean {
         after.member_id === null &&
         after.replacement_due === null &&
         after.last_flight_at == null) ||
-      (after.generation === 1 &&
-        after.member_id !== null &&
-        after.replacement_due === null &&
-        after.last_flight_at == null)
+      born(after)
     );
-  if (before.generation === 0)
-    return (
-      after.generation === 1 &&
-      after.member_id !== null &&
-      after.replacement_due === null &&
-      after.last_flight_at == null
-    );
+  if (before.generation === 0) return born(after);
   if (before.replacement_due === null)
     return (
       after.generation === before.generation &&
@@ -69,5 +60,14 @@ function legal(kind: string, before: Any, after: Any): boolean {
     after.member_id !== before.member_id &&
     after.replacement_due === null &&
     after.last_flight_at == null
+  );
+}
+
+function born(row: Any) {
+  return (
+    row.generation === 1 &&
+    row.member_id !== null &&
+    row.replacement_due === null &&
+    row.last_flight_at == null
   );
 }

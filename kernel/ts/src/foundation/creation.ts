@@ -1,6 +1,6 @@
 import { validate } from './validate.ts';
 import { encode, type Json } from './canonical.ts';
-import type { DeltaOp, EncounterRow } from '../contracts.gen.ts';
+import type { DeltaOp, EncounterRow, EntityId } from '../contracts.gen.ts';
 import type { State } from './compose.ts';
 type Obj = { readonly [key: string]: Json };
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
@@ -165,18 +165,7 @@ function flightSlot(
   const origin =
     id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
   const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
-  const round = ops.find(
-    (op) =>
-      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
-      op.writer_group === s.writer_group &&
-      op.expected?.active_ids?.includes(id!) &&
-      selectedFlight(op.expected, id!, state) &&
-      (op.op === 'encounter.close' || !op.active_ids?.includes(id!)),
-  );
-  const due =
-    round && 'job_id' in round
-      ? ((state.jobs ?? {}) as Record<string, Obj>)[round.job_id]?.due_time
-      : undefined;
+  const due = flightDue(ops, s.writer_group, id!, state);
   return (
     id !== null &&
     prior?.member_id === id &&
@@ -202,6 +191,20 @@ function flightSlot(
         op.destination_id !== op.source_id,
     ).length === 1
   );
+}
+
+function flightDue(ops: readonly DeltaOp[], group: number, id: EntityId, state: State) {
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === group &&
+      op.expected?.active_ids?.includes(id) &&
+      selectedFlight(op.expected, id, state) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
+  );
+  return round && 'job_id' in round
+    ? ((state.jobs ?? {}) as Record<string, Obj>)[round.job_id]?.due_time
+    : undefined;
 }
 
 function selectedFlight(row: EncounterRow, id: string, state: State) {

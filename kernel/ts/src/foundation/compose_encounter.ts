@@ -19,37 +19,18 @@ export function openEncounter(
   npcRoom: Json | undefined,
   encounters: [string, Json][],
 ): Outcome {
-  const known = (state.known_entities ?? {}) as Record<string, Row>;
   const roster = op.active_ids;
   const pack = roster !== undefined;
-  const origin = ((state.created ?? {}) as Record<string, Row>)[op.npc_id]?.origin as
-    Row | undefined;
-  const spec =
-    origin?.kind === 'spawned'
-      ? ((state.population_specs ?? {}) as Record<string, Row>)[encode(origin.by)]
-      : undefined;
-  const opted = !!(spec?.plan as Row | undefined)?.pack;
   const participants = pack ? roster : [op.npc_id];
   if (
     row !== undefined ||
-    known[op.body_id]?.kind !== 'body' ||
-    known[op.body_id]?.owner_id !== op.character_id ||
-    known[op.npc_id]?.kind !== 'npc' ||
-    known[op.room_id]?.kind !== 'room' ||
-    op.body_id === op.npc_id ||
+    !openParticipants(op, state) ||
     bodyRoom !== op.room_id ||
     npcRoom !== op.room_id ||
-    pack !== opted ||
+    pack !== packOpted(op.npc_id, state) ||
     pack !== (op.next_opponent_id !== undefined) ||
     (pack && !packMembers(state, roster!, op.npc_id, op.next_opponent_id!, op.room_id)) ||
-    encounters.some(
-      ([, r]) =>
-        (r as Row).status === 'open' &&
-        [
-          (r as Row).body_id,
-          ...(((r as Row).active_ids as string[] | undefined) ?? [(r as Row).npc_id]),
-        ].some((id) => id === op.body_id || participants.includes(id as typeof op.npc_id)),
-    )
+    participantsBusy(encounters, op.body_id, participants)
   )
     return failed;
   return {
@@ -64,6 +45,43 @@ export function openEncounter(
       ...(pack && { active_ids: [...roster!], next_opponent_id: op.next_opponent_id }),
     },
   };
+}
+
+function openParticipants(op: EncounterOp & { op: 'encounter.open' }, state: State) {
+  const known = (state.known_entities ?? {}) as Record<string, Row>;
+  return (
+    known[op.body_id]?.kind === 'body' &&
+    known[op.body_id]?.owner_id === op.character_id &&
+    known[op.npc_id]?.kind === 'npc' &&
+    known[op.room_id]?.kind === 'room' &&
+    op.body_id !== op.npc_id
+  );
+}
+
+function packOpted(id: string, state: State) {
+  const origin = ((state.created ?? {}) as Record<string, Row>)[id]?.origin as Row | undefined;
+  const spec =
+    origin?.kind === 'spawned'
+      ? ((state.population_specs ?? {}) as Record<string, Row>)[encode(origin.by)]
+      : undefined;
+  return !!(spec?.plan as Row | undefined)?.pack;
+}
+
+function participantsBusy(
+  encounters: [string, Json][],
+  body: string,
+  participants: readonly string[],
+) {
+  return encounters.some(([, value]) => {
+    const row = value as Row;
+    return (
+      row.status === 'open' &&
+      [
+        row.body_id as string,
+        ...((row.active_ids as string[] | undefined) ?? [row.npc_id as string]),
+      ].some((id) => id === body || participants.includes(id))
+    );
+  });
 }
 
 function packMembers(
@@ -94,22 +112,32 @@ function packMembers(
     ids.length > (spec.cap as number)
   )
     return false;
-  return ids.every((id) => {
-    const member = created[id]?.origin as Row | undefined;
-    const slot =
-      member && slots[encode({ kind: 'population_slot', plan: member.by, slot: member.slot })];
-    return (
-      known[id]?.kind === 'npc' &&
-      containers[id] === room &&
-      member?.kind === 'spawned' &&
-      member.role === 'hound' &&
-      member.member_id === id &&
-      encode(member.by) === encode(origin.by) &&
-      slot?.member_id === id &&
-      slot.generation === member.generation &&
-      slot.replacement_due === null
-    );
-  });
+  return ids.every((id) => packMember(id, room, origin.by, known, containers, created, slots));
+}
+
+function packMember(
+  id: string,
+  room: string,
+  plan: Json,
+  known: Record<string, Row>,
+  containers: Record<string, string>,
+  created: Record<string, Row>,
+  slots: Record<string, Row>,
+) {
+  const member = created[id]?.origin as Row | undefined;
+  const slot =
+    member && slots[encode({ kind: 'population_slot', plan: member.by, slot: member.slot })];
+  return (
+    known[id]?.kind === 'npc' &&
+    containers[id] === room &&
+    member?.kind === 'spawned' &&
+    member.role === 'hound' &&
+    member.member_id === id &&
+    encode(member.by) === encode(plan) &&
+    slot?.member_id === id &&
+    slot.generation === member.generation &&
+    slot.replacement_due === null
+  );
 }
 
 export function changeEncounter(
@@ -131,29 +159,7 @@ export function changeEncounter(
       value: { ...row, status: 'closed', ...(pack && { active_ids: [], next_opponent_id: null }) },
     };
   if (row.round !== op.round || op.next_job_id === op.job_id) return failed;
-  if (pack) {
-    const old = row.active_ids as unknown as NonNullable<typeof op.active_ids>;
-    const next = op.active_ids;
-    if (
-      !next?.length ||
-      !next.includes(op.npc_id!) ||
-      !next.includes(op.next_opponent_id!) ||
-      next.some((id, i) => !old.includes(id) || (i > 0 && next[i - 1] >= id)) ||
-      old.some((id) => next.includes(id) !== present(id, row.room_id as string))
-    )
-      return failed;
-    const starting = old.filter((id) => initiallyPresent(id, row.room_id as string));
-    const cursor = row.next_opponent_id as (typeof old)[number];
-    const selected = starting.includes(cursor)
-      ? cursor
-      : (starting.find((id) => id > cursor) ?? starting[0]);
-    if (
-      !selected ||
-      op.npc_id !== (next.includes(row.npc_id as never) ? row.npc_id : next[0]) ||
-      op.next_opponent_id !== (next.find((id) => id > selected) ?? next[0])
-    )
-      return failed;
-  }
+  if (pack && !packAdvanceValid(op, row, present, initiallyPresent)) return failed;
   try {
     return {
       value: {
@@ -171,6 +177,36 @@ export function changeEncounter(
     if (error instanceof KernelError && error.code === 'integer_overflow') return failed;
     throw error;
   }
+}
+
+function packAdvanceValid(
+  op: Extract<DeltaOp, { op: 'encounter.advance' }>,
+  row: Row,
+  present: (id: string, room: string) => boolean,
+  initiallyPresent: (id: string, room: string) => boolean,
+) {
+  const old = row.active_ids as unknown as NonNullable<typeof op.active_ids>;
+  const next = op.active_ids;
+  if (
+    !next?.length ||
+    !next.includes(op.npc_id!) ||
+    !next.includes(op.next_opponent_id!) ||
+    next.some((id, i) => !old.includes(id) || (i > 0 && next[i - 1] >= id)) ||
+    old.some((id) => next.includes(id) !== present(id, row.room_id as string))
+  )
+    return false;
+  const starting = old.filter((id) => initiallyPresent(id, row.room_id as string));
+  const cursor = row.next_opponent_id as (typeof old)[number];
+  const selected = starting.includes(cursor)
+    ? cursor
+    : (starting.find((id) => id > cursor) ?? starting[0]);
+  if (
+    !selected ||
+    op.npc_id !== (next.includes(row.npc_id as never) ? row.npc_id : next[0]) ||
+    op.next_opponent_id !== (next.find((id) => id > selected) ?? next[0])
+  )
+    return false;
+  return true;
 }
 
 export function composeJob(

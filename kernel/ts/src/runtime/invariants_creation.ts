@@ -104,12 +104,15 @@ function complete(state: Any, ops: Any[]): boolean {
             h.identity.origin.generation === s.value.generation,
         ) ||
         flightSlot(state, ops, s),
-    ) &&
-    pelts.every((p) =>
-      hounds.some(
-        (h) => h.writer_group === p.writer_group && p.identity.origin.member_id === h.identity.id,
-      ),
-    )
+    ) && peltsMatch(pelts, hounds)
+  );
+}
+
+function peltsMatch(pelts: Any[], hounds: Any[]) {
+  return pelts.every((p) =>
+    hounds.some(
+      (h) => h.writer_group === p.writer_group && p.identity.origin.member_id === h.identity.id,
+    ),
   );
 }
 

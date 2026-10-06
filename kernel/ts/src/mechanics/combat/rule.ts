@@ -1,5 +1,6 @@
 import { jobId } from '../schedule/behavior.ts';
-import { accepted, bodyOf, rejected, type Rule } from '../../runtime/decision.ts';
+import { accepted, bodyOf, rejected, type Rule, type World } from '../../runtime/decision.ts';
+import type { EntityId } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { attackRefused, npcRef, encounterId } from './shared.ts';
 import { flee } from './flee.ts';
@@ -42,11 +43,15 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
       },
     ],
     [],
-    roster
-      ?.filter((id) => id !== payload.target_id)
-      .map((id) => ({
-        key: packPlan(world, payload.target_id)!.narration.helper_joined,
-        participants: { enemy: id },
-      })),
+    helperNotes(world, payload.target_id, roster),
   );
 };
+
+function helperNotes(world: World, target: EntityId, roster?: readonly EntityId[]) {
+  return roster
+    ?.filter((id) => id !== target)
+    .map((id) => ({
+      key: packPlan(world, target)!.narration.helper_joined,
+      participants: { enemy: id },
+    }));
+}

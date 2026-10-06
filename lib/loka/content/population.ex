@@ -61,32 +61,34 @@ defmodule Loka.Content.Population do
         Enum.all?(rooms, &is_map/1) && reciprocal?(rooms, p["area"])
 
     bundle_ok = is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"])
-    pack = p["pack"]
-
-    flight_directions =
-      for room <- rooms,
-          is_map(room),
-          {direction, edge} <- room["exits"] || %{},
-          edge["to"] in p["area"],
-          do: direction
-
-    pack_ok =
-      pack == nil or
-        (Enum.all?(flight_directions, &Map.has_key?(pack["narration"]["enemy_fled"], &1)) and
-           Enum.all?(
-             Map.values(Map.delete(pack["narration"], "enemy_fled")) ++
-               Map.values(pack["narration"]["enemy_fled"]),
-             &Map.has_key?(text, &1)
-           ))
 
     []
     |> add(not targets, ["day_target"])
     |> add(not valid_time, ["wander_interval"])
     |> add(not connected, ["area"])
     |> add(not bundle_ok, ["bundle"])
-    |> add(not pack_ok, ["pack", "narration"])
+    |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
   end
+
+  defp pack_valid?(nil, _, _, _), do: true
+
+  defp pack_valid?(pack, area, rooms, text) do
+    directions =
+      for room <- rooms,
+          is_map(room),
+          {direction, edge} <- room["exits"] || %{},
+          edge["to"] in area,
+          do: direction
+
+    narration = pack["narration"]
+
+    Enum.all?(directions, &Map.has_key?(narration["enemy_fled"], &1)) and
+      Enum.all?(narration_keys(narration), &Map.has_key?(text, &1))
+  end
+
+  defp narration_keys(narration),
+    do: Map.values(Map.delete(narration, "enemy_fled")) ++ Map.values(narration["enemy_fled"])
 
   defp add(errors, true, path), do: [path | errors]
   defp add(errors, false, _), do: errors

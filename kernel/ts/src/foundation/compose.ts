@@ -9,6 +9,7 @@ import {
   initializePopulationResource,
   populationRow,
 } from './compose_population.ts';
+import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 // StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
@@ -191,68 +192,6 @@ function encounter(
     read(containment(op.body_id), ctx),
     read(containment(op.npc_id), ctx),
     rows('encounter', 'encounters', 'encounter_id', ctx),
-  );
-}
-
-function packMemberRemains(
-  id: string,
-  room: string,
-  group: number,
-  due: Json | undefined,
-  ctx: Ctx,
-): boolean {
-  const origin = get(section(ctx.state, 'created')[id], 'origin') as Obj | undefined;
-  if (origin?.kind !== 'spawned' || !packMemberInitiallyPresent(id, room, ctx.state)) return false;
-  const target = {
-    kind: 'population_slot',
-    plan: origin.by as never,
-    slot: origin.slot as number,
-  } as const;
-  const before = populationRow(target, ctx.state);
-  const slot = read(target, ctx);
-  const current =
-    read(containment(id), ctx) === room &&
-    get(slot, 'member_id') === id &&
-    get(slot, 'generation') === origin.generation &&
-    get(slot, 'replacement_due') === null;
-  if (current) return true;
-  const slotWrite = ctx.overlay.get(key(target));
-  const moved = ctx.overlay.get(key(containment(id)));
-  const hp = ctx.overlay.get(
-    key({
-      kind: 'resource',
-      entity_id: id,
-      resource: { ...(origin.by as Obj), kind: 'resource', key: 'hp' },
-    }),
-  );
-  const flew =
-    moved?.group === group &&
-    moved.value !== room &&
-    slotWrite?.group === group &&
-    Number.isSafeInteger(due) &&
-    get(slot, 'last_flight_at') === due &&
-    get(before, 'last_flight_at') !== due &&
-    get(slot, 'replacement_due') === null;
-  const died =
-    slotWrite?.group === group &&
-    hp?.group === group &&
-    get(slot, 'replacement_due') !== null &&
-    get(hp.value, 'value') === 0;
-  return !(flew || died);
-}
-
-function packMemberInitiallyPresent(id: string, room: string, state: State): boolean {
-  const origin = get(section(state, 'created')[id], 'origin') as Obj | undefined;
-  if (origin?.kind !== 'spawned') return false;
-  const slot = populationRow(
-    { kind: 'population_slot', plan: origin.by as never, slot: origin.slot as number },
-    state,
-  );
-  return (
-    section(state, 'containers')[id] === room &&
-    get(slot, 'member_id') === id &&
-    get(slot, 'generation') === origin.generation &&
-    get(slot, 'replacement_due') === null
   );
 }
 
