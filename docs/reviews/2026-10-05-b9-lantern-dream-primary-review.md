@@ -162,3 +162,22 @@ cleanly; original setup, contention, size and pre-label outcomes remain preserve
 Ponytail Review: Lean already. This approval covers the combined local source and
 retained integration proof, superseding the prior provisional-source scope;
 publication remains pending. No owner-save or native lifecycle proof is added.
+
+## Final hosted source-head Sol review
+
+The PM ran a read-only independent `codex exec` review after all six hosted checks
+passed on PR #226 at `34dfc630917297c194ef243641907be4a4ad6dbd`.
+The output below is reproduced verbatim:
+```text
+APPROVE
+
+Reviewed exact head 34dfc630917297c194ef243641907be4a4ad6dbd against base dec92357f6bdc6242e06ceb56f7c9da0abed8a84. No findings.
+
+Correctness assessment: paid Rest starts one durable dream; Close/Resume preserves its checkpoint and branch; only final acknowledgment commits memory and S10 resolution. Receipt replay, uncertain-COMMIT fencing and cold recovery preserve once-only behavior. D2 Read remains independent, and unavailable Rest uses the human label “Rest: not now”.
+
+Executable source matches the previously approved frozen source. Independently verified all 69 evidence hashes and the v028/API1.25 canonical payload/hash; inspected retained behavior controls and browser captures.
+
+Ponytail assessment: lean composition using existing state, transaction, receipt and Book owners; no unnecessary machinery found.
+
+Read-only review; no files edited or broad suites run. Hosted CI status accepted as reported.
+```
