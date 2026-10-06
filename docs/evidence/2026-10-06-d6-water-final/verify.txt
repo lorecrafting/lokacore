@@ -5,6 +5,7 @@ custody-green.log: OK
 custody-red.log: OK
 full-gate.log: OK
 kernel-test.log: OK
+redaction-check.log: OK
 schema-red.log: OK
 sources.txt: OK
 exit 0

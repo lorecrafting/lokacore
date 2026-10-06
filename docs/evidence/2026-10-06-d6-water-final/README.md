@@ -30,5 +30,8 @@ by the required gate. Self-review checked both cancellation shapes, the
 original-root bought-item save path, and the actual diff. No known behavioral
 blocker remains; independent review is still required.
 
-All retained logs were redacted by `capture.py`. `SHA256SUMS` covers the files
+The capture script accepts a log directory argument, reads relative names, and redacts
+absolute home, scratch, alternate-worktree, and file-URL paths. Controlled
+redaction inputs pass and removing the generic path rule fails as expected
+(`redaction-check.log`). All retained logs were redacted by `capture.py`. `SHA256SUMS` covers the files
 except itself and `verify.txt`; `verify.txt` records a successful verification.
