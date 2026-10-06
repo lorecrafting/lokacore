@@ -411,3 +411,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D6 independent Astra pacing advice](2026-10-06-d6-water-pacing-astra-advice.md): advice only; PM adopts separate replacement tuning; fresh scoped approval remains pending.
 
 - [D6 selected contract independent review](2026-10-06-d6-water-depths-selected-review.md): initial head `0ff5f75e`, CHANGES REQUIRED for D6-R1; [scoped recheck](2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) APPROVE at corrected contract `705e78a4`, preserving D1 recovery through underwater-only Chapel eligibility. Documentation only; source proof remains pending.
+
+- [D6 provisional primary source review](2026-10-06-d6-water-primary-review.md): independent APPROVE at source/evidence head `4ea7ad65`; no open findings. 54 focused/neighbor and five Elixir tests pass; current-occurrence and captured-Surface plants fail, restored 21 water cases pass, all 64 schema guard removals killed or generator-rejected. Successor pins, later-source integration, second opinion, browser proof and final hosted gates remain pending.
