@@ -138,7 +138,11 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
 }
 
 const jsonType = (s: Schema, defs: Defs): string =>
-  typeof s.$ref === 'string' ? jsonType(defs[s.$ref], defs) : (s.type as string);
+  typeof s.$ref === 'string'
+    ? jsonType(defs[s.$ref], defs)
+    : s.oneOf
+      ? 'object'
+      : (s.type as string);
 
 function oneOf(branches: Schema[], v: Obj, path: string, defs: Defs): ContractError[] {
   const first = branches[0].properties!;

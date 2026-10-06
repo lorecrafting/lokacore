@@ -6,6 +6,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
+import { resolved } from '../src/commands/actions.ts';
 
 // Provisional input artifact; literal HP/time answers below are independent of its compiler.
 const artifact = read('kernel/ts/test/fixtures/c5-provisional-artifact.json');
@@ -128,10 +129,23 @@ test('only a surviving positive hound strike applies one owned bleed', () => {
     assert.equal(!!due.world.state.bleeds?.[world.body]?.active, bleeding);
     if (bleeding) {
       const row = due.world.state.bleeds![world.body]!;
+      assert.ok(row.active);
       assert.equal(row.generation, 1);
       assert.equal(row.next_tick_at, 65050);
       assert.equal(row.ends_at, 65250);
       assert.equal(due.world.state.jobs![row.job_id!].due_time, 65050);
+      assert.deepEqual(gameView(due.world).bleeding, {
+        label: 'condition.bleeding',
+        generation: 1,
+        ends_at: 65250,
+        next_tick_at: 65050,
+        hp_loss: 1,
+        tick_every: 100,
+      });
+      assert.ok(
+        due.decision.kind === 'accepted' &&
+          due.decision.narration?.some((line) => line.key === 'narration.bleed.applied'),
+      );
     }
   }
 });
@@ -202,16 +216,18 @@ test('Flee and re-engagement pair the exact same-due round and bleed tick', () =
     assert.equal(tick.decision.kind, 'accepted', JSON.stringify(tick.decision));
     const row = Object.values(tick.world.state.encounters ?? {}).find((e) => e.status === 'open')!;
     const bleed = tick.world.state.bleeds![world.body]!;
+    assert.ok(bleed.active);
     assert.equal(tick.world.state.jobs![row.job_id].due_time, 65150);
     assert.equal(tick.world.state.jobs![bleed.job_id!].due_time, 65150);
     orders.add(row.job_id < bleed.job_id! ? 'round_first' : 'bleed_first');
     const paired = elapsed(tick.world, 65150, 8);
     assert.equal(paired.decision.kind, 'accepted', JSON.stringify(paired.decision));
     assert.equal(hp(paired.world), 6);
-    assert.equal(paired.world.state.bleeds![world.body]!.active, true);
-    assert.equal(paired.world.state.bleeds![world.body]!.generation, 1);
-    assert.equal(paired.world.state.bleeds![world.body]!.next_tick_at, 65250);
-    assert.equal(paired.world.state.bleeds![world.body]!.ends_at, 65450);
+    const refreshed = paired.world.state.bleeds![world.body]!;
+    assert.ok(refreshed.active);
+    assert.equal(refreshed.generation, 1);
+    assert.equal(refreshed.next_tick_at, 65250);
+    assert.equal(refreshed.ends_at, 65450);
   }
   assert.deepEqual([...orders].sort(), ['bleed_first', 'round_first']);
 });
@@ -253,10 +269,18 @@ test('bleed expires at 65250 after exactly two HP ticks', () => {
   const fled = command(first.world, 2, { type: 'flee' }, 3);
   const tick1 = elapsed(fled.world, 65050, 4);
   assert.equal(tick1.decision.kind, 'accepted', JSON.stringify(tick1.decision));
+  assert.deepEqual(
+    tick1.decision.narration?.map((line) => line.key),
+    ['narration.bleed.tick'],
+  );
   const tick2 = elapsed(tick1.world, 65150, 5);
   assert.equal(tick2.decision.kind, 'accepted', JSON.stringify(tick2.decision));
   const end = elapsed(tick2.world, 65250, 6);
   assert.equal(end.decision.kind, 'accepted', JSON.stringify(end.decision));
+  assert.deepEqual(
+    end.decision.narration?.map((line) => line.key),
+    ['narration.bleed.expired'],
+  );
   assert.equal(hp(end.world), 7);
   assert.equal(end.world.state.bleeds![world.body]!.active, false);
 });
@@ -293,6 +317,17 @@ test('held qualified bandage treats during combat without spending its round', (
   assert.equal(treated.world.state.encounters![encounterId].status, 'open');
   assert.equal(treated.world.state.containers[item], world.consumed);
   assert.equal(treated.world.state.bleeds![world.body]!.active, false);
+});
+
+// Breaks: broadening the combat command allowlist admits an authored perform recipe beside Bandage.
+test('an authored recipe remains excluded while the hound fight offers Bandage', () => {
+  const { world, target } = fixture();
+  const first = command(world, 1, { type: 'attack', target_id: target }, 1);
+  const fight = elapsed(first.world, 64950, 2).world;
+  const { ready } = readyBandage(fight);
+  assert.ok(Object.values(ready.cartridge.recipes ?? {}).some((r) => r.key === 'study_tracks'));
+  assert.equal(resolved(ready, ready.character).study_tracks, undefined);
+  assert.ok(Object.values(resolved(ready, ready.character)).some((a) => a.command === 'bandage'));
 });
 
 // Breaks: a stale Book button spends a held bandage against a later effect generation.

@@ -8,14 +8,14 @@ import type {
   EncounterRow,
   EntityId,
 } from '../../contracts.gen.ts';
-import { type Mint, type World } from '../../runtime/decision.ts';
+import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
 import { add, mul } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
-import { clearBleed, wound } from '../bleed/shared.ts';
+import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
@@ -140,7 +140,16 @@ function injure(
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
   } else {
-    if (target_id === row.body_id) r.ops.push(...wound(world, attacker_id, target_id, mint));
+    if (target_id === row.body_id) {
+      const prior = currentBleed(world, target_id);
+      const applied = wound(world, attacker_id, target_id, mint);
+      r.ops.push(...applied);
+      const effect = applied.find((op) => op.op === 'bleed.transition');
+      if (effect?.op === 'bleed.transition' && effect.value.active) {
+        const spec = world.cartridge.bleeds![refString(effect.value.effect!)];
+        r.notes.push({ key: prior ? spec.narration.refreshed : spec.narration.applied });
+      }
+    }
     if (sleeping) wake(prefix(world, [fatalLoss], r.due_time), row, r);
   }
 }

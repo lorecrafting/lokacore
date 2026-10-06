@@ -240,7 +240,9 @@ The decision result (04 §5, §5.0, §5.2).
 
 The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.
 
-- **BleedRow**: One body bleed generation, retained after removal. Active fields are checked together by composition and save.
+- **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
+  - `true`
+  - `false`
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
 - **DeltaOp**: One registered delta operation (04 §5.3 families). Each description names the op's target and precondition.

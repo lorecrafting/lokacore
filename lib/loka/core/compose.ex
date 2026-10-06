@@ -197,8 +197,8 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "job." <> _} = op, t, {_, horizon, _} = ctx),
     do: Loka.Core.ComposeEncounter.job(op, read(t, ctx), horizon)
 
-  defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, _} = ctx),
-    do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon)
+  defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, overlay} = ctx),
+    do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon, overlay)
 
   defp apply_op(%{"op" => "encounter.open"} = op, t, {state, _, _} = ctx),
     do:

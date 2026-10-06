@@ -1796,7 +1796,20 @@
     },
     "BleedDefinition": {
       "description": "An authored body bleed duration, tick cadence and HP loss.",
-      "examples": [{ "key": "bleeding", "duration": 300, "tick_every": 100, "hp_loss": 1 }],
+      "examples": [
+        {
+          "key": "bleeding",
+          "duration": 300,
+          "tick_every": 100,
+          "hp_loss": 1,
+          "narration": {
+            "applied": "narration.bleed.applied",
+            "refreshed": "narration.bleed.refreshed",
+            "tick": "narration.bleed.tick",
+            "expired": "narration.bleed.expired"
+          }
+        }
+      ],
       "type": "object",
       "properties": {
         "key": {
@@ -1816,13 +1829,38 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "narration": {
+          "type": "object",
+          "properties": {
+            "applied": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "refreshed": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "tick": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "expired": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "applied",
+            "refreshed",
+            "tick",
+            "expired"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "key",
         "duration",
         "tick_every",
-        "hp_loss"
+        "hp_loss",
+        "narration"
       ],
       "additionalProperties": false
     }

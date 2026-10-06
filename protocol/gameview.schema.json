@@ -2313,7 +2313,16 @@
     },
     "BleedingView": {
       "description": "Current body bleed condition and exact generation for a held bandage invocation.",
-      "examples": [{ "label": "condition.bleeding", "generation": 1, "ends_at": 400, "next_tick_at": 200 }],
+      "examples": [
+        {
+          "label": "condition.bleeding",
+          "generation": 1,
+          "ends_at": 400,
+          "next_tick_at": 200,
+          "hp_loss": 1,
+          "tick_every": 100
+        }
+      ],
       "type": "object",
       "properties": {
         "label": {
@@ -2329,13 +2338,25 @@
         },
         "next_tick_at": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "hp_loss": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "tick_every": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
         }
       },
       "required": [
         "label",
         "generation",
         "ends_at",
-        "next_tick_at"
+        "next_tick_at",
+        "hp_loss",
+        "tick_every"
       ],
       "additionalProperties": false
     }

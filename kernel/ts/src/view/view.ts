@@ -83,6 +83,8 @@ export function gameView(world: World): GameView {
         generation: bleed.generation,
         ends_at: bleed.ends_at!,
         next_tick_at: bleed.next_tick_at!,
+        hp_loss: world.cartridge.bleeds![refString(bleed.effect!)].hp_loss,
+        tick_every: world.cartridge.bleeds![refString(bleed.effect!)].tick_every,
       },
     }),
     place: { id: here, title: text(room.title), description },

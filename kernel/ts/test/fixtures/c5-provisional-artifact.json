@@ -119,6 +119,12 @@
         "duration": 300,
         "hp_loss": 1,
         "key": "bleeding",
+        "narration": {
+          "applied": "narration.bleed.applied",
+          "expired": "narration.bleed.expired",
+          "refreshed": "narration.bleed.refreshed",
+          "tick": "narration.bleed.tick"
+        },
         "tick_every": 100
       }
     },
@@ -9791,6 +9797,9 @@
       "narration.b_vesper_riddle": "“A lantern. Well answered,” Vesper says. Wren smiles. The question of returning to Elspeth still waits.",
       "narration.bandaged": "You bind the wound with a clean bandage. The bleeding stops.",
       "narration.begin_epilogue": "You pause beside the market cross and let the village settle around you.",
+      "narration.bleed.applied": "The hound tears your skin. The wound begins to bleed.",
+      "narration.bleed.expired": "The bleeding finally stops.",
+      "narration.bleed.refreshed": "The hound opens the wound again.",
       "narration.bleed.tick": "Blood seeps from the wound.",
       "narration.c_vesper_answered": "Vesper places his folded message in your hand. Wren stays beside him. You agree to take the message to Elspeth at Ferry Landing.",
       "narration.eat_apple": "You eat the apple and feel a little less weary.",
@@ -10468,5 +10477,5 @@
       }
     }
   },
-  "content_hash": "bdb7e40ab7dafaa07446e98fee4b8f557da9fadb7320b29f8e33c781d93a322c"
+  "content_hash": "f45f864b99a9bf0726c81889b47eb5bacf7fc23d7956361f8690fc3ad5684232"
 }

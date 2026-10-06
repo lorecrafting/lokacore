@@ -6,7 +6,7 @@ import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { branch, refused, said, why, type Hint, type Pool } from './model.ts';
+import { bleedingLine, branch, refused, said, why, type Hint, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { body, paper } from './paper.ts';
 
@@ -218,7 +218,9 @@ export function Status(p: StatusProps) {
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
       {p.bleeding && (
-        <Text style={{ ...small, color: paper.accent }}>{p.text(p.bleeding.label)}</Text>
+        <Text style={{ ...small, color: paper.accent }}>
+          {bleedingLine(p.bleeding, p.time, p.text)}
+        </Text>
       )}
       <Pressable
         disabled={p.locked}

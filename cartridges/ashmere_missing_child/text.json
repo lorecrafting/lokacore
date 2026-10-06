@@ -680,5 +680,8 @@
   "action.bandage": "Use bandage",
   "narration.bandaged": "You bind the wound with a clean bandage. The bleeding stops.",
   "condition.bleeding": "Bleeding",
-  "narration.bleed.tick": "Blood seeps from the wound."
+  "narration.bleed.tick": "Blood seeps from the wound.",
+  "narration.bleed.applied": "The hound tears your skin. The wound begins to bleed.",
+  "narration.bleed.refreshed": "The hound opens the wound again.",
+  "narration.bleed.expired": "The bleeding finally stops."
 }

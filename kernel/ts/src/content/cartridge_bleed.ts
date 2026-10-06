@@ -23,6 +23,8 @@ export function bleed(c: Obj): Diagnostic[] {
   for (const [ref, b] of Object.entries(defs) as [string, Obj][]) {
     if (b.tick_every >= b.duration)
       out.push(diag('SCHEMA_VIOLATION', `.cartridge.bleeds${step(ref)}.tick_every`));
+    if (!b.narration || Object.values(b.narration as Obj).some((key) => !c.text?.[key as string]))
+      out.push(diag('SCHEMA_VIOLATION', `.cartridge.bleeds${step(ref)}.narration`));
   }
   for (const [ref, n] of hits) {
     const at = `.cartridge.npcs${step(ref)}.attack.on_positive_hit`;

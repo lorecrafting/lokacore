@@ -23,7 +23,7 @@ defmodule Loka.Content.Bleed do
   end
 
   defp verify(m, defs, text, bleeds, hits, items) do
-    gate(m) ++ values(bleeds) ++ producers(m, defs, hits) ++ bandages(m, defs, text, items)
+    gate(m) ++ values(bleeds, text) ++ producers(m, defs, hits) ++ bandages(m, defs, text, items)
   end
 
   defp gate(m) do
@@ -40,10 +40,19 @@ defmodule Loka.Content.Bleed do
        else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
   end
 
-  defp values(bleeds) do
-    for {_, {rel, _, b}} <- bleeds,
-        b["tick_every"] >= b["duration"],
-        do: diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))
+  defp values(bleeds, text) do
+    Enum.flat_map(bleeds, fn {_, {rel, _, b}} ->
+      n = b["narration"]
+
+      if(b["tick_every"] >= b["duration"],
+        do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
+        else: []
+      ) ++
+        if(is_map(n) and Enum.all?(Map.values(n), &Map.has_key?(text, &1)),
+          do: [],
+          else: [diag("SCHEMA_VIOLATION", at(rel, ["narration"]))]
+        )
+    end)
   end
 
   defp producers(m, defs, hits) do

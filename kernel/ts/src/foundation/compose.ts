@@ -125,7 +125,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.cancel':
       return composeJob(op, row, ctx.horizon);
     case 'bleed.transition':
-      return transitionBleed(op, row, ctx.state, ctx.horizon);
+      return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':

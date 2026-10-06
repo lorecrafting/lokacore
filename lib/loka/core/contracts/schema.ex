@@ -203,6 +203,12 @@ defmodule Loka.Core.Contracts.Schema do
   # The JSON type an anyOf branch accepts, following $refs (seen stops a cycle); else nil.
   defp json_type(%{"type" => t}, _, _) when t in ["object" | @scalar_types], do: t
 
+  defp json_type(%{"oneOf" => branches}, _, _) when is_list(branches) do
+    if branches != [] and Enum.all?(branches, &match?(%{"type" => "object"}, &1)),
+      do: "object",
+      else: nil
+  end
+
   defp json_type(%{"$ref" => ref}, {_, names} = ctx, seen) do
     case target(ref, ctx) do
       {f, _} = key ->

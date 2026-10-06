@@ -168,11 +168,15 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
         ? [n.helper_joined, n.primary_changed, n.pack_withdrew, ...Object.values(n.enemy_fled)]
         : [];
     });
+    const bleedKeys = Object.values(s.world.cartridge.bleeds ?? {}).flatMap((bleed) =>
+      Object.values(bleed.narration),
+    );
     const lines = d.narration ?? [];
     const combat_lines = lines.flatMap((line, i) =>
       root ||
       keys.includes(line?.key) ||
       packKeys.includes(line?.key) ||
+      (bleedKeys.includes(line?.key) && !!engaged(s.world, s.world.body)) ||
       (d.outcome === 'bandaged' && d.encounter_id === engaged(s.world, s.world.body)?.id)
         ? [i]
         : [],

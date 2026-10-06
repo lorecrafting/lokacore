@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -20,7 +20,7 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import type { Db } from './store.ts';
-import { buttonsOf, group } from '../../app/book/model.ts';
+import { bleedingLine, buttonsOf, group } from '../../app/book/model.ts';
 
 // Breaks: the managed elapsed driver skips the newly scheduled second tick or expiry in one
 // offline catch-up, or cold reopen loses the resulting HP and inactive condition.
@@ -82,9 +82,9 @@ test('managed offline catch-up commits each bleed tick and expiry through real S
   assert.equal(after.resources?.find((r) => r.resource.key === 'hp')?.current, 7);
 });
 
-// Breaks: a saved exact cure loses terminal custody or resurrects the tick on cold replay;
-// an idempotent retry spends that item twice.
-test('saved exact bandage cure reopens and replays once on real SQLite', (t) => {
+// Breaks: failed or uncertain tick/cure COMMIT leaks half of HP, wound, job or item custody;
+// an idempotent retry spends the bandage twice.
+test('active tick and exact cure reconcile real SQLite COMMIT faults and replay once', (t) => {
   const artifact = read('kernel/ts/test/fixtures/c5-provisional-artifact.json');
   const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
   if (!loaded.ok) throw new Error(JSON.stringify(loaded));
@@ -145,14 +145,51 @@ test('saved exact bandage cure reopens and replays once on real SQLite', (t) => 
       return () => `bbbbbbbb-0000-4000-8000-${String(++n).padStart(12, '0')}`;
     })(),
   };
-  const open = (sql: DatabaseSync) => {
+  type Fault = {
+    kind: 'failed' | 'absent' | 'lost';
+    armed: boolean;
+    reads: boolean;
+    inserted: boolean;
+  };
+  const open = (sql: DatabaseSync, fault?: Fault) => {
     const db: Db = {
-      execSync: (q) => sql.exec(q),
-      runSync: (q, ...p) => sql.prepare(q).run(...p),
-      getFirstSync: <T>(q: string, ...p: (string | number | null)[]) =>
-        (sql.prepare(q).get(...p) ?? null) as T | null,
-      getAllSync: <T>(q: string, ...p: (string | number | null)[]) =>
-        sql.prepare(q).all(...p) as T[],
+      execSync: (q) => {
+        const before = sql.isTransaction;
+        if (fault?.armed && fault.kind === 'absent' && q === 'COMMIT') {
+          fault.armed = false;
+          fault.reads = true;
+          throw new Error('COMMIT outcome unknown before execution');
+        }
+        try {
+          sql.exec(q);
+        } catch (e) {
+          if (fault?.armed && before) {
+            fault.armed = false;
+            fault.reads = true;
+          }
+          throw e;
+        }
+        if (fault?.armed && fault.kind === 'lost' && before && !sql.isTransaction) {
+          fault.armed = false;
+          fault.reads = true;
+          throw new Error('COMMIT acknowledgement lost');
+        }
+      },
+      runSync: (q, ...p) => {
+        if (fault?.armed && fault.kind === 'failed' && !fault.inserted) {
+          fault.inserted = true;
+          sql.exec('INSERT INTO child VALUES (1)');
+        }
+        return sql.prepare(q).run(...p);
+      },
+      getFirstSync: <T>(q: string, ...p: (string | number | null)[]) => {
+        if (fault?.reads) sql.prepare('SELECT * FROM unavailable_c5_read').get();
+        return (sql.prepare(q).get(...p) ?? null) as T | null;
+      },
+      getAllSync: <T>(q: string, ...p: (string | number | null)[]) => {
+        if (fault?.reads) sql.prepare('SELECT * FROM unavailable_c5_read').get();
+        return sql.prepare(q).all(...p) as T[];
+      },
       isInTransactionSync: () => sql.isTransaction,
     };
     const story = openStory(db, releases, host);
@@ -181,7 +218,15 @@ test('saved exact bandage cure reopens and replays once on real SQLite', (t) => 
     'saved',
   );
   const row = a.story.world().state.bleeds![fresh.body]!;
-  assert.equal(row.active, true);
+  assert.ok(row.active);
+  assert.equal(
+    bleedingLine(
+      gameView(a.story.world()).bleeding!,
+      64950,
+      (k) => a.story.world().cartridge.text[k],
+    ),
+    'Bleeding · 300s remaining · 1 HP each 100s',
+  );
   assert.deepEqual(
     group(
       buttonsOf(
@@ -193,6 +238,73 @@ test('saved exact bandage cure reopens and replays once on real SQLite', (t) => 
     [{ target_ids: [item], input: { effect_generation: 1 } }],
   );
   const cure = invoke(4, 'bandage', [item], { effect_generation: row.generation });
+  a.sql.close();
+  const snapshot = (sql: DatabaseSync) => ({
+    head: sql.prepare('SELECT * FROM head').all(),
+    rows: sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
+    receipts: sql.prepare('SELECT * FROM receipt ORDER BY revision').all(),
+  });
+  for (const action of ['tick', 'cure'] as const)
+    for (const kind of ['failed', 'absent', 'lost'] as const) {
+      const clone = join(dir, action + '-' + kind + '.db');
+      copyFileSync(path, clone);
+      const sql = new DatabaseSync(clone);
+      if (kind === 'failed')
+        sql.exec(
+          'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+        );
+      const fault: Fault = { kind, armed: false, reads: false, inserted: false };
+      const attempt = open(sql, fault);
+      const prior = snapshot(sql);
+      const old = attempt.story.world();
+      const due = { expected_run_id: attempt.story.runId(), from: 64950, until: 65050 };
+      fault.armed = true;
+      const result = action === 'tick' ? attempt.story.elapsed(due) : attempt.story.invoke(cure);
+      assert.equal(result.kind, 'pending', action + kind);
+      assert.equal(attempt.story.world(), old);
+      assert.equal(attempt.story.invoke(invoke(50, 'look')).kind, 'pending');
+      assert.equal(attempt.story.elapsed(due).kind, 'pending');
+      fault.reads = false;
+      if (sql.isTransaction) sql.exec('ROLLBACK');
+      sql.close();
+      const settled = open(new DatabaseSync(clone));
+      const next = kind === 'lost';
+      if (!next) assert.deepEqual(snapshot(settled.sql), prior, action + kind);
+      assert.equal(
+        settled.story.world().state.bleeds![fresh.body]!.active,
+        action === 'cure' && next ? false : true,
+      );
+      assert.equal(
+        settled.story.world().state.containers[item],
+        action === 'cure' && next ? fresh.consumed : fresh.body,
+      );
+      assert.equal(
+        settled.story.world().state.jobs![row.job_id].status,
+        next ? (action === 'tick' ? 'completed' : 'cancelled') : 'pending',
+      );
+      if (next && action === 'tick') {
+        const continued = settled.story.world().state.bleeds![fresh.body]!;
+        assert.ok(continued.active);
+        assert.equal(settled.story.world().state.jobs![continued.job_id].due_time, 65150);
+      }
+      assert.equal(
+        settled.story.world().state.resources?.[
+          key({ kind: 'resource', entity_id: fresh.body, resource: resourceRef(fresh, 'hp') })
+        ]?.value,
+        action === 'tick' && next ? 8 : 9,
+      );
+      assert.equal(settled.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, next ? 5 : 4);
+      if (next && action === 'tick')
+        assert.deepEqual(
+          settled.story.narration()?.lines.map((line) => line.key),
+          ['narration.bleed.tick'],
+        );
+      const replay = action === 'tick' ? settled.story.elapsed(due) : settled.story.invoke(cure);
+      assert.equal(replay.kind, 'saved');
+      if (replay.kind === 'saved') assert.equal(replay.replay, next);
+      settled.sql.close();
+    }
+  a = open(new DatabaseSync(path));
   const saved = a.story.invoke(cure);
   assert.equal(saved.kind, 'saved', JSON.stringify(saved));
   assert.equal(a.story.world().state.containers[item], fresh.consumed);

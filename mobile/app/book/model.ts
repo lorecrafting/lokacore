@@ -13,6 +13,8 @@ import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
+export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
+  `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 

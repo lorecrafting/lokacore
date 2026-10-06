@@ -1805,39 +1805,71 @@
       "description": "Pinned wrong-answer count and authored positive limit for one conversational sitting."
     },
     "BleedRow": {
-      "description": "One body bleed generation, retained after removal. Active fields are checked together by composition and save.",
-      "examples": [{ "generation": 1, "active": false }],
-      "type": "object",
-      "properties": {
-        "generation": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 2147483647
-        },
-        "active": {
-          "type": "boolean"
-        },
-        "effect": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "source_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "ends_at": {
-          "$ref": "command.schema.json#/$defs/LogicalTime"
-        },
-        "next_tick_at": {
-          "$ref": "command.schema.json#/$defs/LogicalTime"
-        },
-        "job_id": {
-          "$ref": "delta.schema.json#/$defs/JobId"
+      "description": "One body bleed generation, retained after removal. Active fields are required together.",
+      "examples": [
+        {
+          "generation": 1,
+          "active": false
         }
-      },
-      "required": [
-        "generation",
-        "active"
       ],
-      "additionalProperties": false
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "active": {
+              "const": true
+            },
+            "effect": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "source_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "next_tick_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "job_id": {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            }
+          },
+          "required": [
+            "generation",
+            "active",
+            "effect",
+            "source_id",
+            "ends_at",
+            "next_tick_at",
+            "job_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "active": {
+              "const": false
+            },
+            "generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "active",
+            "generation"
+          ],
+          "additionalProperties": false
+        }
+      ]
     }
   }
 }

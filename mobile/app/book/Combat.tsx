@@ -1,6 +1,6 @@
 // A full reading page with the offered actions following its combat history.
 import { ScrollView, Text } from 'react-native';
-import type { group } from './model.ts';
+import { bleedingLine, type group } from './model.ts';
 import { Act, prose, scrollPaper, titleStyle } from './pages.tsx';
 import type { presenter, Button } from './presenter.ts';
 
@@ -18,7 +18,7 @@ export function Combat(p: {
         Combat
       </Text>
       <Text style={prose}>{text(view.combat.name)}</Text>
-      {view.bleeding && <Text style={prose}>{text(view.bleeding.label)}</Text>}
+      {view.bleeding && <Text style={prose}>{bleedingLine(view.bleeding, view.time, text)}</Text>}
       {view.combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose}>
           {text(opponent.name)}

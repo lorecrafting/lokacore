@@ -59,9 +59,15 @@ export function runBleed(
         mint,
       );
       ops.push(...died.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: now } : op)));
-      return accepted(world, 'job_ran', ops, died.events);
+      return accepted(world, 'job_ran', ops, died.events, [{ key: spec.narration.tick }]);
     }
-    return accepted<never>(world, 'job_ran', ops, []);
+    return accepted<never>(
+      world,
+      'job_ran',
+      ops,
+      [],
+      expired ? [{ key: spec.narration.expired }] : loss ? [{ key: spec.narration.tick }] : [],
+    );
   }
   const next_tick_at = tick ? add(row.next_tick_at!, spec.tick_every) : row.next_tick_at!;
   const due_time = Math.min(next_tick_at, row.ends_at!);
@@ -82,5 +88,5 @@ export function runBleed(
     bleed_generation: row.generation,
     due_time,
   });
-  return accepted<never>(world, 'job_ran', ops, []);
+  return accepted<never>(world, 'job_ran', ops, [], loss ? [{ key: spec.narration.tick }] : []);
 }
