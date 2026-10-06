@@ -163,7 +163,8 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
 Local `main` has completed **8 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5, C1).
-GitHub `main` has three (A1, B1, A2).
+GitHub `main` has all eight through [#205](https://github.com/lorecrafting/lokacore/pull/205)
+(A1, B1, A2, B2, A3, B3, B5, C1).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -171,20 +172,19 @@ adopts the A3 Green finale and five-outcome plan; neither PR alone completed a s
 The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
 applied to these five merges while GitHub Actions delayed and cancelled runners.
 B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
-local `main` at chapter 0.0.16/API1.14. The accumulated local checks passed on the
-C1-inclusive head; GitHub publication remains ahead. A3 Green finale is implemented at chapter
+local `main` at chapter 0.0.16/API1.14. The accumulated local and six hosted checks
+passed for [#205](https://github.com/lorecrafting/lokacore/pull/205). A3 Green finale is implemented at chapter
 0.0.17/API1.15 and independently approved after the bound-Continue and save-proof
 findings were fixed ([primary review](reviews/2026-10-05-a3-green-primary-review.md),
-[save review](reviews/2026-10-05-a3-save-second-review.md)). Both await accumulated-head
-publication checks and a GitHub PR.
+[save review](reviews/2026-10-05-a3-save-second-review.md)). Both are published in #205.
 B3 Peg's finite shop is implemented at chapter 0.0.18/API1.16 and independently
 approved after its ID-pin and schema-example findings were fixed
 ([primary review](reviews/2026-10-05-b3-pegs-shop-primary-review.md),
-[save review](reviews/2026-10-05-b3-pegs-shop-save-second-review.md)). It awaits
-accumulated-head publication checks and a GitHub PR. B4 refillable light and
+[save review](reviews/2026-10-05-b3-pegs-shop-save-second-review.md)). It is published in #205. B4 refillable light and
 safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md)
 and [independent plan approval](reviews/2026-10-05-b4-light-plan-review.md);
-source implementation is active in an isolated local branch.
+source implementation is provisionally merged on local `main` while independent
+primary and save/protocol reviews run.
 
 B5 Infirmary Herbs is implemented on local `main` at chapter 0.0.19/API1.17.
 Its finite fenwort harvest, four bandage exchanges and bounded Priory contribution
@@ -192,7 +192,7 @@ passed focused source proof. Trusted elapsed replay, pinned dialogue roles and
 paired quest retirement findings were fixed and independently approved
 ([primary review](reviews/2026-10-05-b5-infirmary-herbs-primary-review.md),
 [save/portable review](reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md)).
-It awaits accumulated-head publication checks and a GitHub PR.
+It is published in #205.
 
 B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
@@ -219,8 +219,8 @@ Its [independent plan review](reviews/2026-10-05-c1-tobin-plan-review.md),
 [save/protocol second opinion](reviews/2026-10-05-c1-tobin-save-second-review.md)
 approved after all findings were fixed. Local `main` carries chapter 0.0.20/API1.18,
 the independently pinned hash `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e`
-and 92 IDs. The accumulated local check passed, including the post-review size fix;
-GitHub publication remains ahead.
+and 92 IDs. The accumulated local check and all six hosted checks passed;
+C1 is published in #205.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
