@@ -70,3 +70,35 @@ adds only the missing invariant. No second food ledger or general deletion frame
 bin/check_docs.exs` passed: 606 documents, zero broken links or unreachable files.
 No implementation tests/mutations, browser/native/save session or full check line
 was run for this planning-only diff, per the workflow. **D4-P1 remains open.**
+
+
+## Scoped fix round 1 — APPROVE
+
+Reviewed exact docs-only fix `f376e31736e9c9b0749bedfc473b22bf4c2047ba`
+(parent `5295d45e`, carrying the original review). **D4-P1 is closed; no open
+findings.** This approves the selected plan, not unbuilt source or future proof.
+
+[Book routing](../system/book-ui.md#d4-home-details-and-carried-food-eat)
+now explicitly makes confirmed `eaten` close the item/Carrying route and show its
+exact receipt narration in World. This overrides the submitted item detail;
+pending/refused/faulted attempts invent no success. Exact reply `command_id`
+selection and command-ID dedup handle eventless lost-acknowledgement/replay.
+[Save recovery](../system/save.md#d4-finite-food-and-terminal-custody-recovery)
+validates original command/actor/item, terminal transfer, recovery and authored
+narration at the accepted history prefix, then omits `detail_id`. Cold reopen
+with Eat as the latest narratable receipt restores World after ordinary chapter
+entry without reviving the apple or borrowing an unrelated detail.
+
+The [brief's controlled acceptance](../briefs/chapter-one/d4-homes-orchard-brief-2026-10-05.md#independent-acceptance-and-red-controls)
+now names live visibility, lost acknowledgement/exact replay and real SQLite
+cold reopen with the apple absent, plus disappearing-detail, missing Eat
+classification and corrupt-link controls. Inspected the four changed docs and
+the installed direct routing/recovery paths (`presenter`, `pagesAfter`,
+`restoredLogs`, exact narration selection); the selected amendment resolves their
+identified gap. Ponytail Review: reuse existing logs/receipts, no new machinery.
+
+`git diff --check 5295d45e f376e317` and `mise exec -- elixir
+bin/check_docs.exs` passed (607 documents, zero broken/unreachable). No source
+mutation, implementation test, browser/native/save session or full check line
+was run for this planning-only fix. Source assignment still requires the brief's
+shared-source integration/re-pin and later independent implementation proof.
