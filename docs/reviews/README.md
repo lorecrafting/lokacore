@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Foreign-world simulator envelope](2026-10-06-sim-foreign-world-envelope-review.md): source `381e1f61`, evidence `9731df92`, fresh independent **APPROVE**; no findings. Published seed71 false positive independently reproduced; fixed 200-seed workload, real Maud offer, three oracle mutants, fault/wrong-code controls and all ten evidence hashes verified.
+
 - [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
 
 - [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
