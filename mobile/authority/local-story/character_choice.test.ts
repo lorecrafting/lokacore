@@ -82,6 +82,41 @@ test('fen choice commits one creation receipt and reopens inherited state', (t) 
   assert.equal(gameView(story.world()).ancestry, 'fen_born');
 });
 
+// Breaks: fey creation omits its initial faction row or receipt, so cold reopen cannot justify Priory/Fen −2.
+test('fey choice saves and reopens its initial faction with creation receipt', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'd11-fey-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const a = chapter(join(dir, 'save.db'));
+  t.after(() => a.sql.close());
+  const story = a.open();
+  const result = story.invoke({
+    invocation_id: 'dddddddd-0000-4000-8000-000000000004',
+    actor_id: a.fresh.character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  });
+  assert.equal(result.kind, 'saved');
+  const receipt = JSON.parse(
+    a.sql.prepare('SELECT response FROM receipt').get()!.response as string,
+  );
+  assert.ok(
+    receipt.delta.ops.some(
+      (op: { op: string; value?: number; fact?: { key: string } }) =>
+        op.op === 'fact.assign' && op.fact?.key === 'priory_fen_axis' && op.value === -2,
+    ),
+  );
+  const reopened = a.open();
+  assert.equal(gameView(reopened.world()).ancestry, 'fey_touched');
+  assert.deepEqual(
+    a.sql
+      .prepare("SELECT value FROM state_row WHERE section='facts'")
+      .all()
+      .map((row) => JSON.parse(row.value as string)),
+    [-2],
+  );
+});
+
 // Breaks: a valid-looking row with a forged ancestry opens despite contradicting its accepted receipt.
 test('forged ancestry row is save_corrupt without replacing the save', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'd11-corrupt-'));
