@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, fresh, ids } from '../../../kernel/ts/test/priory_fixture.ts';
@@ -112,10 +112,13 @@ test('real SQLite preserves original books through ground Take nested open Read 
 });
 
 // Break: first/already-known Read partially commits or exact retry duplicates narration/grant.
-test('real failed and lost COMMIT outcomes fence Read then retry and replay once', () => {
+test('real failed and lost COMMIT outcomes fence Read then retry and replay once', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-d2-faults-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
   for (const kind of ['failed', 'lost'] as const)
     for (const known of [false, true]) {
-      const a = setup();
+      const a = setup(join(dir, `${kind}-${known}.db`));
+      assert.equal(a.sql.prepare('PRAGMA journal_mode').get()!.journal_mode, 'delete');
       a.toBooks();
       a.ok('take', [ids['item/ward_of_the_fen']]);
       if (known) a.read();
@@ -164,7 +167,9 @@ test('real failed and lost COMMIT outcomes fence Read then retry and replay once
 });
 
 // Break: forged Read identity/topic/cause or omitted lawful grant is accepted from today's knowledge rows.
-test('historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody', () => {
+test('historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-d2-corrupt-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
   const mutations = [
     (c: any, d: any) => {
       c.payload.actor_id = ids['npc/ash'];
@@ -183,8 +188,9 @@ test('historical Read and known-topic truth reject wrong actor book definition c
       d.events = [];
     },
   ];
-  for (const mutate of mutations) {
-    const a = setup();
+  for (const [index, mutate] of mutations.entries()) {
+    const path = join(dir, `${index}.db`);
+    const a = setup(path);
     a.toBooks();
     a.ok('take', [ids['item/ward_of_the_fen']]);
     a.read();
@@ -200,7 +206,9 @@ test('historical Read and known-topic truth reject wrong actor book definition c
       .prepare('UPDATE receipt SET command=?,response=? WHERE command_id=?')
       .run(JSON.stringify(c), JSON.stringify(d), row.command_id as string);
     const before = a.sql.prepare('SELECT value FROM state_row ORDER BY section,key').all();
+    const bytes = readFileSync(path);
     assert.equal(a.reopen().kind, 'save_corrupt');
+    assert.deepEqual(readFileSync(path), bytes);
     assert.deepEqual(
       a.sql.prepare('SELECT value FROM state_row ORDER BY section,key').all(),
       before,
