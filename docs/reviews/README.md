@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D7 deer provisional primary source](2026-10-06-d7-deer-provisional-primary-review.md): exact local source `3d198c17`, CHANGES REQUIRED; loader admits hound sight that cold save validation rejects. Focused deer 12/12 and Elixir 14/14; two behavior mutations red. Final predecessor pin, browser and hosted gates remain pending.
+
 - [D7 equal-time round and sight policy](2026-10-06-d7-equal-time-policy-review.md): exact planning head `8085ce5d`, independent APPROVE; checked narrow matching round-to-sight group handoff, both job orders, stale/fatal/blocked/intervening paths and save/Book proof obligations. No source approval.
 
 - [Pre-production CI scope](2026-10-06-preproduction-ci-scope-review.md): initial head `0e3f49a1` CHANGES REQUIRED; scoped fix recheck at `92b0c864` APPROVE closes CI-S1/CI-S2. Browser-success mutation now fails both skipped and failed controls and restores green; active owner rules link the decision. Four local hook cases independently checked.
