@@ -58,3 +58,21 @@ requires no mutation or runtime suite.
 
 Ponytail Review and correctness: lean status corrections using existing records,
 links and tracker; no extra machinery or unrelated source changes.
+
+## Hosted publication and final read-only Codex review
+
+PR #232 source/status head `8c0644225e780a177bc5280898f3235816537949` passed all six hosted checks. The first browser attempt failed with a Web save `Sync operation timeout` / `COMMIT failed; nothing was saved` in unchanged source; the same hosted run's failed-job rerun passed all three browser journeys. Five other jobs passed on the original attempt. This remains a recorded intermittent hosted Web save observation, not a source change in this PR.
+
+The following is the verbatim final Sol review of that head after hosted checks:
+
+```text
+APPROVE
+
+No findings at 8c0644225e780a177bc5280898f3235816537949 against c20addb09431f1ab75b56402d422cc9a29cb8360.
+
+Reviewed all nine changed files and governing planning/workflow documents. Published PRs and local independent review records support the status claims: 18/33 complete; C4/D4 remain provisional. D8’s D6 dependency and C5’s supply/consumption corrections are consistent.
+
+No machine-path leaks found. Export and whitespace checks pass. Exact-head hosted CI and browser workflows report success. Ponytail Review found no unnecessary machinery.
+
+Read-only; no files edited.
+```
