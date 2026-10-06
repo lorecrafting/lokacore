@@ -1096,6 +1096,27 @@
           "additionalProperties": false
         },
         {
+          "description": "Eat one directly held opted edible item; its identity enters terminal custody.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "eat"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
           "type": "object",
           "properties": {
             "type": {

@@ -77,12 +77,12 @@ Report at the end of the slice, not at every step.
    view-to-invocation check for any new availability rule. Where authored keys may differ from
    commands, include such an alias in that check. Reuse an existing same-layer check if it
    catches that break.
-3. **Build and self-review (developer).** Implement; run the full local check line from
-   AGENTS.md once for publication (the [provisional local lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md) uses focused checks first; the pre-push hook is the final publication run: do not run it again right before the push); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
+3. **Build and self-review (developer).** Implement; run focused checks for the changed behavior
+   and required red controls, then let the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md) make the final local publication run (do not repeat it immediately before pushing); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
    docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
    both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
-   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full TypeScript checks. Commit, then publish
+   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
    the PR or keep a [local draft PR](#local-draft-pr-cadence) (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
    branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
    dispositions, deviations from the brief, open questions.
@@ -125,8 +125,8 @@ Report at the end of the slice, not at every step.
    whose CI you confirmed green, so a later push makes the merge fail instead of landing
    unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
    appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
-   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs only when the head differs from a commit whose code jobs all passed by
-   Markdown files alone ([CHECKS](CHECKS.md)), so green CI on the head is enough. Right after the merge the PM writes the
+   other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
+   ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
@@ -167,8 +167,10 @@ checkout for the latest merged status. From another checkout, set
 change the branch or move tracker data. Agents can add `--robot-triage`; human
 readers can use
 the interactive board and graph. `br` mutates local
-SQLite and exports Git-tracked JSONL; after a pull use `br sync --import-only`,
-and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
+SQLite and exports Git-tracked JSONL. Beads Rust 0.7.4 auto-flushes mutations
+and auto-imports newer JSONL on commands by default; use `br sync --status --json`
+to inspect drift, `br sync --import-only` to recover an out-of-date index, and
+`br sync --flush-only` before a tracker commit if the index is dirty. Review the JSONL diff
 and verify it contains no local machine path; the installed release writes
 `source_repo_path` on creation, so clear it with
 `br update <id> --source-repo lokacore --source-repo-path ''` before committing.
@@ -177,7 +179,25 @@ even when the task itself is durable.
 The [export check](CHECKS.md) rejects path, ID and completeness errors in the
 staged commit and CI.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
-Do not install Beads hooks or let the tracker rewrite `AGENTS.md`.
+When a reviewed brief starts building, the PM marks its ready issue
+`in_progress` with `br update <id> --status in_progress` and keeps its current
+source/review links in the issue. After the source is reviewed and merged to
+`main`, the PM uses `br close <id> --reason "Merged <PR or local merge>"` and
+checks `br ready --brief --json` for newly unblocked work. A provisional review
+or green local test alone does not close a slice. Ad hoc findings that need
+follow-up become linked issues only when they are real work; the review record
+keeps the finding and disposition. Beads gate records are deferred during the
+pilot because the existing CI and review records own the gate evidence.
+The [hook comparison](evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
+`post-merge` and `post-checkout` imports only in the main integration checkout.
+After `git config core.hooksPath .githooks`, opt in there with
+`git config --local loka.beads.integrationRoot "$(pwd -P)"`; remove that setting
+with `git config --local --unset loka.beads.integrationRoot`. The hook checks for
+unexported local changes before importing and never stages, commits, pushes or
+closes an issue. A failed import prints a recovery instruction; Git's completed
+merge/checkout cannot be rolled back by a post-hook. These Git hooks run with
+either Codex or Claude Code in that checkout. Do not install Beads-provided hooks
+or let the tracker rewrite `AGENTS.md`.
 
 At the next two source merges, check whether ready/blocked work and Claude/Codex
 handoff remain accurate without duplicating the roadmap. Retire the pilot through
@@ -259,8 +279,10 @@ last-reported phases, activities and check durations; it does not replace these 
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- Delegate mechanical work; clear the session after each merge and resume from the PM state
-  file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
+- Delegate mechanical work. At a stable publication checkpoint, update the
+  roadmap, Beads and shared handoff before a fresh session; do not reset during
+  an open review merely to shorten context. No plugin or `CLAUDE.md` changes
+  mid-session (they bust the prompt cache).
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
@@ -268,6 +290,25 @@ last-reported phases, activities and check durations; it does not replace these 
 - Start a new slice agent with a self-contained brief and no inherited chat
   history; keep a visited path/revision list while following doc links. Reuse
   developer and reviewer context for scoped fixes only while it stays small.
+
+**Codex.** Spawn each new slice with `fork_turns: "none"` and a concise brief
+containing the worktree, exact base/head, governing sections, acceptance checks
+and open findings. Reuse an agent only for its own narrow fix or recheck; a new
+slice gets a fresh agent. Cap tool output, store complete check logs outside the
+conversation and report the failing lines or final counts. At a checkpoint,
+give the owner a copyable continuation prompt pointing to the current shared
+handoff and live Git/Beads state; a fresh session does not reset usage limits.
+
+**Claude Code.** Start a fresh developer and independent reviewer for each new
+slice from `.claude/agents/`; resume the same agent only for that slice's scoped
+fix/recheck while its context remains small. Send full check output to a
+scratchpad and return the short result specified by each role prompt. Before
+clearing or starting a new Claude session, write the same exact-head/open-finding
+handoff; read the index once on takeover and reopen only changed sections.
+
+Both routes preserve the brief, review records and failing evidence on disk;
+compaction or a fresh session never substitutes for a reviewed merge or
+silently closes unfinished work.
 
 ## Milestone gate
 

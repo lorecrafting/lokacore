@@ -1785,6 +1785,28 @@
         },
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "active_opponents": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "name": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Exact current pack roster, in canonical EntityId order; absent for ordinary one-opponent combat."
         }
       },
       "required": [

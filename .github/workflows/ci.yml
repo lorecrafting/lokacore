@@ -26,19 +26,15 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # Code jobs are skipped when nothing but Markdown changed since the newest ancestor of the head
-      # whose elixir, typescript and sim jobs all passed (bin/ci_base.sh, bin/docs_only.sh); no such ancestor or any
-      # API error runs everything. The lint job always runs. Pushes to main never skip.
+      # A missing green code ancestor or API error runs everything; lint always runs.
       - id: docs
         run: |
-          base=
-          [ "$EVENT" = pull_request ] && base=$(bin/ci_base.sh "$HEAD")
-          echo "skip=$([ "$(bin/docs_only.sh "$base" "$HEAD")" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          base=$(bin/ci_base.sh "$HEAD" code)
+          echo "skip=$([ "$(bin/ci_scope.sh "$base" "$HEAD" code)" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
         env:
-          EVENT: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
 
   elixir:
     needs: changes

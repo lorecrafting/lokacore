@@ -30,11 +30,13 @@ type Any = any;
 export const gameview_agrees_with_admission = ({
   view,
   command,
+  world_context_id = command.world_context_id,
   decision,
   resolves = {},
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  if (command.world_context_id !== world_context_id) return code === 'not_found';
   const type = command.payload.type;
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);

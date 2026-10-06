@@ -887,7 +887,7 @@ new schemas need their actual negative fixtures and planted guard controls.
 
 ## C3 hound population and loot
 
-**Selected, pending implementation.** The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
+The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
 adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
 chapter values, not engine/presenter constants or claimed owner preferences.
 
@@ -926,8 +926,8 @@ compile/load; inspect actual slot bounds before traversal or allocation.
 No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
 in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
 S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
-must amend their actual additional contracts. Successor release/API/hash/fresh IDs
-remain null until the reviewed integrated predecessor is known.
+must amend their actual additional contracts. The published C3 release answer is
+recorded in the [roadmap](../ROADMAP.md); C4 owns its separate successor pin.
 
 ## C4 pack response and wounded flight
 
@@ -957,8 +957,8 @@ immunity flag, temporary safe mode, extra return action or night wait is needed.
 C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
 without crossing the strict below25% live flight threshold; misses/defenses retain
 their actual resolver semantics. No weapon/loot is required by the main story.
-C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
-and intervening shared release edits are reviewed and independently re-pinned.
+C4 successor release/API/hash/fresh IDs are candidate answers pending final integrated review
+and independently pinned against the published predecessor.
 
 ## D1 ferry and Isle declarations
 
@@ -980,7 +980,7 @@ policy: D1 has no water action or new attribute to qualify. Sedge's direct
 free dialogue choice uses `skill.acquire` and does not issue D6 water access
 early. D1 defines no underwater admission. [D6's selected admission](mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation)
 uses acquired swim plus current load/MV, without an attribute floor;
-fresh scoped review and publication remain required before source. The optional
+selected-docs review is approved; source publication and proof remain pending. The optional
 dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
@@ -1132,7 +1132,7 @@ allocated-ID answers and the retained provisional fixtures are recorded in the
 
 ## D4 homes and orchard declarations
 
-**Selected plan; source pending.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 source declarations.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 uses these three public reciprocal additions from archived
 [00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
 
@@ -1161,12 +1161,13 @@ narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
 partial fruit. Full MV refuses without consuming. No restock or promised future
 nutrition model is required; the finite B8 meal remains a separate optional supply.
 
-Compiler and loader require `food@1` plus the successor API for edible fields,
-local declared recovery-pool references, positive safe-integer amount and valid
-catalog keys, and reject edible containers, equipment, fuel or liquid vessels.
+Compiler and loader require `food@1` plus API1.27 for edible fields,
+local declared MV recovery-pool references, positive safe-integer amount and valid
+catalog keys, and reject edible containers, equipment (slot, weapon or block metadata), fuel or liquid vessels.
 Expand source short references at the real new field. Edibility belongs to an
 immutable item definition; the terminal holder is generated metadata, never
-cartridge-authored. Successor release/API/hash/IDs remain null until source exists.
+cartridge-authored. The integrated v031/API1.27 answers are independently derived over
+published C3/D1 in the [D4 integration evidence](../evidence/2026-10-06-d4-published-integration/README.md).
 
 Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
 Green's installed terminal variants. Missing means the search is unfinished;
@@ -1215,7 +1216,7 @@ this plan assigns no successor pin or API increment.
 
 ## D6 bottom rooms and water tuning (selected, pending implementation)
 
-**PM-selected contract; implementation and fresh scoped review pending.** Reciprocal exits:
+**PM-selected contract; selected-docs review approved, implementation pending.** Reciprocal exits:
 `well_shaft` down ↔ `well_bottom` up and `black_pool` down ↔ `pool_bottom` up.
 Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
 loot needs B4 light. Well Bottom owns one actual old coin and carved initials;
@@ -1235,3 +1236,27 @@ Current source is the [published D1 v030/API1.26 baseline](../decisions/pm-decis
 Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
+
+## D12 practical skill declarations
+
+**Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
+
+| Chapter parameter | Selected value |
+|---|---|
+| Herbalism qualification | `all`: INT `stat_compare` at least 10 and MV `resource_compare` at least 5 |
+| Haggle qualification | `all`: DEX `stat_compare` at least 10 and MV `resource_compare` at least 5 |
+| Each new lesson | 2 pennies, actor→original bound teacher; all-hours, no duration/cooldown |
+| Herbalism teacher | Sedge in Isle Hut, existing declared penny start |
+| Haggle teacher | Peg in Chandler, existing declared penny start |
+| Careful yield | 2 existing eligible fenwort IDs from Willow Shade |
+| Buy discount | numerator 9 / denominator 10, minimum 1 penny |
+
+Add `dialogues/sedge_herbalism.json` and `dialogues/peg_haggle.json`, each binding the original teacher, with a direct `learn` choice, `skill.acquire`, and existing `lesson_payment`; the dialogue policy offers learning only while its reserved acquired fact is false, never based on qualification. No item gift or extra teacher registry is declared. Their text describes the actual fee/qualification/benefit without promising a ferry or story gate.
+
+The optional closed `harvest.careful` object on Willow Shade's existing `fenwort_patch` is `{skill: "herbalism", count: 2, action: "gather_carefully", narration: "narration.gather_carefully"}` in source. `skill` expands to the declared skill DefinitionRef, `count` is the required eligible-item count, `action` is the declared action key, and `narration` is a TextKey. Retain the existing `harvest.items`, ordinary label/title/narration and all twelve authored herb definitions. Define `actions/gather_carefully.json` with `command: "harvest"`, `target: {kind: "entity", scopes: ["inspectable_details"]}`, `input: ["method"]`, priority 0, declared label/accessibility, and vacuous `all` action policy; the shared method-aware Harvest admission owns skill, patch, stock and carrying eligibility. No other patch opts in. The [wire contract](protocol.md#d12-harvest-method-and-buy-quote-composition) binds only literal `method: "careful"` to this declaration.
+
+The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerator: 9, denominator: 10, minimum: 1}` in Peg's existing shop. `skill` expands to the declared skill DefinitionRef; the other fields are positive ResourceInts. It applies to all that shop's declared Buy offers, and never Sell. Existing bases torch3/oil2/waterskin4/satchel5/sword8/shield4/spare-waterskin4 therefore quote2/1/3/4/7/3/3 when usable; unchanged Sell is1/1/2/2/4/2/2. Existing exact items, balances and currency bounds remain in their owning B3/C1/B7 declarations.
+
+Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
+
+D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.

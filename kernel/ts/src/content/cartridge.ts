@@ -25,6 +25,7 @@ import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
+import { food } from './cartridge_food.ts';
 import { liquids } from './cartridge_liquids.ts';
 import { population } from './cartridge_population.ts';
 
@@ -74,7 +75,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => [...refStage(c), ...liquids(c), ...services(c), ...population(c), ...transports(c)],
+    () => declarations(c),
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -248,3 +249,14 @@ const STEP_EVENT: Readonly<Record<string, string>> = {
   'fact.assign': 'fact_changed',
   'event.emit': 'custom_event',
 };
+
+function declarations(c: Obj): Diagnostic[] {
+  return [
+    ...refStage(c),
+    ...liquids(c),
+    ...services(c),
+    ...food(c),
+    ...population(c),
+    ...transports(c),
+  ];
+}

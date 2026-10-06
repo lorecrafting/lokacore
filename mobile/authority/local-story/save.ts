@@ -1,3 +1,4 @@
+import { eatReceipt } from './food-receipt.ts';
 import { defenseEvidence } from './combat-receipt.ts';
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
@@ -160,8 +161,16 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const keys = d.events.some((e) => e.payload.type === 'attack_result')
       ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
       : [];
+    const packKeys = Object.values(s.world.cartridge.populations ?? {}).flatMap((plan) => {
+      const n = plan.pack?.narration;
+      return n
+        ? [n.helper_joined, n.primary_changed, n.pack_withdrew, ...Object.values(n.enemy_fled)]
+        : [];
+    });
     const lines = d.narration ?? [];
-    const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
+    const combat_lines = lines.flatMap((line, i) =>
+      root || keys.includes(line?.key) || packKeys.includes(line?.key) ? [i] : [],
+    );
     const pickup = corpsePickup(s, r, d);
     if (!lines.length && !pickup) {
       if (command_id) return undefined;
@@ -214,7 +223,6 @@ function receiptDetail(
   r: { command_id: string; command: string },
   d: Extract<DecisionResult, { kind: 'accepted' }>,
 ) {
-  if (d.kind !== 'accepted') return;
   const command = JSON.parse(r.command) as Command | null;
   const dream = dreamDetail(s, command);
   if (dream) return dream;
@@ -247,6 +255,7 @@ function receiptDetail(
       throw new Error('malformed JSON: invalid committed service');
     return command.payload.provider_id;
   }
+  if (command?.payload?.type === 'eat') return eatReceipt(s.world, command, r.command_id, d);
   if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;

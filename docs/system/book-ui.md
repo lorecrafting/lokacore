@@ -23,13 +23,37 @@ its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 ## World and status entry
 
 World is one current-room page. Its centered title remains fixed above the scrolling authored
-description, projected entities, offered place actions and event log. Tapping that title invokes
+description, projected interactibles, offered place actions and event log. The description
+may contain underlined touch links for projected room fixtures: scenery, fixed doors or
+exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
+whether it appears mid-sentence or at the end of the last paragraph; the Book does not
+move it into a separate entity list or force a paragraph break. A fixture is
+immovable room content: it cannot be taken, dropped, stored or otherwise removed
+from the room. A removable object is a loose item in the item group instead.
+The link opens a detail only when the current GameView supplies a visible,
+current-room identity and detail route (for example, an offered place action
+with an exact inspectable target). The Book does not infer visibility, identity,
+detail or an action from bracketed prose alone. If that projection is absent,
+the words remain ordinary prose until a mechanic adds the required projection
+and admission contract. The selected room-description variant itself must omit
+concealed fixture or exit text until the game reveals it; the Book cannot hide
+an authored phrase after receiving it.
+
+Below the description, present players and NPCs have their own paragraph/list, and
+loose room items have a separate paragraph/list. Each projected subject can open its
+own detail. An item's Take option appears only when currently offered; an NPC or
+player uses its own offered interactions. Omit an empty group. Player presence is a
+future projection; the current Book has NPCs and items only. This distinction is
+presentation and custody, not a new entity kind: fixture, actor and item actions still
+come from the current GameView/ActionSet and its captured freshness context.
+
+Tapping the room title invokes
 the current offered Look under the [live action freshness rule](#live-action-freshness); it invents no refresh command. The [current sampler](cartridge.md)
 projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
-Current entities are projected NPCs and items; tapping either opens its full detail. Standalone exit directions, adjacent-sight listings and redundant navigation/
+Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
 to the actual room: after a confirmed accepted action changes place, clear the old-room log
@@ -575,7 +599,7 @@ unrelated latest receipt or treat selected tiles as a grant.
 
 ## C3 living hound and loot details
 
-**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+[C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
 projects each co-present living hound as its own existing NPC detail/action target,
 with its exact EntityId and current HP condition. Shared blueprint names may be
 the same; selecting an entry binds that instance, never the first definition match.
@@ -734,7 +758,7 @@ clock pause, body/map switch, second event transcript or presenter gameplay writ
 
 ## D4 home details and carried-food Eat
 
-**Selected plan; not implemented.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
+**D4 source interaction contract.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
 use ordinary exits, inspectable details and NPC dialogue. Orchard trees expose
 Forage only through the existing exact Harvest offer; Carrying's actual apple
 detail exposes its declared Eat action and capped MV benefit only when admitted.
@@ -779,7 +803,7 @@ original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
 
 ## D6 water exits and Chapel recovery
 
-**PM-selected contract; implementation and fresh scoped review pending.** Shaft/bank show Down with
+**PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
@@ -806,3 +830,11 @@ extra transfer. Drowning shows one actual death/same-body return and recoverable
 original light/fare/key. Later isolated browser proof covers remaining-time/Up on
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
 is authorized by this planning adoption; real SQLite faults remain separate proof.
+
+## D12 practical lessons and benefits
+
+**Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
+
+The Willow Shade patch shows current derived finite supply and its ordinary one-item Harvest. A usable opted skill also supplies the authored careful offer and item count through the same pure method-aware admission as execution; insufficient stock/combined carrying has an honest typed refusal and retains ordinary Harvest where legal. The control sends the [exact alias input](protocol.md#d12-harvest-method-and-buy-quote-composition), without presenter-created herbs or skill gating inferred from names. Peg's rows show the effective Buy price and actual Sell price/availability from the shared current query, and bind the displayed Buy number to invocation. Qualification/stock changes refresh or refuse the stale offer before charge.
+
+Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.

@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote; source/proof remain pending ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
+
 - D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
 
 - D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
@@ -193,6 +195,8 @@ and not repeated here.
 
 ## Process
 
+- During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+
 - Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - Web stays active through game completion: C2 has focused fresh Book proof, browser fatal/Restart remains due by the E3 browser walk, and the preserved terminal save has twice-reopened evidence after the separate Web fix; native verification follows the existing pause ([record](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)).
@@ -291,4 +295,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Q2-A staged first search lead: [PM adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
 
-- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); fresh scoped review, publication and source proof remain pending.
+- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); selected-docs review is approved; publication and source proof remain pending.

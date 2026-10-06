@@ -5,6 +5,18 @@
 [PM adoption](../../decisions/pm-decision-d4-homes-orchard-2026-10-05.md) is planning
 only. Proposed source branch: `chapter-one/d4-homes-orchard` (not created).
 
+
+## Assigned source checkpoint
+
+Source is assigned on isolated `slice/d4-homes-orchard` from published B9 merge
+`b9dd1d9c80cf25d46823f0c3df28830e2af8afdb`, chapter v028/API1.25. The adopted plan
+[scoped review](../../reviews/2026-10-05-d4-homes-orchard-plan-review.md) is APPROVE;
+D4-P1 is closed. Planning pin claims below are historical. C3/D1 publication order
+still controls final successor answers; source/review/evidence/PR remain null until
+recorded. No owner save, native or preview session is authorized. D4 reuses current
+Harvest/recovery/receipt/Book patterns; consumed terminal custody is the narrow new
+primitive selected by the plan.
+
 ## Source re-pin and dependency gate
 
 Inspected published main: `c2cf8938a30a65335edc6e5c139c65c61e5105d5`,
@@ -138,5 +150,7 @@ complete food outcome; return it to PM before proceeding.
 Planning self-review: removed fictional B5 regrowth/B8 Eat reuse, retained finite
 identity/load/recovery and exact child status. Ponytail Review: no new stock ledger,
 physiology, restock or event framework; only the first-consumer terminal invariant
-is added. This task runs docs/diff checks only, with no implementation test,
+is added. The planning checkpoint ran docs/diff checks only, with no implementation test,
 mutation, browser/native proof or independent approval claim.
+
+Provisional source and current proofs are tracked in the [D4 evidence record](../../evidence/2026-10-06-d4-homes-orchard/README.md). Final pins and source approvals remain conditional on published C3/D1 integration.

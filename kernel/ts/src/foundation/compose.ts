@@ -9,9 +9,9 @@ import {
   initializePopulationResource,
   populationRow,
 } from './compose_population.ts';
+import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
-// StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
@@ -40,7 +40,6 @@ const DOOR: Record<string, string[]> = {
   open: ['closed'],
   locked: ['closed'],
 };
-
 export const key = (value: unknown): string => encode(value as Json);
 export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
 export const get = (o: Json | undefined, k: string): Json | undefined =>
@@ -74,23 +73,20 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  if (final && !completeBirths(ops)) return fault('precondition_failed', { kind: 'clock' });
+  if (final && !completeBirths(ops, state)) return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
 
-/** `ops`' operation and job counts over `state`, the composition-profile limits compose checks. */
 export function counts(state: State, ops: readonly DeltaOp[]) {
   const count = (name: string) => ops.filter((o) => o.op === name).length;
   const jobs = Object.values(section(state, 'jobs'));
   const pending = jobs.filter((j) => get(j, 'status') === 'pending').length;
-  const created = count('job.schedule');
-  const due = count('job.complete');
   return {
     operations: ops.length,
-    created_jobs: created,
-    due_jobs_per_advance: due,
-    pending_jobs: pending + created - due - count('job.cancel'),
+    created_jobs: count('job.schedule'),
+    due_jobs_per_advance: count('job.complete'),
+    pending_jobs: pending + count('job.schedule') - count('job.complete') - count('job.cancel'),
   };
 }
 
@@ -100,7 +96,6 @@ export const LIMIT_ORDER = (
   'pending_jobs due_jobs_per_advance scene_auto_advances output_bytes'
 ).split(' ') as Limit[];
 
-/** First exceeded aggregate budget in composition-profile order (04 §5.4). */
 export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined =>
   LIMIT_ORDER.find((k) => counts[k]! > LIMITS[k]);
 
@@ -173,7 +168,20 @@ function encounter(
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
-  if (op.op !== 'encounter.open') return changeEncounter(op, row);
+  if (op.op !== 'encounter.open')
+    return changeEncounter(
+      op,
+      row,
+      (id, room) =>
+        packMemberRemains(
+          id,
+          room,
+          op.writer_group,
+          get(section(ctx.state, 'jobs')[op.job_id], 'due_time'),
+          ctx,
+        ),
+      (id, room) => packMemberInitiallyPresent(id, room, ctx.state),
+    );
   return openEncounter(
     op,
     row,
@@ -200,6 +208,14 @@ function transferOp(
 }
 
 function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
+  const known = section(ctx.state, 'known_entities') as Record<string, Obj>;
+  if (
+    known[e]?.kind === 'consumed' ||
+    known[source]?.kind === 'consumed' ||
+    (known[d]?.kind === 'consumed' &&
+      (known[e]?.kind !== 'item' || known[e]?.edible !== true || known[source]?.kind !== 'body'))
+  )
+    return { code: 'precondition_failed' };
   if (row !== source) return { code: 'precondition_failed' };
   if (inside(d, e, ctx)) return { code: 'containment_cycle' };
   const cap = get(section(ctx.state, 'capacities'), d) as number | undefined;

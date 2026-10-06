@@ -1,18 +1,23 @@
 // Independent encounter/job replay: prove both guards and final rows without composing.
-import { same } from '../foundation/compose.ts';
+import { key, same } from '../foundation/compose.ts';
+import { advancePack, packMembers } from './invariants_pack.ts';
 
 type Any = any;
 export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
   const encounters = new Map<string, Any>(Object.entries(state.encounters ?? {}));
   const jobs = new Map<string, Any>(Object.entries(state.jobs ?? {}));
   const containers = new Map<string, Any>(Object.entries(state.containers ?? {}));
+  const slots = new Map<string, Any>(Object.entries(state.population_slots ?? {}));
   const written = new Map<string, Any>();
+  const preceding: Any[] = [];
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
   for (const op of ops) {
     if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
+    if (op.op === 'population.slot')
+      slots.set(key({ kind: 'population_slot', plan: op.plan, slot: op.slot }), op.value);
     if (op.op.startsWith('encounter.')) {
-      const row = encounter(op, encounters, containers, state.known_entities ?? {});
+      const row = encounter(op, encounters, containers, slots, state, preceding, horizon);
       if (!row) return false;
       encounters.set(op.encounter_id, row);
       written.set(op.encounter_id, {
@@ -26,6 +31,7 @@ export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
       jobs.set(op.job_id, row);
       written.set(`job:${op.job_id}`, { target: { kind: 'job', job_id: op.job_id }, value: row });
     }
+    preceding.push(op);
   }
   return [...written.values()].every((expected) =>
     result.changes.some((row: Any) => same(row, expected)),
@@ -36,32 +42,91 @@ function encounter(
   op: Any,
   encounters: Map<string, Any>,
   containers: Map<string, Any>,
-  known: Any,
+  slots: Map<string, Any>,
+  state: Any,
+  preceding: Any[],
+  horizon: number,
 ): Any {
   const row = encounters.get(op.encounter_id);
-  if (op.op === 'encounter.open') {
-    if (row !== undefined || !participants(op, containers, known)) return undefined;
-    for (const active of encounters.values())
-      if (
-        active.status === 'open' &&
-        [active.body_id, active.npc_id].some((id) => id === op.body_id || id === op.npc_id)
-      )
-        return undefined;
-    return {
-      character_id: op.character_id,
-      body_id: op.body_id,
-      npc_id: op.npc_id,
-      room_id: op.room_id,
-      status: 'open',
-      round: 1,
-      job_id: op.job_id,
-    };
-  }
-  if (row?.status !== 'open' || row.job_id !== op.job_id) return undefined;
-  if (op.op === 'encounter.close') return { ...row, status: 'closed' };
-  if (row.round !== op.round || op.job_id === op.next_job_id || !Number.isSafeInteger(op.round + 1))
+  return op.op === 'encounter.open'
+    ? openEncounter(op, row, encounters, containers, state)
+    : changeEncounter(op, row, containers, slots, state, preceding);
+}
+
+function openEncounter(
+  op: Any,
+  row: Any,
+  encounters: Map<string, Any>,
+  containers: Map<string, Any>,
+  state: Any,
+) {
+  const origin = state.created?.[op.npc_id]?.origin;
+  const opted =
+    origin?.kind === 'spawned' && !!state.population_specs?.[key(origin.by)]?.plan?.pack;
+  if (
+    row !== undefined ||
+    !participants(op, containers, state.known_entities ?? {}) ||
+    opted !== (op.active_ids !== undefined) ||
+    (op.active_ids === undefined) !== (op.next_opponent_id === undefined) ||
+    (op.active_ids !== undefined && !packMembers(op, state, containers))
+  )
     return undefined;
-  return { ...row, round: op.round + 1, job_id: op.next_job_id };
+  for (const active of encounters.values())
+    if (
+      active.status === 'open' &&
+      [active.body_id, ...(active.active_ids ?? [active.npc_id])].some(
+        (id) => id === op.body_id || (op.active_ids ?? [op.npc_id]).includes(id),
+      )
+    )
+      return undefined;
+  return {
+    character_id: op.character_id,
+    body_id: op.body_id,
+    npc_id: op.npc_id,
+    room_id: op.room_id,
+    status: 'open',
+    round: 1,
+    job_id: op.job_id,
+    ...(op.active_ids !== undefined && {
+      active_ids: op.active_ids,
+      next_opponent_id: op.next_opponent_id,
+    }),
+  };
+}
+
+function changeEncounter(
+  op: Any,
+  row: Any,
+  containers: Map<string, Any>,
+  slots: Map<string, Any>,
+  state: Any,
+  preceding: Any[],
+) {
+  if (row?.status !== 'open' || row.job_id !== op.job_id) return undefined;
+  if (row.active_ids !== undefined && !same(row, op.expected)) return undefined;
+  if (op.op === 'encounter.close')
+    return {
+      ...row,
+      status: 'closed',
+      ...(row.active_ids !== undefined && { active_ids: [], next_opponent_id: null }),
+    };
+  if (
+    row.round !== op.round ||
+    op.job_id === op.next_job_id ||
+    !Number.isSafeInteger(op.round + 1) ||
+    (row.active_ids !== undefined && !advancePack(op, row, containers, slots, state, preceding))
+  )
+    return undefined;
+  return {
+    ...row,
+    round: op.round + 1,
+    job_id: op.next_job_id,
+    ...(row.active_ids !== undefined && {
+      active_ids: op.active_ids,
+      npc_id: op.npc_id,
+      next_opponent_id: op.next_opponent_id,
+    }),
+  };
 }
 
 function participants(op: Any, containers: Map<string, Any>, known: Any): boolean {

@@ -123,7 +123,9 @@ export type World = {
   readonly details: Readonly<Record<string, Detail>>; // by detail target id
   readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
-  readonly knownEntities: Readonly<Record<string, { kind: string; owner_id?: CharacterId }>>;
+  readonly knownEntities: Readonly<
+    Record<string, { kind: string; owner_id?: CharacterId; edible?: true }>
+  >;
   readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
   readonly populationSpecs: Readonly<
     Record<
@@ -144,6 +146,7 @@ export type World = {
     Record<string, { capacity: number; kinds: readonly DefinitionRef[] }>
   >;
   readonly capacities: Readonly<Record<string, number>>; // by EntityId: declared limit, or zero for noncontainer items
+  readonly consumed?: EntityId; // roomless terminal custody, allocated after slot holders
   readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text

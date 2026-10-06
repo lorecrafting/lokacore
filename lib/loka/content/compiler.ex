@@ -45,6 +45,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
+      Loka.Content.Food.check(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
       Loka.Content.Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),

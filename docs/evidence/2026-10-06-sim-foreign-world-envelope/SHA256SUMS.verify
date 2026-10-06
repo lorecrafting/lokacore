@@ -1,0 +1,10 @@
+capture.mjs: OK
+check-all-green.log: OK
+exact-service-green.log: OK
+fixed-regression-green.log: OK
+foreign-accepted-mutant-red.log: OK
+old-oracle-red.log: OK
+overbroad-not-found-mutant-red.log: OK
+published-v030-baseline-red.log: OK
+published-v030-fixed-green.log: OK
+service-repro.mjs: OK

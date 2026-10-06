@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "apple",
+    "apple_01"
+  ],
+  "short": "item.apple.short",
+  "room_line": "item.apple_01.room",
+  "description": "item.apple.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "orchard"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 6,
+    "label": "action.eat",
+    "narration": "narration.eat_apple"
+  }
+}

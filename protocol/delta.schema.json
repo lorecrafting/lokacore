@@ -616,6 +616,16 @@
             },
             "job_id": {
               "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            "active_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "maxItems": 64
+            },
+            "next_opponent_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
@@ -663,6 +673,22 @@
             },
             "next_job_id": {
               "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            "expected": {
+              "$ref": "#/$defs/EncounterRow"
+            },
+            "active_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "maxItems": 64
+            },
+            "npc_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "next_opponent_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
@@ -699,6 +725,9 @@
             },
             "job_id": {
               "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            "expected": {
+              "$ref": "#/$defs/EncounterRow"
             }
           },
           "required": [
@@ -1696,6 +1725,23 @@
         },
         "job_id": {
           "$ref": "delta.schema.json#/$defs/JobId"
+        },
+        "active_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/EntityId"
+          },
+          "maxItems": 64
+        },
+        "next_opponent_id": {
+          "anyOf": [
+            {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

@@ -1,3 +1,4 @@
+import { foodTransferValid } from './invariants_food.ts';
 import { liquidRowsValid } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { patrolsHold } from './invariants_patrol.ts';
@@ -131,7 +132,7 @@ function extra(
     case 'fuel.set':
       return fuelValid(op, s);
     case 'entity.transfer':
-      return transferValid(op, containers, s.capacities);
+      return foodTransferValid(op, s) && transferValid(op, containers, s.capacities);
     case 'quest.retire':
     case 'quest.activate':
     case 'quest.transition':

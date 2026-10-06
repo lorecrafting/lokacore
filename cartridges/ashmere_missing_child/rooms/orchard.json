@@ -1,0 +1,35 @@
+{
+  "title": "room.orchard.title",
+  "description": "room.orchard.description",
+  "exits": {
+    "east": {
+      "to": "smithy"
+    }
+  },
+  "details": {
+    "apple_trees": {
+      "aliases": [
+        "apple_trees",
+        "trees",
+        "apples"
+      ],
+      "description": "detail.orchard.apple_trees.description",
+      "harvest": {
+        "items": [
+          "apple_01",
+          "apple_02",
+          "apple_03"
+        ],
+        "label": "action.forage",
+        "narration": "narration.forage_apple",
+        "title": "detail.apple_trees.title"
+      }
+    },
+    "beehive": {
+      "aliases": [
+        "beehive"
+      ],
+      "description": "detail.orchard.beehive.description"
+    }
+  }
+}

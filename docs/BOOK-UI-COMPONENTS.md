@@ -7,8 +7,13 @@ a claim that every existing page has finished visual polish.
 
 ## Grammar
 
-Start from the existing page type. World shows the room; tapping a projected
-subject opens its detail; a child detail returns to its parent; Leave/Back changes
+Start from the existing page type. World shows the room title and authored
+description with inline links for fixed room fixtures, then separate present
+player/NPC and loose-item paragraphs when projected. Each linked subject opens
+its detail when the current projection supplies that route; general scenery
+links await a real projection consumer. Fixtures stay in the room, while Take
+is an item action only when offered. The exact [room-page rule](system/book-ui.md#world-and-status-entry)
+governs visibility and placement. A child detail returns to its parent; Leave/Back changes
 only the local route unless the current offered action explicitly says otherwise.
 The [canonical detail order](system/book-ui.md#detail-page-order) is identity,
 authored description and projected state, nonempty chronological detail history,
