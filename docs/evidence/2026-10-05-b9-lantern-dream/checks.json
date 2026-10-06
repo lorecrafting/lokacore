@@ -1,6 +1,6 @@
 {
   "base": "594b8ae1b6c790891e49d160ff4d023c9db1e9f1",
-  "source_checkpoint": "8b9e5b52fffdffd34569cb0f6aa837090a7478df",
+  "source_checkpoint": "667347ac14c36e996e6c71048dae99e87db4a322",
   "candidate_provisional": true,
   "checks": [
     {
@@ -13,7 +13,7 @@
         "docs/evidence/2026-10-05-b9-lantern-dream/pins.mjs"
       ],
       "exit": 0,
-      "seconds": 1.631
+      "seconds": 1.402
     },
     {
       "name": "focused",
@@ -41,7 +41,7 @@
         "mobile/app/book/notice_board.test.ts"
       ],
       "exit": 0,
-      "seconds": 14.663
+      "seconds": 5.905
     },
     {
       "name": "elixir-focused",
@@ -59,7 +59,7 @@
         "test/loka/content_patrol_test.exs"
       ],
       "exit": 0,
-      "seconds": 14.09
+      "seconds": 12.439
     },
     {
       "name": "kernel-types",
@@ -74,7 +74,7 @@
         "typecheck"
       ],
       "exit": 0,
-      "seconds": 9.526
+      "seconds": 9.272
     },
     {
       "name": "app-types",
@@ -87,7 +87,7 @@
         "mobile/app"
       ],
       "exit": 0,
-      "seconds": 2.524
+      "seconds": 2.162
     },
     {
       "name": "renderer-imports",
@@ -102,7 +102,7 @@
         "mobile-renderer-imports|ts-rule-module-imports"
       ],
       "exit": 0,
-      "seconds": 0.091
+      "seconds": 0.146
     },
     {
       "name": "renderer-boundary",
@@ -118,7 +118,7 @@
         "mobile/app/book"
       ],
       "exit": 0,
-      "seconds": 0.112
+      "seconds": 0.106
     },
     {
       "name": "docs",
@@ -130,7 +130,7 @@
         "bin/check_docs.exs"
       ],
       "exit": 0,
-      "seconds": 0.787
+      "seconds": 0.92
     },
     {
       "name": "trace-capture",
@@ -142,7 +142,7 @@
         "docs/evidence/2026-10-05-b9-lantern-dream/trace-capture.mjs"
       ],
       "exit": 0,
-      "seconds": 1.195
+      "seconds": 1.53
     }
   ],
   "full_gate": {
@@ -150,7 +150,7 @@
       "bin/check_all.sh"
     ],
     "exit": 0,
-    "source_checkpoint": "8b9e5b52fffdffd34569cb0f6aa837090a7478df",
-    "log": "full-gate-frozen.log"
+    "source_checkpoint": "667347ac14c36e996e6c71048dae99e87db4a322",
+    "log": "p1-full-gate.log"
   }
 }

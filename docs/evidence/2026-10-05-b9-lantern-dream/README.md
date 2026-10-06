@@ -1,8 +1,10 @@
 # B9 Lantern Rest/dream — shared source evidence
 
 B9 is local source on `slice/b9-lantern-dream`, with published B8 prerequisite
-`594b8ae1b6c790891e49d160ff4d023c9db1e9f1` integrated. Frozen provisional source checkpoint: `8b9e5b52fffdffd34569cb0f6aa837090a7478df`. Fresh
-primary/save review verdicts: **null**, pending independent records. Publication
+`594b8ae1b6c790891e49d160ff4d023c9db1e9f1` integrated. Corrected provisional source checkpoint: `667347ac14c36e996e6c71048dae99e87db4a322`.
+Initial source `8b9e5b52` has independent [primary CHANGES REQUIRED](../../reviews/2026-10-05-b9-lantern-dream-primary-review.md)
+for B9-P1 and [save/protocol APPROVE](../../reviews/2026-10-05-b9-lantern-dream-save-review.md).
+Corrected-source scoped verdicts: **null**, pending independent rechecks. Publication
 PR/merge: **null**. No owner save, native preview, browser or device proof is claimed.
 
 The independently derived local candidate is `ashmere_missing_child@0.0.26`,
@@ -22,7 +24,7 @@ retain their selected row through final memory/S10 acknowledgment and later deat
 
 `schema-sweep.py` observes all 73 changed required/bound/closed-shape removals red;
 `schema-controls.log` records each result. Independent literal inputs are retained
-in `protocol/fixtures/dream_contracts.json`. `behavior-mutants.py` observes sixteen
+in `protocol/fixtures/dream_contracts.json`. `behavior-mutants.py` observes seventeen
 feature breaks red while the corresponding older focused suites remain green;
 `behavior-controls.log` and `behavior-failing-assertions.log` retain exact edits,
 commands and failed assertions. The first old-suite run caught a real empty-Continue
@@ -49,10 +51,10 @@ receipts, both choice offers, captured Wake, final acknowledgment and cold recei
 history. After the existing chapter Continue, cold launch remains at World and the
 actual safe bed offers Resume. Native leaves are test substitutes, not layout proof.
 
-`bin/check_all.sh` is exit 0 on the frozen source (see `full-gate-frozen.log`),
-including all 349 Elixir tests and the full TypeScript suite, source boundaries, size,
+`bin/check_all.sh` is exit 0 on corrected source `667347ac` (see `p1-full-gate.log`),
+including all 350 Elixir tests and the full TypeScript suite, source boundaries, size,
 controls, docs and formatting. The final focused capture has 106 TypeScript tests,
-14 forced Elixir tests, both type checks and all other recorded jobs passing. `checks.json`
+15 forced Elixir tests, both type checks and all other recorded jobs passing. `checks.json`
 records the final focused commands and exits; complete compiler bytes and all 111
 independent allocations match the provisional candidate. The developer
 [correctness and Ponytail self-review](self-review.md) records the current audit.
@@ -83,3 +85,16 @@ Book test. `pre-commit-boundary-red.log` retains that refusal; the test now obta
 the same fixture through its authority test helper, preserving the production boundary.
 
 The [local draft PR description](local-draft-pr.md) records the reviewable source scope.
+
+B9-P1 is corrected by normalizing compiler Rest trigger identity to room/detail,
+matching the existing TypeScript loader; modal trigger identity is unchanged. The
+new controlled compiler case uses distinct credit/memory/quest refs, accepts distinct
+room/detail pairs and refuses both same-anchor sites. Reverting normalization leaves
+older focused compiler tests green and the new test red by accepting the duplicate
+source. The final behavior-control record retains that observed acceptance. Initial
+fixture-setup failures are retained separately and do not count as a mutation proof.
+D2 has now published at `4bcb2eaf`; integrate the actual published predecessor only
+after these scoped fix reviews, then independently derive B9's final successor pins.
+
+The original 349-test source gate remains in `full-gate-frozen.log` as historical
+evidence. The corrected-source full gate and all nine focused jobs are green.

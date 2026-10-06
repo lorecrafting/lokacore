@@ -1,3 +1,3 @@
 command: mise exec -- elixir bin/check_docs.exs
 exit: 0
-603 docs, 0 broken link(s), 0 unreachable
+606 docs, 0 broken link(s), 0 unreachable
