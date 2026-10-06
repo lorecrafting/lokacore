@@ -5,7 +5,7 @@ import { fuelAt } from '../src/foundation/fuel.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import { resolve } from '../src/commands/target.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
-import { fresh, entity, room } from './light_fixture.ts';
+import { fresh, entity, room, lightActionFixture } from './light_fixture.ts';
 const torch = entity('torch'),
   oil = entity('lamp_oil'),
   bag = entity('satchel');
@@ -266,4 +266,37 @@ test('successor identity pin names the actual fresh rooms, subjects, jobs and eq
   for (const [id, j] of Object.entries(fresh.state.jobs ?? {})) actual[`job/${j.job.key}`] = id;
   for (const [slot, id] of Object.entries(fresh.slots)) actual[`slot/${slot}`] = id;
   assert.deepEqual(actual, answers);
+});
+
+// Break: a physically eligible held/worn light advertises an alias rejected by its authored target/input contract.
+test('light projection respects loaded keyed target and input admission before offering a source', () => {
+  for (const [target, input] of [
+    [{ kind: 'none' }, []],
+    [{ kind: 'entity', scopes: ['room_contents'] }, []],
+    [{ kind: 'entity', scopes: ['inventory'] }, ['until']],
+  ] as const) {
+    const base = lightActionFixture('kindle', 'ignite', target, [...input]);
+    for (const holder of [base.body, base.slots.light]) {
+      const w = {
+        ...base,
+        state: { ...base.state, containers: { ...base.state.containers, [torch]: holder } },
+      };
+      const view = gameView(w);
+      assert.ok(!view.actions.some((a) => a.action_key === 'kindle' && a.available));
+      const source =
+        holder === base.body
+          ? view.inventory.find((e) => e.id === torch)!
+          : view.equipment!.find((e) => e.slot === 'light')!.item!;
+      assert.ok(!source.actions.some((a) => a.action_key === 'kindle' && a.available));
+      const command = {
+        id: 'bbbbbbbb-0000-4000-8000-000000000003',
+        world_context_id: w.context,
+        payload: { type: 'ignite', actor_id: w.character, item_id: torch },
+      };
+      assert.deepEqual(step(w, command as never, 1, 'kindle' as never).decision, {
+        kind: 'rejected',
+        error: { code: 'unsupported_capability' },
+      });
+    }
+  }
 });

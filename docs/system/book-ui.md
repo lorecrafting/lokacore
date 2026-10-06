@@ -463,7 +463,10 @@ Refuel names the exact directly held compatible bottle on its button (`Refuel
 <source> from <supply>`) and sends ordered targets `[source_id, supply_id]`, with
 no amount input or extra selector. The source item owns the control and its committed
 detail history; the bottle is a bound participant, so its own page does not list
-another item's Refuel. No eligible supply means no Refuel button.
+another item's Refuel. Authored aliases follow the projected semantic `command`,
+while their `action_key` remains the invocation identity. Narrowed target or
+input contracts are checked by keyed authority admission before a light control
+is offered as available. No eligible supply means no Refuel button.
 Wear/Remove and Put/Take retain their existing places. Confirmed receipts refresh
 source, supply and World; stale/refused/fenced results never narrate success.
 

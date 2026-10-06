@@ -806,5 +806,49 @@
       "refueled": "light.refueled"
     },
     "valid": false
+  },
+  {
+    "name": "authored_refuel_semantic_command",
+    "contract": "AdvertisedAction",
+    "value": {
+      "available": true,
+      "action_key": "top_up",
+      "command": "refuel",
+      "label": "action.refuel",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "target_ids": [
+        "bbbbbbbb-0000-4000-8000-000000000001",
+        "bbbbbbbb-0000-4000-8000-000000000002"
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "malformed_semantic_command",
+    "contract": "AdvertisedAction",
+    "value": {
+      "available": true,
+      "action_key": "top_up",
+      "command": 42,
+      "label": "action.refuel",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "target_ids": [
+        "bbbbbbbb-0000-4000-8000-000000000001",
+        "bbbbbbbb-0000-4000-8000-000000000002"
+      ]
+    },
+    "valid": false
   }
 ]

@@ -71,4 +71,36 @@ defmodule Loka.ContentLightTest do
       assert Enum.any?(diagnostics, &(&1["code"] in ~w(SCHEMA_VIOLATION UNRESOLVED_REFERENCE)))
     end
   end
+
+  # Break: actual fuel or darkness compiles under API1.18 despite the API1.19 wire fields.
+  test "actual light fields enforce the API1.19 floor", %{tmp_dir: dir} do
+    manifest = put_in(source("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.18")
+
+    for fields <- ~w(fuel darkness unused) do
+      replacements =
+        for {path, field, keep} <- [
+              {"items/torch.json", "fuel", "fuel"},
+              {"items/lamp_oil.json", "fuel", "fuel"},
+              {"rooms/well_shaft.json", "dark_description", "darkness"}
+            ],
+            fields != keep,
+            into: %{},
+            do: {path, Map.delete(source(path), field)}
+
+      result = compile(Path.join(dir, fields), Map.put(replacements, "cartridge.json", manifest))
+
+      if fields == "unused" do
+        assert {:ok, _, []} = result
+      else
+        assert {:error, diagnostics} = result
+
+        assert Enum.map(diagnostics, &Map.take(&1, ~w(code path))) == [
+                 %{
+                   "code" => "KERNEL_API_RANGE_INVALID",
+                   "path" => "cartridge.requires.kernel_api.at_least"
+                 }
+               ]
+      end
+    end
+  end
 end

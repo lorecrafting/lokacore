@@ -18,6 +18,23 @@ defmodule Loka.Core.FuelTest do
                "result" => c["expected"]
              }),
              c["id"]
+
+      # The success-only invariant must reject forged successes for independently invalid literals.
+      if get_in(c, ["expected", "fault", "code"]) == "precondition_failed" do
+        counterfeit = %{
+          "changes" =>
+            Enum.map(c["ops"], fn op ->
+              %{"target" => %{"kind" => "fuel", "item_id" => op["item_id"]}, "value" => op["to"]}
+            end)
+        }
+
+        refute Invariants.check("delta_preconditions_hold", %{
+                 "state" => c["state"],
+                 "delta" => delta,
+                 "result" => counterfeit
+               }),
+               c["id"]
+      end
     end
   end
 

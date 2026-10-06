@@ -32,6 +32,9 @@ defmodule Loka.Content.Requires do
 
   defp minimum_feature_api(m, all) do
     cond do
+      Enum.any?(all, fn {_, _, d} -> light_feature?(d) end) ->
+        [1, 19]
+
       is_map_key(m["requires"]["capabilities"], "skills") ->
         [1, 18]
 
@@ -51,6 +54,8 @@ defmodule Loka.Content.Requires do
         []
     end
   end
+
+  defp light_feature?(d), do: is_map_key(d, "fuel") or is_map_key(d, "dark_description")
 
   defp variant_feature?(d),
     do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil

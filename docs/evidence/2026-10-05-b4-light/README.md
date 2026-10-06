@@ -101,3 +101,38 @@ the named exact bottle → Put/Take. The focused Book check verifies ordered tar
 source/supply label membership, worn controls and confirmed fuel projection. Native
 or browser interaction was not run at this checkpoint; source and headless proof
 remain subject to the workflow's later gates.
+
+## Scoped review fix round
+
+Independent review at `909082b0` requested B4-01/B4-02/B4-03 and B4-S1.
+B4-01 now projects the light action's resolved semantic `command`, preserving
+its authored invocation `action_key`. Book uses the command for “from” wording
+and binds Refuel's source as its `detail_id`; participant membership cannot leak
+that control onto its bottle. A loaded `top_up` alias is checked through source
+and bottle pages, exact ordered IDs, keyed acceptance and conserved 7200/7197 rows.
+
+B4-02 reuses keyed `refusal` on the exact candidate payload before the existing
+pure light transition. Loaded `kindle` cases with no target, a room-only target
+or required unused input are not offered as legal on held/worn sources; targetless
+light controls also stay off World. Existing worn source/Refuel pair controls stay
+green. B4-03 tests actual fuel alone, darkness alone and neither, at API1.18:
+compiler and loader reject each actual field at the hand-specified lower-bound
+path, while an unused reserved light lock still succeeds. The actual chapter
+still matches v021/API1.19, its unchanged independent hash and all94 identities.
+
+B4-S1 extends the existing independent literal table with forged successful rows
+for each precondition failure. Bypassing the independent Elixir fuel guard leaves
+the old core suite green and makes the extended literal test red; no production
+invariant change was needed. [Scoped controls](review-fix-red-controls.json) record
+six primary mutants and that guard bypass. All seven are old-green/new-red and
+restored. These checks are behavior on loaded inputs and literal rows, not source
+text assertions.
+
+Final round checks: 584 kernel tests, 168 Elixir core/compiler tests, 47 authority/
+Book tests; typecheck, generated contracts, pure lint, active TS/Elixir size and
+strict Credo. The interface adds optional `AdvertisedAction.command` with shared
+valid/invalid literal wire cases; no cartridge content/pin or mutable save row
+changed. Ponytail Review reuses ordinary admission, semantic keys and existing UI
+ownership metadata; no new selector, target/input checker or alias catalog.
+Same-reviewer scoped rechecks remain required; this evidence claims neither
+independent closure nor publication/browser/native acceptance.
