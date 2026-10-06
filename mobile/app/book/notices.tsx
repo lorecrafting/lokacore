@@ -1,3 +1,4 @@
+import { DreamResume } from './DreamPage.tsx';
 // Local notice routes consume only GameView metadata and its exact current action offers.
 import { Text } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -25,7 +26,7 @@ export function restoredNoticePages(screen: Screen): Page[] {
     b.notices.some((n) => screen.detail(n.id).length > 0),
   );
   const notice = (board?.notices ?? screen.view.notices)?.find(
-    (n) => screen.detail(n.id).length > 0,
+    (n) => !n.bed && screen.detail(n.id).length > 0,
   );
   return notice
     ? [
@@ -116,7 +117,6 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       : undefined;
   const detail = board ?? noticesOf(p.screen.view).find((n) => n.id === p.page.id);
   if (!detail) return null;
-  const standalone = p.screen.view.notices?.some((n) => n.id === detail.id);
   return (
     <Sheet title={p.screen.text(detail.title)}>
       <Text style={prose}>{plain(p.screen.text(detail.description))}</Text>
@@ -146,11 +146,12 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
             </Tap>
           ) : !offer.available ? (
             <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
-              {p.screen.text(offer.label)}: {why(offer, p.screen.text)}
+              {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
             </Text>
           ) : null;
         })}
-      {standalone && <Leave leave={p.world} />}
+      {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
+      {p.screen.view.notices?.some((n) => n.id === detail.id) && <Leave leave={p.world} />}
     </Sheet>
   );
 }

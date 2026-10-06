@@ -3,74 +3,202 @@
   "title": "Scene contracts",
   "$defs": {
     "SceneDefinition": {
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "Scene key: lowercase snake_case of at most 58 characters, leaving room for the engine fact prefix scene_ within Key's 64-character limit.",
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*$",
-          "maxLength": 58,
-          "examples": [
-            "bell_rung",
-            "k",
-            "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
-          ]
-        },
-        "on": {
+      "oneOf": [
+        {
           "type": "object",
           "properties": {
-            "story_point": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "action": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "detail": { "$ref": "action.schema.json#/$defs/Key" },
-            "outcome": { "$ref": "action.schema.json#/$defs/Key" }
-          },
-          "required": ["outcome"],
-          "exactlyOneRequired": ["story_point", "quest", "action"],
-          "additionalProperties": false
-        },
-        "control": {
-          "const": "modal"
-        },
-        "steps": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/SceneStep"
-          }
-        },
-        "on_end": {
-          "type": "object",
-          "properties": {
-            "assign": {
-              "type": "array",
-              "minItems": 1,
-              "maxItems": 3,
-              "items": {
-                "type": "object",
-                "properties": {
-                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "value": { "$ref": "delta.schema.json#/$defs/FactValue" }
+            "key": {
+              "description": "Scene key: lowercase snake_case of at most 58 characters, leaving room for the engine fact prefix scene_ within Key's 64-character limit.",
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 58,
+              "examples": [
+                "bell_rung",
+                "k",
+                "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+              ]
+            },
+            "on": {
+              "type": "object",
+              "properties": {
+                "story_point": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "required": ["fact", "value"],
-                "additionalProperties": false
+                "quest": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "action": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "room": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "detail": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "outcome": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "outcome"
+              ],
+              "exactlyOneRequired": [
+                "story_point",
+                "quest",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "control": {
+              "const": "modal"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SceneStep"
               }
             },
-            "story_point": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+            "on_end": {
+              "type": "object",
+              "properties": {
+                "assign": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fact": {
+                        "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                      },
+                      "value": {
+                        "$ref": "delta.schema.json#/$defs/FactValue"
+                      }
+                    },
+                    "required": [
+                      "fact",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "story_point": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "outcome": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "assign",
+                "story_point",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
           },
-          "required": ["assign", "story_point", "outcome"],
+          "required": [
+            "key",
+            "on",
+            "control",
+            "steps"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "description": "Scene key: lowercase snake_case of at most 58 characters, leaving room for the engine fact prefix scene_ within Key's 64-character limit.",
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 58,
+              "examples": [
+                "bell_rung",
+                "k",
+                "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+              ]
+            },
+            "on": {
+              "type": "object",
+              "properties": {
+                "rest": {
+                  "$ref": "scene.schema.json#/$defs/RestBinding"
+                }
+              },
+              "required": [
+                "rest"
+              ],
+              "additionalProperties": false
+            },
+            "control": {
+              "const": "presentation_only"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SceneStep"
+              }
+            },
+            "on_end": {
+              "type": "object",
+              "properties": {
+                "assign": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fact": {
+                        "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                      },
+                      "value": {
+                        "$ref": "delta.schema.json#/$defs/FactValue"
+                      }
+                    },
+                    "required": [
+                      "fact",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "outcome": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "quest": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "assign",
+                "quest",
+                "outcome"
+              ],
+              "additionalProperties": false
+            },
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "description": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "key",
+            "on",
+            "control",
+            "steps",
+            "title",
+            "description",
+            "on_end"
+          ],
           "additionalProperties": false
         }
-      },
-      "required": [
-        "key",
-        "on",
-        "control",
-        "steps"
       ],
-      "additionalProperties": false,
-      "description": "Modal current_world text sequence; ordered narrate×n (n ≥ 1), await_ack, end validated by compiler/loader. mechanics.md scene@1; dated subset of 06 §33–§37, 21 §3.6.",
+      "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream.",
       "examples": [
         {
           "key": "bell_rung",
@@ -141,6 +269,64 @@
             "type"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "choice"
+            },
+            "key": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "prompt": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "choices": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "choice_id": {
+                    "$ref": "action.schema.json#/$defs/Key"
+                  },
+                  "label": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  },
+                  "text": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  }
+                },
+                "required": [
+                  "choice_id",
+                  "label",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "type",
+            "key",
+            "prompt",
+            "choices"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "branch"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -153,6 +339,128 @@
         },
         {
           "type": "end"
+        },
+        {
+          "type": "choice",
+          "key": "fork",
+          "prompt": "dream.fork",
+          "choices": [
+            {
+              "choice_id": "follow_fox",
+              "label": "dream.follow",
+              "text": "dream.follow.final"
+            },
+            {
+              "choice_id": "wake",
+              "label": "dream.wake",
+              "text": "dream.wake.final"
+            }
+          ]
+        },
+        {
+          "type": "branch"
+        }
+      ]
+    },
+    "RestBinding": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "detail": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "entitlement": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "credit": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "quest": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "required": [
+        "room",
+        "detail",
+        "entitlement",
+        "credit",
+        "quest"
+      ],
+      "additionalProperties": false,
+      "description": "One exact paid Rest binding: authored bed, first-credit fact and sole quest.",
+      "examples": [
+        {
+          "room": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "inn"
+          },
+          "detail": "bed",
+          "entitlement": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "paid"
+          },
+          "credit": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "rested"
+          },
+          "quest": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "room"
+          }
+        }
+      ]
+    },
+    "DreamDraw": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "line": {
+          "const": 4
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "room_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "scene",
+        "line",
+        "body_id",
+        "room_id",
+        "expected_revision"
+      ],
+      "additionalProperties": false,
+      "description": "Captured original scene-owned choice occurrence at its shown choice beat.",
+      "examples": [
+        {
+          "scene": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "scene",
+            "key": "dream"
+          },
+          "line": 4,
+          "body_id": "11111111-2222-4333-8444-555555555555",
+          "room_id": "22222222-2222-4333-8444-555555555555",
+          "expected_revision": 3
         }
       ]
     }

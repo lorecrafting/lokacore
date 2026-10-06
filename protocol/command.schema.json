@@ -588,6 +588,9 @@
             },
             "patrol": {
               "$ref": "relation.schema.json#/$defs/PatrolDraw"
+            },
+            "dream": {
+              "$ref": "scene.schema.json#/$defs/DreamDraw"
             }
           },
           "required": [

@@ -662,6 +662,27 @@
             "quantity"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "rested"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "body_id",
+            "room_id"
+          ],
+          "additionalProperties": false,
+          "description": "An accepted actor-owned Rest after prior-rate settlement, at its actual body/room."
         }
       ],
       "examples": [
@@ -757,6 +778,11 @@
           "type": "action_completed",
           "action": "ring_bell",
           "subject_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "type": "rested",
+          "body_id": "11111111-2222-4333-8444-555555555555",
+          "room_id": "22222222-2222-4333-8444-555555555555"
         }
       ]
     }

@@ -1,0 +1,27 @@
+{
+  "source_checkpoint": "7bc3f745658b6727ce252c639ea9116a637c833a",
+  "summary": {
+    "discovered": 2,
+    "selected": 2,
+    "executed": 2,
+    "passed": 2,
+    "failed": 0,
+    "interrupted": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "title": [
+        "Book keeps a confirmed move across reload"
+      ],
+      "status": "passed"
+    },
+    {
+      "title": [
+        "paid Lantern Rest resumes its captured dream choice after browser reload"
+      ],
+      "status": "passed"
+    }
+  ]
+}

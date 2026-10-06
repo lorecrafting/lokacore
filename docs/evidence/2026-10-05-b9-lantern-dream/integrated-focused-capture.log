@@ -1,0 +1,12 @@
+command: python3 docs/evidence/2026-10-05-b9-lantern-dream/capture.py
+source_checkpoint: 066bfda44dfe2947467d1a36eb93ee0c80d7fe68
+exit: 0
+pins: exit 0
+focused: exit 0
+elixir-focused: exit 0
+kernel-types: exit 0
+app-types: exit 0
+renderer-imports: exit 0
+renderer-boundary: exit 0
+docs: exit 0
+trace-capture: exit 0

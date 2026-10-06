@@ -169,7 +169,7 @@ export const COMPOSES = {
   dialogue: ['quest', 'containment', 'movement'],
   movement: ['quest'],
   commerce: ['containment'],
-  scene: ['dialogue'],
+  scene: ['dialogue', 'quest'],
   reaction: ['quest'],
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

@@ -36,6 +36,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
 
+  def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
+
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
 
@@ -185,7 +187,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "quest", ref(q, "quest", m))
+    do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
   def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
     do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
@@ -353,9 +355,7 @@ defmodule Loka.Content.Checks do
       )
   end
 
-  # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
-  # dialogue's.
+  # Every located policy root from the source definitions.
   defp trees(defs, actions) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),

@@ -257,6 +257,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
   return {
     view,
     text,
+    label,
     buttons,
     log: s.log,
     combatLog: s.combatLog,

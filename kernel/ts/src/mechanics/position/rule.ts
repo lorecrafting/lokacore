@@ -3,12 +3,12 @@
 // adds when the lock holds position (cartridge.md Compiler), by one fact.assign whose expected
 // value is the current position, after opted pools settle and change rate. The same position
 // is invalid_state. The host logs fact_changed.
-import { accepted, bodyOf, refString, rejected, type Rule } from '../../runtime/decision.ts';
+import { accepted, bodyOf, refString, rejected, event, type Rule } from '../../runtime/decision.ts';
 import { assigned } from '../fact.ts';
 import { fact, positionOf, VERBS } from './shared.ts';
 import { recoveryAdjustments } from '../resource.ts';
 
-export const decide: Rule<'position'> = (world, command) => {
+export const decide: Rule<'position'> = (world, command, mint) => {
   const { type, actor_id } = command.payload;
   const verb = VERBS[type];
   if (!verb) return rejected('invalid_state');
@@ -20,6 +20,16 @@ export const decide: Rule<'position'> = (world, command) => {
   const body = bodyOf(world, actor_id);
   if (!body) return rejected('not_found');
   const start = { ops: recoveryAdjustments(world, body, to), position: 0, facts: {} };
-  const { ops } = assigned(world, actor_id, start, { fact: fact(world), value: v });
-  return accepted(world, outcome, ops, []);
+  const run = assigned(world, actor_id, start, { fact: fact(world), value: v });
+  const events =
+    type === 'rest'
+      ? [
+          event(world, command, mint, run.position + 1, {
+            type: 'rested',
+            body_id: body,
+            room_id: world.state.containers[body],
+          }),
+        ]
+      : [];
+  return accepted(world, outcome, run.ops, events);
 };

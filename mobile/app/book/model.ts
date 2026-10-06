@@ -1,3 +1,4 @@
+import { dreamPages, dreamButtons, dreamAt } from './dreams.ts';
 // size: allow 350, current shop quotes join the shared button/freshness builder
 import type {
   ActionInput,
@@ -30,30 +31,22 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
-const POSITIONS = ['standing', 'sitting', 'resting', 'sleeping'];
-export const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
-export function nextPosition(position: GameView['position'], actions: Button[]) {
-  const at = POSITIONS.indexOf(position ?? '');
-  if (at < 0) return;
-  for (let step = 1; step < 4; step++) {
-    const next = POSITION_ACTIONS[(at + step) % 4];
-    const offered = actions.find((b) => b.action_key === next);
-    if (offered) return offered;
-  }
-}
+export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
   if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
   if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
   if (before.place.id !== after.place.id) return [];
+  const dreaming = dreamPages(stack, before, after);
+  if (dreaming) return dreaming;
   const visible = things(after);
   const boards = after.notice_boards ?? [];
   const notices = [...(after.notices ?? []), ...boards.flatMap((b) => b.notices)];
@@ -278,6 +271,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...travel(v),
     ...doors,
     ...held,
+    ...dreamButtons(v, label),
     ...shopButtons(v, text),
     ...serviceButtons(v, text),
     ...asked(v, label),
@@ -319,6 +313,7 @@ export function actionContext(
     Object.entries(b.input)
       .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
       .sort(([a], [z]) => a.localeCompare(z)),
+    b.detail_id?.startsWith('dream:') ? dreamAt(view, b.detail_id.slice('dream:'.length)) : null,
     view.actor_id,
     view.place.id,
     view.choice,

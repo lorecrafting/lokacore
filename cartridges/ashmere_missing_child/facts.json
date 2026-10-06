@@ -66,7 +66,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "Maud\u2019s trust in the player."
+      "meaning": "Maud’s trust in the player."
     },
     "inn_cellar_cleared": {
       "version": 1,
@@ -77,7 +77,7 @@
       "scopes": [
         "instance"
       ],
-      "meaning": "Maud\u2019s cellar quest has been completed."
+      "meaning": "Maud’s cellar quest has been completed."
     },
     "fen.tracks_found": {
       "version": 1,
@@ -110,7 +110,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "Vesper accepted the player\u2019s letter-bank answer."
+      "meaning": "Vesper accepted the player’s letter-bank answer."
     },
     "fen.return_branch": {
       "version": 1,
@@ -126,7 +126,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "The player\u2019s chosen return: Vesper\u2019s message while Wren stays, or escorting Wren to Elspeth."
+      "meaning": "The player’s chosen return: Vesper’s message while Wren stays, or escorting Wren to Elspeth."
     },
     "chapel.bell_rung": {
       "version": 1,
@@ -183,7 +183,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "The player\u2019s standing between Priory and Fen."
+      "meaning": "The player’s standing between Priory and Fen."
     },
     "peg_trust": {
       "version": 1,
@@ -196,7 +196,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "Peg\u2019s trust in the player."
+      "meaning": "Peg’s trust in the player."
     },
     "priory.tithe_delivered": {
       "version": 1,
@@ -343,6 +343,28 @@
         "player"
       ],
       "meaning": "The player deliberately read Bell Rites while lawfully holding its original book."
+    },
+    "slept_at_lantern": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "First actual paid Lantern Rest; only its declared Rest reaction grants this credit."
+    },
+    "dream_seen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Local continuity memory player.dream_seen; only the acknowledged dream end writes it."
     }
   }
 }
