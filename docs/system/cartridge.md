@@ -1124,7 +1124,7 @@ allocated-ID answers and the retained provisional fixtures are recorded in the
 
 ## D4 homes and orchard declarations
 
-**Selected plan; source pending.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 source declarations.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 uses these three public reciprocal additions from archived
 [00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
 

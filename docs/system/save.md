@@ -876,7 +876,7 @@ After the ordinary chapter Continue, cold launch stays at World. Resume is offer
 only at the projected safe bed, and retained history appears in its dream child.
 ## D4 finite food and terminal custody recovery
 
-**Selected plan; not implemented.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 source recovery contract.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 persists ordinary item containment and the adjusted recovery row with the Eat
 receipt in the existing changed-row transaction. The immutable consumed-holder
 ID/kind is reconstructed from the current cartridge and independent allocation;

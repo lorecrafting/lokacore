@@ -1024,7 +1024,7 @@ hash/ID answers are recorded in the [B9 evidence](../evidence/2026-10-05-b9-lant
 Publication remains pending the normal gates.
 ## D4 held-food composition
 
-**Selected plan; not an installed schema.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
 accepted outcome `eaten {item_id: EntityId}` and immutable optional item metadata
 `edible {resource: DefinitionRef(resource), amount: positive safe integer,
@@ -1040,8 +1040,11 @@ service benefit alternative is required. Add generated known-entity kind
 `consumed` and one immutable food-enabled-world holder mapping, appended after
 slot holders in fresh allocation. The terminal transfer guard must reject escape,
 nonfood entry and foreign-source entry; food is the sole new admission owner.
-Containment, carry and reach account for this terminal holder explicitly rather
-than treating it as a room/body/container. Derive consumed status from custody.
+Immutable composition context uses existing `known_entities`: the holder has
+`kind=consumed`, opted item entries have `edible=true`, and only known-body source
+entry is admissible. Runtime stores the generated holder ID once in immutable world
+metadata; no saved holder/stock row is added. Containment and carry terminate there
+as unowned custody; reach is false. Derive consumed status from custody.
 Eat's accepted reply supplies its exact command ID for existing narration
 recovery despite having no event. Its receipt-derived narration record is a
 World result with no detail ID; live result routing must not fall back to the
