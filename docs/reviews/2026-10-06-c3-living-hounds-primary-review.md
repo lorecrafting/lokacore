@@ -70,3 +70,41 @@ No new browser/native session or full accumulated-head publication check ran;
 the existing browser screenshot predates the remount path. These focused proofs
 are not hosted CI, native certification or complete lethal/nested recovery proof.
 Both findings remain open; save/foundation concerns are owned by the separate opinion.
+
+
+## Scoped fix recheck — APPROVE
+
+Exact final fix source `2dbf55b51cf7ae6bf930a550bb2dd61327a4127e`, frozen evidence
+`ea3e39166a7acdb15f34a4cb9d5cf224270ba58f`. The evidence commit changes no
+source. Scope: C3-R1/C3-R2 fixes and their direct Book/result/recovery callers;
+S1/S2 and the `runtime/proposal.ts` audit retain their separate reviewers.
+
+- **C3-R1 closed.** Remounted pending Take completion binds the exact confirmed
+  saved command’s corpse pickup before restoring its currently reachable detail.
+  The retained real component case checks the selected corpse route, one local
+  pickup, no World pickup, original pelt in Carrying and Leave to World. Existing
+  corpse Take retry/refusal/history and D2 remounted Read paths still pass.
+- **C3-R2 closed.** The retained controlled extra-slot death pins fatal clock 108150,
+  due 194550, generation 1 at daytime 198000 and a fresh generation 2 at night 244800.
+  It protects the missing night-only replacement case without duplicating the
+  existing base-slot delay/loot test. The old thirty-day case remains a no-kill
+  successor-bound check; it is not claimed as death/replacement stress proof.
+
+Independent exact-head command:
+`mise exec -- node --test --experimental-strip-types
+--test-name-pattern='extra-slot|remounted pending pelt|corpse Contents|Book restores'
+kernel/ts/test/hounds.test.ts mobile/app/book/polish.test.ts
+mobile/app/book/priory.test.ts`: **5/5 pass**. Independently replanting the original
+night-only eligibility break fails (`generation 2` versus `generation 1`), and
+misrouting the remounted Take completion again fails (`[]` versus the selected
+corpse route). Both focused controls exit 1; restoring source returns **5/5 pass**.
+No source edit is retained.
+
+All 12 C3 evidence checksums match. The retained final full active line passes 358
+Elixir tests and reaches the remaining contract/kernel/docs/architecture/size/format
+checks successfully; it was inspected, not rerun by this scoped review. The
+optional broad mobile run’s predecessor-pin and pre-existing Combat Flee failures
+remain disclosed in the evidence, outside these two fixes. Final ordered release
+pins, hosted CI and fresh browser/native proof remain separate publication work.
+Ponytail Review: lean; exact saved receipt routing and one distinct behavioral
+regression are sufficient. No primary finding remains open.
