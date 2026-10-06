@@ -1,0 +1,15 @@
+# D8 exact crow scavenging planning review — 2026-10-06
+
+Reviewed planning head `d3af934c` against published main `f014aa26`. D6's clean unpublished `3245550d` supplies provisional old-coin evidence only. This is an independent docs-only review; no source, runtime, browser, owner save or native proof was run.
+
+## Requirements checked
+
+Archived chapter-one content calls for four instance crows in Green, Drowned Oak and Oak Branches, bounded replacement/wander, actual shiny-item scavenging and a reachable Oak Branches nest of at most eight items. Published C3 has fixed slots, a two-room wander and death-only replacement; D5 supplies the reciprocal reachable canopy. D8 needs exact custody, adjacent transport, one durable intent/job generation, safe fallback and no player acquisition credit. Cartridge owns numbers and world-specific choices; the engine and generic compiler may validate their shape and references without imposing this chapter's literal population count. D6's final published coin and successor answers still require a fresh pin.
+
+## Verdict: CHANGES REQUIRED for source assignment
+
+1. **Should-fix D8-P1 — successful scavenging permanently removes Green crows from Green.** `docs/system/cartridge.md:1305` and `docs/system/mechanics.md:1492` explicitly leave a completed Green-home crow in Oak Branches, outside its Green/Well Lane pair, and skip its ordinary wander until death. Take the delivered sole coin, return it to Green and drop it twice: each cap-one Green crow can make one delivery, then both remain live outside their pairs. A third Green Drop can never bind a present crow, and death-only replacement never fires. Select a bounded lawful return to the ordinary pair after delivery/release or another explicit policy that keeps Green scavenging live, then align the job/save/Book proof. Do not widen ordinary C3 wander or silently retire a live slot.
+
+2. **Should-fix D8-P2 — world-specific cardinality is assigned to generic compiler/loader validation.** `docs/system/cartridge.md:1311` requires the compiler/loader to enforce “exactly four cap-one plans” and direct capacity eight. If that rule is implemented as a generic source or artifact guard, another valid cartridge with three crows or a different nest capacity is rejected even though the declared bounds and references are sound. Keep four/eight as D8 cartridge values, validate legal plan/container structure and the authored D8 relationship through its declaration, and prove this chapter's chosen totals in controlled tests/simulation. No engine chapter-name check is needed.
+
+The four selected homes, reciprocal corridor, one actual D6 coin allowlist, no fake pelt, same-ID custody, Shoo/Attack release and real nest use have plausible first consumers. The exact D6 publication gate and null successor answers are stated honestly. Ponytail Review: no extra framework or dependency; D8-P2 is the only unnecessary generalized validation pressure. `git diff --check f014aa26 d3af934c` passed. Docs-only review requires no mutation or runtime gate.

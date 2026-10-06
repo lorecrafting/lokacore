@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D8 exact crow scavenging plan](2026-10-06-d8-crow-plan-review.md): independent docs-only review at `d3af934c`, CHANGES REQUIRED for Green crow return/liveness and world-specific count validation; D6 publication re-pin and source proof remain pending.
+
 - [D12 practical skills final integrated primary review](2026-10-06-d12-final-primary-review.md): exact local `9830cece`, independent APPROVE, no findings; v034/API1.29/hash/184 IDs, 370-test full gate, focused SQLite and 2/2 isolated browser proof verified; independent two-herb mutant red/restored green. Hosted CI/PR/publication remain PM gates.
 
 - [D3 Western Ashmere final integrated source](2026-10-06-d3-western-ashmere-final-review.md): exact `559ae690`, independent APPROVE, no findings; v033/API1.28/hash/184 IDs rechecked, retained full gate and isolated two-route browser proof verified, six focused tests pass, independent return-route mutant red. Remote CI/PR/publication remain PM gates.
