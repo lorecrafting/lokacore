@@ -277,6 +277,58 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   a.sql.close();
 });
 
+// Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
+// pickup to World because the new presenter has no press context.
+test('remounted pending pelt Take settles on its exact corpse detail', () => {
+  const chapter = bundle('missing_child_c3_provisional_hash');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
+    const reply = a.game.invoke({ action_key, target_ids, input } as never);
+    assert.equal(reply.kind, 'saved');
+    if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
+  };
+  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
+  const member = a.game.view().view.entities.find((e) => e.name === 'npc.fen_hound.short')!;
+  invoke('attack', [member.id]);
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  for (let i = 0; i < 20 && !corpse; i++) {
+    a.clock.wall += 3000;
+    a.clock.mono += 3000;
+    assert.equal(a.game.pulse().kind, 'ready');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  }
+  assert.ok(corpse);
+  const pelt = corpse.contents!.find((e) => e.name === 'item.hound_pelt.short')!;
+  const first = book(chapter, a);
+  first.tap(first.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
+  first.tap(first.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  first.tap(first.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(a.game.pending(), true);
+  first.unmount();
+  const remounted = book(chapter, a);
+  a.fault.reads = false;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.deepEqual(
+    remounted.stack.map((p: any) => p.id),
+    [corpse.id],
+  );
+  assert.equal(
+    remounted.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
+  assert.equal(remounted.p.screen().log.includes('You pick up a hound pelt.'), false);
+  assert.ok(a.game.view().view.inventory.some((e) => e.id === pelt.id));
+  remounted.tap('Leave');
+  assert.deepEqual(remounted.stack, []);
+  remounted.unmount();
+  a.sql.close();
+});
+
 // Breaks: room title scrolls away, room Ways returns, or Back pops to Contents instead of World.
 test('room is focused while Map retains directions and every detail returns to the world', () => {
   const h = book();

@@ -4,6 +4,7 @@ import { key, same } from '../foundation/compose.ts';
 
 // Decoded portable observations, as in invariants.ts.
 type Any = any;
+// size: allow 45, one independent pass covers paired placement, origin and result rows
 export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
   const made = new Set<string>();
   const identities = new Map<string, Any>();
@@ -16,7 +17,11 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
         previous?.op !== 'entity.create' ||
         previous.identity.id !== op.entity_id ||
         previous.writer_group !== op.writer_group ||
-        (state.known_entities?.[op.destination_id]?.kind !== 'room' &&
+        ((state.known_entities?.[op.destination_id]?.kind !== 'room' ||
+          previous.identity.origin?.role === 'pelt' ||
+          (previous.identity.origin?.kind === 'spawned' &&
+            state.population_specs?.[key(previous.identity.origin.by)]?.home !==
+              op.destination_id)) &&
           !paired(identities.get(op.destination_id), previous.identity))
       )
         return false;
@@ -42,7 +47,68 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
     made.add(i.id);
     identities.set(i.id, i);
   }
-  return true;
+  return complete(ops);
+}
+
+// size: allow 60, independent pair, HP and slot proof mirrors the contract
+function complete(ops: Any[]): boolean {
+  const hounds = ops.filter(
+    (op) =>
+      op.op === 'entity.create' &&
+      op.identity.origin?.kind === 'spawned' &&
+      op.identity.origin.role === 'hound',
+  );
+  const pelts = ops.filter(
+    (op) =>
+      op.op === 'entity.create' &&
+      op.identity.origin?.kind === 'spawned' &&
+      op.identity.origin.role === 'pelt',
+  );
+  const slots = ops.filter((op) => op.op === 'population.slot');
+  if (hounds.length !== pelts.length) return false;
+  for (const h of hounds) {
+    const origin = h.identity.origin;
+    if (
+      pelts.filter(
+        (p) => p.writer_group === h.writer_group && p.identity.origin.member_id === h.identity.id,
+      ).length !== 1 ||
+      ops.filter(
+        (op) =>
+          op.op === 'resource.initialize' &&
+          op.writer_group === h.writer_group &&
+          op.entity_id === h.identity.id,
+      ).length !== 1 ||
+      slots.filter(
+        (op) =>
+          op.writer_group === h.writer_group &&
+          same(op.plan, origin.by) &&
+          op.slot === origin.slot &&
+          op.value.generation === origin.generation &&
+          op.value.member_id === h.identity.id &&
+          op.value.replacement_due === null,
+      ).length !== 1
+    )
+      return false;
+  }
+  return (
+    slots.every(
+      (s) =>
+        s.value.member_id === null ||
+        s.value.replacement_due !== null ||
+        !hounds.some((h) => h.writer_group === s.writer_group) ||
+        hounds.some(
+          (h) =>
+            h.writer_group === s.writer_group &&
+            h.identity.id === s.value.member_id &&
+            h.identity.origin.slot === s.slot,
+        ),
+    ) &&
+    pelts.every((p) =>
+      hounds.some(
+        (h) => h.writer_group === p.writer_group && p.identity.origin.member_id === h.identity.id,
+      ),
+    )
+  );
 }
 
 function initialized(

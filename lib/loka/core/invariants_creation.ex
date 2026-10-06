@@ -27,7 +27,8 @@ defmodule Loka.Core.InvariantsCreation do
     ids = for %{"op" => "entity.create", "identity" => i} <- ops, do: i["id"]
 
     length(ids) == length(Enum.uniq(ids)) and
-      Enum.all?(Enum.with_index(ops), &op_holds?(&1, state, ops, result))
+      Enum.all?(Enum.with_index(ops), &op_holds?(&1, state, ops, result)) and
+      complete?(ops)
   end
 
   defp op_holds?({op, index}, state, ops, result) do
@@ -49,10 +50,67 @@ defmodule Loka.Core.InvariantsCreation do
   defp placed?(s, op, %{"op" => "entity.create", "identity" => i} = previous, ops),
     do:
       previous["writer_group"] == op["writer_group"] and i["id"] == op["entity_id"] and
-        (get_in(s, ["known_entities", op["destination_id"], "kind"]) == "room" or
+        ((get_in(s, ["known_entities", op["destination_id"], "kind"]) == "room" and
+            get_in(i, ["origin", "role"]) != "pelt" and
+            (get_in(i, ["origin", "kind"]) != "spawned" or
+               get_in(s, ["population_specs", Compose.key(get_in(i, ["origin", "by"])), "home"]) ==
+                 op["destination_id"])) or
            paired?(created_identity(ops, op["destination_id"]), i))
 
   defp placed?(_, _, _, _), do: false
+
+  # size: allow 55, independent birth oracle; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp complete?(ops) do
+    spawned =
+      Enum.filter(
+        ops,
+        &(&1["op"] == "entity.create" and get_in(&1, ["identity", "origin", "kind"]) == "spawned")
+      )
+
+    hounds = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "hound"))
+    pelts = Enum.filter(spawned, &(get_in(&1, ["identity", "origin", "role"]) == "pelt"))
+
+    length(hounds) == length(pelts) and
+      Enum.all?(hounds, fn h ->
+        id = get_in(h, ["identity", "id"])
+        origin = get_in(h, ["identity", "origin"])
+        group = h["writer_group"]
+
+        Enum.count(
+          pelts,
+          &(&1["writer_group"] == group and get_in(&1, ["identity", "origin", "member_id"]) == id)
+        ) == 1 and
+          Enum.count(
+            ops,
+            &(&1["op"] == "resource.initialize" and &1["writer_group"] == group and
+                &1["entity_id"] == id)
+          ) == 1 and
+          Enum.count(ops, fn op ->
+            op["op"] == "population.slot" and op["writer_group"] == group and
+              op["plan"] == origin["by"] and op["slot"] == origin["slot"] and
+              get_in(op, ["value", "generation"]) == origin["generation"] and
+              get_in(op, ["value", "member_id"]) == id and
+              get_in(op, ["value", "replacement_due"]) == nil
+          end) == 1
+      end) and
+      Enum.all?(ops, fn op ->
+        op["op"] != "population.slot" or get_in(op, ["value", "member_id"]) == nil or
+          get_in(op, ["value", "replacement_due"]) != nil or
+          not Enum.any?(hounds, &(&1["writer_group"] == op["writer_group"])) or
+          Enum.any?(hounds, fn h ->
+            h["writer_group"] == op["writer_group"] and
+              get_in(h, ["identity", "id"]) == get_in(op, ["value", "member_id"]) and
+              get_in(h, ["identity", "origin", "slot"]) == op["slot"]
+          end)
+      end) and
+      Enum.all?(pelts, fn p ->
+        Enum.any?(
+          hounds,
+          &(&1["writer_group"] == p["writer_group"] and
+              get_in(&1, ["identity", "id"]) == get_in(p, ["identity", "origin", "member_id"]))
+        )
+      end)
+  end
 
   defp created_identity(ops, id) do
     Enum.find_value(ops, fn

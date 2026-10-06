@@ -12,7 +12,7 @@ import {
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 // StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
-import { creationValid, initialPair, initialPlacement } from './creation.ts';
+import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -51,7 +51,7 @@ const containment = (e: string): MutationTarget =>
 
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
-export function compose(state: State, delta: StateDelta): Result {
+export function compose(state: State, delta: StateDelta, final = true): Result {
   const { ops } = delta;
   if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
@@ -72,6 +72,7 @@ export function compose(state: State, delta: StateDelta): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
+  if (final && !completeBirths(ops)) return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }

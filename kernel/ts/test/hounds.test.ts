@@ -294,6 +294,54 @@ test('deliberate attack leaves the same pelt in a hound corpse and delays replac
   );
 });
 
+// Breaks: a due extra slot is replaced at the first daytime wander after a kill, bypassing the
+// night-only cap even though the replacement delay has elapsed.
+test('a due extra-slot death waits for night before its next generation', () => {
+  let w = advance(fresh(), 108000);
+  for (const [i, direction] of ['south', 'south', 'east'].entries())
+    w = command(w, 'move', direction, i + 1);
+  const slotKey = Object.keys(w.state.population_slots ?? {}).find(
+    (k) => JSON.parse(k).slot === 5,
+  )!;
+  const member = w.state.population_slots![slotKey]!.member_id!;
+  const hp = key({
+    kind: 'resource',
+    entity_id: member,
+    resource: {
+      cartridge_id: 'ashmere_missing_child',
+      cartridge_version: '0.0.28',
+      kind: 'resource',
+      key: 'hp',
+    },
+  });
+  w = {
+    ...w,
+    state: { ...w.state, resources: { ...w.state.resources, [hp]: { value: 1, at: 108000 } } },
+    cartridge: {
+      ...w.cartridge,
+      world: {
+        ...w.cartridge.world!,
+        combat: {
+          ...w.cartridge.world!.combat!,
+          player_attack: { chance: 100, damage_min: 1, damage_max: 1 },
+        },
+      },
+    },
+  };
+  w = command(w, 'attack', member, 4);
+  w = elapsed(w, 108150);
+  assert.deepEqual(w.state.population_slots![slotKey], {
+    generation: 1,
+    member_id: member,
+    replacement_due: 194550,
+  });
+  w = advance(w, 198000);
+  assert.equal(w.state.population_slots![slotKey]!.generation, 1);
+  w = advance(w, 244800);
+  assert.equal(w.state.population_slots![slotKey]!.generation, 2);
+  assert.notEqual(w.state.population_slots![slotKey]!.member_id, member);
+});
+
 // Breaks: a lethal hound reply marks its living slot dead or strands the player's same body outside the shrine.
 test('a lethal hound reply returns the same body and keeps the surviving hound', () => {
   let w = fresh();

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { read } from '../../../kernel/ts/test/read.ts';
@@ -28,6 +30,90 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 const releases = [{ fresh, content_hash: pin.sha256 }] as const;
+
+function populationOnly() {
+  const c = structuredClone(pin.value);
+  const keep = (rows: Record<string, unknown>, names: string[]) =>
+    Object.fromEntries(
+      Object.entries(rows).filter(([id]) => names.some((name) => id.endsWith(`/${name}`))),
+    );
+  c.rooms = keep(c.rooms, ['hound_run', 'adder_nest']);
+  const run = Object.keys(c.rooms).find((id) => id.endsWith('/hound_run'))!;
+  c.rooms[run].exits = { east: c.rooms[run].exits.east };
+  c.items = keep(c.items, ['hound_pelt', 'hound_corpse', 'player_corpse', 'rat_corpse']);
+  c.npcs = keep(c.npcs, ['fen_hound']);
+  c.resources = keep(c.resources, ['hp', 'mv']);
+  c.skills = keep(c.skills, ['dodge']);
+  for (const section of [
+    'actions',
+    'barriers',
+    'quests',
+    'dialogues',
+    'reactions',
+    'recipes',
+    'scenes',
+    'story_points',
+    'liquids',
+    'topics',
+    'services',
+  ] as const)
+    c[section] = {};
+  c.chapters = [{ title: 'chapter.missing_child' }];
+  c.entry = { ...c.entry, key: 'hound_run' };
+  c.world.death.shrine = { ...c.world.death.shrine, key: 'hound_run' };
+  delete c.world.death_credit;
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const loaded = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  return {
+    artifact: { canonical, sha256 },
+    releases: [
+      {
+        fresh: newWorld(
+          loaded.cartridge as Cartridge,
+          '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+          [1, 2, 3, 4],
+        ),
+        content_hash: sha256,
+      },
+    ] as const,
+  };
+}
+
+// Breaks: a population-only cartridge skips receipt replay and opens after its accepted wander
+// receipt's actor is forged, even though the persisted world rows still look complete.
+test('population alone activates byte-preserving accepted-history refusal', (t) => {
+  const only = populationOnly();
+  const dir = mkdtempSync(join(tmpdir(), 'loka-population-only-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  const p = elapsedHost(path, { wall: 10000, mono: 0 }, only.artifact);
+  const story = openStory(p.db, only.releases, p.host);
+  assert.equal(story.kind, 'open');
+  if (story.kind !== 'open') return;
+  const advanced = story.elapsed({ expected_run_id: story.runId(), from: 64800, until: 68400 });
+  assert.equal(advanced.kind, 'saved');
+  p.sql
+    .prepare("UPDATE receipt SET actor_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' WHERE revision=1")
+    .run();
+  p.sql.close();
+  const altered = readFileSync(path);
+  const sql = new DatabaseSync(path);
+  t.after(() => sql.close());
+  const db = {
+    execSync: (query: string) => sql.exec(query),
+    runSync: (query: string, ...args: any[]) => sql.prepare(query).run(...args),
+    getFirstSync: (query: string, ...args: any[]) => sql.prepare(query).get(...args) ?? null,
+    getAllSync: (query: string, ...args: any[]) => sql.prepare(query).all(...args),
+    isInTransactionSync: () => sql.isTransaction,
+  };
+  assert.equal(openStory(db as never, only.releases, p.host).kind, 'save_corrupt');
+  assert.deepEqual(readFileSync(path), altered);
+});
 
 // Breaks: a population job writes rows the phone cannot cold-load, or lost COMMIT acknowledgement duplicates its births.
 test('one hound wander persists across real SQLite unknown-COMMIT recovery and cold reopen', (t) => {

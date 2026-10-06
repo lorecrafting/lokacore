@@ -68,7 +68,64 @@ defmodule Loka.Core.Creation do
         Map.take(child_origin, ~w(by bundle slot generation occurrence_id member_id)) ==
           Map.take(parent_origin, ~w(by bundle slot generation occurrence_id member_id))
 
-    same_group and (room or held)
+    home = get_in(state, ["population_specs", key(child_origin["by"] || %{}), "home"])
+
+    same_group and
+      ((room and child_origin["role"] != "pelt" and
+          (child_origin["kind"] != "spawned" or home == op["destination_id"])) or held)
+  end
+
+  # size: allow 55, one final birth-group guard; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  def complete?(ops) do
+    made =
+      Enum.filter(
+        ops,
+        &(&1["op"] == "entity.create" and get_in(&1, ["identity", "origin", "kind"]) == "spawned")
+      )
+
+    hounds = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "hound"))
+    pelts = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "pelt"))
+
+    length(hounds) == length(pelts) and
+      Enum.all?(hounds, fn h ->
+        origin = h["identity"]["origin"]
+        id = h["identity"]["id"]
+        group = h["writer_group"]
+
+        Enum.count(
+          pelts,
+          &(&1["writer_group"] == group and get_in(&1, ["identity", "origin", "member_id"]) == id)
+        ) == 1 and
+          Enum.count(
+            ops,
+            &(&1["op"] == "resource.initialize" and &1["writer_group"] == group and
+                &1["entity_id"] == id)
+          ) == 1 and
+          Enum.count(ops, fn op ->
+            op["op"] == "population.slot" and op["writer_group"] == group and
+              op["plan"] == origin["by"] and op["slot"] == origin["slot"] and
+              get_in(op, ["value", "generation"]) == origin["generation"] and
+              get_in(op, ["value", "member_id"]) == id and
+              get_in(op, ["value", "replacement_due"]) == nil
+          end) == 1
+      end) and
+      Enum.all?(ops, fn op ->
+        op["op"] != "population.slot" or get_in(op, ["value", "member_id"]) == nil or
+          get_in(op, ["value", "replacement_due"]) != nil or
+          not Enum.any?(hounds, &(&1["writer_group"] == op["writer_group"])) or
+          Enum.any?(hounds, fn h ->
+            h["writer_group"] == op["writer_group"] and
+              h["identity"]["id"] == get_in(op, ["value", "member_id"]) and
+              get_in(h, ["identity", "origin", "slot"]) == op["slot"]
+          end)
+      end) and
+      Enum.all?(pelts, fn p ->
+        Enum.any?(
+          hounds,
+          &(&1["writer_group"] == p["writer_group"] and
+              &1["identity"]["id"] == get_in(p, ["identity", "origin", "member_id"]))
+        )
+      end)
   end
 
   defp section(state, name), do: Map.get(state, name, %{})

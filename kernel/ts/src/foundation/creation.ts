@@ -57,7 +57,11 @@ export function initialPlacement(
   return (
     row === undefined &&
     group === op.writer_group &&
-    ((section(state, 'known_entities')[op.destination_id] as Obj | undefined)?.kind === 'room' ||
+    (((section(state, 'known_entities')[op.destination_id] as Obj | undefined)?.kind === 'room' &&
+      !(child?.kind === 'spawned' && child.role === 'pelt') &&
+      (child?.kind !== 'spawned' ||
+        (section(state, 'population_specs')[key(child.by)] as Obj | undefined)?.home ===
+          op.destination_id)) ||
       (child?.kind === 'spawned' &&
         child.role === 'pelt' &&
         holder?.kind === 'spawned' &&
@@ -69,5 +73,80 @@ export function initialPlacement(
         child.generation === holder.generation &&
         child.occurrence_id === holder.occurrence_id &&
         child.member_id === holder.member_id))
+  );
+}
+
+/** A final proposal must bind each spawned pair, HP and membership in its birth group. */
+// size: allow 60, one final guard checks pair, HP and slot membership together
+export function completeBirths(ops: readonly DeltaOp[]): boolean {
+  const made = ops.filter(
+    (op): op is Extract<DeltaOp, { op: 'entity.create' }> =>
+      op.op === 'entity.create' && op.identity.origin.kind === 'spawned',
+  );
+  const hounds = made.filter(
+    (op) => op.identity.origin.kind === 'spawned' && op.identity.origin.role === 'hound',
+  );
+  const pelts = made.filter(
+    (op) => op.identity.origin.kind === 'spawned' && op.identity.origin.role === 'pelt',
+  );
+  const slots = ops.filter(
+    (op): op is Extract<DeltaOp, { op: 'population.slot' }> => op.op === 'population.slot',
+  );
+  if (hounds.length !== pelts.length) return false;
+  for (const h of hounds) {
+    const o = h.identity.origin;
+    if (o.kind !== 'spawned') return false;
+    const related = pelts.filter(
+      (p) =>
+        p.writer_group === h.writer_group &&
+        p.identity.origin.kind === 'spawned' &&
+        p.identity.origin.member_id === h.identity.id,
+    );
+    const slot = slots.filter(
+      (s) =>
+        s.writer_group === h.writer_group &&
+        key(s.plan) === key(o.by) &&
+        s.slot === o.slot &&
+        s.value.generation === o.generation &&
+        s.value.member_id === h.identity.id &&
+        s.value.replacement_due === null,
+    );
+    const hp = ops.filter(
+      (op) =>
+        op.op === 'resource.initialize' &&
+        op.writer_group === h.writer_group &&
+        op.entity_id === h.identity.id,
+    );
+    if (related.length !== 1 || slot.length !== 1 || hp.length !== 1) return false;
+  }
+  return (
+    birthSlotsMatch(slots, hounds) &&
+    pelts.every((p) =>
+      hounds.some(
+        (h) =>
+          h.writer_group === p.writer_group &&
+          p.identity.origin.kind === 'spawned' &&
+          p.identity.origin.member_id === h.identity.id,
+      ),
+    )
+  );
+}
+
+function birthSlotsMatch(
+  slots: Extract<DeltaOp, { op: 'population.slot' }>[],
+  hounds: Extract<DeltaOp, { op: 'entity.create' }>[],
+) {
+  return slots.every(
+    (s) =>
+      s.value.member_id === null ||
+      s.value.replacement_due !== null ||
+      !hounds.some((h) => h.writer_group === s.writer_group) ||
+      hounds.some(
+        (h) =>
+          h.writer_group === s.writer_group &&
+          h.identity.id === s.value.member_id &&
+          h.identity.origin.kind === 'spawned' &&
+          h.identity.origin.slot === s.slot,
+      ),
   );
 }

@@ -50,10 +50,11 @@ defmodule Loka.Core.Compose do
   # A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec compose(map(), map()) :: %{String.t() => term()}
-  def compose(state, %{"ops" => ops}) do
+  def compose(state, %{"ops" => ops}, final \\ true) do
     cond do
       not is_integer(state["clock"]) -> fault("precondition_failed", %{"kind" => "clock"})
       over_budget?(state, ops) -> fault("budget_exceeded", nil)
+      final and not Creation.complete?(ops) -> fault("precondition_failed", %{"kind" => "clock"})
       true -> apply_all(state, ops)
     end
   end

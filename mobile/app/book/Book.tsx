@@ -66,7 +66,7 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
-      // A remounted pending Read has no local retry context; settle its exact route once.
+      // A remounted pending Read or corpse Take has no local retry context.
       if (update.kind === 'completion' && update.invocation_id === restoreInvocation.current) {
         restoreInvocation.current = undefined;
         if (
@@ -78,6 +78,29 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
             ...restoredItemPages(after.view, after.detail, update.intent.target_ids[0]),
             ...next,
           ];
+        if (
+          update.reply.kind === 'saved' &&
+          update.reply.decision.kind === 'accepted' &&
+          update.reply.decision.outcome === 'taken'
+        ) {
+          let receipt: ReturnType<Game['lastNarration']>;
+          try {
+            receipt = p.game.lastNarration(update.reply.command_id);
+          } catch {
+            receipt = undefined; // presenter owns the storage fault shown to the player
+          }
+          if (
+            receipt &&
+            receipt.command_id === update.reply.command_id &&
+            receipt.pickup_name &&
+            receipt.detail_id
+          )
+            next = resultPages(next, {
+              ...after,
+              returnDetail: receipt.detail_id,
+              returnWorld: false,
+            });
+        }
       }
       if (terminal) next = resultPages(next, after);
       current.current = { stack: next, view: after.view };

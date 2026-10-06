@@ -808,6 +808,8 @@ transition in one writer group. Bundle completeness is checked at the complete
 atomic group; valid paired prefixes must hydrate for later proposal reads without
 mistaking a temporarily unfinished pair for a corrupt complete state. Generic
 source/cycle/capacity guards and one-container proof stay in force.
+The additive `spawned_bundle.json` fixture pins a complete accepted pair, final
+bundle refusals and a composable paired prefix in both portable kernels.
 
 Derived dynamic entities/resource specs/capacity and known-victim observations
 include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the

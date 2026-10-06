@@ -1,0 +1,222 @@
+{
+  "description": "C3 independent literal spawned pair, HP and slot admission. Prefix hydration is only an intermediate read.",
+  "state": {
+    "clock": 0,
+    "known_entities": {
+      "11111111-1111-4111-8111-111111111111": {
+        "kind": "room"
+      }
+    },
+    "population_specs": {
+      "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+        "bundle": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "bundle",
+          "key": "hound_pair"
+        },
+        "cap": 2,
+        "home": "11111111-1111-4111-8111-111111111111",
+        "hound": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "hound"
+        },
+        "pelt": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "pelt"
+        },
+        "hp": {
+          "start": 7
+        }
+      }
+    }
+  },
+  "ops": [
+    {
+      "op": "entity.create",
+      "writer_group": 0,
+      "identity": {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "definition": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "hound"
+        },
+        "origin": {
+          "kind": "spawned",
+          "by": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "bundle": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "bundle",
+            "key": "hound_pair"
+          },
+          "slot": 1,
+          "generation": 1,
+          "occurrence_id": "44444444-4444-4444-8444-444444444444",
+          "member_id": "22222222-2222-4222-8222-222222222222",
+          "role": "hound"
+        }
+      }
+    },
+    {
+      "op": "entity.transfer",
+      "writer_group": 0,
+      "entity_id": "22222222-2222-4222-8222-222222222222",
+      "source_id": null,
+      "destination_id": "11111111-1111-4111-8111-111111111111"
+    },
+    {
+      "op": "entity.create",
+      "writer_group": 0,
+      "identity": {
+        "id": "33333333-3333-4333-8333-333333333333",
+        "definition": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "pelt"
+        },
+        "origin": {
+          "kind": "spawned",
+          "by": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "bundle": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "bundle",
+            "key": "hound_pair"
+          },
+          "slot": 1,
+          "generation": 1,
+          "occurrence_id": "44444444-4444-4444-8444-444444444444",
+          "member_id": "22222222-2222-4222-8222-222222222222",
+          "role": "pelt"
+        }
+      }
+    },
+    {
+      "op": "entity.transfer",
+      "writer_group": 0,
+      "entity_id": "33333333-3333-4333-8333-333333333333",
+      "source_id": null,
+      "destination_id": "22222222-2222-4222-8222-222222222222"
+    },
+    {
+      "op": "resource.initialize",
+      "writer_group": 0,
+      "entity_id": "22222222-2222-4222-8222-222222222222",
+      "resource": {
+        "cartridge_id": "fen",
+        "cartridge_version": "0.0.1",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "value": 7,
+      "at": 0
+    },
+    {
+      "op": "population.slot",
+      "writer_group": 0,
+      "plan": {
+        "cartridge_id": "fen",
+        "cartridge_version": "0.0.1",
+        "kind": "population",
+        "key": "hounds"
+      },
+      "slot": 1,
+      "expected": null,
+      "value": {
+        "generation": 1,
+        "member_id": "22222222-2222-4222-8222-222222222222",
+        "replacement_due": null
+      }
+    }
+  ],
+  "expected_rows": {
+    "hound": {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "definition": {
+        "cartridge_id": "fen",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "hound"
+      },
+      "origin": {
+        "kind": "spawned",
+        "by": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "population",
+          "key": "hounds"
+        },
+        "bundle": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "bundle",
+          "key": "hound_pair"
+        },
+        "slot": 1,
+        "generation": 1,
+        "occurrence_id": "44444444-4444-4444-8444-444444444444",
+        "member_id": "22222222-2222-4222-8222-222222222222",
+        "role": "hound"
+      }
+    },
+    "pelt": {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "definition": {
+        "cartridge_id": "fen",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "pelt"
+      },
+      "origin": {
+        "kind": "spawned",
+        "by": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "population",
+          "key": "hounds"
+        },
+        "bundle": {
+          "cartridge_id": "fen",
+          "cartridge_version": "0.0.1",
+          "kind": "bundle",
+          "key": "hound_pair"
+        },
+        "slot": 1,
+        "generation": 1,
+        "occurrence_id": "44444444-4444-4444-8444-444444444444",
+        "member_id": "22222222-2222-4222-8222-222222222222",
+        "role": "pelt"
+      }
+    },
+    "room": "11111111-1111-4111-8111-111111111111",
+    "member": "22222222-2222-4222-8222-222222222222",
+    "child": "33333333-3333-4333-8333-333333333333",
+    "hp": {
+      "value": 7,
+      "at": 0
+    },
+    "slot": {
+      "generation": 1,
+      "member_id": "22222222-2222-4222-8222-222222222222",
+      "replacement_due": null
+    }
+  }
+}
