@@ -162,7 +162,7 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **7 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5).
+Local `main` has completed **8 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5, C1).
 GitHub `main` has three (A1, B1, A2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
@@ -171,7 +171,8 @@ adopts the A3 Green finale and five-outcome plan; neither PR alone completed a s
 The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
 applied to these five merges while GitHub Actions delayed and cancelled runners.
 B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
-local `main` at chapter 0.0.16/API1.14. A3 Green finale is implemented at chapter
+local `main` at chapter 0.0.16/API1.14. The accumulated local checks passed on the
+C1-inclusive head; GitHub publication remains ahead. A3 Green finale is implemented at chapter
 0.0.17/API1.15 and independently approved after the bound-Continue and save-proof
 findings were fixed ([primary review](reviews/2026-10-05-a3-green-primary-review.md),
 [save review](reviews/2026-10-05-a3-save-second-review.md)). Both await accumulated-head
@@ -212,11 +213,14 @@ B8 source/review re-pins, [independent B9 plan review](reviews/2026-10-05-b9-lan
 release/API/hash/ID/proof pins remain ahead; no playable S10 is claimed here.
 
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
-and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md)
-against corrected B3 integration `9c7e5379`; its
-[independent plan review](reviews/2026-10-05-c1-tobin-plan-review.md) approved.
-Source implementation is active in an isolated local branch; exact release pins
-and final proof remain ahead.
+and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
+Its [independent plan review](reviews/2026-10-05-c1-tobin-plan-review.md),
+[primary source review](reviews/2026-10-05-c1-tobin-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-c1-tobin-save-second-review.md)
+approved after all findings were fixed. Local `main` carries chapter 0.0.20/API1.18,
+the independently pinned hash `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e`
+and 92 IDs. The accumulated local check passed, including the post-review size fix;
+GitHub publication remains ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
