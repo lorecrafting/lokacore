@@ -19,6 +19,9 @@ defmodule Loka.Core.ComposeTarget do
 
   def target(%{"op" => "job." <> _, "job_id" => j}), do: %{"kind" => "job", "job_id" => j}
 
+  def target(%{"op" => "bleed.transition", "body_id" => b}),
+    do: %{"kind" => "bleed", "body_id" => b}
+
   def target(%{"op" => "encounter." <> _, "encounter_id" => e}),
     do: %{"kind" => "encounter", "encounter_id" => e}
 

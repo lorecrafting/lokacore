@@ -1,4 +1,5 @@
 import { eatReceipt } from './food-receipt.ts';
+import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { defenseEvidence } from './combat-receipt.ts';
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
@@ -169,7 +170,12 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     });
     const lines = d.narration ?? [];
     const combat_lines = lines.flatMap((line, i) =>
-      root || keys.includes(line?.key) || packKeys.includes(line?.key) ? [i] : [],
+      root ||
+      keys.includes(line?.key) ||
+      packKeys.includes(line?.key) ||
+      (d.outcome === 'bandaged' && d.encounter_id === engaged(s.world, s.world.body)?.id)
+        ? [i]
+        : [],
     );
     const pickup = corpsePickup(s, r, d);
     if (!lines.length && !pickup) {
@@ -256,6 +262,22 @@ function receiptDetail(
     return command.payload.provider_id;
   }
   if (command?.payload?.type === 'eat') return eatReceipt(s.world, command, r.command_id, d);
+  if (command?.payload?.type === 'bandage') {
+    const item = s.world.entities[command.payload.item_id];
+    if (
+      validate('Command', command).length ||
+      command.id !== r.command_id ||
+      d.outcome !== 'bandaged' ||
+      d.item_id !== command.payload.item_id ||
+      d.effect_generation !== command.payload.effect_generation ||
+      item?.kind !== 'item' ||
+      !item.bandage ||
+      d.narration?.length !== 1 ||
+      d.narration[0].key !== item.bandage.narration
+    )
+      throw new Error('malformed JSON: invalid committed bandage');
+    return undefined;
+  }
   if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;

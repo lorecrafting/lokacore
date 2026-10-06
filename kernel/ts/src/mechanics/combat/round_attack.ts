@@ -15,6 +15,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
+import { clearBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
@@ -119,9 +120,14 @@ function injure(
   r.ops.push(fatalLoss);
   if (fatalLoss.to === 0) {
     const closing = target_id === row.body_id || !row.active_ids || row.active_ids.length === 1;
-    if (closing) r.ops.push(close);
+    const closingOps = [
+      fatalLoss,
+      ...(closing ? [close] : []),
+      ...(target_id === row.body_id ? clearBleed(world, target_id) : []),
+    ];
+    r.ops.push(...closingOps.slice(1));
     const died = deathSequence(
-      prefix(world, closing ? [fatalLoss, close] : [fatalLoss]),
+      prefix(world, closingOps, r.due_time),
       command,
       {
         loss: fatalLoss,
@@ -133,7 +139,10 @@ function injure(
     );
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
-  } else if (sleeping) wake(prefix(world, [fatalLoss]), row, r);
+  } else {
+    if (target_id === row.body_id) r.ops.push(...wound(world, attacker_id, target_id, mint));
+    if (sleeping) wake(prefix(world, [fatalLoss], r.due_time), row, r);
+  }
 }
 
 function wake(at: World, row: EncounterRow, r: Round) {

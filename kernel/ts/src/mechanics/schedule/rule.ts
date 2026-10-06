@@ -24,6 +24,7 @@ import type { DeltaOp, JobId } from '../../contracts.gen.ts';
 import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
+import { runBleed } from '../bleed/job.ts';
 
 // size: allow 45, schedule dispatch retains its due job and elapsed clock paths
 export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
@@ -32,6 +33,7 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending') return rejected('invalid_state');
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
+    if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint);

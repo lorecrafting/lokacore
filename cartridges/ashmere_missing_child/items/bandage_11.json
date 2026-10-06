@@ -10,5 +10,11 @@
   "location": {
     "in": "npc",
     "npc": "wick"
+  },
+  "bandage": {
+    "effect": "bleeding",
+    "skill": "bandage",
+    "action": "bandage",
+    "narration": "narration.bandaged"
   }
 }

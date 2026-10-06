@@ -487,5 +487,17 @@
     "definitions": [
       "edible"
     ]
+  },
+  {
+    "key": "bleed",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "bandage"
+    ],
+    "definitions": [
+      "bleed"
+    ]
   }
 ]

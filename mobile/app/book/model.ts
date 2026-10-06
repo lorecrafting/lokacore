@@ -76,6 +76,7 @@ export function group(buttons: Button[]) {
     door: (direction: string) =>
       buttons.filter((b) => !['move', 'flee'].includes(b.action_key) && dir(b) === direction),
     flee: buttons.filter((b) => b.action_key === 'flee'),
+    bandage: buttons.filter((b) => b.action_key === 'bandage'),
     continue: buttons.find((b) => b.action_key === 'continue'),
     position: buttons.filter(
       (b) => !b.detail_id && ['stand', 'sit', 'rest', 'sleep'].includes(commandOf(b)),
@@ -248,11 +249,14 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        return button(
+        const offered = button(
           a,
           ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
+        return a.action_key === 'bandage' && v.bleeding
+          ? { ...offered, input: { effect_generation: v.bleeding.generation } }
+          : offered;
       }),
   );
   const placed = place.map((a) => ({

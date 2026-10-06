@@ -7,6 +7,7 @@ import {
   type FuelRow,
   type FuelSpec,
   type BarrierState,
+  type BleedRow,
   type CharacterId,
   type Command,
   type CommandPayload,
@@ -49,6 +50,7 @@ import type { RngState } from '../foundation/rng.ts';
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
 export type State = {
+  readonly bleeds?: Readonly<Record<string, BleedRow>>;
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
@@ -94,6 +96,8 @@ export type JobRow = {
   readonly encounter_id?: EncounterId;
   readonly quest_instance_id?: QuestInstanceId;
   readonly actor_id?: CharacterId;
+  readonly bleed_body_id?: EntityId;
+  readonly bleed_generation?: number;
 };
 
 export { row } from './rows.ts';
@@ -120,7 +124,7 @@ export type World = {
   readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly knownEntities: Readonly<
-    Record<string, { kind: string; owner_id?: CharacterId; edible?: true }>
+    Record<string, { kind: string; owner_id?: CharacterId; edible?: true; bandage?: true }>
   >;
   readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
   readonly populationSpecs: Readonly<

@@ -221,7 +221,13 @@ export function composeJob(
     if (
       (op.quest_instance_id === undefined) !== (op.actor_id === undefined) ||
       (op.quest_instance_id !== undefined &&
-        (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+        (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+      (op.bleed_body_id === undefined) !== (op.bleed_generation === undefined) ||
+      (op.job.kind === 'bleed') !== (op.bleed_body_id !== undefined) ||
+      (op.bleed_body_id !== undefined &&
+        (op.job.kind !== 'bleed' ||
+          op.encounter_id !== undefined ||
+          op.quest_instance_id !== undefined))
     )
       return failed;
     return {
@@ -233,12 +239,18 @@ export function composeJob(
         ...(op.quest_instance_id === undefined
           ? {}
           : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
+        ...(op.bleed_body_id === undefined
+          ? {}
+          : { bleed_body_id: op.bleed_body_id, bleed_generation: op.bleed_generation }),
       },
     };
   }
   if (row?.status !== 'pending') return failed;
   if (op.op === 'job.cancel')
-    return row.encounter_id === op.encounter_id
+    return (op.encounter_id !== undefined && row.encounter_id === op.encounter_id) ||
+      (op.bleed_body_id !== undefined &&
+        row.bleed_body_id === op.bleed_body_id &&
+        row.bleed_generation === op.bleed_generation)
       ? { value: { ...row, status: 'cancelled' } }
       : failed;
   return (row.due_time as number) <= horizon ? { value: { ...row, status: 'completed' } } : failed;

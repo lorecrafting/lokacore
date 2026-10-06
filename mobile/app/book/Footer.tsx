@@ -180,6 +180,7 @@ type StatusProps = {
   time: number;
   calendar?: GameView['calendar_status'];
   resources?: readonly Pool[];
+  bleeding?: GameView['bleeding'];
   position?: GameView['position'];
   text: (key: string) => string;
   locked: boolean;
@@ -216,6 +217,9 @@ export function Status(p: StatusProps) {
         {time ?? branch(p.time).glyph}
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
+      {p.bleeding && (
+        <Text style={{ ...small, color: paper.accent }}>{p.text(p.bleeding.label)}</Text>
+      )}
       <Pressable
         disabled={p.locked}
         accessibilityRole="button"

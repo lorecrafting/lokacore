@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_missing_child",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "title": "Ashmere — The Missing Child",
   "requires": {
     "kernel_api": {
-      "at_least": "1.29",
+      "at_least": "1.30",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -44,7 +44,8 @@
       "behavior": 1,
       "population": 1,
       "resource": 1,
-      "food": 1
+      "food": 1,
+      "bleed": 1
     },
     "client_features": []
   },

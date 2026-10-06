@@ -182,9 +182,22 @@ defmodule Loka.Core.ComposeEncounter do
   @spec job(map(), term(), integer()) :: {:ok, map()} | {:error, String.t()}
   def job(%{"op" => "job.schedule"} = op, row, horizon) do
     cond do
-      row != nil -> {:error, "precondition_failed"}
-      op["due_time"] <= horizon -> {:error, "nonfuture_job"}
-      true -> {:ok, Map.take(op, ~w(job due_time encounter_id)) |> Map.put("status", "pending")}
+      row != nil ->
+        {:error, "precondition_failed"}
+
+      op["due_time"] <= horizon ->
+        {:error, "nonfuture_job"}
+
+      not valid_bleed_job?(op) ->
+        {:error, "precondition_failed"}
+
+      true ->
+        {:ok,
+         Map.take(
+           op,
+           ~w(job due_time encounter_id quest_instance_id actor_id bleed_body_id bleed_generation)
+         )
+         |> Map.put("status", "pending")}
     end
   end
 
@@ -192,10 +205,23 @@ defmodule Loka.Core.ComposeEncounter do
     cancel = op["op"] == "job.cancel"
 
     valid =
-      if cancel, do: row["encounter_id"] == op["encounter_id"], else: row["due_time"] <= horizon
+      if cancel,
+        do:
+          (op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]) or
+            (op["bleed_body_id"] != nil and row["bleed_body_id"] == op["bleed_body_id"] and
+               row["bleed_generation"] == op["bleed_generation"]),
+        else: row["due_time"] <= horizon
 
     if row["status"] == "pending" and valid,
       do: {:ok, Map.put(row, "status", if(cancel, do: "cancelled", else: "completed"))},
       else: {:error, "precondition_failed"}
+  end
+
+  defp valid_bleed_job?(op) do
+    bound = op["bleed_body_id"] != nil
+
+    op["bleed_generation"] != nil == bound and
+      get_in(op, ["job", "kind"]) == "bleed" == bound and
+      (not bound or (op["encounter_id"] == nil and op["quest_instance_id"] == nil))
   end
 end

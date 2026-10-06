@@ -18,6 +18,7 @@ export function Combat(p: {
         Combat
       </Text>
       <Text style={prose}>{text(view.combat.name)}</Text>
+      {view.bleeding && <Text style={prose}>{text(view.bleeding.label)}</Text>}
       {view.combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose}>
           {text(opponent.name)}
@@ -33,6 +34,9 @@ export function Combat(p: {
       {p.g.look && <Act b={p.g.look} press={p.press} />}
       {p.g.flee.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
+      ))}
+      {p.g.bandage.map((b) => (
+        <Act key={b.target_ids[0]} b={b} press={p.press} />
       ))}
     </ScrollView>
   );

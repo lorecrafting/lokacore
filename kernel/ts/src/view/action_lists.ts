@@ -1,6 +1,7 @@
 // size: allow 312, food projection and method-aware Harvest share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
+import { bandageActions } from './bleed.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
@@ -33,7 +34,18 @@ import { reach } from '../mechanics/lookups.ts';
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
-const HIDDEN = ['eat', 'buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = [
+  'eat',
+  'bandage',
+  'buy',
+  'sell',
+  'use_service',
+  'read',
+  'fill',
+  'pour',
+  'drink',
+  ...MODAL,
+];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -83,6 +95,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
         foodActions(world, actor, id, set, steps),
+        bandageActions(world, actor, id, set, steps),
         readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>

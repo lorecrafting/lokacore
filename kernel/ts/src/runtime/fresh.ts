@@ -200,7 +200,11 @@ function pinnedEntities(
     ...Object.fromEntries(
       Object.entries(entities).map(([id, e]) => [
         id,
-        { kind: e.kind, ...(e.kind === 'item' && e.edible && { edible: true as const }) },
+        {
+          kind: e.kind,
+          ...(e.kind === 'item' && e.edible && { edible: true as const }),
+          ...(e.kind === 'item' && e.bandage && { bandage: true as const }),
+        },
       ]),
     ),
     ...Object.fromEntries(Object.values(slots).map((id) => [id, { kind: 'slot' }])),

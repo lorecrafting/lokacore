@@ -671,5 +671,14 @@
   "combat.hound_fled_east": "A wounded fen hound bolts east into Adder Nest.",
   "combat.hound_fled_west": "A wounded fen hound bolts west into Hound Run.",
   "combat.hound_primary_changed": "Another fen hound becomes your immediate opponent.",
-  "combat.hound_pack_withdrew": "No hound remains in this fight."
+  "combat.hound_pack_withdrew": "No hound remains in this fight.",
+  "skill.bandage.label": "Bandage",
+  "skill.bandage.requirement": "DEX 10 required to use.",
+  "wick.bandage.prompt": "Wick offers to teach you how to bind a bleeding wound. The lesson is free.",
+  "wick.bandage.choice": "Learn bandaging",
+  "wick.bandage.learned": "Wick shows you how to bind a wound. You learn bandaging.",
+  "action.bandage": "Use bandage",
+  "narration.bandaged": "You bind the wound with a clean bandage. The bleeding stops.",
+  "condition.bleeding": "Bleeding",
+  "narration.bleed.tick": "Blood seeps from the wound."
 }

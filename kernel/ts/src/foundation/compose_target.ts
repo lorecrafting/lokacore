@@ -24,6 +24,8 @@ export function target(op: DeltaOp): MutationTarget {
     case 'job.complete':
     case 'job.cancel':
       return { kind: 'job', job_id: op.job_id };
+    case 'bleed.transition':
+      return { kind: 'bleed', body_id: op.body_id };
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':

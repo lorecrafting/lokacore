@@ -1147,6 +1147,9 @@
             ],
             "additionalProperties": false
           }
+        },
+        "bleeding": {
+          "$ref": "gameview.schema.json#/$defs/BleedingView"
         }
       },
       "required": [
@@ -2307,6 +2310,34 @@
           "available": true
         }
       ]
+    },
+    "BleedingView": {
+      "description": "Current body bleed condition and exact generation for a held bandage invocation.",
+      "examples": [{ "label": "condition.bleeding", "generation": 1, "ends_at": 400, "next_tick_at": 200 }],
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "ends_at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "next_tick_at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        }
+      },
+      "required": [
+        "label",
+        "generation",
+        "ends_at",
+        "next_tick_at"
+      ],
+      "additionalProperties": false
     }
   }
 }

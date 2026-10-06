@@ -33,6 +33,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
+import { currentBleed } from '../mechanics/bleed/shared.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -70,11 +71,20 @@ export function gameView(world: World): GameView {
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
+  const bleed = currentBleed(world, world.body);
   const view: GameView = {
     actor_id: world.character,
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
+    ...(bleed && {
+      bleeding: {
+        label: 'condition.bleeding' as TextKey,
+        generation: bleed.generation,
+        ends_at: bleed.ends_at!,
+        next_tick_at: bleed.next_tick_at!,
+      },
+    }),
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door, steps),
     actions: actions.place,

@@ -1,5 +1,6 @@
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
+import { transitionBleed } from './compose_bleed.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
@@ -123,6 +124,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.complete':
     case 'job.cancel':
       return composeJob(op, row, ctx.horizon);
+    case 'bleed.transition':
+      return transitionBleed(op, row, ctx.state, ctx.horizon);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':
@@ -194,8 +197,7 @@ function transferOp(
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
-  if (op.source_id !== null)
-    return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
+  if (op.source_id !== null) return transfer(op, row, ctx);
   const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
   const parent = ctx.overlay.get(key({ kind: 'entity', entity_id: op.destination_id }));
   return check(
@@ -204,13 +206,24 @@ function transferOp(
   );
 }
 
-function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
+function transfer(
+  op: Extract<DeltaOp, { op: 'entity.transfer' }>,
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  const { entity_id: e, source_id: source, destination_id: d } = op;
+  if (source === null) return { code: 'precondition_failed' };
   const known = section(ctx.state, 'known_entities') as Record<string, Obj>;
   if (
     known[e]?.kind === 'consumed' ||
     known[source]?.kind === 'consumed' ||
     (known[d]?.kind === 'consumed' &&
-      (known[e]?.kind !== 'item' || known[e]?.edible !== true || known[source]?.kind !== 'body'))
+      (known[e]?.kind !== 'item' ||
+        known[source]?.kind !== 'body' ||
+        (op.consumption === 'bandaged'
+          ? known[e]?.bandage !== true
+          : known[e]?.edible !== true))) ||
+    (op.consumption === 'bandaged' && known[d]?.kind !== 'consumed')
   )
     return { code: 'precondition_failed' };
   if (row !== source) return { code: 'precondition_failed' };
@@ -252,6 +265,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'choices'), t.continuation_id);
     case 'job':
       return get(section(s, 'jobs'), t.job_id);
+    case 'bleed':
+      return get(section(s, 'bleeds'), t.body_id);
     case 'encounter':
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':

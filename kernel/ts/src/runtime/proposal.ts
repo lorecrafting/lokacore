@@ -4,7 +4,7 @@
 // order), composition and adoption. runtime/world.ts routes each command here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
-import { counts, over, target, type Limit } from '../foundation/compose.ts';
+import { counts, over, same, target, type Limit } from '../foundation/compose.ts';
 import {
   CAPABILITY_OWNERS,
   type CommandId,
@@ -24,6 +24,8 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
+import { currentBleed } from '../mechanics/bleed/shared.ts';
+import { living } from '../mechanics/death/shared.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -263,6 +265,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  const paired = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -283,11 +286,52 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: p.group + 1 }));
+    const pair = bleedRoundPair(at, job_id as JobId, current);
+    const group = paired.get(job_id) ?? p.group + 1;
+    if (pair) paired.set(pair, group);
+    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: group }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
+}
+
+/** Only current bleed and encounter occurrences of the same living body at one due time pair. */
+function bleedRoundPair(
+  world: World,
+  job_id: JobId,
+  job: NonNullable<World['state']['jobs']>[string],
+) {
+  const round = job.encounter_id && currentRound(world, job_id, job);
+  const body = round?.body_id ?? job.bleed_body_id;
+  if (!body || !living(world, body)) return;
+  const bleed = currentBleed(world, body);
+  if (!bleed || !bleed.job_id || !bleed.effect || !bleed.source_id) return;
+  const bleedId = bleed.job_id;
+  const bleedJob = world.state.jobs?.[bleedId];
+  const encounter =
+    round ??
+    Object.values(world.state.encounters ?? {}).find(
+      (r) => r.status === 'open' && r.body_id === body,
+    );
+  const roundId = encounter?.job_id;
+  const roundJob = roundId && world.state.jobs?.[roundId];
+  if (
+    !roundId ||
+    !roundJob ||
+    !bleedJob ||
+    !currentRound(world, roundId, roundJob) ||
+    bleedJob.status !== 'pending' ||
+    roundJob.status !== 'pending' ||
+    bleedJob.bleed_body_id !== body ||
+    bleedJob.bleed_generation !== bleed.generation ||
+    !same(bleedJob.job, bleed.effect) ||
+    bleedJob.due_time !== roundJob.due_time ||
+    job.due_time !== bleedJob.due_time ||
+    (job_id !== bleedId && job_id !== roundId)
+  )
+    return;
+  return job_id === bleedId ? roundId : bleedId;
 }
 
 // The capability owning a command or event type; own keys only, so `constructor` names none.
