@@ -1,0 +1,12 @@
+{
+  "title": "room.oak_branches.title",
+  "description": "room.oak_branches.description",
+  "exits": {
+    "down": {
+      "to": "drowned_oak"
+    },
+    "up": {
+      "to": "oak_crown"
+    }
+  }
+}
