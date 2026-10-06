@@ -1071,12 +1071,12 @@ and applicable two-kernel differential cases if the foundation changes.
 
 ## D6 water movement and corpse selection
 
-**Unadopted D1-base draft; no source authorization.** Use installed `move` and
+**PM-selected contract; implementation and fresh scoped review pending.** Use installed `move` and
 ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
 `input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
 Trust actor/invocation/freshness fields normally. A shared read-only exact-edge
 admission serves ExitView, execution and captured-invocation proof. Descend reads
-skill/load/life/posture/encounter/MV/no-following-NPC and debits 10 MV instead of
+skill/load/life/posture/encounter/MV/no-following-Wren and debits 10 MV instead of
 ordinary fare. Living Up bypasses ordinary posture/fare checks and costs 0 MV.
 Both preserve body transfer and `entity_entered_room`; other exits stay ordinary.
 

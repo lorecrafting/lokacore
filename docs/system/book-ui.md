@@ -779,7 +779,7 @@ original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
 
 ## D6 water exits and Chapel recovery
 
-**Unadopted D1-base draft; no source authorization.** Shaft/bank show Down with
+**PM-selected contract; implementation and fresh scoped review pending.** Shaft/bank show Down with
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
@@ -800,4 +800,4 @@ recovery may overload Carrying. Pending/stale/refused/replayed actions claim no
 extra transfer. Drowning shows one actual death/same-body return and recoverable
 original light/fare/key. Later isolated browser proof covers remaining-time/Up on
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
-is authorized by this draft; real SQLite faults remain separate proof.
+is authorized by this planning adoption; real SQLite faults remain separate proof.

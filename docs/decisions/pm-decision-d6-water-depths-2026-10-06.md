@@ -1,20 +1,20 @@
-# Draft PM decision: D6 water depths and recoverable drowning — 2026-10-06
+# PM decision: D6 water depths and recoverable drowning — 2026-10-06
 
-**Unadopted draft for PM judgment and fresh scoped review. No source authorization.**
-Prepared under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
+**PM-selected contract; fresh scoped review, publication and source assignment remain pending.**
+The PM adopts this replacement water/recovery contract under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
 The prior local [plan review](../reviews/2026-10-06-d6-water-depths-plan-review.md)
 and [adoption review](../reviews/2026-10-06-d6-water-depths-adoption-review.md)
 remain historical evidence at their named heads. Their final approval predates
-published D1 and covers the old logical timer; it does not approve this draft,
+published D1 and covers the old logical timer; it does not approve this replacement contract,
 the replacement deadline, new source or publication.
 
-Proposed active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-draft-pending-pm-adoption),
-[cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-draft-pending-pm-adoption),
+Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation),
+[cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
 [protocol](../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](../system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
 [D6 brief](../briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
-Those sections are explicitly draft; other active contracts remain in force.
+These clauses select behavior; they do not claim installed source or new independent approval.
 
 ## Published dependency re-pin
 
@@ -43,25 +43,25 @@ provide D1 dependency proof; their dated local-publication caveats remain histor
 The current roadmap records publication. Public isle death is not claimed: its
 recovery proof uses a declared controlled hazard.
 
-## Recommended bounded contract
+## Adopted bounded contract
 
-The [draft mechanic](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-draft-pending-pm-adoption)
+The [selected mechanic](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation)
 uses existing acquired swim, replaces ordinary entry fare, preserves free living
 Up and refuses following Wren. No attribute floor or extra lesson is needed.
 One deadline replaces periodic drain; MV 0 alone is never fatal. Typed drowning
 composes the actual HP fatal transition, conserved corpse and same-body return.
 
-Recommend the narrow Chapel action for any actual owned nonempty corpse,
+Select the narrow Chapel action for any actual owned nonempty corpse,
 including remote non-water deaths, under the linked custody contract. This
 provides the selected Legend recovery fallback without a general remote Take,
 replacement gear or recovery ledger. Deadline equality and historical-receipt
 validation require source proof, not a global scheduler redesign by assumption.
 
-## Deadline recommendation and rejected timer options
+## Selected deadline and rejected timer options
 
-The PM's current **draft** selection is one content-authored **6000 logical seconds**
-submersion deadline: **120 real seconds** at the installed rate 50. It is a generous
-chapter-one playtest target, not an owner quote or final adopted number. Entry at
+The PM selects one content-authored submersion deadline of **6000 logical seconds**: **120 real seconds** at the installed rate 50. It is a generous
+chapter-one starting tuning requiring later browser proof, not an owner quote or
+measured usability result. Entry at
 clock 64800 yields deadline 70800 whether MV after debit is 0 or 90. At 70799 a living
 Up can succeed; at 70800 expiry settles before Up and creates one actual corpse.
 A later entry gets its own generation/deadline. Surface/refusal/posture/recovery/
@@ -71,16 +71,16 @@ every underwater page alongside a captured free Up action.
 [Independent Astra pacing advice](../reviews/2026-10-06-d6-water-pacing-astra-advice.md)
 is preserved at advice commit **0bdbd879ce1b9630fbe7b40b902b4826776b25bc**.
 It recommends a single deadline with an initial 3000-second tuning suggestion;
-PM selects 6000 in this draft for more chapter-one reading runway. Advice is not
+PM selects 6000 for more chapter-one reading runway. Advice is not
 independent approval. Fresh scoped review must inspect this replacement contract,
 PM tuning and the new D1 baseline.
 
-| Option | Actual rate 50 consequence | Draft disposition |
+| Option | Actual rate 50 consequence | PM disposition |
 |---|---|---|
 | Earlier 5 MV/150 logical seconds | MV 10→entry 0: fatal after 3 real seconds; controlled MV 20→entry 10: fatal after 9 real seconds with standing 18/3600 and zero remainder | **Rejected provisional option.** Earlier local approval did not establish acceptable real pacing. |
-| Longer periodic drain | Retaining 5 MV with a longer interval lets standing recovery outpace danger; larger drains avoid that but still add recurring resource work | **Rejected for this draft.** One deadline avoids both low-MV timing and regeneration cancellation. |
+| Longer periodic drain | Retaining 5 MV with a longer interval lets standing recovery outpace danger; larger drains avoid that but still add recurring resource work | **Rejected.** One deadline avoids both low-MV timing and regeneration cancellation. |
 | Action-based danger | Needs counted actions, refusal/replay and passive recovery policy; values/oracle null | **Unselected.** Wider participation than one existing due job. |
-| One 6000-second deadline |120 real seconds regardless of current MV/regeneration/posture | **Recommended draft.** Final PM adoption and scoped review pending. |
+| One 6000-second deadline | 120 real seconds regardless of current MV/regeneration/posture | **Selected.** Fresh scoped review and implementation pending. |
 
 For historical comparison only: the old controlled standing oracle at
 clock 64800/MV 20, entry 10 and zero remainder was 64950→MV 5/remainder 2700,
@@ -88,32 +88,29 @@ clock 64800/MV 20, entry 10 and zero remainder was 64950→MV 5/remainder 2700,
 its old first lethal drain was tick 21 at 63 real seconds. These are independent
 arithmetic for the rejected option, not production acceptance.
 
-## Remaining PM judgments and unknowns
+## Adopted items and remaining unknowns
 
-- Confirm no attribute floor, free unconditional living Up, following-NPC refusal
-  and the general owned-corpse Chapel fallback. These are recommended substantive
-  PM selections, not delegated developer guesses or owner quotes.
-- Ratify the recommended deadline/duration and warning/remaining-time copy.
-  Existing status/exit language shows time and free Up on every underwater page;
-  the authority remains the sole gameplay clock, with no countdown framework.
-- Proposed item numbers: old coin **10g**, silver ring **5g**, sunken chest **2000g**,
-  `container: true`, capacity **1 direct item**, **100% descendant mass**. Actual
-  coin/ring/chest are conserved items, not a balance grant. These values require
-  PM adoption; sell price and chapter-two effect remain **null**/out of scope.
-  Keep B4's actual torch as the light source; no extra sunken lantern or wet-fuel
-  system. Both bottoms are dark with known Up; ordinary loot needs B4 light.
-- Occupancy/job/save wire shape, capability/API successor, release/hash/IDs,
-  source head and PR are **null** until source design and independent derivation.
-  Historical-custody receipt validation and projection of remote owned corpses
-  must be specified before those seams are implemented, with compiler/loader
-  negatives and real SQLite intermediate/fault/replay proof.
+The selected old coin is **10g**, silver ring **5g** and sunken chest **2000g**;
+chest declares `container: true`, capacity **1 direct item** and **100% descendant
+mass**. They are conserved items, not balance grants. Sell price and chapter-two
+effect remain **null**/out of scope. Keep B4's actual torch; no extra sunken lantern
+or wet-fuel system. Both bottoms are dark with known Up and ordinary light rules.
+
+- Occupancy/job/save/projection wire shape, capability/API successor, release/hash/
+  IDs, source head and PR are **null** until source design and independent
+  derivation. Historical-custody receipt validation and remote owned-corpse
+  projection require typed contracts/negatives and real SQLite intermediate/
+  fault/replay proof before implementation is accepted.
+- Remaining-time/warning wording follows PM-delegated copy: show authority-owned
+  time and free Up on every underwater page without a second gameplay clock.
 - D11 cannot use this no-CON consumer as its six-attribute proof. Its future
   CON consumer or narrowed scope remains a separate PM selection.
 
 ## Assignment gates and self-review
 
-PM adoption, a fresh scoped review of this D1-base/deadline/loot draft and the
-corresponding active-spec/owner-rules record precede source assignment. Re-pin
+Fresh independent scoped review of this selected D1-base/deadline/loot contract
+and reviewed publication precede source assignment. The active-spec/owner-rules
+record accompanies this planning adoption. Re-pin
 latest published main again after ongoing D4/C4 changes; inspect their actual
 movement/job/proposal/save consumers, never use local unreviewed source as a
 published dependency. Frozen-fixture conflict, changed death ownership, unsafe

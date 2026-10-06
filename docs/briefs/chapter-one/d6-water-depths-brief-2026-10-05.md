@@ -1,6 +1,6 @@
 # D6 — Real underwater access, qualified swim and recoverable drowning
 
-> **Unadopted D1-base draft, 2026-10-06.** The [draft PM decision](../../decisions/pm-decision-d6-water-depths-2026-10-06.md) identifies recommended contract choices and the recommended replacement deadline. Historical local review approves only its named prior heads. This branch authorizes no source work and certifies no player proof.
+> **Selected PM contract, 2026-10-06.** The [PM decision](../../decisions/pm-decision-d6-water-depths-2026-10-06.md) adopts the replacement deadline, admission, loot and recovery policy. Historical local reviews cover only their old heads; fresh independent scoped review and publication remain pending. This planning adoption claims no source implementation or player proof.
 
 Proposed source branch: `chapter1/d6-water-depths` (not created by this task).
 
@@ -9,8 +9,8 @@ Proposed source branch: `chapter1/d6-water-depths` (not created by this task).
 Add real optional `well_bottom` and `pool_bottom`, with reciprocal shaft/bank
 Down and free Up. D6's two rooms do not complete unmerged D3/D4 room work or
 certify all 57 rooms. C6/S27 is never the first way to acquire its required swim.
-Governors: [draft mechanics](../../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-draft-pending-pm-adoption),
-[cartridge](../../system/cartridge.md#d6-bottom-rooms-and-water-tuning-draft-pending-pm-adoption),
+Governors: [selected mechanics](../../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation),
+[cartridge](../../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
 [protocol](../../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](../../system/book-ui.md#d6-water-exits-and-chapel-recovery), archived00a
@@ -21,35 +21,36 @@ Re-pinned published main **815f66f9039ca22f80d44112a1ff966eadb8381e** includes D
 chapter **0.0.30/API1.26**, hash **dbff57ba20305dffa4a0679ab58d480574fbc3fd93fddeb3bf08d48d78e057b9**,
 **149 starting IDs**. Actual Sedge free lesson and cold reopen are proved;
 B4/D5/C1/carrying/death/transport source findings and consumers are in the
-[draft re-pin](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#published-dependency-re-pin).
+[source re-pin](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#published-dependency-re-pin).
 Do not regenerate frozen v030 fixtures. Re-pin again after intervening D4/C4
 publication before assignment. D6 source/successor/API/hash/IDs/PR are **null**.
 
-## Contract proposed for PM adoption
+## Adopted contract
 
 Use D1's acquired swim and current vacuous qualification; no new CON/DEX gate,
 percentage or teaching action. Entry requires living/standing/no encounter/no
-following NPC, load≤6000g and MV≥10; debit 10 MV replaces ordinary move fare.
+bound following Wren, load≤6000g and MV≥10; debit 10 MV replaces ordinary move fare.
 A living actor below surfaces free regardless of skill/load/MV/posture/light.
 Both invoke `action_key: "move"`, `target_ids: []`, input direction `down`/`up`.
 One read-only exact-edge admission serves GameView and direct execution, including
 an actual captured Up invocation after eligibility changes.
 
 One generation/absolute deadline/one due occurrence owns danger; surface and
-every death invalidate it. The [draft deadline selection](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#deadline-recommendation-and-rejected-timer-options)
+every death invalidate it. The [selected deadline](../../decisions/pm-decision-d6-water-depths-2026-10-06.md#selected-deadline-and-rejected-timer-options)
 is 6000 logical seconds (120 real seconds at rate 50), with no periodic drain and
 no drowning from MV 0 alone. Expiry settles before equal-time input, including Up,
 then positive-to-zero HP and existing same-body corpse/Chapel return commit once.
 Null killer/credit, no fake NPC/loot. Ordinary recovery remains unchanged. Prior
 5 MV/150-second timing is rejected: MV 10 entry can drown after three real seconds.
 
-Recommend Chapel `recover_corpse`: actual selected owned nonempty corpse,
+At Chapel, use `recover_corpse`: actual selected owned nonempty corpse,
 `target_ids: [corpse_id]`, `input: {}`; transfer its direct roots to held body
 custody once, preserve descendants and empty corpse, permit forced overload,
 no auto-equip or restored rewards/deadlines. Refuse foreign/forged/empty corpses.
 Apply to any owned corpse; prove that emptied isle corpses cease granting D1's
 fare waiver. Both dark bottoms have known Up; ordinary loot uses actual B4 light.
-The draft's duration, loot values/warning and general shrine action await PM adoption.
+The PM decision adopts duration, item values and the general shrine action;
+copy follows the selected Book contract.
 Show remaining time and free Up on every underwater page, including details.
 
 ## Composition and scope
@@ -68,7 +69,7 @@ recovery, necessary compiler/loader/protocol/save/projection/Book seams. Out: ne
 sunken lantern, wet/chill/drift/ghost physics, tides, swim escort, percentages/XP,
 ancestry stats, fishing, sale/chapter-two effects, global terrain rewrite.
 
-## Required source proof after adoption
+## Required source proof
 
 Name each realistic break; expected answers are literal, fixture or hand-checked,
 never derived by the implementation. First apply mutants to existing focused
@@ -96,14 +97,14 @@ suite; add a new case only for a distinct missing regression.
 - Later isolated browser Book: free lesson before S27, each bottom, real chest/coin,
   free surface, remaining time on every bottom detail, controlled expiry, Chapel
   selection/original belongings and cold refresh. Existing status/exit warnings, pending/refusal/history/Back controls;
-  actual SQLite fault proof is separate. No preview is authorized by this draft.
+  actual SQLite fault proof is separate. No preview is authorized by this planning adoption.
 
 Use `mise exec --`, relevant mechanics/storage/contracts lessons, normal focused
 kernel/host/compiler/Book checks and one final full gate with exact-head CI. Fresh
 primary plus required save/protocol/foundation opinion; Ponytail and correctness
 self-review before handoff. Native/mobile/simulator/owner saves stay paused.
 
-Stop before source for unadopted PM deadline/loot/shrine/admission choices, missing
-scoped draft approval, absent typed state/cause/custody contract, unsafe return,
+Stop before source for missing fresh scoped adoption approval/publication,
+absent typed state/cause/custody contract, unsafe return,
 frozen-fixture conflict, incompatible latest published dependencies or broader
 framework/scope. Split at a complete safe player outcome, never bottom placeholders.

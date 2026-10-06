@@ -316,10 +316,10 @@ six source-head hosted checks and final Sol review approved. The controlled
 recovery variant supplies a real island death producer for proof; the public
 isle has no attacker or hazard.
 
-D6 has an [unadopted D1-base policy draft](decisions/pm-decision-d6-water-depths-2026-10-06.md)
+D6 has a [selected D1-base PM contract](decisions/pm-decision-d6-water-depths-2026-10-06.md)
 and [amended brief](briefs/chapter-one/d6-water-depths-brief-2026-10-05.md). Published
-D1 v030/API1.26 is re-pinned; proposed deadline, PM adoption and fresh scoped review
-remain open. Historical local approval does not authorize this draft or source.
+D1 v030/API1.26 is re-pinned; fresh scoped adoption review and publication
+remain open before source assignment. Historical approval covers only its prior heads.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

@@ -406,6 +406,6 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D1 CI portability primary recheck](2026-10-06-d1-ferry-isle-primary-review.md#ci-portability-recheck--approve): fix source `f06f89a0`, frozen evidence/head `cf5f8cbe`, APPROVE; no new findings. Same pinned BEAM setup plus locked dependencies supplies the existing authored-source fixture; direct Mix invocation independently passes 6/6 with mise absent while the original fixture fails ENOENT. All five CI evidence hashes/inventory verified; player behavior and prior integrated approval unchanged.
 
-- [D6 historical plan review](2026-10-06-d6-water-depths-plan-review.md) and [historical adoption review](2026-10-06-d6-water-depths-adoption-review.md): prior local heads only; the D1-base draft and replacement deadline have no new approval.
+- [D6 historical plan review](2026-10-06-d6-water-depths-plan-review.md) and [historical adoption review](2026-10-06-d6-water-depths-adoption-review.md): prior local heads only; the D1-base replacement contract has no new independent approval.
 
-- [D6 independent Astra pacing advice](2026-10-06-d6-water-pacing-astra-advice.md): advice only; replacement deadline and PM tuning remain unadopted.
+- [D6 independent Astra pacing advice](2026-10-06-d6-water-pacing-astra-advice.md): advice only; PM adopts separate replacement tuning; fresh scoped approval remains pending.
