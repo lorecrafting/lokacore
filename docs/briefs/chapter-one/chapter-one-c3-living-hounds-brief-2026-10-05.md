@@ -1,13 +1,41 @@
 # C3 — Living Fen hounds, bounded persistence and real fight loot
 
-**Adopted PM plan; dependency re-pin and independent plan review required before
-source GO.** Source branch `chapter-1/c3-living-hounds`, isolated developer worktree.
-Inspected local base `98cc60b1647d031eed790ca085681bbe62af9d73`, chapter0.0.18/API1.16.
-B1/B3 are integrated; C1 source is active. B5 source and other intervening release
-edits are not pinned here. B5 is not a hound mechanics dependency, but serialize
-shared cartridge/schema/save edits and record the actual reviewed predecessor.
-C3 successor release/API/hash/fresh IDs, source head, PR, verdicts and proof: null.
-This docs-only plan runs no runtime, browser, SQLite or native acceptance.
+**Adopted plan, source dependencies re-pinned; integration order still required.**
+The [independent plan review](../../reviews/2026-10-05-c3-living-hounds-plan-review.md#scoped-fix-recheck--round-1)
+approved corrected plan `0127bf4c9c02f944941008d3962982c1144fd2e2`; C3-P1 is
+closed. This approves the contract, not executed C3 or source/publication proof.
+Source branch remains `chapter-1/c3-living-hounds`, in its own developer worktree.
+
+Historical published B7 baseline `547f809ccdd587498dee86cb14822f564efee642`,
+[#209](https://github.com/lorecrafting/lokacore/pull/209), contains reviewed B1 clock,
+B3 commerce, C1 lessons/armed combat, B4 light and B5 herbs. Its cartridge is
+`ashmere_missing_child@0.0.22`, API1.20, SHA-256
+`0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`,
+with [independent release answer](../../../protocol/fixtures/missing_child_b7_hash.json)
+and [96 initial IDs](../../../protocol/fixtures/missing_child_b7_ids.json). B7 final
+source `d24b6f8917fa46e171fbf1791e3ed2c3bd848109` has approved
+[primary](../../reviews/2026-10-05-b7-waterskin-primary-review.md#scoped-fix-round-1--approve)
+and [save/protocol](../../reviews/2026-10-05-b7-waterskin-save-second-review.md#scoped-book-fix-recheck--2026-10-05)
+reviews. B5/B7 supply is not a semantic hound dependency; preserve their installed
+rows, carrying mass and save history in the successor.
+
+Current published source predecessor is B6 Wisp plus the reviewed B8 brief in
+[#210](https://github.com/lorecrafting/lokacore/pull/210), merge
+`c912134556993da33a362be82ba9ee3bfcb25d32`; roadmap-only follow-up
+`71c2f9ae31905f5110c40fa7d553ff2a74c21709` changes no source pin. B6's exact source
+`e7aeace7f369254e3fb4b3f197dc1b641b6e6e87` and evidence
+`76f2ed59b76833d0f938fcc93f48da986a9f543d` have approved
+[primary](https://github.com/lorecrafting/lokacore/blob/c912134556993da33a362be82ba9ee3bfcb25d32/docs/reviews/2026-10-05-b6-wisp-primary-review.md)
+and [save/protocol](https://github.com/lorecrafting/lokacore/blob/c912134556993da33a362be82ba9ee3bfcb25d32/docs/reviews/2026-10-05-b6-wisp-save-second-review.md)
+reviews. Current release is `ashmere_missing_child@0.0.23`, API1.21, SHA-256
+`e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`, with
+[independent release answer](https://github.com/lorecrafting/lokacore/blob/c912134556993da33a362be82ba9ee3bfcb25d32/protocol/fixtures/missing_child_v023_hash.json)
+and [103 initial IDs](https://github.com/lorecrafting/lokacore/blob/c912134556993da33a362be82ba9ee3bfcb25d32/protocol/fixtures/missing_child_v023_ids.json).
+Exact labelled Talk selection and bounded choice attempts are installed. B8 source
+and the final reviewed C2 integration remain separate upcoming predecessors;
+publication of B8's brief certifies no service implementation. C3 source is unbuilt.
+Its successor release/API/hash/fresh IDs, source head, PR, verdicts and runtime proof
+remain null. This docs-only re-pin runs no source, browser, SQLite or native work.
 
 ## Player outcome and governing contract
 
@@ -54,6 +82,82 @@ engagement, tide or night gate. The same surviving hound is retryable immediatel
 a killed hound leaves recoverable loot immediately. Rescue, bell and patrol do not
 need this optional fight, pelt or respawn. Never wait for replacement in the Book
 walk. Due-boundary and 30-day proofs drive trusted elapsed with controlled clocks.
+
+## Source readiness and parallel boundary
+
+Semantic prerequisites are installed clock/segmented jobs, ordinary movement,
+C1 single-opponent armed combat, HP/death/corpse custody and checked identities.
+Neither Wisp/ward, patrol/trust nor Maud service/bed entitlement is required to
+spawn or fight hounds. Preserve their actual source rather than invent substitutes.
+B6 has now built Marsh Light; C3 retains its adopted two-room area and adds no
+Marsh Light connection merely because that room now exists. C4 remains separate.
+
+At the initial readiness pass, C2's developer reported `slice/c2-watchmans-rounds`
+checkpoint `9ee1bbbd1a5932686ce4416710ca085604a6766f` with its B6-selector merge
+unresolved. That is a historical reported checkpoint, not the final reviewed
+combined head; re-confirm actual C2 source/reviews before assignment. C2 moves
+the same original Tobin to Watch Post and adds fatal patrol reset. It reports creation/hydration and `runtime/proposal.ts` untouched. Wait for
+the reviewed B6→C2 integration before changing their overlapping seams or deriving
+any successor pin; keep both C2 failure and C3 victim-slot updates in the actual
+fatal writer group without adding a second Tobin location writer.
+
+| Work | May proceed independently | Must serialize or be checked on the combined head |
+|---|---|---|
+| C3 versus active C2 | This plan, controlled birth/slot/job oracles, template/route prose, owned population/creation module design | State/delta registries and both composers, runtime rows/dispatch, movement/death hooks, content/compiler/loader, save replay, Book and release pins |
+| C3 versus queued B8 | After C2 is stable, population/bundle/creation work and service-specific rule/stock work in separate feature worktrees | Shared command/action/feature generation, chapter manifest/text/IDs, dispatch/content/save entrypoints and Book; choose merge order before source assignment |
+
+Recommend queued B8 then C3 for the shared successor pins. This is scheduling,
+not a new semantic prerequisite: PM may select the reverse order before assignment.
+After the order is selected, disjoint domain work can run concurrently in isolated
+worktrees; defer conflicting shared-file integration and final fixture generation
+until the predecessor lands. Do not call either partial layer a complete slice.
+The final C3 head must include actual predecessor source and pass its affected
+C2 patrol/death and B8 service/liquid/receipt checks alongside C3. Parallel branch
+checks alone certify no combined head. Until C2's actual reviewed head and
+successor order are confirmed, full C3 source assignment remains queued; planning
+can continue.
+
+Installed seams still requiring the C3 consumer: `runtime/created.ts` hydrates
+room-fixed corpse items only; `foundation/creation.ts` admits death origins and
+room-only initial placement; `combat/shared.ts` maps `npcRef` through the one-authored
+instance map; `death/sequence.ts` selects the default NPC corpse and requires a
+known killer. Extend those actual guards for proven spawned members, dynamic HP
+and per-plan corpse selection, preserving default rat/player behavior. Schedule
+currently dispatches encounter, deadline and daily NPC jobs; add only the exact
+plan-owned dispatch. Do not silently treat schema `spawned` as installed support.
+
+B7's `receipt-save.ts` already invokes `receipt-history.ts` through `liquid-save.ts`:
+it replays accepted commands/elapsed in revision order and compares full decisions
+and final state. Extend this existing path to valid spawned hydration/genesis and
+population slot/control evidence; reuse it for C3 historical custody, HP and jobs.
+No second population history ledger or gameplay writer. Ensure replay is invoked
+for C3's opted plan rather than accidentally relying on an unrelated vessel to
+trigger it, and retain the documented linear cold-recovery limit. Every lawful
+complete birth/partial injury/death/loot/replacement state must reach this verifier;
+prefix hydration during a proposal remains distinct from complete-save validation.
+
+## Book action and route readiness
+
+Reuse the [Book component language](../../BOOK-UI-COMPONENTS.md): World→exact living
+hound Thing/NPC detail→Combat foreground→World→corpse Thing detail→pelt child detail.
+The selected NPC entry uses the offered `attack` key (or its actual authored alias),
+resolved command
+`attack {actor_id, target_id}`, ordered targets `[hound_id]`, empty input. Contents
+uses `take`, resolved `take {actor_id, item_id}`, `[pelt_id]`, empty input. Preserve
+an authored alias key while resolving the same command; projection and execution
+use the same bounded admission checks, including actual dynamic life/presence,
+combat precedence, visibility and Take carrying/custody. No new population verb.
+
+One loaded alias case must run the advertised view→ActionInvocation→command and
+observe the literal admitted/refused result; reuse existing same-layer checks when
+they catch it. Combat owns hit/fatal history; item detail owns confirmed Take history.
+A departing/dead generation prunes its exact route; a new same-named hound cannot
+inherit the old target. Pelt Back returns to its corpse, then World; combat closure
+restores World. Walk this complete browser interaction with two same-named hounds,
+actual pelt Take and refresh, plus lost-ack/refused controls. Fix misleading results,
+stale targeting and dead-end nested returns in this slice; the later chapter polish
+pass does not defer them. Amend canonical Book rules only if actual interaction
+changes beyond the existing selected C3 contract.
 
 ## Composition and minimal implementation
 
@@ -212,7 +316,10 @@ no separate inventory/population balance ledger or speculative behavior framewor
 Ponytail Review: lean; one owned job and fixed slots reuse existing time/death/
 custody/receipts. Correctness review checked surplus, extra-slot eligibility,
 post-death identities, stale invocation and honest delayed optional replenishment.
-C3-P1 (the sole open finding, review record commit `3c0a81632934e0f5297757fefc4115d5e4447388`)
-is addressed by separate slot/control targets, preserved equal-time ordering and
-the literal collision controls above; same-reviewer scoped recheck remains pending.
-This is author review; independent plan/source approval remains ahead.
+C3-P1 is closed by the linked independent scoped plan approval; preserve its
+separate slot/control targets and both literal equal-time job-ID order controls.
+This source-readiness update changes no population behavior or tuning. Its short
+fresh docs review and later independent source reviews remain required. Self-review
+found no new framework: use installed replay, current Book patterns and the exact
+creation/hydration gaps above. Current predecessor integration and pin order remain
+the scheduling gate; source proof is still ahead.
