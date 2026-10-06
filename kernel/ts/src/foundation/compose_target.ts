@@ -8,11 +8,10 @@ export function target(op: DeltaOp): MutationTarget {
   if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
   if (op.op === 'liquid.set' || op.op === 'fuel.set')
     return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
+  if (op.op === 'population.control' || op.op === 'population.slot') return populationTarget(op);
   switch (op.op) {
     case 'fact.assign':
-      const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
-      if (op.subject_id !== undefined) t.subject_id = op.subject_id;
-      return t as MutationTarget;
+      return factTarget(op);
     case 'entity.create':
       return { kind: 'entity', entity_id: op.identity.id };
     case 'entity.transfer':
@@ -36,10 +35,25 @@ export function target(op: DeltaOp): MutationTarget {
     case 'time.advance':
       return { kind: 'clock' };
     case 'resource.adjust':
+    case 'resource.initialize':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':
       return { kind: 'cooldown', actor_id: op.actor_id, action: op.action };
     case 'barrier.transition':
       return { kind: 'barrier', barrier: op.barrier };
   }
+}
+
+function factTarget(op: Extract<DeltaOp, { op: 'fact.assign' }>): MutationTarget {
+  const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
+  if (op.subject_id !== undefined) t.subject_id = op.subject_id;
+  return t as MutationTarget;
+}
+
+function populationTarget(
+  op: Extract<DeltaOp, { op: 'population.control' | 'population.slot' }>,
+): MutationTarget {
+  return op.op === 'population.control'
+    ? { kind: 'population_plan', plan: op.plan }
+    : { kind: 'population_slot', plan: op.plan, slot: op.slot };
 }

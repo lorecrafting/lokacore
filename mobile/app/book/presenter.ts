@@ -27,6 +27,7 @@ type Say = (key: string) => string;
 export type { DetailLine } from './logs.ts';
 import {
   narrationLines,
+  pickupLine,
   restoredLogs,
   savedNarration,
   resetLogs,
@@ -69,24 +70,30 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
   const itemChanged = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
-  s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
   const retained =
-    accepted?.narration?.length && (command_id || accepted.outcome !== 'riddle_wrong')
+    (accepted?.narration?.length || accepted?.outcome === 'taken') &&
+    (command_id || accepted.outcome !== 'riddle_wrong')
       ? savedNarration(game, s, command_id)
       : undefined;
+  const pickup = retained?.pickup_name ? retained.detail_id : undefined;
+  s.returnDetail = pickup;
+  s.returnWorld = (itemChanged && !pickup) || accepted?.outcome === 'choice_closed';
   const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
+    pickup ??
     readableDetail ??
     (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail);
   s.confirmedRead = accepted?.outcome === 'read' ? detail : undefined;
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
-      : detail && !itemChanged && (!moved || accepted?.outcome === 'read' || readableDetail)
+      : detail &&
+          (!itemChanged || !!pickup) &&
+          (!moved || accepted?.outcome === 'read' || readableDetail)
         ? detailLines(s, detail)
         : s.log;
   if (s.fault && combatResult(accepted)) return '';
@@ -99,7 +106,8 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
         ? ''
         : undefined;
   const routed = retained ? narrationLines(retained, now, text) : undefined;
-  const line = repeated ? '' : routed ? routed[0] : replyLine(reply, text, now, fallback);
+  const taken = pickupLine(retained, text);
+  const line = repeated ? '' : taken || routed?.[0] || replyLine(reply, text, now, fallback);
   if (line) lines.push(line);
   if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
   s.log.push(...comings(s.projection.view, now, text));
@@ -122,6 +130,7 @@ function background(
 ) {
   s.status = update.status;
   s.returnWorld = false;
+  s.returnDetail = undefined;
   if (update.status.kind === 'error') s.fault = update.status.message;
   if (update.status.kind === 'fault') s.fault = `Time stopped: ${update.status.code}`;
   if (update.status.kind === 'replaced') s.fault = 'This game has been replaced; reopen it.';
@@ -139,7 +148,8 @@ function background(
     return;
   }
   if (last && last.command_id !== s.narrationId) {
-    const [line, combat] = narrationLines(last, now, text);
+    const [narrated, combat] = narrationLines(last, now, text);
+    const line = pickupLine(last, text) || narrated;
     if (combat) s.combatLog.push(combat);
     if (line)
       (last.detail_id
@@ -165,7 +175,10 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
           ? `Time stopped: ${reply.decision.code}`
           : undefined;
   const line = s.fault ? '' : received(game, reply, was, s, text);
-  if (s.fault) s.returnWorld = false;
+  if (s.fault) {
+    s.returnWorld = false;
+    s.returnDetail = undefined;
+  }
   s.projection = game.view();
   s.status =
     reply.kind === 'save_corrupt'
@@ -196,6 +209,7 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
+  s.returnDetail = undefined;
   s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
@@ -266,6 +280,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     catchingUp: s.status.kind === 'catching_up',
     fault: s.fault,
     returnWorld: s.returnWorld,
+    returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
   };
 }

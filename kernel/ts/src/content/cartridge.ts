@@ -25,6 +25,7 @@ import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
 import { services } from './cartridge_services.ts';
 import { liquids } from './cartridge_liquids.ts';
+import { population } from './cartridge_population.ts';
 
 import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
@@ -72,7 +73,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => [...refStage(c), ...liquids(c), ...services(c)],
+    () => [...refStage(c), ...liquids(c), ...services(c), ...population(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {

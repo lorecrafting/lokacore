@@ -96,13 +96,13 @@ function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
       },
     );
   const narration = game.lastNarration;
-  game.lastNarration = () => {
+  game.lastNarration = (command_id?: string) => {
     const revision = sql.prepare('SELECT revision FROM head').get()!.revision as number;
     if (failedNarrationAfter !== undefined && revision > failedNarrationAfter) {
       failedNarrationAfter = undefined;
       sql.exec('SELECT * FROM missing_narration');
     }
-    return narration();
+    return narration(command_id);
   };
   const state: any[] = [];
   let slot = 0;
@@ -164,6 +164,9 @@ function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
     get p() {
       return state[0];
     },
+    get stack() {
+      return state[1];
+    },
     game,
     sql,
     clock,
@@ -179,6 +182,152 @@ function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
     text,
   };
 }
+
+// Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
+// its pickup on the World log instead of the exact corpse after reopening.
+test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
+  const chapter = bundle('missing_child_v029_hash');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
+    const reply = a.game.invoke({ action_key, target_ids, input } as never);
+    assert.equal(reply.kind, 'saved');
+    if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
+  };
+  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
+  const member = a.game.view().view.entities.find((e) => e.name === 'npc.fen_hound.short')!;
+  invoke('attack', [member.id]);
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  for (let i = 0; i < 20 && !corpse; i++) {
+    a.clock.wall += 3000;
+    a.clock.mono += 3000;
+    assert.equal(a.game.pulse().kind, 'ready');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  }
+  assert.ok(corpse);
+  const pelt = corpse.contents!.find((e) => e.name === 'item.hound_pelt.short')!;
+  const h = book(chapter, a);
+  h.tap(h.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
+  h.tap(h.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id, pelt.id],
+  );
+  h.tap('Back to container');
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id],
+  );
+  h.tap(h.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  assert.ok(
+    h.labels().some((x) => x.startsWith('Take')),
+    JSON.stringify(h.labels()),
+  );
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  h.tap(h.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(h.game.pending(), true);
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id, pelt.id],
+  );
+  assert.equal(h.p.screen().detail(corpse.id).length, 0);
+  a.fault.reads = false;
+  h.tap(h.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(h.game.pending(), false);
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id],
+  );
+  assert.equal(
+    h.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
+  assert.equal(h.p.screen().log.includes('You pick up a hound pelt.'), false);
+  assert.ok(h.game.view().view.inventory.some((e) => e.id === pelt.id));
+  const refused = h.game.invoke({ action_key: 'take', target_ids: [pelt.id], input: {} } as never);
+  assert.equal(refused.kind, 'saved');
+  if (refused.kind === 'saved') assert.equal(refused.decision.kind, 'rejected');
+  assert.equal(
+    h.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
+  h.tap('Leave');
+  assert.deepEqual(h.stack, []);
+  const drop = h.game.invoke({ action_key: 'drop', target_ids: [pelt.id], input: {} } as never);
+  assert.equal(drop.kind, 'saved');
+  if (drop.kind === 'saved') assert.equal(drop.decision.kind, 'accepted');
+  h.unmount();
+  const reopened = book(chapter, { ...a, game: openGame(a.db, chapter, a.host) });
+  assert.equal(reopened.p.screen().log.includes('You pick up a hound pelt.'), false);
+  reopened.tap(reopened.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
+  assert.equal(
+    reopened.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
+  reopened.unmount();
+  a.sql.close();
+});
+
+// Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
+// pickup to World because the new presenter has no press context.
+test('remounted pending pelt Take settles on its exact corpse detail', () => {
+  const chapter = bundle('missing_child_v029_hash');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
+    const reply = a.game.invoke({ action_key, target_ids, input } as never);
+    assert.equal(reply.kind, 'saved');
+    if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
+  };
+  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
+  const member = a.game.view().view.entities.find((e) => e.name === 'npc.fen_hound.short')!;
+  invoke('attack', [member.id]);
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  for (let i = 0; i < 20 && !corpse; i++) {
+    a.clock.wall += 3000;
+    a.clock.mono += 3000;
+    assert.equal(a.game.pulse().kind, 'ready');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  }
+  assert.ok(corpse);
+  const pelt = corpse.contents!.find((e) => e.name === 'item.hound_pelt.short')!;
+  const first = book(chapter, a);
+  first.tap(first.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
+  first.tap(first.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  first.tap(first.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(a.game.pending(), true);
+  first.unmount();
+  const remounted = book(chapter, a);
+  a.fault.reads = false;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.deepEqual(
+    remounted.stack.map((p: any) => p.id),
+    [corpse.id],
+  );
+  assert.equal(
+    remounted.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
+  assert.equal(remounted.p.screen().log.includes('You pick up a hound pelt.'), false);
+  assert.ok(a.game.view().view.inventory.some((e) => e.id === pelt.id));
+  remounted.tap('Leave');
+  assert.deepEqual(remounted.stack, []);
+  remounted.unmount();
+  a.sql.close();
+});
 
 // Breaks: room title scrolls away, room Ways returns, or Back pops to Contents instead of World.
 test('room is focused while Map retains directions and every detail returns to the world', () => {

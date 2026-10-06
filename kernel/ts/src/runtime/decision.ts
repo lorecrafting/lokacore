@@ -20,6 +20,9 @@ import {
   type EntityIdentity,
   type EscortRelation,
   type PatrolRelation,
+  type PopulationControl,
+  type PopulationSlot,
+  type PopulationPlan,
   type ErrorCode,
   type EventPayload,
   type FactValue,
@@ -49,6 +52,8 @@ export type State = {
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
+  readonly population_plans?: Readonly<Record<string, PopulationControl>>; // by plan ref
+  readonly population_slots?: Readonly<Record<string, PopulationSlot>>; // by target
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
@@ -116,6 +121,21 @@ export type World = {
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly knownEntities: Readonly<Record<string, { kind: string; owner_id?: CharacterId }>>;
   readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
+  readonly populationSpecs: Readonly<
+    Record<
+      string,
+      {
+        readonly bundle: DefinitionRef;
+        readonly hound: DefinitionRef;
+        readonly pelt: DefinitionRef;
+        readonly corpse: DefinitionRef;
+        readonly home: EntityId;
+        readonly cap: number;
+        readonly hp: ResourceSpec;
+        readonly plan: PopulationPlan;
+      }
+    >
+  >;
   readonly liquidSpecs: Readonly<
     Record<string, { capacity: number; kinds: readonly DefinitionRef[] }>
   >;

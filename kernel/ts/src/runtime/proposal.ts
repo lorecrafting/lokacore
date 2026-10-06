@@ -143,7 +143,7 @@ export function propose(
 // it), or its fault.
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
-    const r = apply(p.at, p.ops.slice(p.applied));
+    const r = apply(p.at, p.ops.slice(p.applied), false);
     if ('fault' in r) {
       p.limit = r.limit;
       return r.fault as Admitted;

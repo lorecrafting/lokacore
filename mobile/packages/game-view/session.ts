@@ -19,6 +19,7 @@ export type { ActionInput, ActionInvocation, DecisionResult, EntityId, ErrorCode
 export type NarrationRecord = CommittedNarration & {
   combat_lines?: readonly number[];
   detail_id?: string;
+  pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
 };
 
 /** What a press sends: an invocation without its id and actor, which the session adds. */

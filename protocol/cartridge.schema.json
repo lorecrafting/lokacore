@@ -274,6 +274,24 @@
                 "$ref": "liquid.schema.json#/$defs/LiquidDefinition"
               }
             },
+            "population_bundles": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population_bundle/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/PopulationBundle"
+              }
+            },
+            "populations": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
+              }
+            },
             "services": {
               "type": "object",
               "propertyNames": {
@@ -1557,6 +1575,160 @@
         }
       ],
       "description": "A declared localized topic mapped to its player Boolean knowledge fact."
+    },
+    "PopulationBundle": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "npc": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "item": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "corpse": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "required": [
+        "key",
+        "npc",
+        "item",
+        "corpse"
+      ],
+      "additionalProperties": false,
+      "description": "One NPC, directly held item and public NPC corpse template for a bounded population.",
+      "examples": [
+        {
+          "key": "hounds",
+          "npc": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "hound"
+          },
+          "item": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "pelt"
+          },
+          "corpse": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "hound_corpse"
+          }
+        }
+      ]
+    },
+    "PopulationPlan": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "bundle": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "home": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "area": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "day_target": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "night_target": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "night_start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "night_end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "replacement_delay": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "wander_interval": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "key",
+        "bundle",
+        "home",
+        "area",
+        "cap",
+        "day_target",
+        "night_target",
+        "night_start",
+        "night_end",
+        "replacement_delay",
+        "wander_interval"
+      ],
+      "additionalProperties": false,
+      "description": "One fixed-slot, two-room bounded population with an owned wander and replacement job.",
+      "examples": [
+        {
+          "key": "hounds",
+          "bundle": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population_bundle",
+            "key": "hounds"
+          },
+          "home": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "run"
+          },
+          "area": [
+            {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "run"
+            },
+            {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "nest"
+            }
+          ],
+          "cap": 6,
+          "day_target": 4,
+          "night_target": 6,
+          "night_start": 20,
+          "night_end": 6,
+          "replacement_delay": 240,
+          "wander_interval": 10
+        }
+      ]
     }
   }
 }

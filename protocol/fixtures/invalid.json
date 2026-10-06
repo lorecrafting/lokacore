@@ -4628,7 +4628,31 @@
     },
     "errors": [
       {
+        "path": "/bundle",
+        "code": "missing_property"
+      },
+      {
         "path": "/by",
+        "code": "missing_property"
+      },
+      {
+        "path": "/generation",
+        "code": "missing_property"
+      },
+      {
+        "path": "/member_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/occurrence_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/role",
+        "code": "missing_property"
+      },
+      {
+        "path": "/slot",
         "code": "missing_property"
       }
     ]

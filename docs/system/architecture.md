@@ -159,7 +159,7 @@ release pin does not silently retarget the historical demo regression corpus.
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
 packages never import an authority or a feature; Story and Realm code never import each other.
 The app shell imports the local authority's session controller
-(`localSession`, `mobile/app/App.tsx:11`); it implements `GameSession`
+(`localSession`, `mobile/app/App.tsx:16`); it implements `GameSession`
 ([owner rule](owner-rules.md#architecture-and-engine)).
 
 ## Hosts

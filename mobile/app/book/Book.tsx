@@ -47,6 +47,15 @@ type BookState = {
   setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
+
+function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
+  if (screen.returnWorld && !screen.view.combat) return [];
+  if (!screen.returnDetail) return next;
+  const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
+  if (index >= 0) return next.slice(0, index + 1);
+  const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
+  return pagesAfter(corpse, screen.view, screen.view);
+}
 function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const { current, restoreInvocation, setStack, setFlip, redraw } = s;
   useEffect(() => {
@@ -57,7 +66,7 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
-      // A remounted pending Read has no local retry context; settle its exact route once.
+      // A remounted pending Read or corpse Take has no local retry context.
       if (update.kind === 'completion' && update.invocation_id === restoreInvocation.current) {
         restoreInvocation.current = undefined;
         if (
@@ -69,8 +78,31 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
             ...restoredItemPages(after.view, after.detail, update.intent.target_ids[0]),
             ...next,
           ];
+        if (
+          update.reply.kind === 'saved' &&
+          update.reply.decision.kind === 'accepted' &&
+          update.reply.decision.outcome === 'taken'
+        ) {
+          let receipt: ReturnType<Game['lastNarration']>;
+          try {
+            receipt = p.game.lastNarration(update.reply.command_id);
+          } catch {
+            receipt = undefined; // presenter owns the storage fault shown to the player
+          }
+          if (
+            receipt &&
+            receipt.command_id === update.reply.command_id &&
+            receipt.pickup_name &&
+            receipt.detail_id
+          )
+            next = resultPages(next, {
+              ...after,
+              returnDetail: receipt.detail_id,
+              returnWorld: false,
+            });
+        }
       }
-      if (terminal && after.returnWorld && !after.view.combat) next = [];
+      if (terminal) next = resultPages(next, after);
       current.current = { stack: next, view: after.view };
       setStack(next);
       if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
@@ -106,7 +138,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
     if (after.confirmedRead)
       next = [...restoredItemPages(after.view, after.detail, after.confirmedRead), ...next];
   }
-  if (after.returnWorld && !after.view.combat) next = [];
+  next = resultPages(next, after);
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

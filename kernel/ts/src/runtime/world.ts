@@ -72,6 +72,7 @@ const RULELESS = [
   'death',
   'escort',
   'patrol',
+  'population',
   'behavior',
   'calendar',
   'reaction',

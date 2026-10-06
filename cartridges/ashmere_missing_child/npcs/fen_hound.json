@@ -1,0 +1,10 @@
+{
+  "keywords": ["hound", "fen_hound"],
+  "short": "npc.fen_hound.short",
+  "room_line": "npc.fen_hound.room",
+  "description": "npc.fen_hound.description",
+  "room": "hound_run",
+  "spawn_template": true,
+  "hp": { "minimum": 0, "maximum": 8, "start": 8, "gain": 0 },
+  "attack": { "chance": 80, "damage_min": 1, "damage_max": 1 }
+}

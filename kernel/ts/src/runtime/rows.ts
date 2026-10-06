@@ -19,6 +19,8 @@ const SECTIONS: Readonly<
     | 'encounters'
     | 'escorts'
     | 'patrols'
+    | 'population_plans'
+    | 'population_slots'
   >
 > = {
   liquid: 'liquids',
@@ -26,6 +28,8 @@ const SECTIONS: Readonly<
   encounter: 'encounters',
   escort: 'escorts',
   patrol: 'patrols',
+  population_plan: 'population_plans',
+  population_slot: 'population_slots',
   entity: 'created',
   containment: 'containers',
   fact: 'facts',
@@ -48,19 +52,21 @@ export const row = (t: MutationTarget) =>
     SECTIONS[t.kind]!,
     t.kind === 'fuel' || t.kind === 'liquid'
       ? t.item_id
-      : t.kind === 'containment' || t.kind === 'entity'
-        ? t.entity_id
-        : t.kind === 'patrol'
-          ? t.quest_instance_id
-          : t.kind === 'escort'
-            ? t.actor_id
-            : t.kind === 'encounter'
-              ? t.encounter_id
-              : t.kind === 'quest'
-                ? t.instance_id
-                : t.kind === 'job'
-                  ? t.job_id
-                  : t.kind === 'choice'
-                    ? t.continuation_id
-                    : key(t),
+      : t.kind === 'population_plan'
+        ? key(t.plan)
+        : t.kind === 'containment' || t.kind === 'entity'
+          ? t.entity_id
+          : t.kind === 'patrol'
+            ? t.quest_instance_id
+            : t.kind === 'escort'
+              ? t.actor_id
+              : t.kind === 'encounter'
+                ? t.encounter_id
+                : t.kind === 'quest'
+                  ? t.instance_id
+                  : t.kind === 'job'
+                    ? t.job_id
+                    : t.kind === 'choice'
+                      ? t.continuation_id
+                      : key(t),
   ] as const);

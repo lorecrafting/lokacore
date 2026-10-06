@@ -10,8 +10,9 @@ import { row, type State, type World } from './decision.ts';
 export function apply(
   world: World,
   ops: readonly DeltaOp[],
+  final = true,
 ): { state: State; world: World } | { fault: Fault; limit?: Limit } {
-  const result = compose(base(world), { ops });
+  const result = compose(base(world), { ops }, final);
   if ('fault' in result)
     return result.fault.code === 'budget_exceeded'
       ? { ...result, limit: over(counts(base(world), ops))! }
@@ -42,6 +43,7 @@ export const base = (world: World) =>
     fuel_specs: world.fuelSpecs,
     known_entities: world.knownEntities,
     corpse_templates: world.corpseTemplates,
+    population_specs: world.populationSpecs,
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
     liquid_specs: world.liquidSpecs,

@@ -4,10 +4,15 @@ import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
+import {
+  populationTransition,
+  initializePopulationResource,
+  populationRow,
+} from './compose_population.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 // StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
-import { creationValid, initialPair, initialPlacement } from './creation.ts';
+import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -24,8 +29,8 @@ export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
 
-type Written = { group: number; target: MutationTarget; value: Json };
-type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
+export type Written = { group: number; target: MutationTarget; value: Json };
+export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
 
 const DOOR: Record<string, string[]> = {
@@ -46,7 +51,7 @@ const containment = (e: string): MutationTarget =>
 
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
-export function compose(state: State, delta: StateDelta): Result {
+export function compose(state: State, delta: StateDelta, final = true): Result {
   const { ops } = delta;
   if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
@@ -67,6 +72,7 @@ export function compose(state: State, delta: StateDelta): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
+  if (final && !completeBirths(ops)) return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
@@ -108,14 +114,10 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
+  if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign':
       return assign(op, row, ctx);
-    case 'entity.create':
-      return check(
-        row === undefined && creationValid(op.identity as unknown as Json, ctx.state),
-        op.identity as Json,
-      );
     case 'entity.transfer':
       return transferOp(op, row, ctx);
     case 'quest.activate':
@@ -132,6 +134,9 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);
+    case 'population.control':
+    case 'population.slot':
+      return populationTransition(op, row);
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
@@ -140,11 +145,24 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
+    case 'resource.initialize':
+      return initializePopulationResource(op, row, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition':
       return barrier(op, row, ctx);
   }
+}
+
+function createEntity(
+  op: Extract<DeltaOp, { op: 'entity.create' }>,
+  row: Json | undefined,
+  state: State,
+): Outcome {
+  return check(
+    row === undefined && creationValid(op.identity as unknown as Json, state),
+    op.identity as Json,
+  );
 }
 
 function encounter(
@@ -171,7 +189,11 @@ function transferOp(
   if (op.source_id !== null)
     return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
   const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
-  return check(initialPlacement(op, row, created?.group, ctx.state), op.destination_id);
+  const parent = ctx.overlay.get(key({ kind: 'entity', entity_id: op.destination_id }));
+  return check(
+    initialPlacement(op, row, created?.group, ctx.state, parent?.value, created?.value),
+    op.destination_id,
+  );
 }
 
 function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
@@ -200,6 +222,7 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
   const s = ctx.state;
+  if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
   switch (t.kind) {
     case 'fact':
       return get(section(s, 'facts'), key(t));

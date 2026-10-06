@@ -1,6 +1,7 @@
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
 // Initial world ids), split from runtime/world.ts, which re-exports newWorld.
 import type { CharacterId, EntityId, ResourceSpec, WorldContextId } from '../contracts.gen.ts';
+import { initialPopulation } from '../mechanics/population/shared.ts';
 import { initialLiquids } from '../mechanics/liquid/shared.ts';
 import { key } from '../foundation/compose.ts';
 import { refString, type Cartridge, type Detail, type Entity, type World } from './decision.ts';
@@ -28,6 +29,15 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
   const mint = () => id(context, NIL, ordinal++) as EntityId;
+  return initialPopulation(baseWorld(cartridge, context, seed, mint), mint, NIL as never);
+}
+
+function baseWorld(
+  cartridge: Cartridge,
+  context: WorldContextId,
+  seed: RngState,
+  mint: () => EntityId,
+): World {
   const [character, body] = [mint() as string as CharacterId, mint()];
   const refs = Object.keys(cartridge.rooms).sort(cmp);
   const roomIds = Object.fromEntries(refs.map((r) => [r, mint()]));
@@ -41,7 +51,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
   const { fuelSpecs, fuel } = initialFuel(entities, clock);
-  return {
+  const world: World = {
     fuelSpecs,
     cartridge,
     context,
@@ -55,14 +65,22 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     capacities,
     liquidSpecs,
     knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character),
-    corpseTemplates: corpseTemplates(cartridge),
+    ...staticSpecs(cartridge, roomIds),
     slots,
+    entityResourceSpecs,
+    state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel, liquids }) },
+  };
+  return world;
+}
+
+function staticSpecs(cartridge: Cartridge, roomIds: World['roomIds']) {
+  return {
+    corpseTemplates: corpseTemplates(cartridge),
+    populationSpecs: populationSpecs(cartridge, roomIds),
     factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
-    entityResourceSpecs,
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
-    state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel, liquids }) },
   };
 }
 
@@ -91,7 +109,9 @@ function place(
   const sorted = <T>(m?: Readonly<Record<string, T>>) =>
     Object.entries(m ?? {}).sort(([a], [b]) => cmp(a, b));
   const defs: [string, Entity][] = [
-    ...sorted(cartridge.npcs).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
+    ...sorted(cartridge.npcs)
+      .filter(([, d]) => !d.spawn_template)
+      .map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
     ...sorted(cartridge.items)
       .filter(([, d]) => d.location.in !== 'template')
       .map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
@@ -185,8 +205,41 @@ function corpseTemplates(cartridge: Cartridge): World['corpseTemplates'] {
     ? {
         [key(cartridge.world.death.player_corpse)]: 'player',
         [key(cartridge.world.death.npc_corpse)]: 'npc',
+        ...Object.fromEntries(
+          Object.values(cartridge.population_bundles ?? {}).map((b) => [key(b.corpse), 'npc']),
+        ),
       }
     : {};
+}
+
+function populationSpecs(
+  cartridge: Cartridge,
+  roomIds: World['roomIds'],
+): World['populationSpecs'] {
+  return Object.fromEntries(
+    Object.entries(cartridge.populations ?? {}).map(([, plan]) => {
+      const bundle = cartridge.population_bundles![refString(plan.bundle)]!;
+      const npc = cartridge.npcs![refString(bundle.npc)]!;
+      return [
+        key({
+          cartridge_id: cartridge.manifest.id,
+          cartridge_version: cartridge.manifest.version,
+          kind: 'population',
+          key: plan.key,
+        }),
+        {
+          bundle: plan.bundle,
+          hound: bundle.npc,
+          pelt: bundle.item,
+          corpse: bundle.corpse,
+          home: roomIds[refString(plan.home)],
+          cap: plan.cap,
+          hp: { key: 'hp' as ResourceSpec['key'], ...npc.hp! },
+          plan,
+        },
+      ];
+    }),
+  );
 }
 
 function holders(cartridge: Cartridge, mint: () => EntityId) {

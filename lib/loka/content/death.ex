@@ -22,12 +22,22 @@ defmodule Loka.Content.Death do
     Enum.flat_map(Entities.all(defs), &template(&1, m, defs, death))
   end
 
-  defp template({"item", rel, %{"location" => %{"in" => "template"}} = i}, m, _, death) do
-    configured =
-      death && ref(i["key"], "item", m) in [death["player_corpse"], death["npc_corpse"]]
+  # ponytail: the one corpse template check keeps its population exception beside death validation. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp template({"item", rel, %{"location" => %{"in" => "template"}} = i}, m, defs, death) do
+    item_ref = ref(i["key"], "item", m)
+    corpse = death && item_ref in [death["player_corpse"], death["npc_corpse"]]
 
-    if(configured, do: [], else: [bad(at(rel, ["location"]))]) ++
-      if(i["container"] == true, do: [], else: [bad(at(rel, ["container"]))]) ++
+    bundle_roles =
+      for {_, {_, _, b}} <- defs["population_bundle"] || %{},
+          b != :invalid,
+          b["item"] == item_ref or b["corpse"] == item_ref,
+          do: if(b["corpse"] == item_ref, do: :corpse, else: :pelt)
+
+    if(corpse or bundle_roles != [], do: [], else: [bad(at(rel, ["location"]))]) ++
+      if(corpse or :corpse in bundle_roles,
+        do: if(i["container"] == true, do: [], else: [bad(at(rel, ["container"]))]),
+        else: if(i["container"] == nil, do: [], else: [bad(at(rel, ["container"]))])
+      ) ++
       for(f <- ~w(capacity slot barrier), is_map_key(i, f), do: bad(at(rel, [f])))
   end
 
