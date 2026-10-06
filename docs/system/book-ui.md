@@ -210,8 +210,8 @@ actions. Description comes first. Talk/Leave/other offered actions follow it ini
 dialogue grows, the offered controls sit immediately after the latest chronological dialogue/
 event entry **inside** the scrolling content. This supersedes the viewport-bottom dock. The
 ordinary long log remains scrollable, and newly appended results keep current options reachable.
-Same-room NPC actions retain the route, mounted scroll area and animation token; they do not
-flip the book or reset scrolling for each result. There is no overlay or saved transcript.
+Same-room NPC actions retain the route and mounted scroll area; they do not replace the page or
+reset scrolling for each result. There is no overlay or saved transcript.
 
 After a confirmed accepted NPC action changes the actual projected journal, append the neutral
 italic **Journal updated** event within that NPC's chronological history, visually distinct from
@@ -305,10 +305,11 @@ boundaries live in [session](../../mobile/packages/game-view/session.ts),
 ## Text clarity
 
 Scrolling content must remain readable with the existing authored text, fonts and fixed title.
-Source/screenshot diagnosis found body blur at fresh revision 0 before Take; the owner's timing
-remains a report, not proof that pickup caused it. Opaque scrolling surfaces and removing a
-settled page's persistent 3D transform are supported UI candidates. Actual cause and resolution
-need later native before/after proof; no unsupported prop, native plugin or dependency patch.
+Remove the page-turn perspective and rotation around scrolling pages while keeping opaque
+scrolling surfaces, page navigation and actions. Source/screenshot diagnosis found body blur at
+fresh revision 0 before Take; the owner's timing is not proof that pickup caused it. The native
+cause and resolution remain unknown until native before/after proof and owner feedback resume.
+No unsupported prop, native plugin or dependency patch.
 
 ## Future boundaries
 
@@ -336,7 +337,7 @@ terminal completion of the retained invocation, with identity and settled pre-co
 Immediate terminal calls are not repeated as completion notifications. Catching up means time
 settlement; pending means an unknown save. The Book consumes one subscription per Game with cleanup/lifetime guards. Each confirmed
 boundary processes ambient arrivals/departures and new narration once, including consecutive
-boundaries in one React batch. Ordinary background updates redraw without a page flip, preserve
+boundaries in one React batch. Ordinary background updates redraw without replacing the page, preserve
 same-room detail/scroll and chapter acknowledgment, and clear action-only return routing.
 They never fabricate an action result, pickup echo or Journal updated event.
 

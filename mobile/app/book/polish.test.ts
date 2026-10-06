@@ -57,13 +57,12 @@ const bundle = (name = 'containers_cartridge_sampler_hash') =>
   );
 const fixture = bundle();
 
-// Expand pure components only. Native animation and map gestures are exercised in Simulator review.
+// Expand pure components only. Native map gestures remain pending under the mobile pause.
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
-    if (element.type.name === 'Turn') return [element, ...nodes(element.props.children)];
     return nodes(element.type(element.props));
   }
   return [element, ...nodes(element.props?.children)];
@@ -426,14 +425,11 @@ test('a postcommit narration read fault preserves the saved result and clears re
 test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
   const h = book();
   h.tap('Old Bram, open');
-  const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
-  const entered = turn();
   assert.deepEqual(h.text().slice(0, 2), [
     'Old Bram',
     'A ferryman with rope-scarred hands and a coat that has never been dry.',
   ]);
   h.tap('Talk to Old Bram');
-  assert.equal(turn(), entered);
   const speaker = h.game.view().view.choice!.speaker_id!;
   const prompt =
     'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"';
@@ -500,10 +496,9 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   h.sql.close();
 });
 
-// Breaks: direct cycling opens a page, flips World, skips a legal state or reuses a new freshness token.
+// Breaks: direct cycling opens a page, skips a legal state or reuses a new freshness token.
 test('only World position taps directly cycle the offered states with captured freshness', () => {
   const h = book();
-  const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
   const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'Position, standing');
   for (const [from, to] of [
     ['standing', 'sitting'],
@@ -513,7 +508,6 @@ test('only World position taps directly cycle the offered states with captured f
   ]) {
     h.tap(`Position, ${from}`);
     assert.equal(h.game.view().view.position, to);
-    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
     assert.ok(h.labels().includes('Old Bram, open'));
   }
   const token = h.game.view().token;
@@ -704,16 +698,14 @@ test('other item actions retain their detail and show their consequences there',
 });
 
 // Breaks: a confirmed boundary is ignored/coalesced, resets the chapter acknowledgment,
-// flips a same-room page, or removes a departed speaker's actual continuation/history.
-test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips', () => {
+// or removes a departed speaker's actual continuation/history.
+test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without losing the page', () => {
   const h = book(bundle('containers_sampler_v010_hash'));
   try {
     h.tap('Old Bram, open');
     h.tap('Talk to Old Bram');
     const speaker = h.game.view().view.choice!.speaker_id!;
     const before = [...h.p.screen().detail(speaker)];
-    const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
-    const opened = turn();
     h.clock.wall = 82000;
     h.clock.mono = 72000;
     assert.equal(h.game.pulse().kind, 'ready');
@@ -723,7 +715,6 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     assert.ok(h.text().includes('They are not here to answer. Find them, or close this.'));
     assert.deepEqual(h.p.screen().detail(speaker), before);
     assert.deepEqual(h.p.screen().log, ['Old Bram leaves.']);
-    assert.equal(turn(), opened);
     // Consecutive committed boundaries in one host pulse must each be consumed, despite batching.
     h.clock.wall = 1810000;
     h.clock.mono = 1800000;
@@ -733,7 +724,6 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
       'Old Bram arrives.',
       'Old Bram leaves.',
     ]);
-    assert.equal(turn(), opened);
     h.tap('Leave');
     assert.equal(h.game.view().view.choice, undefined);
     assert.ok(h.text().includes('Ferry Landing'));
@@ -741,13 +731,11 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
       h.p.screen().log.filter((s: string) => s.includes('leave the question')).length,
       0,
     );
-    const worldTurn = turn();
     h.clock.wall = 2602000;
     h.clock.mono = 2592000;
     assert.equal(h.game.pulse().kind, 'ready');
     assert.equal(h.game.view().view.time, 194400);
     assert.ok(h.labels().includes('Old Bram, open'));
-    assert.equal(turn(), worldTurn);
   } finally {
     h.unmount();
     h.sql.close();
@@ -803,12 +791,10 @@ test('delayed Take returns once with its original item name after a conflicting 
     h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
     h.tap('Equipment & Inventory');
     h.tap('a brass lantern, open');
-    const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
     h.clock.wall += 20;
     h.clock.mono += 20;
     h.game.pulse();
     assert.ok(h.labels().includes('Drop a brass lantern'));
-    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
   } finally {
     h.unmount();
     h.sql.close();

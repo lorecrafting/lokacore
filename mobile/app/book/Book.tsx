@@ -6,11 +6,9 @@ import { Combat } from './Combat.tsx';
 import { Footer, Status } from './Footer.tsx';
 import {
   group,
-  POSITION_ACTIONS,
   pagesAfter,
   initialPages,
   restoredItemPages,
-  npcPage,
   nextPosition,
   type Hint,
   type Page,
@@ -19,7 +17,6 @@ import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
-import { Turn } from './Turn.tsx';
 
 type Presenter = ReturnType<typeof presenter>;
 
@@ -44,7 +41,6 @@ type BookState = {
   restoreInvocation: { current: string | undefined };
   current: { current: { stack: Page[]; view: ReturnType<Presenter['screen']>['view'] } };
   setStack: (stack: Page[]) => void;
-  setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
 
@@ -57,7 +53,7 @@ function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
   return pagesAfter(corpse, screen.view, screen.view);
 }
 function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
-  const { current, restoreInvocation, setStack, setFlip, redraw } = s;
+  const { current, restoreInvocation, setStack, redraw } = s;
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
@@ -105,7 +101,6 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       if (terminal) next = resultPages(next, after);
       current.current = { stack: next, view: after.view };
       setStack(next);
-      if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
       redraw((n) => n + 1);
       if (after.pending || after.fault) p.shell.recovered?.(false);
       else if (pr.recovered()) p.shell.recovered?.(true);
@@ -142,15 +137,8 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);
-  const inline =
-    npcPage(before.stack.at(-1), before.view) ||
-    POSITION_ACTIONS.includes(b.command ?? b.action_key);
-  if (next === before.stack && inline && !before.view.scene && !after.view.scene)
-    s.redraw((n) => n + 1);
-  else {
-    s.setStack(next);
-    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
-  }
+  if (next === before.stack) s.redraw((n) => n + 1);
+  else s.setStack(next);
 }
 
 export default function Book(p: BookProps) {
@@ -160,30 +148,27 @@ export default function Book(p: BookProps) {
     ...restoredItemPages(pr.screen().view, pr.screen().detail),
     ...initialPages(pr.screen().view),
   ]);
-  const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
   const screen = pr.screen();
   const { view } = screen;
   const restoreInvocation = useRef(p.game.pendingInvocation());
   const current = useRef({ stack, view });
   current.current = { stack, view };
-  const state = { current, restoreInvocation, setStack, setFlip, redraw };
+  const state = { current, restoreInvocation, setStack, redraw };
   useUpdates(p, pr, state);
-  const go = (next: Page[], dir: 1 | -1) => {
+  const go = (next: Page[]) => {
     const view = pr.screen().view;
     next = pagesAfter(next, view, view);
     current.current = { stack: next, view };
     setStack(next);
-    setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
   const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
-  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
+  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([])));
   return (
     <BookView
       screen={screen}
       stack={stack}
-      flip={flip}
       go={go}
       press={press}
       refused={refused}
@@ -196,8 +181,7 @@ export default function Book(p: BookProps) {
 type ViewProps = {
   screen: Screen;
   stack: Page[];
-  flip: { turn: number; dir: 1 | -1 };
-  go: (pages: Page[], dir: 1 | -1) => void;
+  go: (pages: Page[]) => void;
   press: (b: Button, detail?: string) => void;
   refused: (line: string) => void;
   startOver: () => void;
@@ -207,25 +191,23 @@ type ViewProps = {
 export function BookView(p: ViewProps) {
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const open = (page: Page) => p.go([...p.stack, page], 1);
+  const open = (page: Page) => p.go([...p.stack, page]);
   const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
   const ctx = {
     ...p,
     g,
     open,
     walk,
-    world: () => p.go([], -1),
-    back: () => p.go(p.stack.slice(0, -1), -1),
+    world: () => p.go([]),
+    back: () => p.go(p.stack.slice(0, -1)),
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-      <Turn turn={p.flip.turn} dir={p.flip.dir}>
-        {p.screen.view.combat ? (
-          <Combat screen={p.screen} g={g} press={p.press} />
-        ) : (
-          <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
-        )}
-      </Turn>
+      {p.screen.view.combat ? (
+        <Combat screen={p.screen} g={g} press={p.press} />
+      ) : (
+        <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1))} />
+      )}
       <Bottom {...ctx} page={page} />
     </SafeAreaView>
   );

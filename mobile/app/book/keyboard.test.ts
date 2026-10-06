@@ -157,7 +157,6 @@ test('Book captures movement keys only on an active World page', (t) => {
     const book = BookView({
       screen: current as any,
       stack: stack as any,
-      flip: { turn: 0, dir: 1 },
       go: () => {},
       press: (button: any) => pressed.push(button.input.direction),
       refused: () => {},

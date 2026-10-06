@@ -1,4 +1,4 @@
-// Controlled Book boundary inputs; native layout and animation proof stays in Simulator.
+// Controlled Book boundary inputs; native layout proof stays pending under the mobile pause.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
@@ -48,13 +48,12 @@ registerHooks({
 });
 const { default: Book, BookView } = await import('./Book.tsx');
 
-// Expand the persistent shell; page contents, native map and animation have separate tests.
+// Expand the persistent shell; page contents and native map have separate tests.
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
-    if (element.type.name === 'Turn') return [element, ...nodes(element.props.children)];
     return nodes(element.type(element.props));
   }
   return [element, ...nodes(element.props?.children)];
@@ -125,7 +124,6 @@ test('combat component shows the exact active pack and marks the current primary
     BookView({
       screen,
       stack: [],
-      flip: { turn: 0, dir: 1 },
       go: () => {},
       press: () => {},
       refused: () => {},
@@ -166,7 +164,6 @@ test('combat page lists offered controls vertically below history in one scroll'
       BookView({
         screen,
         stack,
-        flip: { turn: 0, dir: 1 },
         go: () => {},
         press: (b) => p.press(b),
         refused: () => {},

@@ -52,7 +52,6 @@ function nodes(e: any): any[] {
   if (!e || typeof e !== 'object') return [];
   if (typeof e.type === 'function') {
     if (e.type.name === 'Footer') return [e];
-    if (e.type.name === 'Turn') return [e, ...nodes(e.props.children)];
     return nodes(e.type(e.props));
   }
   return [e, ...nodes(e.props?.children)];
