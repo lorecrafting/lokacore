@@ -60,6 +60,7 @@ defmodule Loka.Content.Position do
         }
   end
 
+  # ponytail: gather reserved names together; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp reserved_names(m, defs) do
     keys = if required?(m), do: ["position"], else: []
 
@@ -73,7 +74,16 @@ defmodule Loka.Content.Position do
           Enum.any?(outcomes, fn {_, t} -> is_map_key(t, "scene") end),
           do: "story_point_" <> key
 
-    Enum.concat([keys, scenes, markers, Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1))])
+    patrols =
+      for {_, {_, _, q}} <- defs["quest"], q["patrol"], do: q["patrol"]["trust_fact"]["key"]
+
+    Enum.concat([
+      keys,
+      scenes,
+      markers,
+      patrols,
+      Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1))
+    ])
   end
 
   @doc "The manifest with fact@1 required under position@1, else unchanged."

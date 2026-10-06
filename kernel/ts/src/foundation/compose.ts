@@ -2,6 +2,7 @@ import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
+import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
@@ -102,6 +103,7 @@ export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
+// size: allow 44, exhaustive dispatch over closed liquid, choice and patrol operations
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
@@ -128,6 +130,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'encounter.advance':
     case 'encounter.close':
       return encounter(op, row, ctx);
+    case 'patrol.transition':
+      return transitionPatrol(op, row);
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
@@ -211,6 +215,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'jobs'), t.job_id);
     case 'encounter':
       return get(section(s, 'encounters'), t.encounter_id);
+    case 'patrol':
+      return get(section(s, 'patrols'), t.quest_instance_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
     case 'liquid':

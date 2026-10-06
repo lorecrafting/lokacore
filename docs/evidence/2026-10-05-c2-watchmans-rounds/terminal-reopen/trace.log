@@ -1,0 +1,122 @@
+First cold open of preserved terminal save against integration65dabf56/Webd9a05954
+
+- heading "The Missing Child — in progress" [level=1]
+- button "Continue":
+  - generic: Continue
+- button "Back to World":
+  - generic: Back to World
+- generic "day 4, 11:00, day, new moon": day 4, 11:00 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- button "Look, Watch Post":
+  - generic: Watch Post
+- generic: An open guard room overlooks the northern arch. The duty roster hangs beside an unlocked cell and the tower stairs.
+- button "Tobin, open":
+  - generic: Tobin is here.
+- button "Duty roster":
+  - generic: Duty roster
+- generic: You completed the rounds with Tobin. The watch recognizes your help.
+- button "Map":
+  - generic: up
+- generic "day 4, 11:09, day, new moon": day 4, 11:09 · day · new moon
+- button "Position, standing":
+  - generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- heading "Journal" [level=1]
+- generic: Watchman’s Rounds
+- generic: resolved
+- generic: 4 of 4 checkpoints. completed. Tobin is at Watch Post.
+- generic: You completed the rounds with Tobin. The watch recognizes your help.
+- button "Back to World":
+  - generic: Back to World
+- generic "day 4, 11:10, day, new moon": day 4, 11:10 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- heading "Tobin" [level=1]
+- generic: Tobin keeps an old sword beside him. He offers immediate lessons in swords and dodge for two pennies each. Learning a skill and qualifying to use it are separate.
+- button "Talk to Tobin":
+  - generic: Talk to Tobin
+- button "Watchman’s Rounds Tobin":
+  - generic: Watchman’s Rounds Tobin
+- button "Leave":
+  - generic: Leave
+- generic "day 4, 11:32, day, new moon": day 4, 11:32 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- heading "Tobin" [level=1]
+- generic: Tobin keeps an old sword beside him. He offers immediate lessons in swords and dodge for two pennies each. Learning a skill and qualifying to use it are separate.
+- generic: Tobin checks where the two of you stand in the rounds.
+- generic: "Continue rounds: not now"
+- generic: "Rejoin: not now"
+- generic: "Restart: not now"
+- generic: "Start rounds: not now"
+- button "Leave":
+  - generic: Leave
+- generic "day 4, 11:33, day, new moon": day 4, 11:33 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- button "Look, Watch Post":
+  - generic: Watch Post
+- generic: An open guard room overlooks the northern arch. The duty roster hangs beside an unlocked cell and the tower stairs.
+- button "Tobin, open":
+  - generic: Tobin is here.
+- button "Duty roster":
+  - generic: Duty roster
+- generic: You completed the rounds with Tobin. The watch recognizes your help.
+- button "Map":
+  - generic: up
+- generic "day 4, 11:33, day, new moon": day 4, 11:33 · day · new moon
+- button "Position, standing":
+  - generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+Second explicit cold reload after terminal control inspection
+
+- heading "The Missing Child — in progress" [level=1]
+- button "Continue":
+  - generic: Continue
+- button "Back to World":
+  - generic: Back to World
+- generic "day 4, 11:49, day, new moon": day 4, 11:49 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- button "Look, Watch Post":
+  - generic: Watch Post
+- generic: An open guard room overlooks the northern arch. The duty roster hangs beside an unlocked cell and the tower stairs.
+- button "Tobin, open":
+  - generic: Tobin is here.
+- button "Duty roster":
+  - generic: Duty roster
+- generic: You completed the rounds with Tobin. The watch recognizes your help.
+- button "Map":
+  - generic: up
+- generic "day 4, 11:50, day, new moon": day 4, 11:50 · day · new moon
+- button "Position, standing":
+  - generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000
+
+- heading "Journal" [level=1]
+- generic: Watchman’s Rounds
+- generic: resolved
+- generic: 4 of 4 checkpoints. completed. Tobin is at Watch Post.
+- generic: You completed the rounds with Tobin. The watch recognizes your help.
+- button "Back to World":
+  - generic: Back to World
+- generic "day 4, 11:50, day, new moon": day 4, 11:50 · day · new moon
+- generic "Position, standing": standing
+- button "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000":
+  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000

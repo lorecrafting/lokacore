@@ -52,7 +52,7 @@ defmodule Loka.Content.Quests do
       duplicate ++
       texts(rel, q, ctx.text) ++
       item(rel, q["objective"], ctx.m, ctx.defs) ++
-      deadline(rel, q["deadline"], ctx)
+      deadline(rel, q["deadline"], ctx) ++ Loka.Content.Patrol.quest(rel, q, ctx)
   end
 
   defp deadline(_, nil, _), do: []

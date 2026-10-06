@@ -394,6 +394,31 @@
             "amount"
           ],
           "additionalProperties": false
+        },
+        "patrol": {
+          "type": "object",
+          "properties": {
+            "npc": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "transition": {
+              "enum": [
+                "start",
+                "continue",
+                "rejoin",
+                "restart"
+              ]
+            }
+          },
+          "required": [
+            "npc",
+            "quest",
+            "transition"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

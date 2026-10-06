@@ -1,4 +1,4 @@
-# size: allow 320, typed terminal quest replacement joins portable composition
+# size: allow 330, typed patrol and terminal quest replacement joins portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of `kernel/ts/src/foundation/compose.ts`.
@@ -228,6 +228,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "encounter." <> _} = op, t, ctx),
     do: Loka.Core.ComposeEncounter.change(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
+    do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
+
   defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
     do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
 
@@ -271,6 +274,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
+  defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
   defp base(%{"kind" => "liquid", "item_id" => i}, s), do: section(s, "liquids")[i]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]

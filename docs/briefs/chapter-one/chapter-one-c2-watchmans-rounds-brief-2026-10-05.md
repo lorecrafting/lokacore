@@ -2,19 +2,21 @@
 
 **Adopted PM assignment; reviewed dependencies re-pinned for source assignment.**
 Suggested source branch `chapter-1/c2-watchmans-rounds`; developer uses its own worktree.
-Source base `cc43d0186e70231d7ba25bf73da61e6838c0bf06` on current GitHub main
-contains B1 clock/status, Q2-C-rescue and the independently approved C1 training
-([primary](../../reviews/2026-10-05-c1-tobin-primary-review.md),
-[save/protocol](../../reviews/2026-10-05-c1-tobin-save-second-review.md)).
-B5 herbs and B4 light are also integrated and reviewed; [the roadmap](../../ROADMAP.md)
-records their publication. The current chapter artifact is 0.0.21/API1.19,
-hash `a274bb1c6b22306718648bbcb1b967ee017e0420b62589afe10e1009434dbbfa`,
-94 IDs ([known answer](../../../protocol/fixtures/missing_child_v021_hash.json)).
-C2 needs no B6 or B7 behavior. If either lands before C2, merge main and re-pin the
-source artifact before implementation or publication; serialize shared cartridge,
-protocol and generated-file edits. C2 successor release/API/hash/IDs, source head,
-PR and verdicts remain null. No source, tests, browser/native sessions or save
-operations are performed by this planning change.
+Assignment began at published main `c85e21ef`, with reviewed C1 training,
+B4 light and B5 herbs. Final candidate integrates published B7 and B6/B8 source
+and status-only C3 planning main `80c3a072`. The labelled exact Talk selector in
+[the B6 contract](../../system/protocol.md#b6-bounded-sitting-and-topic-composition)
+lets patrol controls coexist with original Tobin's unlabelled C1 lessons.
+
+Local C2 candidate: chapter **0.0.24 / API1.22**, independently derived from the
+reviewed B6 v023 artifact; hash
+`62f10e30e226c67627628c0017091284bbf1485a473222883fce92b44947b008`,
+**109 initial IDs** ([known answer](../../../protocol/fixtures/missing_child_v024_hash.json)).
+Published C2 source and PR remain null. Exact local source `74711349` has
+[primary approval](../../reviews/2026-10-05-c2-watchmans-rounds-primary-review.md) and
+[save/protocol approval](../../reviews/2026-10-05-c2-watchmans-rounds-save-second-review.md).
+Source/evidence heads, checks and real Book proof are recorded in the
+[local handoff](c2-watchmans-rounds-local-pr-2026-10-05.md).
 
 ## Goal and governing clauses
 
@@ -152,8 +154,16 @@ Report commands, exits, actual red controls and failures. The provisional lane u
 focused checks; full active mise check_all and red controls run once at accumulated
 publication under the normal hook. Fresh primary plus required save/protocol opinion
 applies; Astra audits runtime/proposal if touched. Later source changes require scoped
-review. Browser proof walks the real Book route, refresh, pause/recovery and terminal
-narration; no native or owner-save operation is authorized by this assignment.
+review. Browser proof follows the
+[C2 staged browser-proof decision](../../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md):
+shared Start/departure/join, pause/Rejoin, committed success narration and resolved
+Journal, plus a fresh-save cold reopen. Keep actual real-host fatal/Restart proof
+distinct from unproved browser fatal/Restart, which must close in the Chapter 1 E3
+browser walk or sooner if practical. Native UI remains deferred under the mobile
+pause. The preserved terminal save now has
+[twice-reopened proof after published PR213](../../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix);
+retain its earlier timeout as historical evidence. No native or
+owner-save operation is authorized by this assignment.
 
 Stop/escalate unreviewed dependency pins, a current-spec conflict, unsupported mortal
 Tobin, blocked required recovery route, silent reuse of escort orientation, a second

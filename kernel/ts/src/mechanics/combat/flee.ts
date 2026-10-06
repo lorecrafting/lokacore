@@ -46,6 +46,7 @@ export function flee(
     { ...command, payload: { ...command.payload, direction: directions[index] } },
     mint,
     'fled',
+    steps,
   );
   return moved.kind === 'accepted' ? { ...moved, rng } : moved;
 }

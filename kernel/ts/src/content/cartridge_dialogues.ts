@@ -1,3 +1,4 @@
+import { patrolChoice } from './cartridge_patrol.ts';
 import { lesson, sequence } from './cartridge_skills.ts';
 // The loader's dialogue checks (dialogue@1; dialogue.schema.json DialogueDefinition; 06 §8
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
@@ -193,6 +194,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
   const roles = d.roles as Obj;
   const out: Diagnostic[] = [];
   text(o, ['label', 'narration'], path);
+  out.push(...patrolChoice(o, d, path, c, { named, typedValue, text }));
   if (o.accept) {
     named(o.accept, 'quest', `${path}.accept`);
     if (d.quest) out.push(diag('OUTCOME_MISMATCH', `${path}.accept`));

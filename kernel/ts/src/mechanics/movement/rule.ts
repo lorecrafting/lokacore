@@ -31,12 +31,12 @@ import { moveSequence } from './sequence.ts';
 import { passage } from './shared.ts';
 export { passage, fare } from './shared.ts';
 
-export const decide: Rule<'movement'> = (world, command, mint) =>
+export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 }) =>
   command.payload.type === 'scan'
     ? accepted(world, 'scanned', [], [])
     : engaged(world, bodyOf(world, command.payload.actor_id)!)
       ? rejected('invalid_state')
-      : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved');
+      : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved', steps);
 
 /**
  * What `body` sees through each exit of its room, in compass order (00 §4.1 scan): the passage

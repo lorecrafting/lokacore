@@ -1,5 +1,11 @@
 # Independent reviews
 
+- [C2 preserved terminal reopen evidence](2026-10-05-c2-terminal-reopen-evidence-review.md): exact local docs/evidence head `e29014d54d7e3534838d77ba650301c3f19fb7f7`, independent APPROVE; same preserved terminal save opens twice after published PR213, historical timeout retained, browser fatal/Restart still due by E3; no findings.
+
+- [C2 Watchman's Rounds staged browser proof scope](2026-10-05-c2-watchmans-rounds-docs-scope-review.md): exact local docs/evidence head `a0b77fbf6e80905451448c1351735a9025a8cfce`, independent APPROVE; fresh shared Book and cold reopen proven, browser fatal/Restart due by E3 and preserved terminal Web timeout open, no findings.
+
+- [C2 Watchman's Rounds save/protocol second opinion](2026-10-05-c2-watchmans-rounds-save-second-review.md): exact local source `747113496572892a01224c47cddc0bf4f63d0fdc`, independent scoped APPROVE; no findings. Real SQLite cold/COMMIT/retry, 21 unchanged-file forgeries, actual Wren combat/Flee/death, both-kernel literals/differential and v024/API1.22/all 109 pins pass; causal/identity red controls fail. Terminal browser-host cold-open remains unverified.
+
 - [B9 Lantern Rest and dream plan](2026-10-05-b9-lantern-dream-plan-review.md): exact planning head `83ec4c3a08de11eda83f6e495f98f6e7126af0b0`, independent APPROVE; no findings, source dependency re-pins and later primary/save reviews remain required.
 
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
@@ -337,5 +343,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [B7 waterskins and liquid actions save/protocol second opinion](2026-10-05-b7-waterskin-save-second-review.md): initial source `d31b47d8` APPROVE; scoped Book fix `d24b6f8` APPROVE, no findings, 49 focused tests and live-quantity red control pass. Current API/hash/all 96 IDs independently verified; save/protocol/pins unchanged by the fix. Headless proof only; primary review and publication gates remain separate.
 
+- [C2 Watchman’s Rounds primary implementation](2026-10-05-c2-watchmans-rounds-primary-review.md): exact local source `747113496572892a01224c47cddc0bf4f63d0fdc`, independent APPROVE; no source/complexity finding, 34 C2 plus 116 neighboring TS/SQLite/Book and 22 Elixir checks pass, two independent mutations fail and restored controls pass. Browser proof, separate save/protocol opinion and publication checks remain distinct requirements.
 - [Web SQLite bounded reads primary review](2026-10-05-web-sqlite-primary-review.md): exact source/evidence head `812a9367`, independent APPROVE; current SELECT semantics, native isolation and retained cold-reopen proof checked; six focused tests, typecheck and two independent red controls pass. No open findings.
 - [Web SQLite bounded reads save/recovery opinion](2026-10-05-web-sqlite-save-review.md): exact source `812a9367cb7b04c574d87658a078914f7516630a`, independent APPROVE; no findings, page/history and real-SQLite COMMIT/replay/refusal probes pass, both independent paging mutants red. Primary review and publication gates remain separate.
+
+- [C2 simulator invariant coverage](2026-10-05-c2-sim-invariant-coverage-review.md): exact source `05bed5bee4c60745df2f320d73df126399a1128a`, evidence/head `f1b5fa495a7ac079ccdd4f87e9a32df67f076d47`, independent APPROVE; one per-step inventory entry, no frozen/demo change, prior and deletion controls independently fail, restored control and26 focused tests pass, evidence hashes verify. No findings.
+
+- [C2 publication-check fixes](2026-10-05-c2-publication-checks-review.md): exact source `595ef10f46cc7abb7c4c272759de23535b17dca9`, independent scoped APPROVE; citation/examples, isolated test controls, function-scoped Credo exceptions and TS trims checked. 36 Elixir/35 TS tests and generation/typecheck/Credo/size/format pass; two independent controls fail and restore green. No findings.

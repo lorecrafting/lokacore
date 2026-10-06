@@ -115,6 +115,56 @@
             "increment"
           ],
           "additionalProperties": false
+        },
+        "patrol": {
+          "type": "object",
+          "properties": {
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "route": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 2,
+              "maxItems": 64
+            },
+            "initial_cursor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 63
+            },
+            "checkpoints": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "required": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "trust_fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "narration": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "npc",
+            "route",
+            "initial_cursor",
+            "checkpoints",
+            "required",
+            "trust_fact",
+            "narration"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -216,6 +266,18 @@
           "required": [
             "evidence",
             "item_acquired"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "evidence": {
+              "const": "patrol"
+            }
+          },
+          "required": [
+            "evidence"
           ],
           "additionalProperties": false
         }

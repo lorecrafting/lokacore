@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_missing_child",
-  "version": "0.0.23",
-  "title": "Ashmere — The Missing Child",
+  "version": "0.0.24",
+  "title": "Ashmere \u2014 The Missing Child",
   "requires": {
     "kernel_api": {
-      "at_least": "1.21",
+      "at_least": "1.22",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -35,6 +35,7 @@
       "light": 1,
       "skills": 1,
       "attributes": 1,
+      "patrol": 1,
       "check": 1,
       "topics": 1,
       "liquid": 1

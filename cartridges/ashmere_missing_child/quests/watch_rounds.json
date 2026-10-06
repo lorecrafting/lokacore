@@ -1,0 +1,34 @@
+{
+  "title": "quest.watch_rounds.title",
+  "objective": {
+    "evidence": "patrol"
+  },
+  "patrol": {
+    "npc": "tobin",
+    "route": [
+      "watch_post",
+      "north_gate",
+      "village_green",
+      "east_gate",
+      "village_green",
+      "north_gate"
+    ],
+    "initial_cursor": 0,
+    "checkpoints": [
+      "north_gate",
+      "village_green",
+      "east_gate",
+      "watch_post"
+    ],
+    "required": 4,
+    "trust_fact": "watch_gate_trusts_player",
+    "narration": "watch.completed"
+  },
+  "journal": {
+    "active": "watch.active",
+    "objectives_met": "watch.completed",
+    "resolved": "watch.completed",
+    "failed": "watch.active",
+    "abandoned": "watch.active"
+  }
+}

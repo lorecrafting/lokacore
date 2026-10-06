@@ -600,7 +600,7 @@ over authorization remain unchanged. Unknown successor pins stay unknown until
 the final integration release is compiled and independently re-pinned.
 ## C2 patrol attempt recovery
 
-**Selected, pending implementation.** The [typed patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source implemented; independent review pending.** The [typed patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses existing changed-row state storage and receipts. Load/reconcile validate its
 original actor/body/Tobin, exact S3 instance/activation choice, attempt start or
 restart command identity, bounded route cursor/status/credit and revision-ordered
