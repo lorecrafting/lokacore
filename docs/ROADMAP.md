@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **19 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2, D1, D4). The latest source publication is
-[#233](https://github.com/lorecrafting/lokacore/pull/233), D4 homes, orchard and finite-apple Forage/Eat.
+Local and GitHub `main` have completed **20 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4). The latest source publication is
+[#239](https://github.com/lorecrafting/lokacore/pull/239), C4 hound aggression, pack assistance and flight.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -284,13 +284,14 @@ the corpse detail, with Back to World. The
 after remount, receipt-replay and birth-membership findings were fixed. The exact
 source passed the local gate, all six hosted checks and final Astra review;
 the record-only head passed its applicable hosted checks. C4 hound aggression,
-pack assistance and flight remains a separate planned slice.
+pack assistance and flight followed in [#239](https://github.com/lorecrafting/lokacore/pull/239).
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
 and an independently reviewed implementation integrated with published D1 and D4.
 Its v032/API1.28 successor hash and 167 starting IDs are frozen; the cumulative
-gate and primary and save/protocol carryover reviews passed. Publication remains ahead.
+gate and fresh primary and save/protocol carryover reviews passed. The source merged in
+[#239](https://github.com/lorecrafting/lokacore/pull/239) at `2714519c` after all six hosted checks passed.
 
 D2 public Priory rooms and held-book Ward/Bell topics have an
 [adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),
