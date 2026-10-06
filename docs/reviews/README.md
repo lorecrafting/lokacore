@@ -1,6 +1,7 @@
 # Independent reviews
 
 - [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; scoped Beads pilot integration recheck at `8049a5f0` APPROVE. Docs and word-budget checks pass; the checkpoint prompt remains a future PM action.
+- [Room interactibles specification](2026-10-06-room-interactables-review.md): exact source `0cc7b7cd` CHANGES REQUIRED; scoped fix `a4338896` and final guide clarification `27a5e929` APPROVE. Docs-only review.
 
 - [D9 dependency correction](2026-10-06-d9-dependency-correction-review.md): exact planning head `0a3673f9`, independent APPROVE; C4/D6 full-scope blockers, underwater-only D6 recovery and the separately pending Study barrier/retrieval rule align across plan, brief and Beads. Docs/export/graph checks pass; source remains gated.
 
