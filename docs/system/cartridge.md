@@ -821,8 +821,11 @@ Compiler/loader validate the bounded finite adjacent route, unique nonempty decl
 checkpoint subset and achievable checkpoint count, original NPC/quest references,
 shared location-writer exclusion, reserved trust ownership and complete room/link/
 readable definitions. Reject malformed cursors, duplicate/unknown checkpoint credit,
-wrong row identities and ordinary writes to reserved state. World route/count values
-are cartridge data, never presenter/engine chapter literals; existing safety budgets
+wrong row identities and ordinary writes to reserved state.
+The patrol Start choice owns activation and its final causal join owns resolution:
+ordinary quest-linked dialogue and reaction activation/resolution/failure cannot
+write a patrol quest independently of its row. World route/count values are
+cartridge data, never presenter/engine chapter literals; existing safety budgets
 bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
 reviewed C1/B5 integration is re-pinned and independently derived.
 
