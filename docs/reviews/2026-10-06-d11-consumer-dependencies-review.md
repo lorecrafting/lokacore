@@ -40,3 +40,21 @@ Independent checks:
 
 This approves the dependency correction only. D11/D12 policy adoption, active-spec
 amendments, actual merged-source pins and implementation proof remain future gates.
+
+## Final hosted source-head Sol review
+
+The PM ran a read-only independent `codex exec` review after all six hosted checks
+passed on PR #227 at `280433e23c9f9bc9c7c188f305281cd1f9d4a2db`.
+The output below is reproduced verbatim:
+
+```text
+APPROVE
+
+No findings at head `280433e23c9f9bc9c7c188f305281cd1f9d4a2db` against main `b9dd1d9c80cf25d46823f0c3df28830e2af8afdb`.
+
+- `docs/MISSING-CHILD-PLAN.md:73`: D11 follows D6/D12; all 30 implementation dependency rows are acyclic, with no reverse D11 prerequisite.
+- `docs/briefs/chapter-one/d11-character-choice-brief-2026-10-05.md:9`: installed STR10/DEX10/PER5 accurately stated. Lines 22/34 preserve B6 difficulty5/immediate discovery, reject an invented PER11 gate, and retain fey +SPI/Priory −2 without spell words. Quantities remain proposals.
+- `docs/briefs/chapter-one/d12-practical-skills-brief-2026-10-05.md:9`: D12 independently owns any missing INT declaration and requires no ancestry overrides.
+
+All four reviewed documents are byte-identical to approved source `abf25758`. B9 documents and review-index entries are preserved. Correctness and Ponytail assessment: no issues or unnecessary machinery. Read-only inspection; no broad suites run.
+```
