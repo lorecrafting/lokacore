@@ -25,6 +25,8 @@ m bin/lint_red_controls.sh --core-only
 m bin/docs_only_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
+python3 bin/check_beads_export.py
+sh bin/beads_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts; do
   [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }

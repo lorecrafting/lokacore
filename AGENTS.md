@@ -144,8 +144,8 @@ uses focused checks first.
 
 ## Working rules
 
-- Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans, developer
-  builds and self-reviews, fresh reviewer reviews, developer fixes.
+- Follow [the delivery workflow](docs/WORKFLOW.md) for slice reviews and the
+  [Beads Rust pilot](docs/WORKFLOW.md#beads-rust-pilot) for PM task status.
 - Update [Book UI](docs/system/book-ui.md) per mechanic; fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
@@ -154,7 +154,7 @@ uses focused checks first.
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
-- Track read path and revision; skip unchanged documents reached again through links.
+- Skip rereading unchanged documents reached through links.
 - Expected failing readiness probes need no fix.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.
