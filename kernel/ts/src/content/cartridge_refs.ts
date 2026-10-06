@@ -1,7 +1,10 @@
+// size: allow 345, NPC explicit resource starts join the existing reference stage
+import { skills } from './cartridge_skills.ts';
+import { exchanges } from './cartridge_exchange.ts';
+import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
-// size: allow 340, one reference stage preserves diagnostic ordering for custody eligibility, carrying and NPC HP
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -16,7 +19,7 @@ import {
 import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
 import { barriers } from './cartridge_barriers.ts';
-import { links } from './cartridge_links.ts';
+import { links, unreachable } from './cartridge_links.ts';
 import { dialogues } from './cartridge_dialogues.ts';
 import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
@@ -66,6 +69,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   }
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     add('npc', n, `.cartridge.npcs${step(ref)}`);
+    if (n.shop) out.push(['shop', n.shop, `.cartridge.npcs${step(ref)}.shop`]);
     if (n.daily_schedule)
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
@@ -102,6 +106,9 @@ export function nodes(c: Obj): [Obj, string][] {
     ...questPolicies(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
+    ),
+    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
+      walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
     ),
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
@@ -165,6 +172,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
+  out.push(...exchanges(c, check));
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
@@ -199,16 +207,18 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  out.push(...skills(c, check));
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  out.push(...pools(c, named), ...death(c, named), ...combat(c, named));
+  out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
   return out;
 }
 
 // Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
 // the world's) is well formed (bands), and the world's move cost names a resource of this
 // cartridge.
+// size: allow 45, NPC resource starts share the resource bounds pass
 function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
@@ -239,6 +249,14 @@ function pools(c: Obj, named: Checks['named']): Diagnostic[] {
     if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
   }
   out.push(...npcHp(c));
+  for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj))
+    for (const [name, value] of Object.entries((npc.resource_starts ?? {}) as Obj)) {
+      const spec = Object.values((c.resources ?? {}) as Obj).find((r) => r.key === name);
+      if (!spec || (value as number) < spec.minimum || (value as number) > spec.maximum)
+        out.push(
+          diag('RESOURCE_SPEC_INVALID', `.cartridge.npcs${step(ref)}.resource_starts${step(name)}`),
+        );
+    }
   if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
   const cost = c.world?.movement?.cost;
   if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
@@ -287,17 +305,6 @@ const npcRooms = (c: Obj): [Obj, string][] =>
       `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
     ]),
   ]);
-function unreachable(details: Obj, at: string): Diagnostic[] {
-  return Object.entries(details).flatMap(([key, d]) => {
-    const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
-    const [first, ...words] = d.aliases[0].split('_');
-    const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
-    return !typable || others.includes(d.aliases[0])
-      ? [diag('UNREACHABLE_DETAIL', `${at}.details.${key}`)]
-      : [];
-  });
-}
-
 // Items and NPCs start in containers that form no cycle (CONTAINMENT_CYCLE, at each item on
 // one) and hold at most their capacity (CAPACITY_EXCEEDED).
 function holders(c: Obj): Diagnostic[] {

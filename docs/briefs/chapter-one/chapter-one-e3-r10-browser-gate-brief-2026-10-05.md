@@ -14,6 +14,8 @@ Before assignment, re-pin the actual A–D merges, chosen mechanics/parameters/f
 
 ## Governing sources and corrected obligations
 
+E3 follows the [chapter-closure browser E2E loop](../../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md). Its browser evidence must include deterministic walks of required routes and UI, an exploratory pass, and a headed run or video visible to the owner. Findings are fixed on an isolated chapter-polish branch; rerun each failed path and the entire chapter walk, then obtain a fresh independent review of the exact final head. Deep mechanics/save defects use narrow tests and reviewed fixes in their owning slices. The current local E2E test only checks that one saved move survives reload; it does not cover this chapter or its routes.
+
 | Requirement | Governing clause |
 |---|---|
 | Player-facing product and authoring proof, not synthetic breadth | `docs/archive/spec/14-implementation-plan.md` R10 Objective/Important/Gate R10 |
@@ -63,7 +65,13 @@ Reuse demonstrated earlier regression controls; add only uncovered plausible fai
 
 Run `mise exec -- bin/check_all.sh`, focused full-chapter compiler/kernel/Book/local-authority/transcript evidence and E1/E2 exact-candidate checks; normal pre-push plus exact-head shared CI including `sim`. Record executed commands/status, retained raw-output hashes and privacy-redaction controls. Apply Ponytail Review and actual-diff correctness self-review before handoff.
 
-Gate review follows the slim workflow: one Astra audit of the stage's actual riskiest code and one fresh checklist reviewer verifying every applicable proof link, every carry's owner/trigger, and docs tidy over changed live milestone docs. No separate narrative docs-only double review. Tidy removes duplicated facts/stale lessons/catch-all drift; leave archived/review/decision history intact. Owner browser play, when actually done, is identified as browser play. Merge with merge commit only after findings close and all started head jobs finish green.
+Gate review follows the slim workflow: one Astra audit of the stage's actual riskiest code and one fresh checklist reviewer verifying every applicable proof link, every carry's owner/trigger, and docs tidy over changed live milestone docs. The separate [one-time Chapter 1 Astra documentation audit](../../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) runs after A–D source/reviews settle and before this gate closes; its current-guidance, handoff and archive-candidate findings are fixed in independently reviewed docs work units. No separate narrative docs-only double review. Tidy removes duplicated facts/stale lessons/catch-all drift; leave archived/review/decision history intact. Owner browser play, when actually done, is identified as browser play. Merge with merge commit only after findings close and all started head jobs finish green.
+
+The browser walk also compares the [Book component patterns](../../BOOK-UI-COMPONENTS.md)
+across complete journeys: detail order, spacing, labels, touch/keyboard access,
+local logs, action placement and nested return. Fix consistency findings in the
+reviewed chapter-polish branch. An earlier mechanic slice still owns any obvious
+broken navigation or UI correctness defect it introduces.
 
 ## Deferred native/prelaunch checkpoint and stop triggers
 

@@ -37,22 +37,22 @@ valid combinations become playable before the whole world's optional surfaces.
 |---|---|---:|
 | **B1 Calendar/status:** see truthful cartridge-owned day/time and changing sun/moon status. | elapsed clock and recovery | 0.7–0.9 |
 | **B2 S2 Chandler's Debt:** accept Peg's ledger and deliver it to Aldric on time, late or after honest expiry. | A1, B1 | 0.9–1.1 |
-| **B3 Peg's shop:** buy and sell useful goods with conserved money, stock and carrying load. | B2 | 0.8–1.0 |
+| **B3 Peg's shop:** buy and sell useful goods with conserved money, stock and carrying load ([adopted contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)). | B2 | 0.8–1.0 |
 | **B4 Light:** use and refuel a light source in an optional dark well passage, with a safe possession-recovery route. | B1, B3 | 0.8–1.0 |
-| **B5 S9 Infirmary Herbs:** harvest real fenwort and exchange three for bandages and bounded faction gain. | B1, B2 | 0.8–1.0 |
-| **B6 S4 Wisp:** start an all-hours marsh riddle, retry promptly and learn its ward. | B4, B5, Q2 riddle | 0.6–0.8 |
+| **B5 S9 Infirmary Herbs:** harvest real fenwort and exchange three for bandages and bounded faction gain ([adopted contract](decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)). | B1, B2 | 0.8–1.0 |
+| **B6 S4 Wisp:** start an all-hours marsh riddle, retry promptly and learn its ward ([adopted contract](decisions/pm-decision-b6-wisp-2026-10-05.md)). | B4, B5, Q2 riddle | 0.6–0.8 |
 | **B7 Well and waterskin:** fill, pour and drink conserved liquid. | B3 | 0.6–0.8 |
-| **B8 Maud's services:** buy a room, food or drink and receive an immediate, declared benefit. | B3, B7, Rest | 0.7–0.9 |
-| **B9 S10 Room at the Lantern:** an actual Rest opens a resumable dream and an acknowledged memory. | A3, B8 | 0.8–1.0 |
+| **B8 Maud's services:** buy a room, food or drink and receive an immediate, declared benefit ([adopted contract](decisions/pm-decision-b8-mauds-services-2026-10-05.md)). | B3, B7, Rest | 0.7–0.9 |
+| **B9 S10 Room at the Lantern:** an actual Rest opens a resumable dream and an acknowledged memory ([adopted contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)). | A3, B8 | 0.8–1.0 |
 
 ## C. Watch, combat and survival
 
 | Slice and player outcome | Depends on | Lift |
 |---|---|---:|
-| **C1 Tobin training:** learn swords and dodge, and see qualification affect a real fight. | B3, installed combat | 0.9–1.1 |
-| **C2 S3 Watchman's Rounds:** accompany Tobin on a finite patrol and recover from failure without waiting for night. | B1, C1, Q2-C-rescue follow | 0.8–1.0 |
-| **C3 Living hounds:** encounter bounded, persistent Fen hounds and collect actual fight loot. | B1, C1, installed combat | 0.9–1.1 |
-| **C4 Hound behavior:** hounds respond to aggression, assist a pack and flee when hurt. | C1, C3 | 0.8–1.0 |
+| **C1 Tobin training:** learn swords and dodge, and see qualification affect a real fight ([adopted contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)). | B3, installed combat | 0.9–1.1 |
+| **C2 S3 Watchman's Rounds:** accompany Tobin on a finite patrol and recover from failure without waiting for night ([adopted contract](decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)). | B1, C1, Q2-C-rescue follow | 0.8–1.0 |
+| **C3 Living hounds:** encounter bounded, persistent Fen hounds and collect actual fight loot ([adopted contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)). | B1, C1, installed combat | 0.9–1.1 |
+| **C4 Hound behavior:** hounds respond to deliberate aggression, assist a pack and flee when hurt ([selected contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)). | C1, C3 | 0.8–1.0 |
 | **C5 Bleeding and bandage:** a hound hit can bleed; a learned bandage skill can stop it. | B5, C1, C4 | 0.7–0.9 |
 | **C6 S27 Night in the Marsh:** begin a bounded survival expedition now and finish its real route alive; any swim-training reward is free and idempotent after Sedge's earlier lesson. | C2, C5, D1, D6 if swim reward retained | 0.7–0.9 |
 
@@ -61,7 +61,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | Slice and player outcome | Depends on | Lift |
 |---|---|---:|
 | **D1 Ferry and isle:** pay for passage, meet Sedge, take an immediately available swim lesson and return safely even after a loss. | B3, B4, B8 | 0.7–0.9 |
-| **D2 Priory books:** explore the public Priory and learn real topics from held books. | A1, B5, B6 | 0.4–0.6 |
+| **D2 Priory books:** explore the public Priory and learn real topics from held books ([adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md)). | A1, B5, B6 | 0.4–0.6 |
 | **D3 Western Ashmere:** explore the mill and cottages and meet Hob through existing interactions. | B4, D1 | 0.3–0.5 |
 | **D4 Homes and orchard:** meet Gareth and Ada, visit Elspeth's home and forage useful food. | B5, B8 | 0.3–0.5 |
 | **D5 Deep Fen:** explore the oak canopy, black pool edge, fox den and fishing shallows. | B4, B6, Q2 returns | 0.3–0.5 |
@@ -86,6 +86,11 @@ neither a sealed room nor an unimplemented quest option earns completion credit.
 | **E1 R9 certification:** reproduce applicable failures against an exact candidate with retained command/seed/fault identity. | applicable A–D contracts | 0.7–1.0 |
 | **E2 R9C interaction proof:** exercise cross-mechanic cases in a compact synthetic cartridge. | E1, final changed contracts | 0.6–0.9 |
 | **E3 R10 browser content gate:** prove reachable rooms, quests, all five ending variants, bounded long runs and a human Book walkthrough on one candidate. | A–D, E1, E2 | 0.7–1.0 |
+
+After A–D source and reviews settle, run the [one-time Astra documentation
+audit](decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) and close
+its reviewed findings before E3 closes. This is a Chapter 1 closure obligation,
+not another implementation slice or a per-slice check.
 
 The shared TypeScript engine simulation, real SQLite transaction/fault checks and
 contract checks remain part of development proof. Browser play uses the same Book

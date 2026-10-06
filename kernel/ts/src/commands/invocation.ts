@@ -57,9 +57,12 @@ const intentDigest = (i: ActionInvocation): string =>
 const TARGETS: Readonly<Record<string, readonly string[]>> = {
   look: ['target_id'],
   read: ['target_id'],
+  harvest: ['target_id'],
   attack: ['target_id'],
   talk: ['target_id'],
   perform: ['target_id'],
+  buy: ['provider_id', 'item_id'],
+  sell: ['provider_id', 'item_id'],
   take: ['item_id'],
   drop: ['item_id'],
   give: ['item_id', 'recipient_id'],

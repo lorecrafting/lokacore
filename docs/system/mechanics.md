@@ -196,7 +196,9 @@ This composes existing detail identity/presence, ActionSet admission and authore
 with receipt replay and Book’s notice detail history; there is no gameplay writer or saved
 reading state.
 Projection offers each exact present readable target with its authored label and shares
-command eligibility. Held books, pagination and topic grants remain later M12 work.
+command eligibility. The selected [D2 held-book extension](#d2-held-books-and-public-priory-selected-contract)
+adds item Read and declared grants; pagination remains deferred. Ordinary room
+notices retain the eventless/no-topic contract above.
 The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records scope.
 
 ## target_resolution@1, policy@1, fact@1
@@ -694,3 +696,628 @@ truth is `save_corrupt`, never repaired in place.
 The four deadline answers are literal: 151200 on_time, 151201 late, 237600 late,
 237601 never for an accepted still-active obligation. These use the B1 chapter calendar
 and existing due-before-input order; player Wait and clock skips remain unavailable.
+
+## Peg's immediate shop (B3 selected contract)
+
+At the chandler, the original living Peg offers the finite, authored
+[B3 shelf](cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
+the displayed price. The offer is rechecked against current co-location, direct custody,
+catalog eligibility, price, balances and carrying load when executed; a stale view or
+forged command has no authority. Reading the shop does not pause the clock. No hours gate
+or restock job applies.
+
+The shelf consists of the exact authored items initially held by Peg. An item is in
+stock precisely while Peg directly holds it; its identity survives purchase, sale,
+death and reopen. Only those authored IDs are saleable, and only while directly held
+in the actor's body; worn, nested, ground, corpse-held and other IDs require ordinary
+custody actions first or are ineligible. The S2 ledger and any active S2 ancestor remain
+protected by the existing Give restriction. There is no mint, stock-count row, abstract
+quantity, replacement or automatic restock. Peg's custody is the stock count.
+
+A successful Buy transfers the exact item Peg→actor and its exact price actor→Peg in
+one proposal. A successful Sell transfers that item actor→Peg and its declared sale
+price Peg→actor. Use B2's checked conserved penny transfer, not saturating resource
+adjustment. Reject absent/malformed/out-of-range balance, insufficient payer funds,
+recipient overflow, unavailable custody, ineligible item, changed quote, absent Peg,
+or positive-load carrying overflow before any effect or RNG consumption. A Buy that
+exactly reaches the ceiling succeeds; a neutral transfer keeps the ordinary carrying
+rules. The existing query budget covers the custody and carrying checks. Accepted
+changes, receipt and narration commit together before adoption or reply; exact retry
+returns the same receipt without another item or payment. Saved custody and both
+participating balances must reopen as valid current-build truth.
+
+## C1 training and armed defense (selected contract)
+
+**API1.18 contract; local source, independent review pending.** [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+adds the first skills and armed/defense consumer to the installed combat above.
+The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
+profile and chance. Qualification is current policy truth, never stored mastery.
+
+`skills@1` owns acquired membership by CharacterId and declared skill reference.
+Each skill has one compiler-generated, reserved player Boolean fact, default false;
+true means acquired permanently. The skill reference deterministically owns its
+fact named `skill_<key>`; duplicates, collisions and non-skill writes to it are rejected. A typed
+`skill.acquire` dialogue consequence checks declared identity and false membership,
+then lowers to the existing `fact.assign` in the choice's writer group. It is not
+a new foundation delta operation. Already acquired refuses before any lesson cost,
+gift or result; replay returns the accepted receipt without running this check again.
+The shared skills query returns acquired, current qualification and usable
+(`acquired && qualified`) separately, using the ordinary VersionedPolicy evaluator
+and the command/projection query budget. Failed qualification never clears acquisition.
+
+Tobin's ordered swords, then dodge conversations bind the original living,
+co-located teacher. Each completed Choose composes the skill acquisition, exact
+conserved actor-to-teacher penny payment, ordinary choice resolution and authored
+narration. The swords choice also receives the exact Tobin-held rusty sword through
+the installed receive/carry predicate. Subsequent dodge teaching binds no sword.
+Both lessons are immediate at every hour; opening Talk grants and charges nothing.
+Learning is permitted independently of qualification for use. Recheck teacher,
+membership, payment, bound custody and carrying before allocation. An unavailable
+gift, insufficient balance, overflow or carrying failure refuses the whole choice;
+Close stays available. No replacement sword, extra fee, cooldown or scheduled lesson
+is introduced. Reserved acquisition facts cannot be assigned by ordinary recipes,
+dialogue assignments or reactions to bypass the skills owner.
+
+At each existing combat opportunity, re-read actual wield/off-hand custody and
+usable skill state from its hydrated World. A directly equipped usable sword in
+the actor body's `wield` holder selects that item's authored AttackProfile only
+with acquired and currently qualified swords; otherwise use the existing unarmed
+profile. A held, nested, foreign, removed or undeclared weapon gives no benefit.
+No chapter/name/string matching belongs in the resolver.
+
+Resolve accuracy → eligible dodge → eligible shield block → damage. Dodge requires
+usable dodge and a living standing defender able to react. Block requires a living
+standing defender and a usable actual shield in its body's `off_hand` holder;
+it is equipment-based and needs no block skill. An absent/ineligible defense draws
+nothing. Each eligible check uses uniform(100), strict roll < authored chance.
+Stop after an accuracy miss or successful defense: no later defense, damage,
+wake or HP operation. Variable damage draws once; fixed damage draws nothing.
+Share the existing eight-raw-draw budget, including rejection draws, across the
+whole round and discard the whole proposal on exhaustion or validation fault.
+
+Existing initiative, due-time scheduling, absence/life rechecks, Flee, recovery,
+sleep damage/wake and death credit stay in force. A sleeping survivor cannot defend
+against the hit that wakes it; a later eligible opportunity may use standing defense.
+The old untrained/unarmed no-defense A/B/C behavior remains a current regression
+contract. NPCs without defense metadata use their ordinary attack profile; C1 adds
+no NPC defense catalog. Learn/Wear/Remove stay unavailable during an open encounter
+under the final shared combat ActionSet. Combat owns the attack/defense sequence,
+reads skills through its shared query, and composes existing HP/job/death writes;
+the authority remains the sole transaction/adoption owner.
+
+## S9 Infirmary Herbs (B5 selected contract)
+
+This consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
+It composes containment, carrying, dialogue, quest,
+bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
+contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
+
+Chapel Nave north↔Cloister south and Cloister east↔Infirmary west are
+public reciprocal exits. The original Wick is living,
+present and reachable there at all hours, regardless of bell, child or faction
+outcomes. Willow Shade has an inspectable fenwort patch with an explicit finite
+set of authored item IDs initially directly in that room. Harvest selects the
+lowest eligible EntityId in lexicographic order still directly in the patch's
+room, and transfers that one real item into the actor's body. The patch is a
+detail, not a new holder or portable container. Its remaining stock is derived
+from these IDs' actual room custody. Ordinary Take of those same items is lawful
+and consumes the same stock. A dropped eligible item in that room restores its
+availability; no elapsed time refills it. Empty stock refuses before any effect.
+Positive-load carrying admission, reach and query budgets are the existing Take
+rules. No random roll, herbalism prerequisite, mint, count row or regrowth job
+exists. Harvest neither deletes nor recreates an item.
+
+Wick offers an explicit S9 acceptance only when the actor directly holds the
+required eligible herbs and Wick directly holds the required funded bandages.
+The offer creates one actor-owned occurrence bound to Wick; a later explicit
+acceptance may replace that actor's resolved S9 with a fresh occurrence identity.
+Active occurrences cannot be replaced, and no acceptance or replacement is
+implicit in Talk or turn-in. Reacceptance has no time gate and does not reset the
+separate player-scoped cumulative S9 contribution. Keep the latest quest row,
+not a second quest history store; committed receipts retain older evidence.
+
+Turn-in binds the active occurrence, Wick, the lexicographically lowest required
+eligible herb IDs directly in the actor's body, and the lowest required funded
+bandage IDs directly held by Wick. Choose rechecks those exact IDs and the living,
+co-located participants; a stale binding cannot silently substitute other items.
+Ground, worn, nested, corpse-held, foreign-definition and other-NPC herbs are
+ineligible until ordinary custody actions restore direct body holding. Current
+custody, not historical item_acquired credit, determines readiness.
+
+One accepted exchange transfers all bound herbs actor→Wick and all bound bandages
+Wick→actor, resolves that occurrence and applies its permitted S9 contribution
+once. Herbs stay at Wick with their original IDs; no deletion/consumed-item sink
+is introduced. The three-for-three numbers and faction increment/cap are content.
+Check the final actor load after outgoing herbs and incoming bandages using the
+shared carry query: equality fits; a positive net acquisition over the ceiling
+refuses, while a neutral or load-reducing exchange follows ordinary carrying
+semantics. Check recipient capacity, custody, distinct IDs and all participating
+facts before effects. Every transfer, fact, quest, choice, event and narration
+commits together or none does; no partial herbs-first delivery is possible.
+
+The S9 contribution fact measures only cumulative gain actually awarded by S9,
+independently of the global Priory/Fen axis. Requested gain is the smaller of the
+authored increment and remaining S9 allowance. Apply B2's global bounds; record
+the actual positive axis increase as contribution, so a globally saturated axis
+cannot spend unawarded allowance. Never lower contribution on unrelated faction
+loss. At the contribution cap, a lawful exchange still gives all its bandages.
+An old receipt or continuation cannot resolve or reward a new occurrence.
+
+S9 and all repetitions are optional and never gate the finale, required travel,
+C5 learning or possession recovery. Drop, Put, Take and the existing owned-corpse
+recovery preserve herbs/bandages and occurrence identity. Retrieval is required
+before turn-in; death does not cancel or refill S9. Giving away an herb or bandage
+may exhaust this optional supply; explain the unavailable exchange rather than
+minting replacements or making the player wait. Any later required consumer of
+bandages must adopt an immediate recovery/supply route before it is exposed.
+
+## B4 light and darkness (selected contract)
+
+Planned under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md),
+not installed source or proof. The first consumer is the optional Well Shaft detail,
+using the real B3 torch and oil; no chapter-required route gains a light gate.
+The torch is a reusable oil-soaked wick on a handle, with unchanged B3 identity,
+prices, mass and light slot. [Cartridge tuning](cartridge.md#b4-well-and-fuel)
+owns every fuel value. Light adds only per-item fuel history and one effective
+illumination query; it composes equipment, custody, confirmed time and details.
+
+Each authored source or supply has a required exact-instance fuel row
+`{remaining, at, lit}`. Supply is always unlit; a source may be lit. At confirmed
+clock `now`, effective source fuel is stored remaining minus elapsed logical units
+multiplied by its authored burn rate, clamped at zero. Unlit rows and supplies do
+not burn. Arithmetic must remain exact and bounded, including very large elapsed
+intervals; compare exhaustion before multiplying an unsafe interval. A query writes
+nothing. Effective `lit` requires stored lit and positive effective fuel.
+Ignite, Douse and Refuel first settle the old interval to now, then write the new
+row. There is no expiry job, per-second write, UI timer or automatic ignition.
+
+Ignite requires a fueled source directly body-held or in the actor's light slot,
+and refuses an already effectively lit source. Douse requires that same custody
+and stored lit, including an exhausted source. Refuel binds such a source and an
+exact compatible supply directly body-held by the actor. Transfer the lesser of
+source headroom and supply remaining; preserve excess supply. Empty supply and a
+full source refuse unchanged. Refuel preserves effective lit status; exhaustion
+stays unlit. Source settlement and supply debit are one atomic writer group.
+No refuel can consume foreign, nested, worn or corpse-held supply. Ordinary Take/
+Remove must make it directly held first. Custody changes, death, Sell/Buy and reopen
+preserve stored fuel and lit history; a lost lit source continues burning.
+
+In a dark room the player has illumination only from an effectively lit source
+directly body-held or in their own light slot. Nested, ground, NPC and corpse-held
+sources do not illuminate, even when burning. The same bounded query governs
+GameView, Look/Scan, detail links, target resolution and direct-command admission;
+it charges the existing query budget. Without illumination expose the authored dark
+room text and ordinary known traversable exits, inventory, posture and escape controls.
+Hide other room details, items and NPC identities and adjacent sight descriptions
+unless opted into the later [B6 narrow glow exception](#s4-all-hours-wisp-b6-selected-contract);
+raw IDs or guessed keywords cannot bypass this gate. Existing combat restrictions
+still win. A visible Exit into a dark room remains traversable; a hidden object is
+not an equipment gate on movement.
+
+Darkness exempts the actor's own actual corpses and their ordinary accessible
+contents. The ownership/custody walk, locked bag rules and positive-load Take checks
+remain authoritative; foreign corpses gain no exemption. Every known route back
+from the shrine remains equipment-free. Well Shaft has no new enemy, water hazard,
+barrier, required clue or deadline. Exhausted, sold, stored or lost light therefore
+cannot strand chapter progress, egress or possession recovery. No free replacement,
+shrine teleport or forced-overload recovery operation is added.
+
+## B7 well and waterskin selected contract
+
+**Selected, pending implementation.** B7 supplies the first `liquid@1` consumer:
+Fill at Well Lane's authored well detail, Pour between two real obtainable
+waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
+units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
+[recovery](save.md#b7-liquid-recovery) and [Book](book-ui.md#b7-water-details)
+govern their shared boundary. No hunger/thirst clock, HP/MV benefit, spill, oil
+conversion or finite environmental reservoir is selected. B8 must amend this
+contract before adding its actual consumption benefit or ale consumer.
+
+Each opted vessel has one exact-instance row `{kind, quantity}`. Empty is exactly
+`{kind: null, quantity: 0}`; positive integer quantity names one declared liquid
+kind and never exceeds authored capacity. Liquid capability does not imply an
+item receptacle: waterskins cannot accept Put of keys or other item entities.
+The empty shell persists after drinking; no item is deleted, minted or replaced.
+
+All three verbs require a living actor and usable vessels whose custody reaches
+that actor's body, including reachable open nested bags and their own worn
+holders. Use the existing bounded custody/lid checks with one query budget;
+reach alone also admits room items and therefore does not establish ownership.
+Ground, NPC, corpse-held and closed/locked-bag vessels are unavailable until
+ordinary Take/open/recovery puts them into eligible custody. Ordinary transfer,
+Wear/Remove, Drop, death and shop Buy/Sell preserve the same vessel row and liquid.
+No liquid verb transfers ownership, moves the actor or advances logical time.
+
+Fill binds the exact well detail in the actor's current room and one compatible
+vessel. It adds exactly its free capacity of the authored source kind. A full
+vessel or nonempty different kind refuses unchanged. This source is explicitly
+inexhaustible: an admitted Fill introduces water, and is not a closed-system
+conservation claim. There is no other liquid issuance path in B7.
+
+Pour binds distinct eligible source and receiver. Transfer exactly the lesser of
+source quantity and receiver free capacity, only into an empty or same-kind
+receiver. Source empty, receiver full, self-pour or different kinds refuse before
+any write. Debit and credit commit atomically; exhausting the source resets its
+kind to null. No arbitrary amount input or discard verb is added. Drink requires
+at least the liquid's authored positive integer drink amount, consumes exactly
+that amount and narrates the committed kind/amount. A smaller remainder refuses
+unchanged; there is no partial last serving. Emptying resets kind to null. B7
+water drinking changes no HP, MV, needs, faction, money, RNG or clock.
+
+Effective item mass is shell mass plus quantity times the liquid's grams/unit,
+in the existing carrying calculation, not a second stored load. Compiler/loader
+validate safe integer products and bound each maximum effective item mass by the
+existing item-mass limit; runtime checked arithmetic faults atomically on
+malformed relevant data. Fill is positive acquisition and requires resulting
+load at or below the authored ceiling; it never partially fills to evade that
+ceiling. Pour within actor custody is neutral even when overloaded, and Drink
+reduces load. Take, Buy and incoming transfer must include current liquid mass;
+Drop and recovery move the same contents without refilling them.
+## S3 finite watch patrol (C2 selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
+selects an all-hours, player-started patrol led by the original noncombatant Tobin.
+The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
+walk and checkpoints. This is player-follow-leader behavior; it does not change
+[escort@1](#escort1)'s NPC-follow-player relation or occupy its actor-keyed row.
+
+The patrol owner retains one typed row per actor's S3 quest instance: original
+actor/body/leader, accepted activation choice, current attempt identity, route
+cursor, bounded unique checkpoint credit and status together/awaiting/paused/
+failed/completed. Start and Restart use their accepted command identity as the
+attempt identity; a restart never allocates another quest instance. Every mutation
+compares the complete prior row. The leader identity and activation binding never
+change; cursor/attempt/status/credit changes obey the transitions below. Authoring
+cannot assign patrol state or forge checkpoint credit through ordinary facts.
+
+Start requires standing living co-located participants and activates S3 once, status
+together, credit empty, at the authored initial route cursor. Continue rounds, from together, moves
+Tobin alone along exactly the next adjacent legal edge and changes to awaiting.
+It rechecks the original participants, current cursor, standing living actor and
+ordinary passage admission. It invokes shared movement queries, never another
+mechanic's player command. Tobin has no scheduled movement. Continue emits only
+Tobin's actual movement occurrence; it never transfers the player, skips time,
+spends RNG or fabricates a player entry.
+
+While awaiting, the actor's accepted Move/Flee over that exact pending edge joins
+Tobin, changes to together and credits the entered checkpoint at most once. Credit
+requires the same attempt, living original participants, expected source/destination
+and their co-location at the hydrated proposal prefix. Leader departure, starting
+co-presence, pre-activation visits, repeated checkpoints and foreign/replayed events
+earn nothing. Ordinary stance, passage, movement cost, combat and Flee remain
+owned by their existing mechanics. A refusal/fault changes neither movement nor credit.
+
+Any other accepted player departure while together/awaiting pauses the attempt,
+retaining its credit and Tobin's actual location/cursor. Walking while paused grants
+no credit, including arrival beside Tobin. Explicit standing, living co-located Rejoin changes paused
+to together without credit; the next legal leg proceeds from that actual cursor.
+An uncredited checkpoint is earned only by a later qualifying entry, at most one
+more circuit away. No player inactivity or reading duration fails an attempt.
+
+A real fatal event for the bound player body in together/awaiting/paused changes
+the attempt to failed and clears all credit in the same death writer group as corpse
+custody and shrine return. Tobin stays where he was. S3 remains active with a failed
+attempt, rather than terminally failing and reopening generic quests. Immediate
+standing, living co-located Restart replaces the attempt identity, clears credit and sets together
+at Tobin's current cursor; the cyclic walk needs at most one circuit for four new
+checkpoints. Old-attempt commands/events cannot resume or credit it. Failed-state
+walking/revival grants no credit. Existing Wren death separation composes independently.
+
+The fourth distinct qualifying checkpoint atomically marks completed, resolves S3
+as `completed` and assigns its reserved player trust fact true, with committed
+narration. Completed patrols never move Tobin again or offer restart/rewards.
+Trust is recognition only; it opens no required gate and grants no skill, sword,
+pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
+trust and nonterminal attempt failure have retained causal evidence, not room-count
+inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
+are outside this selected consumer.
+
+## S4 all-hours wisp (B6 selected contract)
+
+Planned under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
+not installed behavior or proof. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
+no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
+
+At Marsh Light an authored self-luminous marker exposes **Seek Wisp**, even when
+ordinary room details are dark. This narrow perception metadata exposes only the
+marker and, after discovery, the original live co-located wisp; it illuminates
+neither other objects nor adjacent rooms. It uses B4's shared visibility/admission
+query, not a Book exception or a global bypass. Seek, Talk acceptance and answers
+require `light_off`: the actor has no effectively lit directly held or light-slot
+source. Nested, dropped, stored and corpse-held lights follow B4 unchanged.
+Known exits and the actor's actual corpse remain accessible under B4 recovery.
+
+Seek uses a deterministic `check@1` attribute-threshold arm. Read the commanded
+actor's declared immutable attribute through the existing attributes query, pass
+at equality, draw no RNG, and emit the owned `check_passed/check_failed` with the
+recipe reference. Its success sequence alone assigns the player discovery Boolean;
+failure leaves it false and offers immediate Seek again. Neither result grants S4
+or ward. This extends checks, not attributes, ancestry, skills or progression.
+After discovery a bound live/present wisp offers explicit S4 acceptance, followed
+by its riddle while that actor's occurrence remains active. These policies are
+rechecked at pending-option projection and Choose. Close always remains available.
+
+The riddle retains the installed ASCII case/bank/multiplicity rules. Only this
+opted dialogue declares a wrong limit. Its typed continuation count starts at zero;
+each bank-valid wrong answer atomically commits one count increment, bound wrong
+line and receipt. Below the limit the same continuation remains. At the limit,
+close that sitting in the same decision and offer **Ask Wisp again** through the
+ordinary bound Talk path, opening a fresh continuation with count zero. S4 stays
+active; no terminal failure, cooldown, spawn, departure, job or time advance occurs.
+Close/reopen Talk also starts a new sitting; the limit is a conversational pause,
+not an anti-cheating quota. No-limit dialogues, including Q2, keep unlimited retry.
+Malformed/impossible-bank input and exact invocation replay consume no attempt.
+
+Correct input resolves the original actor-owned S4, assigns `fen_wisp_answered`,
+grants the declared ward topic and resolves the choice in one atomic writer group.
+A previously known ward never prevents S4 completion or duplicates knowledge.
+Topics use a declared player-scoped Boolean mapping: typed `topic.grant` lowers to
+existing `fact.assign` only when false; the fact writer owns the mutation. Known
+labels derive in key order from those facts. The immediate ward consumer is the
+public original Aldric's **Ask about ward** dialogue; it remains independently
+selectable even when debt/bell dialogues are eligible. Its informational reply
+requires known ward and a live/present Aldric; it changes no spells, resources,
+faction, quest or chapter ending. This is one real topic consumer, not a full
+conversation graph or a promise of all historical topics.
+
+## C3 bounded living hounds (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
+selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
+owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
+Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
+enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
+
+One instance-scoped plan owns a fixed ordered set of separately targeted slot rows,
+numbered1 through its declared cap. A slot retains its generation, exact current
+hound identity and optional death-to-replacement due time.
+Never-used slots have generation0, null member and null due time. Occupied slots
+start at generation1; a living member has null replacement due. A proven fatal HP
+transition retains the dead member identity and sets due = fatal clock + declared
+replacement delay in the same fatal writer group. Only then may a slot replace it
+at or after due, incrementing generation and allocating a fresh hound and pelt.
+Old identities, HP0, corpses and taken loot remain; they are not active membership.
+
+The first daytime-target slots can fill at every hour; extra nighttime-target
+slots can fill only in the authored night window. Existing live extra members
+remain at dawn. Count all plan-owned living members across both allowed rooms,
+not only the home room; never count authored rats or another plan's animals.
+An eligible never-used slot fills immediately; a dead slot respects its due time
+even when night raises the target. No silent live retirement, corpse decay or
+population-disable consumer is selected. This bounds live membership and scheduled
+work, not total historical corpse/identity/save size.
+
+Fresh worlds initialize the same checked bundle/state transition used by live
+replacement, under the existing genesis allocator. One current plan-owned job
+handles all slots, in slot order. Its successor is due at the earliest next wander
+boundary, day/night target boundary or eligible replacement time, strictly after
+this occurrence. Ignore past due times for night-only slots while ineligible;
+the next night boundary reconsideration prevents a zero-time loop. Require wander
+interval <= replacement delay. The current plan job is no later than the next
+wander boundary, hence no later than a newly fatal member's replacement due. Death
+writes only that slot's eligibility; it never reschedules or writes plan control.
+Existing due ordering, segmentation and shared command budgets apply; plan work
+cannot scan historical created rows to find its six current members.
+
+Equal-time combat and population jobs retain canonical `(due_time, job_id)` order
+and distinct writer groups. Population dispatch changes only actual birth/replacement
+slots, never unchanged living or not-yet-eligible dead slots. Thus population-first
+skips the engaged hound before fatal combat; combat-first leaves a dead slot whose
+new due is strictly later, which population skips. Both advance the separate plan
+control once and conserve the same fatal slot/corpse/pelt. No whole-plan slot rewrite
+or cross-writer exception is permitted; see [targets](protocol.md#c3-spawned-bundles-and-population-composition).
+
+At a wander boundary each living, unengaged member alternates between the two
+adjacent declared rooms through ordinary legal movement. A blocked edge leaves it
+in place; it spends no RNG or player MV. A newly spawned member stays at home for
+that occurrence. An open encounter suppresses its voluntary wander; dead members
+never move. No hound enters the required rescue/shrine corridor. Replacement and
+wandering grant no quest, skill, kill credit or money. Immutable template metadata
+never stores instance HP or location; every query and combat job uses the actual
+runtime EntityId. The created hound's lethal producer uses its declared hound corpse
+and transfers its same directly held pelt through ordinary death custody once.
+
+Combat loss leaves an immediate safe return/recovery route; surviving hounds can
+be deliberately retried now, and defeated hounds' loot is immediately available.
+No required chapter path or Book proof waits for a replacement or night.
+
+## C4 hound response, pack assistance and flight (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
+extends C3's deliberate fight with bounded pack help and wounded flight. Entry,
+reading, elapsed time and night never initiate hostility. This selects response
+to player aggression and defers the provisional night-auto-aggression proposal
+and archived population's aggressive20–6 behavior. No required route, loss retry,
+owned-corpse recovery or first proof depends on night or replacement.
+
+Attack keeps installed standing/life/co-location/sanctuary/modal admission and
+binds the exact attacked EntityId as primary. For a proven C3 hound whose plan
+declares pack assistance, admit that hound plus all currently living, co-present,
+unengaged members of that exact plan, in canonical EntityId order. Inspect its
+fixed slots before traversal; the roster cannot exceed the plan cap. Members in
+another room/plan, retired generations, corpses and authored NPCs cannot join.
+Admission occurs once in Attack's writer group with one encounter/round job, no
+damage/RNG and narration naming actual helpers. There is no later join, pursuit,
+remote assistance or helper job. Other opponents retain single-member encounters.
+
+The encounter owns an ordered unique active roster, primary and next-opponent ID.
+Initially primary and next opponent are the attacked hound, even when it is not
+the lowest ID. At each round, prune absent/dead members and repair removed primary
+to the lowest remaining ID; repair a removed cursor to its next greater remaining
+ID, wrapping to the lowest. Lock that round's selected opponent before either
+opportunity. Retain exactly two opportunities: player against current primary,
+and the selected opponent against the body. Odd rounds are player-first, even
+rounds opponent-first. If the selected opponent dies/departs during the first
+opportunity, skip its slot without replacement or RNG; another helper does not
+inherit the lost opportunity. At round end set the next opponent to the next
+greater remaining ID after the selected ID, wrapping. Primary stays until it
+leaves. Revalidate exact life/presence/job immediately before each opportunity.
+Thus assistance supplies a real rotating opponent attack, never one attack per
+helper. Share C1's attack/defense resolver and the eight-raw-draw round budget.
+
+Immediately before its selected opponent opportunity, a living co-present hound
+strictly below its cartridge HP-fraction threshold attempts flight before attack.
+Compare with checked integer arithmetic; do not round a percentage. Enumerate
+ordinary legal adjacent NPC transfers inside the declared population area in
+canonical direction order, using shared policy/work budgets. Choose the first
+legal exit deterministically, with the declared zero animal fare, no player MV,
+key use, RNG or clock advance. If none is legal, perform at most that ordinary
+opponent attack. Flight transfers the same hound once, preserving injury and its
+same held pelt, removes it from the encounter and records its slot's last-flight
+clock in the same group. It creates no corpse, kill credit, loot or replacement.
+Nonselected injured members wait only for their bounded rotating opportunity;
+no extra timer or player Wait is introduced. Voluntary wandering stays suppressed
+for active members and at the exact last-flight boundary; see
+[composition](protocol.md#c4-pack-encounter-and-flight-composition).
+
+After departure/death, repair primary/cursor as above and narrate the new exact
+primary. With no remaining members close once and cancel/complete the current job.
+A hound's fatal sequence still writes only its own C3 slot and transfers its actual
+pelt to its own public corpse. Player death closes the entire encounter before
+same-body shrine return; no helper strikes the revived body. Player Flee retains
+its existing standing, legal-exit, fare, RNG and budget checks, moves once and
+closes the entire roster without retaliation. It is an immediate action when its
+ordinary prerequisites hold, not an unconditional free escape. Outside combat,
+all hounds are passive, so gear-free corpse recovery and immediate deliberate
+retry of a surviving hound need no time gate. No behavior framework is required.
+
+## B8 Maud's immediate services (selected contract)
+
+**Selected, source implementation pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+selects three all-hours services from the original living, co-located Maud at the
+Drowned Lantern. Each accepted service immediately exchanges the exact quoted
+pennies for its declared benefit in one proposal. A meal is eaten and a serving
+of ale is drunk as part of that transaction; neither purchase creates an item
+waiting for a later Eat/Drink. This deliberately replaces the provisional
+purchase-then-consume recommendation and the historical hunger/drunk formulas.
+
+Room grants one durable actor-scoped Boolean `lantern_bed_paid` for the current
+save lineage. Its immediate consumer is the actual bed detail in Inn Rooms,
+whose paid description and ordinary Rest offer become available. Renting changes
+no position, rate, clock, HP/MV, slept fact, quest or dream state. A new rental
+when already entitled refuses without payment. Ordinary unpaid Rest and all
+upstairs, attic, cellar and corpse routes remain legal. Entitlement survives
+death/reopen and has no night expiry or automatic renewal. B9 alone owns the
+first qualifying actual accepted Rest at Inn Rooms after payment; earlier unpaid
+Rest and rental are not retrospective dream credit. Already resting must Stand
+then Rest for a new accepted transition; B8 adds no Rest event/dream writer.
+
+Meal consumes one unit of Maud's finite nonregenerating meal-stock ResourceSpec
+and grants its authored capped MV increment on the actor body. Drink consumes
+one complete authored serving from the exact Maud-owned ale vessel's B7 liquid
+row and grants its authored capped MV increment. Strict B7 last-serving refusal
+applies: insufficient quantity never buys a partial drink. Exhaustion preserves
+the same empty vessel shell. The shared service query proves original provider,
+living actor/provider, co-location, exact service reference/quote, unowned room
+entitlement or available stock and exact conserved funding. Positive MV headroom
+is required only for meal/drink; room rental remains available at full MV.
+Meal/drink at full MV refuse before charging or consuming. Near the maximum the
+benefit caps; the displayed offer declares that cap. No HP/MA recovery, passive
+hunger/thirst, intoxication, carrying acquisition, food issuance or restock job
+is added. B7 water remains benefit-free and refill cannot introduce ale.
+
+Service owns admission and lowering: payment uses B3's exact debit/credit query,
+room uses existing fact assignment, meal stock uses exact resource debit, and
+MV uses existing resource settlement/capped adjustment. Liquid owns the shared
+pure exact-serving query/transition used for the provider-bound ale consequence;
+service never calls another rule or fabricates an actor-owned Drink. All writes
+share one writer group and query budget. Normal authority elapsed preflight,
+scene/combat admission, freshness and receipt replay precede this work. S1 Talk,
+accept/turn-in and earned chest/key remain reachable in every quest state;
+services are separate direct offers, not a first-eligible dialogue replacement.
+
+## D2 held books and public Priory (selected contract)
+
+Planned under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
+D2 completes the ten public Priory rooms through the reciprocal
+[authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
+its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
+NPC schedule, fare, water skill or time window gates this extension. These are
+safe walking rooms, not a new hazard. Aldric remains public in Chapel Nave;
+S2/S4/Q3 and Wick's S9 stay independently usable. Study's ledger is descriptive,
+never a second Peg ledger. Future private gate/crypt and far Scan are excluded.
+
+A readable item declares one authored text and at most one declared topic. The
+existing actor-bound Read command accepts the exact original book only while
+it is directly held by that actor's body or reachable inside an open chain of
+held containers. Reuse the bounded custody walk and actor/body lookup, sharing
+one command query budget. A closed or locked ancestor, ground/room custody,
+foreign holding, worn-only custody or corpse custody does not qualify; a declared
+book outside this held reach refuses `not_present` before narration or grant.
+Unknown/non-readable targets remain `invalid_target`. Projection and raw admission
+use the same eligibility. Take, Look/Examine, opening details, text rendering and
+ordinary notice Read grant nothing. No keyword or same-key object substitutes
+for the original target identity and pinned definition.
+
+Accepted book Read narrates its one declared text and lowers the optional topic
+grant through [B6's declared Boolean mapping](#s4-all-hours-wisp-b6-selected-contract).
+Readable owns the text; topic lowering owns idempotence; facts owns the knowledge
+write. Already-known Read still narrates, but adds no second grant/write. RNG and
+logical duration remain unchanged; authority elapsed preflight and schedules keep
+running. Ward from either lawful source enables the same public Aldric ward
+conversation; Bell is a real known-topic entry, not Q3 activation, permission,
+resolution or spell acquisition. No quest, faction, resource or skill is awarded.
+
+Dropping/storing/giving a book moves its real identity and never unlearns a topic.
+Death preserves knowledge and puts the actual held books in ordinary owned-corpse
+custody; gear-free shrine routes permit recovery, then ordinary Take/Read. Optional
+books given away need no replacement or mint and cannot strand a required path.
+
+## S10 Lantern Rest and dream (B9 selected contract)
+
+**Selected, source pending.** The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+extends position/scene/quest at this first consumer. The first accepted actor-owned
+`rest` transition at actual `inn_rooms`, with B8 `lantern_bed_paid=true` and
+`slept_at_lantern=false`, sets that declared player fact true and activates the
+actor's sole S10 instance in the same proposal. This is causal post-payment
+credit: unpaid earlier Rest, rental, Sleep, menu/display, elapsed time, reopen,
+refused already-resting Rest and another actor's transition never count. Payment
+while already resting requires a new accepted Stand→Rest. No wait for night,
+MV deficit, elapsed sleep duration or chapter/quest prerequisite is required.
+
+Position emits typed `rested {body_id, room_id}` only after the actual accepted
+transition and old-rate settlement; actor/scope/root cause identify that exact
+occurrence. The consequence reads the causal hydrated prefix, including paid
+eligibility, actual body/room and prior position, not today's unrelated last
+receipt. Reaction owns the guarded first-Rest fact/quest activation; scene owns
+its checkpoint start. Shared delivery ordering, query/output budgets and one
+writer per target apply. No named Lantern switch or second Rest writer belongs
+in position. The room/fact/quest/scene binding is cartridge data.
+
+S10 has no failure/repeat/abandon reward path. Its current-state objective is
+`dream_seen=true`, but only the exact acknowledged dream end may set it and
+resolve S10 with outcome `acknowledged`. First Rest starts one durable dream
+checkpoint at beat1 in that same proposal. Confirmed presentation opens only
+when safe; another interaction defers presentation, never the saved start.
+Resume at the actual bed reads this checkpoint. No second Start command, armed
+fact, queue or timer is required.
+
+Extend scene@1 only with this bounded `presentation_only`, room-anchored subset:
+three narration beats, one two-option scene-owned choice, one selected final
+narration and final acknowledgement/end. Reuse reserved scene cursor facts and
+existing choice rows, adding the exact scene source/beat/actor/anchor binding.
+Continue at beat3 atomically advances to choice4 and opens its one ChoiceRow;
+Choose atomically resolves that row and advances to the selected final beat5.
+The choice persists `follow_fox` or `wake`; both reach the same memory consequence.
+Neither is movement or sleep. No ambience entity, map, body, inventory copy,
+spatial SceneSpace instance or arbitrary consequence/script interpreter is built.
+
+A presentation-only checkpoint does not replace the ordinary ActionSet or count
+as a running modal scene. Its choice is offered only through its dream detail,
+not as an ordinary pending dialogue choice; it neither blocks another dialogue
+nor overwrites one. Close returns to the real bed/World without a gameplay write.
+A saved checkpoint is resumable only by a living actor at its exact room anchor,
+with no encounter, modal or ordinary pending choice. Travel, damage/return or
+another modal makes presentation unavailable, preserves the beat/branch, and
+leaves normal Stand/Flee/movement/recovery available. Return legally and Resume;
+no teleport, immunity, time pause, rerun of first Rest or mandatory dream screen.
+
+Every fresh Continue/choice binds the shown scene, beat and exact choice occurrence
+where applicable; direct Command and projected admission agree. Final Continue
+requires the selected final line in the safe anchor context. It atomically ends
+this scene, assigns `dream_seen=true` and resolves only the bound S10 once. This
+Boolean is the durable local memory `player.dream_seen`; no second export marker,
+`prologue_completed` point/report, account transfer or numerical reward is added.
+Exact accepted replay retains its receipt before current-state admission; new
+stale controls cannot skip a beat, change the branch or repeat the consequence.

@@ -1,3 +1,4 @@
+# size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc """
   Dialogues in a v2 source (dialogue.schema.json DialogueDefinition; 06 §8, §17, §33), twin of
@@ -107,6 +108,10 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp ambiguous?(t, ctx) do
+    if is_map_key(t, "scene"), do: false, else: dialogue_ambiguous?(t, ctx)
+  end
+
+  defp dialogue_ambiguous?(t, ctx) do
     case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
       {rel, _, %{"quest" => quest}} ->
         Enum.any?(all(ctx.defs), fn {other, d} ->
@@ -125,40 +130,88 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp story_point({rel, p}, sites, ctx) do
-    empty = %{"error" => "too_few_items"}
-
-    none =
-      for true <- [p["outcomes"] == %{}],
-          do: diag("SCHEMA_VIOLATION", at(rel, ["outcomes"]), empty)
-
     owned(at(rel, []), "story_point_reached", ctx.events) ++
-      none ++
+      point_empty(rel, p) ++
+      point_key(rel, p) ++
       Enum.flat_map(p["outcomes"], fn {o, t} ->
-        trigger(rel, ["outcomes", o], t, sites[t], ctx)
+        trigger(rel, ["outcomes", o], t, sites[t], ctx, {p["key"], o})
       end)
+  end
+
+  defp point_empty(rel, p) do
+    if p["outcomes"] == %{},
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["outcomes"]), %{"error" => "too_few_items"})],
+      else: []
+  end
+
+  defp point_key(rel, p) do
+    if String.length(p["key"]) > 52 and
+         Enum.any?(p["outcomes"], fn {_, t} -> is_map_key(t, "scene") end),
+       do: [diag("SCHEMA_VIOLATION", at(rel, ["key"]))],
+       else: []
   end
 
   # One outcome's trigger: a dialogue of this cartridge with a quest, one of its choices, and a
   # site no other outcome names.
-  defp trigger(rel, steps, t, n, ctx) do
+  defp trigger(rel, steps, %{"scene" => _} = t, n, ctx, {point, outcome}) do
     dup = if n > 1, do: [diag("DUPLICATE_DEFINITION", at(rel, steps))], else: []
 
-    dup ++
-      reference(rel, steps, "dialogue", t, ctx.m, ctx.defs) ++
-      case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
-        {_, _, d} ->
-          for {true, diag} <- [
-                {not is_map_key(d["choices"], t["choice"]),
-                 diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["choice"]), %{
-                   "target" => t["choice"]
-                 })},
-                {not is_map_key(d, "quest"), diag("OUTCOME_MISMATCH", at(rel, steps))}
-              ],
-              do: diag
+    shape =
+      if is_map_key(t, "choice") or is_map_key(t, "dialogue"),
+        do: [diag("SCHEMA_VIOLATION", at(rel, steps))],
+        else: []
 
-        _ ->
-          []
-      end
+    match = scene_match(rel, steps, t, ctx, point, outcome)
+
+    dup ++ shape ++ reference(rel, steps, "scene", t, ctx.m, ctx.defs) ++ match
+  end
+
+  defp trigger(rel, steps, t, n, ctx, _) do
+    dup = if n > 1, do: [diag("DUPLICATE_DEFINITION", at(rel, steps))], else: []
+
+    shape =
+      if not is_map_key(t, "choice"), do: [diag("SCHEMA_VIOLATION", at(rel, steps))], else: []
+
+    dup ++
+      shape ++
+      reference(rel, steps, "dialogue", t, ctx.m, ctx.defs) ++ dialogue_match(rel, steps, t, ctx)
+  end
+
+  defp scene_match(rel, steps, t, ctx, point, outcome) do
+    case resolve(t["scene"], "scene", ctx.m, ctx.defs) do
+      {_, _, s} ->
+        expected = %{
+          "cartridge_id" => ctx.m["id"],
+          "cartridge_version" => ctx.m["version"],
+          "kind" => "story_point",
+          "key" => point
+        }
+
+        if get_in(s, ["on_end", "story_point"]) == expected and
+             get_in(s, ["on_end", "outcome"]) == outcome,
+           do: [],
+           else: [diag("OUTCOME_MISMATCH", at(rel, steps))]
+
+      _ ->
+        []
+    end
+  end
+
+  defp dialogue_match(rel, steps, t, ctx) do
+    case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
+      {_, _, d} ->
+        for {true, diag} <- [
+              {not is_map_key(d["choices"], t["choice"]),
+               diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["choice"]), %{
+                 "target" => t["choice"]
+               })},
+              {not is_map_key(d, "quest"), diag("OUTCOME_MISMATCH", at(rel, steps))}
+            ],
+            do: diag
+
+      _ ->
+        []
+    end
   end
 
   defp dialogue({rel, d}, ctx) do
@@ -227,14 +280,21 @@ defmodule Loka.Content.Dialogues do
       sequence(rel, steps, o, ctx) ++
       accept(rel, steps, o, d, ctx) ++
       Loka.Content.Escort.choice(rel, steps, o, d, ctx) ++
-      hand_over(rel, steps, o, d) ++ receive_item(rel, steps, o, d, ctx)
+      hand_over(rel, steps, o, d) ++
+      receive_item(rel, steps, o, d, ctx) ++
+      payment(rel, steps, o, d, ctx) ++
+      Loka.Content.Skills.choice(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do
     Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-      owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-        reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
-        adjusted(rel, steps ++ ["sequence", i], s, ctx)
+      if(s["op"] == "skill.acquire",
+        do: [],
+        else:
+          owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
+            reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
+            adjusted(rel, steps ++ ["sequence", i], s, ctx)
+      )
     end)
   end
 
@@ -261,12 +321,25 @@ defmodule Loka.Content.Dialogues do
 
     owned(at(rel, steps), "item_acquired", ctx.events) ++
       transfer_roles(rel, steps, h, d["roles"], "from") ++
-      if is_map_key(o, "accept") or is_map_key(o, "hand_over"),
+      if is_map_key(o, "hand_over"),
         do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
         else: []
   end
 
   defp receive_item(_, _, _, _, _), do: []
+
+  defp payment(rel, steps, %{"payment" => p}, d, ctx) do
+    reference(rel, steps ++ ["payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++
+      if match?(%{"role" => "npc"}, d["roles"][p["from"]]),
+        do: [],
+        else: [
+          diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["payment", "from"]), %{
+            "target" => p["from"]
+          })
+        ]
+  end
+
+  defp payment(_, _, _, _, _), do: []
 
   defp transfer_roles(rel, steps, h, roles, recipient) do
     for {field, kind} <- [{"item", "item"}, {recipient, "npc"}],

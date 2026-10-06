@@ -435,3 +435,406 @@ as `save_corrupt` without guessed repair. Unknown COMMIT stays fenced; receipt r
 cannot duplicate the ledger, payout or penalty. The deadline keeps running through
 death and reopen. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 This is a selected next-release recovery rule, not a claim about current saves.
+
+## B3 shop recovery
+
+The selected [B3 exchange](mechanics.md#pegs-immediate-shop-b3-selected-contract)
+changes the exact item's containment row and both penny rows with one receipt.
+Failed or unknown COMMIT follows the existing fence and reconciliation path. Reopen
+validates the offered item identity, current custody and participating balances;
+it does not rebuild stock from an independent count or mint a missing shelf item.
+
+B3 extends B2's S2 balance/receipt validator, including its unaccepted, active,
+resolved and expired branches. For pennies in this chapter, reconcile the actual
+accepted B3 exchanges and the optional S2 payout in saved revision order from the
+authored player, Peg and Aldric starts. Each receipt's exact debit/credit must match
+the balances at *that commit*, its bound participants, price or payout and item/
+quest outcome; the final replayed balances must match the current saved rows.
+An S2 payout receipt may therefore begin after a Buy or end before a later Buy.
+Do not compare its historical `from`/`to` directly with current balances, or
+require a player still to hold the authored start or start-plus-reward. Reject
+missing, reordered, forged or unexplained transfers, wrong recipients and
+contradictory custody/outcome evidence as `save_corrupt`. Use the existing receipt
+and changed-row trust boundary, not a second money ledger or save migration.
+Receipt replay cannot pay or move the item again; malformed current-build truth
+leaves the save intact.
+
+## C1 learned-skill and lesson recovery
+
+**API1.18 recovery contract.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)
+uses changed fact, resource, containment and choice rows with the same head/receipt
+transaction. No table or save-format change is required. Derive current qualification
+again from the pinned cartridge policy on every open/use; do not save or repair it.
+Cold reopen must accept every legal state after Talk, each lesson, Wear/Remove,
+Attack, defended round, opponent death, player death and possession recovery.
+
+Extend [B3's revision-ordered balance recovery](#b3-shop-recovery) with Tobin's
+authored penny start and accepted lesson payments. Validate each historical payment
+at its own revision, its exact bound teacher, skill/choice and amount, and both
+debit/credit; subsequent commerce/S2/other accepted transfers may change current
+balances. Validate each true acquired fact against exactly one accepted typed grant
+for that character/declared skill, binding command, continuation, source dialogue,
+choice, roles, root cause and consequence. The swords grant proves its exact
+incoming item identity at that commit; lawful later Wear/Drop/Give/death custody
+must not be compared to the original body-held destination. Ordinary current custody
+validation still applies. False/omitted membership is legal only without a successful
+acquisition receipt; reject contradictory receipts or missing acquired rows.
+
+Null/non-Boolean facts, wrong skill/actor/teacher identities, duplicate successful
+grants, forged payment or gift evidence, unexplained balances, or a defense event
+inconsistent with its hit/loss produce typed `save_corrupt`, leaving the file intact.
+Closed/replaced encounter jobs remain harmless after reopen. Do not cache weapon
+or defense eligibility in an encounter: the later due consumer re-reads saved custody,
+membership, qualification, life and posture.
+
+Real failed COMMIT and both uncertain-COMMIT outcomes prove all prior or all next
+cost/membership/custody/choice/HP/RNG/job/head/receipt state. Fence input and elapsed
+work until reconciliation. Lost acknowledgement and exact receipt replay charge,
+grant, draw and narrate no second time. Existing pin refusal and explicit confirmed
+Start over remain; C1 supplies no old-save migration or silent deletion.
+
+## B5 stock and repeat recovery
+
+[B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) stores ordinary authored
+item custody, the latest bound S9 occurrence and its bounded contribution fact.
+Stock is derived from custody; there is no persisted harvest count or reward mint.
+Every changed custody/fact/quest/choice row and its receipt use the existing single
+transaction, failed-COMMIT fence and unknown-COMMIT reconciliation. Exact retry
+returns the committed result without transferring stock or adjusting faction again.
+
+Reopen accepts lawful empty patches, partial harvests, storage/drop/death custody,
+active S9 with temporarily missing herbs, every resolved occurrence and the next
+explicitly accepted occurrence. Validate exact eligible/reward identity sets,
+latest actor/Wick binding and occurrence transitions, distinct exchange IDs,
+receipt-bound transfers and actual S9 contribution. Reconcile S9 contributions
+and B2/unrelated lawful faction adjustments at their own saved revision; do not
+compare an old faction result or item holder with only today's rows. Ordinary
+Take/Drop/Put/Give/death transfers can lawfully change post-exchange custody and
+must not be classified as corruption. The actual current rows must agree with the
+receipt-evidenced sequence; a resolved exchange requires its whole transfer and
+quest evidence, and an old completion cannot justify a later active occurrence.
+
+Malformed/out-of-range contribution, reused occurrence, missing/duplicate item,
+forged transfer or contradictory current rows yields typed save_corrupt without
+repair or deletion. B3's penny/S2 reconciliation remains intact: S9 never changes
+pennies. Lost acknowledgement, both uncertain COMMIT outcomes and reopen must
+produce all prior or all next truth. No migration, save reset, fresh replacement
+item or receipt-derived second ledger is introduced.
+
+For API1.17 explicit repeats, a committed `quest.retire` removes the prior
+resolved quest row in the same changed-row transaction as the new activation.
+Only that typed operation deletes a row; receipts retain prior occurrence proof.
+
+## B4 fuel and dark recovery
+
+Planned [B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the
+pinned current release (authored charge, unlit, at the fresh-world clock), then
+persist independently of custody. Source/supply
+changes and their bound receipt commit together before memory adoption or success
+narration. The loader validates required exact authored instance rows, safe bounded
+charge, valid source/supply binding, boolean lit, supply unlit and timestamps not
+later than the saved clock. Missing/wrong-item rows, charge overflow or impossible
+metadata yield typed `save_corrupt` without repair, refill, deletion or repinning.
+A stored lit source whose confirmed fuel has exhausted is lawful; its effective
+state is unlit, and reopening does not restart its interval.
+
+Reconcile accepted fuel-changing receipts in saved revision/clock order from the
+authored initial rows, binding command ID, actor, exact source/supply IDs and their
+historical custody. Each full prior row and settled replacement must match that
+command's burn/ignite/douse/refill semantics; the resulting stored rows must match
+the current save. Reject a missing debit, fabricated refill, wrong participant,
+reordered receipt or unexplained bounded charge as `save_corrupt`. Read historical
+fuel at its commit, not at today's clock; time/custody receipts do not refill rows.
+Reuse the pure fuel transition verifier at this trust boundary rather than create
+a second writer or generic event ledger.
+
+Real SQLite proof covers fresh/unlit, lit, doused, partially refueled, exhausted,
+sold/bought-back, nested and corpse-held states. Failed COMMIT retains all prior
+rows; both unknown-COMMIT branches reconcile all prior or all next rows, including
+supply debit. Lost acknowledgement and exact receipt retry never consume oil or
+fuel twice. B3/S2 receipt and balance reconciliation remains intact.
+
+Prove a real controlled lethal combat occurrence in an opted dark room with the
+only light and a nested bag among the actual corpse roots. Reopen before recovery,
+walk the shrine's equipment-free route, inspect only the owned corpse and Take the
+same roots/descendants through existing carrying and lid checks. Repeated death
+retains previous corpses and exact fuel custody. This is fixture-driven combat,
+not a new production Well Shaft danger or public death command. Keep the existing
+production cellar recovery proof green; darkness adds no dependency on lost gear.
+
+## B7 liquid recovery
+
+**Selected, pending implementation.** [B7](mechanics.md#b7-well-and-waterskin-selected-contract)
+uses the existing state_row transaction for exact vessel liquid rows, head and
+receipt. No liquid table, second ledger, save-format migration or automatic
+refill/reset is added. Initialize empty rows only when creating the pinned fresh
+world. Every opted authored instance requires its row even while ground, nested,
+Peg-held, sold back or corpse-held. Load rejects missing/extra/wrong-item rows,
+unknown kinds, noninteger/negative/over-capacity quantities and null/positive
+mismatch as typed `save_corrupt`, keeping the file intact.
+
+Bounded revision-ordered validation starts from authored initial rows and checks
+each accepted liquid-changing receipt's exact command ID, actor, source/vessel
+identities, historical custody and full prior/replacement quantities. Fill must
+prove the declared current-room source, compatible free capacity and resulting
+carrying admission at that commit; Pour must prove eligible custody and both
+equal debit/credit; Drink must prove the exact kind and serving debit. Reuse pure
+transition validation, not a second gameplay writer. Ordinary transfers preserve
+liquid and may lawfully change historical holders. The final validated quantities
+must agree with current saved rows; an unrelated latest receipt or merely
+bounded current quantity is not provenance. Preserve B3/S2 penny reconciliation
+and any merged B4/C1/B5 consumers without imposing today's custody on their old
+receipts. Do not invent receipt fields; extend the actual bounded verifier as
+needed to reconstruct relevant historical rows.
+
+Real failed COMMIT retains all prior liquid/custody/head/receipt state. Both
+uncertain-COMMIT branches fence input and elapsed work until reconciliation proves
+all prior or all next truth. No committed Fill/Pour/Drink is narrated before
+adoption. Lost acknowledgement and exact receipt replay return the original
+result without another Fill, debit, item allocation or benefit. Real SQLite
+reopen covers fresh, filled, partially poured, drunk-empty, nested, sold/bought
+back and death/recovered states; explicit release mismatch refusal and Start
+over authorization remain unchanged. Unknown successor pins stay unknown until
+the final integration release is compiled and independently re-pinned.
+## C2 patrol attempt recovery
+
+**Selected, pending implementation.** The [typed patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses existing changed-row state storage and receipts. Load/reconcile validate its
+original actor/body/Tobin, exact S3 instance/activation choice, attempt start or
+restart command identity, bounded route cursor/status/credit and revision-ordered
+transition evidence. Each credited checkpoint must trace to that attempt's accepted
+player movement, expected edge and co-present original leader; the leader's own
+entry alone is insufficient. Rejoin never retroactively supplies missing entry proof.
+
+Together requires co-location; awaiting permits leader at the cursor destination
+and player at the preceding source. Paused/failed permit lawful later player travel,
+including co-location before explicit recovery. Leader stays at the saved route
+cursor in all states. Completed requires all four proven distinct entries, S3's
+own resolved `completed` receipt and matching reserved trust. Historical final
+co-location must not reject later player travel, gear loss, lesson payments or death.
+No patrol row exists before activation; failed attempts keep S3 active and credit
+empty, with a same-body fatal event/return receipt. Restart has its own new attempt
+identity and cannot reuse historical credit. Completed trust and retained rows must
+agree in both directions; current co-location/trust is never terminal proof.
+
+Cold reopen each boundary: start, leader ahead/player behind, joined checkpoint,
+pause, arrival before Rejoin, failed death, player return, Restart and completion.
+Cross-check full definition refs/scopes, choice/command IDs, event cause/correlation,
+transfer source/destination and complete prior/result rows. Malformed/missing rows,
+unknown or duplicate credit, impossible cursor/location, swapped leader/actor/quest,
+forged terminal or old-attempt credit return typed `save_corrupt` without repair or
+file rewriting. Existing storage-error and pin-mismatch distinctions remain.
+
+Failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+prove all-old/all-new movement/attempt/quest/trust/head/receipt. Exact receipt retry
+moves, credits, restarts and rewards nothing twice. Reconcile lawful intermediate
+states with the later consumer, including concurrent Wren following/separation;
+no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
+
+## B6 discovery, sitting and ward recovery
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) retains discovery,
+S4 state and topic knowledge in ordinary typed player facts/quest rows; only an
+opted riddle adds its typed continuation count. Persist changed rows and receipt
+atomically. Cold reopen at zero/one/two mistakes restores the exact continuation,
+opening revision, actor, original wisp, dialogue/choice/quest references and count;
+exact-selector Talk receipts must justify the selected dialogue source;
+a third mistake restores a closed sitting and immediate Ask again, never an active
+count-at-limit pending row. Unsent tiles are not saved. After correct answer,
+restore resolved S4, both narrative truth and known ward, and the original bound
+success line once; repeated receipt replay adds no grants or attempts.
+
+Validate each attempt at its historical revision against its source, answer-bank
+validity, exact prior count, actor, participants, causal command/receipt and closure
+or resolution, then reconcile with current rows. Close/death/current light changes
+cannot retroactively invalidate a lawful historical answer. Discovery requires
+successful owned Seek evidence; wrong/malformed answers justify no answered fact
+or ward grant. Reconcile topic truth with actual declared grants, including an
+already-known ward, rather than assume S4 is its only possible future source.
+Missing/null/corrupt bounded counts or bindings, forged wrong receipts, unjustified
+facts and pending-at-limit states refuse `save_corrupt` without repair/deletion.
+No defaulting a missing counter to zero on load.
+
+Light changes, location changes and death may make the pending answer unavailable;
+Close stays usable. Death preserves discovery, knowledge and active/resolved S4;
+after ordinary same-body recovery, Close if needed and Talk to the same reachable
+wisp immediately. This adds no item requirement or new danger. From the shrine,
+all new walking routes and the owned-corpse exception remain gear-free. Failed
+COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the existing
+fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
+and correct transitions. Current-release mismatch remains explicit; no adapters,
+silent counter repair or save deletion is authorized.
+
+## C3 living population recovery
+
+**Selected, pending implementation.** [C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
+saves immutable spawned identities, containment, HP, separately keyed slot rows
+and plan control/current job, RNG, encounter/death changes, head and receipt through
+the existing changed-row
+transaction. Genesis binds the same checked initialization to revision0; later
+origins bind their exact accepted creation command/job occurrence. No loader
+reconciliation spawns an animal, heals HP, replaces an identity or repairs a slot.
+
+Validate full pinned plan/bundle/template refs, slot/generation/member/role and
+creation occurrence, paired initial parent, actual HP rows and current job/due
+binding. Require exactly the declared ordinal slot keys; control stores no duplicate
+membership index. A fatal receipt changes only its bound slot, while a plan-job
+receipt advances control and actual birth/replacement slots. Equal-time combined
+receipts keep their canonical job-ID order and distinct writer groups; cold reopen
+and uncertain-COMMIT reconciliation accept both legal orders with the same conserved
+fatal slot/corpse/pelt and one current plan successor. No-op rewrites of other slots
+are not valid transition evidence. Later ordinary pelt custody may be its hound,
+public corpse, room, player, bag or other legal owner; validate revision-ordered transfer/death evidence rather
+than requiring its original parent forever. Old HP0 hound identities remain valid
+corpse victims after their slot advances. A due time must trace to that member's
+positive-to-zero fatal event at fatal clock + declared delay. Fresh/never-used,
+living and replacement-eligible slots have the mechanics' distinct row shapes.
+
+Require matching causal command IDs, full refs/scopes, writer groups, event cause/
+correlation and complete prior/result slot rows for creation, fatal eligibility
+and replacement. Reopen accepts every lawful complete intermediate state, including
+live members in either area room, partially injured or engaged members, retained
+dawn surplus, dead slots before/at due and old pelts already taken after replacement.
+Invalid/missing HP, orphan bundle, swapped plan/parent/generation, impossible member
+or job/receipt proof is typed `save_corrupt`, with no rewriting or skipped rows.
+
+Real failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+must reconcile all-prior/all-next identities, slot/generation/due, custody, HP,
+RNG, jobs, encounters, head and receipt. Fence input and elapsed until resolved;
+receipt replay allocates/transfers/schedules nothing twice. Exact unavailable or
+mismatched release pins refuse explicitly; only explicit Start over replaces the
+save. No save migration, periodic checkpoint or second population receipt ledger
+is selected. Browser reload/Book evidence is distinct from real SQLite faults.
+
+## C4 pack and flight recovery
+
+**Selected, pending implementation.** [C4](protocol.md#c4-pack-encounter-and-flight-composition)
+persists the encounter's exact active roster/primary/cursor/job, selected attacks,
+HP/RNG/death, enemy movement and per-slot last-flight clock with ordinary changed
+rows, head and receipt in one transaction. Reopen validates current pin, complete
+prior/result transitions and causal Attack/run_job/flight/death evidence; replay
+never re-admits helpers, rotates again, transfers a pelt or rolls again.
+
+Validate bounded unique same-plan current-generation IDs, original attacked
+primary/admission evidence, current primary/cursor membership and exact current
+job/round/due relation. Bind flight to the selected living hound, actual departure
+room/legal edge, threshold, slot generation and occurrence clock; later legitimate
+wandering, death, replacement and pelt Take do not invalidate historical flight.
+`last_flight_at` is null or a proven flight clock not greater than the saved clock,
+not a freely forgeable timestamp. Old HP0 victims remain valid historical corpse
+identities after C3 replacement; no loader heals, moves, deletes or repairs them.
+
+Accept lawful partial states after Attack, each helper's turn, primary death/
+reselection, successful or blocked flight, final withdrawal and whole-pack player
+Flee/death. A member may lawfully be absent before a pending round through another
+registered movement consumer; as in installed combat, validate its actual legal
+custody and evidence rather than require historical co-presence forever. The next
+round prunes it without remote attack, repairs selection and closes when empty.
+Unknown/malformed membership, forged flight/primary/cursor/slot/job or missing
+receipt linkage is typed `save_corrupt` without rewriting bytes.
+
+At equal flight/population deadlines, retain and reopen either lawful allocated
+job-ID order, including the same-clock wander suppression. Real failed COMMIT,
+unknown-not-committed, unknown-committed and lost acknowledgement reconcile the
+complete prior or next encounter, flight clock, custody, slots/control, HP/RNG,
+jobs, head and receipt. Fence input and elapsed until resolved. Pin mismatch is
+explicit refusal, with no silent deletion or compatibility adapter. Browser Book
+reload remains separate from real SQLite transaction/fault evidence.
+
+## B8 service recovery
+
+**Selected, source pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
+stores only changed balances, entitlement, meal stock, ale row and settled MV
+plus head/receipt in the existing transaction. No service ledger/table, save
+migration or reset-on-open exists. Reopen/reconciliation validates the exact
+original actor/body/provider/service/quote, full refs/scopes, causal command and
+prior/result rows against authored initial truth and revision-ordered receipts.
+B3/S2 payment history and B7 liquid history must recognize the new service
+producer without weakening their own checks. Merely plausible bounded stock,
+MV or paid=true is insufficient evidence. Lawful later movement, death, elapsed
+recovery and other payment producers cannot invalidate an old service receipt.
+
+Room proof requires its unique paid transition and matching exact payment;
+meal proof requires one exact stock debit/payment and independently valid capped
+MV settlement; drink proof requires historical provider-owned exact vessel/kind,
+complete serving debit/payment and MV settlement. Missing/extra malformed opted
+rows, altered bounded stock/quantity, forged entitlement, swapped provider/service,
+wrong price or omitted benefit/payment yields typed `save_corrupt`, preserving
+the file. Never grant, refill, delete, heal or repin to repair a save.
+
+Real failed COMMIT and uncertain-not-committed reopen all prior state; uncertain
+committed/lost acknowledgement reopen all next state. Input and elapsed remain
+fenced while unknown; exact invocation replay charges/consumes/grants nothing
+again. Reopen unpaid, paid-before-Rest, meal-used, ale-partial/empty and actual
+same-body death/recovered states, then invoke their next consumer. Confirmed
+service narration is retained once at the original Maud detail through the
+committed command identity, never inferred from an unrelated latest receipt.
+
+## D2 book knowledge and Read recovery
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
+ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
+cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
+historical Read command/receipt: actor/body, original item and pinned readable/topic
+metadata, lawful held/open-ancestor custody at that revision, causal assignment and
+prior knowledge. A lawful B6 grant also justifies ward; neither source requires the
+other. Already-known Read supplies narration without a new grant. Later Drop, Put,
+lid closure, travel, schedule movement or death cannot invalidate historical Read.
+Current fact truth must agree with the lawful grant history in both directions.
+
+Real SQLite reopen must accept every legal committed intermediate: ground books,
+directly held, open nested holding, closed nested holding, each learned topic,
+already-known reread and later stored/dropped/dead states. Reopen the novice overlap
+and departure, then exercise the next ordinary Read/Talk/move consumer. Missing or
+malformed topic mapping/fact, forged actor/book/source/cause, grant from unheld or
+closed custody, omitted required grant or unjustified knowledge returns typed
+`save_corrupt`, with existing in-place Start over and no silent repair/deletion.
+Operational read failures keep their existing storage-error handling.
+
+Failed COMMIT, both committed and absent uncertain-COMMIT outcomes, and lost
+acknowledgement preserve all-prior or all-next knowledge/receipt state. Exact retry
+replays the original response and grants nothing twice, including after later
+custody changes. Retained Read narration routes once to that exact book detail;
+restore its currently reachable parent chain only when projected, with normal
+scene/chapter precedence. An unavailable book yields no invented visible route or
+World/other-book narration fallback. Current-release pin refusal remains explicit.
+
+## B9 dream recovery
+
+**Selected, source pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+uses existing fact, quest, choice and receipt tables. There is no snapshot, new
+save format, dream ledger or save-on-display. First-Rest credit, S10 activation
+and scene beat1 start commit together even when presentation is deferred.
+Each Continue/branch writes its checkpoint/choice with its receipt.
+Final end, `dream_seen=true`, S10 `resolved/acknowledged` and receipt commit in one
+transaction before adoption and confirmed narration. No dream completion report
+is allocated. Closing or resuming presentation never manufactures an end.
+
+Cold reopen and reconciliation validate the exact revision-ordered chain: B8
+paid entitlement/payment before the qualifying Rest; stored root Rest command,
+actor/body/prior position/actual Inn Rooms, full refs/scopes and causal event;
+first-Rest fact and unique S10 instance; scene start and each bound beat/choice;
+final acknowledged scene end and its sole memory/quest resolution. Bounded
+current facts alone do not prove history. Choice source/beat/anchor/actor,
+continuation id, root cause/correlation and branch must agree with receipts;
+a swapped unrelated Continue cannot justify the memory. Check evidence in both
+directions so a terminal receipt cannot justify today's active S10 or vice versa.
+Lawful later payment, travel, elapsed, body death/return and other modal scenes
+must not invalidate original anchor/body proof. Ending preserves the chosen
+branch; neither reopening nor death changes it or resets entitlement/credit.
+
+Admit unseen/unpaid, paid-before-Rest, started/deferred, each shown narration,
+pending choice, each selected final line, closed/away/combat/returned and ended
+states, then exercise their next actual consumer. Wrong/null rows, impossible
+cursor/branch, duplicate S10/start/end, forged paid/Rest/memory, missing/wrong
+receipt event, early memory or mismatched terminal quest yield typed
+`save_corrupt`, preserve the file and offer existing recovery; never silently
+repair, export, delete or repin. Explicit missing-release refusal still applies.
+
+For qualifying Rest, choice and final acknowledgement, real
+failed COMMIT and unknown-not-committed reopen all old; unknown-committed/lost
+reply reopen all new. Fence both input and elapsed until reconciliation. Exact
+invocation replay preserves the original result and adds no credit/branch/memory.
+Confirmed narration restores to the actual bed/dream nesting by committed command
+identity; when away, retain honest history and Resume availability on legal return,
+never an invented Inn Rooms backdrop or unconfirmed completion.

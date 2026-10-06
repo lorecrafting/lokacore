@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""Chapter 1 board: git facts plus explicitly reported operational status."""
+import argparse
+import datetime as dt
+import html
+import json
+import math
+import pathlib
+import re
+import subprocess
+import time
+import tempfile
+
+PHASES = ('plan', 'build', 'checks', 'provisional', 'reviews', 'fixes', 'local complete', 'publication')
+
+
+def redact(value):
+    value = re.sub(r'(?:/Users/|/home/|/private/|/tmp/|/var/|[A-Za-z]:\\)[^\s<>"\']+', '[local path]', str(value))
+    value = re.sub(r'(?<![\w/])(?:~/|(?:\.\.?/)*tmp/)[^\s<>"\']+', '[local path]', value)
+    value = re.sub(r'\b[0-9A-Fa-f]{8}-(?:[0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}\b', '[identifier]', value)
+    return re.sub(r'(?i)\b(?:udid|ecid|serial|team.?id|certificate|provisioning|device.?name)\s*[:=]\s*[^\n,;]+', '[device/signing identifier]', value)
+
+
+def run(repo, *args):
+    try:
+        result = subprocess.run(args, cwd=repo, text=True, capture_output=True, timeout=20)
+        return result.stdout.strip() if result.returncode == 0 else None
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+def git(repo, *args):
+    return run(repo, 'git', *args)
+
+
+def document(repo, path):
+    return git(repo, 'show', f'main:{path}') or ''
+
+
+def plan_rows(text):
+    rows = []
+    for line in text.splitlines():
+        match = re.match(r'\| \*\*([A-E]\d+)\s+(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|', line)
+        if match:
+            row = dict(zip(('slice', 'outcome', 'depends', 'lift'), match.groups()))
+            row['outcome'] = row['outcome'].replace('**', '')
+            rows.append(row)
+    return rows
+
+
+def read_notes(path):
+    notes, errors = [], 0
+    if path.exists():
+        for line in path.read_text().splitlines():
+            try:
+                item = json.loads(line)
+                if not isinstance(item, dict) or item.get('phase') not in PHASES:
+                    raise ValueError('invalid note')
+                notes.append(item)
+            except (ValueError, TypeError):
+                errors += 1
+    return notes, errors
+
+
+def snapshot(repo, notes_path, github=False):
+    roadmap = document(repo, 'docs/ROADMAP.md')
+    complete = re.search(r'completion slices \(([^)]+)\)', roadmap)
+    completed = set(re.findall(r'\b[A-E]\d+\b', complete[1])) if complete else set()
+    rows = plan_rows(document(repo, 'docs/MISSING-CHILD-PLAN.md'))
+    notes, errors = read_notes(notes_path)
+    for row in rows:
+        row['roadmap'] = 'complete (roadmap)' if row['slice'] in completed else 'candidate'
+        row['reports'] = [n for n in notes if n.get('unit') == row['slice']]
+    worktrees = []
+    for block in (git(repo, 'worktree', 'list', '--porcelain') or '').split('\n\n'):
+        fields = dict(line.split(' ', 1) for line in block.splitlines() if ' ' in line)
+        if 'worktree' in fields:
+            path = fields['worktree']
+            status = git(path, 'status', '--porcelain')
+            worktrees.append({'branch': fields.get('branch', 'detached').removeprefix('refs/heads/'),
+                              'head': fields.get('HEAD'),
+                              'description': git(path, 'log', '-1', '--format=%s'),
+                              'dirty': len(status.splitlines()) if status is not None else None})
+    prs = run(repo, 'gh', 'pr', 'list', '--state', 'all', '--limit', '40', '--json',
+              'number,title,state,url,headRefOid,headRefName,statusCheckRollup') if github else None
+    local = git(repo, 'rev-parse', 'main')
+    remote_ref = 'upstream/main' if git(repo, 'rev-parse', '--verify', 'upstream/main') else 'origin/main'
+    remote = git(repo, 'rev-parse', '--verify', remote_ref)
+    origin_url = git(repo, 'remote', 'get-url', 'origin') or ''
+    mirror = remote_ref == 'origin/main' and not re.match(r'(?:https?://|ssh://|git://|[^/]+@[^:]+:)', origin_url)
+    remote_label = f'Cached {remote_ref}' + (' (local mirror; publication unknown)' if mirror else ' (publication baseline)')
+    ahead = git(repo, 'rev-list', '--left-right', '--count', f'{remote_ref}...main') if remote and local else None
+    commits = git(repo, 'log', '--format=%h %s', f'{remote_ref}..main') if ahead else None
+    return {'at': dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'), 'rows': rows,
+            'notes': notes, 'note_errors': errors, 'worktrees': worktrees, 'local': local,
+            'remote': remote, 'remote_label': remote_label, 'divergence': ahead, 'commits': commits,
+            'prs': json.loads(prs) if prs else None, 'github_requested': github}
+
+
+def table(headers, rows):
+    esc = lambda value: html.escape(redact('unknown' if value is None else value))
+    return '<table><tr>' + ''.join(f'<th>{esc(h)}</th>' for h in headers) + '</tr>' + ''.join(
+        '<tr>' + ''.join(f'<td>{esc(c)}</td>' for c in row) + '</tr>' for row in rows) + '</table>'
+
+
+def render(data, watch=False):
+    esc = lambda value: html.escape(redact(value))
+    reports = data['notes']
+    latest = {}
+    for note in reports:
+        latest[note.get('unit')] = note
+    phases = table(('Phase', 'Last-reported units'), [(phase, ', '.join(
+        str(n.get('unit')) for n in latest.values() if n['phase'] == phase) or '—') for phase in PHASES])
+    notes = table(('Unit / description', 'Phase', 'Agent / activity', 'Reported UTC', 'Check / seconds', 'Exact head'), [
+        (f"{n.get('unit')} — {n.get('description') or 'unknown'}", n['phase'],
+         f"{n.get('agent') or 'unknown'} — {n.get('activity') or 'unknown'}", n.get('at'),
+         f"{n.get('check') or '—'} / {n.get('seconds') if n.get('seconds') is not None else 'unknown'}", n.get('head')) for n in reversed(reports[-50:])])
+    rows = table(('Slice / player outcome', 'Dependencies', 'Lift (not time)', 'Roadmap', 'Last report'), [
+        (f"{r['slice']} — {r['outcome']}", r['depends'], r['lift'], r['roadmap'],
+         f"{r['reports'][-1]['phase']} @ {r['reports'][-1].get('at')}" if r['reports'] else 'no report') for r in data['rows']])
+    trees = table(('Work branch', 'Latest commit description', 'Head', 'Changed files'), [
+        (w['branch'], w['description'], w['head'], w['dirty']) for w in data['worktrees']])
+    pr_rows = []
+    for pr in data['prs'] or []:
+        checks = []
+        for check in pr.get('statusCheckRollup') or []:
+            duration = None
+            if check.get('startedAt') and check.get('completedAt'):
+                duration = (dt.datetime.fromisoformat(check['completedAt'].replace('Z', '+00:00')) -
+                            dt.datetime.fromisoformat(check['startedAt'].replace('Z', '+00:00'))).total_seconds()
+            checks.append(f"{check.get('name', check.get('context', '?'))}: {check.get('conclusion') or check.get('state') or check.get('status')} ({duration if duration is not None else 'unknown'}s)")
+        pr_rows.append((f"#{pr['number']} {pr['title']}", pr['state'], pr['headRefName'], pr['headRefOid'], '; '.join(checks) or 'unknown', pr['url']))
+    prs = table(('PR / one-line description', 'State', 'Branch', 'Head', 'Hosted checks / duration', 'URL'), pr_rows)
+    github_label = 'queried' if data['prs'] is not None else 'unavailable' if data['github_requested'] else 'not queried'
+    refresh = '<meta http-equiv="refresh" content="5">' if watch else ''
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8">{refresh}<title>Loka Chapter 1 board</title>
+<style>body{{font:15px system-ui;margin:2rem;background:#111827;color:#e5e7eb}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}td,th{{padding:.65rem;border:1px solid #374151;text-align:left;vertical-align:top;overflow-wrap:anywhere}}th{{background:#1f2937}}h1,h2{{color:#a7f3d0}}pre{{white-space:pre-wrap}}p{{line-height:1.6}}</style>
+<h1>Chapter 1 delivery board</h1><p>Generated UTC {esc(data['at'])}. {'Refreshes every 5s while the watch command runs.' if watch else 'Snapshot; rerun bin/board to refresh.'}
+Agent activity is last reported, never OS liveness. Changed files do not imply a running agent.
+Reports are operational claims, not independent approval; review and check evidence must match the exact head.
+Local checks are not hosted CI. GitHub: {github_label}. Remote refs are cached; this command never fetches.
+Slice IDs group areas, not execution order; dependencies choose the next source work.
+Candidate means planned but not locally complete; no report means no activity logged; unknown means an exact fact has not been reported. None means skipped.</p>
+<h2>Local integration and publication</h2><p>Local main: {esc(data['local'] or 'unknown')}<br>{esc(data.get('remote_label', 'Cached remote main'))}: {esc(data['remote'] or 'unknown')}<br>
+Remote-only / local-only commits: {esc(data['divergence'] or 'unknown')}</p><pre>{esc(data['commits'] or 'No known local-only commits')}</pre>
+<h2>Pipeline — last reports</h2>{phases}<h2>Activities and measured checks</h2><p>Malformed report lines ignored: {data['note_errors']}. Unreported phase start/end times and check durations remain unknown.</p>{notes}
+<h2>All {len(data['rows'])} Chapter 1 slices and dependencies</h2><p>Source: local main completion plan and roadmap. Plan dependency/lift values are recommendations, not implementation proof.</p>{rows}
+<h2>Work units</h2>{trees}<h2>Recent GitHub PRs</h2>{prs}</html>'''
+
+
+def write_output(output, content):
+    with tempfile.NamedTemporaryFile(mode="w", dir=output.parent, prefix=".chapter-board-", delete=False) as stream:
+        temporary = pathlib.Path(stream.name)
+        stream.write(content)
+    try:
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--repo', type=pathlib.Path, default=pathlib.Path.cwd())
+    parser.add_argument('--output', type=pathlib.Path)
+    parser.add_argument('--watch', action='store_true')
+    parser.add_argument('--github', action='store_true', help='query gh (read-only; network/auth needed)')
+    parser.add_argument('--note', metavar='UNIT')
+    parser.add_argument('--phase', choices=PHASES)
+    parser.add_argument('--agent')
+    parser.add_argument('--activity')
+    parser.add_argument('--description')
+    parser.add_argument('--head')
+    parser.add_argument('--check')
+    parser.add_argument('--seconds', type=float)
+    args = parser.parse_args()
+    repo = args.repo.resolve()
+    if git(repo, 'rev-parse', '--is-inside-work-tree') != 'true':
+        parser.error('repo must be a Git checkout')
+    notes = repo / 'tmp/chapter-board-status.jsonl'
+    if args.note:
+        if not args.phase or not args.activity:
+            parser.error('--note requires --phase and --activity')
+        if args.seconds is not None and (not math.isfinite(args.seconds) or args.seconds < 0):
+            parser.error('--seconds must be finite and nonnegative')
+        note = {key: getattr(args, key) for key in ('phase', 'agent', 'activity', 'description', 'head', 'check', 'seconds')}
+        note.update(unit=args.note, at=dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'))
+        notes.parent.mkdir(parents=True, exist_ok=True)
+        with notes.open('a') as stream:
+            stream.write(json.dumps({k: redact(v) if isinstance(v, str) else v for k, v in note.items()}) + '\n')
+        if not args.watch:
+            print('Operational report recorded; watcher will refresh, or rerun bin/board.')
+            return
+    output = args.output or repo / 'tmp/chapter-board.html'
+    output.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        while True:
+            write_output(output, render(snapshot(repo, notes, args.github), args.watch))
+            print('Chapter board refreshed.', flush=True)
+            if not args.watch:
+                break
+            time.sleep(5)
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == '__main__':
+    main()

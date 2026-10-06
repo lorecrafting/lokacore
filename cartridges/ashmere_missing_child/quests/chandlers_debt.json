@@ -1,0 +1,32 @@
+{
+  "title": "quest.chandlers_debt.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "has_item",
+        "item": "tithe_ledger"
+      }
+    }
+  },
+  "deadline": {
+    "at": 237601,
+    "outcome": "never",
+    "fact": "priory_tithe_delivered",
+    "trust_fact": "peg_trust",
+    "trust_amount": -5
+  },
+  "journal": {
+    "active": "quest.chandlers_debt.active",
+    "objectives_met": "quest.chandlers_debt.ready",
+    "resolved": "quest.chandlers_debt.resolved",
+    "failed": "quest.chandlers_debt.failed",
+    "abandoned": "quest.chandlers_debt.abandoned",
+    "outcomes": {
+      "on_time": "quest.chandlers_debt.on_time",
+      "late": "quest.chandlers_debt.late",
+      "never": "quest.chandlers_debt.never"
+    }
+  }
+}

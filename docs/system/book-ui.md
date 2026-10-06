@@ -4,6 +4,9 @@ Canonical presentation behavior for rebuilding the phone book. The host boundary
 [architecture](architecture.md#book-presenter); action admission, freshness and state come
 from [GameView](protocol.md#gameview). This specification changes presentation, not rules,
 authority, content, receipts or save formats.
+The [Book component guide](../BOOK-UI-COMPONENTS.md) maps these rules to the current
+shared client; the [delivery workflow](../WORKFLOW.md#book-interaction-delivery) requires
+interaction-rule updates in the mechanic slice that needs them.
 
 Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
 [room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md),
@@ -381,3 +384,273 @@ outcomes; a stale displayed choice can refuse safely after due work, without a
 false success entry. Neither the page nor reading suspends the clock or demands a
 Wait. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 These controls await B2 implementation.
+
+## B3 shop detail
+
+Peg's NPC detail presents the current [authored shelf](cartridge.md#pegs-b3-shelf)
+with exact prices and Buy/Sell controls only for eligible item identities. Sold-out,
+unaffordable and too-heavy offers state their current reason; no control promises
+an unavailable exchange. The ordinary live-action freshness token and command
+admission recheck the same offer when tapped. Only a confirmed receipt adds purchase
+or sale narration to Peg's history and refreshes pennies, custody and inventory.
+Stale/refused/fenced results never claim success. Leave retains the existing NPC
+detail behavior and the world clock continues while the page is open.
+
+## C1 teaching and defense details
+
+**API1.18 interaction contract.** Tobin's NPC page offers the current bound
+lesson, its authored price and immediate result under ordinary Talk/Choose/Leave,
+with no new trainer screen or idle-wait control. The swords lesson comes first and
+the next conversation offers dodge. Already acquired teaching is unavailable and
+cannot suggest a replacement gift. Learning and qualification are described
+separately: the Character page lists each declared acquired skill and its current
+qualified/unqualified status plus the authored requirement. Unlearned status does
+not imply a combat benefit. Current chapter STR/DEX are shown from GameView. The
+Character page reads `attributes` and `skills` from confirmed GameView data, filters
+skills by `acquired`, and shows each authored label, requirement and current qualification.
+Known attributes or acquired skills suppress the empty Character placeholder.
+
+The gifted sword and actual Peg equipment use ordinary item detail, Wear and Remove.
+Show their authored slot/profile or block chance, plus the skill requirement where
+needed; carrying a sword is visibly distinct from wielding it. Read numbers and labels
+from the projected cartridge data, never renderer literals or inferred item names.
+No active Dodge button, skill percentage bar, proficiency rank or future skill appears.
+A held sword offers Wear; its worn item offers Remove. Its detail describes the declared
+wield slot, attack chance/damage and projected skill label/requirement. Shield detail
+shows the off-hand slot and authored block chance. These descriptions do not grant use.
+
+The existing combat page narrates committed dodge/block prevention once using the
+structured attack-result supplement and authored text; an accuracy miss has its own
+ordinary narration. Pending, stale, refused and faulted actions never claim paid
+training, acquisition, gift or defended damage. Reopen/retry retain confirmed lesson
+history in Tobin detail and combat history in combat detail through the existing
+receipt routing; ordinary World events remain separate. Shared action freshness and
+combat/scene precedence continue to govern all offers and raw invocation admission.
+The ordinary NPC controls open swords first, then dodge after the committed swords
+lesson. After both grants there is no lesson control. The focused Book scenario clicks
+these actual controls and cold reopens after each lesson, recovering the returned
+committed line once under Tobin; it also checks Character and equipment detail data.
+This headless component/authority proof supplies no browser layout or native claim.
+
+## B5 herbs and Wick details
+
+Willow Shade's patch detail shows its current finite supply and Harvest for one
+real eligible item; empty or too-heavy stock states the current refusal. The
+ordinary inventory may also Take those same room items. Wick's public NPC detail
+explains the exact authored herb/reward quantities, offers explicit Accept or
+Reaccept only when the funded exchange can begin, and offers Turn in for an
+active ready occurrence. The journal distinguishes active, resolved and optional
+reacceptance without promising regrowth or tomorrow's stock. All controls use
+shared confirmed projection/admission and ordinary live-action freshness.
+
+Only a confirmed exchange updates inventory, contribution/faction, journal and
+Wick history. Refused/stale/fenced outcomes never claim reward or completion.
+Drop, stored herbs or corpse custody explain retrieval through the existing item
+and recovery controls. Exhausted or given-away finite supply is an honest optional
+unavailable exchange, never a chapter-blocking wait. No bandage-use or herbalism
+control is exposed before its later real consumer lands.
+
+## B4 light details
+
+Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) uses ordinary
+inventory/item detail for confirmed fuel and Ignite/Douse/Refuel. Refuel identifies
+the exact directly held compatible bottle; Wear/Remove and Put/Take retain their
+existing places. The presenter emits ordinary ActionInvocation and owns no fuel
+arithmetic, automatic ignition or clock. Confirmed receipts refresh light, supply
+and World; stale/refused/fenced results never narrate success.
+
+The dark World description keeps traversable compass/stair exits, inventory and
+recovery controls usable. It displays no hidden detail links or Scan identities.
+Owner-corpse detail and ordinary accessible belongings remain usable in darkness.
+After the same torch is lit directly held or worn, the authored masonry detail is
+visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
+view. Existing freshness handles a control selected before elapsed exhaustion.
+No required waiting, darkness modal, new native control or unfinished lantern UI.
+
+## B7 water details
+
+**Selected, pending implementation.** Well Lane's actual well detail offers Fill
+with an exact currently eligible vessel destination. Inventory and reachable
+item details show confirmed liquid kind, quantity/capacity and authored unit
+label, and offer Drink or Pour to a distinct eligible owned vessel. Distinguish
+the original and spare waterskin with authored names; retain exact IDs through
+target selection rather than resolve an ambiguous keyword automatically.
+Ordinary empty/full/incompatible/carrying refusals use the shared projected
+availability and admission reason. No fake well room, text amount field or new
+management screen is required. Local Leave remains navigation only.
+
+Use the existing ActionInvocation/freshness boundary for the exact displayed
+source/receiver and view context. Revalidate after time/custody/quantity changes;
+a stale pair never silently substitutes another skin. Pending/unknown saves
+show no optimistic quantity or success log. Confirmed action narration reflects
+the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
+saved state. Book owns neither liquid math nor a consumption effect producer.
+## C2 watch patrol details
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
+page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
+current state; C1 lessons remain available at his actual location. The journal names
+the original leader's actual room, next route destination, unique checkpoint progress
+and together/awaiting/paused/failed/completed state. Awaiting explicitly says to walk
+the shown ordinary exit; it offers no second leader departure. Paused arrival says
+Rejoin is still required, while failure says return to Tobin and Restart now.
+
+Show unavailable reasons from shared kernel admission and maintain Close/Leave.
+Capture the exact attempt/cursor/status with each drawn control under existing live
+action freshness. Pending, refused, stale and faulted results claim no movement,
+credit or trust. Only committed narration appears, once, including after lost reply
+and reopen. No new watch page, immunity while reading, countdown, nighttime wait,
+optimistic follow or timer-driven movement is added. Browser proof must walk the
+real start→leader departure→player join→pause/rejoin→death/restart→success route;
+native verification remains paused under the owner decision.
+
+## B6 Seek, retry and ward details
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) uses the shared
+Book at every hour. Marsh Light shows truthful darkness, known return exits and
+its authored glow marker with Seek Wisp; reveal the actual wisp detail only after
+confirmed discovery. A lit carried source explains unavailable Seek/Talk/answer
+through the same confirmed admission result. Ordinary dark objects stay hidden.
+
+Wisp detail follows description → committed history → offered controls. Explicit
+Accept leads to the existing letter-bank controls with committed attempts/limit;
+wrong lines stay with the original speaker. At the third wrong line, discard the
+old tile buffer and show Ask Wisp again immediately, with an active quest journal.
+Fresh Talk resets the sitting, never the quest or learned facts. Close remains
+available through stale light, departure, death, scenes and save recovery under
+existing precedence; stale invocations retain their sent answer for exact retry.
+
+After confirmed success the journal names the ward discovery and the declared ward
+label appears once. At public Aldric, Ask about ward is absent before knowledge,
+then independently selectable beside eligible debt/bell conversations; opening it
+must target its authored dialogue rather than Talk's first eligible key. Its reply
+is informational and promises no spell. Cold reopen restores the exact committed
+wrong/success speaker line once, using that invocation's receipt; never borrow an
+unrelated latest receipt or treat selected tiles as a grant.
+
+## C3 living hound and loot details
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+projects each co-present living hound as its own existing NPC detail/action target,
+with its exact EntityId and current HP condition. Shared blueprint names may be
+the same; selecting an entry binds that instance, never the first definition match.
+Departure/death prunes its detail route and stale Attack revalidates presence/life;
+a different generation cannot inherit the old invocation. Adjacent Scan includes
+living spawned members through ordinary movement sight. HP0 hounds are absent.
+
+Attack opens the existing Combat page, with C1 defenses and only its current
+Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
+the real public hound corpse and its ordinary Contents/Take path. Successful Take
+shows that exact pelt in Carrying, with committed custody narration once. Refused,
+pending or faulted commands claim no spawn, kill or loot. Reopen uses structured
+receipt routing, keeping combat history on Combat and Take history on item detail.
+No ecology status screen, countdown, Skin verb or next-day instruction is needed.
+An all-hours fresh-game Book walk uses existing initial hounds in either allowed
+room, following adjacent sight now when home is empty. Required story, loot/corpse
+recovery and that walk never require waiting for respawn, wandering or darkness.
+
+## C4 pack response and enemy flight details
+
+**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+uses the existing NPC Attack and Combat page. Each hound entry/detail retains its
+exact runtime target. GameView projects the current primary and actual active
+opponents so identical template labels never select another instance; no raw UUID
+needs to appear in prose. Committed admission narration names the assisting
+members, and their own attack results demonstrate real help. Flight names the
+departing member and real direction/destination; a primary change identifies the
+new target. Neither presenter nor elapsed redraw chooses a helper or moves one.
+
+While any opponent remains, keep Combat precedence and its current Flee/Stand/
+Look/Scan ActionSet; do not reveal Attack/Move/equipment or hide Flee behind an
+old NPC conversation. Flee retains current cost/standing refusal semantics.
+Final withdrawal/death/escape restores World and ordinary actions from saved
+state. Enemy flight grants no Carrying entry or corpse; only actual death exposes
+the ordinary real corpse/pelt Take path. All hounds remain passive during ordinary
+reading, room entry and corpse recovery at every hour.
+
+Pending-save fences and typed refusal/fault remain visible with no premature
+success. Membership/flight/primary narration routes once to retained Combat
+history, including same-receipt closure and cold reload. Stale Attack/detail
+targets revalidate after due settlement; a clock redraw cannot resurrect a dead,
+departed or replaced member. Prove real helper attacks, flight, whole-pack Flee,
+lethal loss/owned recovery and exact loot through Book; native work remains paused.
+
+## B8 Maud and bed details
+
+**Selected, source pending.** Original Maud's detail follows the canonical
+[detail order](#detail-page-order), with authored description, nonempty committed
+history, then current S1 dialogue and separate Room/Meal/Drink service offers.
+Each offer states its projected exact price and declared benefit, including
+capped MV recovery and availability reasons. Sold-out,
+already-paid, full-MV and unaffordable offers cannot appear actionable. Existing
+Leave, scene/combat precedence, live freshness and pending-save fence remain.
+Services do not steal S1's first-eligible Talk/turn-in, open a synthetic dialogue
+or create success merely by rendering the menu.
+
+Accepted service narration stays in Maud's history and refreshes confirmed
+pennies/MV/availability once, also after lost reply, cold reopen and exact replay.
+Pending/refused/stale/fault outcomes claim no purchase or recovery. Bed rental
+narration points upstairs; the actual Inn Rooms bed detail shows confirmed free
+or paid text and offers the existing ordinary Rest only when entitled and
+currently admitted. This control emits the existing targetless Rest invocation;
+its bed identity belongs to the local detail route, not a new command target.
+Rest uses position's existing stable-route behavior and
+confirmed outcome. It never narrates a dream or sleep for rental. Ordinary
+position controls remain accessible without payment; Leave returns to World.
+No optimistic balances, local entitlement flags, recovery-rate bonus, time
+pause or new store/UI framework is introduced.
+
+## D2 held book details
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
+ordinary item detail order and custody projection. World → book detail → Take
+confirms the existing return to World. Contents → Equipment & Inventory → held
+book detail offers explicit Read; opening that item sends no Read. For an open
+held container, tapping its projected child pushes the child's full detail onto
+the existing stack. Back to the immediate container pops locally without a command;
+Leave/Back to World clears the stack. No new document/page-navigation system is added.
+Closed/locked ancestors expose no child Read or invented text.
+
+Read follows shared `buttonsOf`, `actionContext`, freshness, pending-save and exact
+retry handling. The confirmed one-page text appends to that exact item's history,
+then current options; the item page stays open. Pending/refused/stale/fault attempts
+show no learned topic or invented page text. Character shows the projected known
+topic labels; re-rendering or visiting Character never grants them. Intentional new
+Read can repeat text; replay of one invocation appends once. Authority clock and
+NPC schedules continue while a player browses these local pages.
+
+After chapter Continue on cold reopen, recover the latest committed Read to its
+original book history and currently reachable item route, including the projected
+open held-container parents. If custody no longer permits that route, retain exact
+history identity without opening an obsolete detail or copying text to World.
+Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
+separate touch cards at the declared overlap; a departed novice's pending context
+retains its original identity and follows normal refusal/Leave rules.
+
+## B9 bed and resumable dream details
+
+**Selected, source pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+uses World→actual Inn Rooms bed→Dream nesting. The paid bed's accepted ordinary
+Rest may open its first dream at the confirmed first beat. Rental, menu opening,
+unpaid Rest or a pending save never does. First Rest commits beat1 even if
+presentation is deferred; the bed shows Resume dream once safely available.
+Resume is a local route, not a world-level shortcut or synthetic room.
+
+The dream is a detail page in canonical title/description, nonempty committed
+history, current options order. It shows the saved narration, then at the choice
+only Follow the fox/Wake, then the selected final line and Acknowledge. Choice
+selection alone claims no memory. Close returns to the real bed; Leave bed returns
+to World. Contents/World access, ordinary position controls, real travel and S2
+delivery stay usable. Close changes only the local route; the durable cursor and
+choice remain. Cold reopen offers Resume through the actual bed rather than forcing
+the dream. Moving away, combat/harm/return or modal precedence exits unavailable
+presentation to the actual current context and preserves its checkpoint.
+
+Every captured control retains actor, anchor, scene, shown beat and exact choice
+identity/revision where applicable. Freshness cannot be refreshed across a branch,
+beat, room, choice or modal/combat change. Refusal redraws saved truth; pending
+uses the original invocation and context and shows save not confirmed. Confirmed
+final acknowledgement displays the once-only memory and truthful resolved S10
+journal, also after lost reply/replay/reopen. There is no optimistic dream_seen,
+clock pause, body/map switch, second event transcript or presenter gameplay writer.

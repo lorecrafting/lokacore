@@ -1,52 +1,218 @@
-# C3 — A bounded persistent fen pack, real deaths and conserved loot
+# C3 — Living Fen hounds, bounded persistence and real fight loot
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted PM plan; dependency re-pin and independent plan review required before
+source GO.** Source branch `chapter-1/c3-living-hounds`, isolated developer worktree.
+Inspected local base `98cc60b1647d031eed790ca085681bbe62af9d73`, chapter0.0.18/API1.16.
+B1/B3 are integrated; C1 source is active. B5 source and other intervening release
+edits are not pinned here. B5 is not a hound mechanics dependency, but serialize
+shared cartridge/schema/save edits and record the actual reviewed predecessor.
+C3 successor release/API/hash/fresh IDs, source head, PR, verdicts and proof: null.
+This docs-only plan runs no runtime, browser, SQLite or native acceptance.
 
-2026-10-05. **Provisional PM draft; no adoption/source GO/proof claimed.** Row C3 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c3-living-hounds`; lift 0.9–1.1. Inspected PM main `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10. Current runtime can create/hydrate only pinned death-origin corpse item templates; generic `spawned` provenance exists in schema but is **not executable population support**. Current jobs bind one authored NPC definition, and authored `entityIds` maps one initial instance. New release/API/hash/allocation/source/PR: **null**. No tests or runtime/device/save work performed here.
+## Player outcome and governing contract
 
-## Player result and dependencies
+C3: encounter bounded persistent Fen hounds, deliberately fight one and Take its
+actual pelt from its real corpse. Follow [PM adoption](../../decisions/pm-decision-c3-living-hounds-2026-10-05.md),
+[population mechanics](../../system/mechanics.md#c3-bounded-living-hounds-selected-contract),
+[chapter parameters and route](../../system/cartridge.md#c3-hound-population-and-loot),
+[creation/composition](../../system/protocol.md#c3-spawned-bundles-and-population-composition),
+[save](../../system/save.md#c3-living-population-recovery) and
+[Book](../../system/book-ui.md#c3-living-hound-and-loot-details).
+The installed combat/death/custody/clock clauses and
+[approved C1 contract](../../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+remain governing. This explicitly reconciles archived
+[00a populations](../../archive/spec/00a-chapter-one-content.md#populations) and
+[M17-B](../../NEXT-MECHANICS.md); it does not implement provisional C4 choices.
 
-Add reachable Hound Run and Adder Nest with real noun details and reciprocal exits. There are living individually identified hounds, each with persisted HP, a bounded physical wander and a real pelt in its bundle. A deliberate Attack uses the shared fight; death yields the same pelt under actual corpse custody, available by legal Take. A new hound is a new identity after the declared respawn rule; neither reopen nor retry manufactures another member or loot. Hounds need no invented aggressive offer until C4 supplies autonomous engagement.
+Read [mechanics](../../lessons/mechanics.md), [storage](../../lessons/storage.md),
+[contracts](../../lessons/contracts.md), [evidence](../../lessons/evidence.md) and,
+before Book/authority work, [mobile](../../lessons/mobile.md) lessons. Apply Ponytail
+before implementation, Ponytail Review and actual-diff correctness review before
+handoff. Native builds/Simulator/device work stay paused.
 
-Re-pin reviewed **B1** time/calendar and **C1** actual armed-defense profile, plus installed M5/M6 corpse/combat/resource/containment/receipts. C3 can use no aggression before C4, but must ship an actual deliberate fight, lethal recovery and loot consumer. B6 Marsh Light is not presumed merged; initially bound population rooms can be Hound Run/Adder Nest. A later reviewed area extension can include Marsh Light. Mandatory Reed Bank/Mire/rescue/corpse routes remain safe. Five Maud rats stay finite, authored and nonrespawning in Lantern Cellar; no rats are moved to Mill Cellar.
+## Real all-hours fight, loot and recovery path
 
-## Governing clauses and decisions before GO
+Use C1's all-hours original Tobin lesson and gifted rusty sword; if C2 already
+landed, use his reviewed Watch Post route rather than adding another Tobin. No
+shield/shop purchase is necessary. From Ferry Landing go south Reed Path, south
+Reed Bank, east Hound Run. Inspect gnawed bones, the exact living NPC entry and its
+Attack action. The fresh plan guarantees four initial hounds even during daytime.
+If they have wandered, use adjacent Scan and go east to Adder Nest now; never
+wait for their home-room return. Wear/learning occur before Attack; combat retains its existing focused actions.
+Kill that one hound through actual due rounds, open its public corpse, Take the
+same original pelt and show it in Carrying. If carrying would overflow, ordinary
+Drop/Put and retry are immediately available after combat; no replacement loot is
+minted. Return west to Reed Bank, or inspect reachable Adder Nest east and return.
+No proposed Sell/skin/rare-ring consumer is part of this result.
 
-Read active composition/typed-foundation clauses; `docs/system/mechanics.md` containment/resource/death/combat/schedule; `protocol.md` durable corpse creation, due-job binding/budgets, encounters and admission; `save.md` created rows, changed-row transactions and live encounters; `cartridge.md` compiler/loader/death templates; `book-ui.md` living NPC/loot/Combat; `docs/NEXT-MECHANICS.md` M17-B/M16-D; `docs/decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md` population and recovery gate; archived 00a §§2,4–5,11 and 21 §§4,10,12,28; applicable R8 population certification in archived14/release-scope. Mechanics/storage/contracts/evidence lessons apply. Amend active installed clauses and add a PM decision before code.
+Also prove real lethal player loss and recovery of actual worn/nested possessions:
+chapel_nave south → chapel_steps south → north_gate south → village_green south →
+well_lane south → ferry_landing south → reed_path south → reed_bank east → hound_run,
+and east to adder_nest only if that is the recorded death room. Use ordinary
+post-return recovery/carry admission; no fare, equipment, key, hostile automatic
+engagement, tide or night gate. The same surviving hound is retryable immediately;
+a killed hound leaves recoverable loot immediately. Rescue, bell and patrol do not
+need this optional fight, pelt or respawn. Never wait for replacement in the Book
+walk. Due-boundary and 30-day proofs drive trusted elapsed with controlled clocks.
 
-**Proposed content policy for PM adoption:** instance-scoped hound plan with absolute live cap6, desired4 by day/6 in the authored night interval, replacement after one cartridge world day. Count the entire plan-owned live membership across its area; movement out of the home room does not create a shortage. Recommend daytime surplus from the night pack stays alive until ordinary death reduces it, never silently deleting live beasts/inventory at dawn. That desired-versus-cap interpretation needs an explicit amendment to the archived 4/6 wording. Production intervals, placement/wander cadence, combat/loot values and any cleanup/disable duration remain **null until selected**; the archived night window and one-day interval are source design, not engine literals. Cap6 is the archived hard-bound acceptance; do not exceed it.
+## Composition and minimal implementation
 
-Select the narrow bundle **one hound plus one real pelt initially directly held by that hound**, no weighted rare-ring table. Pick an appropriate hound/NPC corpse template without rewriting old rat oracles. Physical wandering uses legal adjacent authored area edges and stable arbitration; deterministic alternation over the initial two rooms is sufficient if adopted. No global population manager, random ecology, skinning profession, encounter director or chance-based loot engine. Completed/cancelled plan jobs and inactive membership are cleaned only under their exact owner; existing corpses/loot remain real and ordinary M5 custody is not erased. This slice does not promise constant total historical corpse/save size. Any automatic corpse decay or live-member retirement needs its own explicit policy and trust proof before implementation, not a hidden cleanup shortcut.
+Follow [composition](../../system/architecture.md#building-mechanics-by-composition).
+**Consumer:** one living population, per-instance fight and real pelt custody.
+**Reads:** declared plan/bundle, calendar, bounded current slots/job, exact member
+origins/HP/rooms, encounter, legal edges and shared custody. **Writes:** checked
+identities/placements/HP, separately keyed slot generation/death eligibility and
+plan control/current job, ordinary movement and existing encounter/HP/death/corpse/
+loot consequences.
+**Owners:** population owns bounded membership and replacement; creation owns
+immutable identity/bundle proof; movement owns edges; schedule owns dispatch;
+combat/resource/death own lethal consequences; authority alone owns receipts,
+changed-row transaction/adoption. The presenter has no spawning or countdown writer.
 
-## Composition and required missing invariants
+Reuse IdSource, registered job ordering/segmentation, structural sharing,
+resource/containment/death, dynamic corpse hydration and C1 resolver. Missing
+invariants are exact paired spawned provenance, fresh template-only NPC/item
+creation, slot/generation binding and plan-owned dispatch. Current `created.ts`
+hydrates only room-fixed corpse items, and authored `entityIds` is one-to-one:
+repair those actual seams rather than treating generic `spawned` schema as support.
+Initialize new worlds through the checked bundle sequence after the existing
+birth allocations; independently re-pin current known answers. All six slots use
+one job; no member scheduler or generalized behavior tree is needed. Fatal combat
+writes only its victim slot; population dispatch writes separate control and only
+actual birth/replacement slots, never no-op slot transitions. The fixed declared
+ordinal range is the only slot index; control stores no member/count mirror. Require
+wander <= replacement delay so the existing job is early enough without a death
+control write. Preserve canonical job-ID order and distinct groups at equal times;
+same-slot cross-group writes remain conflicting_write. Runtime
+reads current slots without scanning historical corpses. Derived maps copy only
+when creation changes them; ordinary actions retain existing structural sharing.
 
-**Reads:** plan/bundle definitions, active policy/time, current live members/provenance/HP/physical rooms, replacement due time and current owned job, global known identities/custody and shared RNG if selected. **Writes:** checked spawned identities/initial placement/resource rows/bundle custody; bounded plan membership/replacement state and jobs; legal NPC movement; existing combat/death/corpse transfers. **Owners:** population owns provenance, cap/reconciliation/replacement; creation owns immutable identity and initial bundle placement; movement owns edges; resource/combat/death own HP/death and real loot custody; proposal/authority own one atomic changed-row+receipt path. Initial world population must use the same checked bundle primitive as replacement, not ad hoc edits to entity maps.
+Likely in scope: chapter manifest/two rooms/template NPC/pelt/hound corpse/plan and
+text; minimum protocol identity/state/delta/job/content schemas/registry/generated
+contracts; both foundation creation/compose/precondition/invariant twins; compiler
+and TS loader/short refs; runtime fresh/created/dynamic resource/target/view;
+population rule and schedule dispatch; combat/death dynamic victim and corpse
+selection; local-story state/receipt validation and real SQLite tests; existing
+Book NPC/corpse/item projection only where needed. Inspect proposal callers before
+any necessary change. Out: C4 aggression/assist/flee, C5 status, deer/crows, herb
+regrowth, bell disable, corpse decay, rat respawn, shop restock, new player verbs,
+random loot, server adapters, native work and navigation/style redesign.
 
-Extend the existing typed creation surface only for this real consumer. Today `creationValid` and `hydrate` reject everything except death-origin room-fixed corpse items; treating `origin.kind=spawned` as already supported would fail. A spawned identity must name a declared plan/bundle and its exact occurrence/member relation, match a permitted NPC/item template, use a fresh noncolliding EntityId, and be placed exactly once in the same writer group. The one bundle's item may start inside its **fresh bound hound**, so amend current room-only initial-placement invariant narrowly. Reject cross-plan parents, arbitrary nested children/cycles, missing placement/resource/bundle members and duplicate allocation. The declaration fixes bounded member count before traversal/work. No mutable definition record or shared template HP is the spawned instance.
+## Independent controlled acceptance and red controls
 
-Hydrate dynamic NPCs and pelt items from immutable saved identity plus pinned content at every newly-created intermediate prefix and load. Expand derived known-entity/resource/capacity observations to include those instances only when needed; reuse structural sharing, no full re-encode/rebuild per action. An NPC corpse's victim validation must accept the **real spawned hound identity** under its proven plan origin, not only `world.knownEntities`' original authored NPCs. Per-definition corpse selection, if needed, is an additive declared consumer and preserves the global old rat default. Authored `entityIds[DefinitionRef]` cannot select all hounds: Attack/scan/touch/HP and jobs must bind each runtime EntityId. Dynamic job dispatch rechecks its saved plan/member/occurrence; never act on an arbitrary `by` string or the first instance of a definition.
+Every new test names a distinct realistic break and uses literal expected values.
+Apply its mutant to the old focused suite first; add only a missing same-layer
+regression. Actually observe each claimed new guard fail when broken, restore it
+and rerun. Fixtures freeze their own literal UUIDs for H1–H7, L1–L7, plan A/B and
+rat R; production IDs remain null until allocation is independently checked.
 
-Reconciliation is a registered authority-internal job/command with stable causation and existing due order/budgets. It examines a bounded owned set, creates only the eligible shortfall and advances its job atomically. Death marks the relevant replacement eligibility in the same committed fatal group; do not rely on a later unsaved callback. A hound moved to another allowed room still counts. An open encounter prevents that member's voluntary wander; a legal departure/disabled member's stale combat work closes harmlessly rather than hits remotely. Only owner-proven jobs/members may be cancelled or retired; never count/clean authored rats, player bodies/items/corpses, another plan, or loot already taken. A configured disable later introduced by D9 must re-pin this contract rather than simulate the rule in the presenter.
+1. **Population count ignores location and ownership:** controlled calendar24×10,
+   birth180, night[20,6), wander10, delay240; birth creates H1–H4/L1–L4 in home,
+   count4. At190 the same four move to nest, still4. At200 H5/H6 and L5/L6 fill
+   the two never-used night slots; total6. Replay/reopen stays6; dawn300 retains6.
+   B's hound and R neither count nor move for A. Remove whole-area/owner/cap
+   validation separately and require the relevant controlled case to fail.
+2. **Respawn bypasses death due or reuses an identity:** kill H1 at205 in a real
+   fatal round. Its same L1 goes to one real corpse, A count5, due445; Take L1.
+   At444 there is no H7/L7; at445 H7/L7 fill slot1 generation2 and count6.
+   L1 remains player-held; H1 stays HP0. Exact receipt/job retry creates no H8.
+   In a separate six-live fixture, H5 dies at310: due550 is daytime, so its
+   extra slot stays empty at550 and fills generation2 at night680. Remove
+   delay/generation/occurrence guard; never reuse another slot to evade its delay.
+3. **Instances share HP or template-target selection:** controlled two hounds HP6,
+   S0, playerHP10, zero recovery, accuracy100 both sides, player fixed3/NPC fixed1,
+   no defenses. Attack H1 changes no HP/RNG. After round1: player9/H1=3/H2=6,
+   S2. After round2: player8/H1=0/H2=6, S4, encounter closed, one H1 corpse
+   holding L1, H2 still holding L2. Compare to independent raw/state literals in
+   the [first-encounter oracle](../../spec/conformance/first-encounter.md#frozen-input-sequence).
+   Plant definition-level HP/first-instance targeting or missing dynamic victim
+   admission. Reuse C1's distinct dodge/block tests; do not duplicate them here.
+4. **Malformed spawn accepted:** reject duplicate/colliding ID, wrong plan/bundle/
+   template/role, orphan/extra pelt, swapped member/parent/generation, missing HP,
+   out-of-area birth, source-not-null placement and stale prior slot/job binding
+   atomically. Both portable twins match independent current creation fixtures
+   before differential comparison. Break the new initial-parent/provenance and
+   row-prior checks. Existing corpse/default rat behavior remains independently
+   pinned; changing obsolete release IDs is not backward-compatibility work.
+5. **Wander attacks remotely or stale jobs spawn:** at a boundary move only a
+   living unengaged member along the legal edge, not an engaged/dead one. A
+   blocked edge stays put; no draw/player fare. Cancelled/old plan occurrence
+   creates/moves/draws nothing. The later exact-bound combat round and cold load
+   accept every lawful saved intermediate state. Plant missing encounter/edge/
+   current-job guard; actually run the later consumer, not just inspect topology.
+6. **Persisted rows can forge birth/eligibility/loot:** cold reopen at birth,
+   wander, night/dawn, Attack, partial injury, fatal/take, pre-due/due and after
+   generation2. Change one real saved origin/slot/job/HP/receipt linkage at a time;
+   require typed save_corrupt and unchanged bytes. Real failed COMMIT, both unknown
+   outcomes and lost acknowledgement preserve all-old/all-new bundles, HP, RNG,
+   custody, jobs, head/receipt; retry allocates/transfers nothing twice. A pin
+   mismatch refuses without file deletion. Exercise lawful post-Take pelt custody
+   and an old dead victim after its slot advances; original-parent validation
+   must not reject them. Break atomic slot/bundle/receipt binding as red controls.
+7. **Equal-time fatal and population deliveries conflict:** use the six-live
+   controlled setup at200, HP6/player10, zero recovery, accuracy100, fixed player3/
+   NPC1, no defenses, combat interval5. Attack H1 at200; round205 leaves player9/
+   H1=3/H2–H6=6, S2. At210 round2 and population wander are both due. Use two
+   frozen controlled lineage/command inputs whose actual allocated job IDs put
+   combat first and population first respectively; do not forge IDs or provenance.
+   In both runs require accepted elapsed210, player8/H1=0/H2–H6=6, S4, one closed
+   encounter, one home-room corpse holding the same L1, slot1 generation1/memberH1/
+   replacement due450, live count5, H2–H6 at nest with their original pelts and
+   one pending plan successor due220/next wander220. No H7/L7 is created at210.
+   Control names only that successor, with no duplicate membership index; exact
+   slot keys1–6 stay present and all other slot generations/members stay unchanged.
+   Committed event/operation order follows actual job IDs; require the same stated
+   conserved result, not identical receipts across the two lineages. Cold reopen
+   and exact receipt retry preserve it without another corpse/slot write. Include
+   this boundary in real failed/unknown COMMIT controls.
+   Red control: make population emit a no-op transition for slot1 while advancing
+   control; each ID order must fail instead of accepting the combined elapsed.
+   Independently compose two otherwise valid transitions of the same slot from
+   different groups, using the first transition's resulting row as the second's
+   expected prior row: require literal fault code `conflicting_write` and target
+   `{kind: population_slot, plan: A, slot: 1}`, with no adopted changes. Do not make
+   different-group writes legal to pass the equality test. Distinct control/slot
+   targets must compose to their independent literal rows in both foundations.
+   Compile and load the otherwise valid controlled plan with wander241/delay240:
+   both must refuse; wander240/delay240 is admitted. Remove only this period guard
+   and observe the invalid-plan test fail, protecting the untouched-control proof.
+8. **Bounds or Book path silently fail:** run 30 controlled world days with
+   scripted deliberate fights and autonomous elapsed/wander between them; sample
+   every committed boundary, cap <=6 and exactly one current pending plan job.
+   Retain command/seed/fault identity and literal expected generation/loot rows for
+   the selected trace; cold-reopen splits produce the same answers. Run the real
+   chapter Book fight/Take plus lethal recovery and required-story journeys at
+   day/night, showing separate hounds and exact corpse/pelt. Raw stale Attack,
+   pending saves/refusals/faults claim no success; combat and Take history appear
+   once after reload. Plant a route gate/definition substitution and observe the
+   focused journey fail. This is C3 proof, not complete R8/R10/native certification.
 
-Likely files: chapter hound/loot/corpse templates, two rooms, plan/bundle definitions and text/settings; `protocol/relation.schema.json` origin plus required population/bundle/entity/job/state/delta/admission contracts/registries/generated types; both creation/compose/precondition twins; `kernel/ts/src/runtime/{created,decision,world,proposal}.ts` only for actual dispatch/invariants; population owner, schedule, dynamic HP/death/target/view; compiler/loader (`lib/loka/content`, TS content); local-story load and changed-row proof; Book entity/loot projection if generic flow needs repair. Out: C4 aggression/assist/flee, deer/crows/herb regrow, all-rat respawn, speculative spawn trees, server adapters/native work/UI blur.
+## Checks, review and stop trigger
 
-## Controlled literal acceptance and red controls
+Run focused compiler/loader/short-ref/schema, both creation/composition twins and
+population/clock/combat/death/target tests, changed Book tests and real SQLite
+reopen/fault/replay suites. Run generated-contract and docs checks; schema changes
+need required/bound invalid fixtures and the mutant sweep. Keep simulator enabled.
+Use task-local writable mise state with the pinned toolchain. Provisional local
+source work uses focused checks first; full active `mise exec -- bin/check_all.sh`
+and planted controls run at accumulated-head publication under the normal hook.
+Report exact commands/exits and actual red failures, not claimed proof. Require
+fresh primary review and separate protocol/save/foundation opinion; Astra audits
+`runtime/proposal.ts` if touched. No remote push/merge/native run here.
 
-Use independently frozen identities for plan A, other plan B, authored rat R and hounds H1–H6/pelts L1–L6; no guessed production allocation. A short controlled day can use length1000 and replacement delay1000; these are test inputs, not selected world settings.
+Stop/escalate unresolved reviewed dependency/pin order, unplanned multi-opponent
+combat, broader spawn tree/cleanup/disable behavior, inability to hydrate a lawful
+bundle prefix or reopen its complete commit, unbounded per-action history work,
+main route/loot recovery requiring respawn/night/equipment, or a footprint beyond
+one complete persistent deliberate-fight/loot outcome. Split by an independently
+playable result, never by compiler/kernel/UI layers.
 
-1. Fresh day target4 creates **four** distinct live A hounds and four exact held pelts; no fifth. Reconcile/replay/reopen remains4. A hound moving from Hound Run to Adder Nest still gives4, not3/5. At selected night target6, shortfall is **two**, final6; repeated reconciliation stays6. Return to day under the proposed surplus policy stays6 until deaths. A living B hound and authored R are not counted or cleaned by A. Red controls: count only the home room or omit absolute cap/owner check; observe failures.
-2. Actually kill H1: one real corpse, its same L1 transfers once, live A count decreases **6→5**, no replacement before due. Take L1 and sell/use it through an actual declared consumer if B3 admits that loot. At exactly the selected replacement due, one new identity H7/L7 restores6; H1 and L1 are not reused. Retried due command/unknown COMMIT never creates H8 or another L1. Red controls: respawn at `< due` or omit stable occurrence/provenance.
-3. Reject duplicate/colliding identity, wrong plan/template, orphan hound/item, cross-bundle pelt parent, initial transfer from non-null source, missing dynamic HP and invalid area placement atomically. Both portable twins match independent **additive** creation fixtures before differential comparison; old corpse fixture remains unchanged. Remove a provenance/initial-parent validation and run the controlled invalid fixture as a red control; no text matching.
-4. Each legal wander is one adjacent allowed transfer of the same living member; never to the required safe corridor, through a blocked edge or while in its open encounter. Stale/cancelled member job does no transfer, draw or spawn. Death uses actual dynamic HP, a known spawned victim and one valid corpse; stale post-death opportunity cannot retaliate. Mutate dynamic victim hydration or job runtime binding.
-5. A **30-world-day** deterministic autonomous run samples every committed population/replacement/movement boundary and never exceeds live cap **6**, never duplicates one bundle/loot identity and never cleans unrelated entities. Reopen at day/night, pre-due/due and kill/take boundaries; resume the exact run to the same literal member/provenance/custody result. Keep actual output and failing runs under evidence rules. This is population acceptance, not full R8/R10 certification.
-6. Play actual deliberate hound fight → lethal player return → safe equipment-free/fare-free/nonhostile route to the owned corpse → Take the exact possessions. The main rescue route remains completable at all hours without entering a hostile hound room. Plant a required-corridor aggression/exit block and observe this journey fail.
-
-## Save/review and stop trigger
-
-Cold-load each legal partial bundle/job/encounter lifecycle after its **complete atomic commit**, including hound ahead of its old combat room where the amended movement contract allows it. Invalid/null origins/membership/jobs/HP or swapped plan/parent is typed `save_corrupt`; do not skip rows or regenerate animals on load. Real rollback plus both unknown-COMMIT outcomes fence input/elapsed until all prior/all next membership, entities, custody, HP/RNG/jobs/head/receipt reconcile. Exact pin refusal/explicit Start over remain. Browser observations are separate from real SQLite transactional proof.
-
-Run focused loader/compiler/population/creation/death/target/Book/real SQLite checks, schema mutant sweep, applicable shared full gate, actual Ponytail and correctness self-review. Require independent primary and separate protocol/save/foundation opinion, Astra for proposal changes, exact-head CI and scoped fixes. Shared `sim` remains enabled; native builds/proof defer to adopted browser-first/prelaunch policy.
-
-**Stop trigger:** unadopted day/night/cleanup policy or prerequisite pins; requirement to rewrite frozen corpse/rat fixtures, falsely count schema-only provenance as implemented, delete existing loot/corpses or entire definitions, scan/copy unbounded whole state per action, silently duplicate a hound after load, or expose a hostile sole recovery/rescue route. If actual diff exceeds rescue scale, PM splits once at a complete persistent deliberate-fight/loot outcome, not at compiler/kernel/UI layers.
-
-Planning self-review: applied Ponytail and checked this proposed boundary for correctness. Reuses existing ownership/transactions; no new dependencies or general framework are requested. Production decisions and future source pins remain explicit gates above. This is author self-review only; independent publication/implementation review remains required.
+Planning self-review: the new primitive has its first actual living/loot consumer;
+no separate inventory/population balance ledger or speculative behavior framework.
+Ponytail Review: lean; one owned job and fixed slots reuse existing time/death/
+custody/receipts. Correctness review checked surplus, extra-slot eligibility,
+post-death identities, stale invocation and honest delayed optional replenishment.
+C3-P1 (the sole open finding, review record commit `3c0a81632934e0f5297757fefc4115d5e4447388`)
+is addressed by separate slot/control targets, preserved equal-time ordering and
+the literal collision controls above; same-reviewer scoped recheck remains pending.
+This is author review; independent plan/source approval remains ahead.

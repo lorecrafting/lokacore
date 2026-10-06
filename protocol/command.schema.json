@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Command contracts",
-  "description": "The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only CommandContext (session, receipt time) is not part of it.",
+  "description": "The portable semantic Command registry (04 \u00a71, \u00a73, \u00a721; 14 \u00a7R3A). Host-only CommandContext (session, receipt time) is not part of it.",
   "$defs": {
     "LogicalTime": {
-      "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).",
+      "description": "Explicit logical time (01 A6; 04 \u00a74). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).",
       "type": "integer",
       "minimum": 0,
       "examples": [
@@ -13,7 +13,7 @@
       ]
     },
     "Command": {
-      "description": "A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/archive/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity, [\"loka-job-command-v1\", job_id, occurrence] with the occurrence its due time (numeric-profile.md, job CommandId), so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 §21). Elapsed authority commands use the separate run/world/interval domain in numeric-profile.md; normal player admission refuses them.",
+      "description": "A semantic Command (04 \u00a73): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/archive/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity, [\"loka-job-command-v1\", job_id, occurrence] with the occurrence its due time (numeric-profile.md, job CommandId), so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 \u00a721). Elapsed authority commands use the separate run/world/interval domain in numeric-profile.md; normal player admission refuses them.",
       "type": "object",
       "properties": {
         "id": {
@@ -45,7 +45,7 @@
       ]
     },
     "CommandPayload": {
-      "description": "The registered Command types; an unknown type fails before game rules (04 §3). Invocation-derived types carry the actor; run_job is authority-internal (04 §1) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md).",
+      "description": "The registered Command types; an unknown type fails before game rules (04 \u00a73). Invocation-derived types carry the actor; run_job is authority-internal (04 \u00a71) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md).",
       "oneOf": [
         {
           "description": "Move through a connection.",
@@ -161,7 +161,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Observe the current place, or, with target_id, one thing in it: an id the authority's target resolution returned as unique (21 §7; 04 §17, §18), never the player's words.",
+          "description": "Observe the current place, or, with target_id, one thing in it: an id the authority's target resolution returned as unique (21 \u00a77; 04 \u00a717, \u00a718), never the player's words.",
           "type": "object",
           "properties": {
             "type": {
@@ -181,7 +181,7 @@
           "additionalProperties": false
         },
         {
-          "description": "List what the actor sees through each exit of its room (movement@1; 00 §4.1 scan): the barrier of an exit it bars, else the destination room and the NPCs and items there. It changes nothing, draws no RNG and takes no time, like look; it emits no event.",
+          "description": "List what the actor sees through each exit of its room (movement@1; 00 \u00a74.1 scan): the barrier of an exit it bars, else the destination room and the NPCs and items there. It changes nothing, draws no RNG and takes no time, like look; it emits no event.",
           "type": "object",
           "properties": {
             "type": {
@@ -240,7 +240,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Give a held item to another character in the same place (00 §4.4).",
+          "description": "Give a held item to another character in the same place (00 \u00a74.4).",
           "type": "object",
           "properties": {
             "type": {
@@ -341,7 +341,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Rest (position@1): the actor's position becomes resting; already resting is invalid_state. No regeneration bonus (00 §4.2 as amended 2026-10-03).",
+          "description": "Rest (position@1): the actor's position becomes resting; already resting is invalid_state. No regeneration bonus (00 \u00a74.2 as amended 2026-10-03).",
           "type": "object",
           "properties": {
             "type": {
@@ -375,7 +375,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.",
+          "description": "Perform a cartridge's ActionRecipe by its action key (06 \u00a720; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.",
           "type": "object",
           "properties": {
             "type": {
@@ -491,7 +491,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Advance logical time to `until` (schedule@1): accepted only when `until` is later than the world's time (else invalid_state, and nothing changes); the decision is one time.advance and no event of its own; the host runs the jobs due by `until` in the same decision, each a run_job in its own writer group with its events after (04 §5.4).",
+          "description": "Advance logical time to `until` (schedule@1): accepted only when `until` is later than the world's time (else invalid_state, and nothing changes); the decision is one time.advance and no event of its own; the host runs the jobs due by `until` in the same decision, each a run_job in its own writer group with its events after (04 \u00a75.4).",
           "type": "object",
           "properties": {
             "type": {
@@ -512,7 +512,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Execute a due scheduled job (authority-internal, 04 §1): built only by the host's drain of an explicit advance, never from an invocation; its id is the job CommandId (numeric-profile.md).",
+          "description": "Execute a due scheduled job (authority-internal, 04 \u00a71): built only by the host's drain of an explicit advance, never from an invocation; its id is the job CommandId (numeric-profile.md).",
           "type": "object",
           "properties": {
             "type": {
@@ -536,11 +536,20 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "scene": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
             "type",
-            "actor_id"
+            "actor_id",
+            "scene",
+            "line"
           ],
           "additionalProperties": false,
           "description": "Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs."
@@ -655,6 +664,86 @@
           "properties": {
             "type": {
               "const": "read"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "target_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "buy"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "provider_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quoted_price": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "provider_id",
+            "item_id",
+            "quoted_price"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "sell"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "provider_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quoted_price": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "provider_id",
+            "item_id",
+            "quoted_price"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "harvest"
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"

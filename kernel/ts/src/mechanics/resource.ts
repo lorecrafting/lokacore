@@ -95,6 +95,42 @@ export function pay(
   return { ops, levels };
 }
 
+/** Exact conserved payment between two explicit, nonregenerating balance rows. */
+export function transfer(
+  world: World,
+  from: EntityId,
+  to: EntityId,
+  resource: DefinitionRef,
+  amount: number,
+): { ops: Adjust[] } | undefined {
+  const spec = resourceSpec(world, from, resource);
+  const targetSpec = resourceSpec(world, to, resource);
+  if (
+    !spec ||
+    !targetSpec ||
+    spec.gain !== 0 ||
+    spec.regen ||
+    !Number.isSafeInteger(amount) ||
+    amount <= 0
+  )
+    return;
+  const source = world.state.resources?.[key({ kind: 'resource', resource, entity_id: from })];
+  const destination = world.state.resources?.[key({ kind: 'resource', resource, entity_id: to })];
+  if (
+    !validOverrideRow(source, spec, world.state.clock) ||
+    !validOverrideRow(destination, targetSpec, world.state.clock) ||
+    source.value - amount < spec.minimum ||
+    destination.value + amount > targetSpec.maximum
+  )
+    return;
+  return {
+    ops: [
+      adjust(world, from, resource, -amount, {}).op,
+      adjust(world, to, resource, amount, {}).op,
+    ],
+  };
+}
+
 /** Zero-amount position adjustments in authored DefinitionRef order, including unchanged values. */
 export function recoveryAdjustments(
   world: World,

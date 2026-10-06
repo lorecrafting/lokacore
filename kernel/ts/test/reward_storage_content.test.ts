@@ -92,8 +92,8 @@ test('each transfer feature requires API1.10 without changing terminal receive',
   }
 });
 
-// Breaks: relaxing the receive quest requirement also permits activating a quest in that choice.
-test('nonterminal receive still excludes accept', () => {
+// Breaks: API1.10 silently admits a receive-and-accept choice that needs bound activation.
+test('receive with accept requires API1.14', () => {
   const result = load((c) => {
     c.manifest.requires.kernel_api.at_least = '1.10';
     const d = c.dialogues[`${prefix}:dialogue/maud_turn_in`];
@@ -101,6 +101,5 @@ test('nonterminal receive still excludes accept', () => {
     d.choices.done.accept = ref('quest', 'mauds_cellar');
   });
   assert.ok(!result.ok);
-  assert.equal(result.diagnostic.code, 'OUTCOME_MISMATCH');
-  assert.ok(result.diagnostic.path.endsWith('.receive'));
+  assert.equal(result.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
 });

@@ -1,38 +1,125 @@
-# B4 — useful light, fuel/refill and safe recovery
+# B4 — useful light, fuel/refill and safe recovery: adopted developer brief
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Branch:** `chapter-1/b4-light-fuel` in an isolated developer worktree.
+**Inspected base:** provisional B3 integration `340025a0ef5d3644e84ac23634b74dfa6d20d459`,
+chapter `ashmere_missing_child@0.0.18`, API1.16. B3 source is present and its focused
+checks are recorded in the [B3 check note](../../evidence/2026-10-05-b3-shop/README.md).
+Its independent primary/save reviews remain pending; review has identified current
+ID-fixture/schema-example issues. The [v018 release answer](../../../protocol/fixtures/missing_child_v018_hash.json)
+and [IDs](../../../protocol/fixtures/missing_child_v018_ids.json) are provisional,
+not final dependency proof. Before building, incorporate B3 fixes and re-pin the
+actual source/release independently. B4 successor release, API, hash, generated
+IDs, implementation/review head and PR: null. This brief authorizes the selected
+local source outcome under PM adoption; it does not authorize remote publication.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B4. **Provisional until B1 timing and B3 supply merge, PM adopts perception/fuel/recovery policy, and actual dependency heads are re-pinned.** Reading baseline main `0fbd2847` is not source GO. Dependency/new release/API/hash/IDs/head/PR: null. Suggested branch `chapter-1/b4-light-fuel`, not created. Browser-first shared React Native Book; retain engine/save/headless sim, defer native. No preview, device or owner-save operation here.
+## Goal and player path
 
-## Goal and clauses
+At Well Lane, try the public down stair without equipment: enter a truthful dark
+Well Shaft, retain up egress and inventory, and find no hidden masonry link.
+Return up and west to Peg; Buy the actual B3 torch for3p and oil for2p. Ignite the
+held torch or Wear it in the light slot and Ignite; go east to Well Lane and down.
+Inspect the now-visible masonry detail. Douse to save fuel; return up freely,
+Refuel that exact torch from that exact bottle, Ignite and revisit. Put it into
+the purchased satchel to prove nesting removes illumination while burn continues;
+Take restores only its remaining fuel. Sold/bought-back, exhausted and lost gear
+never blocks the main chapter or recovery. No lantern, new danger or required wait.
 
-Use a real held/worn torch or lantern to inspect an optional dark `well_shaft`; ignite/douse/refuel with authoritative fuel and recover actual possessions after death. Add only `well_shaft` with reciprocal Well Lane stair, an authored dark description/detail and the real B3 supply source. Q2, main bell/corpse routes and the free cellar stay equipment-free.
+Governing clauses: [light and darkness](../../system/mechanics.md#b4-light-and-darkness-selected-contract),
+[well/tuning](../../system/cartridge.md#b4-well-and-fuel),
+[primitive and wire](../../system/protocol.md#b4-fuel-composition),
+[durability/recovery](../../system/save.md#b4-fuel-and-dark-recovery),
+[Book](../../system/book-ui.md#b4-light-details), and the
+[PM adoption](../../decisions/pm-decision-b4-light-2026-10-05.md).
+Those sections replace this brief's former candidate lantern/refill/retrieval policies.
+Follow the no-wait, fixed-time and cartridge-owned-number owner rules.
 
-Amend installed mechanics containment/equipment/movement/resource/schedule, protocol ActionSet/admission/Composition/GameView, cartridge compiler/loader, save changed-row/recovery and Book detail/freshness. Future clauses: `docs/NEXT-MECHANICS.md` M9-A/B; archived00a §§2/5/S4 and archived00 §4.2 light burn; primitive21 §§6/17. Reconciliation “Reachable death recovery and reading” is a pre-danger stop gate; world numbers, fixed time and no-wait are owner rules.
+## Composition record and boundary
 
-## Selected candidate and bounded behavior
+Real consumer: optional room/detail perception and three exact item controls.
+Shared reads: confirmed clock, source/supply definition and instance fuel, actor
+body/light holder, existing custody/lid/carry queries, room darkness and corpse
+ownership. Shared writes: typed `fuel.set` rows, bound narration and normal receipt.
+Light owns fuel changes; elapsed authority owns time; custody/equipment/death/commerce
+retain their existing writers. The host commits changed rows, then adopts, then replies.
+The presenter emits invocations and consumes confirmed views.
 
-Recommend light metadata on the exact item definition plus an authoritative per-instance fuel state. Validate capacity, burn rate and refuel conversion as content settings. Historical candidates torch2 game hours and lantern8 hours translate through adopted B1 calendar; PM must adopt production fuel/oil quantities, initial charge and exact obtainable lantern source before GO. They remain null here beyond those cited candidates. Never silently add the archived cottage lantern to an unbuilt room or issue free replacement gear.
+Reuse containment, equipment, movement, corpse ownership, query budget, writer-group
+conflicts, receipt/freshness and SQLite reconciliation. Missing invariant: conditional
+elapsed burn must retain per-instance history across all custody changes and atomically
+conserve source gain/supply debit. Deliver only the typed fuel row/spec/target and exact
+prior-row op required by that invariant. Current resource gain is unconditional and
+its opted recovery is posture-specific; do not bend either into a second light writer.
+Portable composition additions require Elixir/TypeScript fixtures and differential
+proof; story perception/admission stays TypeScript-only. No chapter-name engine branch.
 
-Fuel queries are pure, bounded arithmetic over confirmed clock: settle old lit interval before douse/refill/ignite changes. Remaining fuel cannot be negative or exceed capacity. Ignite requires reachable owned usable source with fuel; douse remains usable for a reachable lit item. Retrying or transferring/dropping/wearing/reopening the same item neither refills nor repeats burn. Recommend burning continues while its lit-state interval runs, even if custody changes; only an actually directly held/light-slot source illuminates the player's perception. Nested/closed-bag sources do not illuminate. Empty source projects unlit/no illumination without a ticking-per-second loop or UI-owned timer. Ground-source illumination is out unless the selected real consumer requires it.
+In scope: selected docs, chapter torch/oil descriptions/metadata, Well Lane reciprocal
+stair, new Well Shaft dark/normal text and masonry detail; compiler/loader; small light
+rule/shared query; contracts/registries/generated outputs; required fresh/adopt/compose
+seams; existing view/Look/Scan/target/admission; changed-row save validation; Book item
+and World views; focused tests and headless simulator. Existing source identities and
+B3 shop policies are retained within the new release, with new IDs independently pinned.
+No native/phone work, Realm adapter, lantern/cottage, sunlight darkening, hazard,
+replacement gear, shrine retrieval, stacking/liquid framework, ancestry/spell sight,
+mandatory Q2/bell/cellar light gate or unrelated C1 combat change.
 
-The same effective-light query controls room/detail/NPC/item projection, target resolution and execution admission. Held inventory remains usable. A dark room exposes a truthful dark description and known traversable exits, not hidden object identities in Scan/links/failed-target suggestions. **Recommended bounded recovery selection:** darkness never hides an owner's actual corpse or blocks the ordinary custody walk into its belongings; this preserves the equipment-free known route. If this cannot satisfy the actual dark lethal journey, choose the reconciliation's one owned-corpse shrine retrieval before danger, moving existing roots and allowing forced overload. Do not merge danger while recovery is merely assumed.
+## Acceptance and red controls
 
-Refill binds an exact lantern and exact directly usable oil item/charge. It transfers only the adopted fuel amount that fits, retaining excess charge under a stated partial-refill policy; full/no-oil/bad target refuses unchanged. Use B3's quantity/consumption provenance if installed, otherwise one minimal remaining-charge row with a depleted bottle rather than a universal stacking/destruction API. Refill, oil debit, fuel settlement and receipt are atomic. Other actors' or inaccessible corpse oil cannot satisfy it.
+Use controlled inputs and literal expected answers independent of implementation.
+Apply each proposed mutant to the old focused same-layer suite first; add a new test
+only if that distinct plausible regression is otherwise missed.
 
-## Independent controls
+- Source capacity10/start10/rate1, Ignite at100: query103 gives7; Douse103 writes7
+  unlit at103; query110 stays7; Ignite110 then query112 gives5. Transfer, nest,
+  Sell/Buy and cold reopen at112 stay5. At117 effective0/unlit, Ignite refuses;
+  Douse of the stored exhausted interval works once. Refuel never reignites it.
+  Large elapsed intervals exhaust exactly without overflow or negative fuel.
+- Source capacity8/remaining2 and compatible supply6 at a common confirmed clock:
+  Refuel yields8/0; remaining7 and supply6 yields8/5. Full/empty/wrong supply,
+  foreign/nested/worn/corpse supply and unowned source refuse without fuel, custody,
+  RNG or narration effects. Settling a lit interval before refill neither resets
+  the prior burn nor loses remaining supply. Retry returns the exact same receipt.
+- Production path Buy torch then oil yields player15/Peg25/Aldric10 from20/20/10,
+  retains both exact IDs, and total50; B3/S2 both-order reopen proofs stay green.
+  Fuel starts, capacities and burn are independently pinned to the cartridge clauses.
+- In dark Well Shaft without light, ordinary dark text/up egress/inventory/posture
+  remain; masonry/other hidden identities and adjacent sight text are absent.
+  Forged hidden detail or target IDs refuse. Held/light-slot lit source enables
+  the same detail and admission; nested/ground/corpse/NPC source does not. A
+  stale displayed action is rechecked after authoritative elapsed exhaustion.
+- Controlled combat fixture in an opted dark room: Ignite and start the real
+  encounter while visible, then apply the existing lethal round/elapsed producer.
+  The sole torch and a bag with nested goods move to the resulting actual corpse.
+  Cold reopen, same-body chapel return and gear-free legal walk reach only the
+  owner's corpse; Take recovers the exact roots/descendants with ordinary lid/load
+  constraints. Repeated death preserves prior corpses; foreign corpse access
+  refuses. Existing production six-edge cellar recovery remains green.
+- Reopen lawful fuel intermediate states named in the save contract. Real failed
+  COMMIT and both unknown outcomes retain all prior/all next rows; lost acknowledgement
+  retry cannot debit supply twice. Corrupt future timestamp, missing/wrong-item row,
+  excess charge, malformed lit, lit supply or a forged bounded refill/omitted debit
+  receipt is typed `save_corrupt`, no file repair.
+- Plant missing old-interval settlement, source refill without supply debit,
+  custody-triggered refill, nested light admission, hidden raw-ID bypass and omitted
+  owner-corpse exemption/ownership check; observe a focused behavioral red control
+  for each missing break. New portable fixtures include wrong prior row, malformed
+  source/supply rows, bounds and conflicting writer cases in both kernels.
 
-- Controlled torch fuel10, rate1/unit, lit at100: at103 remains7; Douse103 stores7; query110 remains7; Ignite110, query112 remains5. Transfer/reopen at112 still5. At117 source is exhausted/unlit; raw Ignite refuses. Same interval replay must not yield2 or restore10.
-- Controlled lantern capacity8/remaining2 and oil charge6: Refuel yields8/0 in one commit. Capacity8/remaining7 with oil6 under selected partial policy yields8/5. Full lantern refuses without consuming oil. These are controlled settings, not production tuning.
-- Enter Well Shaft without light: dark text/egress/own inventory available; hidden detail absent and forged detail command refuses. With body-held or light-slot lit source: same authored detail appears and admission succeeds. Put into closed bag removes illumination without resetting fuel; Remove/Take restores only remaining fuel.
-- Execute a real controlled Attack/elapsed lethal occurrence in a dark production-capability room, with lit gear and a nested bag on the resulting actual corpse: same-body chapel return→gear-free legal walk→recover those exact IDs. Reopen/repeated death preserves prior corpses. Chapter's existing six-edge cellar recovery remains green.
-- Saved malformed quantity, future settlement time, impossible source binding or wrong-item fuel metadata is typed save_corrupt, not auto-refilled. Preserve failed and both unknown-COMMIT outcomes, lost acknowledgment and exact receipt replay.
-- Plant nested-light admission, an unchecked hidden target, transfer-refill or double settlement; observe focused behavioral red controls. If shrine fallback ships, omit one root transfer or owner check and require red. No fake death command/source-text tests.
+## Checks, review and stop
 
-## Files, checks, review and stop
+Read [mechanics](../../lessons/mechanics.md), [storage](../../lessons/storage.md),
+[contracts](../../lessons/contracts.md), [mobile](../../lessons/mobile.md) and
+[evidence](../../lessons/evidence.md) before their relevant edits. Use pinned mise.
+Provisional lane: focused compiler/loader, portable fuel/conformance/differential,
+light/perception/custody/admission, Book and real SQLite checks, touched TypeScript,
+contract/feature generation and headless simulator; record exact commands/status.
+Before accumulated publication, full active `bin/check_all.sh`, schema mutant sweep,
+independent review closure and exact-head CI remain required. Native verification
+is paused; any authorized browser walk supplements rather than replaces save proof.
 
-Content: manifest/catalog, `rooms/well_shaft.json`, Well Lane reciprocal exit, exact torch/lantern/oil definitions/source. New small `mechanics/light/{rule,shared}.ts`, matching compiler/loader light helper, existing containment/equipment/lookups/target/view/invariants; `runtime/{fresh,decision,apply}.ts` only for actual row initialization/adoption. Protocol item/state/command/action/capability/GameView contracts where consumed; preserve existing transfer/delta vocabulary if adequate. Host `store.ts` validation and Book item/World/freshness; no native code, broad dark-sight ancestry, spells, Q2 gate, water physics or equipment buffs. Amend active docs first and derive the new content pin independently.
-
-Read storage/contracts/mobile/evidence lessons. Run compiler/loader/fuel/perception/carry/target/admission/Book and real SQLite controls plus full `mise exec -- bin/check_all.sh`, schema sweep and exact-head CI including TS headless `sim`. Later authorized browser light/douse/refill/cold refresh proves Book behavior only. Fresh primary plus protocol/save opinion; Astra if proposal/foundation changes. Developer Ponytail Review and actual-diff correctness pass required.
-
-Stop for a sole-light corpse lockout, unconsumed broader equipment or time framework, a mandatory dark path, missing real lantern/oil acquisition, changed existing recovery guarantees, or frozen-fixture conflict. If concrete review exceeds rescue, split complete finite torch+dark consumer first, then complete obtainable refillable lantern; neither PR displays an unfinished refill control.
+Ponytail Review and actual-diff correctness pass are required. Fresh independent
+primary and separate portable/save opinion review the exact head; use Astra if
+`runtime/proposal.ts` changes. The docs-only plan receives a short fresh review.
+Stop for unavailable actual torch/oil supply, unresolved B3 contract conflict,
+sole-light recovery lockout, a mandatory dark route, an unconsumed perception/time/
+liquid framework, loss of B3/S2 save safety, or frozen-conformance conflict. Return
+concrete alternatives to PM; do not expose an unfinished Refuel control.

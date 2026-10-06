@@ -32,6 +32,15 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
+
+- [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.
+- [B9 Lantern Rest and dream PM decision](pm-decision-b9-lantern-dream-2026-10-05.md): first paid Rest, anchored resumable choice and final-only local memory.
+
+- [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
+
+- [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
+
 - [B1 chapter calendar and Book status PM decision](pm-decision-b1-calendar-status-2026-10-05.md): authored hour/day, solar/lunar cycle and confirmed status consumer.
 
 - [Reuse documents already read](owner-decision-read-once-docs-2026-10-05.md): avoid redundant reads when links loop through the same governing files.
@@ -144,6 +153,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
 
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
+- [Codex model routing during local chapter work](pm-decision-codex-model-routing-2026-10-05.md): PM execution choice after the owner's model/role audit request; explicit lower-cost implementation tiers, stronger review at trust boundaries, Astra for highest-risk audits.
+- [Fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md): owner prioritizes speed; complete source slices may merge into local `main` after checks and self-review while independent review runs in parallel, with remote publication still gated.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
 
@@ -199,7 +210,25 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.
 
+- [Local draft-PR cadence and scoped CI exception, 2026-10-05](owner-decision-local-draft-pr-cadence-2026-10-05.md): review and merge work units into local `main`, then publish accumulated work periodically; PRs #200–#204 merged under the owner's one-time hosted-runner exception.
+
 - [Book keyboard navigation, 2026-10-05](owner-decision-book-keyboard-navigation-2026-10-05.md): arrows walk compass exits and Page Up/Page Down use vertical exits in the web Book.
 - [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.
 - [Q3-F fox through a silent bell](pm-decision-q3-fox-silence-2026-10-05.md): after either complete Q2 return, exact Belfry Silence resolves Q3/fox with its own evidenced scene.
 - [A3 voluntary Green finale](pm-decision-a3-green-finale-2026-10-05.md): five fixed ending memories, explicit Begin and final-line acknowledgement before one local completion report.
+
+- [Chapter-closure browser E2E loop](owner-decision-chapter-closure-e2e-loop-2026-10-05.md): deterministic chapter routes/UI, exploratory pass, visible owner evidence, isolated fixes and exact-head review.
+
+- [B5 finite Infirmary Herbs](pm-decision-b5-infirmary-herbs-2026-10-05.md): real conserved herb/bandage supply, immediate optional repeat and separate capped S9 contribution.
+
+- [B4 useful light and safe recovery](pm-decision-b4-light-2026-10-05.md): real B3 refillable torch/oil, typed fuel history and optional dark well with gear-free owned-corpse recovery.
+- [C1 Tobin training and armed fight](pm-decision-c1-tobin-training-2026-10-05.md): immediate paid acquisition, separate attribute qualification, exact sword grant and real dodge/shield consumer.
+- [B7 Well and waterskin](pm-decision-b7-well-waterskin-2026-10-05.md): two real finite Peg offers, mass-accounted water and atomic Fill/Pour/Drink with receipt-backed recovery.
+
+- [C2 finite Watchman's Rounds](pm-decision-c2-watchmans-rounds-2026-10-05.md): all-hours explicit leader steps, causal checkpoint credit, recoverable death failure and trust-only completion.
+
+- [B6 all-hours Wisp and usable ward](pm-decision-b6-wisp-2026-10-05.md): doused-light Seek, bounded sitting with immediate retry and a public Aldric ward consumer.
+- [C3 bounded living Fen hounds](pm-decision-c3-living-hounds-2026-10-05.md): exact spawned bundles, day/night slot bounds, deliberate fights and conserved pelt loot.
+
+- [D2 public Priory and held books](pm-decision-d2-priory-books-2026-10-05.md): ten public rooms, exact held/open-container Read, idempotent Ward/Bell and ordinary custody recovery.
+- [C4 hound response, pack help and flight](pm-decision-c4-hound-behavior-2026-10-05.md): deliberate Attack admission, one rotating enemy opportunity, same-clock wander protection and conserved wounded retreat.

@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "torch",
+    "torch"
+  ],
+  "short": "item.torch.short",
+  "room_line": "item.torch.room",
+  "description": "item.torch.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "slot": "light"
+}

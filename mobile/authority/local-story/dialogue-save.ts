@@ -75,7 +75,7 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
   }
 }
 
-function checkRow(world: World, id: string, row: ChoiceRow) {
+export function checkRow(world: World, id: string, row: ChoiceRow) {
   if (
     !row ||
     validate('ContinuationId', id).length ||
@@ -90,7 +90,15 @@ function checkRow(world: World, id: string, row: ChoiceRow) {
   if (
     !d ||
     row.beat !== d.key ||
-    !same(row.roles, bind(world, d)) ||
+    !same(
+      row.roles.filter(
+        (r) =>
+          !d.quest ||
+          !world.cartridge.quests?.[refString(d.quest)]?.exchange ||
+          !/^(outgoing|incoming)_\d{2}$/.test(r.role),
+      ),
+      bind(world, d),
+    ) ||
     !same(row.choice_ids, choiceIds(d)) ||
     (row.status === 'resolved'
       ? !row.choice_id || !d.choices[row.choice_id]

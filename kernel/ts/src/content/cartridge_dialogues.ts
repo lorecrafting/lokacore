@@ -1,3 +1,4 @@
+import { lesson, sequence } from './cartridge_skills.ts';
 // The loader's dialogue checks (dialogue@1; dialogue.schema.json DialogueDefinition; 06 §8
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
 // the lock stage (content/cartridge.ts): its own kind and each fact.assign's fact_changed (and each story
@@ -103,7 +104,10 @@ function riddle(d: Obj, at: string, { text }: Checks): Diagnostic[] {
 
 function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const site = (t: Obj) => `${refString(t.dialogue as DefinitionRef)} ${t.choice}`;
+  const site = (t: Obj) =>
+    t.scene
+      ? `scene/${refString(t.scene as DefinitionRef)}`
+      : `dialogue/${refString(t.dialogue as DefinitionRef)} ${t.choice}`;
   const all = Object.entries((c.story_points ?? {}) as Obj);
   const sites = all.flatMap(([, p]) => Object.values(p.outcomes as Obj).map(site));
   for (const [ref, p] of all) {
@@ -112,9 +116,21 @@ function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
       out.push(diag('SCHEMA_VIOLATION', `${at}.outcomes`, { error: 'too_few_items' }));
     for (const [name, t] of Object.entries(p.outcomes as Obj)) {
       const path = `${at}.outcomes${step(name)}`;
-      named(t.dialogue, 'dialogue', `${path}.dialogue`);
+      if (!!t.scene === !!t.dialogue || (t.scene ? !!t.choice : !t.choice))
+        out.push(diag('SCHEMA_VIOLATION', path));
+      if (t.scene) {
+        named(t.scene, 'scene', `${path}.scene`);
+        if (p.key.length > 52) out.push(diag('SCHEMA_VIOLATION', `${at}.key`));
+        const scene = (c.scenes ?? {})[refString(t.scene as DefinitionRef)];
+        if (
+          scene &&
+          (scene.on_end?.outcome !== name || refString(scene.on_end.story_point) !== ref)
+        )
+          out.push(diag('OUTCOME_MISMATCH', path));
+      } else named(t.dialogue, 'dialogue', `${path}.dialogue`);
       if (sites.filter((s) => s === site(t)).length > 1)
         out.push(diag('DUPLICATE_DEFINITION', path));
+      if (t.scene) continue;
       const d = (c.dialogues ?? {})[refString(t.dialogue as DefinitionRef)];
       if (d && !Object.hasOwn(d.choices, t.choice))
         out.push(diag('UNRESOLVED_REFERENCE', `${path}.choice`, { target: t.choice }));
@@ -148,7 +164,7 @@ function chapters(c: Obj, { named, text }: Checks): Diagnostic[] {
     const counted: Obj[] = chapter.outcome
       ? [point.outcomes[chapter.outcome]]
       : Object.values(point.outcomes);
-    if (counted.some((t) => ambiguous(c, t)))
+    if (counted.some((t) => !t.scene && ambiguous(c, t)))
       out.push(diag('OUTCOME_MISMATCH', `${at}.story_point`));
   }
   return out;
@@ -170,7 +186,7 @@ function ambiguous(c: Obj, t: Obj): boolean {
 
 // One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that
 // resolves none, with no hand_over: OUTCOME_MISMATCH) and hand_over (an item role to an npc role).
-// size: allow 47, one authored option validates its mutually constrained effects together
+// size: allow 52, one authored option validates its mutually constrained effects together
 function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks, c: Obj) {
   const roles = d.roles as Obj;
   const out: Diagnostic[] = [];
@@ -180,16 +196,9 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (d.quest) out.push(diag('OUTCOME_MISMATCH', `${path}.accept`));
     if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.hand_over`));
   }
-  (o.sequence ?? []).forEach((s: Obj, i: number) => {
-    named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
-    if (s.op === 'fact.adjust') {
-      const t = c.facts[refString(s.fact)]?.value_type;
-      if (t && (t.type !== 'int' || t.minimum === undefined || t.maximum === undefined))
-        out.push(diag('FACT_TYPE_MISMATCH', `${path}.sequence[${i}].fact`));
-    } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
-  });
+  out.push(...sequence(o, path, c, { named, typedValue, text }));
   if (o.receive) {
-    if (o.accept || o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
+    if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
     for (const [field, role] of [
       ['item', 'item'],
       ['from', 'npc'],
@@ -198,6 +207,11 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
         out.push(
           diag('UNRESOLVED_REFERENCE', `${path}.receive.${field}`, { target: o.receive[field] }),
         );
+  }
+  if (o.payment) {
+    named(o.payment.resource, 'resource', `${path}.payment.resource`);
+    if (roles[o.payment.from]?.role !== 'npc')
+      out.push(diag('UNRESOLVED_REFERENCE', `${path}.payment.from`, { target: o.payment.from }));
   }
   if (o.escort) {
     const e = o.escort;
@@ -211,6 +225,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);
   return out.concat(
+    lesson(o, d, path, c, { named, typedValue, text }),
     (['item', 'to'] as const)
       .filter((field) => wrong(field, field === 'to' ? 'npc' : 'item'))
       .map((field) =>

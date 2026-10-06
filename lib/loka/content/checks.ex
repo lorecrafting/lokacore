@@ -1,4 +1,4 @@
-# size: allow 315, new short quest references join the existing checked expansion boundary
+# size: allow 360, finite stock and exchange refs join the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -19,6 +19,7 @@ defmodule Loka.Content.Checks do
     "escort_state" => "quest",
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
+    "skill.acquire" => "skill",
     "quest.activate" => "quest",
     "quest.resolve" => "quest",
     "quest.fail" => "quest",
@@ -76,6 +77,8 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     npc
+    |> Map.delete("shop")
+    |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
     |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
   end
@@ -84,14 +87,50 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
 
+  def expand(%{"offers" => offers, "resource" => r} = shop, m),
+    do:
+      shop
+      |> Map.put("resource", ref(r, "resource", m))
+      |> Map.put(
+        "offers",
+        Enum.map(offers, &Map.update!(&1, "item", fn i -> ref(i, "item", m) end))
+      )
+
+  def expand(%{"quantity" => _, "outgoing" => _, "incoming" => _} = x, m) do
+    x
+    |> Map.update!("npc", &ref(&1, "npc", m))
+    |> Map.update!("outgoing", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+    |> Map.update!("incoming", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+    |> Map.update!("contribution", &ref(&1, "fact", m))
+    |> Map.update!("faction", &ref(&1, "fact", m))
+  end
+
+  def expand(%{"items" => _, "label" => _, "narration" => _} = h, m),
+    do: Map.update!(h, "items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+
   # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
   # map may have a detail keyed resource, whose value is a map).
+  def expand(%{"skill" => s} = n, m) when is_binary(s),
+    do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
+
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
+
+  def expand(%{"at" => _, "trust_fact" => _} = deadline, m),
+    do:
+      deadline
+      |> Map.update!("fact", &ref(&1, "fact", m))
+      |> Map.update!("trust_fact", &ref(&1, "fact", m))
 
   # A story point's trigger (StoryPointDefinition outcome): its short dialogue.
   def expand(%{"dialogue" => d, "choice" => c} = t, m) when is_binary(c),
     do: Map.put(t, "dialogue", ref(d, "dialogue", m))
+
+  def expand(%{"scene" => s} = t, m) when is_binary(s),
+    do: Map.put(t, "scene", ref(s, "scene", m))
+
+  def expand(%{"fact" => f, "value" => _} = t, m) when is_binary(f),
+    do: Map.put(t, "fact", ref(f, "fact", m))
 
   def expand(%{"accept" => k, "narration" => _} = o, m) when is_binary(k),
     do: o |> Map.delete("accept") |> expand(m) |> Map.put("accept", ref(k, "quest", m))
@@ -111,10 +150,17 @@ defmodule Loka.Content.Checks do
 
   # Scene trigger: outcome remains a key.
   def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "story_point", ref(p, "story_point", m))
+    do:
+      trigger
+      |> Map.delete("story_point")
+      |> expand(m)
+      |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
     do: Map.put(trigger, "quest", ref(q, "quest", m))
+
+  def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
+    do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
@@ -142,6 +188,7 @@ defmodule Loka.Content.Checks do
 
     Enum.flat_map(all, &depth/1) ++
       Loka.Content.Requires.features(manifest, all) ++
+      Loka.Content.Exchanges.check(manifest, defs) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
   end
 
@@ -259,22 +306,27 @@ defmodule Loka.Content.Checks do
     Enum.flat_map(actions, fn {rel, a} ->
       command(rel, a["command"], required, m["time_policy"] != nil)
     end) ++
-      Enum.flat_map(trees(defs, actions), &tree(&1, {m, defs, required}))
+      Enum.flat_map(
+        trees(defs, actions),
+        &Loka.Content.Policies.tree(&1, {m, defs, required}, @ref_fields)
+      )
   end
-
-  defp tree({rel, steps, root}, ctx),
-    do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
   # Every policy tree: a named policy's root, each action's inline one, each variant's, each
   # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
   # dialogue's.
   defp trees(defs, actions) do
-    for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
-      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      RoomParts.conditions(defs) ++
-      Entities.conditions(defs) ++
-      Recipes.conditions(defs) ++
-      Quests.conditions(defs) ++ Reactions.conditions(defs) ++ Dialogues.conditions(defs)
+    Enum.concat([
+      for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
+      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}),
+      RoomParts.conditions(defs),
+      Entities.conditions(defs),
+      Recipes.conditions(defs),
+      Quests.conditions(defs),
+      Reactions.conditions(defs),
+      Dialogues.conditions(defs),
+      Loka.Content.Skills.conditions(defs)
+    ])
   end
 
   # run_job is authority-internal (04 §1): no action builds it.
@@ -284,32 +336,4 @@ defmodule Loka.Content.Checks do
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
-
-  defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
-    children =
-      items
-      |> Enum.with_index()
-      |> Enum.flat_map(fn {c, i} -> nodes(c, steps ++ ["items", i]) end)
-
-    [{n, steps} | children]
-  end
-
-  defp nodes(%{"op" => "not", "item" => item} = n, steps),
-    do: [{n, steps} | nodes(item, steps ++ ["item"])]
-
-  defp nodes(n, steps), do: [{n, steps}]
-
-  defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
-    owned(at(rel, steps ++ ["op"]), op, required) ++
-      empty_window(rel, steps, n) ++
-      case @ref_fields[op] do
-        nil -> []
-        field -> reference(rel, steps, field, n, m, defs)
-      end
-  end
-
-  defp empty_window(rel, steps, %{"op" => "time_window", "from" => t, "to" => t}),
-    do: [diag("EMPTY_TIME_WINDOW", at(rel, steps))]
-
-  defp empty_window(_, _, _), do: []
 end

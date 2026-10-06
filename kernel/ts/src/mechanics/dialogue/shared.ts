@@ -1,3 +1,5 @@
+import { membership } from '../skills.ts';
+import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
 import { living } from '../death/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
@@ -33,6 +35,8 @@ import { holds } from '../policy.ts';
 import { carrying } from '../containment/shared.ts';
 import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { questOf } from '../lookups.ts';
+import { choicePayment } from './payment.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
 export const definition = (world: World, source: DefinitionRef): DialogueDefinition =>
@@ -79,6 +83,7 @@ export const pending = (world: World, actor: CharacterId) =>
  * holds; then revalidate actual custody and presence (06 §43): not_present while a bound NPC is not in the actor's room, else not_owned while a
  * bound item is not held by the actor body (or the selected receive NPC); Choose and GameView agree.
  */
+// size: allow 50, dialogue availability and bound custody share one admission check
 export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, steps: Steps) {
   const body = bodyOf(world, row.actor_id);
   const d = definition(world, row.source);
@@ -88,28 +93,79 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   })?.entity_id;
   if (!holds(world, row.actor_id, d.policy.root, { target, steps }))
     return 'invalid_state' as const;
+  const window = option.availability;
+  if (
+    window &&
+    ((window.from !== undefined && world.state.clock < window.from) ||
+      (window.through !== undefined && world.state.clock > window.through))
+  )
+    return 'invalid_state' as const;
   const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
-  for (const r of row.roles) {
-    const expected = d.roles[r.role];
-    const entity = world.entities[r.entity_id];
-    if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
-    if (
-      expected.role === 'npc' &&
-      (!living(world, r.entity_id) ||
-        world.state.containers[r.entity_id] !== world.state.containers[body!])
+  const allRolesNeeded = !!d.quest || !Object.values(d.choices).some((c) => c.receive);
+  const prior = d.quest && questOf(world, row.actor_id, d.quest)?.[1];
+  if (
+    prior?.bindings &&
+    [option.hand_over?.item, option.hand_over?.to].some(
+      (role) => role && prior.bindings?.some((r) => r.role === role && r.entity_id !== bound(role)),
     )
-      return 'not_present' as const;
-    if (expected.role === 'item') {
-      const holder = option.receive?.item === r.role ? bound(option.receive.from) : body;
-      if (!holder || world.state.containers[r.entity_id] !== holder) return 'not_owned' as const;
-    }
-  }
+  )
+    return 'invalid_state' as const;
+  const roles = roleBlocked(world, row, d, option, body!, allRolesNeeded);
+  if (option.exchange && d.quest) return roles ?? exchangeBlocked(world, row, d.quest, steps);
+  if (roles) return roles;
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
+  for (const step of option.sequence ?? [])
+    if (step.op === 'skill.acquire' && membership(world, row.actor_id, step.skill) !== false)
+      return 'invalid_state' as const;
+  if (
+    (option.payment || option.lesson_payment) &&
+    (!body || !choicePayment(world, row, option, body))
+  )
+    return 'insufficient_resource' as const;
   if (option.receive) {
     const item = bound(option.receive.item);
     if (!body || !item) return 'not_owned' as const;
     return carrying(world, body, steps)(item);
+  }
+}
+
+function roleBlocked(
+  world: World,
+  row: ChoiceRow,
+  d: DialogueDefinition,
+  option: DialogueChoice,
+  body: EntityId,
+  allRolesNeeded: boolean,
+) {
+  const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
+  for (const r of row.roles) {
+    const expected = d.roles[r.role];
+    if (option.exchange && /^(outgoing|incoming)_\d{2}$/.test(r.role)) continue;
+    const entity = world.entities[r.entity_id];
+    if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
+    const needed =
+      allRolesNeeded ||
+      r.role ===
+        Object.keys(d.roles).find((name) => {
+          const role = d.roles[name];
+          return role?.role === 'npc' && same(role.npc, d.npc);
+        }) ||
+      [option.receive?.from, option.hand_over?.to, option.payment?.from].includes(r.role);
+    if (
+      expected.role === 'npc' &&
+      needed &&
+      (!living(world, r.entity_id) ||
+        world.state.containers[r.entity_id] !== world.state.containers[body!])
+    )
+      return 'not_present' as const;
+    if (
+      expected.role === 'item' &&
+      (allRolesNeeded || option.receive?.item === r.role || !!option.hand_over)
+    ) {
+      const holder = option.receive?.item === r.role ? bound(option.receive.from) : body;
+      if (!holder || world.state.containers[r.entity_id] !== holder) return 'not_owned' as const;
+    }
   }
 }
 
@@ -119,7 +175,11 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
-export function choiceView(world: World, actor: CharacterId): PendingChoice | undefined {
+export function choiceView(
+  world: World,
+  actor: CharacterId,
+  steps = { n: 0 },
+): PendingChoice | undefined {
   const found = pending(world, actor);
   if (!found) return undefined;
   const [continuation_id, row] = found;
@@ -128,7 +188,6 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
   });
-  const steps = { n: 0 };
   return {
     continuation_id,
     prompt: { key: d.prompt },

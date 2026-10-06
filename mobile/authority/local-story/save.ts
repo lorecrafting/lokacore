@@ -1,3 +1,4 @@
+import { defenseEvidence } from './combat-receipt.ts';
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
@@ -137,6 +138,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
   const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
   if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
     throw new Error('malformed JSON: invalid committed event evidence');
+  defenseEvidence(d.events);
   const root =
     ['engaged', 'fled'].includes(d.outcome) &&
     d.delta.ops.some(
@@ -171,6 +173,13 @@ function receiptDetail(
     d.events.some((e) => e.causation_id === r.command_id && e.payload.type === 'choice_resolved')
   )
     return dialogueDetail(s, r.command_id, command!, d);
+  if (command?.payload.type === 'buy' || command?.payload.type === 'sell') {
+    if (validate('Command', command).length || command.id !== r.command_id)
+      throw new Error('malformed JSON: invalid committed shop exchange');
+    return command.payload.provider_id;
+  }
+  if (d.outcome === 'harvested' && command?.payload.type === 'harvest')
+    return command.payload.target_id;
   if (!['read', 'performed', 'success'].includes(d.outcome)) return;
   if (d.outcome === 'read') {
     if (

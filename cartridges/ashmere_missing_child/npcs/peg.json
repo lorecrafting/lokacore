@@ -1,0 +1,51 @@
+{
+  "keywords": [
+    "peg",
+    "harrow",
+    "chandler"
+  ],
+  "short": "npc.peg.short",
+  "room_line": "npc.peg.room",
+  "description": "npc.peg.description",
+  "room": "chandler",
+  "resource_starts": {
+    "pennies": 20
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "torch",
+        "buy": 3,
+        "sell": 1
+      },
+      {
+        "item": "lamp_oil",
+        "buy": 2,
+        "sell": 1
+      },
+      {
+        "item": "waterskin",
+        "buy": 4,
+        "sell": 2
+      },
+      {
+        "item": "satchel",
+        "buy": 5,
+        "sell": 2
+      },
+      {
+        "item": "iron_sword",
+        "buy": 8,
+        "sell": 4
+      },
+      {
+        "item": "wooden_shield",
+        "buy": 4,
+        "sell": 2
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

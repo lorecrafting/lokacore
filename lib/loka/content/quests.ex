@@ -49,7 +49,19 @@ defmodule Loka.Content.Quests do
       if q["key"] in ctx.taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
     owned(at(rel, []), "quest_activated", ctx.events) ++
-      duplicate ++ texts(rel, q, ctx.text) ++ item(rel, q["objective"], ctx.m, ctx.defs)
+      duplicate ++
+      texts(rel, q, ctx.text) ++
+      item(rel, q["objective"], ctx.m, ctx.defs) ++
+      deadline(rel, q["deadline"], ctx)
+  end
+
+  defp deadline(_, nil, _), do: []
+
+  defp deadline(rel, d, ctx) do
+    for field <- ~w(fact trust_fact) do
+      reference(rel, ["deadline"], {field, "fact"}, d, ctx.m, ctx.defs)
+    end
+    |> Enum.concat()
   end
 
   defp texts(_, _, :unknown), do: []

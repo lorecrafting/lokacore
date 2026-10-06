@@ -79,8 +79,18 @@ function participants(op: Any, containers: Map<string, Any>, known: Any): boolea
 function job(op: Any, row: Any, horizon: number): Any {
   if (op.op === 'job.schedule') {
     if (row !== undefined || op.due_time <= horizon) return undefined;
+    if (
+      (op.quest_instance_id === undefined) !== (op.actor_id === undefined) ||
+      (op.quest_instance_id !== undefined &&
+        (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+    )
+      return undefined;
     const next: Any = { job: op.job, due_time: op.due_time, status: 'pending' };
     if (op.encounter_id !== undefined) next.encounter_id = op.encounter_id;
+    if (op.quest_instance_id !== undefined) {
+      next.quest_instance_id = op.quest_instance_id;
+      next.actor_id = op.actor_id;
+    }
     return next;
   }
   if (row?.status !== 'pending') return undefined;

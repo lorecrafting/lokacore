@@ -4,6 +4,7 @@ import { LIMITS, type EntityId } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
+import { refString } from '../../runtime/decision.ts';
 
 type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
 type Context = {
@@ -28,6 +29,19 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
     const contained = underBody(context, id);
     if (typeof contained === 'string') return contained;
     if (contained) return 'invalid_state' as const;
+  }
+  for (const q of Object.values(world.state.quests ?? {})) {
+    if (
+      !['active', 'objectives_complete'].includes(q.state) ||
+      !world.cartridge.quests?.[refString(q.quest)]?.deadline
+    )
+      continue;
+    for (const role of q.bindings ?? []) {
+      if (world.entities[role.entity_id]?.kind !== 'item') continue;
+      const contained = underBody(context, role.entity_id);
+      if (typeof contained === 'string') return contained;
+      if (contained) return 'invalid_state' as const;
+    }
   }
 }
 
@@ -186,4 +200,31 @@ export function putRefused(
     }
     if (count >= capacity) return 'invalid_state' as const;
   }
+}
+
+/** Carrying after one bounded conserved exchange; outgoing nested mass leaves with its item. */
+export function carryingExchange(
+  world: World,
+  body: EntityId,
+  outgoing: readonly EntityId[],
+  incoming: readonly EntityId[],
+  steps: Steps,
+) {
+  const setting = world.cartridge.world?.carry;
+  if (!setting) return;
+  const context: Context = { world, body, steps, totals: new Map(), owned: new Map() };
+  let net = 0;
+  for (const [items, sign] of [
+    [outgoing, -1],
+    [incoming, 1],
+  ] as const)
+    for (const item of items) {
+      const mass = total(context, item);
+      if (typeof mass === 'string') return mass;
+      net = add(net, sign * mass);
+    }
+  if (net <= 0) return;
+  const load = total(context, body);
+  if (typeof load === 'string') return load;
+  return add(load, net) > setting.max_grams ? ('too_heavy' as const) : undefined;
 }

@@ -594,3 +594,464 @@ receive-plus-accept choice, bound original participants/item, absolute due time,
 resource ownership and exact participating balances. Source may use a narrow typed
 expiry declaration; it must not encode the job as a free-form Effect interpreter.
 This section describes the selected next release, not content already installed.
+
+## Peg's B3 shelf
+
+The [selected shop mechanic](mechanics.md#pegs-immediate-shop-b3-selected-contract)
+uses four separately authored, directly Peg-held items. Each item definition has one
+fresh-world instance; these are the whole initial stock. B3 adds no issuance or restock.
+The prices, masses and capacity below are chapter values, not engine defaults.
+
+| Item | Buy | Sell | Shell mass | Current use |
+|---|---:|---:|---:|---|
+| torch | 3p | 1p | 100g | Wear/Remove in the light slot; B4 adds fuel and light. |
+| lamp_oil | 2p | 1p | 200g | Held supply; B4 adds refill use. |
+| waterskin | 4p | 2p | 500g | Held vessel; B7 adds liquid use. |
+| satchel | 5p | 2p | 100g | Portable `container: true`, capacity four direct items. |
+
+Peg starts with an explicit 20-penny balance under B2's 0..1000 chapter resource
+bound. The player starts with B2's 20p and Aldric keeps his separate 10p funding.
+Shop source declares the four exact eligible item references and both prices; their
+fresh-world IDs are derived from the pinned release, not authored in source.
+Compiler and loader reject duplicate offers, absent/non-Peg starting items, invalid
+prices or missing participating balance declarations. The shop never treats Peg's
+S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata to
+these definitions in their own releases without changing B3's item identities or
+shop rules. The satchel has no lid and its contents count toward the ordinary load.
+
+## C1 Tobin and equipment
+
+**API1.18 source contract.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
+adds `skills@1` and the existing `attributes@1` dependency. Skill definitions declare
+their label and current VersionedPolicy qualification; the compiler creates their
+unique reserved player acquisition facts. Swords and dodge are the only new skills.
+The source `skills/<key>.json` supplies `label`, `requirement` and `qualification`;
+its key comes from its file. The acquisition fact is the exact player Boolean
+`skill_<key>`, default false, reserved to `skills@1`. No writable stat, progression
+or skill-percentage field is introduced.
+
+| Chapter parameter | Selected value |
+|---|---|
+| STR / DEX attribute starts | 10 / 10 |
+| swords qualification | `stat_compare`: STR at least 10 |
+| dodge qualification | `stat_compare`: DEX at least 10 |
+| Each lesson payment | 2 pennies, actor → Tobin |
+| Tobin penny start | 0, under the existing penny bounds |
+| Lesson duration / cooldown | 0 / 0; ordinary authority elapsed settlement still runs |
+| rusty_sword | 500g, `wield`, chance95, fixed damage3; initially Tobin-held |
+| iron_sword | 600g, `wield`, chance95, fixed damage4; initially Peg-held, Buy8p/Sell4p |
+| wooden_shield | 400g, `off_hand`, block chance25; initially Peg-held, Buy4p/Sell2p |
+| Qualified dodge chance | 50 |
+
+Place passive Tobin at reachable `north_gate`, with no attack profile or schedule.
+An ordered swords dialogue receives the single rusty sword while teaching; a later
+dodge dialogue teaches without item roles. A teacher dialogue's typed acquisition
+step identifies the declared skill; its payment binds a live NPC role, penny
+resource and positive amount. The original teacher and item identities are bound
+by ordinary dialogue/receive, not minted on Choose. Learned-status policies use the
+generated typed fact; user content cannot counterfeit an acquired grant.
+
+The iron sword and shield extend [Peg's finite shelf](#pegs-b3-shelf) through its
+existing Buy/Sell contract. Preserve the four B3 definitions and their within-save
+identities; each new release independently derives its own fresh IDs. Gift swords
+are not a shop offer. No renewal/replacement/restock is needed for these optional
+consumers. Add item combat eligibility and the two defense narration keys to the
+smallest current cartridge shape; chance bounds remain integers0..100 and weapon
+damage positive/ordered. Compile and load reject undeclared skills, absent or
+non-Boolean generated facts, unresolved qualification refs, wrong equipment slots,
+invalid profiles/fees, missing teacher balance, collisions and unknown fields.
+
+Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
+main-story routes stay as currently authored. Training and shop equipment are
+optional; every possession-recovery and required story route stays free of a skill,
+weapon, shield, hour or next-day stock gate. C2 later owns Tobin's reachable watch
+post/patrol. The current C1 chapter answer and fresh identities are pinned in
+[the independent v020 payload](../../protocol/fixtures/missing_child_v020_hash.json) and
+[ID answer](../../protocol/fixtures/missing_child_v020_ids.json). Source and checks remain
+local until independent review.
+
+## B5 herb and bandage stock
+
+The [B5 mechanic](mechanics.md#s9-infirmary-herbs-b5-selected-contract) uses finite
+existing authored item instances. Because the current compiler instantiates one
+item per definition, declare twelve individually keyed fenwort definitions and
+twelve individually keyed bandage definitions, with shared visible family names
+and independent exact references. They are real items, not stacks or templates.
+Fenwort starts directly in Willow Shade; bandages start directly with Wick.
+The patch references only those twelve fenwort definitions; S9 references those
+same eligible herbs and twelve reward definitions. Derived release IDs remain
+unknown until the new cartridge is built.
+
+| Chapter setting | Selected value |
+|---|---:|
+| Initial fenwort supply | 12 distinct items |
+| Initial Wick reward supply | 12 distinct bandages |
+| Herbs per turn-in | 3 |
+| Bandages per turn-in | 3 |
+| Fenwort mass | 20g each |
+| Bandage mass | 10g each |
+| S9 Priory increment | +1 |
+| Cumulative S9 contribution cap | +3 |
+| Initial player-scoped S9 contribution | 0 |
+
+The patch and Wick have no hour gate, respawn, restock or cooldown. Four optional
+exchanges are funded in a fresh chapter, and the fourth demonstrates the cap.
+All item definitions retain ordinary custody, storage and death behavior. Wick
+has no finite carrying/custody capacity that could reject the authored incoming
+herbs. Public reciprocal Cloister/Infirmary routes cannot depend on private study
+access, a bell choice, key or timed door. The patch is immediately reachable via
+the existing Willow Shade route. C5 owns bandage use; D12 owns learned herbalism;
+neither is advertised as a selectable unfinished action in B5.
+
+Compiler and loader independently reject duplicate/overlapping eligible and
+reward references, wrong kinds or starting holders, absent patch room/Wick,
+nonpositive or unequal exchange quantities, insufficient initial stock, invalid
+mass, missing bounded contribution declaration, increment outside its cap and
+incompatible B2 faction bounds. The exchange quantities are equal for this
+consumer, not a generic barter language. Definitions and all tuning belong to
+this cartridge; no engine or Book fenwort count/faction literal is permitted.
+
+## B4 well and fuel
+
+The planned [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
+adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
+stairs are public at every hour. Its ordinary description exposes an authored
+inspectable `masonry` detail; its separate dark description names only darkness
+and the return stair, with no hidden-object links. The detail is optional flavor.
+Other installed rooms retain their current visibility; sunlight phases do not
+silently darken them. No lantern, cottage, water or enemy is added.
+
+The chapter's source metadata declares the B3 torch as refillable oil wick:
+capacity7200 fuel units, initial7200, burn1 fuel unit per logical clock unit,
+compatible supply `lamp_oil`. The exact B3 oil bottle starts with7200 units,
+capacity7200 and no burn. These give two game hours of torch light per full
+charge under B1's3600 units/hour; they are tuning, never engine defaults.
+The bottle persists at zero and retains its B3 sell eligibility and shell mass;
+prices never depend on charge. Partial refill preserves excess in the same bottle.
+The satchel still has no lid; nesting alone excludes its source from illumination.
+
+Compiler and loader validate exact source/supply references, nonnegative safe
+integer initial charge within positive bounded capacity, positive source burn rate,
+matching fuel units and authored dark text on opted rooms. A supply cannot be lit
+or illuminate. Missing fuel rows are not an implicit fresh charge. Metadata belongs
+to the exact item definitions; fuel state belongs to their real instances, never to
+the player, room or merchant. No generic stacking, destruction, stock or liquid API.
+
+## B7 water and vessels
+
+**Selected, pending implementation.** The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
+authors `water` in integer quarter-litre units: **250 grams/unit**, Drink **1 unit**.
+Both waterskins have capacity **4 units**, shell mass **500 grams**, and initial
+`null/0` contents. A full skin therefore weighs **1500 grams**, with no rounded
+fractional quantity. Water has no declared resource benefit in B7.
+
+Keep B3's original `waterskin` offer and add one separately authored
+`spare_waterskin`, directly Peg-held, Buy **4p**, Sell **2p**, with the same vessel
+metadata. Its distinct name/keywords and exact identity support Book target
+selection; these are two finite real item offers, not a stack or restock mode.
+This explicitly extends the four-item B3 shelf for B7's real Pour consumer.
+All prior offers and starts stay governed by their existing declarations;
+release-derived IDs must be re-pinned, not copied from another release.
+Two skins cost **8p** from the authored **20p** player start, leaving **12p**;
+with Peg's **20p** start her balance becomes **28p**. Filled skins may be sold
+and bought back for the same authored prices with their contents intact.
+
+Add one actual `well` detail to Well Lane, accessible at all hours with no
+light, quest, bell, combat, tide or room descent requirement. It declares an
+inexhaustible source of the `water` reference; only Fill may introduce its units.
+The B4 well-shaft plan is independent; preserve its exits if already merged.
+No new room or route is counted for B7. The well cannot be carried or targeted
+as a Pour receiver, and cannot be drunk from directly in this slice.
+
+Source/compiler/loader validate positive integer opted vessel capacity, exact
+initial row, kind references, positive integer drink amount and grams/unit,
+source kind/room binding and safe maximum effective mass. Short DefinitionRefs expand through
+the existing compiler path. Reject initial contents over capacity, null with
+positive quantity, unknown kind, unsafe density product and source declarations
+on non-detail entities. Non-opted items and historical frozen artifacts retain
+their existing representation; B4's fuel rows are not liquid vessels.
+## C2 watch route and trust
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
+Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
+down; Village Green east ↔ East Gate west. The cell is vacant with an open,
+unlocked door: no missing-key producer. Gate Tower uses existing adjacent sight;
+no far scan is promised. Watch Post's duty roster and East Gate's flooded-road
+sign use installed readable details. The sign explains that the King's Road is
+outside this chapter; no dangling exit or higher-chapter room is added.
+
+Move the same original C1 Tobin spawn from North Gate to Watch Post, retaining
+his pennies, lesson definitions and exact rusty sword identity. He is a passive
+noncombatant with no attack profile, daily schedule or other location writer.
+His C1 lessons remain available at his current reachable location, including
+between patrol legs; after completion he stays at the terminal checkpoint.
+No paid training, skill, trust, equipment, light or hour condition gates S3.
+
+| Chapter parameter | Selected value |
+|---|---|
+| Cyclic route cursor0..5, initial0 | Watch Post → North Gate → Village Green → East Gate → Village Green → North Gate → Watch Post |
+| Distinct checkpoints | North Gate, Village Green, East Gate, Watch Post |
+| Required new checkpoint entries per attempt | 4; starting co-presence earns0 |
+| Leader movement trigger | One explicit Continue rounds per edge |
+| Patrol duration, deadline, cooldown | 0, none, 0; authority elapsed settlement still applies |
+| S3 success outcome | `completed` |
+| `watch.gate_trusts_player` | Reserved player Boolean, initially false, true only on S3 success |
+| S3 other reward | None; C1 owns swords teaching and the rusty gift |
+
+The closing Watch Post is cursor0 again, not a seventh route occurrence. Route
+cursor denotes the leader's current occurrence, including the repeated Green/North
+Gate positions. On Restart it is retained, not reconstructed
+from room alone. Completing four unique post-start entries takes at most six edges
+from any cursor; repeated connecting rooms count once. Open all North Gate–chapel
+and village/fen/cellar/corpse routes at every hour, without a trust barrier. Watch
+Post, Cell and Tower are safe, equipment-free optional destinations, with usable
+return exits. No hound producer or survive timer is introduced.
+
+Compiler/loader validate the bounded finite adjacent route, unique nonempty declared
+checkpoint subset and achievable checkpoint count, original NPC/quest references,
+shared location-writer exclusion, reserved trust ownership and complete room/link/
+readable definitions. Reject malformed cursors, duplicate/unknown checkpoint credit,
+wrong row identities and ordinary writes to reserved state. World route/count values
+are cartridge data, never presenter/engine chapter literals; existing safety budgets
+bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
+reviewed C1/B5 integration is re-pinned and independently derived.
+
+## B6 marsh route and tuning
+
+The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
+public path on existing firm footing; preserve the already always-passable mire
+and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
+east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
+its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
+The future Hound Run connection waits for C3; no dangling exit is emitted.
+Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
+→ Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
+His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
+
+Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
+self-luminous Seek marker and discovered wisp have explicit visibility metadata;
+other details have no exemption. Old Causeway's carved fox is flavor in B6 and
+must not silently grant ward before the riddle; D2/D5 own later discoveries.
+Bind one actual authored wisp, resident at every hour, not a timed population.
+
+| Chapter setting | Selected value |
+|---|---:|
+| Immutable attribute key/start | `per` / 5 |
+| Seek attribute difficulty | 5 |
+| Seek duration, costs and cooldown | 0 / none / none |
+| S4 answer / ordered bank | `tide` / `TIDE` |
+| Wrong answers per sitting | 3 |
+| Seek discovery fact | player Boolean `fen_wisp_discovered`, false |
+| Answered fact | player Boolean `fen_wisp_answered`, false |
+| Ward topic key / knowledge fact | `ward` / player Boolean `topic_ward_known`, false |
+
+Add `attributes@1`, `check@1`, `topics@1` and the actual light dependency to the
+chapter lock. The topic definition maps key, localized label and exact knowledge
+fact; no separate membership row or nineteen-topic catalog. Source `topic.grant`
+references that definition and lowers once through fact ownership. Chapter values
+never become engine or presenter defaults. All current fresh characters pass;
+D11 must preserve an immediate passing discovery path before changing attributes.
+
+Compiler and loader independently reject unresolved/wrong-kind attribute/topic/
+fact/role refs, non-Boolean or non-player topic facts, duplicate knowledge mappings,
+invalid threshold integers, nonpositive or non-safe-integer wrong limits, malformed
+bank or answer and an unresolved answer choice. Continuation/load validation rejects
+missing opted attempt fields.
+Short references expand in every new field. Existing bounded answer lengths apply;
+new schemas need their actual negative fixtures and planted guard controls.
+
+## C3 hound population and loot
+
+**Selected, pending implementation.** The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
+adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
+chapter values, not engine/presenter constants or claimed owner preferences.
+
+| Parameter | Selected chapter value |
+|---|---|
+| Live cap / ordered slot count | 6 / 6 |
+| Daytime / nighttime eligible slot targets | 4 / 6 |
+| Night window | calendar hours [20,6), wrapping midnight |
+| Replacement delay | one authored world day (currently 86400 units) after death |
+| Wander interval | one authored world hour (currently 3600 units), aligned from time0 |
+| Home / allowed area | Hound Run / Hound Run and Adder Nest only |
+| Bundle | one hound and one pelt directly held by that new hound |
+| Hound HP minimum / maximum / start / gain | 0 / 8 / 8 / 0 |
+| Hound attack chance / fixed damage | 80 / 1 |
+| Pelt mass / equipment / sale offer | 250g / none / none |
+| Hound corpse | new room-fixed, public NPC corpse template, mass0, ordinary unbounded container |
+
+Add Reed Bank east ↔ Hound Run west and Hound Run east ↔ Adder Nest west,
+with gnawed-bones and empty-nest noun details. All exits are free of gates, light,
+skill and hour requirements; Adder Nest contains no live adder or harvest node in
+C3. No exit points at unbuilt Marsh Light. Other room connections stay deferred
+to their owning slices. The existing Reed Bank–Mire–Fox Hollow main story route
+remains usable at all hours without entering the population area.
+
+Hound/pelt definitions are bundle templates, not additional authored birth spawns.
+The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
+allowed rooms, eligible slot targets, time window and periods. Require resolved
+correct-kind short references, distinct allowed rooms connected by legal reciprocal
+edges, positive safe calendar products/periods, wander interval <= replacement
+delay, targets <= cap, and the exact bounded bundle shape. Hound HP/attack obey
+existing profile validation; pelt has ordinary
+item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
+validation. Unknown fields and malformed origin/job/state declarations refuse at
+compile/load; inspect actual slot bounds before traversal or allocation.
+
+No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
+in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
+S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
+must amend their actual additional contracts. Successor release/API/hash/fresh IDs
+remain null until the reviewed integrated predecessor is known.
+
+## C4 pack response and wounded flight
+
+**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+opts the existing C3 `fen_hounds` plan into same-plan, admission-time pack assistance
+and strict below25% HP flight. These are cartridge declarations, not template-name
+checks or engine/presenter world constants. Enemy flight has zero fare, chooses
+the first canonical legal direction without RNG, and remains within Hound Run and
+Adder Nest. Reuse C3's cap6, HP8 and attack profile; do not add spawns, population
+jobs, slots, routes or loot. Exact same-generation slot `last_flight_at` belongs
+to the [transition contract](protocol.md#c4-pack-encounter-and-flight-composition).
+
+Compiler/loader validate the plan's pack/flight declarations and correct-kind
+refs, integer percentage1..100 with positive HP maximum, declared zero animal
+fare, bounded unique connected area and registered committed narration for helper
+admission, enemy flight, primary change and final withdrawal. Unknown or malformed
+fields refuse. Hounds cannot cross the existing west edge into Reed Bank when
+fleeing: it is outside their declared area. No gate can be bypassed and no player
+key is spent on an animal's behalf. With no legal area exit the selected hound
+retains its ordinary attack opportunity; no retry loop is authored.
+
+Deliberate Attack alone begins hostility, at every hour. The archived aggressive
+night rule and provisional unsolicited night initiation are deferred explicitly.
+Required Reed Bank/Mire/Fox Hollow routes and actual corpse recovery are safe even
+inside the optional hound rooms unless the player elects another Attack. No corpse
+immunity flag, temporary safe mode, extra return action or night wait is needed.
+C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
+without crossing the strict below25% live flight threshold; misses/defenses retain
+their actual resolver semantics. No weapon/loot is required by the main story.
+C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
+and intervening shared release edits are reviewed and independently re-pinned.
+
+## B8 Maud's service declarations
+
+The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)
+add no rooms. The original Maud remains all-hours in `drowned_lantern`, declares
+an explicit **10p** initial balance within the existing **0..1000** pennies
+bounds, and offers the following finite chapter values. Values are source-owned,
+never kernel/presenter defaults.
+
+| Service | Price | Immediate benefit | Finite source |
+|---|---:|---|---|
+| Room | 3p | actor `lantern_bed_paid=true`; paid bed detail/Rest at Inn Rooms | once per actor/save lineage |
+| Bread meal | 2p | up to +12 MV, capped at current authored maximum | Maud `lantern_meals`, 0..4, start4, gain0; debit1 |
+| Ale serving | 1p | up to +4 MV, capped at current authored maximum | exact Maud-held `lantern_ale_cask`; debit1 liquid unit |
+
+Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
+detail at `inn_rooms` with free/paid description variants and a paid ordinary
+Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
+bounded ResourceSpec initialized only for Maud, not a second inventory count.
+Add one real provider-held ale vessel with capacity4, initial ale4, drink_amount1,
+shell mass500g; declare `ale` density250g/unit (the B7 quarter-litre unit).
+Empty shell persists as null/0; no Fill source for ale is authored. The cask is
+Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
+slice. No dead Maud stock resurrection/refill occurs.
+
+Declare the three finite offers as `services/<key>.json` definitions, referenced
+by Maud; the typed immediate benefit alternatives are entitlement, meal-stock
+recovery and provider-vessel recovery. No free-form operations list is authored.
+Compiler and loader check typed service keys/labels/narration, original provider
+binding, positive integer quote/benefit/stock debit, resource declarations and
+bounds, Boolean fact scope, exact directly provider-held opted ale vessel/kind,
+compatible complete serving and short-reference expansion. Reject duplicate
+service keys, absent balances, regenerating stock/currency, mismatched stock
+owner, non-MV recovery declarations and unbounded/unknown consequences. The
+minimal service subset covers only these consumed consequences, not an arbitrary
+Effect interpreter. Independently re-pin the integrated bundled release/API and
+known answers after B7 source merges; future hashes/IDs/versions are null now.
+
+## D2 public Priory and book authoring
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
+`prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
+rooms. Every row below is reciprocal and ungated; preserve existing exits.
+
+| Room / outward direction | Neighbor / return direction | Delivery |
+|---|---|---|
+| North Gate / north | Chapel Steps / south | existing public approach |
+| Chapel Steps / north | Chapel Nave / south | existing |
+| Chapel Nave / up | Bell Tower / down | A1 |
+| Bell Tower / up | Belfry / down | A1 |
+| Chapel Nave / north | Cloister / south | B5 |
+| Cloister / east | Infirmary / west | B5 |
+| Chapel Nave / west | Prior Study / east | D2 |
+| Belfry / up | Spire / down | D2 |
+| Cloister / west | Scriptorium / east | D2 |
+| Scriptorium / west | Kitchen Garden / east | D2 |
+
+Spire's view and Kitchen Garden's herbs are descriptive; no far Scan, rue harvest,
+new quest or unfinished action is advertised. Study has no functional quest ledger
+or bell key. This implements archived 00a §§2/4/5/8 with current public/no-wait rules.
+The selected book instances start directly in Scriptorium with ordinary custody.
+
+| Book key | Title / single page | Declared topic / Boolean fact | Mass |
+|---|---|---|---:|
+| `ward_of_the_fen` | The Ward of the Fen / `readable.ward_of_the_fen` | `ward` / B6 `topic_ward_known` | 100g |
+| `bell_rites` | Bell Rites / `readable.bell_rites` | `bell` / `topic_bell_known`, initially false | 100g |
+
+Both facts are player-scoped; reuse B6's ward definition rather than duplicate its
+knowledge mapping. Author localized topic labels and book noun headings. Item
+readable metadata references catalog label/text and an optional topic DefinitionRef;
+compiler short-ref expansion and loader require a local declared topic mapped to a
+unique player Boolean. Reject unresolved/wrong-kind refs, non-Boolean or non-player
+facts, duplicate mappings, missing text/label, malformed metadata and missing opted-in
+mass. Update actual API/capability requirements with the consumed extension; do not
+invent successor version, hash or allocation answers in this plan.
+
+Ash and Hale are distinct original NPCs with distinct descriptions, noun headings,
+flavor Talk and shared `novice` keyword. Under [owner content decision 5](../decisions/owner-decision-chapter-one-content-2026-10-02.md), Ash is in
+Scriptorium 06:00–12:00 and 20:00–06:00, Cloister 12:00–20:00; Hale is in Kitchen
+Garden 06:00–18:00, Cloister 18:00–06:00. Intervals are start-inclusive/end-exclusive.
+At 19:00 both are in Cloister; neither waits for a player or grants topics. All
+scheduled destinations exist. Initial placement must agree with the selected launch
+clock; existing schedule machinery owns departures and saved locations.
+
+## B9 Lantern dream declarations
+
+The [S10 contract](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+adds no rooms, payment or entitlement writer. Reuse the actual B8 `bed` detail
+at `inn_rooms` and declared `lantern_bed_paid`. Declare player Boolean
+`slept_at_lantern` and `dream_seen`, both default false; the latter is the local
+continuity memory `player.dream_seen`. Define quest `a_room_at_the_lantern` with
+no manual offer, no repeat/failure reward, objective `dream_seen=true`, and honest
+active/resolved journal text. It is optional for the Green ending, while E3's ten
+playable quests must still exercise it.
+
+Declare one exact room/entitlement/first-Rest/S10 binding and scene
+`dream_of_the_fen`, `presentation_only`, anchored at `inn_rooms`. Source-owned
+beats are: 1 opening, 2 fen, 3 fox; after Continue at3, a choice at4 offers exactly
+`follow_fox` and `wake`; the selected branch shows its authored final line at5;
+Continue at5 acknowledges/end. Both branches assign the same `dream_seen=true`
+and resolve S10 as `acknowledged`. Three opening lines, two choices and two final
+texts are content values; final prose is delegated, not an engine constant.
+Choice resolution must retain its branch after end in its existing durable row.
+No reward, additional story point, chapter index advance or ambient sound system
+is implied. Resume is a local route over the exact scene checkpoint at the bed;
+no new gameplay Start/Resume command is added.
+
+Compiler and loader validate this consumed source subset in both languages:
+full/short references, exact anchor/detail membership, Boolean player fact
+scopes/defaults, unique trigger and consequence ownership, position/scene/quest
+capability dependencies, bounded reachable beat graph, exactly declared choices,
+choice source/actor/anchor bindings and final-only memory/quest consequence.
+Reject unknown targets/branches, repeated/unreachable consequence beats, modal
+choice mixing, body/container operations and a dream end declaring a completion
+report. Reserve engine cursor/choice ownership as for existing scenes; content
+cannot assign their state. Extend A3's terminal consequence only enough to admit
+memory assignment plus typed quest resolution without a story-point declaration.
+Future integrated release/API/hash/allocated IDs remain null until B8 source and
+review merge and independent current answers are derived.

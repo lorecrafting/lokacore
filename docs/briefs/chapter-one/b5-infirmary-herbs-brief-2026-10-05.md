@@ -1,37 +1,121 @@
-# B5 — S9 harvested herbs, real reward and repeat cap
+# B5 — S9 Infirmary Herbs: adopted developer brief
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Branch:** `chapter-one/b5-infirmary-herbs`.
+**Base:** provisional local `main` `340025a0ef5d3644e84ac23634b74dfa6d20d459`,
+B3 source installed; chapter `ashmere_missing_child@0.0.18`, API1.16,
+independent fixture `protocol/fixtures/missing_child_v018_hash.json`, artifact hash
+`fd98910fd5c0508e6a3ee6e3f56ee4b8477cfb539b7a1527e6a67e60059aa94f`.
+B3 independent source reviews remain pending at assignment.
+B5 release, API, artifact hash, generated IDs, implementation head, PR, review and
+check results: null. Source/dependencies re-pinned at assignment.
+PM adoption model: Codex Sol medium; implementation: Sol high for the
+cross-layer protocol/save contract. This brief is adoption, not implementation proof.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B5. **Provisional until B1 calendar and B2 faction/payment merge, PM adopts node/repeat policy, and actual heads are re-pinned.** Main `0fbd2847` is reading baseline only. New release/API/hash/IDs/source/PR/dependency heads: null. Suggested branch `chapter-1/b5-infirmary-herbs`, not created. Browser-first existing Book; keep real SQLite/shared engine/headless sim; defer native. No previews/devices/owner saves here.
+## Goal and governing contract
 
-## Goal and governing clauses
+Reach public Cloister/Infirmary, meet Wick at all hours, harvest real fenwort at
+Willow Shade and exchange three for three real bandages and capped S9 Priory gain.
+The normative clauses are [mechanics](../../system/mechanics.md#s9-infirmary-herbs-b5-selected-contract),
+[authored stock/tuning](../../system/cartridge.md#b5-herb-and-bandage-stock),
+[composition](../../system/protocol.md#b5-harvest-and-exchange-composition),
+[save/recovery](../../system/save.md#b5-stock-and-repeat-recovery),
+[Book](../../system/book-ui.md#b5-herbs-and-wick-details) and the
+[PM adoption](../../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
+The [public plan](../../MISSING-CHILD-PLAN.md) B5 consumes the finite M17-C subset,
+M20-E repeat/exact rewards and installed M15 adjustment. Historical regrowth and
+daily repeats are superseded for this consumer; no forced wait or new creation.
 
-Reach the new public `cloister` and `infirmary`, meet Wick all hours, harvest three actual fenwort and turn them in for three actual bandages with S9's cumulative Priory gain capped at+3. This consumes M17-C herb nodes, M20-E repeat/reward and M15. Willow Shade already exists; add a real fenwort node there. D1/D5 later author their separate herb geography. No animal population or herbalism prerequisite on the first supply.
+Implement the selected finite authored stock with independent definitions/IDs,
+derived custody stock, deterministic one-item harvest, explicit accept/reaccept,
+occurrence-bound exact multi-item exchange and separate cumulative contribution.
+Source values live only in cartridge tuning. B3 contributes a finite-stock design,
+not a new issuance seam; B2 provides real faction/binding/receipt checks. First
+supply needs no skill, bell, private-study or time gate. All exchanges are optional.
+C5/D12 own later bandage use/herbalism and must not promise unfinished controls.
 
-Amend mechanics quest/dialogue/containment/fact.adjust/schedule and created-item semantics actually reused from B3; protocol actor/causal admission/Composition/GameView; cartridge compiler/loader; save created/custody/quest validation/commit; Book NPC/detail/journal/freshness. Future authority: `docs/NEXT-MECHANICS.md` M17-C/M20-E/M15; archived00a §§2/4/5/6/7(S9), primitive21 §§12/15/16. No-wait, world-parameters and current-build recovery override mandatory next-day waits. Copy is PM-delegated.
+## Composition and implementation boundary
 
-## Selected candidate and exact scope
+Follow [building mechanics by composition](../../system/architecture.md#building-mechanics-by-composition).
+Containment owns conserved transfers and ordinary recovery; a bounded harvest
+selects from authored room stock; dialogue owns exact exchange binding and final
+carry admission; quest owns fresh occurrence/explicit reacceptance; fact owns
+bounded S9/global faction adjustment; authority commits/adopts once; Book projects
+confirmed stock, readiness, refusals and journal. Only missing typed invocation,
+multi-item exchange and resolved→fresh active occurrence shape are in scope.
+Reuse existing command/operation shapes where sufficient; never add a named
+fenwort rule, generic barter interpreter, population, item mint or history store.
 
-Recommend a finite deterministic herb node with definition, initial quantity, harvest unit and logical regrowth period. One accepted Harvest gives one exact item instance using the existing declared creation/provenance seam; decrement node and positive-load-acquire item in the same proposal. Carry refusal depletes/mints nothing. The first reachable stock provides at least three fenwort without skill/night/day waits. Historical regrow2 authored days is a candidate to adopt through B1; node capacity and other tuning remain null until PM selection. A depleted node stores the exact regrowth occurrence/time; retry/reopen/catch-up never refill twice or exceed capacity. Optional regrowth never creates a stranded required obligation. No broad plant/animal spawning or generic inventory stacks: three distinct fenwort IDs suffice if that is the smallest existing quantity path.
+Likely files: chapter manifest/catalog/items/rooms/Wick/patch/dialogues/S9/facts;
+content compiler and TS loader; narrow harvest/exchange admission and rule helpers;
+quest lifecycle/bindings, shared carrying query and view; actual command/action/
+quest/binding schemas plus generated contracts/fixtures only as required;
+local Story store/load/receipt validators and existing Book detail/journal.
+B2's active ledger protections remain intact; retain B3 penny reconciliation
+when its source has integrated before assignment.
+Out: regrowth/jobs, daily eligibility, skill checks, stacks/templates/creation,
+animals, healing/bleeding, native builds/devices and owner-preview/save work.
 
-S9 offer/turn-in is at the actual public Wick. Bind actor-owned active occurrence and exact eligible held fenwort. Turn-in consumes exactly three, selected deterministically by ID when a surplus exists; keep the fourth. Hand those identities to Wick or the declared consumed custody sink, not a delete-and-recreate trick. Credit only the actual committed exchange, not a counter inferred from historical item_acquired. Issue three distinct bandages through the declared reward source/provenance, checking resulting carrying load after outgoing herbs. Whole exchange/reward/faction/quest transition commits or refuses; a full reward load cannot take the herbs first.
+## Independent acceptance literals and red controls
 
-**Recommended repeat policy for PM adoption:** at most one completed turn-in per authored calendar day; resolved row retains occurrence identity and next eligibility, and an eligible explicit reaccept creates the next occurrence. Before then no new active obligation is offered. Old receipts/jobs cannot mutate the next occurrence. Minimal latest-instance metadata plus cumulative reward facts is enough; no full quest-history/event store. Side quest completion never gates finale, and further optional repetitions may become available through ordinary time rather than an imposed Wait.
+- Controlled eligible IDs A/B/C/D at Willow Shade, actor load11980g/max12000g,
+  each herb20g: Harvest selects A, leaves three room-held and yields load12000g.
+  The next Harvest refuses too_heavy with no transfer, narration or RNG. Drop A
+  in that room makes the same ID available again; Take A consumes the same stock.
+  Empty stock refuses; exact replay never acquires a second item.
+- With directly held herbs A/B/C/D and Wick-held bandages P/Q/R/S, active S9
+  occurrence1, all otherwise eligible: turn-in transfers A/B/C to Wick and
+  P/Q/R to actor, retains D/S and resolves1 once. Herbs20g and bandages10g:
+  load12000g becomes11970g; an already overloaded12020g becomes11990g and fits.
+  In a controlled heavier-reward cartridge (herbs10g/bandages20g), load11970g
+  becomes12000g and fits; load11971g refuses with all custody/quest/facts unchanged.
+- Two herbs, nested/ground/corpse/foreign herbs, unavailable Wick, missing reward
+  custody, forged or duplicate IDs and stale bound items refuse entirely.
+  Acceptance/reacceptance requires funded readiness, not historic acquisition.
+  Drop/store an accepted herb, cold reopen, retrieve it through real custody and
+  finish the same occurrence. Death retains the occurrence and actual items in
+  the owned corpse; recovery, Take and turn-in use those same identities.
+- Fresh stock permits four explicit optional occurrences without advancing time.
+  Starting faction0/contribution0 yields (1,1),(2,2),(3,3),(3,3), each with three
+  actual bandages. After unrelated−2 at contribution3, the next exchange leaves
+  faction1/contribution3. Starting faction10/contribution0 yields (10,0), so
+  saturation cannot consume unawarded allowance. Reaccept cannot reset the cap.
+  Duplicate acceptance while active and occurrence1 replay after2 starts cannot
+  replace/resolve2 or award anything again. All twelve herbs end Wick-held;
+  all twelve bandages retain exact ordinary custody; no fifth funded herb set.
+- Drop/store/recover bandages after completion and reopen: no reward refill or
+  contribution reset. Give away optional supplies: no replacement or mandatory
+  waiting path. Finale remains playable with unaccepted, active or exhausted S9.
+  Reopen empty/partial patch, active missing-herb custody, resolved and reaccepted
+  states; then invoke the next real consumer. Preserve lawful B2 balance truth
+  and B3 exchanges if its source is installed on the assigned base.
+- Real failed COMMIT, both uncertain COMMIT outcomes, lost acknowledgment and
+  exact receipt replay leave all prior or all next rows. Corrupt contribution,
+  occurrence/binding, transfer evidence or current custody produces save_corrupt
+  without repair/deletion. Replay historical faction/custody at its own revision.
 
-Track S9's own cumulative contribution separately from the current global faction score. Adopt +1 per accepted turn-in capped at cumulative+3, still awarding three bandages on later allowed completions; global reputation keeps B2's bounds. Removing reputation elsewhere cannot reset S9's contribution allowance. No cumulative coin or unrelated skill gain. D12 later attaches qualified herbalism to its actual bonus/check while retaining first accessible S9 supply.
+Apply each realistic mutant to the old focused suite first; add a minimal test
+only if that layer misses its distinct break. Plant omitted outgoing transfer,
+wrong selected ID, omitted final carry check, cap based on global faction,
+contribution reset on reaccept, and old-occurrence acceptance. Observe focused
+behavioral red failures and retain schema guard/mutant sweep for changed schemas.
+Expected answers are literal, independent of implementation; no source-text tests.
 
-## Independent literals, faults and red controls
+## Checks, review and stop
 
-- Controlled node quantity3/cap3: three Harvest calls yield three distinct same-definition fenwort IDs and node0. Fourth before due refuses. Full-body admission yields neither item nor decrement. Reopen before/after the selected due restores exactly3 once, not6; exact replay mints no extra ID.
-- Controlled body fenwort A/B/C/D plus no bandages: turn-in transfers A/B/C under the adopted ID ordering, retains D, receives three distinct bandages, resolves this S9 once. Two herbs refuse entirely. Ground/other-NPC/bag-inaccessible/substitute herb is ineligible under exact declared custody.
-- Four fresh eligible days/occurrences with starting faction0 and contribution0 give `(faction, contribution)` pairs(1,1),(2,2),(3,3),(3,3), three bandages each time. After an unrelated−2 adjustment at contribution3, another completion leaves faction1, not2. Same-day reaccept/turn-in cannot duplicate reward; replay of occurrence1 after occurrence2 starts does not resolve2.
-- Reopen every harvested/exhausted/accepted/exchanged/eligible intermediate state and use the next real consumer. Bad node due/count/origin, null quest/repeat metadata, duplicate reward ID or contribution outside0..3 yields typed save_corrupt. Use real failed/unknown COMMIT, lost acknowledgment and exact receipt replay.
-- Plant missing node debit, wrong herb count, cap based on current faction, reused reward IDs or same-day repeat bypass. Require focused behavioral red failures; retain schema guard fixtures/sweep. Add only tests that catch a distinct missing break; no source-matching or coverage-only suite.
+Read [mechanics](../../lessons/mechanics.md), [contracts](../../lessons/contracts.md),
+[storage](../../lessons/storage.md), [mobile](../../lessons/mobile.md) and
+[evidence](../../lessons/evidence.md) lessons before touching those areas.
+Run focused compiler/loader/harvest/exchange/repeat/carry/Book/real SQLite checks,
+applicable schema mutant sweep and `mise exec -- bin/check_all.sh` once at handoff.
+Retain exit status/failing lines, not bulk logs. Ponytail Review and actual-diff
+correctness review precede fresh independent Sol review plus required separate
+protocol/save opinion; Astra if proposal/foundation changes. Browser interaction
+proof belongs to a later authorized slice; no native or SQLite-equivalence claim.
 
-## Files, checks, review and stop
+Stop for an unreachable initial patch/Wick, required path stranded by finite
+supply, nonrecoverable actual possessions, new creation/respawn machinery, an
+unplanned foundation/proposal contract, contradictory governing specs, or a
+review footprint exceeding a complete player outcome. PM settles policy; do not
+invent production pins, passing checks or an installed B3 creation seam.
 
-Content: chapter manifest/catalog/facts, public reciprocal cloister/infirmary links, Wick, fenwort/bandage definitions, Willow Shade node, S9 offer/turn-in/quest and bounded node/repeat data. Compiler `quests.ex`, `dialogues.ex`, `checks.ex` and small node helper; matching TS content loaders; narrow `mechanics/gathering/{rule,shared}.ts` or existing action composition, quest lifecycle/repeat helper, carrying/created-source validation, view journal/actions/invariants. State/quest/entity/command/capability schemas only for actual missing shape and generated contracts/maps. Host `store.ts`/bound dialogue recovery; Book harvest/Wick/journal controls. Out: animals, generic stack engine, every herb type, next-day forced activation, full population framework, training/poison/bleeding/healing consumers.
-
-Full focused compiler/loader/harvest/repeat/reward/carry/Book/real SQLite checks; schema mutant sweep, `mise exec -- bin/check_all.sh`, exact-head CI including TypeScript headless `sim`. Later authorized browser harvest-three→Wick turn-in and refresh is interaction evidence, not native/SQLite equivalence. Read contracts/storage/mobile/evidence lessons; developer Ponytail Review/correctness pass. Fresh primary plus save/protocol opinion; Astra if proposal/foundation changes.
-
-Stop for unreachable first supply, Wick access dependent on private study/bell/night, reward issuance without validated provenance, generic repeat design larger than this consumer, unsafe carry/creation budget, overlap with C5/D12 or frozen-fixture conflict. PM freezes node/repeat tuning before GO and reuses B3 issuance if present; no invented production pin or passing-check claim.
+Implementation/check disposition: [local draft PR](b5-infirmary-herbs-local-pr-2026-10-05.md).

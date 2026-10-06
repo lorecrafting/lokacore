@@ -1,3 +1,4 @@
+# size: allow 320, independent retirement pairing joins precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
@@ -98,7 +99,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
-      replay_preconditions(s, ops, result)
+      retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 
   defp replay_preconditions(s, ops, result) do
@@ -184,6 +185,13 @@ defmodule Loka.Core.Invariants do
     not inside?(d, e, containers, MapSet.new()) and (cap == nil or held < cap)
   end
 
+  defp extra?(%{"op" => "quest.retire"} = op, _, _, quests) do
+    q = quests[op["instance_id"]]
+
+    q != nil and q["state"] == "resolved" and q["quest"] == op["quest"] and
+      q["scope"] == op["scope"]
+  end
+
   defp extra?(%{"op" => "quest.activate"} = op, _, _, quests) do
     Enum.all?(quests, fn {_, q} ->
       q["quest"] != op["quest"] or q["scope"] != op["scope"] or
@@ -227,6 +235,9 @@ defmodule Loka.Core.Invariants do
 
   defp moved_container(_, containers), do: containers
 
+  defp moved_quest(%{"op" => "quest.retire"} = op, quests),
+    do: Map.delete(quests, op["instance_id"])
+
   defp moved_quest(%{"op" => "quest.activate"} = op, quests),
     do:
       Map.put(
@@ -245,6 +256,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "fact.assign"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "entity.create", "identity" => i}), do: {nil, i}
   defp link(%{"op" => "entity.transfer"} = op), do: {op["source_id"], op["destination_id"]}
+  defp link(%{"op" => "quest.retire"}), do: {"resolved", nil}
   defp link(%{"op" => "quest.activate"}), do: {nil, "active"}
   defp link(%{"op" => "quest.transition"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "choice.open"}), do: {nil, "pending"}
@@ -280,5 +292,21 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "barrier.transition"} = op, s) do
     with nil <- get_in(s, ["barriers", Compose.key(Compose.target(op))]),
          do: get_in(s, ["barrier_initial", Compose.key(op["barrier"])])
+  end
+
+  defp retirements_hold?(ops) do
+    ops
+    |> Enum.chunk_every(2, 1, [])
+    |> Enum.all?(fn
+      [%{"op" => "quest.retire"} = op, %{"op" => "quest.activate"} = next] ->
+        next["writer_group"] == op["writer_group"] and next["instance_id"] != op["instance_id"] and
+          next["quest"] == op["quest"] and next["scope"] == op["scope"]
+
+      [%{"op" => "quest.retire"} | _] ->
+        false
+
+      _ ->
+        true
+    end)
   end
 end

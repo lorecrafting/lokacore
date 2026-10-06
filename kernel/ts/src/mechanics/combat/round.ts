@@ -1,3 +1,4 @@
+import { status } from '../skills.ts';
 import type {
   AttackProfile,
   Command,
@@ -29,6 +30,7 @@ type Round = {
   rng: RngState;
   draws: number;
   position: number;
+  steps: { n: number };
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -43,6 +45,7 @@ export function roundSequence(
   job_id: JobId,
   job: JobRow,
   mint: Mint,
+  steps = { n: 0 },
 ) {
   const row = currentRound(world, job_id, job);
   if (!row) return accepted<never>(world, 'job_ran', [], []);
@@ -53,6 +56,7 @@ export function roundSequence(
     rng: world.state.rng,
     draws: 0,
     position: 0,
+    steps,
   };
   if (bodyOf(world, row.character_id) !== row.body_id || !same(npcRef(world, row.npc_id), job.job))
     throw new KernelError('precondition_failed');
@@ -104,15 +108,17 @@ function narrate(world: World, row: EncounterRow, events: readonly CombatEvent[]
     key:
       e.type === 'entity_died'
         ? words[e.victim_id === row.body_id ? 'player_died' : 'npc_died']
-        : words[
-            e.attacker_id === row.body_id
-              ? e.hit
-                ? 'player_hit'
-                : 'player_miss'
-              : e.hit
-                ? 'npc_hit'
-                : 'npc_miss'
-          ],
+        : 'prevented_by' in e && e.prevented_by
+          ? words[e.prevented_by]!
+          : words[
+              e.attacker_id === row.body_id
+                ? e.hit
+                  ? 'player_hit'
+                  : 'player_miss'
+                : e.hit
+                  ? 'npc_hit'
+                  : 'npc_miss'
+            ],
   }));
 }
 
@@ -142,10 +148,10 @@ function attack(
   const player = attacker_id === row.body_id;
   const target_id = player ? row.npc_id : row.body_id;
   const settings = world.cartridge.world!.combat!;
-  const npc = world.entities[row.npc_id];
-  if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
-  const profile = player ? settings.player_attack : npc.attack;
-  const hit = draw(r, 100) < profile.chance;
+  const profile = attackProfile(world, row, player, r);
+  const accurate = draw(r, 100) < profile.chance;
+  const prevented_by = accurate && !player ? defend(world, row, r) : undefined;
+  const hit = accurate && !prevented_by;
   const sleeping = !player && positionOf(world, row.character_id) === 'sleeping';
   const damage = hit ? damageRoll(r, profile) : 0;
   const hp = resourceRef(world, 'hp');
@@ -161,6 +167,7 @@ function attack(
       target_id,
       hit,
       loss,
+      ...(prevented_by && { prevented_by }),
     }),
   );
   if (!loss) return;
@@ -238,4 +245,35 @@ function wake(at: World, row: EncounterRow, r: Round) {
   );
   r.ops.push(...wake.ops);
   r.position = wake.position;
+}
+
+function equipped(world: World, body: EntityId, slot: string) {
+  const holder = world.slots[slot];
+  if (!holder || world.state.containers[holder] !== body) return;
+  const id = Object.keys(world.entities).find((id) => world.state.containers[id] === holder);
+  const item = id && world.entities[id];
+  return item && item.kind === 'item' ? item : undefined;
+}
+
+function attackProfile(world: World, row: EncounterRow, player: boolean, r: Round) {
+  const npc = world.entities[row.npc_id];
+  if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
+  if (!player) return npc.attack;
+  const weapon = equipped(world, row.body_id, 'wield')?.weapon;
+  return weapon && status(world, row.character_id, weapon.skill, r.steps).usable
+    ? weapon.attack
+    : world.cartridge.world!.combat!.player_attack;
+}
+
+function defend(world: World, row: EncounterRow, r: Round): 'dodge' | 'block' | undefined {
+  if (!standing(world, row.character_id)) return;
+  const dodge = world.cartridge.world!.combat!.dodge;
+  if (
+    dodge &&
+    status(world, row.character_id, dodge.skill, r.steps).usable &&
+    draw(r, 100) < dodge.chance
+  )
+    return 'dodge';
+  const shield = equipped(world, row.body_id, 'off_hand');
+  if (shield?.block_chance !== undefined && draw(r, 100) < shield.block_chance) return 'block';
 }

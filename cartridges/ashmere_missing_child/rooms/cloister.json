@@ -1,0 +1,12 @@
+{
+  "title": "room.cloister.title",
+  "description": "room.cloister.description",
+  "exits": {
+    "south": {
+      "to": "chapel_nave"
+    },
+    "east": {
+      "to": "infirmary"
+    }
+  }
+}

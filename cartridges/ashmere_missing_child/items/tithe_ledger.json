@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "ledger",
+    "tithe_ledger"
+  ],
+  "short": "item.tithe_ledger.short",
+  "room_line": "item.tithe_ledger.room",
+  "description": "item.tithe_ledger.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  }
+}

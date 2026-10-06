@@ -1,3 +1,4 @@
+import { assignmentEvidence, paymentEvidence } from './dialogue-consequences.ts';
 // Dialogue detail routing is derived from a committed command and its retained bound row.
 import type {
   Command,
@@ -44,13 +45,7 @@ export function dialogueDetail(
   if (row && validate('DefinitionRef', row.source).length) return invalid();
   const source = row && s.world.cartridge.dialogues?.[refString(row.source)];
   const option = source?.choices[p.choice_id];
-  if (
-    !source?.riddle &&
-    !option?.escort &&
-    !transferDetail(s, source, option) &&
-    p.answer === undefined &&
-    d.outcome !== 'riddle_wrong'
-  )
+  if (!detailNeeded(s, source, option) && p.answer === undefined && d.outcome !== 'riddle_wrong')
     return;
   if (
     !row ||
@@ -58,7 +53,10 @@ export function dialogueDetail(
     !option ||
     row.actor_id !== p.actor_id ||
     row.beat !== source.key ||
-    !same(row.roles, bind(s.world, source)) ||
+    !same(
+      row.roles.filter((r) => !option.exchange || !/^(outgoing|incoming)_\d{2}$/.test(r.role)),
+      bind(s.world, source),
+    ) ||
     !same(row.choice_ids, choiceIds(source))
   )
     return invalid();
@@ -115,7 +113,7 @@ function evidence(
       expected_revision: row.opened_revision,
     }) &&
     events.length === 1 &&
-    event.actor_id === p.actor_id &&
+    eventIdentity(event, command, p.actor_id) &&
     event.payload.type === 'choice_resolved' &&
     event.payload.continuation_id === p.continuation_id &&
     event.payload.choice_id === p.choice_id
@@ -134,29 +132,32 @@ function consequences(
   const actor = row.actor_id;
   const ops = d.delta.ops.filter((o) => o.writer_group === 0);
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
-  if (!transferEvidence(s, row, option, ops, events)) return false;
+  if (!transferEvidence(s, command, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events)) return false;
+  if (!paymentEvidence(s, row, option, ops)) return false;
   if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;
   const q = questOf(s.world, actor, source.quest);
+  if (!option.exchange && (!q || q[1].state !== 'resolved' || q[1].outcome !== row.choice_id))
+    return false;
+  const instance_id = option.exchange ? row.quest_instance_id : q![0];
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
   return (
-    !!q &&
-    q[1].state === 'resolved' &&
-    q[1].outcome === row.choice_id &&
     transitions.length === 1 &&
     transitions[0].op === 'quest.transition' &&
-    transitions[0].instance_id === q[0] &&
+    transitions[0].instance_id === instance_id &&
     transitions[0].outcome === row.choice_id &&
-    resolved.length === 1 &&
-    resolved[0].actor_id === actor &&
-    same(resolved[0].payload, {
-      type: 'quest_resolved',
-      quest: source.quest,
-      instance_id: q[0],
-      outcome: row.choice_id,
-    })
+    resolved.some(
+      (e) =>
+        (option.exchange || (resolved.length === 1 && e.actor_id === actor)) &&
+        same(e.payload, {
+          type: 'quest_resolved',
+          quest: source.quest,
+          instance_id,
+          outcome: row.choice_id,
+        }),
+    )
   );
 }
 
@@ -205,6 +206,7 @@ function escortEvidence(
 }
 function transferEvidence(
   s: Story,
+  command: Command,
   row: ChoiceRow,
   option: DialogueChoice,
   ops: readonly DeltaOp[],
@@ -229,56 +231,30 @@ function transferEvidence(
       destination_id: to,
     }) &&
     acquired.length === 1 &&
-    acquired[0].actor_id === row.actor_id &&
+    eventIdentity(acquired[0], command, row.actor_id) &&
     same(acquired[0].payload, { type: 'item_acquired', item_id: item, holder_id: to })
   );
 }
-function assignmentEvidence(
-  s: Story,
-  row: ChoiceRow,
-  option: DialogueChoice,
-  ops: readonly DeltaOp[],
-  events: readonly DomainEvent[],
-) {
-  for (const step of option.sequence ?? []) {
-    if (step.op !== 'fact.assign') continue;
-    const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, step.fact));
-    const op = matching[0];
-    if (
-      matching.length !== 1 ||
-      op.op !== 'fact.assign' ||
-      !same(op.value, step.value) ||
-      !same(op.scope, scopeOf(s.world, row.actor_id, step.fact))
-    )
-      return false;
-    const changed = events.filter(
-      (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, step.fact),
-    );
-    if (same(op.expected, op.value)) {
-      if (changed.length) return false;
-    } else if (
-      changed.length !== 1 ||
-      changed[0].actor_id !== row.actor_id ||
-      !same(changed[0].scope, op.scope) ||
-      !same(changed[0].payload, {
-        type: 'fact_changed',
-        fact: step.fact,
-        old: op.expected,
-        new: step.value,
-      })
-    )
-      return false;
-  }
-  return true;
-}
-
 // Legacy terminal rewards retain their routing; recover the new authored custody path.
-function transferDetail(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
+function detailNeeded(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
+  if (source?.riddle || option?.escort) return true;
+  if (option?.sequence?.some((step) => step.op === 'skill.acquire')) return true;
+  if (option?.exchange) return true;
   if (option?.receive && !source?.quest) return true;
+  if (source?.quest && s.world.cartridge.quests?.[refString(source.quest)]?.deadline) return true;
   const transfer = option?.receive ?? option?.hand_over;
   const role = transfer && source?.roles[transfer.item];
   const entity = role?.role === 'item' && s.world.entities[s.world.entityIds[refString(role.item)]];
   return entity && entity.kind === 'item' && entity.give_allowed === false;
+}
+
+function eventIdentity(event: DomainEvent, command: Command, actor: ChoiceRow['actor_id']) {
+  return (
+    event.actor_id === actor &&
+    event.correlation_id === (command.id as string) &&
+    event.world_context_id === command.world_context_id &&
+    same(event.scope, { kind: 'player', character_id: actor })
+  );
 }
 
 export function committedDialogue(world: World, db: Db, scope: string, continuation: string) {

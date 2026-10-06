@@ -1,38 +1,156 @@
-# B7 — well, waterskin and conserved liquid
+# B7 — Well and waterskin: fill, pour and drink conserved liquid
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted planning brief, source implementation pending.** Planning branch
+`planning/b7-waterskin`, inspected local base `4bfe252e75f2cc6ab556c1dd2601d5d8ca85bdb7`.
+B3 is locally implemented and independently approved at chapter
+`ashmere_missing_child@0.0.18`/API1.16; its accumulated-head publication remains
+pending in the [roadmap](../../ROADMAP.md). Its [check note](../../evidence/2026-10-05-b3-shop/README.md)
+and review heads must be re-pinned against the actual integration base before
+assignment. Implementation branch: `chapter-1/b7-well-waterskin` (not created).
+Successor release/API/hash/item IDs, implementation head, PR and verdicts: null.
+This plan changes docs only; it does not authorize merge/push or certify play.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B7. **Provisional until B3's actual waterskin supply merges and PM adopts units/custody/drink policy.** B1 is needed only by a selected timed need effect; quantity operations have no extra timer dependency. Re-pin actual merged contracts; main `0fbd2847` is a reading baseline. New release/API/hash/IDs/head/PR/dependency heads: null. Suggested branch `chapter-1/b7-well-waterskin`, not created. Browser-first existing Book; shared engine/real SQLite/headless sim stay. No native/preview/device/owner-save work here.
+## Consumer, dependencies and governing clauses
 
-## Goal and authority
+Buy the original and spare waterskin from Peg, walk to the actual Well Lane well,
+Fill, Drink from one filled skin to create receiver space, Pour a partial amount
+from the other skin, and Drink again. B7 adds no rooms. B3 is the only new-slice
+dependency; installed custody, carrying, death, receipts and Book are reused.
+B1 is not needed for untimed water operations. B4, B5 and C1 are separate lanes;
+none supplies a B7 prerequisite, and their successor pins are not assumed.
 
-Buy a real waterskin, fill it at Well Lane's actual well detail, pour between eligible vessels and drink a declared amount exactly once. This is M11-A plus minimum Drink; B8 supplies its later explicit consumption benefit. No new room, underwater traversal, tide, thirst damage or generalized fluid simulation.
+The [PM adoption](../../decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
+selects [mechanics](../../system/mechanics.md#b7-well-and-waterskin-selected-contract),
+[tuning](../../system/cartridge.md#b7-water-and-vessels),
+[composition](../../system/protocol.md#b7-liquid-composition),
+[save](../../system/save.md#b7-liquid-recovery) and
+[Book](../../system/book-ui.md#b7-water-details). They govern over earlier candidate
+language. Follow [composition](../../system/architecture.md#building-mechanics-by-composition),
+world-parameter, no-wait and preproduction owner rules. Historical M11/primitive
+liquid direction does not authorize broad needs, mixing or a fluid simulator.
 
-Amend active mechanics containment/carrying/resource/admission, protocol ActionSet/Composition/GameView and exact target input, cartridge source/compiler/loader, save changed-row/current-build recovery, Book item/detail/freshness. Intended contract: `docs/NEXT-MECHANICS.md` M11-A/B; archived00a §§2/5, archived00 §4.4 and primitive21 §28 liquid invariant. Owner world-parameters/no-wait/fixed-time and authored receptacle rules apply.
+## Selected implementation boundary and composition record
 
-## Selected candidate and precise scope
+- **Real consumer:** the public well detail plus two finite Peg offers. Add
+  `spare_waterskin` at the same prices as the existing waterskin, not a repeat-buy
+  stack. Full details are in the tuning clause; all numerical values live in
+  cartridge definitions. Buying/selling a filled skin moves its exact contents.
+- **Shared reads:** actor through command/bodyOf, living body, current-room detail,
+  actor-owned custody plus bounded reach/lids, immutable liquid/vessel metadata,
+  confirmed quantity, shell/effective mass and existing carrying ceiling. Reach
+  alone includes room items and cannot prove ownership. Use one shared query
+  counter, including candidate-pair evaluation and arithmetic faults.
+- **Missing primitive:** one required typed `liquid` row per opted item,
+  whole-row-precondition `liquid.set`, and shape/capacity/kind invariant with
+  immutable observed specifications. Existing entity transfers move item custody,
+  and resource adjustments do not represent finite vessel kind/capacity. Implement
+  only this row mutation; no separate vessel entity, issuance ledger or factory.
+- **Writer ownership:** liquid rule owns the three immediate commands and their
+  registered events/outcomes. Two Pour writes share one existing writer group;
+  apply/proposal owns generic atomic adoption and budgets. The carrying helper
+  owns derived load, authority owns transaction/receipt/history validation, and
+  Book consumes GameView. B8 later adds its actual benefit through reviewed typed
+  consequences; B7 has no HP/MV or needs writer.
+- **Reuse without extra code:** Take/Drop/Put/Give, ordinary lid checks, death/corpse
+  roots, commerce, freshness and receipt retry carry liquid through the same item.
+  A vessel does not become `container:true`. Open owned nested skins are usable;
+  corpse-held skins must first be recovered. Empty skins persist as empty shells.
+- **Named exceptions:** only the authored inexhaustible source introduces water.
+  This is an explicit source boundary, not closed-system conservation. Pour has
+  exact finite debit/credit, Drink exact consumption. No kernel special-case for
+  Peg, Well Lane, water or waterskin names. No oil/liquid adapter to B4 fuel.
 
-Recommend authored liquid kinds and vessel capacity in integer cartridge units, with one required per-vessel row `{kind or null, quantity}`. Empty is exactly null/0; positive quantity has one known kind and does not exceed capacity. Capacity/initial contents/drink amount/density/benefit tuning remains null until PM freezes the production settings; these are world values, not kernel literals. A liquid vessel does not automatically become an item receptacle: ordinary Put still requires separate `container:true`, and a waterskin need not hold keys/other entities.
+Add the minimal pure `mechanics/liquid/rule.ts` and shared query/transition helper
+only where required; use existing command/view/carry/runtime seams. Portable
+composition gets both language twins and new independently pinned fixtures;
+liquid story logic remains TypeScript-only. Keep optional maps absent for
+non-opted cartridges and frozen fixtures unchanged. Compiler/loader must expand
+short references, reject invalid opted metadata and prove checked maximum mass
+products before runtime. Extend the actual current-build save verifier; do not
+create a new save table or migration.
 
-Fill resolves the current-room source detail and an exact actor-owned usable vessel. Recommend Well Lane as an explicitly authored inexhaustible water source: only an admitted Fill may introduce that water. Never report an inexhaustible environmental source as a closed-system balance conservation proof. Finite-source conservation is the actual Pour consumer; do not add a finite well/reservoir mode solely for a test. Reuse existing actor custody/reach with open nested bags if selected; another NPC/other player's corpse/inaccessible lid never supplies ownership. Freeze whether directly held is required before GO; recommend owned-and-reachable for all three verbs, shared by projection/admission.
+Likely scope: chapter manifest/catalog, Peg offers, original/spare waterskin JSON
+and text, Well Lane detail/text; compiler checks/loader; liquid rule/shared helper;
+containment effective-mass and shared carrying admission; command/target/actions,
+view, fresh/state/apply/composition seams; only necessary protocol
+item/liquid/state/delta/command/action/capability/event/GameView contracts and
+new fixtures/generated maps; foundation Elixir/TS operation validators; local
+Story state_row/hydration/provenance and Book existing detail/pair selection.
+No native/platform work, new dependencies, passive decay, thirst damage, finite
+well, discard/spill, mixing, brewing, general consumable framework or new routes.
 
-Pour transfers `min(source.quantity, receiver.free_capacity)` of the same kind in one atomic delta; this creates the needed partial-pour consumer without arbitrary amount UI. Self-pour, empty source, full receiver and mixed kinds refuse without debit/spill. Both vessels must satisfy the adopted owned/reachable rule; no implicit Give-to-NPC path. Emptying resets source kind to null. Drink debits the authored amount (or uses an explicitly adopted partial-last-drink policy), returns a structured consumption outcome and applies only an authored benefit if one exists. No separate consumption ledger is needed. B7 may narrate drinking without inventing HP/MV/need effects; B8 amends the real consumed benefit. Retries are receipt replays, not a second drink.
+## Literal acceptance oracles and mutation plan
 
-Count declared liquid mass in the existing effective item-mass/carrying helper, without a second stored load. If the production definition chooses nonzero grams/unit, Fill is a positive acquisition and must check resulting total load before source debit. Pour between the actor's own vessels is neutral; dropping a vessel moves its remaining content/mass with the same item. No currency or item IDs appear from liquid units. Nested/worn/death custody preserves the exact vessel row through ordinary conserved item transfer.
+Expected rows/numbers below are hand-checked, never computed with a production
+helper. Header each new test with its plausible break. Apply its mutant to the
+old focused suite first; add a test only when that layer lacks detection.
 
-## Hand-checked behavior and red controls
+| Controlled input | Independent expected result | Break to plant |
+|---|---|---|
+| Production starts actor20p/Peg20p; buy the two empty skins at4p each | actor12p/Peg28p; two distinct same acquired item IDs; each null/0; total empty skin mass1000g | Second offer resolves to first ID or creates replacement stock |
+| Production cap4 water250g/unit; empty500g skin at declared well | water4, skin mass1500g; repeat Fill refuses; receipt replay stays4 | Fill bypasses source binding or overfills |
+| Two filled production skins4/4, Drink1 from spare, Pour original→spare, Drink original | after Drink4/3; after Pour3/4 (transfer1, total7); after last Drink2/4 (total6) | Missing source debit or full-transfer instead of free-space limit |
+| Controlled water5→water4 receiver cap7 | source water2/receiver water7, total9 | Omitted debit or receiver overflow |
+| Controlled water2→empty receiver cap10 | source null/0, receiver water2 | Exhausted row retains kind or deletes shell |
+| Controlled Drink amount2, water7; then exact retry | water5 both times, no resource/RNG/clock change | Replay debits or applies an early benefit |
+| Controlled Drink amount2, water1 | refuse; water1 unchanged | Partial-last policy introduced silently |
+| Body load excluding empty100g skin11900g, cap10, density2g/unit, ceiling12000g | before Fill12000g, proposed12020g; refuse and retain empty skin | Fill ignores liquid mass |
+| Same controlled skin with other body load11880g | full Fill exactly12000g succeeds | Off-by-one carrying refusal |
+| Two owned skins rearranged/Pour while body already overloaded | legal Pour is mass-neutral; Drink/Drop can reduce load | Reuse positive-acquisition check for neutral Pour |
+| Full production1500g skin as incoming item, other actor load10501g/ceiling12000g | Take/Buy refuse proposed12001g; money and custody unchanged | Incoming carrying uses only500g shell |
 
-- Controlled vessel cap10 empty at the declared well: Fill gives water10; replay/cold reopen stays10, and full receiver refuses unchanged. Outside the source room or using an undeclared source, Fill refuses. Filling adds only the receiver's free quantity without manufacturing a finite reservoir row.
-- Controlled source vessel water5, receiver water4/cap7: Pour transfers3, yielding2/7 and total9. Source2→empty receiver cap10 yields0/null and2/water. Self/full/mixed-water-oil cases refuse with both prior rows and RNG intact.
-- Controlled drink amount2 from water7 gives5; exact retry remains5. At quantity1, follow the selected strict/partial-last policy with a separately frozen literal answer. No production helper computes expected balances.
-- Controlled empty carrier shell100g, water2g/unit, body11900g: fill10 gives12020g and refuses entirely at max12000g; fill with body11880g gives12000g and succeeds. Neutral owned-pour works for an overloaded body, and dropping/recovering the exact vessel preserves liquid.
-- Real death/corpse/locked-bag/reopen paths retain kind/quantity; malformed/missing opted row, unknown kind, quantity−1/above capacity, null+positive and wrong carrier provenance give typed save_corrupt, not empty refill. Real failed/unknown COMMIT and lost acknowledgement retain all prior or all next quantities.
-- Plant missing Pour source debit, receiver overflow, mixed-kind acceptance, double Drink or liquid-mass bypass and watch the focused behavior test fail. New custom guards need a demonstrated red control and schema mutant sweep. Keep tests minimal and independent.
+Use table-driven refusal cases for self-pour, full receiver, empty source,
+undeclared/out-of-room source, mixed kinds (controlled declared water/oil only),
+foreign/corpse/closed-bag custody and forged exact IDs. Require all rows, custody,
+RNG and head unchanged; no invented production oil consumer. An owned open
+satchel case must succeed, while a room-ground vessel must fail ownership even
+though reach succeeds. Shared projection/admission and budget exhaustion must
+fail atomically, not hide a bad pair behind absence of controls.
 
-## Files, verification, review and stop
+Portable fixtures pin prior-row mismatch, duplicate writer/conflict, row
+null/positive mismatch, capacity overflow, invalid kind and a two-vessel success
+with literal2/7. Validate each kernel against those independent answers before
+randomized differential comparison. Perform the schema required/bound mutant
+sweep on new/changed schemas, preserving frozen fixtures.
 
-Content manifest/catalog/Well Lane detail, exact waterskin and any actual second vessel definition; PM must supply that second obtainable vessel for the real Pour consumer rather than a test-only receiver. New small `mechanics/liquid/{rule,shared}.ts`, matching compiler/loader liquid helper, existing carrying/mass/lookups, `runtime/{fresh,decision,apply}.ts`, view item actions/admission invariant. Protocol item/state/command/capability/action/GameView contracts only for actual fields/verbs, generated maps/fixtures; existing transfer ops first, one necessary liquid mutation/precondition if existing ops cannot represent quantities. If such an op is portable foundation, add both checked twins and independent fixtures. Host `store.ts` and exact receipt recovery; Book Fill/Pour/Drink controls/labels/freshness. No native files, stacks, spoilage, brewing, water traversal or broad needs.
+Real SQLite cases must reopen every actual intermediate state: empty/fill/partial
+Pour/drunk-empty, open nested bag, dropped, sold/bought back and a real controlled
+fatal combat/corpse/recovered vessel. Current-load row validation alone is
+insufficient: alter a valid bounded quantity without its authorized receipt,
+forge an earlier source/custody participant, omit/reorder a Pour debit and confirm
+`save_corrupt`. Missing/non-opted/unknown-kind/negative/fractional/overflow rows
+must refuse without refill or repair. Preserve B3/S2 historical penny reconciliation
+and lawful post-receipt custody; a sold full skin may lawfully be Peg-held now.
 
-Focused compile/load/quantity/carry/target/admission/Book/real SQLite tests; full `mise exec -- bin/check_all.sh`, schema sweep and exact-head CI **including TS headless sim**. Later authorized browser well→fill→partial pour→drink→refresh proves shared interaction; keep persistence evidence separate from SQLite/native. Read contract/storage/mobile/evidence lessons. Developer Ponytail Review/correctness pass; fresh primary plus protocol/save opinion; Astra for proposal/foundation changes.
+Inject real failed COMMIT and both uncertain-COMMIT outcomes by operation, not
+SQL text. For Pour5/4→2/7, an actual failed transaction reopens5/4; a successful
+COMMIT with lost acknowledgement reopens2/7; exact replay retains2/7. Head/receipt,
+liquid and custody are all prior or all next. Input and elapsed work stay fenced
+while unknown. Plant early adoption/second debit and observe a focused failure.
+Reuse unchanged real receipt/fault proofs where they already detect the mutant;
+retain only the new liquid-row integration regression the old suite misses.
 
-Stop for no real second vessel, ambiguous quantity units/partial-last policy, unsafe quantity-density products, another mass accounting path, a new op without portable validation, or frozen-fixture conflict. PM freezes numerical settings and ownership before GO. Do not hide a load bypass behind “water is free”, or invent pins/check completion.
+## Verification, review and stop triggers
+
+Read [mechanics](../../lessons/mechanics.md), [contracts](../../lessons/contracts.md),
+[storage](../../lessons/storage.md), [mobile](../../lessons/mobile.md) and
+[evidence](../../lessons/evidence.md) lessons before the applicable work.
+Run focused compiler/loader, portable composition, liquid/carry/custody/admission,
+Book pair/freshness and real SQLite checks, followed by
+`mise exec -- bin/check_all.sh` once. TS headless simulation is active; mobile
+verification deferral is not permission to skip changed save/Book targeted
+checks. Advance the actual integrated bundled release/API and independently
+re-pin known answers; do not predict another lane's successor version or IDs.
+
+Do Ponytail Review and actual-diff correctness review. Fresh primary review plus
+separate protocol/save opinion are required; Astra applies for proposal/foundation
+changes. Retain red-control commands and failing assertions. Later authorized
+browser proof uses buy-two→well→fill-both→drink→partial-pour→drink→refresh, with
+source/receiver identities intact. Browser evidence does not certify native
+SQLite, Hermes or background behavior; leave owner's saves/simulators untouched.
+
+Stop for a frozen-fixture conflict, missing real second offer, unsafe arithmetic,
+extra unconsumed physics/physiology, an alternate stored load/quantity writer,
+a broader save protocol than the minimal row requires, an inaccessible mandatory
+source/recovery path or incompatible concurrently merged B4/B5/C1 contract.
+Report the concrete conflict and return to PM rather than weakening validation.

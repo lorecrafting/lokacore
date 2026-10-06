@@ -12,16 +12,26 @@
 // invalid_state.
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
 import { roundSequence } from '../combat/round.ts';
-import { accepted, rejected, refString, type Rule } from '../../runtime/decision.ts';
-import type { DeltaOp } from '../../contracts.gen.ts';
+import {
+  accepted,
+  rejected,
+  refString,
+  type JobRow,
+  type Rule,
+  type World,
+} from '../../runtime/decision.ts';
+import type { DeltaOp, JobId } from '../../contracts.gen.ts';
 import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
+import { assigned, adjusted } from '../fact.ts';
 
-export const decide: Rule<'schedule'> = (world, command, mint) => {
+// size: allow 45, schedule dispatch retains its due job and elapsed clock paths
+export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
   const { payload } = command;
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending') return rejected('invalid_state');
-    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint);
+    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
+    if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     const schedule = scheduleOf(world, row.job);
     const npc = world.entityIds[refString(row.job)];
     const room = world.roomIds[refString(schedule[hourOf(world.cartridge, row.due_time)])];
@@ -56,3 +66,49 @@ export const decide: Rule<'schedule'> = (world, command, mint) => {
     [],
   );
 };
+
+// size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together
+function deadlineJob(world: World, jobId: JobId, row: JobRow) {
+  const quest = world.state.quests?.[row.quest_instance_id!];
+  const deadline = world.cartridge.quests?.[refString(row.job)]?.deadline;
+  if (
+    !quest ||
+    !deadline ||
+    quest.scope.kind !== 'player' ||
+    quest.scope.character_id !== row.actor_id ||
+    refString(quest.quest) !== refString(row.job) ||
+    row.due_time !== deadline.at
+  )
+    return { kind: 'fault', code: 'precondition_failed' } as const;
+  const done = { op: 'job.complete', writer_group: 0, job_id: jobId } as const;
+  if (!['active', 'objectives_complete'].includes(quest.state))
+    return accepted<never>(world, 'job_ran', [done], []);
+  const status = assigned(
+    world,
+    row.actor_id!,
+    { ops: [], position: 0, facts: {} },
+    { fact: deadline.fact, value: deadline.outcome },
+  );
+  const trust = adjusted(world, row.actor_id!, status, {
+    fact: deadline.trust_fact,
+    amount: deadline.trust_amount,
+  });
+  if (!trust) return { kind: 'fault', code: 'precondition_failed' } as const;
+  return accepted<never>(
+    world,
+    'job_ran',
+    [
+      {
+        op: 'quest.transition',
+        writer_group: 0,
+        instance_id: row.quest_instance_id!,
+        from: quest.state,
+        to: 'failed',
+        outcome: deadline.outcome,
+      },
+      ...trust.ops,
+      done,
+    ],
+    [],
+  );
+}

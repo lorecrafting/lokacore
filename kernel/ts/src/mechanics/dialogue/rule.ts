@@ -1,3 +1,6 @@
+import { acquire } from '../skills.ts';
+import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
+import { questOf } from '../lookups.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
 // resolution; 21 §20): talk, choose and close_choice. talk: a target that is no dialogue's speaker
 // is not_found; else it opens the first of its dialogues, in key order, whose own policy holds
@@ -23,10 +26,12 @@
 // else invalid_state.
 import type {
   CharacterId,
+  DefinitionRef,
   DialogueChoice,
   DialogueDefinition,
   EntityId,
   Key,
+  RoleBinding,
 } from '../../contracts.gen.ts';
 import { transition as escortTransition } from '../escort/shared.ts';
 import { same } from '../../foundation/compose.ts';
@@ -43,6 +48,7 @@ import {
   type Rule,
   type Steps,
   type World,
+  refString,
 } from '../../runtime/decision.ts';
 import {
   blocked,
@@ -56,7 +62,8 @@ import {
   spokenBy,
 } from './shared.ts';
 import { assigned, adjusted, type Assigned } from '../fact.ts';
-import { acceptRefused, activation, resolution } from '../quest/lifecycle.ts';
+import { acceptRefused, activation, boundActivation, resolution } from '../quest/lifecycle.ts';
+import { choicePayment } from './payment.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
@@ -88,14 +95,17 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
     actor_id: p.actor_id,
     source: { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key },
     beat: d.key,
-    roles: bind(world, d),
+    roles: [...bind(world, d), ...exchangeRoles(world, p.actor_id, d, steps)],
+    ...(d.quest &&
+      values(d.choices).some((o) => o.exchange) && {
+        quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
+      }),
     choice_ids: choiceIds(d),
   } as const;
   const opened = { type: 'choice_opened', continuation_id } as const;
   return accepted(world, 'choice_opened', [op], [event(world, command, mint, 1, opened)]);
 }
 
-// size: allow 60, one atomic choice validates reward and lowers the ordered sequence before event allocation
 function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {
   const { actor_id, choice_id, continuation_id } = command.payload;
   if (!row.choice_ids.includes(choice_id)) return rejected('invalid_state');
@@ -120,20 +130,66 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
     return rejected('invalid_state');
   if (riddle && answer!.toLowerCase() !== riddle.answer)
     return accepted<never>(world, 'riddle_wrong', [], [], [{ key: riddle.wrong, participants }]);
-  const q = quest(world, actor_id, d, option, choice_id, mint, used);
-  if (typeof q === 'string') return rejected(q);
-  const body = bodyOf(world, actor_id)!;
-  let run: Assigned = { ops: [], position: option.receive || option.hand_over ? 1 : 0, facts: {} };
+  return applyChoice(world, command, mint, row, used, participants);
+}
+
+function sequence(
+  world: World,
+  actor: CharacterId,
+  option: DialogueChoice,
+  boundReceive: boolean,
+  quest?: DefinitionRef,
+) {
+  let run: Assigned = {
+    ops: [],
+    position: boundReceive ? 2 : option.receive || option.hand_over ? 1 : 0,
+    facts: {},
+  };
   for (const step of option.sequence ?? []) {
     const next =
-      step.op === 'fact.adjust'
-        ? adjusted(world, actor_id, run, step)
-        : assigned(world, actor_id, run, step);
-    if (!next) return { kind: 'fault' as const, code: 'precondition_failed' as const };
+      step.op === 'skill.acquire'
+        ? acquire(world, actor, run, step.skill)
+        : step.op === 'fact.adjust'
+          ? adjusted(world, actor, run, step)
+          : assigned(world, actor, run, step);
+    if (!next) return undefined;
     run = next;
   }
-  const given = handOver(world, command, mint, row, option, body);
-  const quests = q ? [event(world, command, mint, run.position + 1, q.payload)] : [];
+  return option.exchange && quest
+    ? contribution(world, actor, quest, {
+        ...run,
+        position: exchangeDefinition(world, quest)!.quantity * 2,
+      })
+    : run;
+}
+
+// size: allow 60, one choice lowers its bound quest, custody, payment and events atomically
+function applyChoice(
+  world: World,
+  command: Command<'choose'>,
+  mint: Mint,
+  row: ChoiceRow,
+  used: Steps,
+  participants: Record<string, EntityId>,
+) {
+  const { actor_id, choice_id, continuation_id } = command.payload;
+  const d = definition(world, row.source);
+  const option = d.choices[choice_id]!;
+  const q = quest(world, actor_id, d, option, choice_id, mint, used, row.roles);
+  if (typeof q === 'string') return rejected(q);
+  const body = bodyOf(world, actor_id)!;
+  const boundReceive = !!(option.accept && option.receive);
+  const run = sequence(world, actor_id, option, boundReceive, d.quest);
+  if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
+  const given =
+    option.exchange && d.quest
+      ? exchangeTransfers(world, command, mint, row, body)
+      : handOver(world, command, mint, row, option, body, boundReceive ? 2 : 1);
+  const quests = q
+    ? [event(world, command, mint, boundReceive ? 1 : run.position + 1, q.payload)]
+    : [];
+  const paid = choicePayment(world, row, option, body);
+  if ((option.payment || option.lesson_payment) && !paid) return rejected('insufficient_resource');
   const escort = escortTransition(world, row, option, continuation_id, choice_id);
   const op = {
     op: 'choice.resolve',
@@ -150,8 +206,21 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   return accepted(
     world,
     choice_id,
-    [...given.ops, ...run.ops, ...escort, ...(q ? q.ops : []), op],
-    [...given.events, ...quests, resolvedChoice, ...reached],
+    [
+      ...(boundReceive && q ? q.ops : []),
+      ...given.ops,
+      ...run.ops,
+      ...(paid?.ops ?? []),
+      ...escort,
+      ...(!boundReceive && q ? q.ops : []),
+      op,
+    ],
+    [
+      ...(boundReceive ? quests : given.events),
+      ...(boundReceive ? given.events : quests),
+      resolvedChoice,
+      ...reached,
+    ],
     [{ key: option.narration, participants }],
   );
 }
@@ -163,14 +232,21 @@ function quest(
   world: World,
   actor: CharacterId,
   d: DialogueDefinition,
-  { accept }: DialogueChoice,
+  option: DialogueChoice,
   choice_id: Key,
   mint: Mint,
   used: Steps,
+  bindings: readonly RoleBinding[],
 ) {
   if (d.quest) return resolution(world, actor, d.quest, choice_id, 0, used);
+  const { accept } = option;
   if (!accept) return undefined;
-  return acceptRefused(world, actor, accept, used) ?? activation(mint, actor, accept);
+  return (
+    acceptRefused(world, actor, accept, used) ??
+    (option.receive || world.cartridge.quests![refString(accept)].exchange
+      ? boundActivation(world, mint, actor, accept, bindings)
+      : activation(mint, actor, accept))
+  );
 }
 
 // The bound transfer: outgoing hand_over or incoming receive, with the actual acquisition holder.
@@ -181,6 +257,7 @@ function handOver(
   row: ChoiceRow,
   { hand_over: h, receive: r }: DialogueChoice,
   body: EntityId,
+  position: number,
 ) {
   if (!h && !r) return { ops: [], events: [] };
   const bound = (role: string) => row.roles.find((r) => r.role === role)!.entity_id;
@@ -194,7 +271,7 @@ function handOver(
     destination_id: holder_id,
   } as const;
   const acquired = { type: 'item_acquired', item_id, holder_id } as const;
-  return { ops: [op], events: [event(world, command, mint, 1, acquired)] };
+  return { ops: [op], events: [event(world, command, mint, position, acquired)] };
 }
 
 // The story_point_reached of the story point outcome whose trigger is this row's dialogue and

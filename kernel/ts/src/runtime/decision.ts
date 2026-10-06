@@ -1,3 +1,4 @@
+// size: allow 310, bound quest, job and scene rows join the runtime decision model
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -27,6 +28,7 @@ import {
   type NpcDefinition,
   type Owned,
   type QuestState,
+  type QuestInstanceId,
   type ResourceSpec,
   type RoleBinding,
   type RoomDefinition,
@@ -74,6 +76,7 @@ export type ChoiceRow = {
   readonly status: 'pending' | 'resolved' | 'closed';
   readonly opened_revision: number;
   readonly choice_id?: Key;
+  readonly quest_instance_id?: QuestInstanceId;
 };
 
 /** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
@@ -82,6 +85,8 @@ export type JobRow = {
   readonly due_time: number;
   readonly status: 'pending' | 'completed' | 'cancelled';
   readonly encounter_id?: EncounterId;
+  readonly quest_instance_id?: QuestInstanceId;
+  readonly actor_id?: CharacterId;
 };
 
 // The State section each written MutationTarget kind lives in (the clock is State.clock).
@@ -144,6 +149,7 @@ export type QuestRow = {
   readonly scope: StateScope;
   readonly state: QuestState;
   readonly outcome?: Key;
+  readonly bindings?: readonly RoleBinding[];
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
@@ -207,6 +213,8 @@ export const COMPOSES = {
   schedule: ['movement', 'combat', 'death'],
   combat: ['movement'],
   dialogue: ['quest', 'containment'],
+  commerce: ['containment'],
+  scene: ['dialogue'],
   reaction: ['quest'],
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

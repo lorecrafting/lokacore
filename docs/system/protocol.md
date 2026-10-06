@@ -498,3 +498,417 @@ presence, custody, carrying and funding checks. Extend schemas and composition t
 only for the actual new operation/row fields, and retain the registered event,
 writer-group, budget and deterministic-ID rules. This is a selected source contract,
 not an installed operation.
+
+## B3 shop composition
+
+Commerce exposes exact Buy and Sell commands with actor, provider, item and quoted
+price; the current ActionSet and NPC GameView projection use the same availability
+query as direct admission. The NPC detail shows each eligible exact item with its
+price and current availability, including sold-out and unaffordable states. A
+displayed offer is never a reservation. The command rechecks the quote, stock,
+custody, balances and carrying admission after elapsed-time settlement. Composition
+uses existing `entity.transfer` and B2's two exact `resource.adjust` operations in
+one writer group; no stock-count or creation operation is needed. The receipt records
+one accepted exchange. Existing `query_steps` and failure codes govern each check;
+the developer adds only the command, capability, authored offer and view schema
+needed for this consumer.
+
+The installed wire shape is `buy`/`sell` with `actor_id`, `provider_id`, `item_id`
+and positive `quoted_price`. `ActionInput.quoted_price` carries that displayed quote;
+ordered invocation targets are provider then item. API 1.16 adds NPC `shop` with
+one conserved `resource`, finite `offers` (`item`, `buy`, `sell`) and `bought`/`sold`
+narration keys. Each NPC `EntityView.shop` row carries `item_id`, `name` and its
+Buy/Sell price, availability and optional typed refusal reason. Runtime admission
+owns the exchange; this projection reserves nothing.
+
+## C1 training and defense composition
+
+**API1.18.** [C1](mechanics.md#c1-training-and-armed-defense-selected-contract)
+reuses Talk/Choose and the existing final combat ActionSet; there is no standalone
+Learn or Dodge invocation, mid-fight equipment verb or new turn clock. The projected
+Tobin lesson and direct Choose share the same acquired/payment/receive admission
+checks. Qualification is evaluated at use, independently of learning admission.
+
+Dialogue lowers its typed `skill.acquire` consequence through the skills owner to
+the reserved acquired fact's ordinary `fact.assign`. Its lesson payment uses the
+installed checked conserved resource transfer; the optional sword receive uses the
+installed `entity.transfer`. Acquisition, payer debit, teacher credit, custody,
+choice resolution, events and narration share writer group0. No acquisition table,
+practice field, custom money ledger or portable foundation op is added. Ordinary
+fact writers refuse the reserved acquisition target. Content and generated contracts
+must describe this actual typed hook and reserved ownership, not a narrative Boolean
+assignment that happens to use a skill name. `DialogueChoice.sequence` carries
+`{op: skill.acquire, skill}` and `lesson_payment` carries `{to, resource, amount}`,
+where `to` is the bound original speaker role. `ItemDefinition.weapon` carries
+`{skill, attack}`; `block_chance` is the shield's authored chance. The optional
+combat `dodge {skill, chance}` identifies its usable defender skill.
+
+The shared skills query projects declared skill identity/name, acquired, qualified
+and usable state; authored requirements and fees reach Book through typed data/text.
+Item detail projects its usable slot/profile or shield chance from current content.
+This is the minimum view supplement for Character, teaching and real equipment.
+Missing acquisition defaults false; malformed current-build acquisition is a fault.
+
+An `attack_result` may add `prevented_by: dodge | block` only for an attempted attack
+stopped by that successful defense, requiring `hit:false` and `loss:0`. An accuracy
+miss omits it. A landed hit also omits it. One existing attack-result event and its
+authored narration distinguish all three outcomes; there is no duplicate damage
+event. The schema constrains its vocabulary. The existing schema subset cannot express
+this cross-field implication, so saved-receipt recovery and committed narration
+projection also enforce `hit:false` and `loss:0` when prevention is present. Optional
+metadata is absent for an ordinary no-defense encounter. Shared budgets, causal
+event allocation and death closure use the existing round/proposal contracts.
+
+## B5 harvest and exchange composition
+
+[B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) needs only a typed
+finite-stock harvest invocation and an exact multi-item dialogue exchange plus
+explicit resolved-quest reacceptance with fresh occurrence identity. The actual
+source consumer may reuse an existing invocation where it expresses this full
+contract; do not add an item creation operation. The death-only entity.create
+contract remains unchanged.
+
+Admission and projection share the same current-stock, participant, occurrence,
+exact-custody, contribution and final-load query under the existing command
+budget. Bound multi-item lists are distinct and deterministic by EntityId; their
+length comes from the authored exchange. Each transfer has the observed source,
+known destination and ordinary preconditions. One writer group owns this bounded
+exchange. Lower existing transfer/quest/fact operations where possible; no
+post-commit authority or presenter gameplay writer is permitted. Receipts bind
+actor, occurrence, Wick, all exact outgoing/incoming IDs and the actual faction
+increase. Reacceptance cannot reuse an earlier occurrence ID. A stale continuation
+cannot act on the latest occurrence merely because its quest definition matches.
+GameView projects remaining harvest availability, exchange readiness, journal
+state and authored refusal reasons from confirmed truth, without a stock ledger,
+created-item origin, expiry job, daily clock cut or unbounded history collection.
+
+API1.17 lowers explicit repeat to terminal-only `quest.retire` followed by a fresh
+`quest.activate` in one writer group. The retire operation names the exact prior
+instance, quest and scope; its null change removes only that quest row. An
+exchange continuation carries `quest_instance_id` and deterministic outgoing/
+incoming item role bindings. Quest-authored `exchange` tuning supplies the shared
+readiness and lowering; detail-authored `harvest` supplies conserved stock IDs.
+
+## B4 fuel composition
+
+Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
+with `ignite {actor_id, item_id}`, `douse {actor_id, item_id}` and
+`refuel {actor_id, item_id, supply_id}`. Invocation targets are source then supply
+for Refuel, and source for Ignite/Douse. The amount is derived from confirmed
+headroom and supply, never player input. Extend ActionSet and the exact item view
+only for these real controls, confirmed remaining/capacity and effective lit state.
+An unavailable compatible supply produces no selectable Refuel promise.
+
+The missing primitive is typed per-item fuel history: state rows and
+`fuel.set {item_id, from, to}` targeting that item's fuel row. `from` is the entire
+stored row, not its derived current value; `to` is the settled replacement at the
+current authoritative clock. Both rows carry `remaining`, `at`, `lit` as defined
+by the mechanic. Composition requires exact prior-row equality, a declared fuel
+item, valid bounded charge/time and no lit supply. Conflicting writers retain
+`conflicting_write`; precondition failures adopt nothing. The light rule owns
+Ignite/Douse/Refuel writes. Time and custody changes need no fuel op.
+
+Add only immutable per-item fuel specifications needed to validate those rows.
+Do not encode engine history as untyped cartridge facts or generalize the new op
+into arbitrary item-state assignment. Because a new delta target crosses portable
+composition, both kernels require independently pinned valid/invalid/precondition
+fixtures and differential coverage; the light story rule remains TypeScript-only.
+The next API/release pins and exact generated shape are assigned from the actual
+implementation base, not assumed by this planning contract. Existing error codes,
+writer groups, checked arithmetic and query budgets apply.
+
+## B7 liquid composition
+
+**Selected, pending implementation.** `liquid@1` owns only commands
+`fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
+and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
+item. ActionInvocation targets retain that exact ordered pair (or Drink's one
+item), with no player-supplied amount, kind or resource benefit. Projection and
+admission share current custody, reach, compatibility, capacity and load checks.
+Use structured filled/poured/drank outcomes containing bound participant IDs,
+kind and actual quantity; no consumer reads success from narration.
+
+The missing primitive is a typed exact-instance liquid row and
+`liquid.set {item_id, from, to}` with whole-row equality precondition and one
+writer target per item. Quantity is a bounded nonnegative integer; null kind iff
+zero; positive kinds and capacity are validated against immutable per-vessel
+specifications and declared liquid references. No facts/resources encode an
+alternate quantity. Pour includes the two writes in one existing writer group;
+any conflict, precondition/invariant or budget failure rolls back both. Emptying
+a vessel preserves its item identity. Optional state sections remain absent in
+cartridges without the capability; fresh worlds initialize only actual opted
+vessels once. No generic create/destroy/mix liquid operation is introduced.
+
+Reuse the existing delta dispatch, target/precondition machinery, immutable
+observation validation and writer-group handling. B4's `fuel.set` has a timed
+`at/lit` history invariant; liquid kind/volume has no burn clock. Do not remodel
+one as the other or add a generic configurable row-operation registry merely
+to share these two shapes. Existing resource rows recover/adjust numeric pools,
+and containment rows move whole item identities; neither represents liquid
+kind plus capacity. Only the new typed variant is justified.
+
+The portable operation/precondition/invariant semantics require both checked
+foundation twins, independently hand-checked new fixtures and randomized
+comparison after fixture validation. Leave frozen fixtures unchanged. The
+player rule and source/custody/issuance semantics stay TypeScript-only until an
+actual server consumes them. Compose remains independent of RPG helpers.
+The generic row invariant checks shape/capacity, not global water conservation:
+Fill introduces water and Drink consumes it. Pour conservation and authorized
+issuance/consumption are mechanic and receipt-bound obligations.
+
+Extend GameView only for confirmed vessel kind/quantity/capacity, authored unit
+labels and exact legal Fill/Pour/Drink actions; existing details and target
+selection remain the UI boundary. No renderer arithmetic creates permission or
+adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets stay
+in force; pair enumeration is bounded before work, not an unmetered all-item scan.
+## C2 patrol composition and admission
+
+**Selected, pending implementation.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
+quest instance, independently of the unchanged escort row. Register its minimal
+state/mutation target/transition and invariant under the patrol owner. Preserve
+foundation precondition/conflict semantics; any new delta/state composition branch
+must have Elixir and TypeScript literal conformance and differential proof. Patrol
+RPG admission and credit remain TypeScript story semantics, with no new server adapter.
+
+Start, Continue rounds, Rejoin and Restart are bound dialogue consequences using
+ordinary Talk/Choose and choice rows. Projection and direct Choose share current
+identity, presence, life, posture, quest, attempt/cursor/status admission. Structured
+input binds the quest instance, attempt and cursor/status drawn, as well as ordinary
+continuation/choice identity; a fresh invocation id cannot convert an old leg into
+the next leg. Normal combat/modal restrictions and Close/Leave remain in force.
+
+Movement owns legal edge transfer and typed entered-room occurrence; patrol owns
+leader progression/credit; quest owns S3 activation/resolution; death owns fatal
+invalidation before revival; fact owns lowering of reserved trust in the same group.
+No raw fact assignment or independently delivered entered-room event can mint credit.
+Use actual accepted causal command/event identity, scope, ordering and proposal-prefix
+presence. All reads share the command budget; bound the finite route before work.
+Continue's leader transfer, player join/progress, pause, fatal reset and final
+quest/trust consequence each commit or roll back as one root proposal. Concurrent
+Wren follow transfers Wren once and preserves both relations' original identities;
+neither relation adds a second player transfer or steals the other's mutation target.
+No due-job chain, new player verb, global objective interpreter or per-frame writer
+is needed. Declare new typed state/transition bounds and planted invalid fixtures;
+update generated contracts and current release pins in the implementation PR.
+
+## B6 bounded sitting and topic composition
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) extends only
+attribute-threshold checks, opted bounded riddle continuations and declared topic
+projection/grant. Use the existing Perform/Talk/Choose/Close invocations and actor
+ActionSet. Shared visibility/light/discovery/quest/participant policies govern
+both offered controls and raw-command admission. For the real Aldric consumer,
+Talk gains an optional exact dialogue DefinitionRef;
+when supplied it must belong to the target speaker and resolve through the actor's
+ActionSet with its own eligibility rechecked. Omission keeps first-eligible-key
+behavior. This is a bounded selector, not a conversation graph. GameView reveals
+bank and committed attempts/limit for an opted sitting, never the canonical answer.
+Known topics project as key-sorted `{topic: DefinitionRef, label: TextKey}` entries;
+the ward consumer reads the same declared Boolean membership as its admission.
+
+Dialogue owns a typed continuation attempt supplement and `choice.attempt` operation:
+bind continuation ID, actor, opening revision and exact prior count; increment by
+one only for a pending bounded sitting, within its pinned authored limit. Conflicts,
+wrong ownership and out-of-range rows fail closed. At the limit, increment and
+ordinary choice close share one writer group; no intervening count-at-limit pending
+world is adopted. This supplement is choice state, not a free-standing player fact,
+quest occurrence, general puzzle state machine or a second receipt ledger.
+Existing no-limit continuation semantics remain unchanged.
+
+The portable delta/precondition/invariant additions receive independently authored
+Elixir and TypeScript conformance answers and randomized differential proof, including
+increment-plus-close and writer conflicts. Check/perception/topic gameplay stays
+TypeScript-first. `topic.grant` is typed cartridge consequence lowering to the
+existing Boolean fact assignment, with no new portable topic operation or writer.
+Definition/participant/quest binding, causal ordering, query budgets and authority
+commit/adopt/response ordering retain their existing contracts.
+
+## C3 spawned bundles and population composition
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+requires a checked extension to death-only creation, not permission to trust the
+currently schema-only `spawned` origin. Register separately keyed full-prior-row
+transitions: target `{kind: population_plan, plan}` contains only current job ID
+and next wander due; target `{kind: population_slot, plan, slot}` contains generation,
+member ID and replacement due. `plan` is the full pinned DefinitionRef; `slot` is
+one ordinal1..declared cap. Genesis creates every slot, including never-used rows.
+Plan control duplicates no member list, count, generation or mutable slot index.
+The declared fixed ordinal range is the only membership index: projection, dispatch
+and load read those exact slot keys and reject absent, extra or foreign keys. Each
+transition compares its own complete prior row; no transition rewrites the plan
+plus all slots. State cannot be forged through ordinary fact assignment or a
+player-accessible population verb.
+Story admission remains TypeScript; added state/delta/precondition semantics and
+creation validation retain both-kernel literal conformance then differential proof.
+
+Each immutable spawned identity binds declared plan and bundle, slot, generation,
+creation occurrence and hound member ID, with role hound or pelt. The hound binds
+itself; its one pelt binds that exact hound, with matching origin fields. Allocate
+hound before pelt in slot order using the existing occurrence allocator. IDs must
+be fresh across authored, created and holder identities. Exact paired definition,
+origin and membership proof rejects extra/missing/duplicate children, cross-plan
+parents, reused generations and arbitrary nested spawn trees.
+
+Each create remains immediately followed by same-group null-source placement:
+hound into the declared home room, then pelt into that newly created hound. The
+second destination is the sole new exception to room-only creation placement.
+Initialize the exact hound HP row and commit both identities, placements and slot
+transition in one writer group. Bundle completeness is checked at the complete
+atomic group; valid paired prefixes must hydrate for later proposal reads without
+mistaking a temporarily unfinished pair for a corrupt complete state. Generic
+source/cycle/capacity guards and one-container proof stay in force.
+
+Derived dynamic entities/resource specs/capacity and known-victim observations
+include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the
+one-authored-instance map; it cannot pick a population member. Attack, targeting,
+view, HP, death and encounters bind exact runtime IDs. A hound death selects its
+plan's NPC corpse template and validates its actual dynamic victim, retaining the
+ordinary player/default authored NPC corpse contracts. S1 cannot credit a hound.
+
+Population owns membership/eligibility/bounded creation; movement owns legal
+transfer; combat/resource/death own loss, closure, corpse and loot transfer;
+schedule dispatches the exact saved plan/job occurrence under existing causation
+and canonical `(due_time, job_id)` ordering. Each due job keeps its existing distinct
+writer group. A fatal combat group writes only its victim's slot, with the ordinary
+HP/encounter/corpse/loot ops; it never writes plan control. The plan-job group advances
+control and only newly filled/replaced slots. No-op transitions of other slots are
+forbidden. If population is first at an equal deadline, the still-engaged victim is
+not moved or rewritten; if combat is first, that newly dead slot's future eligibility
+prevents a replacement or rewrite. Other eligible slots use different mutation
+targets. Control still binds one current pending successor; the plan's declared
+ordinal range and all unchanged slot identities agree in either order. Wander <= replacement
+delay ensures fatal eligibility cannot require an earlier plan-control write.
+
+Ordinary same-target cross-group writes still fault `conflicting_write`, including
+two attempted transitions of one population slot; there is no population exemption,
+writer-group coalescing, job-priority change or last-writer-wins overlay. Only the
+exact current pending binding may run; replayed, cancelled
+or stale occurrences create/move/draw nothing. All writes use existing root
+proposal, conflicts, shared work counters and changed-row transaction. No public
+spawn action, per-hound job, global ecology service or unbounded history scan is
+required. New schemas get invalid fixtures and required/bound mutant sweeps.
+
+## C4 pack encounter and flight composition
+
+**Selected, pending implementation.** [C4 mechanics](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+adds only bounded active opponent IDs, primary and next-opponent ID to the owned
+encounter transition. Each write checks the complete prior encounter row, current
+job/round and exact character/body/room. Active IDs are unique, canonically ordered,
+bounded before iteration and proven current members of the same full plan ref;
+primary/cursor belong to that roster while open. Closed encounters have no active
+participants or pending round. A member cannot belong to two open encounters.
+This is combat-owned internal admission during Attack/run_job, never a public
+assist/damage verb or a player-forgeable behavior intent. Ordinary non-pack NPC
+admission remains one opponent. Generic state/delta/precondition changes require
+both portable twins, independent literal fixtures, then differential proof.
+
+For this actual scheduler seam, extend each separately targeted C3 slot with
+nullable `last_flight_at`, initially null and reset to null only on a new generation.
+A successful selected flight sets it to this occurrence's logical clock, checking
+the exact plan/slot/generation/member and complete prior row. Fatal slot transitions
+retain that generation's value. Population dispatch skips a living member when
+it is engaged or its last flight equals that dispatch clock. It writes no unchanged
+slot. The timestamp prevents combat-first flight followed by same-boundary wander
+from moving one hound twice or causing a cross-group custody conflict; it is not
+a cooldown, mirrored membership list or historical encounter scan.
+
+Canonical `(due_time, job_id)` order and separate groups remain. Population-first
+skips the still-engaged hound; combat-first records the same-clock flight so the
+later population group skips it. Both permit only other unengaged members' ordinary
+wander and one control successor. Flight writes its own slot/custody/encounter in
+the combat group; population writes separate control and actual birth/replacement
+slots. Same-slot or same-custody different-group writes still fault
+`conflicting_write`; no priority rewrite, group merging or conflict exemption.
+At a strictly later wander boundary an unengaged survivor may move normally.
+
+Combat owns admission/rotation/removal/closure and its job; movement owns validated
+flight; population owns slot provenance and its own job; death owns corpse/custody;
+proposal retains atomic conflicts, event causation and shared command budgets;
+authority alone commits changed rows plus the receipt. Flight/departure/primary
+narration binds actual runtime IDs and committed room/membership changes. Stale or
+cancelled round occurrences never move, hit, draw or revive membership. No new
+per-hound job, whole-state copy, receipt ledger or actor assumption is introduced.
+
+## B8 immediate service composition
+
+**Selected, pending implementation.** A service invocation binds actor, exact
+provider EntityId, declared service DefinitionRef and displayed positive quoted
+price. The selected command is `use_service {actor_id, provider_id, service,
+quoted_price}`, with `service` the authored DefinitionRef and accepted outcome
+`service_used`. Invocation targets contain the provider; captured input supplies
+service and quote. Add only the minimal `service@1` command/action/offer projection needed
+for the [real consumer](mechanics.md#b8-mauds-immediate-services-selected-contract).
+The projected NPC service row includes label, price, declared capped benefit and
+current availability/reason; admission reuses its query after due/elapsed work.
+A displayed offer is no reservation and a stale service never substitutes another.
+
+Service lowering uses existing exact two-party `resource.adjust` payment,
+`fact.assign` room entitlement, exact stock `resource.adjust`, settled capped MV
+`resource.adjust`, and B7 whole-row-precondition `liquid.set`. All share one
+writer group; any failed precondition/conflict/budget discards the entire service.
+Provider-bound liquid consumption is an explicit typed service consequence with
+historical provider custody/kind/quantity checks, distinct from actor-owned
+Drink. Extend B7's verifier to recognize this producer, rather than spoof a
+Drink command or add a second liquid mutation. No new portable operation,
+service state row, item creation, clock advance, queue/escrow or automatic job
+is needed. No new service DomainEvent is required: existing fact/resource/liquid
+consequences and the bound receipt command prove the result. Register the actual
+command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
+original provider/service for confirmed narration routing and save validation.
+
+## D2 held-readable composition
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
+existing Read targeting to authored readable items, retaining exact actor, item ID,
+pinned definition and ActionSet resolution. Shared held-reach admission governs
+item/contents offers and raw commands. Expose the authored Read label on each
+eligible item detail; closed ancestors hide unreachable contents and leave no raw
+ID bypass. Use current Item/ContentView and offered-action shapes where sufficient;
+add only consumed readable metadata, never a generic document hierarchy.
+
+Topic grants lower to the B6 Boolean owner; no new portable delta, event writer,
+reading cursor or continuation is needed. Accepted receipt binds the exact Read
+command and original book; confirmed topic projection uses B6's sorted topic entries.
+B6 success and book Read compose on the same membership, so already-known grants
+are neutral. Rejected commands write neither knowledge nor read narration. Current
+scene/combat/freshness/retry rules remain in force. Authority commits changed facts
+and receipt together before adopting memory or replying; no full-state copy occurs.
+
+## B9 Rest occurrence and dream composition
+
+**Selected, source pending.** Register `rested {body_id, room_id}` as a
+position-owned DomainEvent for accepted `rest` only. Its full actor/player scope,
+world/time, root command cause/correlation and causal position bind the actual
+accepted body/room transition after prior-rate settlement. Root-to-event checks
+must reject a rental/Sleep/refusal/foreign actor/body/room producer. Emit it for
+accepted Rest generally; the cartridge's exact typed first-Rest binding selects
+its eligible room and entitlement. An outcome label alone is not event evidence.
+
+The guarded first-Rest delivery assigns its declared fact, activates the bound
+quest once, then starts the exact dream checkpoint at beat1 in the same proposal. All
+reads observe the proposal's causal prefix; all writes use registered fact,
+quest and choice operations with existing conflict/rollback/shared budgets.
+No new portable delta, dream row, clock op, scene queue or host callback is used.
+
+Add only the [consumed scene subset](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract).
+Continue binds the exact scene/beat; Resume/Close are local routes over
+projected saved truth. The existing Choose command
+binds its scene-owned continuation/expected revision and offered choice. A3's
+scene/line freshness remains for modal scenes. For this subset, beat4 is choice,
+beat5 the selected final narration; the saved ChoiceRow binds scene source,
+beat4, actor/body and authored room anchor and survives resolution/end. A fresh
+old occurrence or wrong branch/beat/control refuses; accepted-id replay is first.
+The explicit scene source must not enter ordinary dialogue pending-choice selection.
+
+GameView projects dream availability and exact controls under the real bed detail,
+with authored text and bound choice when open. The shared query admits them only
+at the safe anchor with no ordinary choice/modal/encounter, and confirms the same
+rules for direct commands. The normal World, position and combat sets remain;
+an outstanding presentation-only checkpoint does not create modal replacement.
+Resume does not infer a world move, sleep or memory. Modal precedence and
+combat suppression hide dream controls without erasing their checkpoint.
+Final acknowledged end lowers one `dream_seen` assignment and bound S10 resolution
+in one scene-owned writer sequence, with normal `scene_ended`/`quest_resolved`
+evidence, no `story_point_reached`. The authority only commits changed rows and
+receipt; the Book only emits captured invocations.

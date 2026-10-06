@@ -1,8 +1,8 @@
 # Chapter 1 implementation and proof briefs
 
-These 33 briefs support the [Missing Child completion plan](../../MISSING-CHILD-PLAN.md). They are **provisional PM recommendations**, not adopted specification, implementation authorization, completed slices, review approval or proof of a playable chapter. Each brief records the source it inspected at drafting time; those historical heads and chapter hashes are reading evidence only. Before assigning a slice, the PM must reconcile recommendations with current `docs/system/` and owner decisions, adopt its policy, and re-pin the actual merged dependencies, source head, fixtures, release identity and checks. Unknown future pins remain null. The [delivery workflow](../../WORKFLOW.md) governs implementation and review.
+These 33 briefs support the [Missing Child completion plan](../../MISSING-CHILD-PLAN.md). They are **provisional PM recommendations** unless their own text links an adopted decision; a brief is not implementation proof, review approval or proof of a playable chapter. Before assigning a slice, the PM must reconcile recommendations with current `docs/system/` and owner decisions, and re-pin the actual merged dependencies, source head, fixtures, release identity and checks. Unknown future pins remain null. The [delivery workflow](../../WORKFLOW.md) governs implementation and review.
 
-The public plan owns the 33-row order and dependencies. These briefs add candidate implementation detail. If they differ, the public plan and governing decisions control until the PM resolves the conflict. In particular, B7 describes B1 as conditional for an untimed water path while the public plan names B3 only; B4/B8 and C6 contain proposed recovery, service and reward policies requiring adoption. A1–A3 contain inspected PR190 status and older historical lookups; use the merged status in the public roadmap and re-pin before source work. E1–E3 are proof plans, not gate verdicts.
+The public plan owns the 33-row order and dependencies. These briefs add candidate implementation detail. If they differ, the public plan and governing decisions control until the PM resolves the conflict. B9 now adopts paid actual Rest, a resumable bed-nested dream and final-only memory; B8 source/review re-pins remain required. B7 now adopts an untimed water path with B3 as its sole new-slice dependency; B8 now adopts immediate Maud services with durable bed eligibility and finite stock MV recovery; B7 source must merge before assignment. C6 contains proposed recovery and reward policies requiring adoption. B6 now links its selected all-hours Seek, bounded retry and usable ward contract; B4/B5 source dependencies remain unknown. B4 now links its selected light/fuel/recovery contract; B3 dependency pins and reviews remain provisional. A1–A3 contain inspected PR190 status and older historical lookups; use the merged status in the public roadmap and re-pin before source work. E1–E3 are proof plans, not gate verdicts.
 
 ## A. Main story
 
@@ -18,23 +18,23 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 - **B4:** [B4 — useful light, fuel/refill and safe recovery](b4-light-fuel-recovery-brief-2026-10-05.md)
 - **B5:** [B5 — S9 harvested herbs, real reward and repeat cap](b5-infirmary-herbs-brief-2026-10-05.md)
 - **B6:** [B6 — S4 all-hours wisp riddle and ward knowledge](b6-wisp-ward-riddle-brief-2026-10-05.md)
-- **B7:** [B7 — well, waterskin and conserved liquid](b7-well-waterskin-brief-2026-10-05.md)
-- **B8:** [B8 — Maud's room, food and drink services](b8-mauds-services-brief-2026-10-05.md)
-- **B9:** [B9 — S10 actual inn Rest and acknowledged dream](b9-inn-dream-brief-2026-10-05.md)
+- **B7 (adopted plan):** [B7 — Well and waterskin: fill, pour and drink conserved liquid](b7-well-waterskin-brief-2026-10-05.md)
+- **B8 (adopted plan):** [B8 — Maud's room, food and drink services](b8-mauds-services-brief-2026-10-05.md)
+- **B9 (adopted plan):** [B9 — S10 actual inn Rest and acknowledged dream](b9-inn-dream-brief-2026-10-05.md)
 
 ## C. Watch, combat and survival
 
-- **C1:** [C1 — Tobin teaches swords/dodge; learned skills affect a real fight](chapter-one-c1-tobin-training-brief-2026-10-05.md)
-- **C2:** [C2 — Watchman's Rounds: follow Tobin, survive and recover an attempt](chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
-- **C3:** [C3 — A bounded persistent fen pack, real deaths and conserved loot](chapter-one-c3-living-hounds-brief-2026-10-05.md)
-- **C4:** [C4 — Hound aggression, real pack assistance and enemy flight](chapter-one-c4-hound-behavior-brief-2026-10-05.md)
+- **C1:** [C1 — Tobin teaches swords/dodge; learned skills affect a real fight](chapter-one-c1-tobin-training-brief-2026-10-05.md); [local source handoff](c1-tobin-training-local-pr-2026-10-05.md)
+- **C2:** [C2 — adopted finite Tobin patrol, failure recovery and trust](chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
+- **C3 (adopted plan):** [C3 — Living Fen hounds, bounded persistence and real fight loot](chapter-one-c3-living-hounds-brief-2026-10-05.md)
+- **C4 (adopted plan):** [C4 — Response to deliberate aggression, real pack help and wounded flight](chapter-one-c4-hound-behavior-brief-2026-10-05.md)
 - **C5:** [C5 — A real hound hit causes bleeding; trained bandage stops it](chapter-one-c5-bleeding-bandage-brief-2026-10-05.md)
 - **C6:** [C6 — Night in the Marsh: start a real survival expedition now](chapter-one-c6-marsh-expedition-brief-2026-10-05.md)
 
 ## D. Connected world
 
 - **D1:** [D1 — Paid ferry, Mother Sedge and a usable isle return](d1-ferry-isle-brief-2026-10-05.md)
-- **D2:** [D2 — Public Priory rooms and books that grant their actual topics](d2-priory-books-brief-2026-10-05.md)
+- **D2 (adopted plan):** [D2 — Public Priory rooms and books that grant their actual topics](d2-priory-books-brief-2026-10-05.md)
 - **D3:** [D3 — Western Ashmere, the mill and Hob](d3-western-ashmere-brief-2026-10-05.md)
 - **D4:** [D4 — Homes, the smithy, orchard food and truthful child-state prose](d4-homes-orchard-brief-2026-10-05.md)
 - **D5:** [D5 — Oak canopy, pool edge, deep fox den and shallows](d5-deep-fen-brief-2026-10-05.md)

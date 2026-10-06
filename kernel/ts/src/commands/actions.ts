@@ -209,7 +209,16 @@ export function refusal(
 const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
-const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 'until', 'answer'];
+const INPUTS: readonly string[] = [
+  'direction',
+  'choice_id',
+  'continuation_id',
+  'until',
+  'answer',
+  'scene',
+  'line',
+  'quoted_price',
+];
 
 /**
  * True when action `a` resolves to `payload`'s Command and accepts its target and input. An

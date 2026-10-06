@@ -162,12 +162,79 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-This completes **3 of the 33** proposed Chapter 1 completion slices (A1, B1, A2).
+Local `main` has completed **8 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5, C1).
+GitHub `main` has three (A1, B1, A2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
-adopts the A3 Green finale and five-outcome plan; neither is a completed source slice.
-B2 source implementation remains local; A3 source work remains ahead.
+adopts the A3 Green finale and five-outcome plan; neither PR alone completed a source slice.
+The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
+applied to these five merges while GitHub Actions delayed and cancelled runners.
+B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
+local `main` at chapter 0.0.16/API1.14. The accumulated local checks passed on the
+C1-inclusive head; GitHub publication remains ahead. A3 Green finale is implemented at chapter
+0.0.17/API1.15 and independently approved after the bound-Continue and save-proof
+findings were fixed ([primary review](reviews/2026-10-05-a3-green-primary-review.md),
+[save review](reviews/2026-10-05-a3-save-second-review.md)). Both await accumulated-head
+publication checks and a GitHub PR.
+B3 Peg's finite shop is implemented at chapter 0.0.18/API1.16 and independently
+approved after its ID-pin and schema-example findings were fixed
+([primary review](reviews/2026-10-05-b3-pegs-shop-primary-review.md),
+[save review](reviews/2026-10-05-b3-pegs-shop-save-second-review.md)). It awaits
+accumulated-head publication checks and a GitHub PR. B4 refillable light and
+safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md)
+and [independent plan approval](reviews/2026-10-05-b4-light-plan-review.md);
+source implementation is active in an isolated local branch.
+
+B5 Infirmary Herbs is implemented on local `main` at chapter 0.0.19/API1.17.
+Its finite fenwort harvest, four bandage exchanges and bounded Priory contribution
+passed focused source proof. Trusted elapsed replay, pinned dialogue roles and
+paired quest retirement findings were fixed and independently approved
+([primary review](reviews/2026-10-05-b5-infirmary-herbs-primary-review.md),
+[save/portable review](reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md)).
+It awaits accumulated-head publication checks and a GitHub PR.
+
+B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
+on local base `98cc60b1`. The route finding was fixed and its
+[independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
+B4 source dependency, implementation and successor release/proof pins remain ahead.
+
+B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
+against local B3 integration at `4bfe252e`. Its
+[independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md) approved;
+source implementation, successor release pins and proof remain ahead.
+
+B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
+on local base `10b023e8`. A3 is integrated; B8 has an approved plan but no source.
+B8 source/review re-pins, [independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md) approved; implementation and successor
+release/API/hash/ID/proof pins remain ahead; no playable S10 is claimed here.
+
+C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
+Its [independent plan review](reviews/2026-10-05-c1-tobin-plan-review.md),
+[primary source review](reviews/2026-10-05-c1-tobin-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-c1-tobin-save-second-review.md)
+approved after all findings were fixed. Local `main` carries chapter 0.0.20/API1.18,
+the independently pinned hash `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e`
+and 92 IDs. The accumulated local check passed, including the post-review size fix;
+GitHub publication remains ahead.
+
+C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
+and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
+against local main `98cc60b1`. C1 source and shared cartridge predecessors must
+be re-pinned before source assignment; the equal-time conflict finding was fixed
+and its [independent plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md)
+approved. Successor release pins, implementation and proof remain ahead. C4
+hound aggression, pack assistance and flight is a separate planned slice.
+
+C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
+and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
+against local main `10b023e8`. C1/C3 source and intervening shared release edits
+must be reviewed and re-pinned before assignment. C4 independent plan review,
+implementation, successor release/API/hash/IDs and proof remain ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

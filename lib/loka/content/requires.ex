@@ -23,25 +23,44 @@ defmodule Loka.Content.Requires do
   def features(nil, _), do: []
 
   def features(m, all) do
-    riddles =
-      Enum.any?(all, fn {_, _, d} ->
-        is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
-      end)
-
-    escort = is_map_key(m["requires"]["capabilities"], "escort")
-    transfers = Enum.any?(all, fn {_, _, d} -> transfer_feature?(d) end)
-
-    minimum =
-      cond do
-        escort -> [1, 11]
-        transfers -> [1, 10]
-        riddles -> [1, 9]
-        true -> []
-      end
+    minimum = minimum_feature_api(m, all)
 
     if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
+  end
+
+  defp minimum_feature_api(m, all) do
+    cond do
+      is_map_key(m["requires"]["capabilities"], "skills") ->
+        [1, 18]
+
+      Enum.any?(all, fn {_, _, d} -> debt_feature?(d) end) ->
+        [1, 14]
+
+      is_map_key(m["requires"]["capabilities"], "escort") ->
+        [1, 11]
+
+      Enum.any?(all, fn {_, _, d} -> transfer_feature?(d) end) ->
+        [1, 10]
+
+      Enum.any?(all, fn {_, _, d} -> variant_feature?(d) end) ->
+        [1, 9]
+
+      true ->
+        []
+    end
+  end
+
+  defp variant_feature?(d),
+    do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
+
+  defp debt_feature?(d) do
+    is_map_key(d, "deadline") or is_map_key(d, "resource_starts") or
+      Enum.any?(Map.values(Map.get(d, "choices", %{})), fn choice ->
+        is_map_key(choice, "payment") or is_map_key(choice, "availability") or
+          (is_map_key(choice, "receive") and is_map_key(choice, "accept"))
+      end)
   end
 
   defp transfer_feature?(d) do

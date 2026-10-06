@@ -15849,6 +15849,14 @@
       {
         "path": "/actor_id",
         "code": "missing_property"
+      },
+      {
+        "path": "/line",
+        "code": "missing_property"
+      },
+      {
+        "path": "/scene",
+        "code": "missing_property"
       }
     ]
   },
@@ -15864,6 +15872,14 @@
       {
         "path": "/extra",
         "code": "unknown_property"
+      },
+      {
+        "path": "/line",
+        "code": "missing_property"
+      },
+      {
+        "path": "/scene",
+        "code": "missing_property"
       }
     ]
   },
@@ -17103,6 +17119,143 @@
     "errors": [
       {
         "path": "/check/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "dodge": {
+        "chance": 50
+      }
+    },
+    "errors": [
+      {
+        "path": "/dodge/skill",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "dodge": {
+        "skill": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "dodge"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/dodge/chance",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "dodge": {
+        "skill": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "dodge"
+        },
+        "chance": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/dodge/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "dodge": {
+        "skill": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "dodge"
+        },
+        "chance": 101
+      }
+    },
+    "errors": [
+      {
+        "path": "/dodge/chance",
         "code": "above_maximum"
       }
     ]

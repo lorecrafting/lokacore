@@ -1,0 +1,102 @@
+{
+  "npc": "peg",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "any",
+        "items": [
+          {
+            "op": "quest_state",
+            "quest": "chandlers_debt",
+            "state": "active"
+          },
+          {
+            "op": "quest_state",
+            "quest": "chandlers_debt",
+            "state": "objectives_complete"
+          },
+          {
+            "op": "quest_state",
+            "quest": "chandlers_debt",
+            "state": "resolved"
+          },
+          {
+            "op": "quest_state",
+            "quest": "chandlers_debt",
+            "state": "failed"
+          },
+          {
+            "op": "quest_state",
+            "quest": "chandlers_debt",
+            "state": "abandoned"
+          }
+        ]
+      }
+    }
+  },
+  "prompt": "dialogue.peg_debt.prompt",
+  "roles": {
+    "peg": {
+      "role": "npc",
+      "npc": "peg"
+    },
+    "aldric": {
+      "role": "npc",
+      "npc": "aldric"
+    },
+    "ledger": {
+      "role": "item",
+      "item": "tithe_ledger"
+    }
+  },
+  "choices": {
+    "accept_on_time": {
+      "label": "dialogue.peg_debt.accept_on_time",
+      "narration": "narration.peg_debt.accept_on_time",
+      "accept": "chandlers_debt",
+      "receive": {
+        "item": "ledger",
+        "from": "peg"
+      },
+      "availability": {
+        "through": 151200
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "priory_tithe_delivered",
+          "value": "pending"
+        }
+      ]
+    },
+    "accept_late": {
+      "label": "dialogue.peg_debt.accept_late",
+      "narration": "narration.peg_debt.accept_late",
+      "accept": "chandlers_debt",
+      "receive": {
+        "item": "ledger",
+        "from": "peg"
+      },
+      "availability": {
+        "from": 151201,
+        "through": 237600
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "priory_tithe_delivered",
+          "value": "pending"
+        }
+      ]
+    },
+    "elapsed": {
+      "label": "dialogue.peg_debt.elapsed",
+      "narration": "narration.peg_debt.elapsed",
+      "availability": {
+        "from": 237601
+      }
+    }
+  }
+}

@@ -45,7 +45,8 @@
       "take",
       "drop",
       "give",
-      "put"
+      "put",
+      "harvest"
     ],
     "definitions": [
       "item",
@@ -163,7 +164,10 @@
     "key": "skills",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "skill"
+    ]
   },
   {
     "key": "status",
@@ -311,7 +315,14 @@
     "key": "commerce",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "buy",
+      "sell"
+    ],
+    "definitions": [
+      "shop"
+    ]
   },
   {
     "key": "service",

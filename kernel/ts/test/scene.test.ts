@@ -11,6 +11,7 @@ import { check } from '../src/runtime/invariants.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const equal = (actual: unknown, expected: unknown) =>
   assert.deepEqual(actual === undefined ? undefined : JSON.parse(JSON.stringify(actual)), expected);
@@ -52,7 +53,11 @@ const identifyAction = (w: World, action_key: string, target?: string, input = {
   return i;
 };
 function invoke(w: World, action_key: string, target?: string, input = {}) {
-  const c = resolve(w, identifyAction(w, action_key, target, input)) as Command;
+  const bound =
+    action_key === 'continue'
+      ? { scene: gameView(w).scene!.scene, line: gameView(w).scene!.index }
+      : input;
+  const c = resolve(w, identifyAction(w, action_key, target, bound)) as Command;
   assert.ok('payload' in c, JSON.stringify(c));
   const s = step(w, c, n, action_key as Key);
   const resolves = Object.fromEntries(
@@ -95,6 +100,27 @@ const op = (expected: number, value: number, group: number, actor: World['charac
   scope: { kind: 'player', character_id: actor },
   expected,
   value,
+});
+
+// Breaks: two fresh-id empty Continue commands skip unseen lines in a story-started scene.
+test('every modal Continue requires its shown scene and line', () => {
+  let w = choose(ready()).world;
+  for (let i = 0; i < 2; i++) {
+    const c = {
+      id: `eeeeeeee-0000-4000-8000-${String(++n).padStart(12, '0')}`,
+      world_context_id: w.context,
+      payload: { type: 'continue', actor_id: w.character },
+    } as Command;
+    assert.deepEqual(validate('Command', c), [
+      { path: '/payload/line', code: 'missing_property' },
+      { path: '/payload/scene', code: 'missing_property' },
+    ]);
+    const result = step(w, c, n);
+    assert.equal(result.decision.kind, 'rejected');
+    assert.equal(result.world, w);
+    assert.equal(gameView(result.world).scene?.index, 1);
+    w = result.world;
+  }
 });
 
 // Breaks: declaring scenes allocates a new initial row/id or leaks a scene before its trigger.

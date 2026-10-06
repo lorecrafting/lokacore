@@ -1,3 +1,4 @@
+import { skillViews } from './skills.ts';
 import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
@@ -28,8 +29,10 @@ import * as movement from '../mechanics/movement/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { holds } from '../mechanics/policy.ts';
+import { value } from '../mechanics/fact.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
+import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
 
 /**
@@ -57,7 +60,8 @@ import { status as calendarStatus } from '../mechanics/calendar.ts';
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
-  const actions = lists(world, world.character);
+  const steps = { n: 0 };
+  const actions = lists(world, world.character, steps);
   const equipment = Object.entries(world.slots).map(([slot, holder]) => {
     const [item] = within(world, actions, holder, actions.worn);
     return { slot: slot as SlotKey, ...(item && { item }) };
@@ -65,7 +69,7 @@ export function gameView(world: World): GameView {
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
-  const choice = fight ? undefined : choiceView(world, world.character);
+  const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
   const showing = scene.running(world, world.character);
@@ -73,6 +77,7 @@ export function gameView(world: World): GameView {
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   return {
     actor_id: world.character,
+    ...skillViews(world, steps),
     ...(fight && {
       combat: {
         encounter_id: fight.id,
@@ -149,8 +154,17 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   name: e.short,
   description: e.description,
   kind: e.kind as Key,
+  ...(e.kind === 'item' && e.slot && { slot: e.slot }),
+  ...(e.kind === 'item' &&
+    e.weapon && {
+      weapon: e.weapon,
+      skill_label: world.cartridge.skills![refString(e.weapon.skill)].label,
+      skill_requirement: world.cartridge.skills![refString(e.weapon.skill)].requirement,
+    }),
+  ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });
 
 type Lists = ReturnType<typeof lists>;
@@ -202,9 +216,19 @@ function chapter(world: World): ChapterView | undefined {
   for (let i = 1; i < chapters.length; i++) {
     const c = chapters[i]!;
     const outcomes = world.cartridge.story_points![refString(c.story_point!)].outcomes;
-    const counted = c.outcome ? [outcomes[c.outcome]!] : Object.values(outcomes);
+    const counted = c.outcome
+      ? [[c.outcome, outcomes[c.outcome]!] as const]
+      : Object.entries(outcomes);
     if (
-      counted.some((t) => {
+      counted.some(([outcome, t]) => {
+        if ('scene' in t) {
+          const marker = {
+            ...c.story_point!,
+            kind: 'fact' as const,
+            key: `story_point_${c.story_point!.key}` as Key,
+          };
+          return value(world, world.character, marker) === outcome;
+        }
         const d = definition(world, t.dialogue);
         const q = questOf(world, world.character, d.quest!)?.[1];
         return q?.state === 'resolved' && q.outcome === t.choice;

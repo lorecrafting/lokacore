@@ -8,6 +8,20 @@ and not repeated here.
 
 ## Product and scope
 
+- B9 credits only the first accepted paid Inn Rooms Rest, preserves a closable anchored dream/branch, and commits S10 plus its once-only local memory only on final acknowledgement ([PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)).
+
+- B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).
+
+- D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
+
+- B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
+
+- C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).
+
+- B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).
+- B7 uses the public well and two finite Peg waterskins for mass-accounted Fill/Pour/Drink, without a passive need or resource benefit ([PM adoption](../decisions/pm-decision-b7-well-waterskin-2026-10-05.md)).
+- C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
+
 - A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
   bell; the five fixed local memories and completion report commit only on final
   epilogue acknowledgement ([PM adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md)).
@@ -19,8 +33,12 @@ and not repeated here.
 - B1 uses the delegated [chapter calendar/status selection](../decisions/pm-decision-b1-calendar-status-2026-10-05.md): cartridge time units and sky phases drive confirmed Book/CLI status; deadline effects follow in B2.
 
 - B2 S2 uses the real public Aldric, Peg's always-reachable offer, an inclusive chapter
-  deadline and a conserved funded penny reward; the selected source contract awaits
-  implementation ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
+  deadline and a conserved funded penny reward; its source is installed in the local
+  chapter 0.0.16 ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
+- B5 S9 uses finite real herb/bandage stock, immediate optional explicit repeats and a separate capped Priory contribution ([PM adoption](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)).
+
+- B3 Peg's shop starts with a finite four-item authored shelf, exact conserved penny exchange,
+  same-ID buyback and no restock ([PM adoption](../decisions/pm-decision-b3-pegs-shop-2026-10-05.md)).
 - Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
   quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).
 
@@ -33,6 +51,8 @@ and not repeated here.
 - Active development targets the real Missing Child chapter; Old Bram is outside its active cast and Q1 must be designed from the actual Ashmere roles, cast and rooms ([cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md), [cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)).
 
 - The opening chapter has no required idle waits for tides, night, next day or a returning NPC; any required opening NPC stays reachable, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
+
+- After each chapter, close the deterministic browser route/UI walk, exploratory E2E pass, visible headed run or video, isolated polish fixes and reruns, and exact-head independent review before calling that chapter closed ([record](../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md)).
 
 - Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
 
@@ -90,6 +110,10 @@ and not repeated here.
 - The owner is the human-proof tester for now ([record](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)).
 
 ## Architecture and engine
+
+- C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
+
+- C3 living hounds have a [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; implementation and independent proof remain ahead.
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
@@ -160,6 +184,12 @@ and not repeated here.
   [owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md); the first Realm activity, unchanged-cartridge hosting and formal ADR-074 route remain open.
 
 ## Process
+
+- Update canonical Book interaction rules in the same mechanic slice that changes them, reuse the component language, and fix obvious navigation/UI correctness defects before that slice completes; use E3 for the larger visual consistency pass ([owner decision](../decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
+
+- Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
+
+- After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
 
