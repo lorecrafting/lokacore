@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D12 practical skills final integrated primary review](2026-10-06-d12-final-primary-review.md): exact local `9830cece`, independent APPROVE, no findings; v034/API1.29/hash/184 IDs, 370-test full gate, focused SQLite and 2/2 isolated browser proof verified; independent two-herb mutant red/restored green. Hosted CI/PR/publication remain PM gates.
+
 - [D3 Western Ashmere final integrated source](2026-10-06-d3-western-ashmere-final-review.md): exact `559ae690`, independent APPROVE, no findings; v033/API1.28/hash/184 IDs rechecked, retained full gate and isolated two-route browser proof verified, six focused tests pass, independent return-route mutant red. Remote CI/PR/publication remain PM gates.
 
 - [D3 Western Ashmere provisional source](2026-10-06-d3-western-ashmere-source-review.md): exact source/evidence head `7865ac52`, independent provisional-source APPROVE, no findings; 6 new/40 existing/41 compiler/1 carry checks pass, two independent mutants red/restored green, all 33 evidence hashes verify. D4/C4 integration, successor pins/assets, publication checks/CI/browser and the separate seed71 sim-oracle fix remain mandatory.
