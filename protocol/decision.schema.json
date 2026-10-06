@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Decision contracts",
-  "description": "The decision result (04 §5, §5.0, §5.2).",
+  "description": "The decision result (04 \u00a75, \u00a75.0, \u00a75.2).",
   "$defs": {
     "RngState": {
       "description": "The four-word gameplay RNG state (numeric profile): integers in 0..2^32-1, not all zero.",
@@ -29,7 +29,7 @@
       ]
     },
     "DecisionResult": {
-      "description": "What a pure decision returns (04 §5). accepted: a provisional proposal (delta, proposed events, effects, next RNG) with a typed outcome, including an admitted attempt that failed in game terms (04 §5.0). rejected: not admitted; consumes no RNG, time or cost (04 §5.0). fault: budget, conflict or evaluator fault; the whole proposal is discarded, so it carries none (04 §5.2 step 7). narration, when the attempt has any, is the required narration the host commits with the result and the receipt replays (04 §5.2 step 7; 06 §43); absent means none. Its 64-line cap is an admission limit of this contract version, not a spec number; output_bytes in the composition profile bounds the whole result. Projection hints arrive with GameView.",
+      "description": "What a pure decision returns (04 \u00a75). accepted: a provisional proposal (delta, proposed events, effects, next RNG) with a typed outcome, including an admitted attempt that failed in game terms (04 \u00a75.0). rejected: not admitted; consumes no RNG, time or cost (04 \u00a75.0). fault: budget, conflict or evaluator fault; the whole proposal is discarded, so it carries none (04 \u00a75.2 step 7). narration, when the attempt has any, is the required narration the host commits with the result and the receipt replays (04 \u00a75.2 step 7; 06 \u00a743); absent means none. Its 64-line cap is an admission limit of this contract version, not a spec number; output_bytes in the composition profile bounds the whole result. Projection hints arrive with GameView.",
       "oneOf": [
         {
           "description": "An admitted attempt.",
@@ -66,6 +66,10 @@
               },
               "minItems": 1,
               "maxItems": 64
+            },
+            "item_id": {
+              "description": "Required semantic binding for eaten: the original consumed item, validated against the Eat command and receipt.",
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [

@@ -21,7 +21,8 @@ export function liquidSave(fresh: World, world: World, db: Db, meta: Meta, revis
     !expected.length &&
     !Object.keys(fresh.cartridge.services ?? {}).length &&
     !Object.keys(fresh.cartridge.transports ?? {}).length &&
-    !Object.keys(fresh.populationSpecs ?? {}).length
+    !Object.keys(fresh.populationSpecs ?? {}).length &&
+    !fresh.consumed
   )
     return false;
   receiptHistory(fresh, world, db, meta, revision);

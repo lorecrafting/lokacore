@@ -15,6 +15,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   use_service: [{ kind: 'entity', scopes: ['room_occupants'] }, ['service', 'quoted_price']],
   fill: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],
   pour: [entity('inventory'), []],
+  eat: [entity('inventory'), []],
   drink: [entity('inventory'), []],
   look: [{ kind: 'none' }, []],
   read: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],

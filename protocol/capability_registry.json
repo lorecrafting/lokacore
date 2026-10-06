@@ -475,5 +475,17 @@
     "definitions": [
       "transport"
     ]
+  },
+  {
+    "key": "food",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "eat"
+    ],
+    "definitions": [
+      "edible"
+    ]
   }
 ]

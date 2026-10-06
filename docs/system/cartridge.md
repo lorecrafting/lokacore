@@ -1131,7 +1131,7 @@ allocated-ID answers and the retained provisional fixtures are recorded in the
 
 ## D4 homes and orchard declarations
 
-**Selected plan; source pending.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 source declarations.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 uses these three public reciprocal additions from archived
 [00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
 
@@ -1160,12 +1160,13 @@ narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
 partial fruit. Full MV refuses without consuming. No restock or promised future
 nutrition model is required; the finite B8 meal remains a separate optional supply.
 
-Compiler and loader require `food@1` plus the successor API for edible fields,
-local declared recovery-pool references, positive safe-integer amount and valid
-catalog keys, and reject edible containers, equipment, fuel or liquid vessels.
+Compiler and loader require `food@1` plus API1.27 for edible fields,
+local declared MV recovery-pool references, positive safe-integer amount and valid
+catalog keys, and reject edible containers, equipment (slot, weapon or block metadata), fuel or liquid vessels.
 Expand source short references at the real new field. Edibility belongs to an
 immutable item definition; the terminal holder is generated metadata, never
-cartridge-authored. Successor release/API/hash/IDs remain null until source exists.
+cartridge-authored. The integrated v031/API1.27 answers are independently derived over
+published C3/D1 in the [D4 integration evidence](../evidence/2026-10-06-d4-published-integration/README.md).
 
 Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
 Green's installed terminal variants. Missing means the search is unfinished;

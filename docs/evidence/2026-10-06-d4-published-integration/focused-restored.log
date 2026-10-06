@@ -1,0 +1,49 @@
+✔ loader rejects impossible held-food declarations while retaining capped food (934.047042ms)
+✔ portable creation/custody literals and independent success proof (6.355416ms)
+✔ new contract trust boundaries (1.413959ms)
+✔ independent invariants reject counterfeit success with matching identity rows (0.296625ms)
+✔ three conserved apples share Take/Drop/Forage stock and exact Eat benefit (392.764708ms)
+✔ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (379.849875ms)
+✔ independent fresh IDs include consumed custody before published population births (86.938334ms)
+✔ terminal custody composition and independent success observation use literal cases (23.403833ms)
+✔ food contracts reject independent malformed boundaries and retain valid controls (4.812958ms)
+✔ public homes are reciprocal and Gareth/Ada follow their ordinary day boundaries (440.264833ms)
+✔ controlled committed child enum selects truthful home/cot/Green prose without any writer (212.179209ms)
+✔ population control and slot composition match independent literal rows (9.769709ms)
+✔ population invariant rejects counterfeit success (0.309792ms)
+✔ paid outbound and free return join exact conserved balances and body entry (111.895167ms)
+✔ unaffordable and forged endpoint offers refuse atomically (118.046875ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (64.733833ms)
+✔ Sedge teaches swim once freely through the original present dialogue (61.123875ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (333.678834ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (56.402792ms)
+(node:15133) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/food.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual Book Item Eat returns World once on normal and uncertain settlement and cold remount (1145.942792ms)
+✔ real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers (1001.379916ms)
+✔ food-only cold-open refuses plausible bounded forgeries without writing bytes (376.663667ms)
+✔ real failed and committed/absent uncertain COMMIT preserve atomic Eat and exact retry (183.436458ms)
+✔ spent apple and another apple in a real fight corpse both reopen before a later Eat (351.709292ms)
+(node:15138) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (710.415666ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (766.871417ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (1783.037834ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (143.850375ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (288.699292ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (882.18025ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (171.982959ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7052.33075
+
+EXIT 0

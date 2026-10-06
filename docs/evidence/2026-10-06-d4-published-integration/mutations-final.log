@@ -1,0 +1,7 @@
+book-eat-route: old GREEN / new RED
+Traceback (most recent call last):
+  File "[worktree]/docs/evidence/2026-10-06-d4-published-integration/mutants.py", line 37, in <module>
+    if mutated==original:raise RuntimeError('No mutation: '+name)
+RuntimeError: No mutation: loader-food
+
+EXIT 1

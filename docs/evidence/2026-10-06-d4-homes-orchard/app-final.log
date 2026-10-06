@@ -1,0 +1,706 @@
+
+> loka-app@0.0.0 test
+> node --test --test-reporter=${TEST_REPORTER:-spec} "../authority/**/*.test.ts" "book/*.test.ts" "*.test.ts"
+
+✔ ../authority/local-story/__tests__/dream-host.test.ts (594.897834ms)
+✔ ../authority/local-story/__tests__/elapsed-host.test.ts (597.678542ms)
+✔ ../authority/local-story/__tests__/reward-host.test.ts (703.554958ms)
+✔ bell-first loss survives real rollback-journal SQLite reopen after every scene line (516.10225ms)
+✔ forged lost quest without Ring receipt gives typed save corruption (94.816708ms)
+✔ late Ring keeps both Q2 returns playable through cold reopen (764.627333ms)
+✔ both completed returns keep Silence and its two scene lines through cold reopen (458.552ms)
+✔ fox terminal requires its own committed Silence receipt (119.476708ms)
+✔ Silence receipt rejects foreign actors on linked fact events (313.091917ms)
+✔ Silence receipt binds its action, actor and scene cause (945.616792ms)
+✔ fox terminal rejects contradictory saved rows without repairing them (438.890542ms)
+✔ Silence COMMIT uncertainty settles once and its exact receipt replays unchanged (308.980958ms)
+✔ late Ring rejects a receipt with an extra Q2 loss transition (82.46925ms)
+✔ bell save contradictions offer typed recovery without changing saved rows (1232.077083ms)
+✔ linked Ring receipt fields reject controlled forgeries without repairing rows (2423.428708ms)
+✔ Ring COMMIT uncertainty settles to one complete outcome and one replayable receipt (298.514875ms)
+✔ saved custody cycle faults in step (566.306292ms)
+✔ saved custody cycle faults in list (543.30475ms)
+✔ saved custody cycle faults in barrier (389.573041ms)
+✔ Take and item-barrier reach preserve the spent decision budget (169.131958ms)
+✔ a closed ancestor refuses reach before the hidden cycle (9.531208ms)
+✔ saved B2 acceptance and funded turn-in reopen with their exact rows (183.066459ms)
+✔ reopen refuses a missing bound expiry job (59.917ms)
+✔ expired B2 obligation reopens with one trust penalty (87.639ms)
+✔ on-time saved axis must agree with its turn-in receipt (169.114375ms)
+✔ on-time receipt balances must match funded and saved rows (58.076167ms)
+✔ expiry receipt trust scope must name its bound actor (58.231333ms)
+✔ reopen derives Reeds from the saved trigger choice, equal to headless play (44.900541ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (207.913083ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (26.584916ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (75.845666ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (142.308125ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (147.094709ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (16.952125ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (7.130084ms)
+✔ scheduled opponent departure reopens and reconciles before a harmless due combat round (153.064042ms)
+✔ real SQLite reopens buy before acceptance, active, and both chronological payout orders (412.5005ms)
+✔ purchase receipt retry, sale and buyback cold reopen one exact item and conserved pennies (104.040709ms)
+✔ buy under an active and expired S2 retains the exact ledger and pending/failure truth (101.536459ms)
+✔ cold open refuses omitted debit, wrong recipient, false prior balance and reversed receipt order (335.847625ms)
+✔ shop failed COMMIT and both unknown outcomes retain all prior or all next rows (124.383667ms)
+✔ satchel Put/Take is immediately useful but active S2 ancestor Sell is refused (88.892583ms)
+✔ v018 ID pin binds the spawned world, purchased torch and worn slot after cold reopen (29.594917ms)
+✔ corpse identity, worn roots and shrine return reopen atomically and receipt replay allocates nothing (131.158208ms)
+✔ an older release list refuses the corpse release without rewriting it (72.7315ms)
+✔ real FULL, failed COMMIT and committed-unknown COMMIT preserve all prior or all next corpse rows (128.77975ms)
+✔ save load refuses missing identity, unknown template and illegal corpse custody without repair (80.826083ms)
+✔ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (3212.626541ms)
+✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (986.206ms)
+✔ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (2422.530625ms)
+✔ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (435.838292ms)
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (3.316916ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (80.064417ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (5.067916ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (26.676917ms)
+✔ sixteen segments yield and one reserved input completes at its original finite horizon (76.181041ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (18.36ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (20.070834ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (6.605458ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (6.967667ms)
+✔ resume extends durable target debt rather than a lagging head (11.112167ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (7.257333ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (29.239917ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (96.780584ms)
+✔ a managed v1 upgrade starts its durable account at the actual opening clocks (14.175583ms)
+✔ a committed unknown elapsed segment with corrupt checkpoint completes its input as blocked (4.059541ms)
+✔ a valid replacement during unknown positive elapsed invalidates the old pending input (7.761708ms)
+✔ a private reservation rejects another intent and retains its original bounded input (66.197208ms)
+✔ terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (16.765458ms)
+✔ resumed wall survives fractional reconciliation and invalid/stale preflight before a new input (89.471291ms)
+✔ a new reservation waits for its actual resumed horizon and yields after sixteen boundaries (54.334625ms)
+✔ resume remains armed after fixed A completes and another intent cannot steal its result (19.018292ms)
+✔ elapsed receipt survives reopen and replays its first result after later clock commits (35.015375ms)
+✔ old run elapsed refuses before receipt lookup after replacement without Host.random (6.459708ms)
+✔ unknown elapsed COMMIT fences trusted and player delivery until the real receipt reconciles (4.590667ms)
+✔ modal scene keeps Continue-only player controls while elapsed time commits (86.970625ms)
+✔ malformed stored command JSON conflicts without state or receipt changes (19.014208ms)
+✔ malformed stored response JSON conflicts without state or receipt changes (5.946166ms)
+✔ healthy elapsed delivery preserves actual SQLite receipt-read failures (9.363041ms)
+✔ a worn cap is still worn after reopen, in the state the headless kernel reaches (14.991292ms)
+✔ seed 12: every fault leaves the prior or next revision and the run ends unchanged (2719.133458ms)
+✔ seed 366: every fault leaves the prior or next revision and the run ends unchanged (2043.574666ms)
+✔ seed 30636: every fault leaves the prior or next revision and the run ends unchanged (2613.512416ms)
+✔ seed 300: every fault leaves the prior or next revision and the run ends unchanged (2923.344ms)
+✔ seed 622: every fault leaves the prior or next revision and the run ends unchanged (2453.477333ms)
+✔ seed 9633: every fault leaves the prior or next revision and the run ends unchanged (2350.389958ms)
+✔ seed 2841: every fault leaves the prior or next revision and the run ends unchanged (1659.437083ms)
+✔ seed 454: every fault leaves the prior or next revision and the run ends unchanged (2152.477458ms)
+✔ seed 172: every fault leaves the prior or next revision and the run ends unchanged (2607.9495ms)
+✔ seed 49: every fault leaves the prior or next revision and the run ends unchanged (4140.064458ms)
+✔ seed 211: every fault leaves the prior or next revision and the run ends unchanged (1845.915416ms)
+✔ seed 1595: every fault leaves the prior or next revision and the run ends unchanged (1401.489583ms)
+✔ seed 337982: every fault leaves the prior or next revision and the run ends unchanged (1443.741459ms)
+✔ seed 105497: every fault leaves the prior or next revision and the run ends unchanged (1182.148333ms)
+✔ seed 81: every fault leaves the prior or next revision and the run ends unchanged (1283.342959ms)
+✔ seed 130: every fault leaves the prior or next revision and the run ends unchanged (1240.163541ms)
+✔ seed 54: every fault leaves the prior or next revision and the run ends unchanged (1363.341042ms)
+✔ hand-checked anchors (21.495333ms)
+✔ views, a reopen and a changed host clock leave the play_time clock and world as they were (77.000875ms)
+✔ backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence (9.047084ms)
+✔ failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together (10.445333ms)
+✔ real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate (5.063583ms)
+✔ a timer completes an unknown player receipt before sampling and emits it once (4.214333ms)
+✔ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (444.89625ms)
+✔ acknowledged Green finale reopens at every line and exports one report (747.532708ms)
+✔ real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers (1149.7805ms)
+✔ food-only cold-open refuses plausible bounded forgeries without writing bytes (451.418208ms)
+✔ real failed and committed/absent uncertain COMMIT preserve atomic Eat and exact retry (173.229ms)
+✔ spent apple and another apple in a real fight corpse both reopen before a later Eat (446.194083ms)
+✔ real SQLite reopens every immediate occurrence, exact replay and later ordinary bandage custody (897.488ms)
+✔ failed and lost COMMIT exchange outcomes reconcile all-prior or all-next rows (439.721583ms)
+✔ exchange history corruption refuses without rewriting the SQLite rows (502.014625ms)
+✔ accepted herbs can be dropped, reopened and retrieved for the same exact occurrence (196.615625ms)
+✔ B2 and S9 faction receipts reopen in both composed orders without changing pennies (542.302333ms)
+✔ reacceptance retirement and fresh activation reconcile as one real SQLite commit (509.448542ms)
+✔ randomly seeded B5 lineage reopens and Start over preserves the drawn seed (65.358458ms)
+✔ trusted elapsed reopens before S9 and reaches the actual herb exchange consumer (270.471417ms)
+✔ reopen recomputes possession text and retains earned text after the oar is dropped (33.944792ms)
+✔ openStory.invoke refuses a failing chat on Bram by its key (77.090042ms)
+✔ lantern-carry plays as its frozen trace; its story point reaches the run's account once (124.22625ms)
+✔ lantern-leave plays as its frozen trace; its story point reaches the run's account once (53.868625ms)
+✔ an old run's view token is stale after a new game, at the same revision (14.589125ms)
+✔ adverse early-possession (36.000709ms)
+✔ adverse drop-after-choice-opened (44.549875ms)
+✔ adverse walked-away-rejects-new-choice (29.539583ms)
+✔ adverse walked-away-keeps-receipt (43.331208ms)
+✔ adverse altered-choice (81.435833ms)
+✔ adverse choice-rollback (31.71725ms)
+✔ adverse choice-unknown-commit-absent (36.135791ms)
+✔ adverse choice-unknown-commit-committed (56.942708ms)
+✔ adverse commit-before-display (380.785958ms)
+✔ adverse reading-has-no-effect (34.04325ms)
+✔ adverse stale-choice-and-blocked-exit (108.994833ms)
+✔ a choice committed with its acknowledgement lost recovers to its receipt, reported once (24.754875ms)
+✔ actual torch oil and nested intervals survive cold reopen and sell/buyback with conserved pennies (391.958959ms)
+✔ real failed and unknown refill commits reconcile the entire writer group and exact retry (205.247208ms)
+✔ corrupt fuel and forged refills refuse without repairing SQLite (411.931958ms)
+✔ dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery (476.591708ms)
+✔ a light-only cartridge reopens lawful refill history and rejects a bounded forged charge (10.659375ms)
+✔ undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched (11.598375ms)
+(node:26647) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/model.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book binds the exact oil bottle and keeps worn torch controls on the item (33.172083ms)
+✔ Book owns authored Refuel aliases on their source and preserves exact invocation identity (84.849125ms)
+✔ the app path passes the random source: the pinned context is not the template (16.43825ms)
+✔ two new games draw their own seed and world context, pinned and in the trace header (5.714667ms)
+✔ a reopen rebuilds the ids from the pinned context: first open, Start over, app update (34.763542ms)
+✔ luck replays: the drawn seed is the RNG, and a reopen picks as the same process did (10.239458ms)
+✔ a save from before c1-host opens unchanged and plays on (19.88075ms)
+✔ a pinned context that is not a WorldContextId is save_corrupt (2.350709ms)
+✔ production empty, filled, partial Pour, empty, nested, ground and shop custody reopen exactly (2243.255208ms)
+✔ cold open refuses missing, extra, malformed and plausible bounded liquid rows without repair (1373.109458ms)
+✔ cold open binds every liquid receipt to its historical command, source and complete ordered rows (2409.677458ms)
+✔ Pour failed COMMIT and lost acknowledgement fence liquid then reconcile and replay once (559.282375ms)
+✔ actual fatal combat cold reopens the filled shell on its corpse then ordinary recovery (549.830042ms)
+✔ cold open rejects consistent command/event rewrites that cannot derive from the original invocation (181.650042ms)
+✔ a tiny world survives a restart with the same state (13.127042ms)
+✔ a retried consumed take replays its receipt; altered intent is a conflict (8.182625ms)
+✔ a failed attempt and a rejection persist; their retries draw nothing (10.610416ms)
+✔ a fault changes nothing and gets no receipt (5.748917ms)
+✔ a lost COMMIT acknowledgement reconciles to the committed receipt (9.158833ms)
+✔ a genuinely failed COMMIT reconciles to not committed; the retry is a fresh attempt (13.087792ms)
+✔ while the COMMIT outcome is unknown every call is fenced; a restart settles it (22.965625ms)
+✔ a process killed after COMMIT restarts with the take once and its trace entry once (952.706459ms)
+✔ a definite failure is traced once; a failed trace write changes nothing (11.2195ms)
+✔ while the trace is behind no later entry overtakes a missed one (6.251042ms)
+✔ an unreadable trace never stops play or the save opening (5.699125ms)
+✔ an updated kernel starts a new segment after recovering the old one (6.911792ms)
+✔ a transaction a failed ROLLBACK leaves open is never read as saved nor blocks play (7.610167ms)
+✔ a save does not open inside a transaction left open (1.254458ms)
+✔ jobs survive a restart: waiting to 19:00 after it moves Bram as without it (18.571125ms)
+✔ a recipe whose time cost runs a job replays its receipt on retry (14.5ms)
+✔ a move whose reactions commit replays its events byte for byte after a restart (11.913666ms)
+✔ a recipe narration's pinned participants survive a restart and replay unchanged (4.412542ms)
+✔ a talk committed, then a restart: the stored choice carries its revision and choose works (9.841792ms)
+✔ production five preacceptance kills reopen into Maud reward and usable storage (411.540583ms)
+✔ each of five missing actual credits refuses reward after early acceptance (732.907ms)
+(node:26658) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/model.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Maud completion leaves World free of story-ended claims and storage usable (119.468458ms)
+(node:26678) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ active chapter five actual kills, shrine return, Maud reward and cold-reopen storage (444.967458ms)
+✔ Q1 explicit acceptance, held drawing gate, report priority and durable once-only resolution (146.894916ms)
+✔ picking up the clue first starts no quest and acceptance is immediately ready (32.075625ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is unaccepted (101.396625ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is active (124.539584ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is ready (235.295583ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is resolved (104.812541ms)
+✔ Q1 acceptance, Green pickup, report and Maud offer work throughout the day (950.645083ms)
+✔ Mire Crossing and Fox Hollow offer both approaches and cold return at every hour (4838.450125ms)
+✔ Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead (83.829542ms)
+✔ SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history (280.610833ms)
+✔ malformed Study receipt evidence offers typed Start over on reopen (948.616166ms)
+✔ committed combat line indices come from pinned keys and structured receipt events (4.706375ms)
+✔ actual adopted rat adjustment commits, reopens pinned HP and replays without another write (64.002833ms)
+✔ reopen rejects missing, malformed, or out-of-bounds NPC HP without rewriting progress (23.168ms)
+✔ SQLite FULL, failed COMMIT and lost acknowledgement preserve atomic NPC HP adoption (56.570542ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (17.238ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (13.433584ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (502.7745ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (74.323833ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (9.622625ms)
+✔ a real committed elapsed then ordinary local trace replays identically with header run preflight (2290.045792ms)
+(node:26712) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens every finite leg and explicit pause boundary (2980.557666ms)
+✔ actual cellar death separates concurrent Wren, resets patrol, and permits Restart after cold reopen (2674.341042ms)
+▶ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite
+  ✔ actor_id (344.4295ms)
+  ✔ body_id (150.398542ms)
+  ✔ npc_id (223.266209ms)
+  ✔ quest_instance_id (322.815875ms)
+  ✔ continuation_id (201.539833ms)
+  ✔ attempt_id (252.134583ms)
+  ✔ cursor (212.465042ms)
+  ✔ credit (169.591167ms)
+  ✔ status (165.243416ms)
+  ✔ fractional (172.786375ms)
+  ✔ missing (170.682167ms)
+  ✔ scope (164.923542ms)
+  ✔ cause (185.69475ms)
+  ✔ source (182.283958ms)
+  ✔ lost-transition (130.634959ms)
+✔ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite (3052.594792ms)
+▶ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry
+  ✔ failed (165.315875ms)
+  ✔ lost (116.464042ms)
+✔ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry (282.186083ms)
+▶ final player join commits movement, terminal quest and trust together across both uncertain outcomes
+  ✔ failed (190.800666ms)
+  ✔ lost (316.75925ms)
+✔ final player join commits movement, terminal quest and trust together across both uncertain outcomes (508.881625ms)
+✔ real original-Tobin C1 lessons reopen during patrol and completion grants trust alone (604.731208ms)
+✔ a seated player is still sitting after reopen, in the state the headless kernel reaches (15.462292ms)
+(node:26728) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (3123.325583ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (1439.058333ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (1202.594292ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (369.834917ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (273.031417ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (242.593167ms)
+✔ readable-only SQLite recovery rejects forged narration without another history consumer (20.5085ms)
+(node:26733) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/model.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves an aliased Read place offer and exact target through a live redraw (130.267667ms)
+✔ a leftover transaction is settled before the trace catches up (32.594792ms)
+✔ a file that is not a database or has a corrupt page is save_corrupt (21.33675ms)
+✔ a head with a damaged column is save_corrupt; its new game recreates the head (25.984542ms)
+✔ at the cap a new game deletes the oldest run whole and keeps the current one (134.309291ms)
+✔ a run alone at the cap keeps its beginning and appends no more entries (100.641667ms)
+✔ a new game at the cap makes room for its header by deleting the old run (199.931334ms)
+✔ a run that drops an entry pair below the cap writes nothing more (106.841833ms)
+✔ catch-up at the cap boundary writes a missed entry at 4,998 rows and not at 4,999 (330.755625ms)
+✔ Rest/reopen/Stand keeps literal fractions and replays the Rest receipt without writes (109.6445ms)
+✔ load refuses corrupt opted rows without rewriting stored progress (15.117041ms)
+✔ reconciled adoption rejects wrong authored rate and keeps the prior confirmed view (29.016916ms)
+✔ bundled sampler pays MV1 and rests twice as fast before reaching its pool cap (133.292083ms)
+✔ real SQLite write failures keep the pool and position together until the unchanged retry commits (37.679375ms)
+✔ five actual preacceptance kills reopen into one atomic reward and identity-preserving storage (246.536333ms)
+✔ real rollback, failed COMMIT and lost acknowledgement preserve complete old/new reward rows across reopen (307.838459ms)
+✔ sampler invocation walk reaches all six rooms and resumes the carried ending at line two (200.7025ms)
+✔ leaving the lantern resolves with the fallback journal and no carried chapter or scene (16.211583ms)
+✔ a new save allocates and pins its identity; a restart and a replay reuse it (25.836583ms)
+✔ a save whose pinned release is missing is refused untouched; a new game moves on (6.935917ms)
+✔ a save of an unknown format is refused with nothing written and no new game (12.510208ms)
+✔ a damaged identity is save_corrupt and untouched; its new game repairs it (306.82ms)
+✔ an app update reopens a save on its pinned release; new games pin the newest (31.061208ms)
+✔ a save that does not parse is save_corrupt until the player starts a new game (51.042375ms)
+✔ a new game replaces the save; an old invocation id is new again (11.555542ms)
+✔ a new game that fails part way leaves the old save and memory (4.401875ms)
+✔ a new game settles a pending attempt first, in the run it was made in (7.800875ms)
+✔ a new game whose COMMIT is unknown is fenced; settling it moves play to the new run (7.312625ms)
+✔ a new game whose COMMIT fails keeps the old save, memory and receipts (5.687042ms)
+✔ a committed new game is adopted before play; a retry does not replace it twice (6.631041ms)
+✔ a corrupt save's new game settles its COMMIT like any other (44.348125ms)
+✔ a new run's entries missed by the trace follow its own header (13.209542ms)
+✔ a new game after a settled one replaces the save again (26.990667ms)
+✔ line two survives reopen and triggering receipt retry without duplicate effects (59.197125ms)
+(node:26932) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (1496.045833ms)
+✔ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (1878.044958ms)
+✔ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (979.119208ms)
+✔ real Book captured alias press and lost acknowledgement restore one original-Maud line (509.95925ms)
+✔ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (588.637167ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (59.134292ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (135.556417ms)
+✔ invalid and cyclic shared input refuses before snapshot or elapsed sampling (14.113042ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (57.697042ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (102.832375ms)
+✔ loaded elapsed recovery refuses newer and malformed same-run formats without writes (13.098792ms)
+✔ changed refused elapsed header classifies malformed before differing valid run and preserves newer formats (20.390833ms)
+(node:26953) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a scripted session survives a restart and plays on (77.126583ms)
+✔ an invalid press before a save does not make the next id collide after a restart (13.289958ms)
+✔ an unknown COMMIT shows pending, not a success; a restart shows what committed (13.754583ms)
+✔ a pending press is retried with its own id and replays what committed (8.563208ms)
+✔ a same-scope receipt from another allocator does not move the id counter (14.482084ms)
+✔ a failed write is not claimed unsaved; the next press retries it (21.980542ms)
+✔ a read error after a durable commit does not commit the press twice (24.494541ms)
+✔ a confirmed receipt that is not a decision is a conflict and ends the attempt (9.694583ms)
+✔ start over replaces a file that does not open with a fresh game (88.968625ms)
+✔ start over of a damaged identity keeps the file and its old run (13.106375ms)
+✔ a damaged receipt index fails the open with start over, which gives a fresh game (16.364958ms)
+✔ a newer app's save is never started over (9.773875ms)
+✔ a start over whose delete failed can be tried again (19.440834ms)
+✔ an open that fails but not as corrupt is never started over (4.18875ms)
+✔ a start over that fails during play keeps the game and its retry (20.151083ms)
+✔ a pending start over leaves no game to play until it settles (9.57725ms)
+✔ the gate tap script ends at its declared state, wherever the kills fall (153.486208ms)
+﹣ the save copied from the phone equals the reference (0.055541ms) # SKIP
+(node:26978) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a corrupt report page: Start over gives a working save (191.784375ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (71.251875ms)
+✔ a malformed report index record: Start over gives a working save (66.460459ms)
+✔ an intact report table survives Start over in place (29.496625ms)
+✔ the latest committed narration is read again on reopen, from the receipts (46.747042ms)
+✔ an older save reopens with its narration and keeps its report on Start over (55.540584ms)
+✔ a malformed receipt response: Start over keeps the pending report (40.577ms)
+✔ a narration read that fails on a lock offers no Start over (30.78225ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (29.068125ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (22.956041ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (21.721625ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (22.206667ms)
+✔ a receipt response that is not a decision replays as a conflict (10.008459ms)
+✔ elapsed NOTADB and page corruption recover only through explicit working Start over (145.065334ms)
+✔ unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (67.2135ms)
+✔ a story point reached offline is captured once, survives restart, and is delivered (26.418417ms)
+✔ a run is bound once, when it starts; each of its reports carries that binding (22.915875ms)
+✔ a story point whose report is malformed is not committed (17.8645ms)
+✔ a pending report leaves the canonical state hash unchanged (52.225375ms)
+✔ a report commits with its gameplay result or not at all (74.78675ms)
+✔ a new game keeps a pending report, delivered under its original run (15.680917ms)
+✔ a lost reply is retried and reads back the one acceptance (12.434083ms)
+✔ an acceptance of another payload needs attention (16.725542ms)
+✔ an acknowledgement that does not commit stops the batch; the next call resends it (20.773708ms)
+✔ a report that always fails does not hold back the rest (70.7245ms)
+✔ delivery is bounded, persists each disposition and drops nothing (37.722792ms)
+✔ real SQLite cold reopen retains both lessons, exact replay, wear, Attack and defended due state (183.123375ms)
+✔ forged lesson receipts and contradictory acquired rows reopen as save_corrupt without rewriting (393.786542ms)
+✔ each foreign lesson event identity refuses file-backed reopen after lawful later custody (195.219ms)
+✔ real failed and lost-ack COMMIT keep all prior or all next lesson rows and retry once (139.109083ms)
+✔ defense hit/loss conjunction is guarded at saved-receipt and narration boundaries (77.57675ms)
+✔ trained player death cold reopens and recovers the exact worn lesson sword (103.08825ms)
+✔ authored training/shop/S2 orders retain conserved pennies and trained five-rat reward/storage (8704.232917ms)
+(node:27008) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ original message branch and terminal reopen with their own NPC narration and exact replay (305.231166ms)
+✔ Drop and held-container Put reopen and recover the same item; stale handoff never prints success (218.939208ms)
+✔ fatal combat and cold reopen preserve the message through ordinary corpse recovery (170.801625ms)
+✔ elapsed redraw keeps an unchanged message choice usable (117.979125ms)
+▶ retained delivery evidence corruption is typed even behind an unrelated latest receipt
+  ✔ missing branch row (87.958333ms)
+  ✔ wrong message role (50.662625ms)
+  ✔ null retained source (70.285833ms)
+  ✔ branch fact reset (117.831875ms)
+  ✔ branch fact deleted (56.477208ms)
+  ✔ message in unrelated NPC (75.063791ms)
+  ✔ message nested in NPC-held container (96.077666ms)
+  ✔ malformed receipt command JSON (69.756041ms)
+  ✔ receipt transfer removed (90.909708ms)
+  ✔ receive narration names another speaker (86.336541ms)
+  ✔ terminal fact event missing (102.52725ms)
+  ✔ terminal status reset (81.452542ms)
+  ✔ terminal message returned to actor (81.027958ms)
+  ✔ terminal quest reopened (119.077833ms)
+✔ retained delivery evidence corruption is typed even behind an unrelated latest receipt (1188.27625ms)
+✔ failed and lost branch/terminal COMMIT keep narration and custody behind confirmed disk (269.254708ms)
+✔ v012 refuses the frozen v010 SQLite save and offers explicit Start over without changing it (42.526083ms)
+✔ terminal quest without a message branch refuses reopen and requires explicit Start over (114.46575ms)
+(node:27013) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens at counts zero one two, third close, reset and resolved ward (905.881292ms)
+✔ wrong final-wrong and correct commits reconcile both real outcomes and exact replay once (852.241917ms)
+✔ bounded saves refuse forged rows and wrong receipts without deleting progress (1523.994875ms)
+✔ unjustified discovery and topic facts fail cold-open reconciliation (224.181125ms)
+✔ receipt association checks reject forged actor source and quest independently of later save consumers (102.861291ms)
+✔ cold-open verifies the ward Talk selector against its saved source (124.44575ms)
+(node:27019) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ malformed Q1 after rescue selection or completion offers typed recovery without replacing progress
+  ✔ following row: null (197.150458ms)
+  ✔ following row: false (113.071042ms)
+  ✔ following row: 0 (141.50975ms)
+  ✔ following row: [] (110.56575ms)
+  ✔ following row: {} (184.235166ms)
+  ✔ following row: {"quest":{},"scope":{}} (139.24925ms)
+  ✔ following row: {"quest":true,"scope":true} (147.556958ms)
+  ✔ following quest: {} (128.536708ms)
+  ✔ following scope: {} (171.512708ms)
+  ✔ completed row: null (145.906667ms)
+  ✔ completed row: false (110.590167ms)
+  ✔ completed row: 0 (188.322667ms)
+  ✔ completed row: [] (128.4265ms)
+  ✔ completed row: {} (170.150292ms)
+  ✔ completed row: {"quest":{},"scope":{}} (193.131084ms)
+  ✔ completed row: {"quest":true,"scope":true} (108.863792ms)
+  ✔ completed quest: {} (160.90125ms)
+  ✔ completed scope: {} (192.241708ms)
+✔ malformed Q1 after rescue selection or completion offers typed recovery without replacing progress (2743.143125ms)
+✔ real SQLite rescue reopens start, death separation, Rejoin and terminal with their own narration (528.680584ms)
+▶ retained rescue identity, physical state and own receipts reject corruption behind a later look
+  ✔ missing escort row (61.83575ms)
+  ✔ substituted bound NPC (58.152083ms)
+  ✔ wrong quest instance (126.245917ms)
+  ✔ wrong originating continuation (71.128375ms)
+  ✔ following NPC in another room (39.229ms)
+  ✔ separated without committed death (98.267708ms)
+  ✔ rescue message removed from Vesper (90.517958ms)
+  ✔ rescue branch changed to stays (84.702542ms)
+  ✔ missing start receipt (86.461375ms)
+  ✔ old start receipt missing escort transition (132.534667ms)
+  ✔ forged rescued terminal without turn-in (92.781875ms)
+  ✔ rescued terminal rewritten to stays (61.8885ms)
+  ✔ completed Wren moved away from Elspeth (54.208958ms)
+✔ retained rescue identity, physical state and own receipts reject corruption behind a later look (1080.259833ms)
+(node:27034) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ file-backed riddle cold opens before, after wrong and after success with exact replay/conflict (379.777292ms)
+✔ stored riddle command, binding and root evidence mismatches become typed save corruption (495.882084ms)
+▶ malformed retained riddle source offers typed recovery and explicit Start over
+  ✔ null source (112.576791ms)
+  ✔ missing source (63.964791ms)
+✔ malformed retained riddle source offers typed recovery and explicit Start over (176.98675ms)
+✔ answer input refreshes only across unchanged offered riddle context and reads its own eventless receipt (89.950125ms)
+✔ failed and lost COMMIT answers retain the exact invocation and answer until reconciliation (250.332333ms)
+(node:27036) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/c1.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exit door actions keep their direction and remain separate from walking (1.675834ms)
+✔ worn items and reachable nested contents offer actions on their own ids (0.342083ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (0.277209ms)
+✔ chapter changes queue one title which survives scene lines and acknowledgement (0.124375ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (0.142333ms)
+✔ scene Continue and position verbs have dedicated groups (0.088958ms)
+(node:27037) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ combat page lists offered controls vertically below history in one scroll (4.053041ms)
+✔ committed opponent death narrates once through the existing subscription (0.369542ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (20.821541ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (4.083333ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.52475ms)
+✔ reopening after escape or either death never restores combat into the World log (2.618917ms)
+(node:27038) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (877.363833ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (702.043625ms)
+(node:27042) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/food.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual Book Item Eat returns World once on normal and uncertain settlement and cold remount (2222.809167ms)
+(node:27044) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/infirmary.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book patch and Wick controls use confirmed exact targets, readiness and journal state (315.543292ms)
+(node:27046) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/item_detail.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ retained item results appear chronologically between description and options, empty log omitted (207.029791ms)
+(node:27048) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/joystick.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a drag points at the exit in its 90-degree quadrant, only if that exit exists (0.941583ms)
+✔ a drag inside the cancel radius points at nothing (0.397833ms)
+✔ the label sits opposite the drag, and above for a kept note (1.359125ms)
+✔ stair nodes are reached by dragging out to them, only when the exit exists (0.209833ms)
+✔ a choice opened during a drag keeps the original context stale and commits no move (100.353292ms)
+✔ refused drags do not grow the log without bound (538.707125ms)
+(node:27049) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/keyboard.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ web keyboard uses offered exits and keeps focused controls (2.023292ms)
+✔ Book captures movement keys only on an active World page (1.278042ms)
+(node:27061) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/liquid.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves exact water pairs and invalidates changed quantities in displayed context (428.382917ms)
+✔ Book restores liquid narration on the exact saved source detail after SQLite reopen (353.931333ms)
+✔ loaded liquid aliases reach exact Book presses and matching target/input/policy refusal (3666.964041ms)
+✔ aliased liquid freshness refuses a stale pair after another committed drink (392.916333ms)
+(node:27067) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/live_actions.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ after Bram acceptance an unchanged north drag crosses a pulse and commits exactly one move (161.832792ms)
+✔ sampler Bram offers at19:00 and receives the fetched lantern the next day without waiting (157.253792ms)
+✔ a captured north action never becomes north from a different origin room (45.736958ms)
+✔ Maud acceptance, position and item buttons survive elapsed-only redraws (43.353875ms)
+✔ an altered captured choice is refused without sending a new decision (111.787416ms)
+✔ old Leave and departed Bram actions keep stale refusal after context changes (115.085542ms)
+✔ a held answer refuses after its speaker departs during the elapsed pulse (25.122792ms)
+✔ combat context changes refuse old Look while an unchanged encounter tolerates a pulse (77.469958ms)
+✔ pending move retry adopts its original durable receipt once without a second action (18.289417ms)
+✔ withdrawn or changed-context Notice controls retain their captured stale token (71.38ms)
+(node:27071) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (1.169625ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.12075ms)
+✔ a touch link is shown as its label (0.143667ms)
+✔ a choice's answers and Close are their own group, not place actions (0.112917ms)
+✔ the character label says the hp band and no other (0.1375ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.119709ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.154416ms)
+✔ a closed exit's log line and a capitalised title (0.162291ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.091541ms)
+✔ a hint survives a store that throws, for this session (0.380291ms)
+✔ the status line shows the double hour as its earthly branch (0.177833ms)
+(node:27076) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/notice_board.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (317.411542ms)
+✔ the south search reaches the oak and returns through visible fox clues (150.446ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (154.076584ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (32.01775ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (104.492292ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (78.699958ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (264.554666ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (109.304667ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (106.245ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (91.457333ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (182.234375ms)
+(node:27078) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (341.406708ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (129.361041ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (223.088084ms)
+✔ only World position taps directly cycle the offered states with captured freshness (111.193666ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (38.472125ms)
+✔ only confirmed pickup returns World, including a retry from another page (101.03675ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (40.905083ms)
+✔ inventory Drop returns World with one named event only after confirmation (60.661125ms)
+✔ other item actions retain their detail and show their consequences there (12.125416ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (114.985791ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (184.417166ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (135.9165ms)
+✔ actual trunk detail explains refused Take and restores its button after Remove then Drop (134.193208ms)
+(node:27101) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (10.139459ms)
+✔ journal cues belong only to changed NPC histories (1.140375ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.655875ms)
+✔ confirmed room change clears old history before adding new authored consequences (3.134625ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.317916ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.858417ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.102583ms)
+✔ the log stops growing in one room, its last line the latest answer (10.330583ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.386916ms)
+✔ a narration recovery fault holds combat results while their line routing is unavailable (1.872ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (14.627125ms)
+(node:27108) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/priory.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual nested book Item opens locally and Read stays between description and options with local Back (251.509542ms)
+✔ Book restores Ward or Bell once through pulse after remount during uncertain Read (1402.285917ms)
+✔ Book restores Ward or Bell once through title press after remount during uncertain Read (1239.956833ms)
+(node:27110) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/readable.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Read targets retain confirmed detail messages without changing state (212.911ms)
+✔ uncertain Read recovers its one receipt and narration, then reads again after cold reopen (73.761417ms)
+✔ stale and refused Read retain their target and never narrate an unread body (51.748042ms)
+✔ held Read survives the authored 68350 to 68400 pulse with authority freshness intact (29.730958ms)
+✔ cold reopen refuses a committed Read whose stored target is malformed (101.006416ms)
+✔ invalid Read JSON offers in-place Start over and leaves older pins explicitly refused (84.30575ms)
+(node:27135) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/reward_storage.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book sends the projected Put pair and original freshness through normal touch and receipt routing (512.467625ms)
+(node:27151) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/riddle.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ NPC detail tiles edit a bounded word and submit retry/correct results after history (567.792ms)
+(node:27155) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/shop.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Peg detail binds exact available item, merchant and quote (246.012542ms)
+(node:27226) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/touch.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ talk by day offers one button per choice and Close; carry narrates (227.877584ms)
+✔ a second press from the same screen is a stale view and changes nothing (17.273333ms)
+✔ a reopen shows the last committed narration first; a fresh game none (96.983ms)
+✔ walked away: the choices say why, Close leaves the quest open, the landing resolves it (71.040792ms)
+✔ the log has story words, never a kernel code, across both endings (243.530708ms)
+✔ an NPC who leaves while you stay is logged, and nothing else (93.505625ms)
+✔ closed answers and a stale answer give their reason in words, not their code (212.240166ms)
+✔ the Lantern gate unlocks and opens through its projected exit buttons (83.028459ms)
+(node:27237) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/training.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Character draws projected attributes and acquired qualification with authored labels (3.846791ms)
+✔ item equipment detail copies current typed slot/profile/requirement and block chance (1.688583ms)
+✔ Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once (737.560125ms)
+✔ shared item detail draws confirmed fuel for lit and exhausted items (0.394584ms)
+(node:27246) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/chapter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves (451.998542ms)
+✔ the 0.0.9 chapter save is refused intact until explicit Start over (95.316709ms)
+✔ actual App pause and resume preserve 9ms plus 11ms as exactly one logical unit (101.42ms)
+✔ actual App stops unknown storage wakeups and resumes after confirmed user recovery (147.694542ms)
+✔ old App wakeups cannot mutate the same remounted Game or a replacement save (121.183792ms)
+(node:27269) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/metro.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ git failing drops an inherited stamp (952.718917ms)
+(node:27287) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/sqlite-web.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Web reads preserve bound ordered rows beyond the bulk response capacity (4.974083ms)
+ℹ tests 513
+ℹ suites 0
+ℹ pass 511
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 38731.460667
+
+✖ failing tests:
+
+test at chapter.test.ts:30:1
+✖ the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves (451.998542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'd4cd4284c01201ebe66f649b82be784fe2afe41689a113459ebe3998c82037e4'
+  - '424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e'
+  
+      at TestContext.<anonymous> (file://[worktree]/mobile/app/chapter.test.ts:137:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'd4cd4284c01201ebe66f649b82be784fe2afe41689a113459ebe3998c82037e4',
+    expected: '424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+EXIT 1

@@ -1,0 +1,29 @@
+✔ loader refuses a one-way hound area with a valid hash (67.267333ms)
+✔ loader refuses a slower wander than replacement with a valid hash (61.390291ms)
+✔ the integrated chapter has the independent genesis identities and one held pelt per hound (7.629667ms)
+✔ hourly wander and night boundary keep four then six bounded living hounds (16.89325ms)
+✔ thirty days of segmented elapsed time retain six members and one plan successor (418.371958ms)
+✔ combat-first and population-first boundaries conserve the same fatal hound slot and pelt (16.421375ms)
+✔ deliberate attack leaves the same pelt in a hound corpse and delays replacement (26.298375ms)
+✔ a due extra-slot death waits for night before its next generation (19.432083ms)
+✔ a lethal hound reply returns the same body and keeps the surviving hound (5.638625ms)
+✔ every example transcript replays and exercises its capability (5971.772625ms)
+(node:18726) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/hounds.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book offers instance-bound Attack and prunes a departed hound detail (199.423375ms)
+✔ Book exposes a killed hound pelt through ordinary Contents and Carrying (117.099833ms)
+✔ population alone activates byte-preserving accepted-history refusal (57.193041ms)
+✔ one hound wander persists across real SQLite unknown-COMMIT recovery and cold reopen (160.229625ms)
+✔ a real hound kill and pelt Take cold-reopen with conserved custody and evidence (197.873084ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6341.45375
+
+EXIT 0
