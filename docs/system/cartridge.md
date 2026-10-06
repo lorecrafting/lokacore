@@ -964,8 +964,10 @@ Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
 detail at `inn_rooms` with free/paid description variants and a paid ordinary
 Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
 bounded ResourceSpec initialized only for Maud, not a second inventory count.
-Add one real provider-held ale vessel with capacity4, initial ale4, drink_amount1,
-shell mass500g; declare `ale` density250g/unit (the B7 quarter-litre unit).
+Add one real provider-held ale vessel with capacity4, initial ale4 and shell
+mass500g; declare liquid kind `ale` with drink_amount1 and density250g/unit
+(the B7 quarter-litre unit). The serving amount is liquid-kind metadata, as in
+the installed B7 contract, not a vessel field.
 Empty shell persists as null/0; no Fill source for ale is authored. The cask is
 Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
 slice. No dead Maud stock resurrection/refill occurs.
@@ -981,7 +983,8 @@ service keys, absent balances, regenerating stock/currency, mismatched stock
 owner, non-MV recovery declarations and unbounded/unknown consequences. The
 minimal service subset covers only these consumed consequences, not an arbitrary
 Effect interpreter. Independently re-pin the integrated bundled release/API and
-known answers after B7 source merges; future hashes/IDs/versions are null now.
+known answers after the shared-source scheduling predecessors integrate; future
+B8 hashes/IDs/versions are null now.
 
 ## D2 public Priory and book authoring
 
