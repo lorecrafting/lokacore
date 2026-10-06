@@ -1,0 +1,43 @@
+{
+  "npc": "tobin",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "tobin"
+    },
+    "sword": {
+      "role": "item",
+      "item": "rusty_sword"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_swords",
+      "equals": false
+    }
+  },
+  "prompt": "tobin.swords.prompt",
+  "choices": {
+    "learn": {
+      "label": "tobin.swords.choice",
+      "narration": "tobin.swords.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "swords"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      },
+      "receive": {
+        "item": "sword",
+        "from": "teacher"
+      }
+    }
+  }
+}

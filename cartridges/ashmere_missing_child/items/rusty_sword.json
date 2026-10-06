@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "rusty_sword",
+    "sword"
+  ],
+  "short": "item.rusty_sword.short",
+  "room_line": "item.rusty_sword.room",
+  "description": "item.rusty_sword.description",
+  "location": {
+    "in": "npc",
+    "npc": "tobin"
+  },
+  "mass_grams": 500,
+  "weapon": {
+    "skill": "swords",
+    "attack": {
+      "chance": 95,
+      "damage_min": 3,
+      "damage_max": 3
+    }
+  },
+  "slot": "wield"
+}

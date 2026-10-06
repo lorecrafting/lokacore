@@ -523,7 +523,7 @@ owns the exchange; this projection reserves nothing.
 
 ## C1 training and defense composition
 
-**Selected, pending implementation.** [C1](mechanics.md#c1-training-and-armed-defense-selected-contract)
+**API1.18.** [C1](mechanics.md#c1-training-and-armed-defense-selected-contract)
 reuses Talk/Choose and the existing final combat ActionSet; there is no standalone
 Learn or Dodge invocation, mid-fight equipment verb or new turn clock. The projected
 Tobin lesson and direct Choose share the same acquired/payment/receive admission
@@ -537,7 +537,11 @@ choice resolution, events and narration share writer group0. No acquisition tabl
 practice field, custom money ledger or portable foundation op is added. Ordinary
 fact writers refuse the reserved acquisition target. Content and generated contracts
 must describe this actual typed hook and reserved ownership, not a narrative Boolean
-assignment that happens to use a skill name.
+assignment that happens to use a skill name. `DialogueChoice.sequence` carries
+`{op: skill.acquire, skill}` and `lesson_payment` carries `{to, resource, amount}`,
+where `to` is the bound original speaker role. `ItemDefinition.weapon` carries
+`{skill, attack}`; `block_chance` is the shield's authored chance. The optional
+combat `dodge {skill, chance}` identifies its usable defender skill.
 
 The shared skills query projects declared skill identity/name, acquired, qualified
 and usable state; authored requirements and fees reach Book through typed data/text.
@@ -549,7 +553,9 @@ An `attack_result` may add `prevented_by: dodge | block` only for an attempted a
 stopped by that successful defense, requiring `hit:false` and `loss:0`. An accuracy
 miss omits it. A landed hit also omits it. One existing attack-result event and its
 authored narration distinguish all three outcomes; there is no duplicate damage
-event. Validate this supplement at schema, receipt and view boundaries. Optional
+event. The schema constrains its vocabulary. The existing schema subset cannot express
+this cross-field implication, so saved-receipt recovery and committed narration
+projection also enforce `hit:false` and `loss:0` when prevention is present. Optional
 metadata is absent for an ordinary no-defense encounter. Shared budgets, causal
 event allocation and death closure use the existing round/proposal contracts.
 

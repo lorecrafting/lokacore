@@ -282,14 +282,19 @@ defmodule Loka.Content.Dialogues do
       Loka.Content.Escort.choice(rel, steps, o, d, ctx) ++
       hand_over(rel, steps, o, d) ++
       receive_item(rel, steps, o, d, ctx) ++
-      payment(rel, steps, o, d, ctx)
+      payment(rel, steps, o, d, ctx) ++
+      Loka.Content.Skills.choice(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do
     Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-      owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-        reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
-        adjusted(rel, steps ++ ["sequence", i], s, ctx)
+      if(s["op"] == "skill.acquire",
+        do: [],
+        else:
+          owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
+            reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
+            adjusted(rel, steps ++ ["sequence", i], s, ctx)
+      )
     end)
   end
 

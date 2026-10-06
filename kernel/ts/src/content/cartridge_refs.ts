@@ -1,4 +1,5 @@
-// size: allow 350, finite authored exchange checks join the existing reference stage
+// size: allow 345, NPC explicit resource starts join the existing reference stage
+import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
@@ -18,7 +19,7 @@ import {
 import { refString } from '../runtime/decision.ts';
 import { typed } from '../mechanics/fact.ts';
 import { barriers } from './cartridge_barriers.ts';
-import { links } from './cartridge_links.ts';
+import { links, unreachable } from './cartridge_links.ts';
 import { dialogues } from './cartridge_dialogues.ts';
 import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
@@ -105,6 +106,9 @@ export function nodes(c: Obj): [Obj, string][] {
     ...questPolicies(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
+    ),
+    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
+      walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
     ),
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
@@ -203,6 +207,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  out.push(...skills(c, check));
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
@@ -300,17 +305,6 @@ const npcRooms = (c: Obj): [Obj, string][] =>
       `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
     ]),
   ]);
-function unreachable(details: Obj, at: string): Diagnostic[] {
-  return Object.entries(details).flatMap(([key, d]) => {
-    const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
-    const [first, ...words] = d.aliases[0].split('_');
-    const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
-    return !typable || others.includes(d.aliases[0])
-      ? [diag('UNREACHABLE_DETAIL', `${at}.details.${key}`)]
-      : [];
-  });
-}
-
 // Items and NPCs start in containers that form no cycle (CONTAINMENT_CYCLE, at each item on
 // one) and hold at most their capacity (CAPACITY_EXCEEDED).
 function holders(c: Obj): Diagnostic[] {

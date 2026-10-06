@@ -728,7 +728,7 @@ participating balances must reopen as valid current-build truth.
 
 ## C1 training and armed defense (selected contract)
 
-**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+**API1.18 contract; local source, independent review pending.** [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 adds the first skills and armed/defense consumer to the installed combat above.
 The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
 profile and chance. Qualification is current policy truth, never stored mastery.
@@ -736,7 +736,7 @@ profile and chance. Qualification is current policy truth, never stored mastery.
 `skills@1` owns acquired membership by CharacterId and declared skill reference.
 Each skill has one compiler-generated, reserved player Boolean fact, default false;
 true means acquired permanently. The skill reference deterministically owns its
-fact; duplicates, collisions and non-skill writes to it are rejected. A typed
+fact named `skill_<key>`; duplicates, collisions and non-skill writes to it are rejected. A typed
 `skill.acquire` dialogue consequence checks declared identity and false membership,
 then lowers to the existing `fact.assign` in the choice's writer group. It is not
 a new foundation delta operation. Already acquired refuses before any lesson cost,

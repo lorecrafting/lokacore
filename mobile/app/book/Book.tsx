@@ -314,8 +314,7 @@ function Body(p: BodyProps) {
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
-  if (page.kind === 'character')
-    return <CharacterPage resources={view.resources} position={view.position} text={text} />;
+  if (page.kind === 'character') return <CharacterPage view={view} text={text} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} g={p.g} press={p.press} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;

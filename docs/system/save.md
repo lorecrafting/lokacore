@@ -461,7 +461,7 @@ leaves the save intact.
 
 ## C1 learned-skill and lesson recovery
 
-**Selected, pending implementation.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)
+**API1.18 recovery contract.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)
 uses changed fact, resource, containment and choice rows with the same head/receipt
 transaction. No table or save-format change is required. Derive current qualification
 again from the pinned cartridge policy on every open/use; do not save or repair it.

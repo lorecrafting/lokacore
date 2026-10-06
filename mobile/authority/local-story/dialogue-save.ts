@@ -75,7 +75,7 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
   }
 }
 
-function checkRow(world: World, id: string, row: ChoiceRow) {
+export function checkRow(world: World, id: string, row: ChoiceRow) {
   if (
     !row ||
     validate('ContinuationId', id).length ||

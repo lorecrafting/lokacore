@@ -1,3 +1,4 @@
+import { acquire } from '../skills.ts';
 import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
 import { questOf } from '../lookups.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
@@ -62,7 +63,7 @@ import {
 } from './shared.ts';
 import { assigned, adjusted, type Assigned } from '../fact.ts';
 import { acceptRefused, activation, boundActivation, resolution } from '../quest/lifecycle.ts';
-import { transfer as payment } from '../resource.ts';
+import { choicePayment } from './payment.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
@@ -146,9 +147,11 @@ function sequence(
   };
   for (const step of option.sequence ?? []) {
     const next =
-      step.op === 'fact.adjust'
-        ? adjusted(world, actor, run, step)
-        : assigned(world, actor, run, step);
+      step.op === 'skill.acquire'
+        ? acquire(world, actor, run, step.skill)
+        : step.op === 'fact.adjust'
+          ? adjusted(world, actor, run, step)
+          : assigned(world, actor, run, step);
     if (!next) return undefined;
     run = next;
   }
@@ -186,7 +189,7 @@ function applyChoice(
     ? [event(world, command, mint, boundReceive ? 1 : run.position + 1, q.payload)]
     : [];
   const paid = choicePayment(world, row, option, body);
-  if (option.payment && !paid) return rejected('insufficient_resource');
+  if ((option.payment || option.lesson_payment) && !paid) return rejected('insufficient_resource');
   const escort = escortTransition(world, row, option, continuation_id, choice_id);
   const op = {
     op: 'choice.resolve',
@@ -220,12 +223,6 @@ function applyChoice(
     ],
     [{ key: option.narration, participants }],
   );
-}
-
-function choicePayment(world: World, row: ChoiceRow, option: DialogueChoice, body: EntityId) {
-  if (!option.payment) return undefined;
-  const { from, resource, amount } = option.payment;
-  return payment(world, row.roles.find((r) => r.role === from)!.entity_id, body, resource, amount);
 }
 
 // The dialogue's quest resolving with outcome `choice_id`, or the option's accept activating its
