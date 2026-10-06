@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D7 deer final save, protocol and foundation second opinion](2026-10-06-d7-deer-final-save-review.md): PR #253 exact `776742a6`, independent APPROVE; TS/Elixir cancellation fixture parity, 5 real-SQLite deer tests, OR-branch mutant red/restored green, forged deer transfer refused, v036/API1.31/hash/199 IDs rechecked. Primary verdict and PM merge remain separate.
+- [D7 deer final save, protocol and foundation second opinion](2026-10-06-d7-deer-final-save-review.md): PR #253 original `776742a6` APPROVE; round-1 `6b626769` CHANGES REQUIRED for sight-only completion admitted as population-rebind cause (D7-S3). Exact member and lawful rebind cases pass; PM merge remains gated.
 
 - [D7 deer provisional primary source](2026-10-06-d7-deer-provisional-primary-review.md): original `3d198c17` CHANGES REQUIRED; scoped fix `103fac5a` APPROVE closes hound-sight loader mismatch. Focused 15 kernel and 3 Elixir tests pass; compiler and loader guard mutations red. Final predecessor pin, browser and hosted gates remain pending.
 
