@@ -1,13 +1,20 @@
 # C2 — Watchman's Rounds: finite patrol and immediate recovery
 
-**Adopted PM assignment; reviewed dependency re-pin required before source GO.**
+**Adopted PM assignment; reviewed dependencies re-pinned for source assignment.**
 Suggested source branch `chapter-1/c2-watchmans-rounds`; developer uses its own worktree.
-Inspected local main `4bfe252e`, which contains the approved
-[C1 plan review](../../reviews/2026-10-05-c1-tobin-plan-review.md), installed B1 clock/status
-and Q2-C-rescue. C1 source and B5 source are concurrent. Their reviewed integration,
-actual release/API/hash/IDs and source head must be recorded before implementation;
-C2 target release/API/hash/IDs/source head/PR/verdicts remain null. No source, tests,
-browser/native sessions or save operations are performed by this planning change.
+Source base `cc43d0186e70231d7ba25bf73da61e6838c0bf06` on current GitHub main
+contains B1 clock/status, Q2-C-rescue and the independently approved C1 training
+([primary](../../reviews/2026-10-05-c1-tobin-primary-review.md),
+[save/protocol](../../reviews/2026-10-05-c1-tobin-save-second-review.md)).
+B5 herbs and B4 light are also integrated and reviewed; [the roadmap](../../ROADMAP.md)
+records their publication. The current chapter artifact is 0.0.21/API1.19,
+hash `a274bb1c6b22306718648bbcb1b967ee017e0420b62589afe10e1009434dbbfa`,
+94 IDs ([known answer](../../../protocol/fixtures/missing_child_v021_hash.json)).
+C2 needs no B6 or B7 behavior. If either lands before C2, merge main and re-pin the
+source artifact before implementation or publication; serialize shared cartridge,
+protocol and generated-file edits. C2 successor release/API/hash/IDs, source head,
+PR and verdicts remain null. No source, tests, browser/native sessions or save
+operations are performed by this planning change.
 
 ## Goal and governing clauses
 
@@ -67,9 +74,8 @@ Likely files: chapter manifest/rooms/Tobin/S3/dialogues/facts/text; minimal patr
 owner and shared movement/dialogue/death hooks; compiler/loader; typed protocol
 state/delta/invariant/action/view shapes and generated outputs; both compose twins
 only if needed for the new transition; local-story save validation; existing NPC/
-Journal/World projection and Book details. Serialize shared generated/protocol/
-proposal files after C1/B5 integration. Preserve unrelated C1/B5 definitions within
-the current release and derive fresh successor pins independently. Out: daily NPC
+Journal/World projection and Book details. Preserve integrated C1/B5/B4 definitions
+and derive fresh successor pins independently. Out: daily NPC
 patrol AI, hounds/assist/arrest, NPC death/replacement, survival duration/timer,
 general quest interpreter, skill/reward changes, extra rooms, server adapters,
 new native work, navigation redesign and save migrations.

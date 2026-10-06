@@ -91,6 +91,10 @@ After A–D source and reviews settle, run the [one-time Astra documentation
 audit](decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) and close
 its reviewed findings before E3 closes. This is a Chapter 1 closure obligation,
 not another implementation slice or a per-slice check.
+Run the [one-time Astra architecture audit](decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)
+at the same checkpoint: trace real actions across layers, resolve correctness and
+player-blocking seam findings before E3 closes, and track nonblocking debt. It is
+also a closure obligation, not a 34th story slice.
 
 The shared TypeScript engine simulation, real SQLite transaction/fault checks and
 contract checks remain part of development proof. Browser play uses the same Book

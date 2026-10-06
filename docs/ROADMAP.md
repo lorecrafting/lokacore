@@ -201,7 +201,8 @@ B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6
 and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 on local base `98cc60b1`. The route finding was fixed and its
 [independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
-B4 source dependency, implementation and successor release/proof pins remain ahead.
+B4 source is published in #206; B6 still needs its current-main dependency re-pin,
+implementation and successor release/proof pins.
 
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
@@ -224,6 +225,15 @@ approved after all findings were fixed. Local `main` carries chapter 0.0.20/API1
 the independently pinned hash `78ade4fab1341f1781262ce6327ca8a77ea4e4c0a01fa5279abe7ba874735d3e`
 and 92 IDs. The accumulated local check and all six hosted checks passed;
 C1 is published in #205.
+
+C2 Watchman's Rounds has an [adopted finite-patrol contract](decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md),
+[focused source brief](briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
+re-pinned to current GitHub main `cc43d018`, and
+[independent plan approval](reviews/2026-10-05-c2-watchmans-rounds-plan-review.md).
+B1, Q2-C-rescue and reviewed C1 are integrated. C2 can be assigned while B6/B7
+run; shared cartridge, protocol and generated edits require serialization and an
+intervening-main re-pin. C2 implementation, successor pins, source reviews and
+playable proof remain ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
