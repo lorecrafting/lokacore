@@ -493,3 +493,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 second opinion on fix round 1](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-fix-round-1): verbatim CHANGES REQUIRED at `c04a5c0f`; SO5 corroborates the pending-expiry cadence blocker and SO6 identifies Elixir acceptance of an orphan water body in a bleed schedule.
 
 - [C5 scoped fix round 2](2026-10-06-c5-final-primary-review.md#scoped-fix-round-2--approve): source `0fab0216`, APPROVE; FP2/SO5 early-expiry handoff and SO6 orphan water-binding parity closed. Fixed command27, portable due-tick refusal and independent SQLite reopen-before/after-handoff verified; all recorded findings closed.
+
+- [C5 second opinion on fix round 2](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-fix-round-2): verbatim CHANGES REQUIRED at `0fab0216`; raises SO7 early-delivery cadence enforcement and SO8 missing committed SQLite handoff regression. Primary scoped approval remains as recorded pending evaluation of these new findings.

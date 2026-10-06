@@ -152,3 +152,63 @@ Tests and limits:
 Checks on the corrected source: **20/20 focused TypeScript/kernel/real-SQLite tests; 3/3 Elixir bleed tests; independent SQLite handoff/reopen control passes**. Reviewed the fixture extraction as a move of the existing setup, with no changed inputs. Three targeted mutation controls failed as expected. Source and tests were restored before committing this record. Hosted/full-gate results remain the developer/PM evidence; no browser/native runtime or owner save was used in this review.
 
 Ponytail Review: narrow predicates in the existing two composers, one shared test setup and literal regression cases; no framework or dependency added, no complexity finding. **APPROVE** for the exact source above.
+
+## Independent second opinion on fix round 2
+
+The following answer is retained verbatim for source `0fab0216`. It raises SO7 portable early-cadence enforcement and SO8 a missing committed SQLite regression. The primary scoped APPROVE above is unchanged by this append; disposition of the new findings requires scoped evaluation. The prior primary section separately records its temporary independent SQLite handoff/reopen proof.
+
+```text
+CHANGES REQUIRED
+Head: 0fab02168af6e4047ec179aba5955b3300e1ba23
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+Focus: fixes after be22236b.
+
+C5-SO7 | medium | kernel/ts/src/foundation/compose_bleed.ts:19; lib/loka/core/compose_bleed.ex:53
+Early expiry completion still permits advancing future cadence.
+Controlled input: clock200, completed expiry due200, retained
+next_tick250, refreshed end400. Change the successor cadence and
+job due to350. BOTH composers accept, skipping the pending tick250.
+The unconditional greater-than branch bypasses the early-delivery
+distinction. Require unchanged cadence for early completion and
+advancement for a due tick; add a shared literal refusal case.
+The current story producer behaves correctly; this is incomplete
+portable enforcement, not a reproduced ordinary-play failure.
+
+C5-SO8 | medium / required-proof gap |
+kernel/ts/test/c5_bleed_early_expiry.test.ts:56;
+mobile/authority/local-story/c5_bleed.test.ts:128
+SO5's refreshed-expiry handoff has no cold-reopen regression.
+The new test stops after the in-memory handoff. The SQLite test
+reopens an unrefreshed expiry and removes bleeding; it never
+exercises the newly permitted successor with unchanged cadence.
+Cover reopen around that handoff, receipt reconstruction and the
+later damaging tick, as required by docs/system/save.md.
+No runtime save-corruption defect was demonstrated.
+
+Prior findings:
+- SO5's reported runtime fault is fixed. Both same-time round-first
+  refresh and refresh at65400 before expiry65425 pass controlled
+  TypeScript commands. Both portable composers accept the literal
+  early handoff and reject unchanged cadence after a due tick.
+- SO6 is closed. Both kernels reject complete bleed binding plus
+  orphan water_body_id. Six competing single-field bindings were
+  independently refused in each kernel.
+
+Checks:
+- Exact Git-head sources loaded/compiled in memory; no checkout edits.
+- 17 focused TypeScript tests passed, plus the separate pre-expiry
+  refresh scenario.
+- All 14 shared composition cases and 3 Elixir tests passed.
+- Five in-memory red controls failed as expected: SO5 reversion in
+  both kernels, Elixir SO6 reversion, and weakened due-time guards
+  in both kernels. The latter changed the refusal to nonfuture_job.
+- New fixtures and HP/time assertions use independent literal answers.
+- Inspected generic receipt replay: it recomputes accepted decisions
+  and compares final state; composer acceptance alone does not prove
+  that forged saved history would load.
+- No additional over-engineering finding.
+
+Limits: Did not rerun disk-backed SQLite, full Mix/CI, schema sweep,
+browser/native tests or owner-save operations. No files edited or
+comments posted; working tree remains clean.
+```
