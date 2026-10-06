@@ -199,6 +199,21 @@ export function JournalPage({ view, text }: { view: GameView; text: Say }) {
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose}>{text(q.title)}</Text>
           <Text style={note}>{String(q.state).replaceAll('_', ' ')}</Text>
+          {q.patrol && (
+            <Text style={prose}>
+              {q.patrol.credit} of {q.patrol.required} checkpoints. {q.patrol.status}.{' '}
+              {text(q.patrol.leader_name)} is at {text(q.patrol.room_title)}.{' '}
+              {q.patrol.status === 'awaiting'
+                ? `Walk ${q.patrol.direction} to join him.`
+                : q.patrol.status === 'paused'
+                  ? `Return to ${text(q.patrol.leader_name)} and choose Rejoin.`
+                  : q.patrol.status === 'failed'
+                    ? `Return to ${text(q.patrol.leader_name)} and choose Restart now.`
+                    : q.patrol.status === 'together'
+                      ? `Next: ${text(q.patrol.next_title)}.`
+                      : ''}
+            </Text>
+          )}
           {q.journal && <Text style={prose}>{plain(text(q.journal))}</Text>}
         </View>
       ))}

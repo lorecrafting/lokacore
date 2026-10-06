@@ -1,4 +1,4 @@
-// Existing receipts prove repeated exchanges and custody-independent fuel at their original revisions.
+// Existing receipts prove repeated exchanges, finite patrol attempts and custody-independent fuel at their original revisions.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
@@ -8,7 +8,7 @@ import type { Db, Meta } from './store.ts';
 
 // ponytail: cold recovery replays existing accepted receipts linearly; index only if measured reopen needs it.
 /** Reuse the kernel's exact admission/lowering at each original revision, including unrelated custody/faction changes. */
-// size: allow 50, revision-correct replay validates conserved custody and repeated occurrences together
+// size: allow 55, revision-correct replay validates conserved custody and repeated occurrences together
 export function exchangeSave(
   fresh: World,
   saved: World,
@@ -17,6 +17,7 @@ export function exchangeSave(
   revision: number,
 ): boolean {
   if (
+    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.patrol) &&
     !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
     !Object.keys(fresh.fuelSpecs).length &&
     saved.state.fuel === undefined

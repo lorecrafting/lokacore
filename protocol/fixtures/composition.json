@@ -5772,6 +5772,94 @@
         }
       },
       "holds": false
+    },
+    {
+      "id": "patrol_transitions_hold",
+      "note": "A bound initial attempt has an exact resulting row.",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "patrol.transition",
+              "writer_group": 0,
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "expected": null,
+              "value": {
+                "kind": "patrol",
+                "actor_id": "00000001-2222-4333-8444-555555555555",
+                "body_id": "00000002-2222-4333-8444-555555555555",
+                "npc_id": "00000003-2222-4333-8444-555555555555",
+                "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+                "continuation_id": "00000005-2222-4333-8444-555555555555",
+                "choice_id": "start",
+                "attempt_id": "00000006-2222-4333-8444-555555555555",
+                "cursor": 0,
+                "credit": [],
+                "status": "together"
+              }
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "patrol",
+                "quest_instance_id": "00000004-2222-4333-8444-555555555555"
+              },
+              "value": {
+                "kind": "patrol",
+                "actor_id": "00000001-2222-4333-8444-555555555555",
+                "body_id": "00000002-2222-4333-8444-555555555555",
+                "npc_id": "00000003-2222-4333-8444-555555555555",
+                "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+                "continuation_id": "00000005-2222-4333-8444-555555555555",
+                "choice_id": "start",
+                "attempt_id": "00000006-2222-4333-8444-555555555555",
+                "cursor": 0,
+                "credit": [],
+                "status": "together"
+              }
+            }
+          ]
+        }
+      },
+      "holds": true
+    },
+    {
+      "id": "patrol_transitions_hold",
+      "note": "A successful transition cannot omit its written patrol row.",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "patrol.transition",
+              "writer_group": 0,
+              "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+              "expected": null,
+              "value": {
+                "kind": "patrol",
+                "actor_id": "00000001-2222-4333-8444-555555555555",
+                "body_id": "00000002-2222-4333-8444-555555555555",
+                "npc_id": "00000003-2222-4333-8444-555555555555",
+                "quest_instance_id": "00000004-2222-4333-8444-555555555555",
+                "continuation_id": "00000005-2222-4333-8444-555555555555",
+                "choice_id": "start",
+                "attempt_id": "00000006-2222-4333-8444-555555555555",
+                "cursor": 0,
+                "credit": [],
+                "status": "together"
+              }
+            }
+          ]
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
     }
   ]
 }

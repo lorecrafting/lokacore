@@ -459,6 +459,9 @@
             "answer": {
               "type": "string",
               "pattern": "^[a-zA-Z]{1,32}$"
+            },
+            "patrol": {
+              "$ref": "relation.schema.json#/$defs/PatrolDraw"
             }
           },
           "required": [

@@ -1,3 +1,4 @@
+import { patrolSave } from './patrol-save.ts';
 import { exchangeSave } from './exchange-save.ts';
 import { combatReceipts } from './combat-receipt.ts';
 import { skillsSave } from './skills-save.ts';
@@ -9,6 +10,7 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
 export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+  patrolSave(world);
   skillsSave(world, db, meta);
   combatReceipts(db, `story/${meta.lineage_id}/${world.character}`);
   const exchanges = exchangeSave(fresh, world, db, meta, revision);

@@ -237,7 +237,7 @@ function transferEvidence(
 }
 // Legacy terminal rewards retain their routing; recover the new authored custody path.
 function detailNeeded(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
-  if (source?.riddle || option?.escort) return true;
+  if (source?.riddle || option?.escort || option?.patrol) return true;
   if (option?.sequence?.some((step) => step.op === 'skill.acquire')) return true;
   if (option?.exchange) return true;
   if (option?.receive && !source?.quest) return true;

@@ -277,6 +277,17 @@
         "player"
       ],
       "meaning": "Cumulative Priory gain actually awarded by Infirmary Herbs; unrelated faction changes never reset it."
+    },
+    "watch_gate_trusts_player": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Watch recognition: only successful patrol completion writes it."
     }
   }
 }

@@ -1,3 +1,4 @@
+import * as patrol from '../patrol/sequence.ts';
 import { acquire } from '../skills.ts';
 import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
 import { questOf } from '../lookups.ts';
@@ -111,7 +112,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   if (!row.choice_ids.includes(choice_id)) return rejected('invalid_state');
   const d = definition(world, row.source);
   const option = d.choices[choice_id]!;
-  const code = blocked(world, row, option, used);
+  const code = blocked(world, row, option, used, command.payload.patrol);
   if (code)
     return code === 'budget_exceeded' ||
       code === 'precondition_failed' ||
@@ -190,7 +191,7 @@ function applyChoice(
     : [];
   const paid = choicePayment(world, row, option, body);
   if ((option.payment || option.lesson_payment) && !paid) return rejected('insufficient_resource');
-  const escort = escortTransition(world, row, option, continuation_id, choice_id);
+  const watched = patrol.choice(world, command, row, q?.payload, mint, used);
   const op = {
     op: 'choice.resolve',
     writer_group: 0,
@@ -199,10 +200,8 @@ function applyChoice(
     expected_revision: row.opened_revision,
   } as const;
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
-  const at = run.position + quests.length + 1;
+  const at = run.position + quests.length + watched.events.length + 1;
   const resolvedChoice = event(world, command, mint, at, chosen);
-  // Minted after choice_resolved, so the earlier ids stay put.
-  const reached = storyPoints(world, command, mint, row, at + 1);
   return accepted(
     world,
     choice_id,
@@ -211,15 +210,17 @@ function applyChoice(
       ...given.ops,
       ...run.ops,
       ...(paid?.ops ?? []),
-      ...escort,
+      ...escortTransition(world, row, option, continuation_id, choice_id),
       ...(!boundReceive && q ? q.ops : []),
+      ...watched.ops,
       op,
     ],
     [
       ...(boundReceive ? quests : given.events),
       ...(boundReceive ? given.events : quests),
+      ...watched.events,
       resolvedChoice,
-      ...reached,
+      ...storyPoints(world, command, mint, row, at + 1),
     ],
     [{ key: option.narration, participants }],
   );

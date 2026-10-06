@@ -24,6 +24,7 @@ const SPEC = {
   meaning: "The character's position (position@1): only its rule writes it.",
 };
 
+// size: allow 50, one existing write-site walk checks scene, skill and patrol trust ownership
 export function reserved(c: Obj): Diagnostic[] {
   const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
   if (Object.hasOwn(c.lock.capabilities, 'scene'))
@@ -36,13 +37,19 @@ export function reserved(c: Obj): Diagnostic[] {
       expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
   for (const s of Object.values((c.skills ?? {}) as Obj))
     expected[`skill_${s.key}`] = skillSpec(s.key);
+  const patrolRefs = Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
+    q.patrol ? [refString(q.patrol.trust_fact)] : [],
+  );
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
   for (const [i, ref] of refs.entries())
     if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))
       out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
   const write = (s: Obj, at: string) => {
-    if ((s.op === 'fact.assign' || s.op === 'fact.adjust') && refs.includes(refString(s.fact)))
+    if (
+      (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
+      [...refs, ...patrolRefs].includes(refString(s.fact))
+    )
       out.push(diag('RESERVED_FACT', `${at}.fact`));
   };
   const each = (map: string) => Object.entries((c[map] ?? {}) as Obj);

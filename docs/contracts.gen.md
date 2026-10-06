@@ -47,6 +47,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | narration@1 | portable | portable_capability | client_notification |
 | sense_cue@1 | portable | portable_capability |  |
 | escort@1 | portable | portable_capability |  |
+| patrol@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -248,6 +249,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `escort.transition`: Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed.
   - `quest.retire`: API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only.
   - `fuel.set`: Replace one declared item fuel history with exact whole-row precondition at the authoritative clock.
+  - `patrol.transition`
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
@@ -266,6 +268,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `encounter`
   - `escort`
   - `fuel`
+  - `patrol`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
@@ -532,6 +535,7 @@ QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation p
 - **QuestObjective**: A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).
   - `current_state`
   - `post_activation_event`
+  - `patrol`
 
 ## Reaction contracts (`protocol/reaction.schema.json`)
 
@@ -550,9 +554,13 @@ Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05
   - `death`
 - **EscortRelation**: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.
 - **EscortStatus**: The bounded escort lifecycle: following moves with the actor, separated waits for explicit rejoin, completed never follows again.
+- **PatrolDraw**: The exact quest instance, accepted attempt, occurrence cursor and lifecycle drawn on a patrol control; a fresh invocation cannot reuse a stale leg.
+- **PatrolRelation**: Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle.
+- **PatrolStatus**: Together, awaiting ordinary player entry, explicitly paused, fatally failed or terminally completed.
 - **Relation**: A typed, capability-owned relation between runtime entities (21 §4 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 §23). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.
   - `containment`: entity_id is directly inside container_id (a room, character or container).
   - `escort`: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.
+  - `patrol`: Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle.
 
 ## Resource contracts (`protocol/resource.schema.json`)
 

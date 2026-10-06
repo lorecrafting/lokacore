@@ -667,5 +667,29 @@
       "facts_typed"
     ],
     "implemented_in": "C1 Tobin lessons and actual equipped sword/dodge/shield combat (local implementation; independent review pending)"
+  },
+  "patrol": {
+    "spec": "docs/system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract",
+    "contracts": [
+      "PatrolRelation",
+      "PatrolDraw",
+      "QuestDefinition",
+      "DialogueChoice",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/patrol/shared.ts",
+      "kernel/ts/src/mechanics/patrol/sequence.ts",
+      "kernel/ts/src/foundation/compose_patrol.ts",
+      "lib/loka/core/compose_patrol.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/patrol.json"
+    ],
+    "invariants": [
+      "patrol_transitions_hold"
+    ],
+    "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
   }
 }

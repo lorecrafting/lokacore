@@ -1,3 +1,5 @@
+// size: allow 320, current GameView includes bounded patrol journal projection
+import * as patrol from '../mechanics/patrol/shared.ts';
 import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
@@ -84,7 +86,7 @@ export function gameView(world: World): GameView {
     inventory: within(world, actions, world.body, undefined, steps),
     ...(equipment.length > 0 && { equipment }),
     ...(at !== undefined && { position: at }),
-    journal: journal(world),
+    journal: journal(world, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
     time: world.state.clock,
@@ -249,12 +251,33 @@ function chapter(world: World): ChapterView | undefined {
   return { index, title: chapters[index]!.title };
 }
 
-function journal(world: World): QuestView[] {
-  return Object.values(world.state.quests ?? {})
-    .filter(({ scope: s }) => s.kind === 'player' && s.character_id === world.character)
-    .map((q) => {
+// size: allow 45, existing journal projection includes finite patrol state and actual leader route
+function journal(world: World, steps: Steps): QuestView[] {
+  return Object.entries(world.state.quests ?? {})
+    .filter(([, { scope: s }]) => s.kind === 'player' && s.character_id === world.character)
+    .map(([id, q]) => {
+      const found = world.state.patrols?.[id];
+      const walked = found && patrol.route(world, found, steps);
+      const progress =
+        walked && found
+          ? {
+              patrol: {
+                leader_id: found.npc_id,
+                leader_name: world.entities[found.npc_id].short,
+                room_title: world.rooms[walked.here].title,
+                next_title: world.rooms[walked.there].title,
+                room: walked.settings.route[found.cursor],
+                next_room: walked.settings.route[walked.next],
+                direction:
+                  found.status === 'awaiting' ? walked.pending_direction : walked.direction,
+                credit: found.credit.length,
+                required: walked.settings.required,
+                status: found.status,
+              },
+            }
+          : {};
       const d = world.cartridge.quests![refString(q.quest)];
-      const shown = { quest: q.quest, state: q.state, title: d.title };
+      const shown = { ...progress, quest: q.quest, state: q.state, title: d.title };
       const j = d.journal;
       if (!j) return shown;
       const variant =

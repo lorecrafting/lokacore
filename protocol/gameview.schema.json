@@ -158,6 +158,9 @@
             },
             "label": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "patrol": {
+              "$ref": "relation.schema.json#/$defs/PatrolDraw"
             }
           },
           "required": [
@@ -182,6 +185,9 @@
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
+            },
+            "patrol": {
+              "$ref": "relation.schema.json#/$defs/PatrolDraw"
             }
           },
           "required": [
@@ -784,6 +790,58 @@
         },
         "journal": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "patrol": {
+          "type": "object",
+          "properties": {
+            "leader_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "next_room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "credit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64
+            },
+            "required": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "status": {
+              "$ref": "relation.schema.json#/$defs/PatrolStatus"
+            },
+            "leader_name": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "room_title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "next_title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "leader_id",
+            "room",
+            "next_room",
+            "direction",
+            "credit",
+            "required",
+            "status",
+            "leader_name",
+            "room_title",
+            "next_title"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

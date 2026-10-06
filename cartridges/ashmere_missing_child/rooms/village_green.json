@@ -7,6 +7,9 @@
     },
     "south": {
       "to": "well_lane"
+    },
+    "east": {
+      "to": "east_gate"
     }
   },
   "variants": [

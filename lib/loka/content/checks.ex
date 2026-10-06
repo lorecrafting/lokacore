@@ -64,6 +64,20 @@ defmodule Loka.Content.Checks do
   def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),
     do: Map.put(objective, "item_acquired", ref(k, "item", m))
 
+  def expand(%{"route" => _, "checkpoints" => _, "trust_fact" => _} = p, m) do
+    p
+    |> Map.update!("npc", &ref(&1, "npc", m))
+    |> Map.update!("trust_fact", &ref(&1, "fact", m))
+    |> Map.update!("route", &Enum.map(&1, fn r -> ref(r, "room", m) end))
+    |> Map.update!("checkpoints", &Enum.map(&1, fn r -> ref(r, "room", m) end))
+  end
+
+  def expand(%{"patrol" => p} = o, m),
+    do: o |> Map.delete("patrol") |> expand(m) |> Map.put("patrol", expand(p, m))
+
+  def expand(%{"transition" => t, "quest" => q, "npc" => _} = p, m)
+      when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
+
   # A barrier (a details map may have a detail keyed key_item, whose value is a map).
   def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
     do: Map.put(barrier, "key_item", ref(k, "item", m))

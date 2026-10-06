@@ -286,7 +286,12 @@ defmodule Loka.Core.ComposeTest do
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     :rand.seed(:exsss, {5, 5, 5})
-    pool = for c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op
+    patrol = JSON.decode!(File.read!("protocol/fixtures/patrol.json"))["cases"]
+
+    pool =
+      for(c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op) ++
+        for c <- patrol, op <- c["ops"], do: op
+
     ours = differential(for _ <- 1..1000, do: random_case(pool))
     faults = Enum.frequencies_by(ours, &get_in(&1, ["result", "fault", "code"]))
     assert map_size(faults) >= 6, "generator too narrow: #{inspect(faults)}"
@@ -348,6 +353,14 @@ defmodule Loka.Core.ComposeTest do
 
   defp random_op(pool, state),
     do: vary(%{pick(pool) | "writer_group" => pick([0, 0, 0, 1, 2])}, state)
+
+  defp vary(%{"op" => "patrol.transition"} = op, s),
+    do:
+      Map.put(
+        op,
+        "expected",
+        pick([op["expected"], nil, get_in(s, ["patrols", op["quest_instance_id"]])])
+      )
 
   defp vary(%{"op" => "entity.transfer", "entity_id" => e} = op, s) do
     here = s["containers"][e]

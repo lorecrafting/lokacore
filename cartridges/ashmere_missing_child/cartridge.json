@@ -34,7 +34,8 @@
       "commerce": 1,
       "light": 1,
       "skills": 1,
-      "attributes": 1
+      "attributes": 1,
+      "patrol": 1
     },
     "client_features": []
   },

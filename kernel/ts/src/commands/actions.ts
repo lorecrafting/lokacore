@@ -223,6 +223,7 @@ const INPUTS: readonly string[] = [
   'scene',
   'line',
   'quoted_price',
+  'patrol',
 ];
 
 /**
@@ -246,7 +247,7 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
   const id = p.target_id ?? p.item_id;
   if (a.speaker !== undefined && id !== a.speaker) return false;
   const inputs = Object.keys(payload).filter(
-    (k) => INPUTS.includes(k) && !(a.command === 'choose' && k === 'answer'),
+    (k) => INPUTS.includes(k) && !(a.command === 'choose' && ['answer', 'patrol'].includes(k)),
   );
   if (inputs.length !== a.input.length || !a.input.every((i) => inputs.includes(i))) return false;
   if (a.target.kind === 'none') return id === undefined;

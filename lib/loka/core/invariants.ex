@@ -1,4 +1,4 @@
-# size: allow 320, independent retirement pairing joins precondition replay
+# size: allow 330, independent patrol and retirement pairing joins precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
@@ -28,6 +28,9 @@ defmodule Loka.Core.Invariants do
   }
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec check(String.t(), map()) :: boolean()
+  def check("patrol_transitions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}),
+      do: Map.has_key?(r, "fault") or Loka.Core.InvariantsPatrol.holds?(s, ops, r)
+
   def check("one_container_per_item", %{"state" => s, "result" => r} = observation) do
     ops = get_in(observation, ["delta", "ops"]) || []
     Loka.Core.InvariantsCreation.custody?(s, ops, r)
@@ -99,6 +102,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
+      Loka.Core.InvariantsPatrol.holds?(s, ops, result) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 
@@ -127,6 +131,7 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "job." <> _}, _, _, ctx), do: {:cont, ctx}

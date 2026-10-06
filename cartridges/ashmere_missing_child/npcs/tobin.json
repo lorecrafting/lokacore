@@ -7,7 +7,7 @@
   "short": "npc.tobin.short",
   "room_line": "npc.tobin.room",
   "description": "npc.tobin.description",
-  "room": "north_gate",
+  "room": "watch_post",
   "resource_starts": {
     "pennies": 0
   }

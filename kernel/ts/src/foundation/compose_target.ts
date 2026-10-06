@@ -1,5 +1,10 @@
 import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
-/** The MutationTarget an op writes (04 §5.1). */
+/**
+ * The MutationTarget an op writes (04 §5.1).
+ * Patrol uses the exact quest instance; escort retains its actor target.
+ * Writer conflicts use this identity before any precondition is checked.
+ */
+// size: allow 45, exhaustive mutation target mapping includes the separate patrol row
 export function target(op: DeltaOp): MutationTarget {
   switch (op.op) {
     case 'fact.assign':
@@ -26,6 +31,8 @@ export function target(op: DeltaOp): MutationTarget {
     case 'encounter.advance':
     case 'encounter.close':
       return { kind: 'encounter', encounter_id: op.encounter_id };
+    case 'patrol.transition':
+      return { kind: 'patrol', quest_instance_id: op.quest_instance_id };
     case 'escort.transition':
       return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
