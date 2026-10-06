@@ -1,8 +1,5 @@
 kernel/ts/play/main.ts:2: info: size: allow 315, one terminal session: its loop, each command's dispatch and the replay
-kernel/ts/src/commands/actions.ts:1: info: size: allow 310, service aliases bind their exact action key, provider target and captured input
-kernel/ts/src/content/cartridge.ts:1: info: size: allow 310, the artifact loader includes the consumed service definitions and validation stage
 kernel/ts/src/content/cartridge_dialogues.ts:192: info: size: allow 52, one authored option validates its mutually constrained effects together
-kernel/ts/src/content/cartridge_position.ts:27: info: size: allow 55, one existing write-site walk checks scene, skill, patrol trust and paid-entitlement ownership
 kernel/ts/src/content/cartridge_refs.ts:161: info: size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
 kernel/ts/src/foundation/compose.ts:106: info: size: allow 44, exhaustive dispatch over closed liquid, choice and patrol operations
 kernel/ts/src/foundation/compose_patrol.ts:6: info: size: allow 60, full-prior row and closed attempt lifecycle share one portable precondition
@@ -20,7 +17,6 @@ kernel/ts/src/mechanics/quest/lifecycle.ts:43: info: size: allow 45, exact retir
 kernel/ts/src/mechanics/reaction.ts:60: info: size: allow 58, one ordered delivery lowers fact assignments and quest effects
 kernel/ts/src/mechanics/schedule/rule.ts:27: info: size: allow 45, schedule dispatch retains its due job and elapsed clock paths
 kernel/ts/src/mechanics/schedule/rule.ts:70: info: size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together
-kernel/ts/src/mechanics/service/shared.ts:28: info: size: allow 45, one provider/payment query admits its typed immediate benefit before allocation
 kernel/ts/src/runtime/invariants.ts:1: info: size: allow 315, independent retirement pairing joins precondition replay
 kernel/ts/src/runtime/invariants.ts:1: file, 318 lines, limit 315
 kernel/ts/src/runtime/invariants.ts:200: info: size: allow 46, independent retirement pairing joins existing ordered precondition replay
@@ -30,22 +26,15 @@ kernel/ts/src/runtime/proposal.ts:1: info: size: allow 315, typed quest reaction
 kernel/ts/src/runtime/proposal.ts:215: info: size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
 kernel/ts/src/view/action_lists.ts:44: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 kernel/ts/src/view/action_lists.ts:142: info: size: allow 50, exact detail harvest joins shared action admission and projection
-kernel/ts/src/view/notice_boards.ts:10: info: size: allow 45, standalone detail projection includes the paid bed with ordinary Rest
-kernel/ts/src/view/services.ts:7: info: size: allow 50, one exact provider offer projects its quoted invocation and shared admission reason
-kernel/ts/src/view/view.ts:1: info: size: allow 330, current GameView includes bounded patrol and exact provider-service projection
-kernel/ts/src/view/view.ts:266: info: size: allow 45, existing journal projection includes finite patrol state and actual leader route
 kernel/ts/test/containment.test.ts:1: info: size: allow 555, containment and carrying behavior share the same minimal custody fixture
 kernel/ts/test/dialogue.test.ts:1: info: size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
-kernel/ts/test/sim.ts:1: file, 508 lines, limit 500
-mobile/app/book/Book.tsx:1: info: size: allow 330, notice routes and targetless bed Rest share the existing Book shell
-mobile/app/book/Book.tsx:198: info: size: allow 45, footer keeps standalone Leave and nested Back alongside status and faults
-mobile/app/book/Book.tsx:286: info: size: allow 45, current Book page dispatch including board and notice details
+kernel/ts/test/sim.ts:1: info: size: allow 515, the existing headless action generator also consumes exact service offers
+mobile/app/book/Book.tsx:186: info: size: allow 45, footer keeps standalone Leave and nested Back alongside status and faults
 mobile/app/book/Footer.tsx:35: function Footer, 69 lines, limit 40
 mobile/app/book/Footer.tsx:191: function Status, 47 lines, limit 40
 mobile/app/book/Menu.tsx:66: info: size: allow 45, bounded tile editing and submission share one local buffer
-mobile/app/book/Menu.tsx:120: info: size: allow 60, one ordered NPC detail joins description, history, dialogue and finite service offers
-mobile/app/book/model.ts:1: info: size: allow 390, finite shop and service quotes join the shared button/freshness builder
-mobile/app/book/model.ts:230: info: size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
+mobile/app/book/model.ts:1: info: size: allow 350, current shop quotes join the shared button/freshness builder
+mobile/app/book/model.ts:231: info: size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
 mobile/app/book/notice_board.test.ts:1: info: size: allow 650, Read and Study routes/retry/recovery share one controlled Book renderer
 mobile/app/book/notices.tsx:111: info: size: allow 45, ordered description/history/Notice options share one detail page
 mobile/app/book/pages.tsx:3: info: size: allow 325, established book pages with projected notice entries
@@ -58,8 +47,7 @@ mobile/authority/local-story/bell-save.ts:112: function choiceReceipt, 135 lines
 mobile/authority/local-story/bell-save.ts:132: function <anonymous>, 114 lines, limit 40
 mobile/authority/local-story/bell.test.ts:1: file, 833 lines, limit 500
 mobile/authority/local-story/commerce-save.ts:27: info: size: allow 60, one ordered reconciliation loop joins exact money and custody evidence
-mobile/authority/local-story/commerce-save.ts:28: function commerceSave, 79 lines, limit 60
-mobile/authority/local-story/commerce-save.ts:144: info: size: allow 50, bind one whole exchange to its command, item, payment and acquired event
+mobile/authority/local-story/commerce-save.ts:125: info: size: allow 50, bind one whole exchange to its command, item, payment and acquired event
 mobile/authority/local-story/deadline-save.ts:1: file, 373 lines, limit 300
 mobile/authority/local-story/deadline-save.ts:26: function deadlineSave, 178 lines, limit 40
 mobile/authority/local-story/deadline-save.ts:205: function terminalAxis, 42 lines, limit 40

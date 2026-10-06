@@ -1,0 +1,11 @@
+command: python3 protocol/fixtures/generate_missing_child_v025.py
+exit: 0
+Independent B8 v025: c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a, 111 initial IDs.
+
+command: mise exec -- mix loka.compile cartridges/ashmere_missing_child [scratch-artifact]
+exit: 0
+
+Compiled artifact equals complete independent Python payload.
+SHA-256 c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a
+111 independent initial ID answers (all allocations checked by focused service test).
+Exact combined C2/Web predecessor e2e8cd532321ee7cf4da5ac150dd3d2290bba36a; B8 source 552717d50af951d8f5cd4c43533e53b7102d45fd.
