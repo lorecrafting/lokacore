@@ -12,8 +12,10 @@ Local C2 candidate: chapter **0.0.24 / API1.22**, independently derived from the
 reviewed B6 v023 artifact; hash
 `62f10e30e226c67627628c0017091284bbf1485a473222883fce92b44947b008`,
 **109 initial IDs** ([known answer](../../../protocol/fixtures/missing_child_v024_hash.json)).
-Published C2 source, PR and independent verdicts remain null. Source/evidence heads,
-checks and real Book proof are recorded in the
+Published C2 source and PR remain null. Exact local source `74711349` has
+[primary approval](../../reviews/2026-10-05-c2-watchmans-rounds-primary-review.md) and
+[save/protocol approval](../../reviews/2026-10-05-c2-watchmans-rounds-save-second-review.md).
+Source/evidence heads, checks and real Book proof are recorded in the
 [local handoff](c2-watchmans-rounds-local-pr-2026-10-05.md).
 
 ## Goal and governing clauses
@@ -152,8 +154,15 @@ Report commands, exits, actual red controls and failures. The provisional lane u
 focused checks; full active mise check_all and red controls run once at accumulated
 publication under the normal hook. Fresh primary plus required save/protocol opinion
 applies; Astra audits runtime/proposal if touched. Later source changes require scoped
-review. Browser proof walks the real Book route, refresh, pause/recovery and terminal
-narration; no native or owner-save operation is authorized by this assignment.
+review. Browser proof follows the
+[C2 staged browser-proof decision](../../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md):
+shared Start/departure/join, pause/Rejoin, committed success narration and resolved
+Journal, plus a fresh-save cold reopen. Keep actual real-host fatal/Restart proof
+distinct from unproved browser fatal/Restart, which must close in the Chapter 1 E3
+browser walk or sooner if practical. Native UI remains deferred under the mobile
+pause; the preserved terminal Web startup timeout remains open pending its separate
+Web SQLite fix. No native or
+owner-save operation is authorized by this assignment.
 
 Stop/escalate unreviewed dependency pins, a current-spec conflict, unsupported mortal
 Tobin, blocked required recovery route, silent reuse of escort orientation, a second
