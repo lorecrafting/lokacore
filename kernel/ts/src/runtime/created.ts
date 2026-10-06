@@ -7,7 +7,7 @@ import { refString, type Entity, type State, type World } from './decision.ts';
 type Identity = NonNullable<State['created']>[string];
 type Draft = {
   entities?: Record<string, Entity>;
-  knownEntities?: Record<string, { kind: string; owner_id?: World['character'] }>;
+  knownEntities?: Record<string, World['knownEntities'][string]>;
   capacities?: Record<string, number>;
   entityResourceSpecs?: Record<string, World['resourceSpecs'][string]>;
 };
@@ -66,7 +66,11 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   draft.entities ??= { ...world.entities };
   draft.entities[id] = { ...template, kind: hound ? 'npc' : 'item' } as Entity;
   draft.knownEntities ??= { ...world.knownEntities };
-  draft.knownEntities[id] = { kind: hound ? 'npc' : 'item' };
+  const entity = draft.entities[id];
+  draft.knownEntities[id] = {
+    kind: entity.kind,
+    ...(entity.kind === 'item' && entity.edible && { edible: true as const }),
+  };
   return true;
 }
 

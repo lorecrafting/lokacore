@@ -240,3 +240,34 @@ test('independent fresh IDs include consumed custody before published population
   assert.equal(w.entities[w.consumed!], undefined);
   assert.equal(w.slots.hand, ids['slot/hand']);
 });
+
+// Breaks: derived created-item metadata loses opted edibility, so an offered post-loot Eat faults.
+test('created edible loot uses the same admitted terminal transfer as static food', () => {
+  const w = fresh((c) => {
+    c.items[`${prefix}:item/hound_pelt`].edible = {
+      resource: ref('resource', 'mv'),
+      amount: 6,
+      label: 'action.eat',
+      narration: 'narration.eat_apple',
+    };
+  });
+  const item = Object.keys(w.state.created!).find((id) => {
+    const o = w.state.created![id].origin;
+    return o.kind === 'spawned' && o.role === 'pelt';
+  })!;
+  // Controlled direct custody represents the ordinary loot transfer after the hound dies.
+  const held = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [item]: w.body } },
+  };
+  assert.equal(
+    gameView(held)
+      .inventory.find((i) => i.id === item)!
+      .actions.find((a) => a.action_key === 'eat')!.available,
+    true,
+  );
+  const eaten = step(held, command(held, 1, { type: 'eat', item_id: item }), 0);
+  assert.equal(eaten.decision.kind, 'accepted');
+  assert.equal(eaten.world.state.containers[item], w.consumed);
+  assert.equal(level(eaten.world, w.body, ref('resource', 'mv')), 56);
+});
