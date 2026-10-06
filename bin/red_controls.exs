@@ -15,6 +15,27 @@ end
 # A throwaway copy under the system temp dir: the real file is never edited.
 tmp = &Path.join(System.tmp_dir!(), "loka-red-#{&1}-#{System.unique_integer([:positive])}#{&2}")
 
+registry = JSON.decode!(File.read!(Path.join(root, "protocol/capability_registry.json")))
+rows = JSON.decode!(File.read!(Path.join(root, "docs/features.json")))
+
+unimplemented =
+  Enum.find(registry, fn entry ->
+    row = rows[entry["key"]] || %{}
+    rule = "kernel/ts/src/mechanics/#{entry["key"]}/rule.ts"
+
+    not File.exists?(Path.join(root, rule)) and not Map.has_key?(row, "implemented_in") and
+      not Map.has_key?(row, "spec")
+  end) || raise("no unimplemented capability for feature red control")
+
+ruleless =
+  Enum.find(registry, fn entry ->
+    row = rows[entry["key"]] || %{}
+    rule = "kernel/ts/src/mechanics/#{entry["key"]}/rule.ts"
+
+    (entry["commands"] || []) == [] and not File.exists?(Path.join(root, rule)) and
+      not Map.has_key?(row, "implemented_in") and not Map.has_key?(row, "spec")
+  end) || raise("no unimplemented ruleless capability for feature red control")
+
 controls = [
   {"boundary: web reaches store (only platform may)",
    %{
@@ -95,14 +116,15 @@ controls = [
        ~s({"$defs": {"RedControl": {"anyOf": [{"type": "string"}, {"type": "string"}]}}})
    }, ~w(mix compile --warnings-as-errors --force), "RedControl/anyOf: invalid"},
   {"features: a capability implemented without its feature map cells",
-   %{"kernel/ts/src/mechanics/skills/rule.ts" => "export {};\n"},
-   ~w(elixir bin/features.exs --check), "skills@1: missing spec"},
+   %{"kernel/ts/src/mechanics/#{unimplemented["key"]}/rule.ts" => "export {};\n"},
+   ~w(elixir bin/features.exs --check),
+   "#{unimplemented["key"]}@#{unimplemented["version"]}: missing spec"},
   {"features: a ruleless capability implemented without its feature map cells",
    %{
      "tmp/red-features.json" =>
-       ~s({"skills": {"implemented_in": "planted"}, ) <>
-         String.trim_leading(File.read!(Path.join(root, "docs/features.json")), "{")
-   }, ~w(elixir bin/features.exs --check tmp/red-features.json), "skills@1: missing spec"},
+       JSON.encode!(Map.put(rows, ruleless["key"], %{"implemented_in" => "planted"}))
+   }, ~w(elixir bin/features.exs --check tmp/red-features.json),
+   "#{ruleless["key"]}@#{ruleless["version"]}: missing spec"},
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/ashmere_details/transcripts/skills.jsonl" => ""},
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
