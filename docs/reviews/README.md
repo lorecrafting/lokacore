@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D9 village reactions planning draft](2026-10-06-d9-village-reactions-plan-review.md): exact planning `36f90ab0`, CHANGES REQUIRED for impossible ordinary-play Study-corpse browser precondition; bell observer proof needs clarification. Source remains unbuilt.
+
 - [D6 water depths final integrated primary review](2026-10-06-d6-water-final-primary-review.md): exact local `3245550d`, CHANGES REQUIRED for evidence capture path redaction; runtime/source integration and bought-torch cold-reopen mutant otherwise pass. Final fix recheck, second opinion, hosted CI and publication remain open.
 - [D6 water depths final save/protocol second opinion](2026-10-06-d6-water-final-save-second-review.md): exact integrated `3245550d`, independent APPROVE with no findings; real SQLite 10/10, bought-torch custody mutant red, v035/API1.30/hash/190 IDs independently checked. Hosted exact-head CI/publication remain PM gates.
 - [D6 water depths final integrated primary review](2026-10-06-d6-water-final-primary-review.md): exact local `3245550d` CHANGES REQUIRED for capture path redaction; scoped `b5685dd5` fix recheck APPROVE, no open primary finding. Bought-torch cold-reopen mutant red/restored green; hosted CI/publication remain open.
