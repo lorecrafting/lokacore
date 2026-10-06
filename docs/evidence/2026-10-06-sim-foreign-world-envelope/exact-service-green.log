@@ -1,0 +1,1 @@
+{"baseline":"published v030","moves":["north","east"],"offer":"lantern_meal","available":true,"foreign_world_decision":{"kind":"rejected","error":{"code":"not_found"}},"world_unchanged":true,"oracle_for_foreign":true,"lawful_world_decision":"accepted"}

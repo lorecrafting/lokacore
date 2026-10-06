@@ -89,5 +89,6 @@ which every agent loads every session.
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
-  (r1-acceptance-envelope.md §3); its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
+  (r1-acceptance-envelope.md §3). [Foreign-world envelope oracle evidence](evidence/2026-10-06-sim-foreign-world-envelope/README.md)
+  retains the published-v030 failure and its focused fix controls; its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
   [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).
