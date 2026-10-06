@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **15 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2, D5, D2). The latest source publication is
-[#223](https://github.com/lorecrafting/lokacore/pull/223), D2 public Priory rooms and held Ward/Bell book topics.
+Local and GitHub `main` have completed **16 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, D5, D2). The latest source publication is
+[#226](https://github.com/lorecrafting/lokacore/pull/226), B9 paid Rest, resumable dream and acknowledged memory.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -233,12 +233,18 @@ approved after findings were fixed. The exact source passed the local full gate 
 all six hosted checks before merge. Native preview is paused.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
-and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
-on local base `10b023e8`. A3 and B8 are published. The
-[independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md)
-approved; implementation is active in an isolated branch, with successor
-release/API/hash/ID/proof pins still ahead.
-No playable S10 is claimed here.
+and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md).
+It is published in [#226](https://github.com/lorecrafting/lokacore/pull/226)
+at chapter 0.0.28/API1.25, hash
+`424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e`
+and 127 starting IDs. A paid Rest opens a resumable dream; only final
+acknowledgement commits its memory and S10 resolution. The
+[primary](reviews/2026-10-05-b9-lantern-dream-primary-review.md) and
+[save/protocol](reviews/2026-10-06-b9-lantern-dream-save-carryover-review.md)
+reviews approved after compiler and Book label findings were fixed. The exact
+source passed the local gate, all six hosted checks and final Sol review; the
+record-only head passed its applicable hosted checks. Actual Web choice,
+Resume, acknowledgement and cold reload passed. Native preview remains paused.
 
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
