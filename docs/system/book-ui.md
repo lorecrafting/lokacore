@@ -734,7 +734,7 @@ clock pause, body/map switch, second event transcript or presenter gameplay writ
 
 ## D4 home details and carried-food Eat
 
-**Selected plan; not implemented.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
+**D4 source interaction contract.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
 use ordinary exits, inspectable details and NPC dialogue. Orchard trees expose
 Forage only through the existing exact Harvest offer; Carrying's actual apple
 detail exposes its declared Eat action and capped MV benefit only when admitted.

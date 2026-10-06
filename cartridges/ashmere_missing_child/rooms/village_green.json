@@ -10,6 +10,9 @@
     },
     "east": {
       "to": "east_gate"
+    },
+    "west": {
+      "to": "smithy"
     }
   },
   "variants": [

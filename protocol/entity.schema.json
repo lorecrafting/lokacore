@@ -195,6 +195,9 @@
         },
         "readable": {
           "$ref": "#/$defs/ItemReadable"
+        },
+        "edible": {
+          "$ref": "#/$defs/ItemEdible"
         }
       },
       "required": [
@@ -700,6 +703,46 @@
             "kind": "topic",
             "key": "ward"
           }
+        }
+      ]
+    },
+    "ItemEdible": {
+      "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Positive integer; the canonical numeric profile supplies the safe-integer upper limit."
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "narration": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "resource",
+        "amount",
+        "label",
+        "narration"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "resource": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.29",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 6,
+          "label": "action.eat",
+          "narration": "narration.eat_apple"
         }
       ]
     }

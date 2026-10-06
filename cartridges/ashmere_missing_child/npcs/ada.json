@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "ada"
+  ],
+  "short": "npc.ada.short",
+  "room_line": "npc.ada.room",
+  "description": "npc.ada.description",
+  "room": "elspeth_cottage",
+  "daily_schedule": {
+    "7": "orchard",
+    "17": "elspeth_cottage"
+  }
+}
