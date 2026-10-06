@@ -134,3 +134,67 @@ Ponytail Review: **Lean already. Ship.** No separate over-engineering finding;
 no new dependency, redundant training ledger or speculative progression machinery.
 This simplicity assessment does not override the two blockers. Both remain open;
 the same developer should fix them and return the exact fix head for scoped review.
+
+
+## Scoped fix review — rounds 1 and 2
+
+**Final verdict: APPROVE. No open primary findings.** Source fix round 1:
+`caca4033d24fdd9b5a24efaff28d8bad09b64de2`, directly after the reviewed
+`e8bf456e`. Narrow round 2, final exact source reviewed:
+`11a61c851f42c1b22389626d6b5a405d8efcd90c`, directly after `caca4033`.
+This same independent reviewer checked only the dispositions, changed code and
+its direct callers, including the equipment/transcript repairs. The initial
+findings and evidence above remain historical; their final dispositions follow.
+
+- **C1-PRIMARY-01 closed.** Both gift and choice evidence use the shared
+  `eventIdentity` predicate at `dialogue-receipt.ts:251`, binding actor, correlation,
+  world and exact player scope to the original lawful Choose command. Existing
+  caller filters still bind causation. All six foreign gift/choice identity cases
+  now refuse file-backed reopen without changing file bytes, after accepting lawful
+  later wield custody. I independently removed the world-context guard: the named
+  new test fails on `choice_resolved/world_context_id`, actual `open`, expected
+  literal `save_corrupt`. Restoring the exact source returns that test to green.
+- **C1-PRIMARY-02 closed.** The ordered concatenations and small validation
+  predicates preserve source/reference/ownership checks and diagnostic order.
+  Exact `caca4033` strict Credo reports only the two previously identified inherited
+  B3 findings, with none of the seven C1 diagnostics. On exact combined integration
+  `e3863cb8813880ee14a2bd8a6d7ed3eead1989ca`, containing approved B3-LINT plus
+  C1 round 1, `mise exec -- mix credo --strict` exits0 with no issues. Its compiler
+  merge retains Skills immediately after Commerce. This check is reported against
+  that combined head, not falsely attributed to the uncombined source branch.
+- **C1-PRIMARY-03 found and closed in round 2.** Round 1 inserted `funded?/3`
+  between `lesson/5` clauses. At `caca4033`, `skills.ex:137` makes
+  `mix compile --force --warnings-as-errors` exit1 with the clause-grouping warning,
+  a publication blocker in directly touched code. Final `11a61c85` only moves the
+  fallback lesson clause beside the first clause, with no body/guard change.
+  The same forced compile now exits0; focused training/current-chapter tests
+  pass6/6. No other source file changed in that narrow fix.
+
+### Scoped verification
+
+All commands used `mise exec --` and slice-specific scratch logs. On `caca4033`:
+
+- **64 authority/Book tests pass:** training, reward/storage, repeat infirmary
+  exchanges, escort, riddle and their relevant Book consumers. These cover the
+  shared identity checks and the simplified detail/quest-consequence callers.
+- **27 kernel tests pass:** equipment, every pinned example transcript, training
+  behavior/loader contracts and shared schema example/invalid validation. The
+  equipment assertion now preserves the actual authored `head` slot. Transcript
+  discovery selects chapter answers by both manifest identity and recorded hash;
+  historical commerce/exchange traces replay without retargeting their pins.
+- **92 Elixir tests pass:** training/current chapter, attributes/combat and shared
+  contract/schema suites. The added literal examples and four named dodge invalid
+  cases pass both shared validators. Source cartridge content/hash/IDs were untouched.
+- The identity mutant fails as described above; restored identity regression passes.
+  `git diff --check e8bf456e..caca4033` passes.
+
+On final `11a61c85`, the forced warnings-as-errors compile and six focused compiler
+cases pass. Broader round-1 checks were not repeated for this clause-only reorder.
+No temporary mutation is retained. Full accumulated publication checks, the complete
+schema sweep and browser/native evidence remain their existing workflow obligations;
+this scoped source approval does not claim those were performed.
+
+Ponytail Review: **Lean already. Ship.** The shared event predicate removes duplicate
+validation, ordered `Enum.concat` uses the standard library, and clause grouping adds
+no machinery. Original blockers and the round-1 compiler warning are closed. The normal
+review-only commit hook checks the restored historical record plus this append and index.
