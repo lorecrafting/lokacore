@@ -1,0 +1,1457 @@
+{
+  "bases": {
+    "endpoint": {
+      "contract": "TransportDefinition",
+      "value": {
+        "key": "outbound",
+        "room": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "shore"
+        },
+        "detail": "ferry",
+        "destination": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        "reverse": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "transport",
+          "key": "return"
+        },
+        "recipient": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "npc",
+          "key": "sedge"
+        },
+        "currency": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "resource",
+          "key": "pennies"
+        },
+        "fare": 2,
+        "recovery_rooms": [],
+        "action": "board_ferry",
+        "label": "transport.board",
+        "narration": "transport.crossed"
+      }
+    },
+    "command": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "use_transport"
+      },
+      "value": {
+        "type": "use_transport",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "endpoint_id": "11111111-2222-4333-8444-555555555555",
+        "route": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "transport",
+          "key": "outbound"
+        },
+        "quoted_fare": 2
+      }
+    },
+    "offer": {
+      "contract": "TransportOffer",
+      "value": {
+        "route": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "transport",
+          "key": "outbound"
+        },
+        "fare": 2,
+        "charge": 2,
+        "waived": false,
+        "label": "transport.board",
+        "action": {
+          "action_key": "board_ferry",
+          "command": "use_transport",
+          "target": {
+            "kind": "entity",
+            "scopes": [
+              "inspectable_details"
+            ]
+          },
+          "input": [
+            "route",
+            "quoted_fare"
+          ],
+          "target_ids": [
+            "11111111-2222-4333-8444-555555555555"
+          ],
+          "label": "transport.board",
+          "available": true
+        }
+      }
+    },
+    "detail": {
+      "contract": "InspectableDetail",
+      "value": {
+        "aliases": [
+          "ferry"
+        ],
+        "description": "detail.ferry",
+        "transport": {
+          "route": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "transport",
+            "key": "outbound"
+          },
+          "title": "detail.ferry.title"
+        }
+      }
+    },
+    "input": {
+      "contract": "ActionInput",
+      "value": {
+        "route": {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "transport",
+          "key": "return"
+        },
+        "quoted_fare": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "base": "endpoint",
+      "name": "endpoint valid",
+      "valid": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint unknown field",
+      "valid": false,
+      "path": [
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "command",
+      "name": "command valid",
+      "valid": true
+    },
+    {
+      "base": "command",
+      "name": "command unknown field",
+      "valid": false,
+      "path": [
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "offer",
+      "name": "offer valid",
+      "valid": true
+    },
+    {
+      "base": "offer",
+      "name": "offer unknown field",
+      "valid": false,
+      "path": [
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "detail",
+      "name": "detail valid",
+      "valid": true
+    },
+    {
+      "base": "detail",
+      "name": "detail unknown field",
+      "valid": false,
+      "path": [
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "input",
+      "name": "input valid",
+      "valid": true
+    },
+    {
+      "base": "input",
+      "name": "input unknown field",
+      "valid": false,
+      "path": [
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing key",
+      "valid": false,
+      "path": [
+        "key"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing room",
+      "valid": false,
+      "path": [
+        "room"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing detail",
+      "valid": false,
+      "path": [
+        "detail"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing destination",
+      "valid": false,
+      "path": [
+        "destination"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing reverse",
+      "valid": false,
+      "path": [
+        "reverse"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing recipient",
+      "valid": false,
+      "path": [
+        "recipient"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing currency",
+      "valid": false,
+      "path": [
+        "currency"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing fare",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing recovery_rooms",
+      "valid": false,
+      "path": [
+        "recovery_rooms"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing action",
+      "valid": false,
+      "path": [
+        "action"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing label",
+      "valid": false,
+      "path": [
+        "label"
+      ],
+      "omit": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint missing narration",
+      "valid": false,
+      "path": [
+        "narration"
+      ],
+      "omit": true
+    },
+    {
+      "base": "command",
+      "name": "command missing type",
+      "valid": false,
+      "path": [
+        "type"
+      ],
+      "omit": true
+    },
+    {
+      "base": "command",
+      "name": "command missing actor_id",
+      "valid": false,
+      "path": [
+        "actor_id"
+      ],
+      "omit": true
+    },
+    {
+      "base": "command",
+      "name": "command missing endpoint_id",
+      "valid": false,
+      "path": [
+        "endpoint_id"
+      ],
+      "omit": true
+    },
+    {
+      "base": "command",
+      "name": "command missing route",
+      "valid": false,
+      "path": [
+        "route"
+      ],
+      "omit": true
+    },
+    {
+      "base": "command",
+      "name": "command missing quoted_fare",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing route",
+      "valid": false,
+      "path": [
+        "route"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing fare",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing charge",
+      "valid": false,
+      "path": [
+        "charge"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing waived",
+      "valid": false,
+      "path": [
+        "waived"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing label",
+      "valid": false,
+      "path": [
+        "label"
+      ],
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "name": "offer missing action",
+      "valid": false,
+      "path": [
+        "action"
+      ],
+      "omit": true
+    },
+    {
+      "base": "detail",
+      "name": "detail missing route",
+      "valid": false,
+      "path": [
+        "transport",
+        "route"
+      ],
+      "omit": true
+    },
+    {
+      "base": "detail",
+      "name": "detail missing title",
+      "valid": false,
+      "path": [
+        "transport",
+        "title"
+      ],
+      "omit": true
+    },
+    {
+      "base": "detail",
+      "name": "detail transport unknown field",
+      "valid": false,
+      "path": [
+        "transport",
+        "forged"
+      ],
+      "value": true
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint fare -1",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": -1
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint fare 2147483648",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": 2147483648
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint fare 0.5",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": 0.5
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint fare 0",
+      "valid": true,
+      "path": [
+        "fare"
+      ],
+      "value": 0
+    },
+    {
+      "base": "endpoint",
+      "name": "endpoint fare 2147483647",
+      "valid": true,
+      "path": [
+        "fare"
+      ],
+      "value": 2147483647
+    },
+    {
+      "base": "command",
+      "name": "command quoted_fare -1",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": -1
+    },
+    {
+      "base": "command",
+      "name": "command quoted_fare 2147483648",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 2147483648
+    },
+    {
+      "base": "command",
+      "name": "command quoted_fare 0.5",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 0.5
+    },
+    {
+      "base": "command",
+      "name": "command quoted_fare 0",
+      "valid": true,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 0
+    },
+    {
+      "base": "command",
+      "name": "command quoted_fare 2147483647",
+      "valid": true,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 2147483647
+    },
+    {
+      "base": "offer",
+      "name": "offer fare -1",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": -1
+    },
+    {
+      "base": "offer",
+      "name": "offer fare 2147483648",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": 2147483648
+    },
+    {
+      "base": "offer",
+      "name": "offer fare 0.5",
+      "valid": false,
+      "path": [
+        "fare"
+      ],
+      "value": 0.5
+    },
+    {
+      "base": "offer",
+      "name": "offer fare 0",
+      "valid": true,
+      "path": [
+        "fare"
+      ],
+      "value": 0
+    },
+    {
+      "base": "offer",
+      "name": "offer fare 2147483647",
+      "valid": true,
+      "path": [
+        "fare"
+      ],
+      "value": 2147483647
+    },
+    {
+      "base": "offer",
+      "name": "offer charge -1",
+      "valid": false,
+      "path": [
+        "charge"
+      ],
+      "value": -1
+    },
+    {
+      "base": "offer",
+      "name": "offer charge 2147483648",
+      "valid": false,
+      "path": [
+        "charge"
+      ],
+      "value": 2147483648
+    },
+    {
+      "base": "offer",
+      "name": "offer charge 0.5",
+      "valid": false,
+      "path": [
+        "charge"
+      ],
+      "value": 0.5
+    },
+    {
+      "base": "offer",
+      "name": "offer charge 0",
+      "valid": true,
+      "path": [
+        "charge"
+      ],
+      "value": 0
+    },
+    {
+      "base": "offer",
+      "name": "offer charge 2147483647",
+      "valid": true,
+      "path": [
+        "charge"
+      ],
+      "value": 2147483647
+    },
+    {
+      "base": "input",
+      "name": "input quoted_fare -1",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": -1
+    },
+    {
+      "base": "input",
+      "name": "input quoted_fare 2147483648",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 2147483648
+    },
+    {
+      "base": "input",
+      "name": "input quoted_fare 0.5",
+      "valid": false,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 0.5
+    },
+    {
+      "base": "input",
+      "name": "input quoted_fare 0",
+      "valid": true,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 0
+    },
+    {
+      "base": "input",
+      "name": "input quoted_fare 2147483647",
+      "valid": true,
+      "path": [
+        "quoted_fare"
+      ],
+      "value": 2147483647
+    },
+    {
+      "base": "endpoint",
+      "name": "recovery room bound",
+      "valid": false,
+      "path": [
+        "recovery_rooms"
+      ],
+      "value": [
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        }
+      ]
+    },
+    {
+      "base": "endpoint",
+      "name": "recovery room max",
+      "valid": true,
+      "path": [
+        "recovery_rooms"
+      ],
+      "value": [
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        },
+        {
+          "cartridge_id": "ferry_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "isle"
+        }
+      ]
+    }
+  ]
+}

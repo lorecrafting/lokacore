@@ -1,0 +1,10 @@
+{
+  "title": "room.hut_loft.title",
+  "description": "room.hut_loft.description",
+  "exits": {
+    "down": {
+      "to": "isle_hut"
+    }
+  },
+  "dark_description": "room.hut_loft.dark"
+}

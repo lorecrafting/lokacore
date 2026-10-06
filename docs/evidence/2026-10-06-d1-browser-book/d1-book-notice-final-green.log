@@ -1,0 +1,58 @@
+(node:54062) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/notice_board.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (126.240333ms)
+✔ the south search reaches the oak and returns through visible fox clues (46.554ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (101.939333ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (19.904375ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (39.909458ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (41.468208ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (161.450958ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (38.39375ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (29.575875ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (48.718958ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (93.127333ms)
+(node:54063) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ corpse Contents Take returns to its detail with one local pickup and Back to World (343.67025ms)
+✔ remounted pending pelt Take settles on its exact corpse detail (162.36025ms)
+✔ room is focused while Map retains directions and every detail returns to the world (54.001959ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (40.515625ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (67.637958ms)
+✔ only World position taps directly cycle the offered states with captured freshness (26.54275ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (25.567ms)
+✔ only confirmed pickup returns World, including a retry from another page (25.53125ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (25.774083ms)
+✔ inventory Drop returns World with one named event only after confirmation (23.725416ms)
+✔ other item actions retain their detail and show their consequences there (11.261792ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (28.720292ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (28.075125ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (37.023417ms)
+✔ actual trunk detail explains refused Take and restores its button after Remove then Drop (62.39575ms)
+✔ self-luminous Notice invokes its projected targetless recipe and retains the result (72.267583ms)
+(node:54064) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/readable.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Read targets retain confirmed detail messages without changing state (83.980292ms)
+✔ uncertain Read recovers its one receipt and narration, then reads again after cold reopen (44.854583ms)
+✔ stale and refused Read retain their target and never narrate an unread body (17.243334ms)
+✔ held Read survives the authored 68350 to 68400 pulse with authority freshness intact (14.398125ms)
+✔ cold reopen refuses a committed Read whose stored target is malformed (74.560459ms)
+✔ invalid Read JSON offers in-place Start over and leaves older pins explicitly refused (91.862042ms)
+(node:54065) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/riddle.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ NPC detail tiles edit a bounded word and submit retry/correct results after history (158.941416ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1980.734541

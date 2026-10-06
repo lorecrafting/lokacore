@@ -984,6 +984,13 @@ dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
 
+The narrow `transports/<key>.json` endpoint declares `room`, keyed `detail`,
+`destination`, reciprocal `reverse` transport reference, `recipient`, `currency`,
+integer `fare`, `recovery_rooms`, exact `action`, `label` and `narration`. Each
+boarding detail declares `transport: {route, title}`. The outbound recovery room
+list names the four isle rooms plus Fen Isle Landing; the free return declares
+an empty list. These paired routes add no ordinary compass connection.
+
 Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
 wrong fare/recipient reference, unbounded recipient balance, forged transport
 action, or ordinary exit that bypasses the declared ferry. The final bundled

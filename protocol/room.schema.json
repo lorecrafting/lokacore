@@ -194,6 +194,22 @@
             "entitlement"
           ],
           "additionalProperties": false
+        },
+        "transport": {
+          "type": "object",
+          "properties": {
+            "route": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "route",
+            "title"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

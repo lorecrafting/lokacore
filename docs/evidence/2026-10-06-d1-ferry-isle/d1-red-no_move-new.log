@@ -1,0 +1,67 @@
+X.XX..
+
+Failed tests:
+
+✖ paid outbound and free return join exact conserved balances and body entry (143.060083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2'
+  - 'd7e286c7-c344-8eef-8aa6-94a781d448bd'
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/transport.test.ts:44:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2',
+    expected: 'd7e286c7-c344-8eef-8aa6-94a781d448bd',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ recovery waiver uses actual death owner, isle room and contained roots (88.905083ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"unsupported_capability"}}
+  + actual - expected
+  
+  + 'rejected'
+  - 'accepted'
+  
+      at accepted (file://<worktree>/kernel/ts/test/transport.test.ts:34:10)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/transport.test.ts:119:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'rejected',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ Sedge teaches swim once freely through the original present dialogue (78.693667ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"unsupported_capability"}}
+  + actual - expected
+  
+  + 'rejected'
+  - 'accepted'
+  
+      at accepted (file://<worktree>/kernel/ts/test/transport.test.ts:34:10)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/transport.test.ts:127:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'rejected',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
