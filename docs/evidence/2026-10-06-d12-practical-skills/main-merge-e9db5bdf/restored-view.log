@@ -1,0 +1,26 @@
+$ mise exec -- node --test --test-reporter=spec mobile/app/book/practical_skills.test.ts kernel/ts/test/c4_pack.test.ts
+✔ night admission visits each of six fixed slots once (34.230834ms)
+✔ attack H2 admits both exact co-present hounds with H2 as primary (14.248834ms)
+✔ admission omits an already engaged helper while retaining the free target (8.224917ms)
+✔ one pack round rotates the cursor and keeps one current job (17.669541ms)
+✔ two healthy rounds use the selected helper for its actual attack (9.828625ms)
+✔ due pruning repairs a departed primary before the player opportunity (8.030833ms)
+✔ an empty due roster closes once and narrates pack withdrawal (8.245125ms)
+✔ player Flee closes the whole roster and cancels its sole future round (7.645875ms)
+✔ player-first selected death skips retaliation and repairs to the surviving helper (10.559667ms)
+✔ even-round player death closes every pack member before shrine return (12.294208ms)
+(node:50639) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted]/mobile/app/book/practical_skills.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book teacher detail to learned patch/shop controls sends the exact loaded offer and refreshes after cold open (537.525917ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 994.507584
+
+exit_status=0

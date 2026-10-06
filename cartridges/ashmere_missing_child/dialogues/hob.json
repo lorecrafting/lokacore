@@ -1,0 +1,23 @@
+{
+  "prompt": "dialogue.hob.prompt",
+  "choices": {
+    "leave": {
+      "label": "dialogue.hob.leave",
+      "narration": "dialogue.hob.prompt"
+    }
+  },
+  "npc": "hob",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "roles": {
+    "hob": {
+      "role": "npc",
+      "npc": "hob"
+    }
+  }
+}

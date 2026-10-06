@@ -1,0 +1,27 @@
+COMMAND: node --test kernel/ts/test/transport.test.ts mobile/authority/local-story/transport.test.ts
+EXIT: 0
+✔ paid outbound and free return join exact conserved balances and body entry (134.055083ms)
+✔ unaffordable and forged endpoint offers refuse atomically (170.608625ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (71.704958ms)
+✔ Sedge teaches swim once freely through the original present dialogue (87.671542ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (366.739875ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (54.746791ms)
+(node:10207) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (774.233625ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (758.52075ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (1509.098583ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (142.559125ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (289.554959ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (818.297959ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (100.616542ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5607.124791

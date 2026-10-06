@@ -1,0 +1,11 @@
+$ mise exec -- mix test --force test/loka/content_practical_skills_test.exs test/loka/core/c4_pack_composition_test.exs
+Compiling 72 files (.ex)
+Generated loka app
+Running ExUnit with seed: 502871, max_cases: 16
+
+....
+Finished in 1.2 seconds (1.2s async, 0.00s sync)
+
+Result: 4 passed
+
+exit_status=0

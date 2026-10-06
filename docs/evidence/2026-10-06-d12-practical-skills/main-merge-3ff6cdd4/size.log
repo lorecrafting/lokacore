@@ -1,0 +1,4 @@
+kernel/ts/src/view/action_lists.ts:1: info: size: allow 312, food projection and method-aware Harvest share the composed view list
+kernel/ts/src/view/action_lists.ts:37: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
+kernel/ts/src/view/action_lists.ts:139: info: size: allow 50, exact detail harvest joins shared action admission and projection
+exit_status=0

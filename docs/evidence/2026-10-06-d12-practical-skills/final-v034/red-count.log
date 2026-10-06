@@ -1,0 +1,71 @@
+check: red-count
+exit_status: 1
+✖ loaded careful alias resolves literal input and transfers the two lowest finite IDs (90.214125ms)
+✖ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (201.7205ms)
+✔ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (147.454917ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 620.263
+
+✖ failing tests:
+
+test at kernel/ts/test/practical_skills.test.ts:31:1
+✖ loaded careful alias resolves literal input and transfers the two lowest finite IDs (90.214125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+        '0556eeda-6c38-8679-bc0b-5a9848eba57a',
+        '65271e0f-75a2-82f3-a0a7-a15f7418ae6a',
+        '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+        0
+      ],
+  -   [
+  -     '37ef3668-8242-851e-94bc-66e562abebd7',
+  -     '65271e0f-75a2-82f3-a0a7-a15f7418ae6a',
+  -     '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  -     0
+  -   ]
+    ]
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/practical_skills.test.ts:59:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ '0556eeda-6c38-8679-bc0b-5a9848eba57a', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ] ],
+    expected: [ [ '0556eeda-6c38-8679-bc0b-5a9848eba57a', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ], [ '37ef3668-8242-851e-94bc-66e562abebd7', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/practical_skills.test.ts:83:1
+✖ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (201.7205ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"accepted","outcome":"harvested","delta":{"ops":[{"op":"entity.transfer","writer_group":0,"entity_id":"0556eeda-6c38-8679-bc0b-5a9848eba57a","source_id":"65271e0f-75a2-82f3-a0a7-a15f7418ae6a","destination_id":"3d4829ad-9e43-81ef-bc10-66b1b267e157"}]},"events":[{"id":"391cde46-d8e9-8bbb-93e6-715df16bc1ee","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f","scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"actor_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","logical_time":64800,"position":1,"causation_id":"bbbbbbbb-0000-4000-8000-000000000001","correlation_id":"bbbbbbbb-0000-4000-8000-000000000001","payload":{"type":"item_acquired","item_id":"0556eeda-6c38-8679-bc0b-5a9848eba57a","holder_id":"3d4829ad-9e43-81ef-bc10-66b1b267e157"}}],"effects":[],"rng":[1,2,3,4],"narration":[{"key":"narration.gather_carefully","participants":{"actor":"3d4829ad-9e43-81ef-bc10-66b1b267e157"}}]}
+  + actual - expected
+  
+  + 'accepted'
+  - 'rejected'
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/practical_skills.test.ts:107:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'accepted',
+    expected: 'rejected',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

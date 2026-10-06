@@ -1,0 +1,36 @@
+✔ loaded careful alias resolves literal input and transfers the two lowest finite IDs (107.626125ms)
+✔ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (249.857708ms)
+✖ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (60.962834ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 623.618375
+
+✖ failing tests:
+
+test at kernel/ts/test/practical_skills.test.ts:123:1
+✖ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (60.962834ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'accepted'
+  - 'rejected'
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/practical_skills.test.ts:177:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'accepted',
+    expected: 'rejected',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,58 @@
+COMMAND: mise exec -- node --test kernel/ts/test/combat_credit.test.ts kernel/ts/test/light.test.ts kernel/ts/test/transport.test.ts mobile/authority/local-story/light.test.ts mobile/authority/local-story/transport.test.ts mobile/app/book/notice_board.test.ts
+EXIT: 0
+✔ credit delivery rejects counterfeit attribution and missing fatal/corpse provenance (39.197333ms)
+✔ five distinct preacceptance lethal occurrences set exactly five facts without quest rewards (106.155375ms)
+✔ settles burn intervals once and preserves exhaustion through refueling (144.547917ms)
+✔ refuel conserves exact supply and preserves the settled effective lit state (3.699708ms)
+✔ unavailable refuel controls and forged commands refuse atomically (29.046833ms)
+✔ darkness shares projection/admission and never blocks the return stair (66.221792ms)
+✔ real lethal combat leaves reachable owner-only corpse roots and nested goods in darkness (82.854333ms)
+✔ illumination shares the target policy caller query budget (1.688542ms)
+✔ successor identity pin names the actual fresh rooms, subjects, jobs and equipment holders (0.297708ms)
+✔ light projection respects loaded keyed target and input admission before offering a source (983.837917ms)
+✔ paid outbound and free return join exact conserved balances and body entry (379.965833ms)
+✔ unaffordable and forged endpoint offers refuse atomically (516.380709ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (224.068917ms)
+✔ Sedge teaches swim once freely through the original present dialogue (266.530209ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (1293.289875ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (201.88125ms)
+(node:399) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/notice_board.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (450.413208ms)
+✔ the south search reaches the oak and returns through visible fox clues (279.919375ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (297.936917ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (160.126667ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (207.65675ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (159.381541ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (710.03275ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (198.563166ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (169.028208ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (260.452334ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (200.193125ms)
+✔ actual torch oil and nested intervals survive cold reopen and sell/buyback with conserved pennies (1168.219ms)
+✔ real failed and unknown refill commits reconcile the entire writer group and exact retry (477.436417ms)
+✔ corrupt fuel and forged refills refuse without repairing SQLite (1353.042209ms)
+✔ dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery (1134.909625ms)
+✔ a light-only cartridge reopens lawful refill history and rejects a bounded forged charge (45.492917ms)
+✔ undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched (8.058458ms)
+(node:401) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (2498.522042ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (2493.561ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (3389.055833ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (246.028625ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (1421.51725ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (3228.678209ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (325.618084ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22071.042792

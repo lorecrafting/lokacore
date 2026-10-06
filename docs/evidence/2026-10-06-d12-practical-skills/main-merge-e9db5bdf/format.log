@@ -1,0 +1,5 @@
+$ mise exec -- npx prettier --check kernel/ts/src/view/view.ts kernel/ts/src/view/action_lists.ts kernel/ts/src/contracts.gen.ts mobile/authority/local-story/save.ts cartridges/ashmere_missing_child/text.json
+Checking formatting...
+All matched files use Prettier code style!
+
+exit_status=0

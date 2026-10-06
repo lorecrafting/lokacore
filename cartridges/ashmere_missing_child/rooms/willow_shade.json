@@ -34,7 +34,13 @@
         ],
         "label": "action.harvest",
         "narration": "narration.harvest",
-        "title": "detail.fenwort_patch.title"
+        "title": "detail.fenwort_patch.title",
+        "careful": {
+          "skill": "herbalism",
+          "count": 2,
+          "action": "gather_carefully",
+          "narration": "narration.gather_carefully"
+        }
       }
     }
   }

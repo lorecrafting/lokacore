@@ -26,7 +26,32 @@ defmodule Loka.Content.Exchanges do
     steps = ["details", k, "harvest"]
 
     api(m, at(rel, steps)) ++
-      stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"]))
+      stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"])) ++
+      careful(m, defs, h, at(rel, steps ++ ["careful"]))
+  end
+
+  defp careful(m, defs, %{"careful" => c, "items" => items}, path) do
+    valid =
+      m["requires"]["capabilities"]["skills"] == 1 and
+        match?({_, _, _}, Refs.resolve(c["skill"], "skill", m, defs)) and
+        c["count"] <= length(Enum.uniq(items))
+
+    if valid and careful_action?(m, defs, c["action"]),
+      do: [],
+      else: [diag("OUTCOME_MISMATCH", path)]
+  end
+
+  defp careful(_, _, _, _), do: []
+
+  defp careful_action?(m, defs, key) do
+    case Refs.resolve(ref(key, "action", m), "action", m, defs) do
+      {_, _, a} ->
+        a["command"] == "harvest" and a["input"] == ["method"] and
+          a["target"] == %{"kind" => "entity", "scopes" => ["inspectable_details"]}
+
+      _ ->
+        false
+    end
   end
 
   defp dialogue_choices(m, defs) do

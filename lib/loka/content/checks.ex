@@ -1,4 +1,4 @@
-# size: allow 392, transport, population and dream refs join the shared checked expansion boundary
+# size: allow 400, careful and discounted skill refs join the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -125,6 +125,11 @@ defmodule Loka.Content.Checks do
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
       shop
+      |> Map.merge(
+        if shop["buy_discount"],
+          do: %{"buy_discount" => expand(shop["buy_discount"], m)},
+          else: %{}
+      )
       |> Map.put("resource", ref(r, "resource", m))
       |> Map.put(
         "offers",
@@ -141,7 +146,10 @@ defmodule Loka.Content.Checks do
   end
 
   def expand(%{"items" => _, "label" => _, "narration" => _} = h, m),
-    do: Map.update!(h, "items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+    do:
+      h
+      |> Map.update!("items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+      |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
   # Recipe costs and thresholds expand only their owned reference fields.
   def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),

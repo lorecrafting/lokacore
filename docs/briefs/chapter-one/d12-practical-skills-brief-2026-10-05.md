@@ -30,3 +30,11 @@ Read the relevant [mechanics](../../lessons/mechanics.md), [storage](../../lesso
 Stop at PM for a re-pinned predecessor mismatch, spec conflict, unbound displayed quote, required path gated by training, new generic framework or portable foundation/proposal change. The policy is adopted, but this active-spec amendment passed [fresh scoped review](../../reviews/2026-10-06-d12-practical-skills-selected-contract-review.md) before source work; no D12 source, test, browser or save proof is claimed.
 
 Planning self-review: Ponytail finds no new framework, stock ledger, quote token, currency store or dependency. Correctness preserves acquire≠qualify≠use, literal alias input, current post-settlement pricing, combined carry and atomic finite-ID/payment custody. These are design checks only; no runtime tests, mutations or browser/native proof were run. Independent approval covers the prior policy draft only; this adoption amendment awaits scoped review.
+
+Provisional source/check checkpoint: [D12 local evidence](../../evidence/2026-10-06-d12-practical-skills/README.md). Independent source approval, final successor pins, browser proof and publication remain pending.
+
+Published-main integration remains provisional: [3ff6cdd4 merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-3ff6cdd4/README.md). Successor pins and browser proof await C4 publication.
+
+C4 carryover remains provisional: [e9db5bdf merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-e9db5bdf/README.md). Successor pins and browser proof await D3 publication and final integration.
+
+Final local integration checkpoint: [v034 proof](../../evidence/2026-10-06-d12-practical-skills/final-v034/README.md) supersedes the provisional release/API/hash/ID nulls above. Source is on local `chapter1/d12-practical-skills-provisional` after D3 and Beads-main merges; fresh exact-head reviews, hosted CI and publication are pending.

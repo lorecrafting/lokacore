@@ -1,0 +1,8 @@
+mutant,old_focused_exit,new_focused_exit
+second_transfer,0,1
+combined_carry,0,1
+qualification,0,1
+stale_quote,1,1
+quote_use,0,1
+book_input,0,1
+historical_quote,0,1

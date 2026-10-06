@@ -1,3 +1,4 @@
+// size: allow 529, original ferry custody, death recovery and SQLite faults share one transport fixture
 // D1 uses the real rollback-journal SQLite host, not browser refresh as a fault oracle.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -117,7 +118,7 @@ const truth = (a: ReturnType<typeof setup>) => ({
 });
 function lesson(a: ReturnType<typeof setup>) {
   a.invoke('move', { direction: 'east' });
-  a.invoke('talk', {}, [entity(a.initial, 'npc', 'sedge')]);
+  a.invoke('sedge_swim', {}, [entity(a.initial, 'npc', 'sedge')]);
   return a.attempt('choose', {
     continuation_id: gameView(a.story.world()).choice!.continuation_id,
     choice_id: 'learn',

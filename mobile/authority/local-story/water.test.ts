@@ -6,7 +6,6 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, fresh, room, entity, prefix, ref } from '../../../kernel/ts/test/water_fixture.ts';
 import { gameView } from '../../../kernel/ts/src/index.ts';
-import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
 import { openGame } from './session.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -42,11 +41,7 @@ function setup(path = ':memory:', change: (c: any) => void = () => {}) {
   const lesson = () => {
     const talk = gameView(story.world())
       .entities.find((e) => e.id === entity(initial, 'npc', 'sedge'))!
-      .actions.find(
-        (a) =>
-          resolved(story.world(), initial.character)[a.action_key]?.command === 'talk' &&
-          a.available,
-      )!;
+      .actions.find((a) => a.label === 'sedge.swim.choice' && a.available)!;
     invoke(talk.action_key, {}, [entity(initial, 'npc', 'sedge')]);
     invoke('choose', {
       continuation_id: gameView(story.world()).choice!.continuation_id,

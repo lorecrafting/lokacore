@@ -1,0 +1,4 @@
+** (ArgumentError) protocol/ outside the schema subset:
+entity.schema.json#/$defs/Shop/properties/buy_discount/type: invalid
+    lib/loka/core/contracts/schema.ex:59: Loka.Core.Contracts.Schema.flatten!/1
+    lib/loka/core/contracts.ex:36: (module)

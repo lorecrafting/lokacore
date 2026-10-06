@@ -51,6 +51,12 @@
       }
     ],
     "bought": "shop.bought",
-    "sold": "shop.sold"
+    "sold": "shop.sold",
+    "buy_discount": {
+      "skill": "haggle",
+      "numerator": 9,
+      "denominator": 10,
+      "minimum": 1
+    }
   }
 }
