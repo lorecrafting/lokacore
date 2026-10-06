@@ -161,11 +161,11 @@ then use `br ready --brief --json`,
 `brew install dicklesworthstone/tap/bv`; run `bv` from a checkout with current
 `.beads` data, then press `b` for the board or `g` for the dependency graph.
 `bv` views the data on that checkout's branch, so use the main integration
-checkout for the latest merged status. From another checkout, point the viewer
-at that checkout's data with `bv --db tmp/loka-main-integration/.beads` when
-running from the usual repository root. This is read-only; it does not change
-the branch or move tracker data. For agent triage use
-`bv --db tmp/loka-main-integration/.beads --robot-triage`; human readers can use
+checkout for the latest merged status. From another checkout, set
+`LOKA_INTEGRATION_CHECKOUT` to the main integration checkout directory and run
+`bv --db "$LOKA_INTEGRATION_CHECKOUT/.beads"`. This is read-only; it does not
+change the branch or move tracker data. Agents can add `--robot-triage`; human
+readers can use
 the interactive board and graph. `br` mutates local
 SQLite and exports Git-tracked JSONL; after a pull use `br sync --import-only`,
 and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
