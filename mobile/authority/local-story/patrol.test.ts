@@ -123,12 +123,37 @@ test('real SQLite reopens every finite leg and explicit pause boundary', (t) => 
 });
 
 // Breaks: real cellar death persists old credit or Restart requires another quest/hour and cannot reopen.
-test('actual cellar fatal round, shrine return, ordinary recovery and Restart survive cold reopen', (t) => {
+test('actual cellar death separates concurrent Wren, resets patrol, and permits Restart after cold reopen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-patrol-fatal-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const a = setup(join(dir, 'story.db'));
   t.after(() => a.sql.close());
-  a.start();
+  const choose = (choice_id: string, answer?: string) => {
+    a.ok('choose', [], {
+      continuation_id: a.view().choice!.continuation_id,
+      choice_id,
+      ...(answer && { answer }),
+    });
+  };
+  a.ok('elspeth', [npc(fresh, 'elspeth')]);
+  choose('accept');
+  a.move('north', 'north');
+  const drawing = fresh.entityIds['ashmere_missing_child@0.0.24:item/fox_drawing'];
+  a.ok('take', [drawing]);
+  a.move('south', 'south');
+  a.ok('elspeth', [npc(fresh, 'elspeth')]);
+  choose('report');
+  a.move('south', 'south');
+  a.ok('study_tracks');
+  a.move('south', 'south');
+  a.ok('vesper', [npc(fresh, 'vesper')]);
+  choose('meet_wren');
+  a.ok('vesper', [npc(fresh, 'vesper')]);
+  choose('answer', 'LANTERN');
+  a.ok('wren', [npc(fresh, 'wren')]);
+  choose('rescue');
+  a.move('north', 'north', 'north', 'north', 'north', 'north', 'north', 'east');
+  a.choose('start');
   a.choose('continue');
   a.move('west');
   a.choose('continue');
@@ -149,6 +174,7 @@ test('actual cellar fatal round, shrine return, ordinary recovery and Restart su
   a.reopen();
   assert.equal(a.patrol().value.status, 'failed');
   assert.equal(a.patrol().value.credit.length, 0);
+  assert.equal(a.rows('escorts')[0].value.status, 'separated');
   assert.equal(a.rows('quests').find((q) => q.key === instance)!.value.state, 'active');
   a.move('south', 'south', 'south');
   a.reopen();

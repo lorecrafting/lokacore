@@ -687,7 +687,7 @@ adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets sta
 in force; pair enumeration is bounded before work, not an unmetered all-item scan.
 ## C2 patrol composition and admission
 
-**Selected, pending implementation.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source implemented; independent review pending.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
 quest instance, independently of the unchanged escort row. Register its minimal
 state/mutation target/transition and invariant under the patrol owner. Preserve

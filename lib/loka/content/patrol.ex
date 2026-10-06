@@ -127,7 +127,18 @@ defmodule Loka.Content.Patrol do
             get_in(o, ["patrol", "transition"]) != "start",
           do: diag("OUTCOME_MISMATCH", at(drel, ["choices", key, "accept"]))
 
-    other ++ escorts ++ accepts
+    dialogue =
+      for {_, {drel, _, d}} <- ctx.defs["dialogue"],
+          d["quest"] && d["quest"]["key"] == q["key"],
+          do: diag("OUTCOME_MISMATCH", at(drel, ["quest"]))
+
+    reactions =
+      for {_, {rrel, _, r}} <- ctx.defs["reaction"],
+          {s, i} <- Enum.with_index(r["apply"]),
+          s["quest"] && s["quest"]["key"] == q["key"],
+          do: diag("OUTCOME_MISMATCH", at(rrel, ["apply", i]))
+
+    other ++ escorts ++ accepts ++ dialogue ++ reactions
   end
 
   def choice(rel, steps, %{"patrol" => p} = o, d, ctx) do

@@ -76,13 +76,12 @@ function ownership(c: Obj, q: Obj, p: Obj, at: string): Diagnostic[] {
 
 function conflicts(c: Obj, q: Obj, p: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const [key, d] of Object.entries(c.dialogues ?? {}) as [string, Obj][])
+  const quest = refString({ ...p.npc, kind: 'quest', key: q.key });
+  for (const [key, d] of Object.entries(c.dialogues ?? {}) as [string, Obj][]) {
+    if (d.quest && refString(d.quest) === quest)
+      out.push(diag('OUTCOME_MISMATCH', `.cartridge.dialogues${step(key)}.quest`));
     for (const [choice, o] of Object.entries(d.choices) as [string, Obj][]) {
-      if (
-        o.accept &&
-        refString(o.accept) === refString({ ...p.npc, kind: 'quest', key: q.key }) &&
-        o.patrol?.transition !== 'start'
-      )
+      if (o.accept && refString(o.accept) === quest && o.patrol?.transition !== 'start')
         out.push(
           diag(
             'OUTCOME_MISMATCH',
@@ -97,6 +96,12 @@ function conflicts(c: Obj, q: Obj, p: Obj): Diagnostic[] {
           ),
         );
     }
+  }
+  for (const [key, r] of Object.entries(c.reactions ?? {}) as [string, Obj][])
+    r.apply.forEach((s: Obj, i: number) => {
+      if (s.quest && refString(s.quest) === quest)
+        out.push(diag('OUTCOME_MISMATCH', `.cartridge.reactions${step(key)}.apply[${i}]`));
+    });
   return out;
 }
 

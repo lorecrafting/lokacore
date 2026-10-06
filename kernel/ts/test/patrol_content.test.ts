@@ -74,6 +74,24 @@ test('loader refuses malformed patrol route, writer ownership and bare quest act
         ];
       },
     ],
+    [
+      'reaction activation without a patrol',
+      'OUTCOME_MISMATCH',
+      (c) => {
+        const r: any = Object.values(c.reactions).find(
+          (r: any) => r.apply[0].op === 'quest.activate',
+        );
+        r.apply[0].quest = ref(fresh, 'quest', 'watch_rounds');
+      },
+    ],
+    [
+      'ordinary dialogue completion without patrol credit',
+      'OUTCOME_MISMATCH',
+      (c) => {
+        const d: any = Object.values(c.dialogues).find((d: any) => d.quest);
+        d.quest = ref(fresh, 'quest', 'watch_rounds');
+      },
+    ],
   ];
   for (const [name, code, change] of mutations) {
     const c = patrolBundle().value;

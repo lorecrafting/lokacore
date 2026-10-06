@@ -781,7 +781,7 @@ on non-detail entities. Non-opted items and historical frozen artifacts retain
 their existing representation; B4's fuel rows are not liquid vessels.
 ## C2 watch route and trust
 
-**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+**Local source implemented; independent review pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
 Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
 down; Village Green east ↔ East Gate west. The cell is vacant with an open,
@@ -826,8 +826,9 @@ The patrol Start choice owns activation and its final causal join owns resolutio
 ordinary quest-linked dialogue and reaction activation/resolution/failure cannot
 write a patrol quest independently of its row. World route/count values are
 cartridge data, never presenter/engine chapter literals; existing safety budgets
-bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
-reviewed C1/B5 integration is re-pinned and independently derived.
+bound all validation/traversal. The local 0.0.24/API1.22 candidate and independently derived hash/IDs are pinned
+in the [C2 brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
+Publication and independent source approval remain pending.
 
 ## B6 marsh route and tuning
 

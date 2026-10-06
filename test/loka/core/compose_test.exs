@@ -1,3 +1,4 @@
+# size: allow 520, patrol and liquid cases share the existing randomized differential pool
 defmodule Loka.Core.ComposeTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}

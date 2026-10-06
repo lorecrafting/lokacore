@@ -1,4 +1,4 @@
-# size: allow 360, finite stock and exchange refs join the checked expansion boundary
+# size: allow 380, patrol refs and bounded topics join the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
