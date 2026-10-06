@@ -1,13 +1,13 @@
 # C3 living hounds — provisional source evidence
 
-Source: `dbb20b78` on the isolated C3 branch, integrating published B8 source. Independent source review and publication remain pending. The active chapter is `0.0.26` / kernel API `1.24`; its independently verified SHA-256 is `79191ce8a2653728c4ee1a4ad5cd31eacd38120bd420c8be413c9d0b92afc440`. The genesis fixture pins 124 IDs.
+Source: `18aa78c5f015dd1936a37598259f0fbf9152d5ff` on the isolated C3 branch, integrating published B8 source. Independent source review and publication remain pending. The active chapter is provisionally `0.0.26` / kernel API `1.24`; its independently verified SHA-256 is `79191ce8a2653728c4ee1a4ad5cd31eacd38120bd420c8be413c9d0b92afc440`. The genesis fixture pins 124 IDs. D2 is expected to publish v026 first, so C3 will need a successor re-pin before final review.
 
 ## Checks
 
 | Command | Result |
 | --- | --- |
 | `mise exec -- bin/check_all.sh` | Exit 0; `check-all.log` (351 Elixir tests, contract/schema/docs/architecture, kernel TypeScript, size and formatting). |
-| `mise exec -- node --test --experimental-strip-types kernel/ts/test/hounds.test.ts` | Exit 0, 7/7. |
+| `mise exec -- node --test --experimental-strip-types kernel/ts/test/hounds.test.ts` | Exit 0, 8/8. |
 | `mise exec -- mix test test/loka/content_missing_child_test.exs --force` | Exit 0, 6/6. |
 | `mise exec -- node --test --experimental-strip-types mobile/app/book/hounds.test.ts` | Exit 0, 2/2 after the Book test was moved behind local Story/GameView. |
 | `mise exec -- node --test --experimental-strip-types mobile/authority/local-story/hounds.test.ts` | Exit 0, 2/2 with real SQLite. |
@@ -24,6 +24,7 @@ The real SQLite tests cover one lost COMMIT acknowledgement on a wandering job w
 | Remove Elixir compiler's same period guard | Exit 2; slower-wander compiler test failed (5/6). |
 | Omit fatal population slot transition | Exit 1; deliberate-attack/replacement test failed (6/7). |
 | Reject spawned pelts from ordinary item custody | Exit 1; Book corpse Contents/Take test failed (1/2). |
+| Add a no-op slot1 transition to each population job | Exit 1; both real equal-time order proofs failed, including the new focused test. |
 
 Every planted source edit was restored immediately after its red run.
 

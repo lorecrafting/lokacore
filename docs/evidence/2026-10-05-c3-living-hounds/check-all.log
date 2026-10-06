@@ -1,5 +1,5 @@
 Resolving Hex dependencies...
-Resolution completed in 0.011s
+Resolution completed in 0.016s
 Unchanged:
   boundary 0.11.0
   bunt 1.0.0
@@ -8,17 +8,17 @@ Unchanged:
   jason 1.4.5
 All dependencies have been fetched
 No cycles found
-Running ExUnit with seed: 3846, max_cases: 16
+Running ExUnit with seed: 868687, max_cases: 16
 
 ................................................................................................................................................................................................................................................................................................................................................................
-Finished in 16.5 seconds (16.4s async, 0.05s sync)
+Finished in 22.8 seconds (22.7s async, 0.09s sync)
 
 Result: 352 passed
 Checking 134 source files (this might take a while) ...
 
 Please report incorrect results: https://github.com/rrrene/credo/issues
 
-Analysis took 0.08 seconds (0.05s to load, 0.03s running 4 checks on 134 files)
+Analysis took 0.4 seconds (0.3s to load, 0.07s running 4 checks on 134 files)
 1409 mods/funs, found no issues.
 
 Use `mix credo explain` to explain issues, `mix credo --help` for options.
@@ -73,7 +73,7 @@ ok   ts-rule-module-location
 ok   ts-rule-module-pure
 ok   ts-rule-registration
 ok   docs_only: skip for .md only, run otherwise
-601 docs, 0 broken link(s), 0 unreachable
+602 docs, 0 broken link(s), 0 unreachable
 ok   docs: stale code pointers
 
 > loka-kernel@0.0.0 typecheck
@@ -114,7 +114,7 @@ ok   docs: stale code pointers
 ....................
 ....................
 ....................
-..............
+...............
 ok   kernel tsc rejects host and Node APIs
 ok   typecheck covers the tests
 ok   typecheck covers play/
