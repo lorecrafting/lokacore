@@ -1,0 +1,49 @@
+✔ original leader earns zero until real player joins four unique checkpoints (23.097375ms)
+✔ ordinary detour requires explicit Rejoin and fresh drawn continuation state (16.233625ms)
+✔ fatal combat invalidates together and awaiting attempts before immediate Restart (11.262291ms)
+✔ original Wren follow composes independently with leader-only Continue and one joined Move (9.845208ms)
+✔ public watch rooms, readables and Start remain usable at dusk, late night and next morning (14.521416ms)
+✔ loader refuses malformed patrol route, writer ownership and bare quest activation (516.363791ms)
+✔ patrol contracts match independent boundary literals (17.17775ms)
+✔ patrol composition matches literal lifecycle and refusal rows (2.538708ms)
+✔ patrol invariant rejects counterfeit and missing writes (0.44925ms)
+(node:26706) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens every finite leg and explicit pause boundary (1077.341125ms)
+✔ actual cellar death separates concurrent Wren, resets patrol, and permits Restart after cold reopen (1022.3035ms)
+▶ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite
+  ✔ actor_id (98.520875ms)
+  ✔ body_id (109.179792ms)
+  ✔ npc_id (92.762292ms)
+  ✔ quest_instance_id (89.729584ms)
+  ✔ continuation_id (101.445167ms)
+  ✔ attempt_id (87.697875ms)
+  ✔ cursor (97.203875ms)
+  ✔ credit (94.559875ms)
+  ✔ status (94.961417ms)
+  ✔ fractional (101.886042ms)
+  ✔ missing (114.437542ms)
+  ✔ scope (89.359125ms)
+  ✔ cause (106.433459ms)
+  ✔ source (88.719375ms)
+  ✔ lost-transition (93.144709ms)
+✔ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite (1462.061ms)
+▶ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry
+  ✔ failed (99.413583ms)
+  ✔ lost (103.68475ms)
+✔ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry (203.590916ms)
+▶ final player join commits movement, terminal quest and trust together across both uncertain outcomes
+  ✔ failed (185.233416ms)
+  ✔ lost (192.324041ms)
+✔ final player join commits movement, terminal quest and trust together across both uncertain outcomes (377.932416ms)
+✔ real original-Tobin C1 lessons reopen during patrol and completion grants trust alone (377.964125ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4869.083792

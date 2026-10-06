@@ -1,0 +1,38 @@
+{
+  "source": "747113496572892a01224c47cddc0bf4f63d0fdc",
+  "published_mechanics_base": "80c3a0725e2266871f949b9a72577ba84dd2b70e",
+  "candidate": {
+    "chapter": "0.0.24",
+    "api": "1.22",
+    "sha256": "62f10e30e226c67627628c0017091284bbf1485a473222883fce92b44947b008",
+    "initial_ids": 109
+  },
+  "focused_ts_sqlite": {
+    "command": "mise exec -- node --test kernel/ts/test/patrol.test.ts kernel/ts/test/patrol_content.test.ts kernel/ts/test/patrol_contracts.test.ts mobile/authority/local-story/patrol.test.ts",
+    "exit": 0,
+    "passed": 34
+  },
+  "focused_elixir": {
+    "command": "mise exec -- mix test test/loka/content_patrol_test.exs test/loka/content_missing_child_test.exs test/loka/core/patrol_test.exs test/loka/core/compose_test.exs",
+    "exit": 0,
+    "passed": 22
+  },
+  "schema_controls": {
+    "planted": 91,
+    "survivors": 0
+  },
+  "behavior_controls": {
+    "planted": 10,
+    "old_focused_exit": 0,
+    "new_focused_exit": "nonzero"
+  },
+  "browser": {
+    "route": "completed;4/4 resolved Journal; pause/return/Rejoin; actual surviving combat/Flee",
+    "terminal_reopen": "Sync operation timeout; unresolved",
+    "fatal_restart": null
+  },
+  "full_active": null,
+  "hosted_ci": null,
+  "native": null,
+  "independent_verdicts": "parent records separately"
+}
