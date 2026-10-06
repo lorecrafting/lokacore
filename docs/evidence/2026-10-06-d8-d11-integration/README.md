@@ -62,3 +62,20 @@ missing companion, HP and slot refusals remain covered by existing behavior test
 Next concrete blocker: simplify the existing D8 `cancel_binding?` additions while
 preserving cancellation binding checks; rerun the required gate after that change.
 The scoped parity fix is complete; publication and remaining proof stay pending.
+
+## Bounded cancellation complexity fix
+
+`cancel_binding?` now uses ordered guarded function clauses for crow, bleed, water
+and encounter bindings. The previous branch precedence and every identity,
+generation and exclusive-field check are preserved. `mix xref callers
+Loka.Core.ComposeEncounter` confirms the composition caller. Ponytail/correctness
+self-review selected ordinary function clauses without a new helper abstraction.
+
+- Red control: temporarily refuse valid encounter cancellation; `mise exec -- mix test --force test/loka/core/encounter_composition_test.exs` exits2, 3/6 pass. Original source restored before the fix.
+- Fixed focused `mise exec -- mix test --force test/loka/core/encounter_composition_test.exs test/loka/core/crow_composition_test.exs test/loka/core/bleed_test.exs`: exit0, 14 passed.
+- Sole post-fix full gate: exit1. All393 Elixir tests and Credo passed. The size checker now blocks at `lib/loka/core/compose.ex` (385 lines/limit340; `apply_op` line245 is42/limit40) and `lib/loka/core/invariants.ex` (342 lines/limit340). Later stages did not run.
+
+Next bounded work is to resolve these actual size failures by extracting existing
+cohesive D8 composition/invariant logic without relaxing limits or checks. All
+remaining browser/schema/simulation/independent review and publication proof is
+still pending.

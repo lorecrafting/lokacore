@@ -211,24 +211,25 @@ defmodule Loka.Core.ComposeEncounter do
       else: {:error, "precondition_failed"}
   end
 
+  defp cancel_binding?(%{"crow_member_id" => member} = op, row) when not is_nil(member) do
+    row["crow_member_id"] == member and
+      row["crow_generation"] == op["crow_generation"] and
+      op["encounter_id"] == nil and op["water_generation"] == nil
+  end
+
+  defp cancel_binding?(%{"bleed_body_id" => body} = op, row) when not is_nil(body) do
+    row["bleed_body_id"] == body and
+      row["bleed_generation"] == op["bleed_generation"] and op["encounter_id"] == nil
+  end
+
+  defp cancel_binding?(%{"water_generation" => generation} = op, row)
+       when not is_nil(generation) do
+    row["water_generation"] == generation and
+      row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil
+  end
+
   defp cancel_binding?(op, row) do
-    cond do
-      op["crow_member_id"] != nil ->
-        row["crow_member_id"] == op["crow_member_id"] and
-          row["crow_generation"] == op["crow_generation"] and
-          op["encounter_id"] == nil and op["water_generation"] == nil
-
-      op["bleed_body_id"] != nil ->
-        row["bleed_body_id"] == op["bleed_body_id"] and
-          row["bleed_generation"] == op["bleed_generation"] and op["encounter_id"] == nil
-
-      op["water_generation"] != nil ->
-        row["water_generation"] == op["water_generation"] and
-          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil
-
-      true ->
-        op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
-    end
+    op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
   end
 
   defp binding?(op) do
