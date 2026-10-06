@@ -495,3 +495,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 scoped fix round 2](2026-10-06-c5-final-primary-review.md#scoped-fix-round-2--approve): source `0fab0216`, APPROVE; FP2/SO5 early-expiry handoff and SO6 orphan water-binding parity closed. Fixed command27, portable due-tick refusal and independent SQLite reopen-before/after-handoff verified; all recorded findings closed.
 
 - [C5 second opinion on fix round 2](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-fix-round-2): verbatim CHANGES REQUIRED at `0fab0216`; raises SO7 early-delivery cadence enforcement and SO8 missing committed SQLite handoff regression. Primary scoped approval remains as recorded pending evaluation of these new findings.
+
+- [C5 owner-approved scoped fix round 3](2026-10-06-c5-final-primary-review.md#owner-approved-scoped-fix-round-3--approve): source `0e7bbfe8`, APPROVE; SO7 future-cadence skip refused in both kernels and SO8 committed SQLite reopen/receipt/later-tick regression verified. TS/SQLite21/21, Elixir3/3, three mutation controls red; no open primary finding.

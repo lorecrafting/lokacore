@@ -212,3 +212,13 @@ Limits: Did not rerun disk-backed SQLite, full Mix/CI, schema sweep,
 browser/native tests or owner-save operations. No files edited or
 comments posted; working tree remains clean.
 ```
+## Owner-approved scoped fix round 3 — APPROVE
+
+**Exact source:** `0e7bbfe854ce137d039b48f468c2756c6b6b2b4a`. This bounded review follows the [owner's exception](../decisions/owner-decision-c5-third-fix-round-2026-10-06.md) and examines SO7/SO8, their changed portable predicates, direct producer and committed tests. **SO7 and SO8 are closed; no open finding from the primary review.**
+
+- **SO7 closed:** both composers now choose the cadence rule by the completed occurrence's due time. Early delivery requires exactly the retained future cadence; a due tick requires advancement. The new shared literal case uses clock200, completed expiry200, pending tick250 and end400, and refuses replacing tick250 with350 on the bleed target. Both kernels pass that refusal alongside legitimate early handoff and due-tick controls. Reverting each composer's correction independently makes the new skip-future-cadence fixture fail. Source was restored; Elixir was rerun with `--force`.
+- **SO8 closed:** the committed real SQLite regression now includes the earlier independent proof as a maintained test: actual wound/refresh/Flee/re-engagement gives end65700 and pending cadence65450; cold reopen at65400 retains HP3. The former expiry65425 adds exactly one receipt without HP loss; a second cold open retains the handoff's end/cadence/HP and receipt count. The actual tick65450 reduces HP to literal2, advances cadence65550 and adds exactly one further receipt. Temporarily forcing an early delivery to advance cadence makes this specific SQLite test fail; the mutation was restored.
+
+Verification: **21/21 focused TypeScript/kernel/real-SQLite tests and 3/3 focused Elixir tests pass**. Three independent mutation runs fail as expected. The prior fixed-command27 same-time path and due-tick refusal remain green. Changes preserve the existing occurrence/source/end checks and generic receipt/changed-row authority; no source or test edits remain from this review. No browser/native runtime or owner save was used.
+
+Ponytail Review: the correction replaces a permissive disjunction with the two required cases in the existing composers; the SQLite test covers a distinct durable continuation. No added framework, dependency or complexity finding. **APPROVE** for the exact source above; the PM retains the exact-head hosted CI and merge gates.
