@@ -38,109 +38,117 @@ defmodule Loka.Content.Services do
 
   def check(m, defs, {_, text}) do
     declared = for {_, {rel, [], s}} <- defs["service"], do: {rel, s}
-    errors = Enum.flat_map(declared, fn {rel, s} -> service(rel, s, m, defs, text) end)
 
-    api =
+    Enum.flat_map(declared, fn {rel, s} -> service(rel, s, m, defs, text) end) ++
+      beds(m, defs, text) ++ api(m, declared) ++ providers(m, defs)
+  end
+
+  defp api(m, declared) do
+    minimum =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    api_errors =
-      if declared != [] and api < [1, 23],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
+    if declared != [] and minimum < [1, 23],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
 
-    errors ++
-      beds(m, defs, text) ++
-      api_errors ++
-      for {key, {rel, [], npc}} <- defs["npc"],
-          npc["services"],
-          not providers?(npc["services"], ref(key, "npc", m), m, defs),
-          do: bad(at(rel, ["services"]))
+  defp providers(m, defs) do
+    for {key, {rel, [], npc}} <- defs["npc"],
+        npc["services"],
+        not providers?(npc["services"], ref(key, "npc", m), m, defs),
+        do: bad(at(rel, ["services"]))
   end
 
   defp service(rel, s, m, defs, text) do
     npc = resolved(s["provider"], "npc", m, defs)
+    checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs)
+
+    texts(rel, service_texts(s), text) ++
+      for({valid, steps} <- checks, not valid, do: bad(at(rel, steps)))
+  end
+
+  defp bindings(s, npc, m, defs) do
     currency = resolved(s["currency"], "resource", m, defs)
-    action = defs["action"][s["action"]]
 
-    valid_action =
-      case action do
-        {_, [], a} -> a["command"] == "use_service"
-        _ -> false
-      end
+    [
+      {m["requires"]["capabilities"]["service"] == 1, []},
+      {service_action?(defs["action"][s["action"]]), ["action"]},
+      {declared_stock?(currency, npc, s["currency"]["key"]), ["currency"]},
+      {ref(s["key"], "service", m) in (npc["services"] || []), ["provider"]}
+    ]
+  end
 
-    checks =
-      [
-        {m["requires"]["capabilities"]["service"] == 1, []},
-        {valid_action, ["action"]},
-        {finite?(currency) and npc["resource_starts"][s["currency"]["key"]] != nil, ["currency"]},
-        {ref(s["key"], "service", m) in (npc["services"] || []), ["provider"]}
-      ] ++ benefit(s["benefit"], npc, s, m, defs)
+  defp service_action?({_, [], a}), do: a["command"] == "use_service"
+  defp service_action?(_), do: false
 
+  defp service_texts(s) do
     reasons =
       if s["benefit"]["kind"] == "entitlement",
         do: ~w(service.unaffordable service.already_paid),
         else: ~w(service.unaffordable service.full_mv service.sold_out)
 
-    fields = Enum.map(reasons, &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
-    texts(rel, fields, text) ++ for({valid, steps} <- checks, not valid, do: bad(at(rel, steps)))
+    Enum.map(reasons, &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
   end
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
     f = resolved(r, "fact", m, defs)
-
-    [
-      {f["scopes"] == ["player"] and f["value_type"]["type"] == "bool" and
-         f["value_type"]["default"] == false, ["benefit", "fact"]}
-    ]
+    [{player_bool?(f) and f["value_type"]["default"] == false, ["benefit", "fact"]}]
   end
 
   defp benefit(b, npc, s, m, defs) do
     recovery = resolved(b["recovery"], "resource", m, defs)
-    result = [{recovery["key"] == "mv", ["benefit", "recovery"]}]
-
-    case b["kind"] do
-      "meal" ->
-        stock = resolved(b["stock"], "resource", m, defs)
-
-        result ++
-          [
-            {finite?(stock) and npc["resource_starts"][b["stock"]["key"]] != nil and
-               b["stock"] != s["currency"] and stock["maximum"] - stock["minimum"] >= b["debit"],
-             ["benefit", "stock"]}
-          ]
-
-      "drink" ->
-        item = resolved(b["vessel"], "item", m, defs)
-        liquid = resolved(b["liquid"], "liquid", m, defs)
-
-        result ++
-          [
-            {item["location"]["in"] == "npc" and item["location"]["npc"] == s["provider"] and
-               item["vessel"]["initial"]["kind"] == b["liquid"] and
-               is_integer(liquid["drink_amount"]) and
-               item["vessel"]["capacity"] >= liquid["drink_amount"] and
-               item["vessel"]["initial"]["quantity"] >= liquid["drink_amount"],
-             ["benefit", "vessel"]}
-          ]
-    end
+    [{recovery["key"] == "mv", ["benefit", "recovery"]}] ++ stock(b, npc, s, m, defs)
   end
+
+  defp stock(%{"kind" => "meal"} = b, npc, s, m, defs) do
+    stock = resolved(b["stock"], "resource", m, defs)
+
+    [
+      {declared_stock?(stock, npc, b["stock"]["key"]) and b["stock"] != s["currency"] and
+         stock["maximum"] - stock["minimum"] >= b["debit"], ["benefit", "stock"]}
+    ]
+  end
+
+  defp stock(%{"kind" => "drink"} = b, _, s, m, defs) do
+    item = resolved(b["vessel"], "item", m, defs)
+    liquid = resolved(b["liquid"], "liquid", m, defs)
+    [{held_vessel?(item, s, b) and serves?(item, liquid), ["benefit", "vessel"]}]
+  end
+
+  defp declared_stock?(r, npc, key), do: finite?(r) and npc["resource_starts"][key] != nil
+
+  defp held_vessel?(item, service, benefit) do
+    location = item["location"]
+
+    location["in"] == "npc" and location["npc"] == service["provider"] and
+      item["vessel"]["initial"]["kind"] == benefit["liquid"]
+  end
+
+  defp serves?(item, liquid) do
+    amount = liquid["drink_amount"]
+    vessel = item["vessel"]
+
+    is_integer(amount) and vessel["capacity"] >= amount and
+      vessel["initial"]["quantity"] >= amount
+  end
+
+  defp player_bool?(f), do: f["scopes"] == ["player"] and f["value_type"]["type"] == "bool"
 
   defp beds(m, defs, text) do
     for {_, {rel, [], room}} <- defs["room"],
         {key, %{"bed" => bed}} <- Map.get(room, "details", %{}),
-        f = resolved(bed["entitlement"], "fact", m, defs),
-        d <-
-          if(
-            f["value_type"]["type"] != "bool" or f["scopes"] != ["player"] or
-              m["requires"]["capabilities"]["position"] != 1 or
-              m["requires"]["capabilities"]["service"] != 1,
-            do: [bad(at(rel, ["details", key, "bed"]))],
-            else: []
-          ) ++
-            texts(rel, [{["details", key, "bed", "title"], bed["title"]}], text),
+        d <- bed(rel, key, bed, m, defs, text),
         do: d
+  end
+
+  defp bed(rel, key, bed, m, defs, text) do
+    f = resolved(bed["entitlement"], "fact", m, defs)
+    caps = m["requires"]["capabilities"]
+    valid = player_bool?(f) and caps["position"] == 1 and caps["service"] == 1
+    errors = if valid, do: [], else: [bad(at(rel, ["details", key, "bed"]))]
+    errors ++ texts(rel, [{["details", key, "bed", "title"], bed["title"]}], text)
   end
 
   defp texts(_, _, :unknown), do: []
