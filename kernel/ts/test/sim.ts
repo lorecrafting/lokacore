@@ -33,8 +33,7 @@ import { read } from './read.ts';
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
 export const GENERATOR = 17;
-/** Each registered invariant, by how a step checks it (runtime/world.ts holds on the world after it, */
-/** runtime/invariants.ts check on its observation), or why no step does. */
+/** Each registered invariant's world/observation check or reason for host-only proof. */
 export const CHECKED = {
   world: [
     'player_in_one_room',
@@ -49,6 +48,7 @@ export const CHECKED = {
     'no_last_writer_wins',
     'delta_preconditions_hold',
     'liquid_rows_valid',
+    'patrol_transitions_hold',
     'fault_discards_whole_proposal',
     'fault_codes_are_evaluation_faults',
     'target_candidates_ordered',

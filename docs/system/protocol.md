@@ -177,13 +177,17 @@ Admission independently revalidates its pair under the decision counter.
 
 ## Invariants
 
-`protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
+`protocol/invariants.json` registers the active invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/runtime/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
 (the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:141`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
+The simulator checks registered portable delta invariants, including
+`patrol_transitions_hold`, per step even when a frozen demo has no operation of that
+family. This does not expand its demo corpus or change generated seed sequences;
+the dedicated chapter/literal fixtures prove the family's real transitions.
 
 ## Events
 

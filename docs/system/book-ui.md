@@ -534,8 +534,10 @@ the [C2 staged browser-proof decision](../decisions/owner-decision-c2-staged-bro
 Browser death/Restart remains an explicit gap to close in the Chapter 1 E3 browser
 walk, or sooner if practical. Actual fatal/Restart is proved separately by real-host
 SQLite; native UI verification remains deferred under the mobile pause. The
-preserved terminal Web startup timeout remains open pending the separate Web SQLite
-fix; neither browser fatal recovery nor that save’s reopen is claimed.
+previously failing terminal save has
+[twice-reopened browser evidence](../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
+after the published Web SQLite fix. Browser fatal/Restart remains the separate
+E3 gap; native UI verification is not claimed.
 
 ## B6 Seek, retry and ward details
 

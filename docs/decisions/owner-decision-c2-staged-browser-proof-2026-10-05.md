@@ -18,9 +18,11 @@ Actual fatal attempt reset, shrine return, immediate Restart and cold reopen are
 proved separately by existing real-host SQLite tests. They do not claim browser,
 native or Hermes UI verification.
 
-The preserved terminal browser save still times out during Web SQLite startup.
-That issue remains **open pending the separate Web SQLite fix**; it is not skipped
-permanently, and its save has not been reset or repaired. This decision does not
-claim the save reopens or the worker limit is fixed. C2 gameplay and reviewed source
-are unchanged; only the staging of the
+At staging, the preserved terminal browser save still timed out during Web SQLite
+startup and remained open pending the separate Web fix. After published PR213,
+[twice-reopened C2 evidence](../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
+proves that same observed save opens without reset or repair; the earlier failure
+remains historical evidence. The bridge’s worker limit itself was not changed.
+Browser fatal/Restart remains the E3 gap above. C2 gameplay and reviewed source are
+unchanged; only the staging of the
 [Book UI proof](../system/book-ui.md#c2-watch-patrol-details) is amended.

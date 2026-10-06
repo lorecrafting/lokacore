@@ -1,0 +1,25 @@
+{
+  "integration_source": "65dabf5605bca7da3e0b6e35148986c3700d38ac",
+  "published_web_predecessor": "d9a0595472e0c6d662cc2a43af084ed7bc16997e",
+  "reviewed_c2_source": "747113496572892a01224c47cddc0bf4f63d0fdc",
+  "candidate": {
+    "chapter": "0.0.24",
+    "api": "1.22",
+    "sha256": "62f10e30e226c67627628c0017091284bbf1485a473222883fce92b44947b008",
+    "initial_ids": 109
+  },
+  "browser": {
+    "origin": "same preserved isolated C2 terminal origin;no reset,replacement,repair or manual save editing",
+    "first_cold_open": "passed;chapterContinue\u2192WatchPost;completion narration;resolved/completed4of4Journal;20pennies",
+    "terminal_controls": "originalTobin retains legacyTalk and exactWatchmansRounds;selected patrol displays Start/Continue/Rejoin/Restart notnow;Leave works",
+    "second_cold_open": "passed explicit page reload after ordinaryTalk/Leave;WatchPost;completion narration;resolved/completed4of4Journal;20pennies",
+    "ordinary_actions": "chapterContinue;Contents/Journal;Tobin detail;labelled patrolTalk;Leave;no movement,paid lesson,patrol progression or reward",
+    "prior_timeout": "historical failure retained;observed preserved save now reopens twice after published Web fix",
+    "fatal_restart": null,
+    "fatal_restart_gap": "still due in Chapter1E3browserwalk or sooner;not inferred from terminal proof"
+  },
+  "native": null,
+  "hermes": null,
+  "new_source_changes": null,
+  "independent_evidence_review": null
+}

@@ -40,5 +40,9 @@ build/simulator work and blur polish remain deferred. The [primary](../../review
 [save/protocol](../../reviews/2026-10-05-c2-watchmans-rounds-save-second-review.md)
 reviews approve exact source `74711349`. The later
 [UI proof scope](../../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)
-changes verification only and requires its separate docs review. Full active checks
+changes verification only and has its
+[independent docs review](../../reviews/2026-10-05-c2-watchmans-rounds-docs-scope-review.md).
+The preserved terminal save now has
+[twice-reopened evidence after published Web PR213](../../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix).
+Browser fatal/Restart remains due in E3; no native UI proof is claimed. Full active checks
 run at accumulated publication under the normal workflow. Published C2 source/PR/verdicts remain null.
