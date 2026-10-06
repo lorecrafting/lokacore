@@ -249,20 +249,22 @@ C1 is published in #205.
 
 C2 Watchman's Rounds has an [adopted finite-patrol contract](decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md),
 [focused source brief](briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
-re-pinned to current GitHub main `cc43d018`, and
+re-pinned for source assignment, and
 [independent plan approval](reviews/2026-10-05-c2-watchmans-rounds-plan-review.md).
 B1, Q2-C-rescue and reviewed C1 are integrated. C2 source work is active in an
-isolated worktree. It found a shared exact-Talk selector need also implemented
-by B6; final C2 integration now waits for that reviewed selector. Shared
-cartridge, protocol and generated edits require serialization and a final
-predecessor re-pin. C2 successor pins, source reviews and playable proof remain ahead.
+isolated worktree. The shared exact-Talk selector is published with B6 in #210;
+C2 has merged that source and current main locally while resolving its patrol
+release. Shared cartridge, protocol and generated edits require final combined
+checks. C2 source reviews and playable proof remain ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
-against local main `98cc60b1`. C1 source and shared cartridge predecessors must
-be re-pinned before source assignment; the equal-time conflict finding was fixed
-and its [independent plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md)
-approved. Successor release pins, implementation and proof remain ahead. C4
+re-pinned to published B6 v023/API1.21, with
+[independent readiness review](reviews/2026-10-05-c3-source-readiness-review.md)
+approved and published in #211. The earlier equal-time conflict finding was fixed
+in its [plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md).
+C2 integration precedes C3 source release pinning; successor pins,
+implementation and proof remain ahead. C4
 hound aggression, pack assistance and flight is a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
