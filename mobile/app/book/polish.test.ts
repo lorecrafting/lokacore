@@ -1,7 +1,7 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 // size: allow 750, Book routes, elapsed completion and carrying note regressions share one real-session adapter
 import assert from 'node:assert/strict';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { DatabaseSync } from 'node:sqlite';
@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 
 const require = createRequire(import.meta.url);
@@ -900,11 +901,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
 
 // Break: a targetless recipe exists only in a self-luminous Notice, so the World detail has no control.
 test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
-  const c = JSON.parse(bundle('missing_child_v030_hash').canonical);
-  c.entry.key = 'marsh_light';
-  c.calendar.start = 0;
-  const canonical = JSON.stringify(c);
-  const h = book({ canonical, sha256: createHash('sha256').update(canonical).digest('hex') });
+  const h = book(darkMarshBundle());
   try {
     assert.ok(h.labels().includes('Marsh glow'));
     h.tap('Marsh glow');
