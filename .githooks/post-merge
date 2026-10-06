@@ -1,2 +1,3 @@
 #!/bin/sh
+[ -f bin/beads_after_git.py ] || exit 0
 exec python3 bin/beads_after_git.py

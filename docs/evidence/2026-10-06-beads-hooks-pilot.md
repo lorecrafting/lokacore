@@ -30,3 +30,9 @@ Removing the root comparison caused the wrong checkout to import (red control);
 restoring it made that case skip again. Python compilation, shell syntax,
 whitespace and the docs link check passed. This proves routing only; real Beads
 import and latency remain to be observed after publication.
+
+Creating a separate worktree exposed a post-checkout edge: Git invoked the
+new hook while the destination branch did not yet contain its Python helper.
+The shell wrapper now exits successfully when the helper is absent. The actual
+separate worktree passed this control after the fix. No tracker file in that
+worktree was changed.
