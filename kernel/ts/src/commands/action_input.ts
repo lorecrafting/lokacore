@@ -39,16 +39,13 @@ export function accepts(
   if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
   if (payload.type === 'talk' && payload.dialogue && !same(a.dialogue, payload.dialogue))
     return false;
-  if (
-    payload.type === 'use_service' &&
-    world.cartridge.services?.[refString(payload.service)]?.action !== a.key
-  )
-    return false;
-  if (
-    payload.type === 'use_transport' &&
-    world.cartridge.transports?.[refString(payload.route)]?.action !== a.key
-  )
-    return false;
+  const bound =
+    payload.type === 'use_service'
+      ? world.cartridge.services?.[refString(payload.service)]?.action
+      : payload.type === 'use_transport'
+        ? world.cartridge.transports?.[refString(payload.route)]?.action
+        : a.key;
+  if (bound !== a.key) return false;
   if (a.engine) return true;
   const id = primaryTarget(payload);
   if (a.speaker !== undefined && id !== a.speaker) return false;
