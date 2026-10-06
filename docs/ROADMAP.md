@@ -20,7 +20,7 @@ lift and proof. Completed rows are recorded below. The
 [33 provisional slice briefs](briefs/chapter-one/README.md), merged in
 [#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
 was fixed and independently rechecked, provide candidate assignment detail.
-The [Beads Rust pilot](WORKFLOW.md#beads-rust-pilot) mirrors a small active subset;
+The [Beads Rust pilot](WORKFLOW.md#beads-rust-pilot) mirrors all 33 Chapter 1 slices;
 this roadmap remains the published completion record.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
