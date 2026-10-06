@@ -10,8 +10,8 @@ import {
 } from '../src/index.ts';
 import { read } from './read.ts';
 import { value } from '../src/mechanics/fact.ts';
-export const bundle = read('protocol/fixtures/missing_child_v020_hash.json');
-export const answers = read('protocol/fixtures/missing_child_v020_ids.json');
+export const bundle = read('protocol/fixtures/missing_child_v021_hash.json');
+export const answers = read('protocol/fixtures/missing_child_v021_ids.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -38,7 +38,7 @@ export const wick = id('npc', 'wick'),
 export const ref = (kind: string, k: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.20',
+    cartridge_version: '0.0.21',
     kind,
     key: k,
   }) as import('../src/contracts.gen.ts').DefinitionRef;

@@ -591,7 +591,7 @@ readiness and lowering; detail-authored `harvest` supplies conserved stock IDs.
 
 ## B4 fuel composition
 
-Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
+**API1.19.** [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
 with `ignite {actor_id, item_id}`, `douse {actor_id, item_id}` and
 `refuel {actor_id, item_id, supply_id}`. Invocation targets are source then supply
 for Refuel, and source for Ignite/Douse. The amount is derived from confirmed
@@ -608,13 +608,22 @@ item, valid bounded charge/time and no lit supply. Conflicting writers retain
 `conflicting_write`; precondition failures adopt nothing. The light rule owns
 Ignite/Douse/Refuel writes. Time and custody changes need no fuel op.
 
+Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
+`capacity`, bounded nonnegative `initial` and a `unit` key. A source declares
+`kind: source` with those fields, positive `rate`, its exact compatible item
+`supply` reference and the `ignited`, `doused`, `refueled` narration keys. Runtime
+immutable `fuel_specs` bind these specifications to their actual item instances;
+mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
+is its authored darkness opt-in. `FuelView` carries confirmed `remaining`,
+`capacity`, and effective `lit` without a presenter clock.
+
 Add only immutable per-item fuel specifications needed to validate those rows.
 Do not encode engine history as untyped cartridge facts or generalize the new op
 into arbitrary item-state assignment. Because a new delta target crosses portable
 composition, both kernels require independently pinned valid/invalid/precondition
 fixtures and differential coverage; the light story rule remains TypeScript-only.
-The next API/release pins and exact generated shape are assigned from the actual
-implementation base, not assumed by this planning contract. Existing error codes,
+The [current successor pin](cartridge.md#b4-well-and-fuel) is independently derived
+from the actual C1/B5 base. Existing error codes,
 writer groups, checked arithmetic and query budgets apply.
 
 ## B7 liquid composition

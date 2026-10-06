@@ -11,5 +11,16 @@
     "in": "npc",
     "npc": "peg"
   },
-  "slot": "light"
+  "slot": "light",
+  "fuel": {
+    "kind": "source",
+    "capacity": 7200,
+    "initial": 7200,
+    "rate": 1,
+    "unit": "oil",
+    "supply": "lamp_oil",
+    "ignited": "light.ignited",
+    "doused": "light.doused",
+    "refueled": "light.refueled"
+  }
 }

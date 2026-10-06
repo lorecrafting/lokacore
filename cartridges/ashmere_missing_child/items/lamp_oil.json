@@ -10,5 +10,11 @@
   "location": {
     "in": "npc",
     "npc": "peg"
+  },
+  "fuel": {
+    "kind": "supply",
+    "capacity": 7200,
+    "initial": 7200,
+    "unit": "oil"
   }
 }

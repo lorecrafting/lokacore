@@ -103,7 +103,12 @@ export function group(buttons: Button[]) {
         !OWN.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
-    on: (id: string) => buttons.filter((b) => b.detail_id === id || b.target_ids.includes(id)),
+    on: (id: string) =>
+      buttons.filter(
+        (b) =>
+          b.detail_id === id ||
+          (b.action_key === 'refuel' ? b.target_ids[0] === id : b.target_ids.includes(id)),
+      ),
   };
 }
 
@@ -263,7 +268,11 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        return button(a, ` ${text(e.name)}${destination ? ` in ${text(destination)}` : ''}`, e.id);
+        return button(
+          a,
+          ` ${text(e.name)}${destination ? ` ${a.action_key === 'refuel' ? 'from' : 'in'} ${text(destination)}` : ''}`,
+          e.id,
+        );
       }),
   );
   const placed = place.map((a) => ({

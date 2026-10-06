@@ -665,10 +665,9 @@ Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
 main-story routes stay as currently authored. Training and shop equipment are
 optional; every possession-recovery and required story route stays free of a skill,
 weapon, shield, hour or next-day stock gate. C2 later owns Tobin's reachable watch
-post/patrol. The current C1 chapter answer and fresh identities are pinned in
-[the independent v020 payload](../../protocol/fixtures/missing_child_v020_hash.json) and
-[ID answer](../../protocol/fixtures/missing_child_v020_ids.json). Source and checks remain
-local until independent review.
+post/patrol. C1 source is carried by the current [B4 successor](#b4-well-and-fuel), which owns
+the current chapter payload and identity pin. Source and checks remain local until
+independent review.
 
 ## B5 herb and bandage stock
 
@@ -713,7 +712,13 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-The planned [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
+The current local successor is `ashmere_missing_child@0.0.21`, API1.19:
+[independent payload](../../protocol/fixtures/missing_child_v021_hash.json),
+[94-ID answer](../../protocol/fixtures/missing_child_v021_ids.json),
+[derivation](../../protocol/fixtures/generate_missing_child_v021.py).
+Independent B4 review and final C1 dependency fixes remain pending.
+
+The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
 adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
 stairs are public at every hour. Its ordinary description exposes an authored
 inspectable `masonry` detail; its separate dark description names only darkness

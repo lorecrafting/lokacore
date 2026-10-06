@@ -38,7 +38,9 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const slots = holders(cartridge, mint);
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
+  const { fuelSpecs, fuel } = initialFuel(entities, clock);
   return {
+    fuelSpecs,
     cartridge,
     context,
     character,
@@ -57,7 +59,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityResourceSpecs,
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
-    state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
+    state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel }) },
   };
 }
 
@@ -192,4 +194,19 @@ function roomDetails(
     ))
       details[mint()] = { ...d, room: roomIds[r], key };
   return details;
+}
+
+function initialFuel(entities: World['entities'], clock: number) {
+  const fuelSpecs = Object.fromEntries(
+    Object.entries(entities).flatMap(([i, e]) =>
+      e.kind === 'item' && e.fuel ? [[i, e.fuel]] : [],
+    ),
+  );
+  const fuel = Object.fromEntries(
+    Object.entries(fuelSpecs).map(([i, spec]) => [
+      i,
+      { remaining: spec.initial, at: clock, lit: false },
+    ]),
+  );
+  return { fuelSpecs, fuel };
 }

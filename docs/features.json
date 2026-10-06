@@ -628,6 +628,25 @@
     ],
     "implemented_in": "B3 finite Peg Buy/Sell (TypeScript)"
   },
+  "light": {
+    "spec": "docs/system/mechanics.md B4 light and darkness; docs/system/protocol.md B4 fuel composition",
+    "contracts": [
+      "FuelRow",
+      "FuelSpec",
+      "FuelView",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "fixtures": [
+      "protocol/fixtures/fuel_composition.json"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/light/shared.ts"
+    ],
+    "invariants": [],
+    "implemented_in": "B4 useful light"
+  },
   "skills": {
     "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md C1 composition",
     "contracts": [

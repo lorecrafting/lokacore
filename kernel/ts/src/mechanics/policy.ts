@@ -48,7 +48,7 @@ export function holds(
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
     case 'target_present':
-      return ctx.target !== undefined && present(world, actor, ctx.target);
+      return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
     case 'stat_compare':
     case 'resource_compare':
       return atLeast(world, actor, p);

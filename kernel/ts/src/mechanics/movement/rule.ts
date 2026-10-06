@@ -1,3 +1,4 @@
+import { dark, illuminated } from '../light/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
@@ -21,6 +22,7 @@ import {
   refString,
   type Rule,
   type World,
+  type Steps,
   values,
 } from '../../runtime/decision.ts';
 import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
@@ -43,12 +45,15 @@ export const decide: Rule<'movement'> = (world, command, mint) =>
  * them). Read-only. ponytail: sight passes exactly where a move would (passage); perception
  * policies, darkness and far scan from view rooms join with map discovery.
  */
-export function sight(world: World, body: EntityId) {
+export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
   return COMPASS.filter((d) => has(room.exits, d)).map((direction) => {
     const barred = passage(world, room, direction);
     if (barred) return { direction, code: barred };
+    if (dark(world, world.character, steps)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
+    if (world.rooms[there].dark_description && !illuminated(world, world.character, steps))
+      return { direction };
     const at = (id: string): id is EntityId =>
       world.state.containers[id] === there && living(world, id);
     return { direction, room: there, entities: keys(world.entities).filter(at) };

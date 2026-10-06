@@ -206,6 +206,9 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `buy`
   - `sell`
   - `harvest`
+  - `ignite`
+  - `douse`
+  - `refuel`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -244,6 +247,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `job.cancel`
   - `escort.transition`: Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed.
   - `quest.retire`: API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only.
+  - `fuel.set`: Replace one declared item fuel history with exact whole-row precondition at the authoritative clock.
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
@@ -261,6 +265,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `entity`
   - `encounter`
   - `escort`
+  - `fuel`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
@@ -294,6 +299,10 @@ Effects and the effect registry's durability and idempotency classifications (04
 Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.
 
 - **AttackProfile**: Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.
+- **FuelRow**: Exact-instance fuel history: bounded remaining charge, confirmed settlement time and stored ignition state. Supplies are never lit.
+- **FuelSpec**: Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys.
+  - `source`
+  - `supply`
 - **ItemDefinition**: A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.
 - **ItemLocation**: Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).
   - `room`
@@ -381,6 +390,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **ExitView**: One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.
   - `true`: Moving through it is legal now.
   - `false`: Shown but not legal now, with the reason. Never a security boundary (ACT-09).
+- **FuelView**: Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn.
 - **GameView**: One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.
 - **GameViewSnapshot**: An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.
 - **NarrationRecord**: The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 §43; 03 §14).

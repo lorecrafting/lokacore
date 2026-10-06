@@ -1,3 +1,4 @@
+import { dark } from '../light/shared.ts';
 import { living } from '../death/shared.ts';
 // description_variant@1 (capability_registry.json): look at the current place, or examine one
 // of its inspectable details, an item or NPC in it, or an item the actor holds (21 §6, §8; 04
@@ -5,7 +6,15 @@ import { living } from '../death/shared.ts';
 // described by describe(). A target_id is re-validated here, whatever resolved it: no detail or
 // entity by that id is not_found, one elsewhere not_present.
 import type { CharacterId, DescriptionVariant, TextKey } from '../../contracts.gen.ts';
-import { accepted, bodyOf, has, rejected, type Rule, type World } from '../../runtime/decision.ts';
+import {
+  accepted,
+  bodyOf,
+  has,
+  rejected,
+  type Rule,
+  type Steps,
+  type World,
+} from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 
 export const decide: Rule<'description_variant'> = (world, command) => {
@@ -28,6 +37,14 @@ export const decide: Rule<'description_variant'> = (world, command) => {
 export const describe = (
   world: World,
   actor: CharacterId,
-  of: { readonly description: TextKey; readonly variants?: readonly DescriptionVariant[] },
+  of: {
+    readonly description: TextKey;
+    readonly dark_description?: TextKey;
+    readonly variants?: readonly DescriptionVariant[];
+  },
+  steps: Steps = { n: 0 },
 ): TextKey =>
-  of.variants?.find((v) => holds(world, actor, v.when.root))?.description ?? of.description;
+  of.dark_description && dark(world, actor, steps)
+    ? of.dark_description
+    : (of.variants?.find((v) => holds(world, actor, v.when.root, { steps }))?.description ??
+      of.description);
