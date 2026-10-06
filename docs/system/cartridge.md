@@ -967,8 +967,8 @@ Herb Garden and Isle Shrine. Ferry Landing west/east connects to Boathouse;
 Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
 Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
 Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
-transport endpoints, never as a free compass exit. Do not expose the future
-Boathouse–Old Mill edge. Isle Shrine is descriptive sanctuary/foreshadow;
+transport endpoints, never as a free compass exit. The Boathouse–Old Mill edge
+is opened by [D3](#d3-western-ashmere-declarations). Isle Shrine is descriptive sanctuary/foreshadow;
 `chapel_nave` remains the actual death shrine.
 
 The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
@@ -1211,3 +1211,29 @@ crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
 D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
 current location. Release/hash/IDs advance independently when source exists;
 this plan assigns no successor pin or API increment.
+
+## D3 Western Ashmere declarations
+
+Selected under the [approved D3 brief](../briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
+with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
+as the content basis. Boathouse south/north connects to Old Mill while retaining
+its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
+connects to Empty Cottage, up/down to Mill Loft and down/up to Mill Cellar;
+Empty Cottage up/down connects to Cottage Loft. No exit names an unbuilt place.
+
+Mill Loft and Mill Cellar declare ordinary and dark descriptions and consume
+[B4 perception and owned-corpse recovery](mechanics.md#b4-light-and-darkness-selected-contract).
+Rat holes are descriptive: the five original Lantern Cellar rats remain the
+only S1 rats. Owl, loose board and ghost traces are flavor/foreshadow, without
+an enemy, hidden route or chapter-two quest. The cottage sign offers no property
+purchase. The ledger and sign are standalone readable details with noun titles,
+confirmed bodies and no topic, quest, fact, money or loot write.
+
+Original Hob uses ordinary daily scheduling: Old Mill 06:00–18:00, Mill Loft
+18:00–06:00. At the chapter's 64800 launch clock he starts in Mill Loft;
+his first job is due at 108000, followed by 151200. Both destinations exist.
+Flavor dialogue grants nothing and gates no required story action; darkness
+and scheduled departure retain existing admission. Movement, readable details,
+light perception and schedule jobs keep their existing state writers. No new
+command, capability or save shape is selected. Release/API/hash/allocation pins
+remain provisional until the ordered source integration and independent re-pin.

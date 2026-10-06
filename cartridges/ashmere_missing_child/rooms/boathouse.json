@@ -4,6 +4,9 @@
   "exits": {
     "east": {
       "to": "ferry_landing"
+    },
+    "south": {
+      "to": "old_mill"
     }
   },
   "details": {

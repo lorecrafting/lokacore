@@ -776,3 +776,21 @@ never claims message custody, topic learning or child return credit. Landscape
 text describes dry footing and natural den light, without a bottom, far Scan,
 fishing, drift or nest action that the actual projection cannot offer. The
 original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
+
+## D3 mill, cottage and Hob details
+
+The [D3 declarations](cartridge.md#d3-western-ashmere-declarations) use existing
+World exits, adjacent sight, NPC details and [standalone notice flow](#notice-board-details).
+Hob's ledger and the For-sale sign have noun headings; entry invokes the exact
+captured Read offer. Confirmed bodies belong only to their respective detail
+histories, with the existing safe Leave/Back and cold-reopen receipt recovery.
+Neither document grants a gameplay change or promises a property/ghost quest.
+
+Hob's present detail offers flavor Talk with ordinary Conversation/Leave;
+scheduled departure removes present-speaker offers, and re-entry uses the same
+NPC identity. Clock jobs continue while details are open. Unlit Mill Loft and
+Mill Cellar show authored dark text, known up/down return exits and the actor's
+actual owned corpse/accessible contents under B4; ordinary Hob and detail links
+remain hidden. No light exemption, forced-overload Take or replacement gear is
+added. Headless Book/SQLite proof is distinct from browser refresh/interaction;
+native and browser preview sessions remain deferred during provisional source work.
