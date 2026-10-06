@@ -14,7 +14,7 @@ crow bundles omit the companion pelt label. Frozen predecessors are unchanged.
 
 Result: `ashmere_missing_child@0.0.39`, API1.34, SHA-256
 `e604180806f19b6afa9ca2dc1e69e663c0c4057f8f7f04c5a42560d4289d94a3`,
-204 starting IDs. The focused compiler test independently matches the complete
+208 starting IDs. The focused compiler test independently matches the complete
 artifact bytes and hash.
 
 ## Checks actually run
@@ -117,3 +117,24 @@ current-release test. Frozen predecessor fixtures must remain unchanged. Later
 kernel red controls, TypeScript size and final formatting did not execute because
 npm test failed. No D8-specific schema sweep/30-day proof was begun: the requested
 full-gate prerequisite was not green. No browser, PR or review was started.
+
+## Corrected independent v039 ID oracle
+
+The old active deer test first read frozen v038 IDs. Switching it to v039 exposed
+an error in this new generator: companion allocation was selected by a `pelt`
+field, whereas independently retained compiled bundle declarations use `item`.
+That omitted four hound companion labels. The generator now uses declared `item`
+presence; crow bundles still allocate no companion. The corrected v039 oracle has
+**208 initial IDs**, replacing the earlier erroneous 204 count. Content version,
+API and artifact hash are unchanged. Frozen predecessor fixtures are unchanged.
+
+- Deer focused run against the flawed v039 oracle: exit1, exact allocation mismatch.
+- Corrected `mise exec -- node --test kernel/ts/test/deer.test.ts kernel/ts/test/crow.test.ts`: exit0, 28 passed, including the existing deer 30-day conservation replay.
+- `mise exec -- mix test test/loka/content_missing_child_test.exs test/loka/core/crow_composition_test.exs`: exit0, 15 passed.
+- Existing crow expected-row red control remains recorded above; no redundant new test was added.
+- A full gate started on `13e76021` before discovery of the flawed oracle was stopped on PM instruction to avoid a known failure; process exit143. It had passed the Elixir suite/Credo/size before stopping during planted contract controls. This is an interrupted run, not a green gate.
+
+Resume with a full gate on the corrected oracle. D8-specific schema sweep and crow
+30-day cap/nest/coin conservation remain unperformed. The existing deer 30-day
+proof does not certify crow conservation. Browser and independent review remain
+pending. All working files are committed, with no retained mutant or gate process.

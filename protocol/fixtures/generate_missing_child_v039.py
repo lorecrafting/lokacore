@@ -42,7 +42,7 @@ for plan in sorted(v['populations'].values(), key=lambda p: p['key']):
     for slot in range(1, plan['day_target'] + 1):
         labels += [f"population/{plan['key']}/slot{slot}/{role}" for role in (
             'deer', 'hide') if 'sight' in plan] if 'sight' in plan else [
-            f"population/{plan['key']}/slot{slot}/{role}" for role in (('member', 'pelt') if 'pelt' in v['population_bundles'][named('population_bundle', plan['bundle']['key'])] else ('member',))]
+            f"population/{plan['key']}/slot{slot}/{role}" for role in (('member', 'pelt') if 'item' in v['population_bundles'][named('population_bundle', plan['bundle']['key'])] else ('member',))]
     labels += [f"population/{plan['key']}/job"]
 answers = {}
 for ordinal, label in enumerate(labels):
