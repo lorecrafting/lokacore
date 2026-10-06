@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
+
 - [C3 living hounds save/protocol second opinion](2026-10-06-c3-hounds-save-second-review.md): original `a692a2b8` CHANGES REQUIRED; first fix `8e767434` retains residual S2; strict source `2dbf55b5` APPROVE closes S1/S2. Published-B9 carryover source `f96e0245`, evidence `33163a1b`, scoped APPROVE: 22 TS/SQLite and 13 Elixir checks pass; integrated dream/population cold recovery and fifteen byte-preserving forgeries pass, all 140 v029/API1.25 IDs/hash and thirteen evidence hashes verify. Separate Astra approval; hosted publication remains ahead.
 
 - [B9 publication and D11 tracker status](2026-10-06-b9-d11-status-review.md): exact status head `ac40b513`, independent APPROVE; merged PR226/227, source/applicable hosted checks, v028/API1.25 hash/127 IDs and linked approvals verified. All 33 tracker issues are path-clean and acyclic, 16 closed codes match the roadmap, D11 six prerequisites agree and D12 has no reverse edge. No findings; docs/export controls pass.
