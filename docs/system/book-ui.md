@@ -27,11 +27,17 @@ description, projected interactibles, offered place actions and event log. The d
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
 whether it appears mid-sentence or at the end of the last paragraph; the Book does not
-move it into a separate entity list or force a paragraph break. Tapping it opens the
-subject's detail when that detail is offered. A fixture remains at the room and never
-offers Take or Drop merely because it is linked. A concealed fixture or exit appears
-only when the current projection actually reveals it; text markup alone grants no
-visibility or action.
+move it into a separate entity list or force a paragraph break. A fixture is
+immovable room content: it cannot be taken, dropped, stored or otherwise removed
+from the room. A removable object is a loose item in the item group instead.
+The link opens a detail only when the current GameView supplies a visible,
+current-room identity and detail route (for example, an offered place action
+with an exact inspectable target). The Book does not infer visibility, identity,
+detail or an action from bracketed prose alone. If that projection is absent,
+the words remain ordinary prose until a mechanic adds the required projection
+and admission contract. The selected room-description variant itself must omit
+concealed fixture or exit text until the game reveals it; the Book cannot hide
+an authored phrase after receiving it.
 
 Below the description, present players and NPCs have their own paragraph/list, and
 loose room items have a separate paragraph/list. Each projected subject can open its
