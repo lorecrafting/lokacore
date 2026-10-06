@@ -9,8 +9,7 @@ defmodule Loka.Core.Invariants do
     `Loka.Core.Compose.compose/2` result;
   - `"resolution"`: a TargetResolution;
   - `"decision"`, `"commit"`, `"published"`: a DecisionResult, the host's commit outcome
-    (committed, failed or unknown) and what the
-    host published. An unknown id raises.
+    (committed, failed or unknown) and the host's publication. An unknown id raises.
   """
   alias Loka.Core.Compose
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
