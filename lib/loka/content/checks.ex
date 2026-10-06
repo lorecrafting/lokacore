@@ -55,10 +55,17 @@ defmodule Loka.Content.Checks do
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
-    field = fn {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)} end
+    field = fn
+      {"corpse_ingress", v} -> {"corpse_ingress", expand(v, m)}
+      {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)}
+    end
+
     exit = fn {d, e} -> {d, Map.new(e, field)} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
+
+  def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
+    do: Map.put(gate, "fact", ref(f, "fact", m))
 
   # A reaction's trigger (ReactionRule on): its short fact or room.
   def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
@@ -349,9 +356,21 @@ defmodule Loka.Content.Checks do
     Enum.flat_map(RoomParts.parts(r), fn {steps, kind} ->
       owned(at(rel, steps), kind, required)
     end) ++
-      for {dir, exit} <- r["exits"],
-          d <- reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs),
-          do: d
+      Enum.flat_map(r["exits"], fn {dir, exit} ->
+        reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs) ++
+          if(exit["corpse_ingress"],
+            do:
+              reference(
+                rel,
+                ["exits", dir, "corpse_ingress"],
+                {"fact", "fact"},
+                exit["corpse_ingress"],
+                m,
+                defs
+              ),
+            else: []
+          )
+      end)
   end
 
   defp text_keys(_, _, :unknown), do: []

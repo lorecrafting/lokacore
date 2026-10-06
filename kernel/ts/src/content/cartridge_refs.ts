@@ -184,8 +184,17 @@ export function refStage(c: Obj): Diagnostic[] {
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
-    for (const [dir, exit] of Object.entries(r.exits as Obj))
+    for (const [dir, exit] of Object.entries(r.exits as Obj)) {
       named(exit.to, 'room', `${at}.exits.${dir}.to`);
+      if (exit.corpse_ingress) {
+        named(exit.corpse_ingress.fact, 'fact', `${at}.exits.${dir}.corpse_ingress.fact`);
+        typedValue(
+          exit.corpse_ingress.fact,
+          exit.corpse_ingress.equals,
+          `${at}.exits.${dir}.corpse_ingress.equals`,
+        );
+      }
+    }
     out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
   }
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
