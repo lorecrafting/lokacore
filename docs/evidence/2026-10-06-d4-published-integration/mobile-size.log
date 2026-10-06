@@ -1,0 +1,8 @@
+mobile/app/book/presenter.ts:1: file, 312 lines, limit 300
+mobile/app/book/presenter.ts:66: info: size: allow 55, receipt-specific Read/recipe routing joins existing item, combat and conversation histories
+mobile/app/book/presenter.ts:67: function received, 58 lines, limit 55
+mobile/authority/local-story/save.ts:1: file, 340 lines, limit 300
+mobile/authority/local-story/save.ts:130: function narration, 52 lines, limit 40
+mobile/authority/local-story/save.ts:213: function receiptDetail, 48 lines, limit 40
+
+EXIT 1

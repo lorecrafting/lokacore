@@ -1,17 +1,18 @@
 # C4 — Hound response to aggression, real pack help and wounded flight
 
-**Adopted PM plan; published dependencies re-pinned, fresh independent plan review
-required before source GO.** Source branch `chapter-1/c4-hound-behavior`, isolated
-developer worktree. Readiness base `1b269871275c900343f9e2dcfcadc5c856880589`
-contains published [C1 #205](https://github.com/lorecrafting/lokacore/pull/205),
-[B9 #226](https://github.com/lorecrafting/lokacore/pull/226) and
-[C3 #229](https://github.com/lorecrafting/lokacore/pull/229), including C3's
-record-only status merge. The active chapter is `0.0.29` / kernel API `1.25`,
-independent SHA-256 `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`
-with 140 genesis IDs. C4's successor release/API/hash/fresh IDs, source head, PR,
-new plan verdict and runtime/browser/SQLite/native proof remain null. The
-[original plan approval](../../reviews/2026-10-05-c4-hound-behavior-plan-review.md)
-precedes these source publications; this readiness revision needs its own review.
+**Reviewed C4 source re-pinned over published D4; final carryover review pending.**
+Source branch `chapter-1/c4-hound-behavior` has published D4 main
+`536c80bc76882839465aecc330e22e891e1e137d` as its integration parent.
+D4's chapter `0.0.31` / kernel API `1.27`, independent SHA-256
+`57e2943395340908161b6535a46fd55e4e982bc969ceb765c02ffc505c4e000b`
+and 167 genesis IDs remain its frozen published answers. C4's candidate successor
+is chapter `0.0.32` / API `1.28`, independently derived SHA-256
+`b8e7b783483c598e6a455d8c117674bd01b96aaab5edc80b6be8df9e3b8db2bd`
+with 167 genesis IDs. Final source/evidence heads, PR, carryover verdict and
+runtime/browser/SQLite/native proof are recorded separately when available.
+The [original plan approval](../../reviews/2026-10-05-c4-hound-behavior-plan-review.md)
+precedes source publication; the scoped source reviews and D4 integration are
+tracked in [C4 local evidence](../../evidence/2026-10-06-c4-hound-behavior/README.md).
 
 ## Player outcome and governing contract
 

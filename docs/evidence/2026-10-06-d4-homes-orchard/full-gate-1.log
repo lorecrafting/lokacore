@@ -1,0 +1,33 @@
+Resolving Hex dependencies...
+Resolution completed in 0.012s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+No cycles found
+Running ExUnit with seed: 930391, max_cases: 16
+
+..................................................................................................................................................................................................................................................................................................................................................................
+Finished in 14.0 seconds (14.0s async, 0.05s sync)
+
+Result: 354 passed
+Checking 138 source files (this might take a while) ...
+
+  Refactoring opportunities                                                     
+┃ 
+┃ [F] → Function is too complex (ABC size is 39, max is 30).
+┃       lib/loka/content/food.ex:24:8 #(Loka.Content.Food.declaration)
+┃ [F] → Function is too complex (cyclomatic complexity is 10, max is 9).
+┃       lib/loka/content/food.ex:24:8 #(Loka.Content.Food.declaration)
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.1 seconds (0.06s to load, 0.04s running 4 checks on 138 files)
+1398 mods/funs, found 2 refactoring opportunities.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+
+EXIT 8

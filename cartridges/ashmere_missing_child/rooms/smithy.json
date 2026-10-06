@@ -1,0 +1,32 @@
+{
+  "title": "room.smithy.title",
+  "description": "room.smithy.description",
+  "exits": {
+    "east": {
+      "to": "village_green"
+    },
+    "west": {
+      "to": "orchard"
+    }
+  },
+  "details": {
+    "forge": {
+      "aliases": [
+        "forge"
+      ],
+      "description": "detail.smithy.forge.description"
+    },
+    "anvil": {
+      "aliases": [
+        "anvil"
+      ],
+      "description": "detail.smithy.anvil.description"
+    },
+    "tools": {
+      "aliases": [
+        "tools"
+      ],
+      "description": "detail.smithy.tools.description"
+    }
+  }
+}

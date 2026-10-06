@@ -1361,7 +1361,7 @@ stale controls cannot skip a beat, change the branch or repeat the consequence.
 
 ## D4 homes, finite apples and Eat (selected contract)
 
-**Planning only; not installed.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
+**D4 source contract.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
 selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
 The orchard detail reuses B5 Harvest over three actual authored item identities.
 Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
@@ -1396,8 +1396,12 @@ food alone admits direct-body to consumed transfer. No transfer out is lawful,
 and nonedible items cannot enter. Containment queries terminate there, deriving
 no inventory, room presence, reach or carried mass. Do not implement this as an
 invisible room, NPC, mutable narrative fact, deleted item or second stock ledger.
-The holder metadata and terminal transition invariant are new contracts; extend
-both foundation validators and their fixture/differential proof where applicable.
+Immutable known-entity metadata tags the holder `consumed` and each opted item
+`edible=true`. Generic transfer composition rejects any consumed source and admits
+consumed destinations only for an opted item directly transferred from a known body.
+The food rule alone admits that transition for its command actor and capped recovery.
+Both foundation validators and independent precondition checks enforce the terminal
+subset; literal fixtures and differential proof cover it.
 Projection and execution share one budgeted pure admission query, including exact
 keyed-action admission. Ordinary uneaten food custody and death remain unchanged.
 

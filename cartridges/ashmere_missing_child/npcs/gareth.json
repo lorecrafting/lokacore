@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "gareth"
+  ],
+  "short": "npc.gareth.short",
+  "room_line": "npc.gareth.room",
+  "description": "npc.gareth.description",
+  "room": "drowned_lantern",
+  "daily_schedule": {
+    "8": "smithy",
+    "18": "drowned_lantern",
+    "22": "smithy"
+  }
+}

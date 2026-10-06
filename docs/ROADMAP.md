@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **17 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2). The latest source publication is
-[#229](https://github.com/lorecrafting/lokacore/pull/229), C3 persistent Fen hounds and conserved corpse loot.
+Local and GitHub `main` have completed **18 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2, D1). The latest source publication is
+[#231](https://github.com/lorecrafting/lokacore/pull/231), D1 paid ferry, free Sedge swim lesson and safe isle return.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -288,23 +288,33 @@ pack assistance and flight remains a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
-re-pinned against published main `1b269871` with C1, B9 and C3 and chapter
-`0.0.29`/API `1.25`. A fresh independent readiness review remains required before
-source assignment. C4 implementation, successor release/API/hash/IDs and proof
+and a reviewed provisional implementation integrated with published D1 and D4.
+C4's final successor release/API/hash/IDs, cumulative gate and carryover review
+remain ahead.
 remain ahead.
 
 D2 public Priory rooms and held-book Ward/Bell topics have an
 [adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),
 [focused brief](briefs/chapter-one/d2-priory-books-brief-2026-10-05.md) and
 [independent plan approval](reviews/2026-10-05-d2-priory-books-plan-review.md).
-A1, B5 and B6 are published; D2 source implementation is active in an isolated
-branch from published main. Final successor pins, source reviews and proof remain
-ahead. D1 paid ferry, Mother Sedge and safe isle return has an
+D2 source is published in [#223](https://github.com/lorecrafting/lokacore/pull/223),
+with its held-book and Priory interaction proof in the linked source reviews.
+D1 paid ferry, Mother Sedge and safe isle return has an
 [adopted PM contract](decisions/pm-decision-d1-ferry-isle-2026-10-05.md),
 [source brief](briefs/chapter-one/d1-ferry-isle-brief-2026-10-05.md) and
 [independent plan approval](reviews/2026-10-05-d1-ferry-plan-review.md),
 published in [#217](https://github.com/lorecrafting/lokacore/pull/217).
-D1 source implementation and player proof remain ahead.
+The source is published in [#231](https://github.com/lorecrafting/lokacore/pull/231)
+at chapter 0.0.30/API1.26, hash
+`dbff57ba20305dffa4a0679ab58d480574fbc3fd93fddeb3bf08d48d78e057b9`
+and 149 starting IDs. It adds six isle rooms, a conserved paid crossing, free
+immediate Sedge swim training and an owned-corpse fare waiver. Production Book
+ferry/lesson/exploration/return and controlled browser corpse recovery pass;
+the [primary](reviews/2026-10-06-d1-ferry-isle-primary-review.md) and
+[save/protocol](reviews/2026-10-06-d1-ferry-save-second-review.md) reviews,
+six source-head hosted checks and final Sol review approved. The controlled
+recovery variant supplies a real island death producer for proof; the public
+isle has no attacker or hazard.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

@@ -834,5 +834,36 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
+  },
+  "food": {
+    "spec": "docs/system/mechanics.md D4; docs/system/protocol.md D4 held-food composition",
+    "contracts": [
+      "CommandPayload",
+      "DecisionResult",
+      "ItemEdible",
+      "ItemDefinition"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/food/shared.ts",
+      "kernel/ts/src/view/food.ts",
+      "kernel/ts/src/content/cartridge_food.ts",
+      "lib/loka/content/food.ex",
+      "lib/loka/core/compose_food.ex",
+      "lib/loka/core/invariants_food.ex",
+      "kernel/ts/src/runtime/invariants_food.ts",
+      "mobile/authority/local-story/food-receipt.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/food_composition.json",
+      "protocol/fixtures/food_contracts.json",
+      "protocol/fixtures/missing_child_v031_hash.json",
+      "protocol/fixtures/missing_child_v031_ids.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "D4 finite held-food Eat with terminal custody over published C3/D1"
   }
 }
