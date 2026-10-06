@@ -1,0 +1,22 @@
+Compiling 66 files (.ex)
+Generated loka app
+Running ExUnit with seed: 1976, max_cases: 16
+
+
+
+  1) test literal terminal custody composition and independent precondition observation (Loka.Core.FoodTest)
+     test/loka/core/food_test.exs:6
+     cannot-remove-spent-food
+     code: for c <- @cases do
+     stacktrace:
+       test/loka/core/food_test.exs:11: anonymous fn/2 in Loka.Core.FoodTest."test literal terminal custody composition and independent precondition observation"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/food_test.exs:7: (test)
+
+.
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+
+Result: 1/2 passed
+Failed: 1 test
+
+EXIT 2

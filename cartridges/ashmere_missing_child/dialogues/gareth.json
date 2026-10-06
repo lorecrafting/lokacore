@@ -1,0 +1,23 @@
+{
+  "prompt": "dialogue.gareth.prompt",
+  "choices": {
+    "leave": {
+      "label": "dialogue.gareth.leave",
+      "narration": "dialogue.gareth.leave_narration"
+    }
+  },
+  "npc": "gareth",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "roles": {
+    "gareth": {
+      "role": "npc",
+      "npc": "gareth"
+    }
+  }
+}

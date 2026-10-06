@@ -1,0 +1,34 @@
+✔ real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers (672.2775ms)
+✖ food-only cold-open refuses plausible bounded forgeries without writing bytes (170.818ms)
+✔ real failed and committed/absent uncertain COMMIT preserve atomic Eat and exact retry (159.3065ms)
+✔ spent apple and another apple in a real fight corpse both reopen before a later Eat (329.398958ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1547.295791
+
+✖ failing tests:
+
+test at mobile/authority/local-story/food.test.ts:85:1
+✖ food-only cold-open refuses plausible bounded forgeries without writing bytes (170.818ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception: item_id
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/food.test.ts:142:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /invalid committed Eat/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+EXIT 1

@@ -1,0 +1,16 @@
+✔ literal room/meal/ale outcomes conserve exact money, stock and capped MV (184.363833ms)
+✔ service refusal rolls back every row and respects exact provider, quote and complete serving (542.993291ms)
+✔ loaded differently named service keys project exactly the captured invocation admission (153.292958ms)
+✔ old-rate elapsed settlement precedes meal and actual targetless bed Rest (104.637208ms)
+✔ bound second provider pays and consumes its own stock; only service can assign entitlement (35.919208ms)
+✔ the complete integrated B8 initial identities match the Python known answer (34.537042ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1214.632292
+
+EXIT 0
