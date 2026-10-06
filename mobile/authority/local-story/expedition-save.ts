@@ -56,6 +56,7 @@ export function expeditionSave(world: World, db: Db, meta: Meta, head: number) {
       validate('DecisionResult', decision).length ||
       command.id !== r.command_id ||
       r.actor_id !== world.character ||
+      command.payload.actor_id !== world.character ||
       command.world_context_id !== world.context ||
       r.revision < last ||
       r.revision > head
@@ -118,6 +119,29 @@ export function expeditionSave(world: World, db: Db, meta: Meta, head: number) {
     )
       invalid();
     const nextRow = changed.value;
+    const expected =
+      payload.type === 'expedition'
+        ? payload.transition === 'shelter'
+          ? attempt && { ...attempt, sheltered: true }
+          : {
+              kind: 'expedition',
+              actor_id: world.character,
+              body_id: world.body,
+              quest_instance_id: changed.quest_instance_id,
+              attempt_id: command.id,
+              cursor: 0,
+              sheltered: false,
+              status: 'active',
+            }
+        : attempt &&
+          (died || outside
+            ? { ...attempt, cursor: 0, sheltered: false, status: 'failed' }
+            : {
+                ...attempt,
+                cursor: attempt.cursor + 1,
+                status: attempt.cursor + 1 === spec.route.length ? 'completed' : 'active',
+              });
+    if (!same(nextRow, expected)) invalid();
     if (payload.type === 'expedition') {
       const stage = payload.transition;
       const detail = stage === 'shelter' ? spec.shelter_detail : spec.start_detail;

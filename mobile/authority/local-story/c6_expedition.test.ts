@@ -14,6 +14,8 @@ import {
 import { read } from '../../../kernel/ts/test/read.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openGame } from './session.ts';
+import { load } from './store.ts';
+import { expeditionSave } from './expedition-save.ts';
 
 function fixture() {
   const content = structuredClone(
@@ -111,4 +113,102 @@ test('C6 five real entries and optional shelter survive every cold reopen', (t) 
     view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')?.state,
     'resolved',
   );
+});
+
+// Breaks: receipt replay accepts a forged shelter flag at Start, a foreign command actor,
+// or a shelter command that silently replaces the current attempt identity.
+test('cold reopen refuses forged expedition transitions without changing saved rows', (t) => {
+  const { bundle, initial } = fixture();
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
+  t.after(() => a.sql.close());
+  const invoke = (action_key: string, input: object = {}) => {
+    const notice = a.game
+      .view()
+      .view.notices?.find((n) => n.actions?.some((action) => action.action_key === action_key));
+    const reply = a.game.invoke({
+      action_key,
+      target_ids: notice ? [notice.id] : [],
+      input,
+    } as never);
+    assert.equal(reply.kind, 'saved');
+    if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
+  };
+  const corrupt = (change: (row: any, command: any) => void) => {
+    const before = load(a.db, initial, () => {
+      throw new Error('existing save required');
+    })!;
+    const receipt = a.sql
+      .prepare('SELECT command_id, command, response FROM receipt ORDER BY revision DESC LIMIT 1')
+      .get()!;
+    const saved = a.sql
+      .prepare('SELECT key,value FROM state_row WHERE section=?')
+      .get('expeditions')!;
+    try {
+      const response = JSON.parse(receipt.response as string);
+      const command = JSON.parse(receipt.command as string);
+      const transition = response.delta.ops.find((op: any) => op.op === 'expedition.transition');
+      change(transition.value, command);
+      a.sql
+        .prepare('UPDATE receipt SET command=?, response=? WHERE command_id=?')
+        .run(JSON.stringify(command), JSON.stringify(response), receipt.command_id);
+      a.sql
+        .prepare('UPDATE state_row SET value=? WHERE section=? AND key=?')
+        .run(JSON.stringify(transition.value), 'expeditions', transition.quest_instance_id);
+      const forged = {
+        ...before.world,
+        state: {
+          ...before.world.state,
+          expeditions: { [transition.quest_instance_id]: transition.value },
+        },
+      };
+      assert.throws(
+        () => expeditionSave(forged, a.db, before.meta, before.revision),
+        /inconsistent expedition receipt/,
+      );
+      const snapshot = JSON.stringify(
+        a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
+      );
+      assert.throws(
+        () => openGame(a.db, bundle, a.host),
+        (error: any) => error.cause?.kind === 'save_corrupt',
+      );
+      assert.equal(
+        JSON.stringify(a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all()),
+        snapshot,
+      );
+    } finally {
+      a.sql
+        .prepare('UPDATE receipt SET command=?, response=? WHERE command_id=?')
+        .run(receipt.command, receipt.response, receipt.command_id);
+      a.sql
+        .prepare('UPDATE state_row SET value=? WHERE section=? AND key=?')
+        .run(saved.value, 'expeditions', saved.key);
+    }
+  };
+  invoke('begin_marsh_watch', { transition: 'start' });
+  corrupt((row) => {
+    row.sheltered = true;
+  });
+  corrupt((_, command) => {
+    command.payload.actor_id = 'aaaaaaaa-0000-4000-8000-000000009999';
+  });
+  invoke('flee');
+  if (a.game.view().view.place.title.key === 'room.adder_nest.title')
+    invoke('move', { direction: 'west' });
+  if (a.game.view().view.place.title.key === 'room.hound_run.title')
+    invoke('move', { direction: 'west' });
+  invoke('move', { direction: 'west' });
+  invoke('move', { direction: 'south' });
+  const row = a.game
+    .view()
+    .view.journal.find((q) => q.quest.key === 'a_night_in_the_marsh')!.expedition!;
+  invoke('use_marsh_shelter', {
+    transition: 'shelter',
+    quest_instance_id: row.quest_instance_id,
+    attempt_id: row.attempt_id,
+    cursor: 3,
+  });
+  corrupt((row) => {
+    row.attempt_id = 'aaaaaaaa-0000-4000-8000-000000009999';
+  });
 });
