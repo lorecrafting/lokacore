@@ -1001,3 +1001,34 @@ Final acknowledged end lowers one `dream_seen` assignment and bound S10 resoluti
 in one scene-owned writer sequence, with normal `scene_ended`/`quest_resolved`
 evidence, no `story_point_reached`. The authority only commits changed rows and
 receipt; the Book only emits captured invocations.
+
+## D4 held-food composition
+
+**Selected plan; not an installed schema.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
+accepted outcome `eaten {item_id: EntityId}` and immutable optional item metadata
+`edible {resource: DefinitionRef(resource), amount: positive safe integer,
+label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
+exact directly held edible item with no input. Its GameView inventory action
+uses the same pure keyed admission query as execution. Harvest remains the
+installed containment invocation; only its orchard label says Forage.
+
+Food reads actual custody, life, settled recovery/headroom and immutable metadata,
+then lowers one ordinary conserved `entity.transfer` plus `resource.adjust` in
+one writer group. No new event, fact, food-count row, mint, removal operation or
+service benefit alternative is required. Add generated known-entity kind
+`consumed` and one immutable food-enabled-world holder mapping, appended after
+slot holders in fresh allocation. The terminal transfer guard must reject escape,
+nonfood entry and foreign-source entry; food is the sole new admission owner.
+Containment, carry and reach account for this terminal holder explicitly rather
+than treating it as a room/body/container. Derive consumed status from custody.
+Eat's accepted reply supplies its exact command ID for existing narration
+recovery despite having no event. Its receipt-derived narration record is a
+World result with no detail ID; live result routing must not fall back to the
+submitted apple page after that identity leaves the projected inventory.
+
+Keep shared query budget, structural sharing, exact replay and whole-proposal
+rollback. Compiler/loader, ActionSet/verb, outcome/generated contracts, world/save
+projection and both generic delta validators must agree on this consumed subset.
+No frozen fixture is rewritten; add independent literal terminal-transfer cases
+and applicable two-kernel differential cases if the foundation changes.

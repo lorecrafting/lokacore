@@ -63,8 +63,8 @@ valid combinations become playable before the whole world's optional surfaces.
 | **D1 Ferry and isle:** pay for passage, meet Sedge, take an immediately available swim lesson and return safely even after a loss ([adopted contract](decisions/pm-decision-d1-ferry-isle-2026-10-05.md)). | B3, B4, B8 | 0.7–0.9 |
 | **D2 Priory books:** explore the public Priory and learn real topics from held books ([adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md)). | A1, B5, B6 | 0.4–0.6 |
 | **D3 Western Ashmere:** explore the mill and cottages and meet Hob through existing interactions. | B4, D1 | 0.3–0.5 |
-| **D4 Homes and orchard:** meet Gareth and Ada, visit Elspeth's home and forage useful food. | B5, B8 | 0.3–0.5 |
-| **D5 Deep Fen:** explore the oak canopy, black pool edge, fox den and fishing shallows. | B4, B6, Q2 returns | 0.3–0.5 |
+| **D4 Homes and orchard:** meet Gareth and Ada, visit Elspeth's home and Forage/Eat finite food ([adopted contract](decisions/pm-decision-d4-homes-orchard-2026-10-05.md)). | B5 finite Harvest, B8 recovery, Q2 returns, A1 lost | 0.7–0.9 |
+| **D5 Deep Fen:** explore the oak canopy, dry black pool edge, naturally lit fox den and fishing shallows ([adopted contract](decisions/pm-decision-d5-deep-fen-2026-10-05.md)). | B4, B6, Q2 returns | 0.3–0.5 |
 | **D6 Water depths:** use Sedge's earlier swim lesson to reach two bottom rooms through an explicit, recoverable water rule; S27 is not the first way to learn swim. | B4, C1, D1, D5 | 0.8–1.0 |
 | **D7 Deer:** observe bounded deer fleeing and conserved loot from deliberate fights. | C3, C4, D4 | 0.4–0.6 |
 | **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5 | 0.6–0.8 |
