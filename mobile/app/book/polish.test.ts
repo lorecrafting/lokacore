@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 
 const require = createRequire(import.meta.url);
@@ -186,7 +187,7 @@ function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
 // Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening.
 test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
-  const chapter = bundle('missing_child_v029_hash');
+  const chapter = bundle('missing_child_v030_hash');
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
@@ -280,7 +281,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
 // Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
 // pickup to World because the new presenter has no press context.
 test('remounted pending pelt Take settles on its exact corpse detail', () => {
-  const chapter = bundle('missing_child_v029_hash');
+  const chapter = bundle('missing_child_v030_hash');
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
@@ -896,4 +897,22 @@ test('actual trunk detail explains refused Take and restores its button after Re
   assert.ok(h.game.view().view.inventory.some((e) => e.name === 'item.trunk.short'));
   h.unmount();
   h.sql.close();
+});
+
+// Break: a targetless recipe exists only in a self-luminous Notice, so the World detail has no control.
+test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
+  const h = book(darkMarshBundle());
+  try {
+    assert.ok(h.labels().includes('Marsh glow'));
+    h.tap('Marsh glow');
+    assert.ok(h.text().includes('You follow the glow and find a wisp waiting above the reeds.'));
+    assert.equal(
+      h.p.screen().log.includes('You follow the glow and find a wisp waiting above the reeds.'),
+      false,
+    );
+    assert.ok(h.labels().includes('Leave'));
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
 });

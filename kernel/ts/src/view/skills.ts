@@ -1,5 +1,5 @@
 import { status } from '../mechanics/skills.ts';
-import type { World } from '../runtime/decision.ts';
+import { refString, type World } from '../runtime/decision.ts';
 import type { DefinitionRef } from '../contracts.gen.ts';
 
 export function skillViews(world: World, steps = { n: 0 }) {
@@ -23,4 +23,18 @@ export function skillViews(world: World, steps = { n: 0 }) {
     value: a.start,
   }));
   return { ...(skills.length && { skills }), ...(attributes.length && { attributes }) };
+}
+
+/** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
+export function freeLessons(world: World, npc: string) {
+  const refs = Object.values(world.cartridge.dialogues ?? {})
+    .filter((d) => world.entityIds[refString(d.npc)] === npc)
+    .flatMap((d) =>
+      Object.values(d.choices).flatMap((o) =>
+        o.lesson_payment
+          ? []
+          : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
+      ),
+    );
+  return refs.length ? { lessons: refs } : {};
 }

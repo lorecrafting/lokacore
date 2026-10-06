@@ -1,3 +1,4 @@
+import { transportOffer } from './transports.ts';
 import { dreamView } from './dreams.ts';
 import { value } from '../mechanics/fact.ts';
 import { resolved, refusal } from '../commands/actions.ts';
@@ -19,7 +20,7 @@ export function noticeViews(
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
     visible(world, world.character, id, steps) &&
-    (detail.readable || detail.harvest || detail.perception || detail.bed) &&
+    (detail.readable || detail.harvest || detail.perception || detail.bed || detail.transport) &&
     !grouped.has(id as EntityId)
       ? [
           {
@@ -28,7 +29,7 @@ export function noticeViews(
             ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, world.character, detail, steps),
             ...bedView(world, detail, steps),
-            ...offered(detail.bed ? bedActions(world, detail, steps) : actions(id)),
+            ...transportActions(world, id as EntityId, detail, actions, steps),
           },
         ]
       : [],
@@ -80,9 +81,23 @@ function noticeBoards(
   });
 }
 
+function transportActions(
+  world: World,
+  id: EntityId,
+  detail: World['details'][string],
+  actions: (id: string) => AdvertisedAction[],
+  steps: Steps,
+) {
+  const transport = transportOffer(world, id, steps);
+  return transport
+    ? { transport, actions: [transport.action] }
+    : offered(detail.bed ? bedActions(world, detail, steps) : actions(id));
+}
+
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
 
 const detailTitle = (detail: World['details'][string]) =>
+  detail.transport?.title ??
   detail.bed?.title ??
   detail.harvest?.title ??
   detail.perception?.title ??

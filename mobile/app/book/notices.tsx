@@ -45,7 +45,10 @@ function noticeOffer(view: GameView, id: string) {
       a.target_ids?.length === 1 &&
       a.target_ids[0] === id,
   );
-  return offers.find((a) => a.available) ?? offers[0];
+  const contextual = offers.length
+    ? offers
+    : (view.notices?.find((n) => n.id === id)?.actions ?? []);
+  return contextual.find((a) => a.available) ?? contextual[0];
 }
 
 function control(screen: Screen, id: string) {
@@ -53,7 +56,8 @@ function control(screen: Screen, id: string) {
   return offer?.available
     ? screen.buttons.find(
         (b) =>
-          b.action_key === offer.action_key && b.target_ids.length === 1 && b.target_ids[0] === id,
+          b.action_key === offer.action_key &&
+          (b.detail_id === id || (b.target_ids.length === 1 && b.target_ids[0] === id)),
       )
     : undefined;
 }
@@ -63,7 +67,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
-  if (notice.bed || notice.remaining !== undefined)
+  if (notice.bed || notice.transport || notice.remaining !== undefined)
     return (
       <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
         <Text style={{ ...prose, color: paper.accent }}>
@@ -126,6 +130,13 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
           {typeof line === 'string' ? line : line.text}
         </Text>
       ))}
+      {'transport' in detail && detail.transport && (
+        <Text style={note}>
+          {detail.transport.waived
+            ? 'Free passage to recover your belongings on the isle.'
+            : `Fare: ${detail.transport.charge === 0 ? 'free' : `${detail.transport.charge}p`}.`}
+        </Text>
+      )}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
       {!board &&

@@ -126,7 +126,9 @@ defmodule Loka.Content.Skills do
   end
 
   defp lesson(rel, steps, o, _, _) do
-    if Enum.any?(o["sequence"] || [], &(&1["op"] == "skill.acquire")),
+    grants = Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
+
+    if grants > 0 and (grants != 1 or o["payment"] != nil),
       do: [bad(at(rel, steps ++ ["lesson_payment"]))],
       else: []
   end

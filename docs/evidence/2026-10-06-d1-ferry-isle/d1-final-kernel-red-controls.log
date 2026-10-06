@@ -1,0 +1,4 @@
+ok   kernel tsc rejects host and Node APIs
+ok   typecheck covers the tests
+ok   typecheck covers play/
+ok   step cannot skip admit()
