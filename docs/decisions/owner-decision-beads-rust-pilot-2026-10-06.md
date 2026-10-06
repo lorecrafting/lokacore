@@ -25,6 +25,19 @@ published source closed, active source in progress and unbuilt source open.
 External prerequisites and conditional dependencies remain stated in the plan
 until they become definite; do not invent extra tracker tasks to represent them.
 
+The owner expanded the pilot again on 2026-10-06: allow hooks and deeper
+integration, and preserve comparable observations from before and after hooks.
+Use the repo-owned, opt-in Git import hook described in the
+[workflow](../WORKFLOW.md#beads-rust-pilot). It updates only the local Beads index
+after Git advances the selected integration checkout. Git reviews, source gates,
+roadmap publication and PM-owned task closures stay as before. The same hook
+runs for Claude Code and Codex because it belongs to the checkout, not an agent
+session. The workflow also gives the PM a simple ready → building → merged
+lifecycle using `br update`, `br close` and `br ready`, with reviewed records as
+the evidence. The [comparison record](../evidence/2026-10-06-beads-hooks-pilot.md)
+holds the baseline and post-hook observations; do not claim a speed improvement
+until real merges have supplied comparable data.
+
 ## Pilot observations for the keep-or-retire decision
 
 - The pilot could show ready, blocked and active slices in `br` and a dependency
