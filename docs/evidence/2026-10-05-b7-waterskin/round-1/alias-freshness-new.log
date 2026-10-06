@@ -1,0 +1,35 @@
+New regression alias-freshness exit 1
+(node:44240) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/liquid.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ aliased liquid freshness refuses a stale pair after another committed drink (123.732834ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 308.70525
+
+✖ failing tests:
+
+test at mobile/app/book/liquid.test.ts:244:1
+✖ aliased liquid freshness refuses a stale pair after another committed drink (123.732834ms)
+  AssertionError [ERR_ASSERTION]: Expected "actual" to be strictly unequal to:
+  
+  '[0,"decant",["5ce172d0-4fa9-8ded-bde5-0f32bc984fcc","ab8a8c57-b23a-8814-9cf6-293d9141c078"],"5ce172d0-4fa9-8ded-bde5-0f32bc984fcc",[],"bd595711-ea5f-89a5-abb0-046cd349d2f9","d68b48e6-93a5-8899-81ec-808f7be333f8",null,null,null,null,null,null]'
+      at TestContext.<anonymous> (file://[workspace]/mobile/app/book/liquid.test.ts:257:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '[0,"decant",["5ce172d0-4fa9-8ded-bde5-0f32bc984fcc","ab8a8c57-b23a-8814-9cf6-293d9141c078"],"5ce172d0-4fa9-8ded-bde5-0f32bc984fcc",[],"bd595711-ea5f-89a5-abb0-046cd349d2f9","d68b48e6-93a5-8899-81ec-808f7be333f8",null,null,null,null,null,null]',
+    expected: '[0,"decant",["5ce172d0-4fa9-8ded-bde5-0f32bc984fcc","ab8a8c57-b23a-8814-9cf6-293d9141c078"],"5ce172d0-4fa9-8ded-bde5-0f32bc984fcc",[],"bd595711-ea5f-89a5-abb0-046cd349d2f9","d68b48e6-93a5-8899-81ec-808f7be333f8",null,null,null,null,null,null]',
+    operator: 'notStrictEqual',
+    diff: 'simple'
+  }

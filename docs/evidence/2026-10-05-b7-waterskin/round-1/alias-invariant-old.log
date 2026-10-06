@@ -1,0 +1,18 @@
+Prior focused alias-invariant exit 0
+✔ two real shop offers cost eight pennies and retain two empty shell identities (10.571375ms)
+✔ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (2.823625ms)
+✔ liquid refusal participants and custody leave every row unchanged while open nested skins work (1.538708ms)
+✔ Fill includes liquid mass, admits equality, and owned Pour/Drink remain legal while overloaded (1.528208ms)
+✔ Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs (6.8065ms)
+✔ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (1.127417ms)
+✔ closed owned nested vessels and exact out-of-room sources refuse without a write (0.701959ms)
+✔ liquid pair projection fails at the same exhausted budget as direct admission (0.437875ms)
+✔ authored liquid overrides project the same availability as the exact invocation (4.504709ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 368.226083

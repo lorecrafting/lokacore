@@ -1,11 +1,12 @@
 # B7 finite water — local source evidence
 
-Implementation branch `b7-well-waterskin`, exact source
+Implementation branch `b7-well-waterskin`, initial checked source
 `d31b47d8b2474699348675d697b2fa26a34ba181`. The assigned integration base was
 `1898dbb5fc512e573c56f038f1a0ccf465e10aab` (C1, v020/API1.18), explicitly
 replacing the brief's older B3 pin. Reviewed B4 source
 `a3f9897643b01f53707d04a62f51b4073eadcc25` was merged before the final B7 pin;
 its fuel, dark-well and recovery behavior is retained. Source author: Sol, high.
+Latest source and local fix proof: [primary review fix round](#primary-review-fix-round).
 Fresh primary and separate save/protocol verdicts, PR, publication CI and browser
 proof: null. These checks certify headless Node/SQLite behavior only; native builds,
 Hermes, mobile simulator, device background behavior and owner saves were not used.
@@ -118,3 +119,58 @@ reviews are still required; this note is the developer's local proof, not approv
 
 Captures are redacted before retention. [SHA256SUMS](SHA256SUMS) hashes retained
 captures; [verification](verify.txt) records `shasum -a 256 -c SHA256SUMS`.
+
+
+## Primary review fix round
+
+Exact corrected source `d24b6f8917fa46e171fbf1791e3ed2c3bd848109`. Primary review
+record `2f620caa9550c9d1d2efc9d0c9bb65bdfd756f7a` required B7-01/02/03 changes
+at the initial source. The parent reports the separate save/protocol opinion
+approved that initial source without findings; both scoped rechecks remain pending.
+The release pin and saved schema/writers are unchanged in this round.
+
+B7-01: liquid projection selects each resolved semantic command and retains its
+authored action key, target, input, policy and ordered participants. The existing
+admission invariant accepts semantic commands under an exact key; its unkeyed
+case also respects any available matching offer rather than the first dictionary
+entry. Book uses one small command lookup for wording, source ownership and
+freshness, and keeps the authored key on the invocation.
+
+B7-02: Pour belongs only to its source detail using existing button metadata.
+The real production two-skin test puts the source in an open satchel, verifies
+that the receiver page excludes its Pour, presses from the source, retains the
+nested page stack and sees the committed result there.
+
+B7-03: live accepted receipts use the same existing narration formatter as cold
+restoration. A controlled, actually loaded cartridge declares `draw_water`→Fill,
+`decant`→Pour and `sip`→Drink and replaces the Well Lane ActionSet with these
+keys. For each command, its projected Book button resolves to the exact accepted
+command/participants and displays the committed quantity after a real lost-COMMIT
+acknowledgement and exact retry. Reopen restores the same source history.
+Separate loaded variants verify narrowed target/input and denied-policy refusal;
+a direct intervening Drink also prevents an aliased stale pair from refreshing.
+The old helper-only quantity test was replaced by this real integration check.
+
+| Scoped check | Result |
+|---|---|
+| Core liquid plus real Book consumers | [13 pass](round-1/focused.log) |
+| Exact corrected-source active full checks | [exit 0](round-1/full-active.log); 336 Elixir tests pass |
+| Full headless Local Story/Book suite | [exit 0](round-1/full-story-book.log) |
+| App TypeScript | [exit 0](round-1/app-types.log) |
+
+Five narrow mutations each leave the prior focused test file from `d31b47d8`
+green and make the corrected regression fail: select by action key instead of
+command; require invariant key=command; remove Pour's source owner; restore the
+combat-only live formatter; classify liquid freshness by authored key. Commands
+are `mise exec -- node --test` on `kernel/ts/test/liquid.test.ts` or
+`mobile/app/book/liquid.test.ts`, and the new cases use `--test-name-pattern` for
+`authored liquid overrides`, `loaded liquid aliases`, `Book preserves exact water
+pairs` or `aliased liquid freshness`. Raw old/new failures are retained under
+[round-1](round-1/alias-new.log). Every mutation was restored before source commit.
+
+Actual-diff review and Ponytail Review found no additional machinery to cut:
+existing resolved actions, keyed refusal, pure liquid transition, semantic offer
+metadata, source detail routing and saved narration suffice. No new abstraction
+layer, dependency or source-size allowance was added. Save/protocol code and
+`runtime/proposal.ts` are unchanged. Full browser/native/publication proof remains
+null; this is local developer evidence awaiting independent scoped verdicts.
