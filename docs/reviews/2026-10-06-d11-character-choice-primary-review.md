@@ -59,3 +59,48 @@ missing focused contract proof, not a redesign.
 Ponytail Review: lean already; no complexity finding. Correctness review found no
 additional source defect. **Open: D11-P1.** Hosted final-head checks and publication
 remain PM-owned after the fix and scoped re-review.
+
+## Independent save/protocol second opinion
+
+```text
+CHANGES REQUIRED
+PR: #257 — D11 Character Choice
+Head: 73d3d9725589c8f4c77e34a8b3a1d1d9c836cc6e
+Base: 60f64a5b31c0b5c26842caf488c4b3fcb24ee463
+
+D11-SP-01 | blocker | lib/loka/core/compose.ex:118
+Scenario: compose the literal character.select fixture against a base containing
+characters[character_id] = null. Elixir accepts and replaces the existing null
+row; TypeScript returns precondition_failed (kernel/ts/src/foundation/compose.ts:111).
+The Elixir nil comparison conflates an absent key with a present malformed row,
+violating D11's “only when absent” precondition and portable semantic agreement.
+Distinguish absence from a present null value and add the literal refusal case
+to both kernels. The new tests cover absent and selected rows, missing this case.
+This is a foundation defect; current mobile SQLite recovery rejected null rows.
+
+Checks:
+- Read AGENTS.md, WORKFLOW, D11 brief, governing mechanics/save/protocol/Book
+  clauses, composition rules, and owner prechoice-elapsed ruling.
+- Exact-head source loaded from Git objects without checkout or source edits.
+- Focused character choice/contracts tests: 10 passed.
+- Real in-memory SQLite: all four choices reopened, replayed once, refused a
+  second choice, and refused unavailable release pins without losing the save.
+- Eleven malformed/forged row or receipt probes returned typed save_corrupt.
+- Genuine deferred-constraint COMMIT failure and lost COMMIT acknowledgement:
+  input fenced; absent/committed reconciliation branches passed.
+- All four ancestries composed with controlled C5 hound hit, bleed ticks and
+  expiry; reopened state retained ancestry and attribute values.
+- Independent frozen-C5 oracle reproduction matched v038 artifact and 199 IDs.
+  Canonical hash, literal selection delta digest and event fields matched.
+- Direct exact-head TS/Elixir composition probes reproduced D11-SP-01.
+- Ponytail review: no additional complexity finding.
+
+Limits:
+Read-only sandbox prevented file-backed SQLite creation and process-level cold
+reopen. Reviewed the file/fault tests and reported evidence; independently ran
+SQLite probes in memory with fresh authority instances on the same connection.
+No broad gate, native/browser work, full differential run, source edits or
+posted comments. Later training and death/corpse-recovery reopen were not
+independently executed.
+```
+Open findings after the second opinion: **D11-P1, D11-SP-01**. Verdict remains **CHANGES REQUIRED**.
