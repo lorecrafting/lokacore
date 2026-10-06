@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **24 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3, D12, D6, D7). The latest source publication is
-[#253](https://github.com/lorecrafting/lokacore/pull/253), D7 bounded deer sight flight, replacement and conserved hides.
+Local and GitHub `main` have completed **25 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3, D12, D6, D7, C5). The latest source publication is
+[#255](https://github.com/lorecrafting/lokacore/pull/255), C5 hound bleeding and bandage cure.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -340,6 +340,14 @@ approved the fixed source; the local gate, Book browser routes, SQLite replay,
 schema mutation sweep and all exact-head hosted checks passed. The independently
 derived hash is `b0c0da219ee8d19a5d6bf0e9d6a18c138d9c5da1543c28e8b1949d5e17aebfc0`
 with 199 genesis IDs.
+
+C5 hound bleeding, retained tick cadence and exact bandage cure are published in
+[#255](https://github.com/lorecrafting/lokacore/pull/255) at chapter v037/API1.32.
+The [primary review](reviews/2026-10-06-c5-final-primary-review.md) and its
+independent second opinions approved the final source after the owner's bounded
+extra fix round. The local gate, real SQLite reopen/replay controls, portable
+schema mutations, Book browser routes and exact-head hosted checks passed. The
+independently derived hash is `d995ec92f0e7dcfd45d495504cd008176c04a3fa6c822e4a194b0b127be7fc65`.
 
 D6 underwater routes, qualified swim, the drowning deadline and owned-bottom-corpse
 Chapel recovery are published in [#247](https://github.com/lorecrafting/lokacore/pull/247)

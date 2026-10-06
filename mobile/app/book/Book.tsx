@@ -280,6 +280,7 @@ function Bottom(p: BottomProps) {
         time={view.time}
         calendar={view.calendar_status}
         resources={view.resources}
+        bleeding={view.bleeding}
         position={view.position}
         text={text}
         locked={!!view.scene || !!view.combat}

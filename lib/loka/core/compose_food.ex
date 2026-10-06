@@ -6,8 +6,16 @@ defmodule Loka.Core.ComposeFood do
     destination = known[op["destination_id"]] || %{}
     item = known[op["entity_id"]] || %{}
 
-    item["kind"] != "consumed" and source["kind"] != "consumed" and
-      (destination["kind"] != "consumed" or
-         (item["kind"] == "item" and item["edible"] == true and source["kind"] == "body"))
+    cond do
+      item["kind"] == "consumed" or source["kind"] == "consumed" -> false
+      op["consumption"] == "bandaged" -> terminal?(item, source, destination, "bandage")
+      destination["kind"] == "consumed" -> terminal?(item, source, destination, "edible")
+      true -> true
+    end
   end
+
+  defp terminal?(item, source, destination, marker),
+    do:
+      destination["kind"] == "consumed" and item["kind"] == "item" and
+        source["kind"] == "body" and item[marker] == true
 end

@@ -26,6 +26,7 @@ import { calendarStage } from './cartridge_calendar.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
+import { bleed } from './cartridge_bleed.ts';
 import { liquids } from './cartridge_liquids.ts';
 import { population } from './cartridge_population.ts';
 
@@ -129,6 +130,7 @@ const DEFINITION_MAPS = [
   'liquids',
   'services',
   'transports',
+  'bleeds',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -256,6 +258,7 @@ function declarations(c: Obj): Diagnostic[] {
     ...liquids(c),
     ...services(c),
     ...food(c),
+    ...bleed(c),
     ...population(c),
     ...transports(c),
   ];

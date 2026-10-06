@@ -268,6 +268,14 @@
       ]
     },
     {
+      "id": "bleed@1",
+      "first_required": "chapter_one",
+      "phase": "R8",
+      "gates": [
+        "TRANSACTION"
+      ]
+    },
+    {
       "id": "calendar@1",
       "first_required": "proof",
       "phase": "R8",

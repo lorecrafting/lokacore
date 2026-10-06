@@ -869,6 +869,33 @@
     ],
     "implemented_in": "D4 finite held-food Eat with terminal custody over published C3/D1"
   },
+  "bleed": {
+    "spec": "docs/system/mechanics.md C5 hound bleeding and bandage; docs/system/protocol.md C5 composition",
+    "contracts": [
+      "BleedRow",
+      "BleedDefinition",
+      "ItemBandage",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/bleed/shared.ts",
+      "kernel/ts/src/mechanics/bleed/job.ts",
+      "kernel/ts/src/foundation/compose_bleed.ts",
+      "lib/loka/content/bleed.ex",
+      "lib/loka/core/compose_bleed.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/bleed_composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "Chapter 1 C5 one hound bleed, exact held bandage cure and managed elapsed replay; provisional release pin"
+  },
   "water": {
     "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md D6 water movement and corpse selection",
     "contracts": [

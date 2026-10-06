@@ -1,0 +1,274 @@
+# C5 final primary source review
+
+**Verdict: CHANGES REQUIRED.** Independent reviewer authored none of the source.
+
+- PR: [#255](https://github.com/lorecrafting/lokacore/pull/255).
+- Exact source reviewed: `93f7bb25f47b62402463cfb73011cd72686b037a`; published base `9efebfd5`.
+- Governing [brief](../briefs/chapter-one/chapter-one-c5-bleeding-bandage-brief-2026-10-05.md), [mechanics](../system/mechanics.md#c5-hound-bleeding-and-bandage-selected-contract), [protocol](../system/protocol.md#c5-bleed-and-bandage-composition), [cartridge](../system/cartridge.md#c5-bleed-and-bandage-declarations), [composition](../system/architecture.md#building-mechanics-by-composition), [save](../system/save.md#c5-bleed-and-bandage-recovery), and [Book](../system/book-ui.md#c5-bleeding-and-bandage-details).
+
+## Requirements derived before the diff
+
+Actual positive surviving hound loss must create one body/effect generation. Further eligible hound hits refresh the end without stacking or postponing its pending cadence. Current jobs damage strictly before the end; cure, expiry and every player death clear the owned occurrence. Canonically ordered same-time round/bleed work may share a group only for the exact current pair. Exact acquired/currently qualified, directly held-item treatment alone is admitted during combat; consumption, status and job changes commit together without changing HP, clock or initiative. Save replay must reconstruct accepted history, preserve mismatch/corruption refusal and never delete a save silently. Book offers and confirmed narration must reflect the same admission and receipts. The two generic composers must accept legitimate producers as well as refuse malformed transitions.
+
+## Findings
+
+1. **C5-FP1 — blocker — another hound's hit faults instead of refreshing.** `kernel/ts/src/mechanics/bleed/shared.ts:77` always writes the current attacker's `source_id`, but `kernel/ts/src/foundation/compose_bleed.ts:16` and `lib/loka/core/compose_bleed.ex:35` require an active refresh to retain its source. With the bundled v037 cartridge, two live hounds placed together, controlled 100% hound hits, 0% player hits and no dodge, the actual first round at 64950 applies bleeding; after its tick at 65050 the next pack opportunity at 65100 returns `fault/evaluator_error`. A direct second-hound `wound` composition returns `precondition_failed` on the bleed target. Temporarily retaining the active row's original source makes the exact pack reproduction pass. Preserve the selected provenance while allowing every eligible pack hit to refresh, and cover the real alternating-hound producer.
+
+2. **C5-FP2 — blocker — an off-cadence refresh stalls the clock before expiry.** `kernel/ts/src/foundation/compose_bleed.ts:47` and `lib/loka/core/compose_bleed.ex:22` reject `next_tick_at > ends_at`, although `kernel/ts/src/mechanics/bleed/job.ts:86` advances cadence and schedules `min(next_tick_at, ends_at)` specifically to deliver the final expiry. Reproduction uses real commands: wound at 64950, Flee, wait to 64975, return and re-engage, settle tick 65050 and hound hit 65125, then Flee again. The refreshed end is 65425; ticks at 65150 and 65250 succeed, but tick 65350 proposes cadence 65450 and expiry job 65425 and faults `precondition_failed`. Elapsed cannot reach lawful expiry. Permit the pending expiry representation in both portable composers without weakening exact job/generation checks; test an arbitrary re-engagement phase and its cold reopen.
+
+3. **C5-FP3 — blocker — a noncombat player death leaves bleeding active after return.** `kernel/ts/src/mechanics/bleed/shared.ts:11` is called by combat cleanup, while `kernel/ts/src/mechanics/death/sequence.ts:173` clears water/escort/patrol state without clearing this bleed. The actual water expiry caller has no other cleanup. Controlled v037 input with authored water duration 50: wound at 64950, Flee, enter a declared water bottom through the water occurrence helper, then deliver drowning at 65000. The delivery is accepted and returns HP10 at Chapel, but the original bleed remains active with its pending job. This violates the explicit all-player-death cleanup clause. The published duration6000 normally outlasts duration300 bleeding; the failure is in supported authored-duration composition, not a claim that the stock route currently triggers it. Clear C5 in the shared player-death path, accounting for already completed/cancelled bleed jobs so its own fatal tick remains valid.
+
+4. **C5-FP4 — blocker — fatal bleed has no typed bleeding cause.** `kernel/ts/src/mechanics/bleed/job.ts:27` calls `deathSequence` with source hound and null credit but no cause; `kernel/ts/src/mechanics/death/sequence.ts:23` supports only the drowning cause. An actual HP1 bleed delivery emits `entity_died` with original hound `killer_id` and null `credited_character_id`, but no `cause`. The selected protocol requires a typed bleeding cause and original-producer evidence. Preserve the existing no-credit behavior, add the narrow typed cause through the existing event/death contract, and assert it on the actual tick producer. Do not fabricate a melee attack event.
+
+## Verification and limits
+
+- Unchanged C5 kernel, portable composition and real SQLite authority tests: **15/15 pass**. This includes the six tick/cure COMMIT outcomes, input/elapsed fencing, cold reopen and replay. Existing focused tests miss the pack-source switch and off-cadence refresh failures above.
+- Tested the tests in the detached throwaway checkout: removing `row.generation === generation` from exact bandage matching made the existing stale-generation refusal fail (`accepted` instead of `rejected`). Restored the source afterwards.
+- The four targeted behavioral controls above fail on this exact source. The pack-source control passes with the temporary provenance correction; that correction was restored and is not committed. The drowning control uses the real expiry producer and an explicit controlled content duration. All temporary tests were removed before committing this record.
+- Tracked schema sweep rerun: **56 mutations, 56 killed, no survivors**. Read the separately tracked discriminator compile control and portable literal cases. The sweep result is not evidence for the behavioral cases missing above.
+- v035/v036 frozen hash fixtures are byte-identical to the published base. v037 canonical bytes and SHA256 independently recomputed with Python agree with `d995ec92f0e7dcfd45d495504cd008176c04a3fa6c822e4a194b0b127be7fc65`. The successor script takes published v036 plus the reviewed provisional C5 artifact; it does not regenerate the expected answer through the current compiler.
+- Reviewed the integration/helper split changes with the current composers, producer/job paths, keyed/raw admission, status projection, terminal custody and generic receipt replay. The confirmed receipt path and explicit mismatch refusal remain. Hosted checks and browser results are the PM's exact-head evidence; this review did not rerun a browser or use an owner save or native runtime.
+
+Ponytail Review: no additional framework or dependency is needed. Existing resource/death/job/receipt owners remain the right boundaries; fix these cases there. No separate over-engineering finding. The verdict remains CHANGES REQUIRED until C5-FP1 through C5-FP4 are closed.
+
+## Independent save/protocol second opinion
+
+The following answer is retained verbatim for source `93f7bb25`. SO1/SO2 overlap FP1/FP2; SO3 and SO4 add portable binding findings to the open fix list.
+
+```text
+CHANGES REQUIRED
+Head: 93f7bb25f47b62402463cfb73011cd72686b037a
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+All locations below refer to that head.
+
+C5-SO1 | blocker | kernel/ts/src/mechanics/bleed/shared.ts:77
+A second pack hound’s positive hit replaces source_id, but both composers require the active source to remain unchanged. Reproduced against v037: wound at 64950, tick at 65050, next round at 65100 faults evaluator_error instead of refreshing. Preserve the retained source when refreshing.
+
+C5-SO2 | blocker | kernel/ts/src/foundation/compose_bleed.ts:47; lib/loka/core/compose_bleed.ex:23
+Off-cadence refresh cannot reach expiry. Example: application at T0, refresh at T150, end T450. The T400 tick advances next_tick_at to T500 and schedules expiry at T450, but both composers reject next_tick_at > ends_at. Reproduced precondition_failed; elapsed cannot advance through that tick. Permit the retained future cadence needed by an expiry delivery.
+
+C5-SO3 | blocker | lib/loka/core/compose_encounter.ex:236
+Portable composers disagree on mixed bleed/sight scheduling. A schema-valid job.schedule containing a complete bleed binding plus sight returns precondition_failed in TypeScript, but Elixir accepts it and drops sight. Reproduced directly in both runtimes. Reject the competing binding in Elixir and add a shared refusal fixture.
+
+C5-SO4 | should-fix | protocol/delta.schema.json:868
+The four-way discriminator does not reject partial bindings. Validation accepts bleed_body_id without bleed_generation, and encounter_id with an orphan bleed_generation. The latter can cancel an encounter job while ignoring the stray bleed field. Require complete binding fields and exclude partial competing bindings; the current sweep misses these cases.
+
+Checks/limits: 13 focused TypeScript tests passed; an in-memory cadence-guard mutant failed the expected fixture. The passing suite misses the reproduced scenarios above. Frozen v035/v036/combat fixtures are unchanged; v037 loads with the stated hash. Reviewed receipt replay, transaction fencing and six SQLite fault cases; did not rerun SQLite, full CI or mobile/native work. Browser retry remains a risk observation, not defect evidence. No files or comments changed.
+```
+## Scoped fix round 1 — CHANGES REQUIRED
+
+**Exact fix head:** `c04a5c0fd962c8e6fd9e79c5a99c472c1c33c940`, including spec-first commit `670c0fa6`. Reviewed only the six open findings, the fix diff and affected callers. **FP1, FP3, FP4, SO3 and SO4 are closed. FP2 remains open.** SO1 overlaps closed FP1; SO2 overlaps remaining FP2.
+
+- **FP1 closed:** active refresh retains the original source. The actual alternating pack opportunity now succeeds and preserves its pending job/cadence. Replacing retained source with current attacker again makes the focused second-hound test fail.
+- **FP3 closed:** shared player return clears C5 before restoring the body; cleanup avoids cancelling an already completed/cancelled occurrence. The real short-water expiry test returns HP10 with inactive bleed and a cancelled job, and the later old tick leaves HP10. Removing shared cleanup makes that test fail. Combat and bleed deaths still pass.
+- **FP4 closed:** fatal bleed supplies `cause: "bleeding"`; the existing death/event contract admits it, preserves original hound provenance and null credit, and produces no fake melee event. Removing that cause makes the actual fatal-tick assertion fail.
+- **SO3 closed:** Elixir explicitly rejects `sight` in a bleed schedule. The shared literal mixed-binding case fails if that rejection is removed; restored focused Elixir tests pass.
+- **SO4 closed:** standard `dependentRequired` is implemented in both validators and the schema compiler; the cancellation body/generation pair requires both fields, while the existing discriminator excludes competing complete bindings. Generated cancellation types preserve that relationship. Removing TypeScript dependent-required enforcement makes the partial-binding test fail. The new checks keep valid encounter/sight/water cancellation forms.
+
+### FP2 remaining direct-consumer failure
+
+**Blocker — `kernel/ts/src/foundation/compose_bleed.ts:19` and `lib/loka/core/compose_bleed.ex:52`.** Removing `next_tick_at <= ends_at` fixes ordinary off-cadence expiry, including real SQLite reopen. But the completed-job branch still requires strictly advancing `next_tick_at`, rejecting the explicitly selected no-damage reschedule when a round refreshes an expiry before the future cadence.
+
+Independent real-command reproduction on the corrected source, using the existing controlled C5 fixture (seed `[1,2,3,4]`, hound hit100%, player hit0%, no dodge):
+
+1. Attack at64800; first hound wound at64950. Flee; elapsed to64975; Move back along the reciprocal exit; Attack again.
+2. Settle tick65050 and round65125, which refreshes end65425. Flee; settle65150 and65250; elapsed to65275.
+3. Move back and Attack at65275, making the next round due65425. Choose a command ID whose resulting round JobId sorts before the bleed JobId (the independent control checked IDs20 through39 until that canonical order was present).
+4. Settle tick65350: active bleed has `next_tick_at=65450`, `ends_at=65425`, with its expiry job due65425. Both current jobs are confirmed due65425.
+5. Elapsed65425 runs the round first: its positive hit extends end65725. The following expiry delivery correctly requests a fresh job at65450 without HP loss and preserves `next_tick_at=65450`. Composition returns `fault/precondition_failed` on the bleed target because the completed-job cadence predicate requires `65450 > 65450`.
+
+Temporarily allowing equality in that predicate makes this exact real-command control pass with end65725 and cadence65450; the temporary edit was restored. The fix must distinguish a legitimate delivery before the next tick from an actual tick, preserving cadence advancement when damage is due and exact occurrence validation. Cover this round-first former-expiry path in both portable semantics and the real consumer, with reopen as appropriate. This is the affected direct consumer required by the existing C5 equal-time clause, not a reopened unrelated area.
+
+Verification on unchanged fix head: **19/19 focused TypeScript/kernel/real-SQLite tests; 12/12 Elixir bleed/contracts tests; schema sweep59/59**. Individually reverting FP1, ordinary FP2, FP3, FP4, SO3 and SO4 made their focused tests fail; Elixir used `mix test --force`. The independent remaining-FP2 control fails on the exact fix head. All mutations and temporary tests were restored; only this record/index are committed. No browser, native runtime or owner save was used in this re-review.
+
+Ponytail Review: the fixes reuse the existing provenance, death, delta and schema owners. No separate complexity finding. Keep the remaining fix within the current cadence check and its real job consumer.
+
+## Independent second opinion on fix round 1
+
+The following answer is retained verbatim for source `c04a5c0f`. SO5 corroborates the remaining FP2 expiry handoff; SO6 adds an adjacent portable binding parity defect to the open fix list.
+
+```text
+CHANGES REQUIRED
+Head: c04a5c0fd962c8e6fd9e79c5a99c472c1c33c940
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+All locations refer to the exact head.
+
+C5-SO5 | blocker | kernel/ts/src/foundation/compose_bleed.ts:19; lib/loka/core/compose_bleed.ex:52
+Refreshing a pending off-cadence expiry still stalls elapsed.
+Reproduced with final v037 content and controlled real commands:
+wound at 64950; Flee/re-engage; refresh at 65125 gives end65425.
+Flee, return and attack at 65250. Tick65350 leaves next_tick65450
+and expiry job65425. Hound hit65400 extends end to65700 while
+retaining that job. At65425, runBleed correctly attempts a
+nondamaging successor at65450, retaining next_tick65450.
+Both composers require a strictly increased cadence after job
+completion, so TypeScript returns fault/precondition_failed.
+Permit this checked nondamaging handoff in both composers and
+cover refresh before a pending expiry, including cold reopen.
+
+C5-SO6 | blocker | lib/loka/core/compose_encounter.ex:236
+The bleed binding branch misses orphan water_body_id.
+A schema-valid job.schedule with complete bleed binding plus
+water_body_id, without water_generation, is rejected by TypeScript
+with precondition_failed. Elixir's job composer accepts it and
+retains water_body_id. Reproduced in both runtimes. Reject this
+competing partial binding and add a shared refusal fixture.
+
+Prior findings:
+- Different-hound refresh: original scenario fixed.
+- Off-cadence expiry: original scenario fixed; SO5 remains.
+- Drowning death cleanup: fixed; real short-duration water expiry
+  cancels bleeding before Chapel return.
+- Typed bleed death cause: fixed; bleeding, original source and
+  null kill credit asserted.
+- Mixed bleed+sight: original refusal now agrees; SO6 is adjacent.
+- Partial cancellation bindings: missing generation and orphan
+  generation beside encounter binding are rejected.
+
+Tests and limits:
+- Exact-head sources loaded from Git into memory; 16 focused
+  TypeScript tests passed.
+- Five in-memory reversions caused the expected tests to fail:
+  provenance, cadence bound, death cleanup, typed cause and
+  dependentRequired. Removing Elixir's sight guard reproduced
+  acceptance of the forbidden mixed schedule.
+- Schema sweep: 59 mutations, 59 killed, zero survivors.
+- Inspected literal HP/time/schema expectations and SQLite
+  transaction, fencing, replay and off-cadence reopen tests.
+  Existing tests miss SO5 and SO6.
+- Did not rerun disk-backed SQLite tests, full Mix/CI gates,
+  browser/native tests or owner-save operations.
+- No additional over-engineering finding.
+- No files edited, no comments posted; working tree remains clean.
+```
+## Scoped fix round 2 — APPROVE
+
+**Exact source:** `0fab02168af6e4047ec179aba5955b3300e1ba23`. Reviewed the remaining FP2/SO5 early-expiry handoff and SO6 binding refusal, their spec amendment, tests and direct consumers. **All primary and second-opinion findings recorded above are closed; no open finding from this scoped review.**
+
+- **FP2/SO5 closed:** both composers inspect the exact completed job's due time. Unchanged cadence is admitted only when that delivery preceded the retained tick; a due tick must still advance. The fixed command27 real-command test asserts canonical round-first ordering at65425, then literal HP3, end65725 and successor/cadence65450. The shared literal fixtures separately admit the early handoff and refuse an unchanged due tick. Temporarily removing the early exception makes the real-command test fail; admitting equality for a due tick makes the portable refusal fail. Both mutations were restored.
+- **SQLite neighbor verified independently:** a temporary controlled real-authority test repeated wound64950, refresh65125/end65425, Flee/re-entry/Attack65250, tick65350 and positive hit65400/end65700, then Flee. Closed the database at65400 and reopened it; the old expiry at65425 committed a nondamaging handoff with HP3 and retained cadence65450. A new authority cold-opened that committed receipt/state, retained end65700/cadence65450, and delivered the real tick65450 to literal HP2. This verifies refresh before the pending expiry, reopen before and after handoff, and its later consumer. The temporary test was removed, not committed.
+- **SO6 closed:** Elixir's bleed schedule branch now rejects an orphan `water_body_id`. The new shared schema-valid mixed-binding fixture returns the same `precondition_failed` job target in both composers. Removing only that Elixir guard makes the focused fixture fail; restored tests pass with `mix test --force`.
+
+Checks on the corrected source: **20/20 focused TypeScript/kernel/real-SQLite tests; 3/3 Elixir bleed tests; independent SQLite handoff/reopen control passes**. Reviewed the fixture extraction as a move of the existing setup, with no changed inputs. Three targeted mutation controls failed as expected. Source and tests were restored before committing this record. Hosted/full-gate results remain the developer/PM evidence; no browser/native runtime or owner save was used in this review.
+
+Ponytail Review: narrow predicates in the existing two composers, one shared test setup and literal regression cases; no framework or dependency added, no complexity finding. **APPROVE** for the exact source above.
+
+## Independent second opinion on fix round 2
+
+The following answer is retained verbatim for source `0fab0216`. It raises SO7 portable early-cadence enforcement and SO8 a missing committed SQLite regression. The primary scoped APPROVE above is unchanged by this append; disposition of the new findings requires scoped evaluation. The prior primary section separately records its temporary independent SQLite handoff/reopen proof.
+
+```text
+CHANGES REQUIRED
+Head: 0fab02168af6e4047ec179aba5955b3300e1ba23
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+Focus: fixes after be22236b.
+
+C5-SO7 | medium | kernel/ts/src/foundation/compose_bleed.ts:19; lib/loka/core/compose_bleed.ex:53
+Early expiry completion still permits advancing future cadence.
+Controlled input: clock200, completed expiry due200, retained
+next_tick250, refreshed end400. Change the successor cadence and
+job due to350. BOTH composers accept, skipping the pending tick250.
+The unconditional greater-than branch bypasses the early-delivery
+distinction. Require unchanged cadence for early completion and
+advancement for a due tick; add a shared literal refusal case.
+The current story producer behaves correctly; this is incomplete
+portable enforcement, not a reproduced ordinary-play failure.
+
+C5-SO8 | medium / required-proof gap |
+kernel/ts/test/c5_bleed_early_expiry.test.ts:56;
+mobile/authority/local-story/c5_bleed.test.ts:128
+SO5's refreshed-expiry handoff has no cold-reopen regression.
+The new test stops after the in-memory handoff. The SQLite test
+reopens an unrefreshed expiry and removes bleeding; it never
+exercises the newly permitted successor with unchanged cadence.
+Cover reopen around that handoff, receipt reconstruction and the
+later damaging tick, as required by docs/system/save.md.
+No runtime save-corruption defect was demonstrated.
+
+Prior findings:
+- SO5's reported runtime fault is fixed. Both same-time round-first
+  refresh and refresh at65400 before expiry65425 pass controlled
+  TypeScript commands. Both portable composers accept the literal
+  early handoff and reject unchanged cadence after a due tick.
+- SO6 is closed. Both kernels reject complete bleed binding plus
+  orphan water_body_id. Six competing single-field bindings were
+  independently refused in each kernel.
+
+Checks:
+- Exact Git-head sources loaded/compiled in memory; no checkout edits.
+- 17 focused TypeScript tests passed, plus the separate pre-expiry
+  refresh scenario.
+- All 14 shared composition cases and 3 Elixir tests passed.
+- Five in-memory red controls failed as expected: SO5 reversion in
+  both kernels, Elixir SO6 reversion, and weakened due-time guards
+  in both kernels. The latter changed the refusal to nonfuture_job.
+- New fixtures and HP/time assertions use independent literal answers.
+- Inspected generic receipt replay: it recomputes accepted decisions
+  and compares final state; composer acceptance alone does not prove
+  that forged saved history would load.
+- No additional over-engineering finding.
+
+Limits: Did not rerun disk-backed SQLite, full Mix/CI, schema sweep,
+browser/native tests or owner-save operations. No files edited or
+comments posted; working tree remains clean.
+```
+## Owner-approved scoped fix round 3 — APPROVE
+
+**Exact source:** `0e7bbfe854ce137d039b48f468c2756c6b6b2b4a`. This bounded review follows the [owner's exception](../decisions/owner-decision-c5-third-fix-round-2026-10-06.md) and examines SO7/SO8, their changed portable predicates, direct producer and committed tests. **SO7 and SO8 are closed; no open finding from the primary review.**
+
+- **SO7 closed:** both composers now choose the cadence rule by the completed occurrence's due time. Early delivery requires exactly the retained future cadence; a due tick requires advancement. The new shared literal case uses clock200, completed expiry200, pending tick250 and end400, and refuses replacing tick250 with350 on the bleed target. Both kernels pass that refusal alongside legitimate early handoff and due-tick controls. Reverting each composer's correction independently makes the new skip-future-cadence fixture fail. Source was restored; Elixir was rerun with `--force`.
+- **SO8 closed:** the committed real SQLite regression now includes the earlier independent proof as a maintained test: actual wound/refresh/Flee/re-engagement gives end65700 and pending cadence65450; cold reopen at65400 retains HP3. The former expiry65425 adds exactly one receipt without HP loss; a second cold open retains the handoff's end/cadence/HP and receipt count. The actual tick65450 reduces HP to literal2, advances cadence65550 and adds exactly one further receipt. Temporarily forcing an early delivery to advance cadence makes this specific SQLite test fail; the mutation was restored.
+
+Verification: **21/21 focused TypeScript/kernel/real-SQLite tests and 3/3 focused Elixir tests pass**. Three independent mutation runs fail as expected. The prior fixed-command27 same-time path and due-tick refusal remain green. Changes preserve the existing occurrence/source/end checks and generic receipt/changed-row authority; no source or test edits remain from this review. No browser/native runtime or owner save was used.
+
+Ponytail Review: the correction replaces a permissive disjunction with the two required cases in the existing composers; the SQLite test covers a distinct durable continuation. No added framework, dependency or complexity finding. **APPROVE** for the exact source above; the PM retains the exact-head hosted CI and merge gates.
+
+## Independent second opinion on owner-approved fix round 3
+
+The following answer is retained verbatim. Its APPROVE applies to the corrected exact source `0e7bbfe854ce137d039b48f468c2756c6b6b2b4a`; SO7/SO8 are closed with no open findings.
+
+```text
+APPROVE
+Head reviewed: 0e7bbfe854ce137d039b48f468c2756c6b6b2b4a
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+Scope: changes after ff462201 and direct callers.
+
+Head discrepancy: the supplied identifier
+0e7bbfe854ce137d039b48f468c2756c6b2b4a
+does not resolve. Approval applies only to the preserved branch
+head stated above.
+
+Findings: none open.
+
+C5-SO7 | closed | kernel/ts/src/foundation/compose_bleed.ts:19;
+lib/loka/core/compose_bleed.ex:52
+Completed expiry due200 with retained tick250/end400 now refuses
+successor cadence350. Preserving250 succeeds; completion at250
+requires advancement. Controlled inputs agree in both runtimes.
+
+C5-SO8 | closed | mobile/authority/local-story/c5_bleed.test.ts:141
+Committed real SQLite regression closes/reopens before expiry65425
+and after its nondamaging handoff. Independent literals assert
+end65700, retained cadence65450 and HP3, then cadence65550/HP2
+after the later tick. Receipt counts advance once per settlement.
+Cold loading reconstructs stored rows and validates revision-ordered
+receipts by replay against the reconstructed state. Inspected
+recorded red control fails at the handoff pulse; restored run passes.
+
+Checks:
+- 17 focused TypeScript tests passed.
+- All 15 literal Elixir composition cases passed with the changed
+  module freshly compiled in memory.
+- Six additional cadence boundary cases passed in each runtime.
+- Independent in-memory SO7 mutations in both runtimes changed
+  refusal to acceptance, confirming the regression check detects it.
+- Direct caller and neighboring boundary review found no new defect.
+- Diff whitespace check passed; Ponytail Review found no excess machinery.
+
+Limits:
+Disk-backed SQLite was inspected with its recorded green/red evidence,
+not rerun under the read-only filesystem. Elixir checks used existing
+dependency beams with freshly compiled changed source. No broad gates,
+hosted CI, browser/native tests or owner-save operations were run.
+No files edited or comments posted.
+```

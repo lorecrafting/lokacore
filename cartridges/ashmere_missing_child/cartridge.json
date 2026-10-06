@@ -45,6 +45,7 @@
       "population": 1,
       "resource": 1,
       "food": 1,
+      "bleed": 1,
       "water": 1
     },
     "client_features": []
