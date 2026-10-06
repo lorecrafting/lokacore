@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote; source/proof remain pending ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
+
 - D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
 
 - D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
