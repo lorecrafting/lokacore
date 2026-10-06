@@ -1,0 +1,45 @@
+✔ loader independently rejects wrong-kind refs, non-Boolean topics and malformed bounded consumers (334.503833ms)
+✔ Wisp release keeps its independently generated initial IDs (4.036875ms)
+✔ marsh marker is visible in darkness while ordinary details and the undiscovered wisp refuse raw IDs (42.754416ms)
+✔ immutable attribute Seek passes at five, fails at four and keeps RNG and time unchanged (6.65225ms)
+✔ only bank-valid wrong answers count and third closes only the sitting with immediate reset (49.691958ms)
+✔ pending answer rechecks effective direct light and bound original participants while Close remains usable (32.631542ms)
+✔ correct uppercase answer resolves S4 once, projects one ward and exactly selects public Aldric ward dialogue (13.916792ms)
+✔ an already-known ward still resolves S4 without another topic assignment (7.812958ms)
+✔ projected and raw bounded Choose reject a foreign NPC binding without an attempt (7.459167ms)
+✔ independent bounded attempt and Wisp contracts (23.925792ms)
+(node:32614) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ NPC detail tiles edit a bounded word and submit retry/correct results after history (129.205708ms)
+(node:32615) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens at counts zero one two, third close, reset and resolved ward (569.222458ms)
+✔ wrong final-wrong and correct commits reconcile both real outcomes and exact replay once (429.814875ms)
+✔ bounded saves refuse forged rows and wrong receipts without deleting progress (734.667375ms)
+✔ unjustified discovery and topic facts fail cold-open reconciliation (143.803583ms)
+✔ receipt association checks reject forged actor source and quest independently of later save consumers (56.639792ms)
+✔ cold-open verifies the ward Talk selector against its saved source (82.077416ms)
+(node:32616) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ file-backed riddle cold opens before, after wrong and after success with exact replay/conflict (231.564583ms)
+✔ stored riddle command, binding and root evidence mismatches become typed save corruption (299.072709ms)
+▶ malformed retained riddle source offers typed recovery and explicit Start over
+  ✔ null source (45.708042ms)
+  ✔ missing source (43.859833ms)
+✔ malformed retained riddle source offers typed recovery and explicit Start over (89.988708ms)
+✔ answer input refreshes only across unchanged offered riddle context and reads its own eventless receipt (32.53275ms)
+✔ failed and lost COMMIT answers retain the exact invocation and answer until reconciliation (115.036417ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2467.947542

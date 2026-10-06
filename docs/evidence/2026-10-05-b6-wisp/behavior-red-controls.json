@@ -1,0 +1,139 @@
+[
+  {
+    "mutation": "threshold equality",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ marsh marker is visible in darkness while ordinary details and the undiscovered wisp refuse raw IDs",
+      "✖ immutable attribute Seek passes at five, fails at four and keeps RNG and time unchanged",
+      "✖ only bank-valid wrong answers count and third closes only the sitting with immediate reset",
+      "✖ pending answer rechecks effective direct light and bound original participants while Close remains usable",
+      "✖ correct uppercase answer resolves S4 once, projects one ward and exactly selects public Aldric ward dialogue",
+      "✖ an already-known ward still resolves S4 without another topic assignment",
+      "✖ projected and raw bounded Choose reject a foreign NPC binding without an attempt"
+    ]
+  },
+  {
+    "mutation": "light bypass",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ pending answer rechecks effective direct light and bound original participants while Close remains usable"
+    ]
+  },
+  {
+    "mutation": "marker exposes ordinary darkness",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ marsh marker is visible in darkness while ordinary details and the undiscovered wisp refuse raw IDs"
+    ]
+  },
+  {
+    "mutation": "wrong grants success",
+    "old_focused_status": 1,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ only bank-valid wrong answers count and third closes only the sitting with immediate reset",
+      "✖ pending answer rechecks effective direct light and bound original participants while Close remains usable"
+    ]
+  },
+  {
+    "mutation": "third remains pending",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ only bank-valid wrong answers count and third closes only the sitting with immediate reset"
+    ]
+  },
+  {
+    "mutation": "reset retains old count",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ only bank-valid wrong answers count and third closes only the sitting with immediate reset",
+      "✖ pending answer rechecks effective direct light and bound original participants while Close remains usable",
+      "✖ correct uppercase answer resolves S4 once, projects one ward and exactly selects public Aldric ward dialogue",
+      "✖ an already-known ward still resolves S4 without another topic assignment",
+      "✖ projected and raw bounded Choose reject a foreign NPC binding without an attempt"
+    ]
+  },
+  {
+    "mutation": "Aldric selector ignored",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ correct uppercase answer resolves S4 once, projects one ward and exactly selects public Aldric ward dialogue"
+    ]
+  },
+  {
+    "mutation": "attempt foreign source",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ independent bounded attempt and Wisp contracts"
+    ]
+  },
+  {
+    "mutation": "saved attempt foreign actor",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ receipt association checks reject forged actor source and quest independently of later save consumers"
+    ]
+  },
+  {
+    "mutation": "duplicate increment",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ independent bounded attempt and Wisp contracts"
+    ]
+  },
+  {
+    "mutation": "third fails quest",
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ only bank-valid wrong answers count and third closes only the sitting with immediate reset"
+    ]
+  },
+  {
+    "mutation": "dead opted NPC revealed",
+    "baseline_status": 0,
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ marsh marker is visible in darkness while ordinary details and the undiscovered wisp refuse raw IDs"
+    ]
+  },
+  {
+    "mutation": "bound NPC key forgery",
+    "baseline_status": 0,
+    "old_focused_status": 0,
+    "new_focused_status": 1,
+    "killed": true,
+    "failing_tests": [
+      "✖ projected and raw bounded Choose reject a foreign NPC binding without an attempt"
+    ]
+  },
+  {
+    "mutation": "Elixir attempt accepts foreign source",
+    "old_focused_status": 0,
+    "new_focused_status": 2,
+    "killed": true,
+    "named_failure": "both-kernel literal bounded attempt answers"
+  }
+]

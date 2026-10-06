@@ -1,0 +1,56 @@
+✔ marsh marker is visible in darkness while ordinary details and the undiscovered wisp refuse raw IDs (46.426459ms)
+✔ immutable attribute Seek passes at five, fails at four and keeps RNG and time unchanged (12.58425ms)
+✔ only bank-valid wrong answers count and third closes only the sitting with immediate reset (29.092416ms)
+✔ pending answer rechecks effective direct light and bound original participants while Close remains usable (31.007042ms)
+✔ correct uppercase answer resolves S4 once, projects one ward and exactly selects public Aldric ward dialogue (18.404417ms)
+✔ an already-known ward still resolves S4 without another topic assignment (12.713625ms)
+✔ projected and raw bounded Choose reject a foreign NPC binding without an attempt (7.999417ms)
+(node:9818) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (89.384042ms)
+✔ the south search reaches the oak and returns through visible fox clues (52.253833ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (74.674125ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (21.603875ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (30.574833ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (29.5455ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (107.403584ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (21.1ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (26.635791ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (37.03075ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (83.641583ms)
+(node:9819) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ active chapter five actual kills, shrine return, Maud reward and cold-reopen storage (285.185042ms)
+✔ Q1 explicit acceptance, held drawing gate, report priority and durable once-only resolution (99.18625ms)
+✔ picking up the clue first starts no quest and acceptance is immediately ready (15.178459ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is unaccepted (63.915083ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is active (51.017917ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is ready (61.0835ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is resolved (50.288459ms)
+✔ Q1 acceptance, Green pickup, report and Maud offer work throughout the day (383.352084ms)
+✔ Mire Crossing and Fox Hollow offer both approaches and cold return at every hour (2082.556792ms)
+✔ Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead (16.90725ms)
+✔ SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history (91.861917ms)
+✔ malformed Study receipt evidence offers typed Start over on reopen (288.304125ms)
+(node:9820) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens at counts zero one two, third close, reset and resolved ward (619.64825ms)
+✔ wrong final-wrong and correct commits reconcile both real outcomes and exact replay once (450.075666ms)
+✔ bounded saves refuse forged rows and wrong receipts without deleting progress (680.868417ms)
+✔ unjustified discovery and topic facts fail cold-open reconciliation (111.556958ms)
+✔ receipt association checks reject forged actor source and quest independently of later save consumers (47.78625ms)
+✔ cold-open verifies the ward Talk selector against its saved source (70.358333ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3927.338833

@@ -1,0 +1,243 @@
+[
+  {
+    "contract": "ChoiceAttempts",
+    "path": [],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "TopicDefinition",
+    "path": [],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DeltaOp",
+    "path": [
+      "oneOf",
+      21
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DeltaOp",
+    "path": [
+      "oneOf",
+      21,
+      "properties",
+      "op"
+    ],
+    "keyword": "const",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DeltaOp",
+    "path": [
+      "oneOf",
+      21
+    ],
+    "keyword": "required",
+    "field": "op",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "InspectableDetail",
+    "path": [
+      "properties",
+      "perception"
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "NpcDefinition",
+    "path": [
+      "properties",
+      "perception"
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DialogueChoice",
+    "path": [
+      "properties",
+      "sequence",
+      "items",
+      "oneOf",
+      3
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DialogueChoice",
+    "path": [
+      "properties",
+      "sequence",
+      "items",
+      "oneOf",
+      3,
+      "properties",
+      "op"
+    ],
+    "keyword": "const",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "DialogueChoice",
+    "path": [
+      "properties",
+      "sequence",
+      "items",
+      "oneOf",
+      3
+    ],
+    "keyword": "required",
+    "field": "op",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "ActionRecipe",
+    "path": [
+      "properties",
+      "check",
+      "oneOf",
+      2
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "ActionRecipe",
+    "path": [
+      "properties",
+      "check",
+      "oneOf",
+      2,
+      "properties",
+      "kind"
+    ],
+    "keyword": "const",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "ActionRecipe",
+    "path": [
+      "properties",
+      "check",
+      "oneOf",
+      2
+    ],
+    "keyword": "required",
+    "field": "kind",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "Policy",
+    "path": [
+      "oneOf",
+      12
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "Policy",
+    "path": [
+      "oneOf",
+      12,
+      "properties",
+      "op"
+    ],
+    "keyword": "const",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "Policy",
+    "path": [
+      "oneOf",
+      12
+    ],
+    "keyword": "required",
+    "field": "op",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "GameView",
+    "path": [
+      "properties",
+      "topics",
+      "items"
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  },
+  {
+    "contract": "CompiledCartridge",
+    "path": [
+      "oneOf",
+      1,
+      "properties",
+      "topics"
+    ],
+    "keyword": "additionalProperties",
+    "killed": false,
+    "controls": [],
+    "generator_status": 1,
+    "generator_rejected": true
+  }
+]
+

@@ -2,8 +2,8 @@
 
 Branch: `chapter-1/b6-wisp-ward`. Source assignment base:
 `fe25fe07702a957e4731eb4254ea4385e09b1e4b`; B7 predecessor:
-`547f809ccdd587498dee86cb14822f564efee642`. Exact source/review head is supplied
-in the developer handoff. Hosted PR/CI, independent B6 primary and save/protocol
+`547f809ccdd587498dee86cb14822f564efee642`. Exact implementation source:
+`e7aeace7f369254e3fb4b3f197dc1b641b6e6e87`. Hosted PR/CI, independent B6 primary and save/protocol
 reviews, browser/native proof: null.
 
 The player can reach Marsh Light, Old Causeway and Tide Flats at any hour, douse
