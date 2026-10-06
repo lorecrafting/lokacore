@@ -155,11 +155,13 @@ focused checks; full active mise check_all and red controls run once at accumula
 publication under the normal hook. Fresh primary plus required save/protocol opinion
 applies; Astra audits runtime/proposal if touched. Later source changes require scoped
 review. Browser proof follows the
-[mobile-focused C2 verification decision](../../decisions/owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md):
+[C2 staged browser-proof decision](../../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md):
 shared Start/departure/join, pause/Rejoin, committed success narration and resolved
 Journal, plus a fresh-save cold reopen. Keep actual real-host fatal/Restart proof
-distinct from unproved browser fatal/Restart and deferred native UI verification;
-the preserved terminal web-only startup timeout remains deferred. No native or
+distinct from unproved browser fatal/Restart, which must close in the Chapter 1 E3
+browser walk or sooner if practical. Native UI remains deferred under the mobile
+pause; the preserved terminal Web startup timeout remains open pending its separate
+Web SQLite fix. No native or
 owner-save operation is authorized by this assignment.
 
 Stop/escalate unreviewed dependency pins, a current-spec conflict, unsupported mortal

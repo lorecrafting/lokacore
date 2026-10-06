@@ -17,7 +17,8 @@
     "fatal_restart": null,
     "return": "active;paused;2of4;Rejoin available;Restart unavailable",
     "success": "resolved;completed;4of4;originalTobin at Watch Post;20pennies;no paid lesson or item/skill grant",
-    "preserved_terminal_reopen": "not attempted;prior Sync operation timeout remains unresolved/deferred"
+    "preserved_terminal_reopen": "not attempted;prior Sync operation timeout remains open pending separate Web SQLite fix",
+    "fatal_restart_gap": "close in Chapter1 E3 browser walk or sooner if practical;not satisfied by surviving combat"
   },
   "real_host_fatal_restart": "retained34passingTS/SQLitechecks plus literal portable/EXproof;browser/native not inferred",
   "native": null,

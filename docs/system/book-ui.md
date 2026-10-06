@@ -527,14 +527,15 @@ Capture the exact attempt/cursor/status with each drawn control under existing l
 action freshness. Pending, refused, stale and faulted results claim no movement,
 credit or trust. Only committed narration appears, once, including after lost reply
 and reopen. No new watch page, immunity while reading, countdown, nighttime wait,
-optimistic follow or timer-driven movement is added. Browser proof covers
-shared Start→leader departure→player join→pause/Rejoin→success controls, committed
-narration, resolved checkpoint Journal and a fresh-save cold reopen under the
-[mobile-focused C2 proof decision](../decisions/owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md).
-Actual fatal/Restart remains proved by real-host SQLite; native fatal/Restart UI
-verification is deferred under the mobile pause. Browser fatal/Restart and the
-preserved terminal save’s web-only startup timeout remain explicit evidence gaps;
-no native verification or web worker fix is claimed.
+optimistic follow or timer-driven movement is added. The focused browser proof
+covers shared Start→leader departure→player join→pause/Rejoin→success controls,
+committed narration, resolved checkpoint Journal and a fresh-save cold reopen under
+the [C2 staged browser-proof decision](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md).
+Browser death/Restart remains an explicit gap to close in the Chapter 1 E3 browser
+walk, or sooner if practical. Actual fatal/Restart is proved separately by real-host
+SQLite; native UI verification remains deferred under the mobile pause. The
+preserved terminal Web startup timeout remains open pending the separate Web SQLite
+fix; neither browser fatal recovery nor that save’s reopen is claimed.
 
 ## B6 Seek, retry and ward details
 

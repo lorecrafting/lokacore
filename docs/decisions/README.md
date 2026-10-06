@@ -32,7 +32,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
-- [Mobile-focused C2 UI proof](owner-decision-mobile-focused-c2-ui-proof-2026-10-05.md): shared Book route and fresh cold reopen, distinct real-host fatal recovery proof, deferred native fatal/Restart UI and preserved terminal web timeout.
+- [C2 staged browser proof](owner-decision-c2-staged-browser-proof-2026-10-05.md): focused fresh Book route and cold reopen, distinct real-host fatal recovery proof, browser fatal/Restart due by E3 and terminal Web timeout open pending a separate fix.
 
 - [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
 

@@ -28,10 +28,10 @@
   },
   "browser": {
     "route": "completed;4/4 resolved Journal; pause/return/Rejoin; actual surviving combat/Flee",
-    "terminal_reopen": "prior Sync operation timeout;unresolved/deferred;preserved save untouched",
+    "terminal_reopen": "prior Sync operation timeout;open pending separate Web SQLite fix;preserved save untouched",
     "fatal_restart": null,
     "fresh_shared_proof": "fresh-book/checks.json",
-    "verification_scope": "owner-decision-mobile-focused-c2-ui-proof-2026-10-05"
+    "verification_scope": "owner-decision-c2-staged-browser-proof-2026-10-05"
   },
   "full_active": null,
   "hosted_ci": null,
