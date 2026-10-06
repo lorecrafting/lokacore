@@ -1,0 +1,34 @@
+{
+  "npc": "bram",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "rescued"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "prior"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.d9_bram_rescued_prior.prompt",
+  "roles": {
+    "bram": {
+      "role": "npc",
+      "npc": "bram"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.d9.leave",
+      "narration": "narration.d9.leave"
+    }
+  }
+}

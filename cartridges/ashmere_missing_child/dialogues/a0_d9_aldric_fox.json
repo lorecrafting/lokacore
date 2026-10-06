@@ -1,0 +1,29 @@
+{
+  "npc": "aldric",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "fox"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.d9_aldric_fox.prompt",
+  "roles": {
+    "aldric": {
+      "role": "npc",
+      "npc": "aldric"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.d9.leave",
+      "narration": "narration.d9.leave"
+    }
+  }
+}

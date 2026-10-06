@@ -1,0 +1,34 @@
+{
+  "npc": "maud",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "lost"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "prior"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.d9_maud_lost_prior.prompt",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.d9.leave",
+      "narration": "narration.d9.leave"
+    }
+  }
+}

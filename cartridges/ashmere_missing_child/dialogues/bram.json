@@ -1,0 +1,23 @@
+{
+  "npc": "bram",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.bram.prompt",
+  "roles": {
+    "bram": {
+      "role": "npc",
+      "npc": "bram"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.bram.leave",
+      "narration": "narration.bram.leave"
+    }
+  }
+}
