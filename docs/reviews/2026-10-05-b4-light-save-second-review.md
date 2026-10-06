@@ -68,3 +68,30 @@ rooms, details, subjects, jobs and holders match the entire ID answer.
 Ponytail Review: **Lean already. Ship.** No unnecessary machinery finding; B4-S1
 remains open. Full publication checks/schema sweep/hosted CI and native/browser
 gates are unclaimed. Recheck scope: the missing invariant control and its mutant.
+
+## Scoped fix recheck — 2026-10-05
+
+Exact fix source `a3f9897643b01f53707d04a62f51b4073eadcc25`.
+**APPROVE; B4-S1 closed.** The initial finding and verdict remain historical.
+
+The existing Elixir literal table now gives independently invalid fuel inputs
+forged successful changes and requires the invariant to reject them. No production
+logic, fixture, framework or duplicate test was added. Independently bypassing the
+fuel guard still passes the original **159-core** suite, then fails the new fuel
+assertion on `excess-charge` (exit2). The mutation was restored; fuel2 passes.
+
+Scoped save/protocol inspection of the primary fixes found no new issue.
+Optional `AdvertisedAction.command` supplies semantic wording/ownership while the
+invocation retains its authored action key and ordered exact participants; it
+adds no persisted fuel writer or row. A real-SQLite Book `top_up` alias probe
+commits source7200/supply7197, cold reopens, and retries without another debit.
+Compiler and loader require API1.19 for actual fuel/darkness fields while allowing
+an unused reserved light lock at1.18; their controlled boundary tests pass.
+
+Focused Node fuel/wire/SQLite/Book checks **11 passed**; Elixir
+fuel/wire/compiler/current-source checks **10 passed**, including seeded portable
+differential; actual fresh94-ID consumer **1 passed**. Contract generation is
+clean. The current hash and 94-ID fixtures are byte-identical to `909082b0`, and
+current source compilation still matches their fixed payload. Ponytail Review:
+**Lean already. Ship.** No open findings in this opinion; accumulated publication,
+schema sweep, hosted CI and browser/native gates remain separate.
