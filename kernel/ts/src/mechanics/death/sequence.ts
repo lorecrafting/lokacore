@@ -12,13 +12,14 @@ import { cmp } from '../../foundation/validate.ts';
 import { key } from '../../foundation/compose.ts';
 
 import { leave } from '../water/shared.ts';
+import { clearBleed } from '../bleed/shared.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
 };
 type Loss = Extract<DeltaOp, { op: 'resource.adjust' }>;
 export type Fatal = {
-  cause?: 'drowning';
+  cause?: 'drowning' | 'bleeding';
   loss: Loss;
   owner_id: CharacterId | null;
   killer_id: EntityId | null;
@@ -171,6 +172,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const writer_group = fatal.loss.writer_group;
   const room_id = world.state.containers[victim_id];
   const ops: DeltaOp[] = [
+    ...clearBleed(world, victim_id).map((op) => ({ ...op, writer_group })),
     ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),

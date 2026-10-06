@@ -8,13 +8,14 @@ import type {
   EncounterRow,
   EntityId,
 } from '../../contracts.gen.ts';
-import { type Mint, type World } from '../../runtime/decision.ts';
+import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
 import { add, mul } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
+import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
@@ -114,14 +115,17 @@ function injure(
   close: DeltaOp,
 ) {
   const player = attacker_id === row.body_id;
-  const hp = resourceRef(world, 'hp');
-  const fatalLoss = { ...adjust(world, target_id, hp, -loss, {}).op, at: r.due_time };
-  r.ops.push(fatalLoss);
+  const fatalLoss = damage(world, target_id, loss, r);
   if (fatalLoss.to === 0) {
     const closing = target_id === row.body_id || !row.active_ids || row.active_ids.length === 1;
-    if (closing) r.ops.push(close);
+    const closingOps = [
+      fatalLoss,
+      ...(closing ? [close] : []),
+      ...(target_id === row.body_id ? clearBleed(world, target_id) : []),
+    ];
+    r.ops.push(...closingOps.slice(1));
     const died = deathSequence(
-      prefix(world, closing ? [fatalLoss, close] : [fatalLoss]),
+      prefix(world, closingOps, r.due_time),
       command,
       {
         loss: fatalLoss,
@@ -133,7 +137,28 @@ function injure(
     );
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
-  } else if (sleeping) wake(prefix(world, [fatalLoss]), row, r);
+  } else {
+    if (target_id === row.body_id) recordBleed(world, attacker_id, target_id, mint, r);
+    if (sleeping) wake(prefix(world, [fatalLoss], r.due_time), row, r);
+  }
+}
+
+function damage(world: World, target: EntityId, loss: number, r: Round) {
+  const hp = resourceRef(world, 'hp');
+  const op = { ...adjust(world, target, hp, -loss, {}).op, at: r.due_time };
+  r.ops.push(op);
+  return op;
+}
+
+function recordBleed(world: World, attacker: EntityId, body: EntityId, mint: Mint, r: Round) {
+  const prior = currentBleed(world, body);
+  const applied = wound(world, attacker, body, mint);
+  r.ops.push(...applied);
+  const effect = applied.find((op) => op.op === 'bleed.transition');
+  if (effect?.op === 'bleed.transition' && effect.value.active) {
+    const spec = world.cartridge.bleeds![refString(effect.value.effect!)];
+    r.notes.push({ key: prior ? spec.narration.refreshed : spec.narration.applied });
+  }
 }
 
 function wake(at: World, row: EncounterRow, r: Round) {

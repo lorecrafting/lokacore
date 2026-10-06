@@ -79,7 +79,7 @@ export function roundSequence(
   };
   if (row.active_ids) return packRound(world, command, job, row, encounter_id, r, close, mint);
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
-  const narration = narrate(world, row, r.events);
+  const narration = [...narrate(world, row, r.events), ...r.notes];
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);
 }

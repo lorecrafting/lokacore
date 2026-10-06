@@ -25,6 +25,7 @@ import type { DeltaOp, JobId } from '../../contracts.gen.ts';
 import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
+import { runBleed } from '../bleed/job.ts';
 import { runSight } from '../population/behavior.ts';
 
 export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
@@ -35,6 +36,7 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     if (row.water_generation !== undefined)
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
+    if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     if (row.sight) return runSight(world, payload.job_id, row, steps);
     if (row.job.kind === 'population')

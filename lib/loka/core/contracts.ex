@@ -120,6 +120,12 @@ defmodule Loka.Core.Contracts do
       else: keyword("required", r |> Map.values() |> hd(), v, path, nil)
   end
 
+  defp keyword("dependentRequired", dependencies, v, path, _) do
+    Enum.flat_map(dependencies, fn {key, fields} ->
+      if Map.has_key?(v, key), do: keyword("required", fields, v, path, nil), else: []
+    end)
+  end
+
   # ponytail: recompiles the pattern on every call; precompile per contract if it shows up in profiles.
   defp keyword("pattern", p, v, path, _) do
     matched = :re.run(v, p, [:unicode, :dollar_endonly, capture: :none]) == :match
@@ -187,6 +193,7 @@ defmodule Loka.Core.Contracts do
   defp type?("null", v), do: v == nil
 
   defp json_type(%{"$ref" => name}, defs), do: json_type(defs[name], defs)
+  defp json_type(%{"oneOf" => _}, _), do: "object"
   defp json_type(%{"type" => t}, _), do: t
 
   defp code_points(s), do: s |> String.to_charlist() |> length()

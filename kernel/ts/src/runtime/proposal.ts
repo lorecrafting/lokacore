@@ -1,10 +1,8 @@
-// size: allow 315, typed quest reactions join the existing FIFO admission/causation path
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
 import { counts, over, target, type Limit } from '../foundation/compose.ts';
 import {
-  CAPABILITY_OWNERS,
   type CommandId,
   type DecisionResult,
   type DeltaOp,
@@ -13,7 +11,7 @@ import {
   type QuestInstanceId,
   type Text,
 } from '../contracts.gen.ts';
-import { allocator, COMPOSES, event, type Mint, type Steps, type World } from './decision.ts';
+import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { earned } from '../mechanics/quest/lifecycle.ts';
@@ -23,6 +21,9 @@ import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
+import { bleedRoundPair } from './proposal_bleed.ts';
+import { admit, type Admitted } from './proposal_admit.ts';
+export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -262,6 +263,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  const paired = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -282,33 +284,16 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
+    const pair = bleedRoundPair(at, job_id as JobId, current);
+    const group = paired.get(job_id) ?? p.group + 1;
+    if (pair) paired.set(pair, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     const own = ran.delta.ops.map((o) => ({
       ...o,
-      writer_group: handoffGroup(o, handoff, p.group + 1),
+      writer_group: handoffGroup(o, handoff, group),
     }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
 }
-
-export const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>
-  Object.hasOwn(owners, type) ? owners[type]!.split('@')[0] : undefined;
-
-/**
- * An accepted rule result as the host admits it (04 §5.2 step 7): an event type neither the
- * owning capability nor one it COMPOSES owns faults unowned_event, which discards the whole
- * proposal. adopt() checks the output budget once the host's events are added.
- */
-export function admit(owner: string, decision: DecisionResult): Admitted {
-  if (decision.kind !== 'accepted') return decision as Admitted;
-  const may: readonly unknown[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
-  if (decision.events.some((e) => !may.includes(ownerOf(CAPABILITY_OWNERS.event, e.payload.type))))
-    return { kind: 'fault', code: 'unowned_event' } as Admitted;
-  return decision as Admitted;
-}
-
-declare const ADMITTED: unique symbol;
-/** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
-export type Admitted = DecisionResult & { readonly [ADMITTED]: true };
