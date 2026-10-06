@@ -450,3 +450,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Beads hook first source-merge observation](2026-10-06-beads-hook-observation-review.md): PR #242 head `518761ac`, independent APPROVE; unchanged C4 merge JSONL, hook opt-in, real healthy 33/33 status and PM closure commit verified. No measured latency or savings claimed.
 
 - [D7 bounded deer plan review](2026-10-06-d7-deer-plan-review.md): initial `fec51d6d` CHANGES REQUIRED; scoped recheck APPROVE at corrected planning head `bd10b857`, closing neutral night bounds, zero-hit attack profile and checked population-transfer sight binding. Source proof remains pending.
+- [D7 provisional save/protocol second opinion](2026-10-06-d7-deer-provisional-save-review.md): source `3d198c17`, CHANGES REQUIRED for changed-schema mutant sweep and D7-specific real SQLite commit-uncertainty proof. Four focused SQLite cases pass; final D6 predecessor/release-pin review remains pending.
