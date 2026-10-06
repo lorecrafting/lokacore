@@ -60,7 +60,8 @@ run a decision to project offers. Use [composition rules](../../system/architect
 Scope: three rooms/reciprocal edges, Gareth/Ada/schedules/flavor, three apples and
 tree/cot/forge details/text; minimal food command/item metadata/terminal-holder
 contracts, compiler/loader/generated files, authority consumed receipt validation,
-existing GameView/Book action flow, current bundle and independent pins. No repairs,
+existing GameView/Book action flow and exact World Eat-result routing/recovery,
+current bundle and independent pins. No repairs,
 season model, regrowth, physiology, Elspeth relocation, duplicate Wren/lantern,
 other quests, B9/C3/D2 features or generic create/delete framework.
 
@@ -93,6 +94,16 @@ restore, then green for each new control. No source-text/count-only tests.
   rescued or teleport Wren on cottage arrival. Reuse B5 harvest and schedule
   controls unless D4 introduces a distinct failure. If generic transfer guards
   change, independent literal invalid terminal cases must fail in both kernels.
+- Open the carried apple detail and accept Eat: the absent apple page/Carrying
+  route closes to World, and its exact committed narration is visibly present
+  once beside updated MV/load. Test genuinely lost acknowledgement plus exact
+  replay, then real SQLite cold reopen and chapter entry with Eat selected as the
+  latest narratable receipt: the apple remains absent and the same World line
+  appears once. Use an unrelated prior item/NPC receipt to prove the recovered
+  command/item/narration is the actual Eat, with no event-ID fallback or borrowed
+  detail. Named red controls: route Eat to the disappearing item detail, omit Eat
+  receipt classification or corrupt original item/narration linkage; each must
+  fail its live/reopen/replay control. Reuse existing receipt/log machinery.
 - Compiler/loader negatives: missing food capability/API, unknown resource,
   zero/negative/unsafe benefit, malformed catalog/ref, edible container/equipment/
   fuel/vessel; validate short-ref expansion and exact alias view→invocation.

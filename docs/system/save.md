@@ -876,6 +876,17 @@ Reconstruction rejects transfer out, forged entry, mismatched holder or benefit,
 a consumed item restored into circulation, and unsupported pins as typed corruption
 or explicit mismatch, without silent repair/deletion.
 
+Narration reconstruction classifies an accepted Eat as a World result, never a
+consumed-item detail. Its saved command must match the receipt command ID and
+actor, typed `eaten` item, same-item body-to-consumed transfer, recovery adjustment
+and that item's authored narration key at the accepted history prefix. Return the
+existing narration record with this exact `command_id` and lines, omitting
+`detail_id`; do not infer routing from current item presence or unrelated latest
+narration. Live recovery requests the sent Eat command; ordinary cold reopen
+selects the latest saved narratable receipt and preserves its validated identity.
+No new history table is selected. Forged command/item/narration linkage yields
+typed `save_corrupt`, not a fallback success sentence.
+
 Prove real SQLite reopen at fresh stock, each harvest, stored/dropped/given food,
 owned-corpse custody, consumed food, each NPC schedule departure and each child
 variant (including following/separated escort). Exercise later actual Eat after

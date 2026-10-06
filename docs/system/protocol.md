@@ -1022,6 +1022,10 @@ slot holders in fresh allocation. The terminal transfer guard must reject escape
 nonfood entry and foreign-source entry; food is the sole new admission owner.
 Containment, carry and reach account for this terminal holder explicitly rather
 than treating it as a room/body/container. Derive consumed status from custody.
+Eat's accepted reply supplies its exact command ID for existing narration
+recovery despite having no event. Its receipt-derived narration record is a
+World result with no detail ID; live result routing must not fall back to the
+submitted apple page after that identity leaves the projected inventory.
 
 Keep shared query budget, structural sharing, exact replay and whole-proposal
 rollback. Compiler/loader, ActionSet/verb, outcome/generated contracts, world/save
