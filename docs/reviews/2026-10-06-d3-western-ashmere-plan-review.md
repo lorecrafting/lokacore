@@ -1,0 +1,16 @@
+# D3 Western Ashmere — independent plan review
+
+Planning head: `f0a4fe231a62d5f8b1ce9035c260aa5ffb3b993d`, against published main `1b269871275c900343f9e2dcfcadc5c856880589`. Verdict: **APPROVE**. No findings. This approves the [planning brief](../briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md), not source assignment or implementation proof.
+
+Requirements checked: the [archived map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11; [initial placement and schedule](../system/mechanics.md#schedule1-behavior1-calendar1-mechanicsschedulerulets-kernelts-srcmechanicsschedulebehaviorts); [B4 darkness/recovery](../system/mechanics.md#b4-light-and-darkness-selected-contract); [Book detail order](../system/book-ui.md#detail-page-order); and the [pending D1 Boathouse contract](../system/cartridge.md#d1-ferry-and-isle-declarations).
+
+- The published baseline's manifest, canonical SHA-256 and 140-ID fixture agree with v029/API1.25 and the brief. That baseline has no Boathouse source. D1 publication, actual Boathouse inspection and independent successor re-pin remain explicit prerequisites; D3 source/release/hash/IDs/PR remain null.
+- The five reciprocal connections match the archive: Boathouse–Old Mill–Empty Cottage, Mill Loft/Cellar branches, and Cottage Loft. D1's boarding detail/east mainland route are preserved; no hidden Well/Lantern-cellar connection or unbuilt route is enabled.
+- Hob's original identity and 06:00/18:00 schedule match the archived cast. At launch 64800 he must already occupy Mill Loft; strictly future jobs fall at 108000 and 151200. These times were independently checked against the published 24×3600 calendar. A controlled 06:00 setup supplies the inverse-boundary proof without a player wait requirement.
+- Both dark branches explicitly reuse B4's visibility, known exits, ordinary carrying and real owned-corpse recovery rules. Actual Chapel return with sole lost light, preserved possessions and both room branches are future source acceptance, not an asserted result.
+- The ledger/sign use existing readable-detail history with no quest/topic/currency/property grant. Hob's flavor schedule adds no required story gate; rat holes and chapter-two ghost hints remain descriptive, preserving the current five original S1 rats.
+- Source contracts must enter the active cartridge/Book clauses before implementation. Route, schedule, Read, dark recovery, isolated browser refresh and actual SQLite reopen are separately required; existing fault/replay checks are reused unless a new writer/save shape is selected. Native/owner-save work remains excluded.
+
+Ponytail and actual-diff review: lean already. Existing movement, schedule, readable, light, Book and host seams cover this content; no new framework, command, writer or component is proposed. Governing AGENTS/owner decisions continue to control fixture treatment and review routing.
+
+Verification: exact diff contains only the brief; `git diff --check` passes. The normal review commit runs the documentation/link checks. No source tests, mutations, mobile changes, preview, native or owner-save operation were performed or credited. D1 source/publication pinning and every D3 implementation proof remain ahead.
