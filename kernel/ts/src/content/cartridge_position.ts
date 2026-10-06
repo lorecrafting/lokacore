@@ -27,11 +27,10 @@ const SPEC = {
 export function reserved(c: Obj): Diagnostic[] {
   const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
   if (Object.hasOwn(c.lock.capabilities, 'scene'))
-    for (const s of Object.values((c.scenes ?? {}) as Obj))
-      expected[`scene_${s.key}`] = spec(
-        s.key,
-        s.steps.filter((x: Obj) => x.type === 'narrate').length,
-      );
+    Object.values((c.scenes ?? {}) as Obj).forEach((s) => {
+      const lines = s.steps.filter((x: Obj) => x.type === 'narrate').length;
+      expected[`scene_${s.key}`] = spec(s.key, lines);
+    });
   for (const p of Object.values((c.story_points ?? {}) as Obj))
     if (Object.values(p.outcomes as Obj).some((t: Obj) => !!t.scene))
       expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
@@ -39,10 +38,9 @@ export function reserved(c: Obj): Diagnostic[] {
     expected[`skill_${s.key}`] = skillSpec(s.key);
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
-  refs.forEach((ref, i) => {
+  for (const [i, ref] of refs.entries())
     if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))
       out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
-  });
   const write = (s: Obj, at: string) => {
     if ((s.op === 'fact.assign' || s.op === 'fact.adjust') && refs.includes(refString(s.fact)))
       out.push(diag('RESERVED_FACT', `${at}.fact`));
