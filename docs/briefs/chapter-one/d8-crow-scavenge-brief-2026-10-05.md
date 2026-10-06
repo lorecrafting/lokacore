@@ -6,7 +6,7 @@ Proposed branch: `chapter1/d8-crow-scavenge`.
 
 ## Goal, dependencies and governing clauses
 
-Crows visibly acquire a dropped shiny item, carry it and deliver it to a real nest in Oak Branches, from which the player can recover it. Re-pin C3 provenance/animal jobs, D5 canopy, D6's actual old coin and exact custody/container eligibility. No quest/room additions. Governors: archived00a §§4/5/10/11, active containment/protected Give/death/schedule/reaction, protocol events/composition/budgets, save changed-row/reopen and C1 job-emitted acquisition carry at this actual consumer.
+Crows visibly acquire a dropped shiny item, carry it and deliver it to a real nest in Oak Branches, from which the player can recover it. Source depends on C3 provenance/animal jobs, D5 canopy and D6's actual old coin; re-pin all three and exact custody/container eligibility before assignment. No quest/room additions. Governors: archived00a §§4/5/10/11, active containment/protected Give/death/schedule/reaction, protocol events/composition/budgets, save changed-row/reopen and C1 job-emitted acquisition carry at this actual consumer.
 
 ## PM policy and composition
 
