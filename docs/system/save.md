@@ -990,6 +990,19 @@ Extend D4 terminal-holder recovery for the exact C5 bandage path. A historical a
 
 Cold reopen after application, refresh, each tick, expiry, cure and fatal return, then exercise a later real consumer. Reopen both canonical same-due bleed/round orders after Flee and re-engagement, including round-first refresh of a former expiry and tick-first fatal cleanup. A forged paired occurrence, second bleed successor or missing current round/bleed job is corrupt; a foreign same-target job retains ordinary conflict refusal. Real SQLite failed COMMIT leaves all prior HP/status/job/item/encounter truth; uncertain absent/committed COMMIT fences input and elapsed until reconciliation. Lost acknowledgment and exact invocation replay consume the bandage once and never rerun cure. Unsupported release/API/hash refuses explicitly; preserve bytes and in-place Start over. Browser refresh and headless simulation supplement, not replace, this durability proof. Owner-save access and native testing remain paused.
 
+## D10 discovered-place and observation recovery
+
+A fresh save records its entry-room visit for the starting character. Each new visit
+and visible NPC observation commits changed knowledge rows with the body-entry or accepted
+Look receipt, before memory adopts the proposal. Reopen derives immutable map positions
+from the pinned release, never from saved coordinates. An unvisited current room,
+malformed rows, wrong actor ownership, impossible room/NPC references, duplicate IDs and
+invalid logical times are typed `save_corrupt` with in-place Start over; no row is
+silently repaired. Failed COMMIT keeps prior knowledge, both uncertain COMMIT outcomes
+reconcile to exactly prior or next knowledge, and lost acknowledgement/retry creates no
+second visit or newer invented observation. Pinned-release mismatch remains explicit
+refusal with no silent deletion or migration.
+
 ## C6 expedition recovery
 
 **Planning contract, pending C5 source and C6 implementation.** Save the exact S27 quest occurrence, `ExpeditionAttempt` row, player location/body/life, optional C4 encounter, terminal fact/faction changes and one receipt through the existing changed-row transaction. Reconcile Start/Restart to their accepted command IDs and original actor/quest; cursor advancement to revision-ordered accepted player Move/Flee transfers over the exact declared edge; failure with cursor0/shelter false to an accepted outside-footprint transfer or the actual same-body fatal event; and completion to the fifth transfer, resolved quest, one `fen.night_survived` assignment and one bounded −1 faction adjustment. The current room alone is never proof of past entries, shelter or survival. A lawful later exit, death, faction change or Sedge conversation cannot invalidate historical completion.

@@ -1336,6 +1336,27 @@ D12 implementation head, final predecessor re-pin, successor release/API/hash/al
 Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
 
 Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
+## D10 map positions and Chapel door (selected, pending implementation)
+
+The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
+These integer drawing coordinates are content, not an engine inference from compass
+directions: the room graph contains ferry links and loops. Compilation and loading
+require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
+the rendered links still come only from real exits. Unknown map fields or duplicate
+positions fail before play. No coordinate changes movement cost, sight or reachability.
+
+The first chapter physical door is one barrier shared by Chapel Steps north and Chapel
+Nave south, starting open with no key. It admits ordinary existing Open/Close behavior
+and a declared Knock response on the Steps north face keyed to actual Aldric presence
+in the Nave. The public
+chapel remains reachable by opening a closed door. This differs from the archive's
+keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
+D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
+exact-edge predicate, not a barrier or Knock target. Wren's one boot is an actual
+recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
+Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
+and can be held together for real resolver ambiguity; touch selects an exact item ID.
+Neither replaces Q2 drawing or message credit.
 
 ## C6 S27 expedition declarations
 

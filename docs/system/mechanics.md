@@ -1552,6 +1552,49 @@ Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is p
 
 Amend the focused combat ActionSet for this exact bandage command after shared ordinary action composition. It may be offered and admitted during an open encounter together with Flee, Stand, Look and Scan. Other item actions, recipes, movement and equipment remain excluded; a raw command or alias cannot widen the exception. Treatment leaves the encounter and pending initiative intact. Flee remains immediate under its existing prerequisites. No required story path, death recovery or owner save depends on teaching, stock, waiting or UI polish.
 
+## D10 discovered places, observations and Knock (selected, pending implementation)
+
+Map knowledge belongs to the character. A new character knows only the entry room. An
+accepted body entry adds the destination room once, in the same proposal as its real
+transfer; this includes a paid ferry, a water surface move and a death respawn. Looking,
+adjacent sight, a refused or stale move and opening Map do not visit a room. The visited
+relation is monotone for that character and never grants an exit, changes a barrier or
+teleports an actor. The view joins visited room identities with static cartridge map
+positions and actual exits; it shows a connection only when both ends are visited. A
+visited connection outside the actor's current room is only a known static link, not a
+promise of current traversal. Only exits from the actor's current room show live
+availability from ordinary Move admission, including the D9 Study ingress rule. No
+remote admission simulation or automatic travel is selected.
+
+`where {target_id}` resolves an exact currently **visible and present** NPC or a previously
+observed exact NPC ID belonging to this character. `Here` requires the same current
+visibility gate as Look and direct target admission, whether the request arrived as a
+raw ID, alias or touch selection. A co-located NPC hidden by darkness or another
+visibility rule is not `here`: use the actor's saved last observation, or `unknown`
+when there is none. A prior observation reports its **last observed** room and logical
+time, never its live location. The observation is recorded only at a successful body
+entry or an accepted `look` in the actor's current room, for NPCs actually visible
+to that actor at that point; `look {target_id}` also observes its actual visible target.
+Recording an unchanged observation need not write a row. An unobserved, ambiguous or
+unresolvable name reveals no remote identity or location. Observation does not imply
+current presence, route availability or room visitation beyond the actor's own entry.
+An NPC hidden by darkness or another visibility rule cannot be observed.
+`where` itself is read only. It uses existing exact keyword/alias and ambiguity rules,
+extended to the actor's remembered IDs without leaking unknown candidates; touch passes
+the chosen ID. No schedule prediction or global tracker is selected.
+
+`knock {direction}` is offered only for a physical barrier on an exit from the actor's
+current room whose content declares a response. It resolves the same exact exit/barrier
+identity as the existing door verbs. A knock produces the authored local response as
+an accepted, receipt-bound narration with no barrier transition, actor movement,
+payment, quest or fact mutation. It remains usable whether the physical door is open
+or closed. A missing, remote or undeclared door refuses. The response cannot bypass
+the D9 Prior Study ingress predicate, which is not a physical barrier. The chapter's
+first selected door is the Chapel Steps north / Chapel Nave south pair, initially open;
+Knock is declared on the Steps north face only. Its response comes from the Nave
+only while the actual Aldric is present there.
+An absent Aldric yields the authored no-answer response, without asserting his location.
+
 ## C6 S27 Night in the Marsh (selected planning contract)
 
 **Planning only; C5 source and C6 independent review remain gates.** The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
