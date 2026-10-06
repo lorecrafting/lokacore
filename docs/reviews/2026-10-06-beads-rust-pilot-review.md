@@ -13,3 +13,13 @@ Exact source head: `6791cc2d302dd60ab70542fad3383efad9bd4571` on `ops/br-pilot`,
 - No workflow conflict found. The path cleanup procedure is explicit, but manual review does not prevent recurrence (BRP-1).
 - Ponytail review: no unnecessary abstractions or machinery in this docs/config/data change. The seven-row pilot is bounded and the existing Git records remain the durable evidence.
 - Read-only `br ready --brief --json`, `br blocked --json`, and `br list --json` succeeded after cold import. No source code or test changes reviewed.
+
+## Scoped fix re-review
+
+Exact fix head: `478f1b3269e5f180aff537d64ded9331eb87833b` (parent `421f92442dd61c1238d18d380d67a93048fdbfd4`).
+
+### Verdict: APPROVE
+
+- **BRP-1 closed.** `bin/check_beads_export.py` rejects nonempty `source_repo_path`, invalid JSON rows, and local-path patterns in nested JSON string values. The pre-commit hook passes `--staged`, which reads `git show :.beads/issues.jsonl`; CI and `check_all` run the same checker on the checkout. The red controls cover both a nonempty relative `source_repo_path` and a machine path in a nested value.
+- Independently staged a bad JSONL blob while leaving the worktree copy unchanged; `python3 bin/check_beads_export.py --staged` exited 1 with `Beads export row 1 contains a local path`. Restored the original index blob afterward. The clean export check and `bin/beads_red_controls.sh` passed; `git diff --check 421f9244..478f1b32` passed.
+- The fix stays within the requested scope and adds no Beads hook or new dependency. No further scoped finding.

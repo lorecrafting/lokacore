@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): exact source head `6791cc2d302dd60ab70542fad3383efad9bd4571` on `ops/br-pilot`, based on `21c44e27`; CHANGES REQUIRED, BRP-1 deterministic path/source_repo_path guard needed before tracker commits.
+- [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 
 - [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.
 
