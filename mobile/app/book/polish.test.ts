@@ -222,7 +222,18 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.labels().some((x) => x.startsWith('Take')),
     JSON.stringify(h.labels()),
   );
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
   h.tap(h.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(h.game.pending(), true);
+  assert.deepEqual(
+    h.stack.map((p: any) => p.id),
+    [corpse.id, pelt.id],
+  );
+  assert.equal(h.p.screen().detail(corpse.id).length, 0);
+  a.fault.reads = false;
+  h.tap(h.labels().find((x) => x.startsWith('Take'))!);
+  assert.equal(h.game.pending(), false);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
     [corpse.id],
@@ -236,6 +247,16 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   );
   assert.equal(h.p.screen().log.includes('You pick up a hound pelt.'), false);
   assert.ok(h.game.view().view.inventory.some((e) => e.id === pelt.id));
+  const refused = h.game.invoke({ action_key: 'take', target_ids: [pelt.id], input: {} } as never);
+  assert.equal(refused.kind, 'saved');
+  if (refused.kind === 'saved') assert.equal(refused.decision.kind, 'rejected');
+  assert.equal(
+    h.p
+      .screen()
+      .detail(corpse.id)
+      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+    1,
+  );
   h.tap('Leave');
   assert.deepEqual(h.stack, []);
   const drop = h.game.invoke({ action_key: 'drop', target_ids: [pelt.id], input: {} } as never);

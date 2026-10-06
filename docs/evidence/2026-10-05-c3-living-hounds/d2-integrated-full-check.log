@@ -1,5 +1,5 @@
 Resolving Hex dependencies...
-Resolution completed in 0.018s
+Resolution completed in 0.012s
 Unchanged:
   boundary 0.11.0
   bunt 1.0.0
@@ -8,17 +8,17 @@ Unchanged:
   jason 1.4.5
 All dependencies have been fetched
 No cycles found
-Running ExUnit with seed: 127875, max_cases: 16
+Running ExUnit with seed: 946847, max_cases: 16
 
 .................................................................................................................................................................................................................................................................................................................................................................
-Finished in 23.5 seconds (23.4s async, 0.06s sync)
+Finished in 17.2 seconds (17.2s async, 0.06s sync)
 
 Result: 353 passed
 Checking 135 source files (this might take a while) ...
 
 Please report incorrect results: https://github.com/rrrene/credo/issues
 
-Analysis took 0.1 seconds (0.06s to load, 0.05s running 4 checks on 135 files)
+Analysis took 0.1 seconds (0.09s to load, 0.06s running 4 checks on 135 files)
 1416 mods/funs, found no issues.
 
 Use `mix credo explain` to explain issues, `mix credo --help` for options.
@@ -73,7 +73,7 @@ ok   ts-rule-module-location
 ok   ts-rule-module-pure
 ok   ts-rule-registration
 ok   docs_only: skip for .md only, run otherwise
-623 docs, 0 broken link(s), 0 unreachable
+624 docs, 0 broken link(s), 0 unreachable
 ok   docs: stale code pointers
 ok   beads: local paths, missing slices and reserved IDs refused
 
