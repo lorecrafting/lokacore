@@ -178,6 +178,73 @@ test('thirty days of segmented elapsed time retain six members and one plan succ
   );
 });
 
+// Breaks: equal-time population and fatal combat deliveries conflict, move the engaged victim, or lose its pelt in either real job-ID order.
+test('combat-first and population-first boundaries conserve the same fatal hound slot and pelt', () => {
+  const member = ids['population/fen_hounds/slot1/member'];
+  const pelt = ids['population/fen_hounds/slot1/pelt'];
+  const hp = key({
+    kind: 'resource',
+    entity_id: member,
+    resource: {
+      cartridge_id: 'ashmere_missing_child',
+      cartridge_version: '0.0.26',
+      kind: 'resource',
+      key: 'hp',
+    },
+  });
+  for (const [n, combatFirst] of [
+    [4, true],
+    [7, false],
+  ] as const) {
+    let w = elapsed(fresh(), 68250);
+    for (const [i, direction] of ['south', 'south', 'east'].entries())
+      w = command(w, 'move', direction, i + 1);
+    w = {
+      ...w,
+      state: {
+        ...w.state,
+        resources: { ...w.state.resources, [hp]: { value: 1, at: 68250 } },
+      },
+      cartridge: {
+        ...w.cartridge,
+        world: {
+          ...w.cartridge.world!,
+          combat: {
+            ...w.cartridge.world!.combat!,
+            player_attack: { chance: 100, damage_min: 1, damage_max: 1 },
+          },
+        },
+      },
+    };
+    w = command(w, 'attack', member, n);
+    const due = Object.entries(w.state.jobs ?? {})
+      .filter(([, row]) => row.status === 'pending' && row.due_time === 68400)
+      .map(([id, row]) => [id, row.job.kind] as const);
+    assert.equal(due.length, 2);
+    const fight = due.find(([, kind]) => kind === 'npc')![0];
+    const population = due.find(([, kind]) => kind === 'population')![0];
+    assert.equal(fight < population, combatFirst);
+    w = elapsed(w, 68400);
+    assert.equal(w.state.resources?.[hp]?.value, 0);
+    const slot = Object.values(w.state.population_slots ?? {}).find(
+      (row) => row.member_id === member,
+    );
+    assert.deepEqual(slot, { generation: 1, member_id: member, replacement_due: 154800 });
+    const corpses = Object.entries(w.state.created ?? {}).filter(
+      ([, i]) => i.origin.kind === 'death',
+    );
+    assert.equal(corpses.length, 1);
+    assert.equal(w.state.containers[pelt], corpses[0]![0]);
+    assert.equal(w.state.containers[corpses[0]![0]], w.state.containers[member]);
+    assert.deepEqual(
+      Object.values(w.state.jobs ?? {})
+        .filter((row) => row.status === 'pending' && row.job.kind === 'population')
+        .map((row) => row.due_time),
+      [72000],
+    );
+  }
+});
+
 // Breaks: a deliberate hound kill yields generic rat loot or replenishes before the one-day delay.
 test('deliberate attack leaves the same pelt in a hound corpse and delays replacement', () => {
   let w = fresh();
