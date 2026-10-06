@@ -80,7 +80,7 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   await go('west', 'Boathouse');
   await screen.getByRole('button', 'Rope ferry').tap();
   await expect(screen.getByText('Fare: 2p.')).toBeVisible();
-  await screen.getByRole('button', 'Board — 2p').tap();
+  await screen.getByRole('button', 'Board — 2p').doubleTap();
   await expect(screen.getByRole('button', 'Look, Fen Isle Landing')).toBeVisible();
   await expect(money()).toBeVisible();
   await go('east', 'Isle Hut');

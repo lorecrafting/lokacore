@@ -30,9 +30,27 @@ jobs:
       - run: npx e2e-web install chromium --with-deps
       - run: npm run test:e2e
       - if: failure()
+        name: Redact browser failure diagnostics
+        run: |
+          python3 - <<'PYTHON'
+          import os, re
+          from pathlib import Path
+          def redact(text):
+              text = text.replace(os.environ['GITHUB_WORKSPACE'], '<checkout>')
+              return re.sub(r'(?:/Users/|/home/|/tmp/|/private/var/|/var/folders/)[^\s"\)\]\x1b]+', '<redacted-path>', text)
+          files = [Path('.e2e/report.json'), *Path('.e2e/artifacts').rglob('*')]
+          for file in files:
+              if file.is_file() and file.suffix in {'.json', '.txt', '.log'}:
+                  file.write_text(redact(file.read_text()))
+          PYTHON
+      - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: book-browser-failure
-          path: mobile/app/.e2e/
+          path: |
+            mobile/app/.e2e/report.json
+            mobile/app/.e2e/artifacts/**/screenshots/*.png
+            mobile/app/.e2e/artifacts/**/failure/screen.txt
+            mobile/app/.e2e/artifacts/**/*.log
           include-hidden-files: true
           if-no-files-found: ignore
