@@ -396,3 +396,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C3 publication status](2026-10-06-c3-publication-status-review.md): PM status head `2a809bd3`, independent APPROVE; actual PR229 merge/hosted jobs/review closure and v029 pins verified, 33 issues/17 closed, only C3 transition, portable acyclic export.
 
 - [C4 source readiness](2026-10-06-c4-source-readiness-review.md): exact planning head `196bfd75`, independent APPROVE/GO against published `1b269871`; C1/B9/C3 dependency pins, current v029/API1.25, bounded rotation/flight and atomic recovery contract verified. Docs-only; implementation proof remains ahead.
+
+- [C4 provisional save/protocol second opinion](2026-10-06-c4-hound-behavior-save-second-review.md): source `252eb456`, evidence `11fa7579`, CHANGES REQUIRED; standalone flight stamps accept without an occurrence, lawful earlier flights fail at a later elapsed endpoint, and claimed retained evidence is absent. 39 TS/SQLite/Book and seven Elixir tests pass; 18 byte-preserving cold forgeries and 12 real COMMIT/reopen/retry probes verified. D1 integration and final successor carryover remain required.
