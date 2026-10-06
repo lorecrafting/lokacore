@@ -776,3 +776,37 @@ never claims message custody, topic learning or child return credit. Landscape
 text describes dry footing and natural den light, without a bottom, far Scan,
 fishing, drift or nest action that the actual projection cannot offer. The
 original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
+
+## D6 water exits and Chapel recovery
+
+**PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
+shared admission's actual availability/refusal. Show authored entry cost and
+submersion/drowning warning before descent. Bottom pages use ordinary World and
+item/container details, with remaining submersion time visible from confirmed
+water projection. Deadline and logical time belong to the authority; presentation
+must not renew time or create its own gameplay clock. Extend the existing status
+language/controls rather than add a new timer framework.
+
+Offer free Up on every underwater page, including item/container details, for a
+living body before expiry despite altered skill/load/MV/posture/light. Bind the
+captured `move` Up offer with normal freshness/pending/refusal. At equality the
+authority settles expiry before Up; an old view never promises rescue. Confirmed
+entry/surface has one room change/current MV, without an unconfirmed safety claim.
+Sedge remains the existing free pre-S27 lesson; no second training control.
+
+At Chapel, list actual owned nonempty corpses currently in either underwater
+bottom room and bind the chosen ID; show actual
+corpse location and confirmed returned items once, retaining empty corpse. Held
+recovery may overload Carrying. Pending/stale/refused/replayed actions claim no
+extra transfer. Drowning shows one actual death/same-body return and recoverable
+original light/fare/key. Later isolated browser proof covers remaining-time/Up on
+every bottom page, expiry, Chapel selection and refresh. No preview or owner save
+is authorized by this planning adoption; real SQLite faults remain separate proof.
+
+## D12 practical lessons and benefits
+
+**Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
+
+The Willow Shade patch shows current derived finite supply and its ordinary one-item Harvest. A usable opted skill also supplies the authored careful offer and item count through the same pure method-aware admission as execution; insufficient stock/combined carrying has an honest typed refusal and retains ordinary Harvest where legal. The control sends the [exact alias input](protocol.md#d12-harvest-method-and-buy-quote-composition), without presenter-created herbs or skill gating inferred from names. Peg's rows show the effective Buy price and actual Sell price/availability from the shared current query, and bind the displayed Buy number to invocation. Qualification/stock changes refresh or refuse the stale offer before charge.
+
+Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.
