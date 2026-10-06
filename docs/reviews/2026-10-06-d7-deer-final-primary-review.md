@@ -44,3 +44,10 @@ Independent focused run: four D7 equal-time and unrelated-conflict cases passed 
 `compose_sight_rebind.ts` now names the actual current `population_plans[plan].job_id` and requires its pending, sight-free job, equal due time, plan and completion group before accepting the same-slot rebind. The new sight cause must be derived from that exact job. The historical `deer-save.ts` caller requires a same-receipt `population.control` transition whose prior control job is the completed sight-free population job. These are the exact current and historical proofs added to the [protocol](../system/protocol.md#d7-sight-flight-composition-planning-contract) and [save](../system/save.md#d7-deer-recovery-planning-contract) clauses.
 
 Independent focused run: lawful equal-time rebind, sight-only counterfeit, unrelated encounter conflict and sight-only receipt refusal passed 4/4. Replacing the exact control-job selection with the former same-plan/same-due search made the counterfeit foundation test fail (`true` instead of `false`); source was restored. The developer's retained save red control shows the former receipt guard accepted the forged sight-only cause; all seven round-2 evidence hashes verified. No source edits remain. Ponytail Review: two direct trust-boundary checks; no safe deletion or new framework. This scoped approval does not assert hosted CI completion.
+
+## Codex Sol scoped foundation recheck at `c446bee0`
+
+```
+VERDICT: APPROVE
+NONE
+```
