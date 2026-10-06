@@ -94,3 +94,35 @@ export function lightOnlyFixture() {
     fresh: newWorld(loaded.cartridge as Cartridge, fresh.context, [1, 2, 3, 4]),
   };
 }
+
+/** Schema-valid authored aliases keep independent action identities and contracts. */
+export function lightActionFixture(
+  key: string,
+  command: string,
+  target: object,
+  input: string[] = [],
+) {
+  const value = structuredClone(c);
+  value.actions[named('action', key)] = {
+    key,
+    command,
+    label: `action.${command}`,
+    accessibility: `action.${command}`,
+    target,
+    input,
+    priority: 1,
+    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  };
+  const bytes = encode(value);
+  const loaded = loadCartridge(
+    new TextEncoder().encode(
+      JSON.stringify({
+        cartridge: value,
+        content_hash: createHash('sha256').update(bytes).digest('hex'),
+      }),
+    ),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  return newWorld(loaded.cartridge as Cartridge, fresh.context, [1, 2, 3, 4]);
+}

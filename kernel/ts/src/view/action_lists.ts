@@ -14,7 +14,7 @@ import type {
   TargetSpec,
 } from '../contracts.gen.ts';
 import { admission, detailOf, refusal, resolved, type Offered } from '../commands/actions.ts';
-import { bodyOf, type World } from '../runtime/decision.ts';
+import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -85,6 +85,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           !readableRecipe(a) &&
           !door(a) &&
           !equip(a) &&
+          !light.VERBS.includes(a.command) &&
           a.command !== current,
       ),
       ...readActions(world, actor, set, steps),
@@ -93,8 +94,9 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
         set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
     ),
     of: (scope: string, id: string, nested = false) =>
-      listed((a) => entityOffered(world, actor, a, scope, id, nested), id, scope),
-    worn: (id: string) => listed((a) => entityOffered(world, actor, a, 'worn', id, false), id),
+      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope),
+    worn: (id: string) =>
+      listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
 }
@@ -106,6 +108,7 @@ function entityOffered(
   scope: string,
   id: string,
   nested: boolean,
+  steps: Steps,
 ) {
   if (scope === 'worn' && !light.VERBS.includes(a.command))
     return a.command === 'remove' && fits(world, actor, a, id);
@@ -113,13 +116,7 @@ function entityOffered(
     return (
       ['inventory', 'worn'].includes(scope) &&
       !nested &&
-      typeof light.transition(
-        world,
-        actor,
-        a.command,
-        id as EntityId,
-        a.command === 'refuel' ? light.refillSupply(world, actor, id) : undefined,
-      ) !== 'string'
+      lightOffered(world, actor, a, id as EntityId, steps)
     );
   return door(a)
     ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
@@ -144,12 +141,10 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
-  const target_ids =
-    id && light.VERBS.includes(a.command)
-      ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
-      : undefined;
+  const target_ids = lightTargets(world, actor, a, id);
   const shown = {
     action_key: a.key,
+    ...(light.VERBS.includes(a.command) && { command: a.command }),
     label: a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
@@ -260,4 +255,24 @@ function noticeOffer(world: World, a: Offered, id: string) {
       detailOf(world, a.recipe.target) === id
     )
   );
+}
+
+function lightOffered(world: World, actor: CharacterId, a: Offered, item: EntityId, steps: Steps) {
+  const supply = a.command === 'refuel' ? light.sourceSupply(world, item) : undefined;
+  const payload = {
+    type: a.command,
+    actor_id: actor,
+    item_id: item,
+    ...(supply && { supply_id: supply }),
+  } as CommandPayload;
+  return (
+    !refusal(world, payload, steps, a.key) &&
+    typeof light.transition(world, actor, a.command, item, supply) !== 'string'
+  );
+}
+
+function lightTargets(world: World, actor: CharacterId, a: Offered, id?: string) {
+  return id && light.VERBS.includes(a.command)
+    ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
+    : undefined;
 }

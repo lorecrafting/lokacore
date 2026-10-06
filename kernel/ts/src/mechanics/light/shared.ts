@@ -137,11 +137,14 @@ function refillFrom(
   return { op, amount };
 }
 
-export function refillSupply(w: World, actor: CharacterId, source: string): EntityId | undefined {
+export function sourceSupply(w: World, source: string): EntityId | undefined {
   const spec = w.fuelSpecs[source];
-  if (spec?.kind !== 'source') return undefined;
-  const supply = w.entityIds[refString(spec.supply)];
-  return typeof transition(w, actor, 'refuel', source as EntityId, supply) === 'string'
-    ? undefined
-    : supply;
+  return spec?.kind === 'source' ? w.entityIds[refString(spec.supply)] : undefined;
+}
+
+export function refillSupply(w: World, actor: CharacterId, source: string): EntityId | undefined {
+  const supply = sourceSupply(w, source);
+  return supply && typeof transition(w, actor, 'refuel', source as EntityId, supply) !== 'string'
+    ? supply
+    : undefined;
 }

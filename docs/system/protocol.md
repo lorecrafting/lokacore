@@ -598,6 +598,12 @@ for Refuel, and source for Ignite/Douse. The amount is derived from confirmed
 headroom and supply, never player input. Extend ActionSet and the exact item view
 only for these real controls, confirmed remaining/capacity and effective lit state.
 An unavailable compatible supply produces no selectable Refuel promise.
+Light item controls project optional `AdvertisedAction.command`, the resolved
+semantic command key, alongside the authored `action_key` used for invocation.
+The presenter uses this authority-supplied command for participant wording and
+source ownership; authored aliases retain their own action identity. Light
+projection runs keyed ordinary target/input/policy admission on the exact
+candidate payload before its pure fuel transition.
 
 The missing primitive is typed per-item fuel history: state rows and
 `fuel.set {item_id, from, to}` targeting that item's fuel row. `from` is the entire
@@ -614,7 +620,9 @@ Item definitions opt into `fuel`: a supply declares `kind: supply`, positive
 `supply` reference and the `ignited`, `doused`, `refueled` narration keys. Runtime
 immutable `fuel_specs` bind these specifications to their actual item instances;
 mutable `fuel` rows are keyed by item ID. A room's optional `dark_description`
-is its authored darkness opt-in. `FuelView` carries confirmed `remaining`,
+is its authored darkness opt-in. Actual fuel or darkness fields require a
+`requires.kernel_api.at_least` floor of 1.19 in both compiler and loader;
+an unused reserved light capability does not impose that floor. `FuelView` carries confirmed `remaining`,
 `capacity`, and effective `lit` without a presenter clock.
 
 Add only immutable per-item fuel specifications needed to validate those rows.

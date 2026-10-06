@@ -4,7 +4,7 @@
   "description": "The portable GameView envelope and its freshness (04 \u00a714-\u00a716; 00 \u00a74.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 \u00a715).",
   "$defs": {
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 \u00a719), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 \u00a72, \u00a717) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 \u00a74.10).",
+      "description": "One action of a resolved ActionSet (04 \u00a719), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 \u00a72, \u00a717) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 \u00a74.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -33,6 +33,9 @@
               "items": {
                 "$ref": "identity.schema.json#/$defs/EntityId"
               }
+            },
+            "command": {
+              "$ref": "action.schema.json#/$defs/Key"
             }
           },
           "required": [
@@ -74,6 +77,9 @@
               "items": {
                 "$ref": "identity.schema.json#/$defs/EntityId"
               }
+            },
+            "command": {
+              "$ref": "action.schema.json#/$defs/Key"
             }
           },
           "required": [
@@ -97,7 +103,8 @@
           },
           "input": [
             "until"
-          ]
+          ],
+          "command": "wait"
         },
         {
           "available": true,

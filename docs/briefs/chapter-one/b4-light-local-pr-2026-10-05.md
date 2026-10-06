@@ -25,9 +25,14 @@ C1's shared item-detail component also renders confirmed fuel.
 
 Provisional source handoff: independent B4 primary and save/protocol opinions remain
 required. C1's final source corrections and approved B3 compiler/shop cleanup are integrated.
-Final checks pass: 582 kernel tests, 167 Elixir core/compiler tests, 46 authority/Book
-tests, literal/seeded portable differential, generation, typecheck, pure lint,
-Elixir/active TypeScript size and strict Credo. B4's source size allowances were removed
-or restored to inherited values through small concrete splits; all affected
-checks, 13 TS red controls and the Elixir prior-row control reran after that cleanup. Full active
+The evidence records the final kernel/core, authority/Book, portable differential,
+generation, type, lint, size and Credo checks plus their restored red controls.
+Full active
 checks/schema sweep/exact-head hosted CI and browser/native gates are unclaimed.
+
+Scoped review fixes make authored light aliases preserve their invocation identity
+while following authority-projected semantics for labels and source ownership.
+Projection uses ordinary keyed target/input admission, and actual fuel/darkness
+requires API1.19 at both content boundaries. Independent invalid-success literals
+now protect Elixir's separate fuel invariant. See the evidence's scoped round for
+actual checks/red controls; same-reviewer rechecks remain pending.
