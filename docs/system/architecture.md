@@ -185,8 +185,8 @@ The app shell imports the local authority's session controller
   The preview is for development;
   browser saves have no compatibility promise across chapter builds. The local run and
   worktree-switch procedure is in [web preview](../web-preview.md).
-  The paused [Web recovery investigation](../evidence/2026-10-05-web-sqlite-stream/README.md)
-  retains its measurements and current limits for scope reassessment.
+  The [Web recovery evidence](../evidence/2026-10-05-web-sqlite-stream/README.md)
+  records cold-open verification and the remaining transport limits.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`

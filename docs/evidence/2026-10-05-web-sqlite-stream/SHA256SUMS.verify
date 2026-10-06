@@ -1,4 +1,5 @@
 README.md: OK
+active-checks.log: OK
 after-red.json: OK
 app-result.log: OK
 browser-proof.tsx.txt: OK
@@ -8,6 +9,10 @@ cold-open.json: OK
 cold-reload.json: OK
 cold-reload.png: OK
 focused.log: OK
+fresh-tab.json: OK
+fresh-tab.png: OK
 make-seed.mts.txt: OK
 old-suite-mutant-result.log: OK
+resumed-cold-reload.json: OK
+resumed-import.json: OK
 seed.json: OK
