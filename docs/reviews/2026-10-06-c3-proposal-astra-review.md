@@ -73,3 +73,40 @@ Ponytail Review: lean already. The fix tightens existing guard seams and preserv
 explicit prefix handling; no dependency, alternate scheduler, compatibility mode
 or redundant persistence mechanism. Primary/save reviews and publication remain
 separate gates.
+
+## Published B9 carryover — APPROVE
+
+Exact integrated source `f96e0245ab6086dacfaa276e338405f1710a0b8d`, evidence
+`33163a1bca6de9d8b5e0e0bf0cf45134542b77fb`; published B9 predecessor
+`b9dd1d9c80cf25d46823f0c3df28830e2af8afdb` is an ancestor. **APPROVE**, no new
+findings. C3-A1 remains closed.
+
+The proposal/apply paths, both composers, all four strict birth/slot guards and
+population-only replay activation are byte-identical to approved `2dbf55b5`.
+B9's fact ownership and Rest reaction changes retain their published source;
+the combined runtime retains both population support and API1.25. No final-admission
+exception or replacement of prefix handling was introduced by integration.
+
+Independent focused verification on the exact integrated tree:
+
+- **28 TypeScript/SQLite tests** pass across spawned bundles, population composition,
+  C3 hounds and B9 dreams/recovery. **13 Elixir tests** pass, including both portable
+  literal/differential suites and the authored chapter compilation against v029.
+- All three retained malformed birth/slot probes still fault in both portable
+  kernels; both independent invariants reject forged success. On the loaded v029
+  world, final adoption refuses foreign-plan, cross-group duplicate-slot and
+  birth-free assignments, while the valid slot5 birth succeeds.
+- Both actual v029 paid Rest routes, `follow_fox` and `wake`, reach their final
+  acknowledged quest outcome through ordinary commands and preserve every C3
+  created identity and slot. These additional checks use the combined artifact,
+  not B9's standalone v028 fixture.
+- Python independently confirms canonical JSON and SHA-256
+  `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`;
+  every one of the **140 labelled runtime genesis IDs** matches v029. All **13 C3
+  evidence hashes** verify. The evidence-only commit changes no source; its retained
+  full-gate log reports **360 Elixir tests passed** and reaches successful formatting.
+  The full gate was inspected, not rerun by this reviewer.
+
+Ponytail Review: no new complexity finding. This scoped carryover claims no browser,
+native, owner-save, hosted-CI or publication proof; primary/save reviews remain
+separate requirements.
