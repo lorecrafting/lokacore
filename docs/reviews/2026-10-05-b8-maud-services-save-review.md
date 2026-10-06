@@ -108,6 +108,11 @@ pinned fixture, and all **111** allocation answers pass. Cartridge source,
 protocol wire schemas/fixtures, save/replay/recovery/transaction implementation
 and candidate hash are unchanged from the reviewed B8 checkpoint.
 
+Evidence head `125ce77740c6516294a8e36cc0a28f4533d6cf7f` changes only the
+B8 evidence folder and is source-identical to the approved checkpoint. All
+**32** evidence hashes verify; its corrected source/predecessor and
+v025/API1.23/hash/111-ID claims agree with the independently checked source.
+
 Ponytail Review: lean extractions preserve validation; no new complexity finding.
 **APPROVE**, no open findings. Publication checks and browser/native evidence
 remain separate from this headless save/protocol opinion.
