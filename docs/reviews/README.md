@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D3 Western Ashmere predecessor re-pin](2026-10-06-d3-western-ashmere-repin-review.md): exact planning head `fc2a3e9d`, independent APPROVE; published PR231/v030/API1.26 canonical hash/149-ID fixture and actual Boathouse declarations verified; provisional assignment and D4/C4 final integration gates retained. No findings; docs/whitespace checks pass, no source approval.
+
 - [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
 
 - [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
