@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D3 Western Ashmere provisional source](2026-10-06-d3-western-ashmere-source-review.md): exact source/evidence head `7865ac52`, independent provisional-source APPROVE, no findings; 6 new/40 existing/41 compiler/1 carry checks pass, two independent mutants red/restored green, all 33 evidence hashes verify. D4/C4 integration, successor pins/assets, publication checks/CI/browser and the separate seed71 sim-oracle fix remain mandatory.
+
 - [D3 Western Ashmere predecessor re-pin](2026-10-06-d3-western-ashmere-repin-review.md): exact planning head `fc2a3e9d`, independent APPROVE; published PR231/v030/API1.26 canonical hash/149-ID fixture and actual Boathouse declarations verified; provisional assignment and D4/C4 final integration gates retained. No findings; docs/whitespace checks pass, no source approval.
 
 - [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
