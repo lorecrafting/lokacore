@@ -4,16 +4,19 @@
 
 Proposed branch: `chapter1/d9-village-reactions`.
 
-**Current source gate, 2026-10-06:** Published main `f014aa26` contains D4
-and published C4 hound behavior; D6 water depths are unpublished. D9 source,
-successor pins and PR remain null. Before source GO, re-pin actual merged D6,
+**Current source gate, 2026-10-06:** Published main `f57f1a8c` contains C4
+hound behavior and D6 water depths. D6 [#247](https://github.com/lorecrafting/lokacore/pull/247)
+merged at `61f4200c`: chapter v035/API1.30, canonical SHA-256
+`560e16712f3c04538343e9a3ac767604093656bc527864360ccad6a8ab719581`,
+190 starting IDs. D9 source, successor pins and PR remain null. Before source GO,
 independently review the [selected D9 Study ingress rule](../../decisions/pm-decision-d9-village-reactions-2026-10-06.md),
-and preserve public S2 delivery. D6's Chapel recovery applies only to owned
-nonempty corpses in `well_bottom` or `pool_bottom`, never the Prior Study.
+and preserve public S2 delivery. D6's installed Chapel `recover_corpse`
+checks `world.water.routes` bottoms: an owned nonempty corpse in `prior_study`
+cannot pass that admission. D9's physical Study route does not widen it.
 
 ## Goal, dependencies and governing clauses
 
-Give the existing cast distinct, truthful child/allegiance responses; project committed bell sound only over its declared area; implement actual selected hound suppression and optional-study closure without stranding delivery/corpses. Re-pin A1–A3 terminal/scene order, B2 relationships/faction/public Aldric, D1 Sedge, D2 Priory, D4 villagers, C3/C4 population and D6's actual underwater-only recovery contract. C4 is published; D6 remains an unconditional merged prerequisite for full D9 source. This draft selects its own Study-corpse physical retrieval rule, pending independent review. Governors: archived00a §§6/8/10/11, current four-state/three-ending owner decision, mechanics reaction/description/dialogue/schedule, protocol event ownership/narration, M14/M16/M22/M23 release families, no-wait and recovery/reading gates.
+Give the existing cast distinct, truthful child/allegiance responses; project committed bell sound only over its declared area; implement actual selected hound suppression and optional-study closure without stranding delivery/corpses. Re-pin A1–A3 terminal/scene order, B2 relationships/faction/public Aldric, D1 Sedge, D2 Priory, D4 villagers, C3/C4 population and D6's published underwater-only recovery contract. This draft selects its own Study-corpse physical retrieval rule, pending independent review. Governors: archived00a §§6/8/10/11, current four-state/three-ending owner decision, mechanics reaction/description/dialogue/schedule, protocol event ownership/narration, M14/M16/M22/M23 release families, no-wait and recovery/reading gates.
 
 ## PM reaction matrix and policies
 
@@ -47,7 +50,7 @@ At bell commit, suppression removes aggression/spawn availability without deleti
 
 ## Shared delivery and proof contract
 
-This is a **source-unbuilt PM planning draft** with proposed active clauses, not a source GO, independent approval or completed check. Parent PM must adopt this exact policy after independent planning review and re-pin actual merged D6 before assigning source work. Initial inspected baseline was clean PM `0fbd2847`/chapter v011/API1.10. Revalidated during earlier planning: clean PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` records PR190 merged as `05b0cb6f`, chapter `ashmere_missing_child@0.0.12`/API1.11 with the typed escort/fatal-separation/return contract. The current draft base is published main `f014aa26`; D9 target source SHA, release/API version, content hash, allocation oracle and PR number are **null** until source exists.
+This is a **source-unbuilt PM planning draft** with proposed active clauses, not a source GO, independent approval or completed check. Parent PM must adopt this exact policy after independent planning review. Earlier provisional baselines remain historical; the current integrated planning base is published main `f57f1a8c` with D6 v035/API1.30 as pinned above. D9 target source SHA, successor release/API version, content hash, allocation oracle and PR number are **null** until source exists.
 
 Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
 

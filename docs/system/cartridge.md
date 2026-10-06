@@ -1285,8 +1285,10 @@ not become sound authority. Flood variants affect Reed Path and Mire text only.
 The bell's hound suppression duration is **172800 logical seconds**, owned by
 the cartridge. Author its population-plan reference and resume bound against
 the existing hound plan; no new population cap, catch-up count or creature is
-declared. D9 source release/API/hash/IDs remain null until D6 publishes
-and the actual successor is independently pinned.
+declared. The published D6 predecessor is chapter v035/API1.30,
+[hash/190 IDs](../../protocol/fixtures/missing_child_v035_hash.json).
+D9 source successor release/API/hash/IDs remain null until its actual source
+is independently pinned.
 
 ## D12 practical skill declarations
 

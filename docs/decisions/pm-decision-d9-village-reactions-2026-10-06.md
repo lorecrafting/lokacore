@@ -1,7 +1,9 @@
 # PM decision: D9 village reactions and Study access — 2026-10-06
 
-**Selected planning draft; independent review, D6 publication and D9 source
-remain pending.** Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
+**Selected planning draft; independent review and D9 source remain pending.**
+Published D6 [#247](https://github.com/lorecrafting/lokacore/pull/247)
+merged at `61f4200c`; the current planning base is main `f57f1a8c`,
+chapter v035/API1.30. Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects the narrow Chapter 1 consequence contract in
 [mechanics](../system/mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation),
 [cartridge](../system/cartridge.md#d9-village-reaction-content-selected-pending-implementation),
@@ -33,8 +35,9 @@ empty, the exception ceases. This is an exact-edge movement predicate, not a
 new barrier state or a general corpse-recovery command. The current shared
 barrier model would close both reciprocal faces; no such barrier is installed
 on this edge. Public Aldric's S2 service and all mandatory bell routes stay
-open. D6 Chapel recovery is explicitly underwater-only and cannot substitute
-for this Study route.
+open. Installed D6 Chapel recovery admits only corpses currently in a declared
+`world.water.routes` bottom (`well_bottom` or `pool_bottom`), so it cannot
+substitute for or be widened by this Study route.
 
 Selected child/bell facts, actual corpses, population and encounters remain
 in the ordinary pure proposal and changed-row transaction. No global audio
