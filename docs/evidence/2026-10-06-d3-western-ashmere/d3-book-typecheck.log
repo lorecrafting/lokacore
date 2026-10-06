@@ -1,0 +1,2 @@
+COMMAND: mobile/app: mise exec -- npx tsc --noEmit
+EXIT: 0

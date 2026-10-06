@@ -1,0 +1,25 @@
+✔ one fatal sequence preserves custody and returns the same body with exact restoration (7.799959ms)
+✔ owners recover roots through ordinary Take while corpses remain fixed and private (13.199459ms)
+✔ HP-zero NPC retains identity but leaves living projection and admission (4.622834ms)
+✔ new API gate and narrow hydration reject invalid provenance/custody (13.29875ms)
+✔ living projection refuses a missing required NPC HP row (1.013083ms)
+✔ fatal transfer delta orders unsorted roots between initial placement and return (1.0225ms)
+(node:79099) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (786.07875ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (946.883625ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (2220.688666ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (174.105458ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (354.578375ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (1180.816625ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (133.276625ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7142.813666

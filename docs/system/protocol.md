@@ -12,6 +12,10 @@ flattened contracts with the same paths and error codes (`lib/loka/core/contract
 present. The scene `on` contract uses it for `story_point` versus `quest`, retaining the
 existing story-point shape without a new discriminator. Failure reports `exclusive_properties`
 at the containing object path in both validators.
+The `requiredUnless` object keyword maps one or more declared alternative properties to the same
+list of required properties. Presence of any alternative waives that list; when none is present,
+each missing listed property reports `missing_property`. This retains the combat encounter ID
+requirement while allowing sight-member and water-generation cancellation.
 Every contract's
 `examples` must validate and `protocol/fixtures/invalid.json` must fail with exactly the listed
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
@@ -250,9 +254,11 @@ current API and generated schemas together under the
 the resulting API version and wire shape remain unset until implementation.
 
 An open encounter restricts the fully composed ActionSet to actions whose resolved Command
-is exactly `flee`, `stand`, `look` or `scan`. This final restriction follows engine, cartridge,
-room and pending-choice contributions; a key or alias cannot change the allowed command set.
-Recipes (`perform`), repeated Attack, Move, dialogue/choices, inventory/equipment/door actions,
+is exactly `flee`, `stand`, `look` or `scan`, with the sole later C5 `bandage`
+exception under its [exact-item/current-effect admission](#c5-bleed-and-bandage-composition).
+This final restriction follows engine, cartridge, room and pending-choice contributions;
+a key or alias cannot change the allowed command set.
+Recipes (`perform`), repeated Attack, Move, dialogue/choices, other inventory/equipment/door actions,
 Wait and nonstanding position changes are unavailable. Projection, invocation resolution and
 direct Command admission use this same restricted set. Excluded invocation keys use the
 existing `unsupported_capability` result; a known direct Command excluded during combat
@@ -1097,7 +1103,22 @@ with null killer/credit. MV 0 alone is not fatal. Settlement at the exact deadli
 precedes action admission, including Up; no command-ID tie may grant extra time.
 If existing scheduler ordering cannot express this locally, stop for PM rather
 than change global ordering silently. Compiler/loader/save and event validation
-must define the narrow occupancy/job/cause types before use.
+must define the narrow occupancy/job/cause types before use. An underwater Up
+reservation retains its original occupancy generation through elapsed preflight;
+invalidating that generation returns `stale_view` before the movement rule,
+leaving the same body at Chapel with one corpse. A clock tick within the same
+occupancy does not invalidate the captured free Up. Global scheduler order stays.
+
+Provisional source shape: [water contracts](../../protocol/water.schema.json)
+define content `WaterSettings`, actor-keyed `WaterOccupancy`, bound `WaterJob`,
+confirmed `WaterView` and selected `CorpseRecoveryView`. D6 content opts into
+`real_elapsed`; the view carries logical remaining time and confirmed real
+seconds derived from the cartridge rate, without a presenter clock. `water.transition`
+compares the full prior row and increments the generation on entry or clear.
+An active row binds body, bottom room, entry clock, absolute deadline and job;
+a cleared row retains generation/body and has null room/entry/deadline/job.
+The job binds actor/body/generation to the exact bottom DefinitionRef and due
+clock. These are source candidates, not a successor API/release/hash/ID freeze.
 
 Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
 `target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at
@@ -1121,3 +1142,15 @@ The existing `buy {actor_id, provider_id, item_id, quoted_price}` and ordered pr
 A sight binding is at most one pending job per current deer generation, carrying exact plan/slot/member/player, occurrence and due time; replacing it cancels the prior job atomically. Its job is internal, never a player ActionSet verb. Player entry or the checked population `entity.transfer` into the player's current room establishes co-presence; the latter schedules or resets sight in that same due-job writer group, bound to the exact transfer and population-job occurrence without requiring `entity_entered_room`. That cause and the current slot/job binding authorize dispatch. If the transfer is a new birth, include the sight binding in the birth slot transition rather than writing that slot twice. The sight group completes that job and makes one checked slot transition that clears its binding and, on actual flight, records the last-flight clock; legal deer transfer also stays in that group. Re-read the hydrated prefix; a stale generation, completed job, dead/departed deer or absent player cannot move anything. Sight first may transfer an engaged deer, close its encounter and cancel its still-pending current round entirely in the sight group. Unengaged deer use the same legal transfer without encounter changes. A stale or blocked sight completes harmlessly; when the encounter remains live, its current or successor round stays pending.
 
 For the sole round-to-sight handoff, a current ordinary deer round in group G at the sight job's equal due clock survives and writes checked `encounter.advance` plus one successor `job.schedule`. The later current sight runs in fresh group H. Only its matching `encounter.close` and cancellation of that exact successor retain G; sight `job.complete`, deer transfer and slot transition stay H. Require the same encounter/member, predecessor round and successor job IDs, equal due time, exact current sight binding and no intervening writer to the encounter or successor target. A fatal round cancels its bound sight job in its own group. An intervening population job retains its group and skips the engaged deer; it grants no handoff. Different member, stale successor, unequal due time or any unrelated same-target cross-group write faults `conflicting_write` under ordinary rules. Jobs still sort `(due_time, job_id)` with their own groups; this narrow causal continuation changes neither job priority nor general conflict admission. No untyped fact, broad event listener or additional population ledger.
+
+## C5 bleed and bandage composition
+
+**Selected contract; schema/source pending.** [C5](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) adds one body-keyed typed bleed row and checked `bleed.transition {body_id, expected, value}` delta. The closed C5 value retains a monotone positive generation even while inactive; its active form has producer hound EntityId, `ends_at`, cadence `next_tick_at` and exact pending JobId (whose due time may be the earlier tick or the end). Transitions compare the complete prior row, including null at first application. A new application increments the retained generation; refresh keeps it and the pending due/job. Tick advances that row; cure, expiry and death leave an inactive row with no due/job, preserving the generation needed to reject stale work. Schedule a final expiry delivery at `ends_at` when no damaging tick precedes it. One job owns only one current instance; stale generation/job work is harmless. Both generic delta validators, projection and loader reject malformed rows and impossible transitions. This installs no arbitrary effect script, stack collection or second scheduler.
+
+The hound combat owner may transition only after its resolver actually lowers player HP by a positive nonfatal amount in that writer group. It binds the actual C3 member and body rather than trusting a free event or template name. Due tick reads that status row, body HP/life and owned job at the hydrated prefix; it composes existing `resource.adjust`, fatal sequence if needed, and status/job cleanup in its one writer group. Fatal combat loss and any player death clear this C5 row before return. No `attack_result` is fabricated by a status tick; its typed cause identifies bleeding and original hound without granting hound kill credit.
+
+One narrow causal same-group exception handles a current bleed delivery and current encounter round when both jobs have the **same due time and same living body**, the status row names that exact pending bleed JobId/generation, and the encounter names that exact current round JobId/body. Verify both occurrences and bindings against the hydrated prefix before assigning their shared writer group; keep ordinary `(due_time, job_id)` execution order and revalidate before each delivery. If bleed runs first, damage/death/expiry settles before the round; a fatal tick makes the round harmless. If round runs first, its hit may refresh the same instance or death may inactivate it; the following bleed delivery re-reads `next_tick_at` and `ends_at` rather than trusting the old job label. A former expiry due at the cadence tick becomes one damaging tick if a same-clock refresh extends the end beyond it; if the next cadence tick is still future, the delivery reschedules without damage. If the first delivery closes/cancels the second job, skip the stale second without a write. The pair has one writer group solely for their legitimate same-body HP/status/death/encounter writes. Another job, another body or stale occurrence never joins it. A third due writer to the same target in its own group still faults `conflicting_write`; this is no generic job-coalescing rule or exemption from foundation conflict refusal. Existing segmentation and budgets still apply across arbitrary Flee, cold reopen and later re-engagement clocks; no special phase or tuned interval separates jobs.
+
+Add typed `bandage {actor_id: CharacterId, item_id: EntityId, effect_generation: positive integer}` and exact one-target `ActionInvocation {action_key: "bandage", target_ids: [item_id], input: {effect_generation}}`; accepted outcome `bandaged` binds that item, effect and generation. The current GameView offer and raw command resolve through the same pure query: living actor/body, C1 acquired and currently qualified skill, current matching generation, declared bandage item directly in the actor's body holder, and reachable current mode. After due preflight, recheck all of it. The one proposal transitions body-held item to D4's existing consumed holder, clears the matching status and owned job, and returns one receipt with authored narration. No HP adjustment, clock jump, round advance, encounter close or RNG. A missing/expired/wrong-generation effect refuses before consumption. A later same-command replay returns its original receipt; a new command on a spent item refuses.
+
+Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.

@@ -1,0 +1,26 @@
+{
+  "title": "room.mill_cellar.title",
+  "description": "room.mill_cellar.description",
+  "exits": {
+    "up": {
+      "to": "old_mill"
+    }
+  },
+  "details": {
+    "grain_bins": {
+      "aliases": [
+        "grain_bins",
+        "bins"
+      ],
+      "description": "detail.mill_cellar.grain_bins.description"
+    },
+    "rat_holes": {
+      "aliases": [
+        "rat_holes",
+        "holes"
+      ],
+      "description": "detail.mill_cellar.rat_holes.description"
+    }
+  },
+  "dark_description": "room.mill_cellar.dark"
+}

@@ -566,9 +566,10 @@ in the same nonsanctuary room, with no modal scene or open encounter for either 
 It creates an encounter and its first round job at now + the authored interval; it does
 not attack immediately, advance time or draw RNG. The encounter pins character, body,
 NPC, room, round and current job. While the encounter is open, the final shared
-[ActionSet](protocol.md#actionset-and-admission) allows only Flee, Stand, Look and Scan by
-resolved command, after all ordinary contributions. This blocks repeated Attack, directional
-Move, dialogue/choices, inventory/equipment/doors, Wait, recipes and Sit/Rest/Sleep, including
+[ActionSet](protocol.md#actionset-and-admission) allows Flee, Stand, Look and Scan by
+resolved command, after all ordinary contributions; [C5](#c5-hound-bleeding-and-bandage-selected-contract)
+later adds only its exact bandage treatment. This blocks repeated Attack, directional
+Move, dialogue/choices, other inventory/equipment/doors, Wait, recipes and Sit/Rest/Sleep, including
 aliases and raw commands. Closure restores ordinary actions from state; reopening derives the
 same restriction. This focused mode leaves actor-free scheduled rounds and their existing
 nonstanding/wake semantics intact.
@@ -1452,6 +1453,10 @@ the current water producer lowers positive HP to 0 and invokes the existing
 same-body fatal sequence atomically. Death carries typed drowning, null killer/
 credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinary
 elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
+A captured underwater Up reservation binds its original occupancy generation.
+If elapsed preflight expires or invalidates that generation, return `stale_view`
+with the body at Chapel and one corpse; never reinterpret it as a Chapel exit.
+Ordinary time settlement that retains the same occupancy does not block Surface.
 No second clock, wetness, drift, ghost mode or global movement rewrite.
 
 At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
@@ -1479,3 +1484,15 @@ Peg's opted Buy quote uses current usable haggle after normal elapsed settlement
 The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition-planning-contract). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
 
 The plan's ordinary wander still skips engaged members and the member transferred by sight flight at that same clock, using C4's last-flight guard. At equal sight/combat/population deadlines preserve normal `(due_time, job_id)` order and distinct writer groups: a fatal round cancels its bound sight job; sight first moves the deer and makes a later round harmless; a surviving round first can hand off its exact successor for sight flight; an intervening population job sees engagement and may skip. Only the checked matching encounter closure and successor cancellation use the preceding round group in that handoff. Other same-target conflicts still fault atomically. No priority override, global sight scan or per-hound job is added.
+
+## C5 hound bleeding and bandage (selected contract)
+
+**PM-selected planning contract; source pending.** [C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#c5-bleeding-and-bandage-details) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. No generic status interpreter is selected.
+
+Only an actual C3 hound's positive HP loss to the surviving player body during its combat opportunity applies bleeding. Miss, successful defense, clamped zero loss, fatal hit, other opponents and forged event/name matches do not. The existing combat writer group adds one typed body/effect instance with source hound identity, generation, `ends_at`, `next_tick_at` and current owned job. A second qualifying hit while active refreshes `ends_at = now + authored duration` but retains the generation and pending next tick; it neither stacks nor postpones that tick. A new application after cure/expiry uses a fresh generation. The hound's later death or flight does not cancel its already inflicted effect.
+
+At a current tick strictly before `ends_at`, lose the authored fixed HP amount, clamped by current HP, through the existing resource/death sequence. Schedule the next tick if it is strictly before end, otherwise schedule one expiry delivery at end; expiry removes the active instance without damage. Every due job rechecks body, generation, current job, life and time. Cure/expiry/death inactivate the instance and cancel or complete its work in the same writer group; the retained generation makes stale jobs harmless. Player death clears this bleed before same-body Chapel return and closes the entire pack encounter. Equal-time jobs retain canonical `(due_time, job_id)` order; only the [exact current bleed/round pair](protocol.md#c5-bleed-and-bandage-composition) shares a writer group, while unrelated jobs retain ordinary conflict refusal. Each delivery revalidates the hydrated prefix. Already-due work settles before player treatment at the same clock.
+
+Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is permanent, while use requires current qualification. Exact held bandage treatment is immediate, costs no HP/MA/MV or clock, spends no combat round/opportunity and gives no HP. It atomically transfers that one item to D4's terminal consumed holder, removes the current bleed and cancels its job, then returns a typed result. Refuse without any change if the actor is dead, unlearned/unqualified, another body/effect/generation is targeted, the bandage is not directly held and opted in, or the selected bleed is absent. Normal prerequisite due settlement can cause that last refusal. No remote, nested, worn or corpse-held treatment; retrieve the bandage through ordinary custody first.
+
+Amend the focused combat ActionSet for this exact bandage command after shared ordinary action composition. It may be offered and admitted during an open encounter together with Flee, Stand, Look and Scan. Other item actions, recipes, movement and equipment remain excluded; a raw command or alias cannot widen the exception. Treatment leaves the encounter and pending initiative intact. Flee remains immediate under its existing prerequisites. No required story path, death recovery or owner save depends on teaching, stock, waiting or UI polish.

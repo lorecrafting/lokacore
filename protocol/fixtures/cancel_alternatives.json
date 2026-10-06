@@ -1,0 +1,52 @@
+{
+  "cases": [
+    {
+      "name": "sight",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "job.cancel",
+        "writer_group": 0,
+        "job_id": "11111111-2222-4333-8444-555555555555",
+        "sight_member_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "errors": []
+    },
+    {
+      "name": "water",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "job.cancel",
+        "writer_group": 0,
+        "job_id": "11111111-2222-4333-8444-555555555555",
+        "water_generation": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "combat",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "job.cancel",
+        "writer_group": 0,
+        "job_id": "11111111-2222-4333-8444-555555555555",
+        "encounter_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "errors": []
+    },
+    {
+      "name": "none",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "job.cancel",
+        "writer_group": 0,
+        "job_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "errors": [
+        {
+          "path": "/encounter_id",
+          "code": "missing_property"
+        }
+      ]
+    }
+  ]
+}

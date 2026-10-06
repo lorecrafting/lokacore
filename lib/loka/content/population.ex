@@ -75,12 +75,7 @@ defmodule Loka.Content.Population do
   defp pack_valid?(nil, _, _, _), do: true
 
   defp pack_valid?(pack, area, rooms, text) do
-    directions =
-      for room <- rooms,
-          is_map(room),
-          {direction, edge} <- room["exits"] || %{},
-          edge["to"] in area,
-          do: direction
+    directions = area_directions(rooms, area)
 
     narration = pack["narration"]
 
@@ -90,18 +85,22 @@ defmodule Loka.Content.Population do
 
   defp sight_valid?(nil, _, _, _, _), do: true
 
-  defp sight_valid?(sight, area, rooms, text, bundle) do
-    directions =
-      for room <- rooms,
-          is_map(room),
-          {direction, edge} <- room["exits"] || %{},
-          edge["to"] in area,
-          do: direction
+  defp sight_valid?(sight, area, rooms, text, %{"member_role" => "deer", "loot_role" => "hide"}) do
+    directions = area_directions(rooms, area)
 
-    is_map(bundle) and bundle["member_role"] == "deer" and bundle["loot_role"] == "hide" and
-      is_integer(sight["delay"]) and sight["delay"] > 0 and
+    is_integer(sight["delay"]) and sight["delay"] > 0 and
       Enum.all?(directions, &Map.has_key?(sight["narration"], &1)) and
       Enum.all?(Map.values(sight["narration"]), &Map.has_key?(text, &1))
+  end
+
+  defp sight_valid?(_, _, _, _, _), do: false
+
+  defp area_directions(rooms, area) do
+    for room <- rooms,
+        is_map(room),
+        {direction, edge} <- room["exits"] || %{},
+        edge["to"] in area,
+        do: direction
   end
 
   defp narration_keys(narration),

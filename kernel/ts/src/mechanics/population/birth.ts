@@ -29,25 +29,29 @@ export function birth(
   };
   return [
     ...spawnPair(
-      {
-        id: member_id,
-        definition: spec[spec.member_role]!,
-        origin: { ...origin, role: spec.member_role },
-      },
+      identity(member_id, spec[spec.member_role]!, spec.member_role, origin),
       spec.home,
       writer_group,
     ),
     ...spawnPair(
-      {
-        id: loot_id,
-        definition: spec[spec.loot_role]!,
-        origin: { ...origin, role: spec.loot_role },
-      },
+      identity(loot_id, spec[spec.loot_role]!, spec.loot_role, origin),
       member_id,
       writer_group,
     ),
     hpBirth(plan, member_id, spec.hp.start, at, writer_group),
   ];
+}
+
+function identity(
+  id: EntityId,
+  definition: DefinitionRef,
+  role: 'deer' | 'hide' | 'hound' | 'pelt',
+  origin: Omit<
+    Extract<Extract<DeltaOp, { op: 'entity.create' }>['identity']['origin'], { kind: 'spawned' }>,
+    'role'
+  >,
+) {
+  return { id, definition, origin: { ...origin, role } };
 }
 
 function hpBirth(

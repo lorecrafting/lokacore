@@ -2,6 +2,7 @@ import { validate } from './validate.ts';
 import { encode, type Json } from './canonical.ts';
 import type { DeltaOp, EncounterRow, EntityId } from '../contracts.gen.ts';
 import type { State } from './compose.ts';
+import { sightSlot } from './compose_sight.ts';
 type Obj = { readonly [key: string]: Json };
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
 const key = (value: Json): string => encode(value);
@@ -162,74 +163,6 @@ function birthSlotsMatch(
   );
 }
 
-function sightSlot(
-  s: Extract<DeltaOp, { op: 'population.slot' }>,
-  ops: readonly DeltaOp[],
-  state: State,
-) {
-  const prior = s.expected;
-  const id = s.value.member_id;
-  if (
-    !prior ||
-    !id ||
-    prior.member_id !== id ||
-    prior.generation !== s.value.generation ||
-    s.value.replacement_due !== null ||
-    s.value.last_flight_at !== prior.last_flight_at ||
-    s.value.sight_job_id === prior.sight_job_id
-  )
-    return false;
-  const scheduled = ops.find(
-    (op) =>
-      op.op === 'job.schedule' &&
-      op.writer_group === s.writer_group &&
-      op.job_id === s.value.sight_job_id,
-  );
-  const completed = ops.find(
-    (op) =>
-      op.op === 'job.complete' &&
-      op.writer_group === s.writer_group &&
-      op.job_id === prior?.sight_job_id,
-  );
-  if (scheduled?.op === 'job.schedule') {
-    const sight = scheduled.sight;
-    const plan = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)]
-      ?.plan as Obj | undefined;
-    const entered = ops.some(
-      (op) =>
-        op.op === 'entity.transfer' &&
-        op.writer_group === s.writer_group &&
-        op.source_id === sight?.source_id &&
-        op.destination_id === sight?.destination_id &&
-        (op.entity_id === id ||
-          ((state.known_entities ?? {}) as Record<string, Obj>)[op.entity_id]?.kind === 'body'),
-    );
-    const old = prior.sight_job_id;
-    return (
-      !!plan?.sight &&
-      !!sight &&
-      key(scheduled.job) === key(s.plan as Json) &&
-      sight.member_id === id &&
-      sight.slot === s.slot &&
-      sight.generation === s.value.generation &&
-      (old == null ||
-        ops.some(
-          (op) =>
-            op.op === 'job.cancel' &&
-            op.writer_group === s.writer_group &&
-            op.job_id === old &&
-            op.sight_member_id === id,
-        )) &&
-      entered
-    );
-  }
-  return (
-    s.value.sight_job_id == null &&
-    completed?.op === 'job.complete' &&
-    ((state.jobs ?? {}) as Record<string, Obj>)[completed.job_id]?.sight !== undefined
-  );
-}
-
 function flightSlot(
   s: Extract<DeltaOp, { op: 'population.slot' }>,
   ops: readonly DeltaOp[],
@@ -240,18 +173,7 @@ function flightSlot(
   const origin =
     id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
   const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
-  const sight =
-    prior?.sight_job_id && ((state.jobs ?? {}) as Record<string, Obj>)[prior.sight_job_id];
-  const deerFlight =
-    origin?.role === 'deer' &&
-    sight?.sight &&
-    ops.some(
-      (op) =>
-        op.op === 'job.complete' &&
-        op.writer_group === s.writer_group &&
-        op.job_id === prior?.sight_job_id,
-    );
-  const due = deerFlight ? sight.due_time : flightDue(ops, s.writer_group, id!, state);
+  const due = flightTime(s, ops, state, id);
   return (
     id !== null &&
     prior?.member_id === id &&
@@ -279,6 +201,29 @@ function flightSlot(
         op.destination_id !== op.source_id,
     ).length === 1
   );
+}
+
+function flightTime(
+  s: Extract<DeltaOp, { op: 'population.slot' }>,
+  ops: readonly DeltaOp[],
+  state: State,
+  id: EntityId | null,
+) {
+  const prior = s.expected;
+  const sight =
+    prior?.sight_job_id && ((state.jobs ?? {}) as Record<string, Obj>)[prior.sight_job_id];
+  const origin =
+    id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
+  const deerFlight =
+    origin?.role === 'deer' &&
+    sight?.sight &&
+    ops.some(
+      (op) =>
+        op.op === 'job.complete' &&
+        op.writer_group === s.writer_group &&
+        op.job_id === prior?.sight_job_id,
+    );
+  return deerFlight ? sight.due_time : flightDue(ops, s.writer_group, id!, state);
 }
 
 function flightDue(ops: readonly DeltaOp[], group: number, id: EntityId, state: State) {

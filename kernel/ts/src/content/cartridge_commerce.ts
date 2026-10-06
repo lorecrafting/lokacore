@@ -32,9 +32,22 @@ export function commerce(c: Obj): Diagnostic[] {
       )
         out.push(diag('UNRESOLVED_REFERENCE', at));
     }
+    if (!discountValid(c, s)) out.push(diag('RESOURCE_SPEC_INVALID', `${at}.buy_discount`));
     for (const field of ['bought', 'sold'])
       if (!Object.hasOwn(c.text, s[field]))
         out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`));
   }
   return out;
+}
+
+function discountValid(c: Obj, s: Obj) {
+  const d = s.buy_discount;
+  return (
+    !d ||
+    (c.manifest.requires.capabilities.skills &&
+      d.skill.kind === 'skill' &&
+      c.skills?.[refString(d.skill)] &&
+      d.numerator <= d.denominator &&
+      s.offers.every((o: Obj) => d.minimum <= o.buy && Number.isSafeInteger(o.buy * d.numerator)))
+  );
 }

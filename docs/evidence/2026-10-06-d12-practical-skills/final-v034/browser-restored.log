@@ -1,0 +1,25 @@
+check: browser-restored
+exit_status: 0
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run tests/practical_skills.e2e.ts --workers 1 --output .e2e/d12-final --trace off --video off
+
+
+ RUN  e2e v0.17.0 <WORKTREE>/mobile/app
+      run 01a11251-36e0-77a4-a0f0-bcff9b644305 · targets: web
+
+ ✓ target "web" command ready 916ms
+ ✓ |web| tests/practical_skills.e2e.ts (2 tests) 14.90s
+   ✓ Sedge lesson leads to careful Harvest and survives browser reload 9.07s
+   ✓ Peg lesson discounts an actual purchase after browser reload 5.83s
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  07:44:35
+   Duration  16.18s (startup 916ms)
+     Report  .e2e/d12-final/report.json
+

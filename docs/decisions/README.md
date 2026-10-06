@@ -39,6 +39,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [D7 bounded deer PM proposal](pm-decision-d7-deer-2026-10-06.md): three one-slot local populations, delayed sight job and conserved hides; independent plan review and source pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
+- [Beads import hook retention](pm-decision-beads-hooks-retain-2026-10-06.md): retain the opt-in Chapter 1 integration hook after two observed source merges; no measured speed claim.
 - [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.
 - [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
 - [Review knowledge trail](owner-decision-review-knowledge-trail-2026-10-05.md): retain findings and dispositions; link promoted spec rules, lessons, deterministic checks and deferred tasks to their evidence.
@@ -253,3 +254,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.
 
 - [Pre-production CI scope, 2026-10-06](owner-decision-preproduction-ci-scope-2026-10-06.md): metadata and Book-only changes use narrower local and hosted check lanes, with conservative full fallback.
+
+- [C5 real bleeding and bandage](pm-decision-c5-bleeding-bandage-2026-10-06.md): one hound-produced timed bleed, Wick's skill lesson and exact held-bandage treatment during combat.

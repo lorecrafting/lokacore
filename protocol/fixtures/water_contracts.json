@@ -1,0 +1,1910 @@
+{
+  "bases": {
+    "settings": {
+      "contract": "WaterSettings",
+      "value": {
+        "skill": {
+          "cartridge_id": "water_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "swim"
+        },
+        "maximum_grams": 6000,
+        "entry_cost": 10,
+        "duration": 6000,
+        "warning": "water.warning",
+        "drowned": "water.drowned",
+        "routes": [
+          {
+            "surface": {
+              "cartridge_id": "water_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "shaft"
+            },
+            "bottom": {
+              "cartridge_id": "water_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "bottom"
+            }
+          }
+        ]
+      }
+    },
+    "occupancy": {
+      "contract": "WaterOccupancy",
+      "value": {
+        "generation": 1,
+        "body_id": "22222222-3333-4444-8555-666666666666",
+        "room_id": "33333333-4444-4555-8666-777777777777",
+        "entered_at": 64800,
+        "deadline": 70800,
+        "job_id": "44444444-5555-4666-8777-888888888888"
+      }
+    },
+    "job": {
+      "contract": "WaterJob",
+      "value": {
+        "job": {
+          "cartridge_id": "water_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "bottom"
+        },
+        "due_time": 70800,
+        "status": "pending",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "water_generation": 1,
+        "water_body_id": "22222222-3333-4444-8555-666666666666"
+      }
+    },
+    "projection": {
+      "contract": "WaterView",
+      "value": {
+        "deadline": 70800,
+        "remaining": 6000,
+        "remaining_seconds": 120
+      }
+    },
+    "recovery": {
+      "contract": "CorpseRecoveryView",
+      "value": {
+        "corpse_id": "22222222-3333-4444-8555-666666666666",
+        "room_id": "33333333-4444-4555-8666-777777777777",
+        "room_title": "room.bottom",
+        "roots": [
+          {
+            "id": "22222222-3333-4444-8555-666666666666",
+            "name": "item.trunk.short"
+          }
+        ]
+      }
+    },
+    "transition": {
+      "contract": "DeltaOp",
+      "value": {
+        "op": "water.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "generation": 1,
+          "body_id": "22222222-3333-4444-8555-666666666666",
+          "room_id": "33333333-4444-4555-8666-777777777777",
+          "entered_at": 64800,
+          "deadline": 70800,
+          "job_id": "44444444-5555-4666-8777-888888888888"
+        }
+      }
+    },
+    "command": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "recover_corpse",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "corpse_id": "22222222-3333-4444-8555-666666666666"
+      }
+    },
+    "cause": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "entity_died",
+        "victim_id": "22222222-3333-4444-8555-666666666666",
+        "room_id": "33333333-4444-4555-8666-777777777777",
+        "killer_id": null,
+        "credited_character_id": null,
+        "corpse_id": "22222222-3333-4444-8555-666666666666",
+        "cause": "drowning"
+      }
+    },
+    "schedule": {
+      "contract": "DeltaOp",
+      "value": {
+        "job": {
+          "cartridge_id": "water_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "bottom"
+        },
+        "due_time": 70800,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "water_generation": 1,
+        "water_body_id": "22222222-3333-4444-8555-666666666666",
+        "op": "job.schedule",
+        "writer_group": 0,
+        "job_id": "44444444-5555-4666-8777-888888888888"
+      }
+    },
+    "cancel": {
+      "contract": "DeltaOp",
+      "value": {
+        "op": "job.cancel",
+        "writer_group": 0,
+        "job_id": "44444444-5555-4666-8777-888888888888",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "water_generation": 1
+      }
+    },
+    "target": {
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "water",
+        "actor_id": "11111111-2222-4333-8444-555555555555"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "settings valid",
+      "base": "settings",
+      "valid": true
+    },
+    {
+      "name": "settings missing skill",
+      "base": "settings",
+      "path": [
+        "skill"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing maximum_grams",
+      "base": "settings",
+      "path": [
+        "maximum_grams"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing entry_cost",
+      "base": "settings",
+      "path": [
+        "entry_cost"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing duration",
+      "base": "settings",
+      "path": [
+        "duration"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing warning",
+      "base": "settings",
+      "path": [
+        "warning"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing drowned",
+      "base": "settings",
+      "path": [
+        "drowned"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings missing routes",
+      "base": "settings",
+      "path": [
+        "routes"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "settings extra field",
+      "base": "settings",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "occupancy valid",
+      "base": "occupancy",
+      "valid": true
+    },
+    {
+      "name": "occupancy missing generation",
+      "base": "occupancy",
+      "path": [
+        "generation"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy missing body_id",
+      "base": "occupancy",
+      "path": [
+        "body_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy missing room_id",
+      "base": "occupancy",
+      "path": [
+        "room_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy missing entered_at",
+      "base": "occupancy",
+      "path": [
+        "entered_at"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy missing deadline",
+      "base": "occupancy",
+      "path": [
+        "deadline"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy missing job_id",
+      "base": "occupancy",
+      "path": [
+        "job_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "occupancy extra field",
+      "base": "occupancy",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "job valid",
+      "base": "job",
+      "valid": true
+    },
+    {
+      "name": "job missing job",
+      "base": "job",
+      "path": [
+        "job"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job missing due_time",
+      "base": "job",
+      "path": [
+        "due_time"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job missing status",
+      "base": "job",
+      "path": [
+        "status"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job missing actor_id",
+      "base": "job",
+      "path": [
+        "actor_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job missing water_generation",
+      "base": "job",
+      "path": [
+        "water_generation"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job missing water_body_id",
+      "base": "job",
+      "path": [
+        "water_body_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "job extra field",
+      "base": "job",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "projection valid",
+      "base": "projection",
+      "valid": true
+    },
+    {
+      "name": "projection missing deadline",
+      "base": "projection",
+      "path": [
+        "deadline"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "projection missing remaining",
+      "base": "projection",
+      "path": [
+        "remaining"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "projection extra field",
+      "base": "projection",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "recovery valid",
+      "base": "recovery",
+      "valid": true
+    },
+    {
+      "name": "recovery missing corpse_id",
+      "base": "recovery",
+      "path": [
+        "corpse_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovery missing room_id",
+      "base": "recovery",
+      "path": [
+        "room_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovery missing room_title",
+      "base": "recovery",
+      "path": [
+        "room_title"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovery missing roots",
+      "base": "recovery",
+      "path": [
+        "roots"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovery extra field",
+      "base": "recovery",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "transition valid",
+      "base": "transition",
+      "valid": true
+    },
+    {
+      "name": "transition missing op",
+      "base": "transition",
+      "path": [
+        "op"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "transition missing writer_group",
+      "base": "transition",
+      "path": [
+        "writer_group"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "transition missing actor_id",
+      "base": "transition",
+      "path": [
+        "actor_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "transition missing expected",
+      "base": "transition",
+      "path": [
+        "expected"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "transition missing value",
+      "base": "transition",
+      "path": [
+        "value"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "transition extra field",
+      "base": "transition",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "command valid",
+      "base": "command",
+      "valid": true
+    },
+    {
+      "name": "command missing type",
+      "base": "command",
+      "path": [
+        "type"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "command missing actor_id",
+      "base": "command",
+      "path": [
+        "actor_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "command missing corpse_id",
+      "base": "command",
+      "path": [
+        "corpse_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "command extra field",
+      "base": "command",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "cause valid",
+      "base": "cause",
+      "valid": true
+    },
+    {
+      "name": "cause missing type",
+      "base": "cause",
+      "path": [
+        "type"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause missing victim_id",
+      "base": "cause",
+      "path": [
+        "victim_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause missing room_id",
+      "base": "cause",
+      "path": [
+        "room_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause missing killer_id",
+      "base": "cause",
+      "path": [
+        "killer_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause missing credited_character_id",
+      "base": "cause",
+      "path": [
+        "credited_character_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause missing corpse_id",
+      "base": "cause",
+      "path": [
+        "corpse_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "cause extra field",
+      "base": "cause",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "settings invalid duration 0",
+      "base": "settings",
+      "path": [
+        "duration"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "settings invalid duration 9007199254740992",
+      "base": "settings",
+      "path": [
+        "duration"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "settings invalid maximum_grams -1",
+      "base": "settings",
+      "path": [
+        "maximum_grams"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "settings invalid maximum_grams 2147483648",
+      "base": "settings",
+      "path": [
+        "maximum_grams"
+      ],
+      "value": 2147483648,
+      "valid": false
+    },
+    {
+      "name": "settings invalid entry_cost -1",
+      "base": "settings",
+      "path": [
+        "entry_cost"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "settings invalid entry_cost 2147483648",
+      "base": "settings",
+      "path": [
+        "entry_cost"
+      ],
+      "value": 2147483648,
+      "valid": false
+    },
+    {
+      "name": "settings invalid routes []",
+      "base": "settings",
+      "path": [
+        "routes"
+      ],
+      "value": [],
+      "valid": false
+    },
+    {
+      "name": "settings invalid routes [{'surface': {'cartridge_",
+      "base": "settings",
+      "path": [
+        "routes"
+      ],
+      "value": [
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        },
+        {
+          "surface": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shaft"
+          },
+          "bottom": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          }
+        }
+      ],
+      "valid": false
+    },
+    {
+      "name": "settings invalid routes.0.surface None",
+      "base": "settings",
+      "path": [
+        "routes",
+        0,
+        "surface"
+      ],
+      "value": null,
+      "valid": false
+    },
+    {
+      "name": "settings invalid routes.0.bottom None",
+      "base": "settings",
+      "path": [
+        "routes",
+        0,
+        "bottom"
+      ],
+      "value": null,
+      "valid": false
+    },
+    {
+      "name": "occupancy invalid generation 0",
+      "base": "occupancy",
+      "path": [
+        "generation"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "occupancy invalid generation 9007199254740992",
+      "base": "occupancy",
+      "path": [
+        "generation"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "occupancy invalid deadline -1",
+      "base": "occupancy",
+      "path": [
+        "deadline"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "occupancy invalid body_id forged",
+      "base": "occupancy",
+      "path": [
+        "body_id"
+      ],
+      "value": "forged",
+      "valid": false
+    },
+    {
+      "name": "job invalid water_generation 0",
+      "base": "job",
+      "path": [
+        "water_generation"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "job invalid water_generation 9007199254740992",
+      "base": "job",
+      "path": [
+        "water_generation"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "job invalid status renewed",
+      "base": "job",
+      "path": [
+        "status"
+      ],
+      "value": "renewed",
+      "valid": false
+    },
+    {
+      "name": "projection invalid remaining -1",
+      "base": "projection",
+      "path": [
+        "remaining"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "recovery invalid roots []",
+      "base": "recovery",
+      "path": [
+        "roots"
+      ],
+      "value": [],
+      "valid": false
+    },
+    {
+      "name": "recovery invalid roots.0.id forged",
+      "base": "recovery",
+      "path": [
+        "roots",
+        0,
+        "id"
+      ],
+      "value": "forged",
+      "valid": false
+    },
+    {
+      "name": "recovery invalid roots.0.name None",
+      "base": "recovery",
+      "path": [
+        "roots",
+        0,
+        "name"
+      ],
+      "value": null,
+      "valid": false
+    },
+    {
+      "name": "cause invalid cause combat",
+      "base": "cause",
+      "path": [
+        "cause"
+      ],
+      "value": "combat",
+      "valid": false
+    },
+    {
+      "name": "route missing surface",
+      "base": "settings",
+      "path": [
+        "routes",
+        0,
+        "surface"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "route missing bottom",
+      "base": "settings",
+      "path": [
+        "routes",
+        0,
+        "bottom"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovered root missing id",
+      "base": "recovery",
+      "path": [
+        "roots",
+        0,
+        "id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "recovered root missing name",
+      "base": "recovery",
+      "path": [
+        "roots",
+        0,
+        "name"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "schedule valid",
+      "base": "schedule",
+      "valid": true
+    },
+    {
+      "name": "schedule invalid generation 0",
+      "base": "schedule",
+      "path": [
+        "water_generation"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "schedule invalid generation 9007199254740992",
+      "base": "schedule",
+      "path": [
+        "water_generation"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "cancel valid",
+      "base": "cancel",
+      "valid": true
+    },
+    {
+      "name": "cancel invalid generation 0",
+      "base": "cancel",
+      "path": [
+        "water_generation"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "cancel invalid generation 9007199254740992",
+      "base": "cancel",
+      "path": [
+        "water_generation"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "schedule malformed body",
+      "base": "schedule",
+      "path": [
+        "water_body_id"
+      ],
+      "value": "forged",
+      "valid": false
+    },
+    {
+      "name": "route rejects unknown fields",
+      "base": "settings",
+      "path": [
+        "routes",
+        0,
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "recovered root rejects unknown fields",
+      "base": "recovery",
+      "path": [
+        "roots",
+        0,
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "projection requires confirmed real seconds",
+      "base": "projection",
+      "path": [
+        "remaining_seconds"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "projection refuses negative real seconds",
+      "base": "projection",
+      "path": [
+        "remaining_seconds"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "water target valid",
+      "base": "target",
+      "valid": true
+    },
+    {
+      "name": "water target missing kind",
+      "base": "target",
+      "path": [
+        "kind"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "water target missing actor",
+      "base": "target",
+      "path": [
+        "actor_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "water target rejects extra",
+      "base": "target",
+      "path": [
+        "extra"
+      ],
+      "value": 1,
+      "valid": false
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 // Independent creation/initial-custody proof, without compose's creation guard or result oracle.
 import { validate } from '../foundation/validate.ts';
 import { key, same } from '../foundation/compose.ts';
+import { sightSlot } from './invariants_sight.ts';
 
 // Decoded portable observations, as in invariants.ts.
 type Any = any;
@@ -117,142 +118,6 @@ function peltsMatch(pelts: Any[], hounds: Any[]) {
   );
 }
 
-function sightSlot(state: Any, ops: Any[], s: Any) {
-  const prior = s.expected,
-    id = s.value.member_id;
-  if (
-    !prior ||
-    !id ||
-    prior.member_id !== id ||
-    prior.generation !== s.value.generation ||
-    s.value.replacement_due !== null ||
-    s.value.last_flight_at !== prior.last_flight_at ||
-    s.value.sight_job_id === prior.sight_job_id
-  )
-    return false;
-  const scheduled = ops.find(
-    (op) =>
-      op.op === 'job.schedule' &&
-      op.writer_group === s.writer_group &&
-      op.job_id === s.value.sight_job_id,
-  );
-  const completed = ops.find(
-    (op) =>
-      op.op === 'job.complete' &&
-      op.writer_group === s.writer_group &&
-      op.job_id === prior.sight_job_id,
-  );
-  if (scheduled) {
-    const sight = scheduled.sight;
-    const plan = state.population_specs?.[key(s.plan)]?.plan;
-    const entered = ops.some(
-      (op) =>
-        op.op === 'entity.transfer' &&
-        op.writer_group === s.writer_group &&
-        op.source_id === sight?.source_id &&
-        op.destination_id === sight?.destination_id &&
-        (op.entity_id === id || state.known_entities?.[op.entity_id]?.kind === 'body'),
-    );
-    return (
-      !!plan?.sight &&
-      !!sight &&
-      same(scheduled.job, s.plan) &&
-      sight.member_id === id &&
-      sight.slot === s.slot &&
-      sight.generation === s.value.generation &&
-      (prior.sight_job_id == null ||
-        ops.some(
-          (op) =>
-            op.op === 'job.cancel' &&
-            op.writer_group === s.writer_group &&
-            op.job_id === prior.sight_job_id &&
-            op.sight_member_id === id,
-        )) &&
-      entered
-    );
-  }
-  return (
-    s.value.sight_job_id == null && completed && state.jobs?.[completed.job_id]?.sight !== undefined
-  );
-}
-
-function flightSlot(state: Any, ops: Any[], s: Any) {
-  const id = s.value.member_id;
-  const origin = state.created?.[id]?.origin;
-  const round = ops.find(
-    (op) =>
-      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
-      op.writer_group === s.writer_group &&
-      op.expected?.active_ids?.includes(id) &&
-      selectedFlight(state, op.expected, id) &&
-      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
-  );
-  const sight = s.expected?.sight_job_id && state.jobs?.[s.expected.sight_job_id];
-  const deerFlight =
-    origin?.role === 'deer' &&
-    sight?.sight &&
-    ops.some(
-      (op) =>
-        op.op === 'job.complete' &&
-        op.writer_group === s.writer_group &&
-        op.job_id === s.expected.sight_job_id,
-    );
-  const due = deerFlight ? sight.due_time : round && state.jobs?.[round.job_id]?.due_time;
-  return (
-    id &&
-    s.expected?.member_id === id &&
-    s.expected.generation === s.value.generation &&
-    s.expected.replacement_due === null &&
-    s.value.replacement_due === null &&
-    Number.isSafeInteger(due) &&
-    s.value.last_flight_at === due &&
-    s.expected.last_flight_at !== due &&
-    origin?.kind === 'spawned' &&
-    ['hound', 'deer'].includes(origin.role) &&
-    origin.member_id === id &&
-    same(origin.by, s.plan) &&
-    origin.slot === s.slot &&
-    origin.generation === s.value.generation &&
-    (origin.role === 'deer'
-      ? state.population_specs?.[key(s.plan)]?.plan?.sight && s.value.sight_job_id == null
-      : state.population_specs?.[key(s.plan)]?.plan?.pack) &&
-    ops.filter(
-      (op) =>
-        op.op === 'entity.transfer' &&
-        op.writer_group === s.writer_group &&
-        op.entity_id === id &&
-        op.source_id === state.containers?.[id] &&
-        op.destination_id !== op.source_id,
-    ).length === 1
-  );
-}
-
-function selectedFlight(state: Any, row: Any, id: string) {
-  const present = row.active_ids.filter((member: string) => {
-    const origin = state.created?.[member]?.origin;
-    const slot =
-      origin &&
-      state.population_slots?.[
-        key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })
-      ];
-    return (
-      state.containers?.[member] === row.room_id &&
-      origin?.kind === 'spawned' &&
-      origin.role === 'hound' &&
-      origin.member_id === member &&
-      slot?.member_id === member &&
-      slot.generation === origin.generation &&
-      slot.replacement_due === null
-    );
-  });
-  const cursor = row.next_opponent_id;
-  return (
-    (present.includes(cursor)
-      ? cursor
-      : (present.find((member: string) => member > cursor) ?? present[0])) === id
-  );
-}
-
 function initialized(
   state: Any,
   ops: Any[],
@@ -334,5 +199,87 @@ function rowsMatch(result: Any, i: Any): boolean {
       (c: Any) => c.target.kind === 'entity' && c.target.entity_id === i.id && same(c.value, i),
     ) &&
     result.changes.some((c: Any) => c.target.kind === 'containment' && c.target.entity_id === i.id)
+  );
+}
+
+function flightSlot(state: Any, ops: Any[], s: Any) {
+  const id = s.value.member_id;
+  const origin = state.created?.[id]?.origin;
+  const due = flightTime(state, ops, s, id);
+  return (
+    id &&
+    s.expected?.member_id === id &&
+    s.expected.generation === s.value.generation &&
+    s.expected.replacement_due === null &&
+    s.value.replacement_due === null &&
+    Number.isSafeInteger(due) &&
+    s.value.last_flight_at === due &&
+    s.expected.last_flight_at !== due &&
+    origin?.kind === 'spawned' &&
+    ['hound', 'deer'].includes(origin.role) &&
+    origin.member_id === id &&
+    same(origin.by, s.plan) &&
+    origin.slot === s.slot &&
+    origin.generation === s.value.generation &&
+    (origin.role === 'deer'
+      ? state.population_specs?.[key(s.plan)]?.plan?.sight && s.value.sight_job_id == null
+      : state.population_specs?.[key(s.plan)]?.plan?.pack) &&
+    ops.filter(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.entity_id === id &&
+        op.source_id === state.containers?.[id] &&
+        op.destination_id !== op.source_id,
+    ).length === 1
+  );
+}
+
+function flightTime(state: Any, ops: Any[], s: Any, id: string) {
+  const origin = state.created?.[id]?.origin;
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === s.writer_group &&
+      op.expected?.active_ids?.includes(id) &&
+      selectedFlight(state, op.expected, id) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
+  );
+  const sight = s.expected?.sight_job_id && state.jobs?.[s.expected.sight_job_id];
+  const deerFlight =
+    origin?.role === 'deer' &&
+    sight?.sight &&
+    ops.some(
+      (op) =>
+        op.op === 'job.complete' &&
+        op.writer_group === s.writer_group &&
+        op.job_id === s.expected.sight_job_id,
+    );
+  return deerFlight ? sight.due_time : round && state.jobs?.[round.job_id]?.due_time;
+}
+
+function selectedFlight(state: Any, row: Any, id: string) {
+  const present = row.active_ids.filter((member: string) => {
+    const origin = state.created?.[member]?.origin;
+    const slot =
+      origin &&
+      state.population_slots?.[
+        key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })
+      ];
+    return (
+      state.containers?.[member] === row.room_id &&
+      origin?.kind === 'spawned' &&
+      origin.role === 'hound' &&
+      origin.member_id === member &&
+      slot?.member_id === member &&
+      slot.generation === origin.generation &&
+      slot.replacement_due === null
+    );
+  });
+  const cursor = row.next_opponent_id;
+  return (
+    (present.includes(cursor)
+      ? cursor
+      : (present.find((member: string) => member > cursor) ?? present[0])) === id
   );
 }

@@ -1,5 +1,4 @@
 import { dark, illuminated } from '../light/shared.ts';
-import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
@@ -9,13 +8,11 @@ import { living } from '../death/shared.ts';
 // declares the mv pool (resource@1; 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot
 // pay is insufficient_resource ("You are too exhausted."). Accepted: that resource.adjust (none
 // without a cost), one entity.transfer of the actor's body and entity_entered_room; no resource
-// event. ponytail: one cost per world; per-exit and terrain costs (the average of the two rooms'
-// terrain, 00 §4.1) join in chapter three (00 §11). scan (00 §4.1) is accepted
+// event. D6's exact authored water edges share movementPlan for entry debit/free Surface.
+// Other exits retain the ordinary world fare. scan (00 §4.1) is accepted
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
-  bodyOf,
-  rejected,
   COMPASS,
   has,
   keys,
@@ -34,9 +31,7 @@ export { passage, fare } from './shared.ts';
 export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 }) =>
   command.payload.type === 'scan'
     ? accepted(world, 'scanned', [], [])
-    : engaged(world, bodyOf(world, command.payload.actor_id)!)
-      ? rejected('invalid_state')
-      : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved', steps);
+    : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved', steps);
 
 /**
  * What `body` sees through each exit of its room, in compass order (00 §4.1 scan): the passage

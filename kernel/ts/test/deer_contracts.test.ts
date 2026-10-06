@@ -25,7 +25,7 @@ const schedule = {
   job_id: id,
   job: {
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.32',
+    cartridge_version: '0.0.36',
     kind: 'population',
     key: 'willow_deer',
   },

@@ -110,3 +110,16 @@ Stop before source for missing fresh scoped adoption approval/publication,
 absent typed state/cause/custody contract, unsafe return,
 frozen-fixture conflict, incompatible latest published dependencies or broader
 framework/scope. Split at a complete safe player outcome, never bottom placeholders.
+
+## Provisional source handoff
+
+[Focused source/evidence](../../evidence/2026-10-06-d6-water-provisional/README.md)
+records the isolated developer candidate. It does not close publication, independent
+review, predecessor re-pin or final browser proof; successor API/release/hash/IDs remain null.
+
+[Published-main carryover evidence](../../evidence/2026-10-06-d6-main-carry/README.md)
+records the local reconciliation with D4/C4 and its focused checks. D3, successor pins,
+browser proof and the final gate remain pending.
+
+[Final local integration evidence](../../evidence/2026-10-06-d6-water-final/README.md)
+records v035 proof, the full local gate, browser Book paths and red controls.

@@ -1,0 +1,2 @@
+COMMAND: mix loka.compile cartridges/ashmere_missing_child [scratch-path]
+EXIT: 0

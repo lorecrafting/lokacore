@@ -150,6 +150,32 @@
             },
             "title": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "careful": {
+              "type": "object",
+              "properties": {
+                "skill": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 64
+                },
+                "action": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "narration": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "skill",
+                "count",
+                "action",
+                "narration"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [

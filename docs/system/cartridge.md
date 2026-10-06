@@ -967,8 +967,8 @@ Herb Garden and Isle Shrine. Ferry Landing west/east connects to Boathouse;
 Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
 Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
 Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
-transport endpoints, never as a free compass exit. Do not expose the future
-Boathouse–Old Mill edge. Isle Shrine is descriptive sanctuary/foreshadow;
+transport endpoints, never as a free compass exit. The Boathouse–Old Mill edge
+is opened by [D3](#d3-western-ashmere-declarations). Isle Shrine is descriptive sanctuary/foreshadow;
 `chapel_nave` remains the actual death shrine.
 
 The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
@@ -1214,6 +1214,35 @@ D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
 current location. Release/hash/IDs advance independently when source exists;
 this plan assigns no successor pin or API increment.
 
+## D3 Western Ashmere declarations
+
+Selected under the [approved D3 brief](../briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
+with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
+as the content basis. Boathouse south/north connects to Old Mill while retaining
+its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
+connects to Empty Cottage, up/down to Mill Loft and down/up to Mill Cellar;
+Empty Cottage up/down connects to Cottage Loft. No exit names an unbuilt place.
+
+Mill Loft and Mill Cellar declare ordinary and dark descriptions and consume
+[B4 perception and owned-corpse recovery](mechanics.md#b4-light-and-darkness-selected-contract).
+Rat holes are descriptive: the five original Lantern Cellar rats remain the
+only S1 rats. Owl, loose board and ghost traces are flavor/foreshadow, without
+an enemy, hidden route or chapter-two quest. The cottage sign offers no property
+purchase. The ledger and sign are standalone readable details with noun titles,
+confirmed bodies and no topic, quest, fact, money or loot write.
+
+Original Hob uses ordinary daily scheduling: Old Mill 06:00–18:00, Mill Loft
+18:00–06:00. At the chapter's 64800 launch clock he starts in Mill Loft;
+his first job is due at 108000, followed by 151200. Both destinations exist.
+Flavor dialogue grants nothing and gates no required story action; darkness
+and scheduled departure retain existing admission. Movement, readable details,
+light perception and schedule jobs keep their existing state writers. No new
+command, capability or save shape is selected.
+
+The [final D3 integration proof](../evidence/2026-10-06-d3-final-integration/README.md)
+records the independently pinned successor and checks; the
+[provisional proof](../evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
+
 ## D6 bottom rooms and water tuning (selected, pending implementation)
 
 **PM-selected contract; selected-docs review approved, implementation pending.** Reciprocal exits:
@@ -1274,3 +1303,11 @@ D12 implementation head, final predecessor re-pin, successor release/API/hash/al
 The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
 
 Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
+
+## C5 bleed and bandage declarations
+
+**Selected planning values, not installed source.** [C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1}` and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
+
+Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
+
+Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.

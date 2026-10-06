@@ -8,6 +8,7 @@ import { compose } from '../src/foundation/compose.ts';
 import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
 import { content, fresh, ref } from './deer_fixture.ts';
+import { read } from './read.ts';
 
 const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 const missSeed = [2710938419, 1329376837, 2657997399, 1914447725] as const;
@@ -62,6 +63,23 @@ function advance(w: World, until: number): World {
 function slot(w: World, member: string) {
   return Object.values(w.state.population_slots ?? {}).find((s) => s.member_id === member)!;
 }
+
+// Breaks: a new plan shifts genesis allocation or mints a second member or hide.
+test('independent v036 genesis IDs include all three deer pairs and control jobs', () => {
+  const w = fresh();
+  const expected = read('protocol/fixtures/missing_child_v036_ids.json');
+  for (const name of ['oak_deer', 'orchard_deer', 'willow_deer']) {
+    for (const role of ['deer', 'hide']) {
+      const id = Object.entries(w.state.created ?? {}).find(
+        ([, row]) =>
+          row.origin.kind === 'spawned' && row.origin.by.key === name && row.origin.role === role,
+      )?.[0];
+      assert.equal(id, expected[`population/${name}/slot1/${role}`], `${name}/${role}`);
+    }
+    const job = Object.entries(w.state.jobs ?? {}).find(([, row]) => row.job.key === name)?.[0];
+    assert.equal(job, expected[`population/${name}/job`], `${name}/job`);
+  }
+});
 
 // Breaks: a deer birth reuses hound provenance, duplicates a hide, or exceeds its one-slot plan.
 test('three independent fresh deer each hold one typed hide at their authored home', () => {

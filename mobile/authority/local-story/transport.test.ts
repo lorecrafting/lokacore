@@ -1,3 +1,4 @@
+// size: allow 529, original ferry custody, death recovery and SQLite faults share one transport fixture
 // D1 uses the real rollback-journal SQLite host, not browser refresh as a fault oracle.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -117,7 +118,7 @@ const truth = (a: ReturnType<typeof setup>) => ({
 });
 function lesson(a: ReturnType<typeof setup>) {
   a.invoke('move', { direction: 'east' });
-  a.invoke('talk', {}, [entity(a.initial, 'npc', 'sedge')]);
+  a.invoke('sedge_swim', {}, [entity(a.initial, 'npc', 'sedge')]);
   return a.attempt('choose', {
     continuation_id: gameView(a.story.world()).choice!.continuation_id,
     choice_id: 'learn',
@@ -416,6 +417,8 @@ function dieOnIsle(a: ReturnType<typeof setup>) {
     )![0];
   assert.equal(w.state.containers[w.body], room(w, 'chapel_nave'));
   assert.equal(w.state.containers[corpse], room(w, 'hut_loft'));
+  // D6 must leave this actual nonempty isle corpse to the fare-waived physical trip.
+  assert.equal(gameView(w).corpse_recovery, undefined);
   assert.equal(w.state.containers[bag], corpse);
   assert.equal(w.state.containers[torch], bag);
   assert.equal(w.state.fuel![torch].lit, true);
@@ -463,6 +466,8 @@ test('actual Chapel death return reaches the dark-loft corpse without gear and r
   assert.equal(w.state.containers[torch], w.body);
   assert.equal(w.state.containers[bag], w.body);
   assert.equal(w.state.containers[corpse], room(w, 'hut_loft'));
+  // D6 must leave this actual nonempty isle corpse to the fare-waived physical trip.
+  assert.equal(gameView(w).corpse_recovery, undefined);
   assert.deepEqual(pennies(w), [0, 2]);
   a.invoke('move', { direction: 'down' });
   a.invoke('move', { direction: 'west' });

@@ -1,0 +1,13 @@
+✔ encounter and bound job composition matches portable literal rows (6.523334ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.255666ms)
+✔ independent replay verifies every written lifecycle row (0.496084ms)
+✔ cancelling a future job frees one slot in a full queue (4.110584ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (2.651792ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 166.4635

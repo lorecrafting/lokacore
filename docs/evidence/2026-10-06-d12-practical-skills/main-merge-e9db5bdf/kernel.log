@@ -1,0 +1,41 @@
+$ mise exec -- node --test --test-reporter=spec kernel/ts/test/practical_skills.test.ts kernel/ts/test/practical_skills_contracts.test.ts kernel/ts/test/commerce.test.ts kernel/ts/test/c4_pack.test.ts kernel/ts/test/c4_pack_flight.test.ts kernel/ts/test/c4_pack_composition.test.ts kernel/ts/test/c4_schema_contracts.test.ts
+✔ night admission visits each of six fixed slots once (126.71475ms)
+✔ attack H2 admits both exact co-present hounds with H2 as primary (51.049708ms)
+✔ admission omits an already engaged helper while retaining the free target (7.653541ms)
+✔ one pack round rotates the cursor and keeps one current job (14.737708ms)
+✔ two healthy rounds use the selected helper for its actual attack (28.307291ms)
+✔ due pruning repairs a departed primary before the player opportunity (52.448125ms)
+✔ an empty due roster closes once and narrates pack withdrawal (6.1205ms)
+✔ player Flee closes the whole roster and cancels its sole future round (22.655375ms)
+✔ player-first selected death skips retaliation and repairs to the surviving helper (90.864083ms)
+✔ even-round player death closes every pack member before shrine return (52.167416ms)
+✔ literal exact pack admission and refusals agree with both independent guards (7.772292ms)
+✔ a legal transfer and stamp remain composable before their round exit is appended (0.184375ms)
+✔ strictly wounded selected hound flies with its pelt before either attack (144.961542ms)
+✔ HP2 of maximum8 remains and attacks at the strict 25 percent boundary (43.871833ms)
+✔ a player-first hit can wound the selected hound into flight before its turn (18.06625ms)
+✔ even-round helper flight still gives the player one attack on the healthy primary (7.649916ms)
+✔ no legal area exit keeps the wounded hound in combat (28.067583ms)
+✔ both real same-deadline job orders leave the fled hound and pelt at its destination (46.262ms)
+✔ C4 pack bounds and required fields reject invalid declarations (4.839334ms)
+✔ C4 encounter roster caps reject 65 members (0.981291ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.523916ms)
+✔ C4 population flight clock rejects negative time (0.142292ms)
+✔ buy at the carrying ceiling, sell and buyback conserve forty pennies and one identity (50.917875ms)
+✔ projection and direct exchange refuse too-heavy, poor, absent and changed-quote purchases atomically (4.396ms)
+✔ sell requires direct eligible custody and funded Peg (1.221667ms)
+✔ loader independently rejects malformed shop stock and funding (352.820459ms)
+✔ loaded careful alias resolves literal input and transfers the two lowest finite IDs (564.087709ms)
+✔ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (529.712792ms)
+✔ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (322.883167ms)
+✔ method is literal and optional declarations enforce every new field and numeric boundary (3328.5635ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4229.579708
+
+exit_status=0

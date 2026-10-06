@@ -17,6 +17,7 @@ const INPUTS: readonly string[] = [
   'scene',
   'line',
   'quoted_price',
+  'method',
   'service',
   'route',
   'quoted_fare',
@@ -39,12 +40,7 @@ export function accepts(
   if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
   if (payload.type === 'talk' && payload.dialogue && !same(a.dialogue, payload.dialogue))
     return false;
-  const bound =
-    payload.type === 'use_service'
-      ? world.cartridge.services?.[refString(payload.service)]?.action
-      : payload.type === 'use_transport'
-        ? world.cartridge.transports?.[refString(payload.route)]?.action
-        : a.key;
+  const bound = boundAction(world, payload, a.key);
   if (bound !== a.key) return false;
   if (a.engine) return true;
   const id = primaryTarget(payload);
@@ -66,6 +62,16 @@ export function accepts(
     room_occupants: kind === 'npc' && at === world.state.containers[body!],
   };
   return a.target.scopes.some((s) => scope[s]);
+}
+
+function boundAction(world: World, payload: CommandPayload, fallback: string) {
+  return payload.type === 'use_service'
+    ? world.cartridge.services?.[refString(payload.service)]?.action
+    : payload.type === 'use_transport'
+      ? world.cartridge.transports?.[refString(payload.route)]?.action
+      : payload.type === 'harvest' && payload.method
+        ? world.details[payload.target_id]?.harvest?.careful?.action
+        : fallback;
 }
 
 function inventory(

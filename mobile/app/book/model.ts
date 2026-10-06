@@ -8,7 +8,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { serviceButtons, shopButtons, transportButtons } from './offers.ts';
+import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
@@ -209,14 +209,14 @@ function travel(v: GameView): Press[] {
     : v.exits
         .filter((e) => e.available)
         .map((e) => ({
-          label: `Go ${e.direction}`,
+          label: v.water && e.direction === 'up' ? 'Surface (free)' : `Go ${e.direction}`,
           action_key: 'move',
           target_ids: [],
           input: { direction: e.direction },
         }));
 }
 
-// size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
+// size: allow 60, D6 corpse and D12 notice offers join the existing button conversion
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
     a: { action_key: string; label: string; target_ids?: readonly string[]; command?: string },
@@ -259,15 +259,14 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...button(a, ''),
     ...(a.target.kind === 'entity' && { place: true as const }),
   }));
-  if (v.scene) {
-    const next = v.actions.find((a) => a.action_key === 'continue' && a.available);
-    if (next)
-      placed.push({ ...button(next, ''), input: { scene: v.scene.scene, line: v.scene.index } });
-  }
-  const notices = noticeButtons(v, button, names, text);
+  const scene = v.scene;
+  const next = scene && v.actions.find((a) => a.action_key === 'continue' && a.available);
+  if (scene && next)
+    placed.push({ ...button(next, ''), input: { scene: scene.scene, line: scene.index } });
   return [
     ...placed,
-    ...notices,
+    ...corpseButtons(v, text),
+    ...noticeButtons(v, button, names, text),
     ...travel(v),
     ...doors,
     ...held,
@@ -288,10 +287,15 @@ function noticeButtons(
   return [...(v.notices ?? []), ...(v.notice_boards ?? []).flatMap((b) => b.notices)].flatMap((n) =>
     (n.actions ?? [])
       .filter(
-        (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
+        (a) =>
+          a.available &&
+          (!a.input.length ||
+            (a.command === 'harvest' && a.input.length === 1 && a.input[0] === 'method')) &&
+          (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
         ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
+        ...(a.input.includes('method') && { input: { method: 'careful' } }),
         detail_id: n.id,
       })),
   );

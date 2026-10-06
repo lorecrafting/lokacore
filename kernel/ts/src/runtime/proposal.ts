@@ -1,10 +1,8 @@
 // size: allow 315, typed quest reactions join the existing FIFO admission/causation path
-// The proposal of one admitted decision (04 §5.1-§5.4): admission of a rule's result, its whole
-// proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
-// order), composition and adoption. runtime/world.ts routes each command here.
+// Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
-import { counts, over, same, target, type Limit } from '../foundation/compose.ts';
+import { counts, over, target, type Limit } from '../foundation/compose.ts';
 import {
   CAPABILITY_OWNERS,
   type CommandId,
@@ -24,6 +22,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
+import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -283,120 +282,15 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const handoff = sightHandoff(p, at, job_id as JobId, due_time, ran.delta.ops);
+    const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     const own = ran.delta.ops.map((o) => ({
       ...o,
-      writer_group:
-        handoff &&
-        ((o.op === 'encounter.close' &&
-          o.encounter_id === handoff.encounter_id &&
-          o.job_id === handoff.successor_id) ||
-          (o.op === 'job.cancel' &&
-            o.job_id === handoff.successor_id &&
-            o.encounter_id === handoff.encounter_id))
-          ? handoff.group
-          : p.group + 1,
+      writer_group: handoffGroup(o, handoff, p.group + 1),
     }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
-}
-
-// The capability owning a command or event type; own keys only, so `constructor` names none.
-/** The only permitted reuse of a preceding due job's writer group. */
-function sightHandoff(p: P, at: World, sight_id: JobId, due_time: number, ops: readonly DeltaOp[]) {
-  const sight = at.state.jobs?.[sight_id]?.sight;
-  if (!sight) return;
-  const flight = ops.find(
-    (o): o is Extract<DeltaOp, { op: 'entity.transfer' }> =>
-      o.op === 'entity.transfer' && o.entity_id === sight.member_id,
-  );
-  const close = ops.find((o) => o.op === 'encounter.close');
-  const cancel = ops.find((o) => o.op === 'job.cancel' && o.encounter_id === close?.encounter_id);
-  if (
-    !flight ||
-    close?.op !== 'encounter.close' ||
-    cancel?.op !== 'job.cancel' ||
-    close.job_id !== cancel.job_id ||
-    sight.player_id !== at.character ||
-    at.state.containers[at.body] !== flight.source_id ||
-    at.state.containers[sight.member_id] !== flight.source_id
-  )
-    return;
-  const row = at.state.encounters?.[close.encounter_id];
-  if (
-    !row ||
-    row.status !== 'open' ||
-    row.npc_id !== sight.member_id ||
-    row.job_id !== close.job_id
-  )
-    return;
-  const binding =
-    at.state.population_slots?.[
-      encode({
-        kind: 'population_slot',
-        plan: at.state.jobs![sight_id]!.job,
-        slot: sight.slot,
-      } as never)
-    ];
-  if (
-    !binding ||
-    binding.member_id !== sight.member_id ||
-    binding.generation !== sight.generation ||
-    binding.sight_job_id !== sight_id ||
-    binding.replacement_due !== null
-  )
-    return;
-  const advanceAt = p.ops.findIndex(
-    (o) =>
-      o.op === 'encounter.advance' &&
-      o.encounter_id === close.encounter_id &&
-      o.next_job_id === close.job_id,
-  );
-  if (advanceAt < 0) return;
-  const advance = p.ops[advanceAt];
-  if (advance.op !== 'encounter.advance') return;
-  const old = p.world.state.jobs?.[advance.job_id];
-  const successor = at.state.jobs?.[close.job_id];
-  if (
-    !old ||
-    old.due_time !== due_time ||
-    old.encounter_id !== close.encounter_id ||
-    !successor ||
-    successor.status !== 'pending' ||
-    successor.encounter_id !== close.encounter_id ||
-    !same(successor.job, old.job) ||
-    !p.ops.some(
-      (o) =>
-        o.op === 'job.complete' &&
-        o.writer_group === advance.writer_group &&
-        o.job_id === advance.job_id,
-    ) ||
-    !p.ops.some(
-      (o) =>
-        o.op === 'job.schedule' &&
-        o.writer_group === advance.writer_group &&
-        o.job_id === close.job_id &&
-        o.encounter_id === close.encounter_id,
-    ) ||
-    p.ops
-      .slice(advanceAt + 1)
-      .some(
-        (o) =>
-          o.writer_group !== advance.writer_group &&
-          ((o.op.startsWith('encounter.') &&
-            'encounter_id' in o &&
-            o.encounter_id === close.encounter_id) ||
-            ('job_id' in o && o.job_id === close.job_id)),
-      )
-  )
-    return;
-  return {
-    group: advance.writer_group,
-    encounter_id: close.encounter_id,
-    successor_id: close.job_id,
-  };
 }
 
 export const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>

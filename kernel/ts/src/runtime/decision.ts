@@ -42,6 +42,7 @@ import {
   type StateScope,
   type Text,
   type WorldContextId,
+  type WaterOccupancy,
 } from '../contracts.gen.ts';
 import { key, type Stored } from '../foundation/compose.ts';
 import { id } from '../foundation/id_source.ts';
@@ -50,6 +51,7 @@ import type { RngState } from '../foundation/rng.ts';
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
 export type State = {
+  readonly water?: Readonly<Record<string, WaterOccupancy>>;
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
@@ -89,6 +91,8 @@ export type ChoiceRow = {
 
 /** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
 export type JobRow = {
+  readonly water_generation?: number;
+  readonly water_body_id?: EntityId;
   readonly job: DefinitionRef;
   readonly due_time: number;
   readonly status: 'pending' | 'completed' | 'cancelled';

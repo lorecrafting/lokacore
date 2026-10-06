@@ -213,7 +213,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
         op.op === 'resource.initialize'
       )
         continue;
-      if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
+      if (['water.', 'encounter.', 'job.'].some((p) => op.op.startsWith(p))) continue;
       const k = key(target(op));
       const [need, give] = link(op);
       if (op.op === 'resource.adjust') {

@@ -47,6 +47,9 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
   }
 }
 
+export const load = (world: World, body: EntityId, steps: Steps) =>
+  total({ world, body, steps, totals: new Map(), owned: new Map() }, body);
+
 /** One shared predicate for voluntary Take, called after existing target/reach admission. */
 export function carrying(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const setting = world.cartridge.world?.carry;

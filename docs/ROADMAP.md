@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **20 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4). The latest source publication is
-[#239](https://github.com/lorecrafting/lokacore/pull/239), C4 hound aggression, pack assistance and flight.
+Local and GitHub `main` have completed **23 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3, D12, D6). The latest source publication is
+[#247](https://github.com/lorecrafting/lokacore/pull/247), D6 underwater rooms, qualified swim, drowning deadline and Chapel recovery.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -327,32 +327,32 @@ Elspeth's Cottage, with finite Forage/Take apples and held-item Eat.
 approve, the local gate and isolated browser proof pass, and all six hosted
 checks are green on the exact reviewed head.
 
-D7 deer has a [PM-selected planning proposal](decisions/pm-decision-d7-deer-2026-10-06.md)
-and [re-pinned brief](briefs/chapter-one/d7-deer-brief-2026-10-05.md) on published
-C3/C4/D4. Three one-slot local populations replace the provisional nine-room
-corridor; delayed sight flight and typed deer/hide origin remain source work.
-The [independent plan review](reviews/2026-10-06-d7-deer-plan-review.md) found three
-source-readiness gaps; the PM selected the night window, zero-hit deer profile and
-checked population-transfer sight cause in the local fix. Reviewer recheck, D7
-release pins, source checks and PR are pending.
+D3 western Ashmere's five mill/cottage rooms, Hob and readable clues are published in
+[#243](https://github.com/lorecrafting/lokacore/pull/243) at chapter v033/API1.28.
+The [final independent review](reviews/2026-10-06-d3-western-ashmere-final-review.md),
+full local gate, isolated Book browser routes and all exact-head hosted checks passed.
 
-D3 western Ashmere has a [brief](briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md)
-and independently approved provisional source for five rooms, Hob, and readable
-mill clues. Final predecessor re-pin, accumulated gate and browser proof follow
-D4/C4 integration.
+D7 bounded deer is in final local integration after D6 publication. Its
+[reviewed provisional source](briefs/chapter-one/d7-deer-brief-2026-10-05.md)
+adds three cap-one deer, generation-bound delayed sight flight and conserved hides.
+The local successor is v036/API1.31 with independently derived hash `b0c0da219ee8d19a5d6bf0e9d6a18c138d9c5da1543c28e8b1949d5e17aebfc0` and 199 genesis IDs; exact-head reviews, checks and PR remain pending.
 
-D6 has a [selected D1-base PM contract](decisions/pm-decision-d6-water-depths-2026-10-06.md)
-and [amended brief](briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
-Published D1 v030/API1.26 is re-pinned, and the corrected selected contract
-passed [fresh scoped review](reviews/2026-10-06-d6-water-depths-selected-review.md).
-Provisional water/expiry/recovery source is compiling; focused proof, successor
-pins, source review and publication remain ahead.
+D6 underwater routes, qualified swim, the drowning deadline and owned-bottom-corpse
+Chapel recovery are published in [#247](https://github.com/lorecrafting/lokacore/pull/247)
+at chapter v035/API1.30. The [selected contract](decisions/pm-decision-d6-water-depths-2026-10-06.md),
+[final primary review](reviews/2026-10-06-d6-water-final-primary-review.md),
+[save/protocol second opinion](reviews/2026-10-06-d6-water-final-save-second-review.md),
+full local gate, bundled Book browser routes, real SQLite recovery/replay and all
+exact-head hosted checks passed. The first hosted browser attempt hit a generic
+Web SQLite save timeout; an unchanged-head rerun passed, as did the local full
+browser suite with one worker.
 
-D12 practical herbalism and haggle has a [selected contract](decisions/pm-decision-d12-practical-skills-2026-10-06.md)
-and [brief](briefs/chapter-one/d12-practical-skills-brief-2026-10-05.md) that passed
-[fresh scoped review](reviews/2026-10-06-d12-practical-skills-selected-contract-review.md).
-Provisional source passes focused kernel, SQLite and Book checks; final predecessor
-re-pin, source review, browser proof and publication remain ahead.
+D12 practical herbalism and haggle is published in
+[#245](https://github.com/lorecrafting/lokacore/pull/245) at chapter v034/API1.29.
+The [selected contract](decisions/pm-decision-d12-practical-skills-2026-10-06.md),
+[final primary review](reviews/2026-10-06-d12-final-primary-review.md),
+[save/protocol second opinion](reviews/2026-10-06-d12-final-save-review.md),
+full local gate, isolated Book lesson/benefit flows and all exact-head hosted checks passed.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

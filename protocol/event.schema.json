@@ -516,6 +516,12 @@
             },
             "victim_definition": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "cause": {
+              "type": "string",
+              "enum": [
+                "drowning"
+              ]
             }
           },
           "required": [

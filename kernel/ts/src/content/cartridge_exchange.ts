@@ -17,6 +17,7 @@ export function exchanges(c: Obj, checks: Checks): Diagnostic[] {
         ...stock(c, checks, d.harvest.items, { ...c.entry, key: r.key }, `${at}.items`),
       );
       checks.text(d.harvest, ['title', 'label', 'narration'], at);
+      out.push(...careful(c, checks, d.harvest, at));
       patches.push({ room, items: d.harvest.items });
     }
   for (const [ref, q] of Object.entries((c.quests ?? {}) as Obj))
@@ -37,6 +38,22 @@ export function exchanges(c: Obj, checks: Checks): Diagnostic[] {
         );
     }
   return out;
+}
+
+function careful(c: Obj, checks: Checks, h: Obj, at: string): Diagnostic[] {
+  if (!h.careful) return [];
+  const x = h.careful;
+  checks.named(x.skill, 'skill', `${at}.careful.skill`);
+  checks.text(x, ['narration'], `${at}.careful`);
+  const a = Object.values((c.actions ?? {}) as Obj).find((a) => a.key === x.action);
+  return !c.manifest.requires.capabilities.skills ||
+    x.count > new Set(h.items.map(refString)).size ||
+    !a ||
+    a.command !== 'harvest' ||
+    !same(a.input, ['method']) ||
+    !same(a.target, { kind: 'entity', scopes: ['inspectable_details'] })
+    ? [diag('OUTCOME_MISMATCH', `${at}.careful`)]
+    : [];
 }
 
 function api(c: Obj, at: string): Diagnostic[] {

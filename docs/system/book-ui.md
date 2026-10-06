@@ -607,8 +607,9 @@ Departure/death prunes its detail route and stale Attack revalidates presence/li
 a different generation cannot inherit the old invocation. Adjacent Scan includes
 living spawned members through ordinary movement sight. HP0 hounds are absent.
 
-Attack opens the existing Combat page, with C1 defenses and only its current
-Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
+Attack opens the existing Combat page, with C1 defenses and its current
+Stand/Flee/Look/Scan controls; [C5](#c5-bleeding-and-bandage-details) later adds
+qualified exact Bandage treatment. Committed death closes once; the room then exposes
 the real public hound corpse and its ordinary Contents/Take path. Successful Take
 returns to that corpse detail with Back to World, shows that exact pelt in Carrying,
 and adds committed pickup narration to corpse history once. Refused,
@@ -630,8 +631,8 @@ members, and their own attack results demonstrate real help. Flight names the
 departing member and real direction/destination; a primary change identifies the
 new target. Neither presenter nor elapsed redraw chooses a helper or moves one.
 
-While any opponent remains, keep Combat precedence and its current Flee/Stand/
-Look/Scan ActionSet; do not reveal Attack/Move/equipment or hide Flee behind an
+While any opponent remains, keep Combat precedence and its Flee/Stand/
+Look/Scan ActionSet, with C5's exact treatment exception; do not reveal Attack/Move/equipment or hide Flee behind an
 old NPC conversation. Flee retains current cost/standing refusal semantics.
 Final withdrawal/death/escape restores World and ordinary actions from saved
 state. Enemy flight grants no Carrying entry or corpse; only actual death exposes
@@ -801,13 +802,33 @@ text describes dry footing and natural den light, without a bottom, far Scan,
 fishing, drift or nest action that the actual projection cannot offer. The
 original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
 
+## D3 mill, cottage and Hob details
+
+The [D3 declarations](cartridge.md#d3-western-ashmere-declarations) use existing
+World exits, adjacent sight, NPC details and [standalone notice flow](#notice-board-details).
+Hob's ledger and the For-sale sign have noun headings; entry invokes the exact
+captured Read offer. Confirmed bodies belong only to their respective detail
+histories, with the existing safe Leave/Back and cold-reopen receipt recovery.
+Neither document grants a gameplay change or promises a property/ghost quest.
+
+Hob's present detail offers flavor Talk with ordinary Conversation/Leave;
+scheduled departure removes present-speaker offers, and re-entry uses the same
+NPC identity. Clock jobs continue while details are open. Unlit Mill Loft and
+Mill Cellar show authored dark text, known up/down return exits and the actor's
+actual owned corpse/accessible contents under B4; ordinary Hob and detail links
+remain hidden. No light exemption, forced-overload Take or replacement gear is
+added. Headless Book/SQLite proof is distinct from
+[browser refresh/interaction proof](../evidence/2026-10-06-d3-final-integration/README.md);
+native verification remains paused.
+
 ## D6 water exits and Chapel recovery
 
 **PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
-water projection. Deadline and logical time belong to the authority; presentation
+water projection, with remaining real seconds derived by the authority from
+the cartridge elapsed rate. Deadline and logical time belong to the authority; presentation
 must not renew time or create its own gameplay clock. Extend the existing status
 language/controls rather than add a new timer framework.
 
@@ -816,6 +837,9 @@ living body before expiry despite altered skill/load/MV/posture/light. Bind the
 captured `move` Up offer with normal freshness/pending/refusal. At equality the
 authority settles expiry before Up; an old view never promises rescue. Confirmed
 entry/surface has one room change/current MV, without an unconfirmed safety claim.
+If elapsed preflight expires the captured Up occupancy, show `stale_view` with
+the same body at Chapel and one corpse; do not turn the old Surface control
+into Chapel Up. Same-generation elapsed settlement keeps Surface usable.
 Sedge remains the existing free pre-S27 lesson; no second training control.
 
 At Chapel, list actual owned nonempty corpses currently in either underwater
@@ -840,3 +864,11 @@ Pending, stale, refused or fenced actions claim no lesson, extra herb or discoun
 **PM-selected proposal; independent plan review and source proof pending.** Project each co-present living deer as its own exact runtime NPC detail and Attack target through ordinary GameView/admission. The 300-unit pending sight job does not hide a present target; successful sight flight removes that exact deer from the room/detail and closes its Combat page when no opponent remains, including after a surviving equal-due round. If the encounter remains live, stale or blocked sight leaves Combat and its next round intact. Narrate only confirmed departure, with its actual adjacent direction; a stale pending or refused job claims none. Flight reveals no corpse or hide.
 
 A true combat death exposes that deer's real public corpse and exact conserved hide through ordinary Contents/Take/Carrying, including after refresh. A stale target never binds a new generation; render/entry alone gives no item or credit. Demonstrate a legal +150 attack-before-flight kill, an unengaged live sight departure, and a controlled missed attack whose surviving equal-due round hands off to +300 flight, with confirmed receipt routing and refresh. Native device work remains paused; this clause does not promise a Sell/use action for a hide without an admitted consumer.
+
+## C5 bleeding and bandage details
+
+**Selected planning interaction; source pending.** Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
+
+Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
+
+Confirmed treatment leaves HP and encounter/round state unchanged, removes the condition and item from Carrying, and routes its result to Combat if that encounter remains open or World otherwise. It does not reopen the consumed item detail. Cold reopen and replay recover the exact committed line once using the saved command ID, with no invented success from another receipt. Isolated browser proof follows real Wick teaching, B5 exchange, hound injury, Bandage, tick/expiry and refresh; headless authority and real SQLite proof are separate. Mobile/native and cosmetic UI blur remain deferred.

@@ -1,0 +1,11 @@
+Auto-merging cartridges/ashmere_missing_child/text.json
+CONFLICT (content): Merge conflict in cartridges/ashmere_missing_child/text.json
+Auto-merging docs/briefs/chapter-one/d12-practical-skills-brief-2026-10-05.md
+Auto-merging docs/reviews/README.md
+Auto-merging kernel/ts/src/contracts.gen.ts
+CONFLICT (content): Merge conflict in kernel/ts/src/contracts.gen.ts
+Auto-merging kernel/ts/src/view/action_lists.ts
+CONFLICT (content): Merge conflict in kernel/ts/src/view/action_lists.ts
+Auto-merging protocol/command.schema.json
+Auto-merging protocol/entity.schema.json
+Automatic merge failed; fix conflicts and then commit the result.
