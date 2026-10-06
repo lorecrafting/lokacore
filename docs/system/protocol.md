@@ -1108,6 +1108,37 @@ current corpse location in `well_bottom` or `pool_bottom`. Containment transfers
 writer group/receipt. Preserve descendants/empty corpse, forced overload, no
 rewearing and no general remote Take. Malformed custody never creates an offer.
 
+## D9 reaction, cue and Study admission composition
+
+**Selected, pending implementation.** The existing child and bell choice
+producers emit their committed fact/quest events; D9 consumes them in the
+bounded reaction queue. Terminal fact writers are unchanged. Cast and Green
+profiles may be derived from current facts without a persisted mirror. A
+single typed hound suppression generation/deadline and one resume job carry
+the time-limited effect. Bell consequence delivery closes any current hound
+encounter and cancels its round in the same causal writer group; population
+jobs read the suppression and remain bounded. At deadline equality the resume
+job checks its generation and actual living count; stale jobs do nothing.
+If this composes into two conflicting writers on one encounter, stop for PM
+before changing the proposal conflict rule.
+
+The bell cue is bound to one accepted source event, its command/actor and the
+observer's room at that logical instant. Only an observer in the cartridge's
+explicit audible area receives it. Subsequent projection is read-only and may
+render retained history as a past cue, never as a fresh sound or second event.
+No global sound bus, remote Scan or fabricated actor movement is selected.
+
+Share one read-only Study ingress check between direct `move` admission,
+ActionInvocation resolution, ExitView availability and actual movement. It
+checks the exact Nave-west edge, fox allegiance, actual actor ownership,
+corpse location in Study and direct nonempty custody at the current revision.
+An ordinary blocked ingress is `exit_closed`; an eligible owner enters by the
+ordinary `move` command and pays its ordinary fare. Study-east egress follows
+normal movement checks. A captured old exception is rechecked on invocation;
+forged corpse IDs, empty/foreign/moved corpses and stale offers cannot bypass
+the gate. The shared reciprocal barrier transition and door verbs are not
+changed. D6's `recover_corpse` remains restricted to its two underwater rooms.
+
 ## D12 Harvest method and Buy quote composition
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) extends only the existing Harvest command and action input with optional literal `method: "careful"`. A projected careful offer is `ActionInvocation {action_key: "gather_carefully", target_ids: [patch_detail_id], input: {method: "careful"}}`, with the ordinary actor/id context; it resolves to `{type: "harvest", actor_id, target_id: patch_detail_id, method: "careful"}`. `ActionInputParameter` registers `method`, and `ActionInput.method` plus `Command.harvest.method` accept only that literal. Ordinary Harvest has `input: {}` and omits the command method. A method requires the exact offered action's input declaration and the target's opted [careful metadata](cartridge.md#d12-practical-skill-declarations); neither an arbitrary detail nor ordinary Harvest input can invoke the benefit by name alone. Unsupported method/shape fails typed wire/admission validation before effects.

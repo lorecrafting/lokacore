@@ -1463,6 +1463,44 @@ deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings a
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
 
+## D9 village consequences and Prior Study access (selected, pending implementation)
+
+**PM selection, not installed behavior.** The five valid terminal pairs are
+`rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
+`lost/fox` remains invalid. Child and bell quest owners alone write their
+terminal facts. Elspeth, Bram, Maud, the Green, Aldric, Vesper and Sedge read
+those committed facts for distinct authored responses; reading or rendering
+never changes them, reopens an ending or pays a reward. A missing child or
+unknown allegiance retains truthful search/base text.
+
+The actual accepted bell occurrence emits one committed cue for the actor's
+observer frame only when it is in the chapter's declared audible area. The
+cue retains its event/command cause, actor, room and logical time; a later
+Look, Read, reopen or travel cannot generate another sound. The ordinary bell
+scene remains the initiating actor's immediate narration. Reed Path and Mire
+may describe flood after the bell, but their dry exits, rescue and corpse routes
+stay passable.
+
+The bell suppresses Fen hound spawning and aggression for the cartridge's
+172800 logical seconds from the accepted occurrence. Existing hounds remain
+living, present and loot-free; any open hound encounter closes without an
+attack/reward and cancels its current round. Suppressed population jobs
+advance harmlessly. At the exact deadline normal bounded population resumes
+from actual living count and current generation, with no accumulated spawn
+debt or duplicate job. Sedge's hostile/warm response never disables her
+existing lessons or recovery route.
+
+Fox allegiance restricts only **Nave west → Prior Study** ingress. The shared
+barrier state remains unchanged and no door Open/Unlock bypass is invented.
+Ordinary ingress refuses `exit_closed`. The owning living actor may enter when
+an actual actor-owned corpse is still in the Study with at least one direct
+item root. The opposite **Study east → Nave** exit always admits ordinary
+movement (subject to unrelated normal life/posture rules); taking the corpse's
+last root removes the ingress exception on the next decision. There is no
+remote Study recovery, duplicate item, item teleport or resurrection. The
+public Nave and Aldric's S2 turn-in remain accessible. The gate does not close
+Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm-decision-d9-village-reactions-2026-10-06.md).
+
 ## D12 practical skill consumers (selected contract)
 
 **PM-adopted policy, pending implementation.** The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.

@@ -1266,6 +1266,28 @@ Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
+## D9 village reaction content (selected, pending implementation)
+
+The five valid child/allegiance pairs and the Study rule are defined in
+[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
+Author distinct child responses for Elspeth and Bram, five truthful Maud rumor
+variants and Green descriptions, prior/fox Aldric and Vesper responses, and
+bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave.
+The Study remains the existing reciprocal Nave-west/Study-east edge; no new
+door/barrier definition or key is authored. Only its west ingress gets the
+conditional fox policy. No new room, NPC, token relationship fact or synthetic
+ferryman instance is needed.
+
+The audible area is the existing **25 Ashmere rooms and ten public Priory
+rooms**, excluding Fen and isle rooms. Author the area as explicit chapter
+room references with loader validation; a room's ordinary descriptive tags do
+not become sound authority. Flood variants affect Reed Path and Mire text only.
+The bell's hound suppression duration is **172800 logical seconds**, owned by
+the cartridge. Author its population-plan reference and resume bound against
+the existing hound plan; no new population cap, catch-up count or creature is
+declared. D9 source release/API/hash/IDs remain null until D6 publishes
+and the actual successor is independently pinned.
+
 ## D12 practical skill declarations
 
 **Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.

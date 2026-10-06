@@ -847,6 +847,25 @@ original light/fare/key. Later isolated browser proof covers remaining-time/Up o
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
 is authorized by this planning adoption; real SQLite faults remain separate proof.
 
+## D9 village reactions and bell cue
+
+**Selected, pending implementation.** Show current fact-derived cast dialogue,
+rumors and Green description for each of the five valid child/bell pairs,
+keeping `stays` distinct from `rescued`. The bell cue appears once in the
+eligible observer's confirmed chronological history; redisplay and refresh
+label it as past, with no new sound or consequence. Fen/isle frames do not
+claim they heard the bell. Flooded Fen text cannot hide a real dry exit.
+
+The Nave's west ExitView reports `exit_closed` after fox allegiance unless the
+actual player owns a nonempty corpse in the Study. While eligible, it offers
+ordinary Move with truthful fare; Study east remains offered when otherwise
+movable. Direct commands and captured taps use the same current admission.
+Show the actual reachable corpse and its contents through ordinary physical
+pages/Take; never advertise D6 Chapel `recover_corpse` for a Study corpse.
+Public Aldric/S2, Sedge lessons, Wren return and existing corpse routes remain
+available. A retained bell or death line is presented from confirmed receipts,
+not an optimistic display callback.
+
 ## D12 practical lessons and benefits
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
