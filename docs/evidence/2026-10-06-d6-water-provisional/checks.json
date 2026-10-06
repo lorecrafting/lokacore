@@ -78,6 +78,12 @@
     "log": "helper-boundary.log"
   },
   {
+    "command": "git commit -m 'Implement provisional D6 water deadlines and owned bottom corpse recovery'",
+    "exit_status": 0,
+    "result": "normal pre-commit formatting, import/purity guard and docs checks passed",
+    "log": "source-commit.log"
+  },
+  {
     "command": "shasum -a 256 -c SHA256SUMS (evidence folder)",
     "exit_status": 0,
     "result": "all retained-file hashes verified",

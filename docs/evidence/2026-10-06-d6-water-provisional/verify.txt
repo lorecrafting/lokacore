@@ -43,6 +43,7 @@ schema-generation-red.json: OK
 schema-generation.py: OK
 schema-summary.json: OK
 schema-sweep.ts: OK
+source-commit.log: OK
 source-head.json: OK
 stale-drowns-old.log: OK
 stale-drowns-red.log: OK
