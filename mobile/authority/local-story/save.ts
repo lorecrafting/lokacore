@@ -125,7 +125,7 @@ export function adopt(s: Story) {
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
-  if (s.fence || s.db.isInTransactionSync()) return undefined; // Await adopted confirmation (03 §15).
+  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
   const r = s.db.getFirstSync<{ command_id: string; command: string; response: string }>(
     `SELECT command_id, command, response FROM receipt WHERE scope = ?
      AND json_array_length(response, '$.narration') > 0
