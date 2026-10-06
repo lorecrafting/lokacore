@@ -164,9 +164,10 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **13 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2). The latest source publication is
-[#215](https://github.com/lorecrafting/lokacore/pull/215), B8 Maud's paid room, food and drink services.
+Local and GitHub `main` have completed **14 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2, D5). The latest source publication is
+[#221](https://github.com/lorecrafting/lokacore/pull/221), D5 deeper Fen rooms, natural light
+for Wren's den, and ward-stone Read.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
