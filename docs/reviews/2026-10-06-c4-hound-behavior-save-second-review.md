@@ -52,3 +52,46 @@ receipt transaction suffice; no extra framework is requested. Fix the two missin
 proof boundaries and retained-evidence claim. Published D1 integration, successor
 release/hash/ID answers, final schema controls/full gate and scoped save carryover
 remain later gates. No native, browser preview or owner save was used.
+
+## Scoped fix recheck — APPROVE
+
+Exact corrected source `251b0bff4f90b7e89cf327f11effe60282791574`, frozen
+evidence `7b38aa1428eef28068b96b7e2e6e770ca3d8829c`. **C4-S1, C4-S2 and C4-S3
+are closed; no open save/protocol finding in this scoped recheck.** Earlier
+findings and evidence limitations above remain the historical initial result.
+
+- S1: the final slot exception now requires the selected current-generation
+  member's same-group encounter removal and actual departure, bound to that
+  round's job due time. Replayed the original healthy/no-encounter input: both
+  portable composers refuse, both independent observers reject the forged
+  successful changes, and final TS runtime `apply` refuses. Literal stationary,
+  unselected, missing-exit and dead-cursor cases retain their independent answers.
+- S2: departure proof uses the actual occurrence due clock rather than the final
+  elapsed horizon. The original real-SQLite Attack/rotation then elapsed64950→65101
+  now commits the flight stamped65100. Both portable kernels accept the exact
+  resulting proposal and their independent observations hold. Round prefix
+  composition explicitly remains nonfinal; final complete-group validation still
+  occurs before the authority commits/adopts. Inspected the changed portable
+  twins and direct round/admission callers, including repaired selection and
+  the player's retained even-round opportunity after a selected helper flies.
+- S3: the [evidence README](../evidence/2026-10-06-c4-hound-behavior/README.md)
+  now correctly labels earlier raw runs uncaptured. All **12 retained raw-log
+  hashes** verify; the only unlisted files are README, manifest and verification
+  output. Inspected the retained failing controls for selected flight/dead cursor,
+  late endpoint, pack shape, helper identity, even-round opportunity and premature
+  flight adoption; corrected focused commands record individual exit0 results.
+
+Independent recheck: **43 TS/kernel/real-SQLite/Book tests** and **eight Elixir
+foundation tests** pass. Repeated all **18 byte-preserving cold forgeries** and
+**12 real failed/uncertain/lost-COMMIT, connection-close/reopen/retry probes** from
+the initial review, including both actual equal-time job-ID orders. They remain
+green with one committed flight/receipt and fenced pending input. No production
+source was edited; malformed-input controls and retained source-red evidence were
+used within this read-only assignment.
+
+Ponytail/correctness scoped recheck found no complexity issue: the fix retains
+the existing encounter/job/slot proof owners and transaction path. This approves
+only the corrected provisional v029 source above. Published D1 integration,
+independent successor release/hash/ID pins, final schema controls/full gate and
+integrated save/protocol carryover remain required. Primary/foundation verdicts
+remain separate; no native, preview or owner-save access occurred.
