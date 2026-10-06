@@ -1,0 +1,15 @@
+app-types.log: OK
+compile.log: OK
+compiler.log: OK
+contracts.log: OK
+core-size.log: OK
+format.log: OK
+host-book.log: OK
+kernel-types.log: OK
+kernel.log: OK
+merge-commit.log: OK
+red-c4-view-roster.log: OK
+red-d12-view-method.log: OK
+release-compile.log: OK
+restored-view.log: OK
+size.log: OK

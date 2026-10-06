@@ -34,3 +34,5 @@ Planning self-review: Ponytail finds no new framework, stock ledger, quote token
 Provisional source/check checkpoint: [D12 local evidence](../../evidence/2026-10-06-d12-practical-skills/README.md). Independent source approval, final successor pins, browser proof and publication remain pending.
 
 Published-main integration remains provisional: [3ff6cdd4 merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-3ff6cdd4/README.md). Successor pins and browser proof await C4 publication.
+
+C4 carryover remains provisional: [e9db5bdf merge checks](../../evidence/2026-10-06-d12-practical-skills/main-merge-e9db5bdf/README.md). Successor pins and browser proof await D3 publication and final integration.
