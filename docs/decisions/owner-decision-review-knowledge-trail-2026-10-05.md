@@ -1,9 +1,11 @@
 # Owner decision: retain review knowledge for future mechanics
 
-The owner wants important project history, including issues found in reviews, kept
-as cross-referenceable evidence for later mechanics, system layers and Book UI rules.
-This is a paraphrase of the owner's 2026-10-05 direction during Beads migration
-planning, not a decision to install Beads.
+The owner said during Beads migration planning on 2026-10-05:
+
+> keep in mind that we would love to keep some important history of the project for example issues that surfaced in reviews etc as a substrate or data to build better mechanisms system or layers if possible, or to cross reference if  you think that's a good idea, or to accumulate things like book-ui spec or whatever else
+
+Interpretation: retain important review history as cross-referenceable evidence for
+later mechanics, system layers and Book UI rules. This does not adopt Beads.
 
 Keep the original review finding and its disposition in the reviewed Git record.
 When it reveals a lasting behavior rule, update the owning active specification
