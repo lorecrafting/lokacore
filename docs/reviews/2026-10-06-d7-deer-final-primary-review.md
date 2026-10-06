@@ -27,3 +27,12 @@ VERDICT: CHANGES REQUIRED
 ```
 
 The developer's [round 1 fixes and retained red controls](../evidence/2026-10-06-d7-deer-round1/README.md) address these findings. The approval above applies to its stated head; fresh exact-head rechecks remain required for the fix head.
+
+## Round 1 scoped recheck — APPROVE
+
+**Exact pushed fix head:** `6b6267694127834eef9d1dda4030a5a3f5c2d5d4`. **D7-01 and D7-02 are closed; no open primary findings.** This checks the two findings, their direct callers, the new protocol clause and their red controls. Hosted jobs at this head were still running when this record was made, so this verdict does not claim the final CI gate.
+
+- **D7-01 closed.** `compose_sight.ts`, the independent `invariants_sight.ts` check and cold `deer-save.ts` now select the later current sight completion by the encounter's exact deer member. The controlled equal-time Oak sight → Willow sight case finishes the Willow round handoff and closes the encounter; another deer's sight no longer supplies the proof. Removing the foundation member match in this detached checkout reproduced `precondition_failed`; restored focused cases passed.
+- **D7-02 closed.** The protocol names the sole harmless-sight clear → equal-due population-arrival rebind. `compose_sight_rebind.ts` requires one earlier clear of the same plan/slot/member/generation, a current completed sight without deer transfer, an equal-due current population completion, and a fresh sight schedule bound to that member's checked transfer and population occurrence. `compose.ts` consults it only for the conflicting slot target. The controlled case retains one new binding due at 68700. Widening the exception to all conflicts in this checkout made the unrelated-conflict control fail; restored cases passed. A review-only real-SQLite run of this exact sequence saved and cold-reopened identical state, then the temporary test was removed.
+
+Independent focused run: four D7 equal-time and unrelated-conflict cases passed 4/4. The two intentional mutants each failed the named case, then source was restored. The direct save caller accepts the lawful rebind; no source edits remain. Ponytail Review: no safe deletion in the narrow checked exception or member selection. The separate save/protocol fix recheck and PM's exact-head hosted checks remain publication gates.
