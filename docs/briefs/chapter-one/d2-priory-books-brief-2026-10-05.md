@@ -148,3 +148,6 @@ nonrecoverable actual custody, changed ordinary notice grants, protocol/foundati
 scope beyond this consumer or conflicting governing clauses. No invented successor
 pins, passing proof, merge or publication. Planning self-review: reuse existing
 custody/topic/receipt/detail owners, no new framework/dependency; source proof null.
+
+Developer source and headless verification for independent review:
+[local D2 handoff](../../evidence/2026-10-05-d2-priory-books/README.md).

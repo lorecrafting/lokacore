@@ -1,0 +1,48 @@
+(node:51124) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of [redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.985083ms)
+✔ journal cues belong only to changed NPC histories (0.292209ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.155917ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.200625ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.140125ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.147916ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.081625ms)
+✔ the log stops growing in one room, its last line the latest answer (1.987709ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.145333ms)
+✔ a narration recovery fault holds combat results while their line routing is unavailable (0.328375ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.29625ms)
+✔ lantern-carry plays as its frozen trace; its story point reaches the run's account once (75.421708ms)
+✔ lantern-leave plays as its frozen trace; its story point reaches the run's account once (51.54275ms)
+✔ an old run's view token is stale after a new game, at the same revision (8.779667ms)
+✔ adverse early-possession (30.436833ms)
+✔ adverse drop-after-choice-opened (42.711916ms)
+✔ adverse walked-away-rejects-new-choice (30.714416ms)
+✔ adverse walked-away-keeps-receipt (35.687166ms)
+✔ adverse altered-choice (41.1515ms)
+✔ adverse choice-rollback (24.901041ms)
+✔ adverse choice-unknown-commit-absent (42.530167ms)
+✔ adverse choice-unknown-commit-committed (45.33075ms)
+✔ adverse commit-before-display (303.336458ms)
+✔ adverse reading-has-no-effect (34.230958ms)
+✔ adverse stale-choice-and-blocked-exit (32.862875ms)
+✔ a choice committed with its acknowledgement lost recovers to its receipt, reported once (28.515584ms)
+(node:51126) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of [redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite preserves original books through ground Take nested open Read closure travel and reread (1320.421625ms)
+✔ real failed and lost COMMIT outcomes fence Read then retry and replay once (682.427916ms)
+✔ historical Read and known-topic truth reject wrong actor book definition cause missing grants and closed custody (634.5175ms)
+✔ actual fatal fight reopens with learned topics and gear-free recovery Takes the original books (160.219042ms)
+✔ saved 19:00 novice overlap and 20:00 departure retain original pending speaker (116.261167ms)
+✔ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (122.501583ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3438.407625
