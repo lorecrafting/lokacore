@@ -67,6 +67,13 @@ which every agent loads every session.
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
+- `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
+  nonempty `source_repo_path` or a local machine path; the full export must contain
+  each Chapter 1 plan slice once with no missing dependency target or Beads-reserved
+  `-wisp-` ID. The pre-commit hook reads the staged export; CI lint and
+  `check_all` read the checkout.
+  `bin/beads_red_controls.sh` plants both path classes, a missing slice and a
+  reserved ID and observes refusal. The check needs no `br` binary.
 - `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
   `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
   `<base>` or an empty diff). The `changes` job of `ci.yml` passes (`bin/ci_base.sh`) the newest ancestor of a pull request

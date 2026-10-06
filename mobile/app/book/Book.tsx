@@ -45,6 +45,15 @@ type BookState = {
   setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
+
+function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
+  if (screen.returnWorld && !screen.view.combat) return [];
+  if (!screen.returnDetail) return next;
+  const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
+  if (index >= 0) return next.slice(0, index + 1);
+  const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
+  return pagesAfter(corpse, screen.view, screen.view);
+}
 function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const { current, setStack, setFlip, redraw } = s;
   useEffect(() => {
@@ -55,7 +64,7 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
-      if (terminal && after.returnWorld && !after.view.combat) next = [];
+      if (terminal) next = resultPages(next, after);
       current.current = { stack: next, view: after.view };
       setStack(next);
       if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
@@ -76,8 +85,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
-  let next = pagesAfter(before.stack, before.view, after.view);
-  if (after.returnWorld && !after.view.combat) next = [];
+  const next = resultPages(pagesAfter(before.stack, before.view, after.view), after);
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

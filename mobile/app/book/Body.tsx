@@ -17,6 +17,7 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 type BodyProps = {
   page?: Page;
+  stack: Page[];
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button, detail?: string) => void;
@@ -24,6 +25,7 @@ type BodyProps = {
   startOver: () => void;
   chapterDone: () => void;
   world: () => void;
+  back: () => void;
 };
 
 export function Body(p: BodyProps) {
@@ -45,7 +47,8 @@ export function Body(p: BodyProps) {
       />
     );
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
-  if (page.kind === 'thing') return <Item {...p} id={page.id} />;
+  if (page.kind === 'thing')
+    return <Item {...p} id={page.id} nested={p.stack.at(-2)?.kind === 'thing'} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character') return <CharacterPage view={view} text={text} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} g={p.g} press={p.press} />;

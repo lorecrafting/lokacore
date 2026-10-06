@@ -1,6 +1,6 @@
 # C3 living hounds — provisional source evidence
 
-Source: `18aa78c5f015dd1936a37598259f0fbf9152d5ff` on the isolated C3 branch, integrating published B8 source. Independent source review and publication remain pending. The active chapter is provisionally `0.0.26` / kernel API `1.24`; its independently verified SHA-256 is `79191ce8a2653728c4ee1a4ad5cd31eacd38120bd420c8be413c9d0b92afc440`. The genesis fixture pins 124 IDs. D2 is expected to publish v026 first, so C3 will need a successor re-pin before final review.
+The first source head was `18aa78c5f015dd1936a37598259f0fbf9152d5ff` on the isolated C3 branch, integrating published B8 source. Its independent answer was `0.0.26` / kernel API `1.24`, SHA-256 `79191ce8a2653728c4ee1a4ad5cd31eacd38120bd420c8be413c9d0b92afc440`, with 124 genesis IDs. This section records that frozen predecessor proof; later integrations follow below. Independent source review and publication remain pending.
 
 ## Checks
 
@@ -32,6 +32,14 @@ Every planted source edit was restored immediately after its red run.
 
 On an isolated localhost web preview, a fresh chapter showed four separate, same-named hounds in Hound Run and adjacent Map sight. I opened one hound, used its Attack action, observed creature-neutral combat narration and automatic closure, opened its real corpse and nested pelt, then used Take. A refresh preserved the exact pelt in Equipment & Inventory → Held; [the screenshot](book-carrying.png) captures that saved state. The corpse no longer offered Buy after the projection fix. The web preview was stopped after capture. No native simulator or device ran.
 
-The general Book rule says accepted Take returns to World, while the C3-specific text says Take history stays on item detail. The owner is resolving that conflict; no dependent routing change is included in this source head.
+The general Book rule said accepted Take returned to World, while the C3-specific text placed Take history on the item detail. The owner resolved this after the first source head.
 
 Ponytail Review: lean already; no additional abstraction or dependency was needed. Correctness self-review found and fixed dynamic pelt custody, generic corpse Buy, rat-only combat wording, and the Book test's direct kernel import. Independent review is still required.
+
+## Published D5 integration and corpse-detail ruling
+
+Merged published D5 source `010dc99447ef1916b5928e7be02aac2805c1f4ca` and the [owner's corpse-detail decision](../../decisions/owner-decision-corpse-loot-take-detail-2026-10-06.md). The separate combined answer is provisionally `0.0.27` / API `1.24`, SHA-256 `c0d0891c2ce45e6d3f0b417adbf435a25febf7ae713f8fe4bc662ec91f1896ea`, with 130 genesis IDs. The frozen C3 and D5 predecessor fixtures were not edited. D2 has since published `v027`; this integration's active pin is temporary and must advance again.
+
+The local authority recognizes corpse Take only from an exact validated saved command, its transfer out of a death-origin corpse, and the matching acquired event. The Book routes a confirmed result to the corpse detail and adds the named pickup there once. A nested pelt's Leave returns to that corpse; its Leave returns to World. Cold reopen reconstructs the pickup from the same receipt, including after the pelt is subsequently dropped. Generic Take retains its World route. Pending/refused/faulted commands do not claim pickup.
+
+`integrated-full-check.log` records `mise exec -- bin/check_all.sh` exit 0 after the integration; the focused Book suite passed 16/16, C3 kernel 8/8, Elixir content 6/6, and mobile TypeScript compilation passed. `corpse-route-red.log` records a real component failure when the corpse route was deliberately changed to return World. The mutation was restored. No new native or browser session ran for this routing amendment.

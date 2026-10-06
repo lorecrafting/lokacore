@@ -1,0 +1,38 @@
+Resolving Hex dependencies...
+Resolution completed in 0.023s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+No cycles found
+Running ExUnit with seed: 939020, max_cases: 16
+
+...................................................................................................................................................................................................................................................................................................................................................
+
+  1) test authored patrol references expand at their own boundary (Loka.ContentPatrolTest)
+     test/loka/content_patrol_test.exs:5
+     Assertion with == failed
+     code:  assert q["patrol"]["npc"] == %{
+              "cartridge_id" => "ashmere_missing_child",
+              "cartridge_version" => "0.0.25",
+              "kind" => "npc",
+              "key" => "tobin"
+            }
+     left:  nil
+     right: %{
+              "cartridge_id" => "ashmere_missing_child",
+              "cartridge_version" => "0.0.25",
+              "key" => "tobin",
+              "kind" => "npc"
+            }
+     stacktrace:
+       test/loka/content_patrol_test.exs:10: (test)
+
+........
+Finished in 22.0 seconds (21.9s async, 0.1s sync)
+
+Result: 347/348 passed
+Failed: 1 test

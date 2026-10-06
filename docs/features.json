@@ -719,7 +719,9 @@
     "fixtures": [
       "protocol/fixtures/population_composition.json",
       "protocol/fixtures/missing_child_v026_hash.json",
-      "protocol/fixtures/missing_child_v026_ids.json"
+      "protocol/fixtures/missing_child_v026_ids.json",
+      "protocol/fixtures/missing_child_c3_provisional_hash.json",
+      "protocol/fixtures/missing_child_c3_provisional_ids.json"
     ],
     "invariants": [
       "delta_preconditions_hold",

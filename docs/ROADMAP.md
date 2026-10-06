@@ -20,6 +20,8 @@ lift and proof. Completed rows are recorded below. The
 [33 provisional slice briefs](briefs/chapter-one/README.md), merged in
 [#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
 was fixed and independently rechecked, provide candidate assignment detail.
+The [Beads Rust pilot](WORKFLOW.md#beads-rust-pilot) mirrors all 33 Chapter 1 slices;
+this roadmap remains the published completion record.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
@@ -162,9 +164,10 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **13 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2). The latest source publication is
-[#215](https://github.com/lorecrafting/lokacore/pull/215), B8 Maud's paid room, food and drink services.
+Local and GitHub `main` have completed **14 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2, D5). The latest source publication is
+[#221](https://github.com/lorecrafting/lokacore/pull/221), D5 deeper Fen rooms, natural light
+for Wren's den, and ward-stone Read.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -277,6 +280,19 @@ and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brie
 against local main `10b023e8`. C1/C3 source and intervening shared release edits
 must be reviewed and re-pinned before assignment. C4 independent plan review,
 implementation, successor release/API/hash/IDs and proof remain ahead.
+
+D2 public Priory rooms and held-book Ward/Bell topics have an
+[adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),
+[focused brief](briefs/chapter-one/d2-priory-books-brief-2026-10-05.md) and
+[independent plan approval](reviews/2026-10-05-d2-priory-books-plan-review.md).
+A1, B5 and B6 are published; D2 source implementation is active in an isolated
+branch from published main. Final successor pins, source reviews and proof remain
+ahead. D1 paid ferry, Mother Sedge and safe isle return has an
+[adopted PM contract](decisions/pm-decision-d1-ferry-isle-2026-10-05.md),
+[source brief](briefs/chapter-one/d1-ferry-isle-brief-2026-10-05.md) and
+[independent plan approval](reviews/2026-10-05-d1-ferry-plan-review.md),
+published in [#217](https://github.com/lorecrafting/lokacore/pull/217).
+D1 source implementation and player proof remain ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

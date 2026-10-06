@@ -1,0 +1,124 @@
+(node:55817) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ fresh dry exploration traverses every reciprocal edge and reopens all five new rooms (1419.746125ms)
+✔ D5 movement and stone Read reconcile committed and absent COMMIT outcomes and replay exactly (489.954292ms)
+✔ actual fatal separation in the den reopens and permits gear-free original-Wren Rejoin and rescue (561.758708ms)
+✔ fixed stone preserves original-message custody before and after stays and preserves lost (425.05975ms)
+✔ the current chapter refuses a lookalike item substituted into the original-message role (136.079041ms)
+(node:55818) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (142.756791ms)
+✔ the south search reaches the oak and returns through visible fox clues (118.449833ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (93.963083ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (27.623833ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (46.418583ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (51.789291ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (136.335ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (30.651542ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (36.832708ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (71.882708ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (119.519708ms)
+(node:55819) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Read targets retain confirmed detail messages without changing state (136.584959ms)
+✔ uncertain Read recovers its one receipt and narration, then reads again after cold reopen (67.445167ms)
+✔ stale and refused Read retain their target and never narrate an unread body (61.014916ms)
+✔ held Read survives the authored 68350 to 68400 pulse with authority freshness intact (67.37125ms)
+✔ cold reopen refuses a committed Read whose stored target is malformed (61.42825ms)
+✔ invalid Read JSON offers in-place Start over and leaves older pins explicitly refused (118.58125ms)
+✔ corpse identity, worn roots and shrine return reopen atomically and receipt replay allocates nothing (51.029167ms)
+✔ an older release list refuses the corpse release without rewriting it (43.28575ms)
+✔ real FULL, failed COMMIT and committed-unknown COMMIT preserve all prior or all next corpse rows (84.839ms)
+✔ save load refuses missing identity, unknown template and illegal corpse custody without repair (103.268166ms)
+✔ actual torch oil and nested intervals survive cold reopen and sell/buyback with conserved pennies (392.129542ms)
+✔ real failed and unknown refill commits reconcile the entire writer group and exact retry (257.521458ms)
+✔ corrupt fuel and forged refills refuse without repairing SQLite (369.419417ms)
+✔ dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery (351.032125ms)
+✔ a light-only cartridge reopens lawful refill history and rejects a bounded forged charge (17.642ms)
+✔ undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched (6.015083ms)
+(node:55822) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves an aliased Read place offer and exact target through a live redraw (99.86925ms)
+(node:55823) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ original message branch and terminal reopen with their own NPC narration and exact replay (403.117791ms)
+✔ Drop and held-container Put reopen and recover the same item; stale handoff never prints success (153.479792ms)
+✔ fatal combat and cold reopen preserve the message through ordinary corpse recovery (172.3165ms)
+✔ elapsed redraw keeps an unchanged message choice usable (93.06475ms)
+▶ retained delivery evidence corruption is typed even behind an unrelated latest receipt
+  ✔ missing branch row (66.614292ms)
+  ✔ wrong message role (64.15525ms)
+  ✔ null retained source (49.037541ms)
+  ✔ branch fact reset (45.538166ms)
+  ✔ branch fact deleted (58.325583ms)
+  ✔ message in unrelated NPC (76.814209ms)
+  ✔ message nested in NPC-held container (79.685459ms)
+  ✔ malformed receipt command JSON (78.683666ms)
+  ✔ receipt transfer removed (66.329458ms)
+  ✔ receive narration names another speaker (54.757416ms)
+  ✔ terminal fact event missing (57.724375ms)
+  ✔ terminal status reset (52.594667ms)
+  ✔ terminal message returned to actor (54.940042ms)
+  ✔ terminal quest reopened (53.346208ms)
+✔ retained delivery evidence corruption is typed even behind an unrelated latest receipt (860.622667ms)
+✔ failed and lost branch/terminal COMMIT keep narration and custody behind confirmed disk (194.078083ms)
+✔ v012 refuses the frozen v010 SQLite save and offers explicit Start over without changing it (38.183208ms)
+✔ terminal quest without a message branch refuses reopen and requires explicit Start over (108.067458ms)
+(node:55864) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[redacted-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [redacted-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ malformed Q1 after rescue selection or completion offers typed recovery without replacing progress
+  ✔ following row: null (174.07ms)
+  ✔ following row: false (111.909833ms)
+  ✔ following row: 0 (112.656958ms)
+  ✔ following row: [] (109.87625ms)
+  ✔ following row: {} (150.021333ms)
+  ✔ following row: {"quest":{},"scope":{}} (156.910584ms)
+  ✔ following row: {"quest":true,"scope":true} (113.628083ms)
+  ✔ following quest: {} (101.630083ms)
+  ✔ following scope: {} (101.557417ms)
+  ✔ completed row: null (119.7205ms)
+  ✔ completed row: false (139.224667ms)
+  ✔ completed row: 0 (162.612209ms)
+  ✔ completed row: [] (112.766291ms)
+  ✔ completed row: {} (114.919959ms)
+  ✔ completed row: {"quest":{},"scope":{}} (135.525417ms)
+  ✔ completed row: {"quest":true,"scope":true} (149.234ms)
+  ✔ completed quest: {} (104.709375ms)
+  ✔ completed scope: {} (112.456458ms)
+✔ malformed Q1 after rescue selection or completion offers typed recovery without replacing progress (2291.735375ms)
+✔ real SQLite rescue reopens start, death separation, Rejoin and terminal with their own narration (355.253958ms)
+▶ retained rescue identity, physical state and own receipts reject corruption behind a later look
+  ✔ missing escort row (48.747708ms)
+  ✔ substituted bound NPC (41.468792ms)
+  ✔ wrong quest instance (49.350917ms)
+  ✔ wrong originating continuation (53.188208ms)
+  ✔ following NPC in another room (49.111583ms)
+  ✔ separated without committed death (44.158125ms)
+  ✔ rescue message removed from Vesper (49.340292ms)
+  ✔ rescue branch changed to stays (53.55725ms)
+  ✔ missing start receipt (56.114042ms)
+  ✔ old start receipt missing escort transition (54.498291ms)
+  ✔ forged rescued terminal without turn-in (47.624ms)
+  ✔ rescued terminal rewritten to stays (52.042458ms)
+  ✔ completed Wren moved away from Elspeth (48.3655ms)
+✔ retained rescue identity, physical state and own receipts reject corruption behind a later look (649.228834ms)
+ℹ tests 89
+ℹ suites 0
+ℹ pass 89
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4526.694166
