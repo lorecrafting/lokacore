@@ -238,3 +238,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [D2 public Priory and held books](pm-decision-d2-priory-books-2026-10-05.md): ten public rooms, exact held/open-container Read, idempotent Ward/Bell and ordinary custody recovery.
 - [C4 hound response, pack help and flight](pm-decision-c4-hound-behavior-2026-10-05.md): deliberate Attack admission, one rotating enemy opportunity, same-clock wander protection and conserved wounded retreat.
+
+- [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.

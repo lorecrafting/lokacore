@@ -862,3 +862,25 @@ invocation replay preserves the original result and adds no credit/branch/memory
 Confirmed narration restores to the actual bed/dream nesting by committed command
 identity; when away, retain honest history and Resume availability on legal return,
 never an invented Inn Rooms backdrop or unconfirmed completion.
+
+## D4 finite food and terminal custody recovery
+
+**Selected plan; not implemented.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+persists ordinary item containment and the adjusted recovery row with the Eat
+receipt in the existing changed-row transaction. The immutable consumed-holder
+ID/kind is reconstructed from the current cartridge and independent allocation;
+no mutable food-count or new persistence table is selected. Loader validation
+admits only opted edible identities in that holder, with terminal entry justified
+by the revision-ordered exact actor/item/source/destination/benefit Eat receipt.
+Reconstruction rejects transfer out, forged entry, mismatched holder or benefit,
+a consumed item restored into circulation, and unsupported pins as typed corruption
+or explicit mismatch, without silent repair/deletion.
+
+Prove real SQLite reopen at fresh stock, each harvest, stored/dropped/given food,
+owned-corpse custody, consumed food, each NPC schedule departure and each child
+variant (including following/separated escort). Exercise later actual Eat after
+retrieval/reopen. A genuinely failed COMMIT leaves both custody and MV unchanged;
+uncertain COMMIT must reconcile committed and absent branches. Lost acknowledgement
+and same-invocation replay return one confirmed Eat, never another benefit; a new
+invocation on that spent ID refuses. Preserve pending-save input refusal, exact
+current-release mismatch handling and in-place explicit Start over for corruption.

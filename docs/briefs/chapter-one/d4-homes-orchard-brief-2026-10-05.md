@@ -1,45 +1,131 @@
-# D4 — Homes, the smithy, orchard food and truthful child-state prose
+# D4 — Homes, smithy, finite orchard food and truthful child-state prose
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted PM plan; independent plan review pending.** This replaces the provisional
+2026-10-05 draft, including its uninstalled regrowth and B8 apple-Eat assumptions.
+[PM adoption](../../decisions/pm-decision-d4-homes-orchard-2026-10-05.md) is planning
+only. Proposed source branch: `chapter-one/d4-homes-orchard` (not created).
 
-Proposed branch: `chapter1/d4-homes-orchard`.
+## Source re-pin and dependency gate
 
-## Goal, dependencies and governing clauses
+Inspected published main: `c2cf8938a30a65335edc6e5c139c65c61e5105d5`,
+`ashmere_missing_child@0.0.25`, kernel API1.23, artifact
+`c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a`,
+111 independently reviewed IDs. These existing pins are dependency evidence,
+not D4 successor or proof values.
 
-Add `smithy`, `orchard`, `elspeth_cottage`; place Gareth/Ada and a usable apple node. Re-pin B8 food consumption, B5 node harvest, reviewed Q2 rescued/stays and A1 lost. Governors: archived00a §§2/4/5/10/11; active movement/custody/description_variant/action_recipe/schedule, B5's adopted harvest contract, Book details and no-wait/real-cast/current child-status decisions. Elspeth's required guide/Q1/Q2 stays at **Ferry Landing**; this slice cannot move her silently.
+| Merged dependency | Exact evidence and installed behavior |
+|---|---|
+| B5 Infirmary Herbs, [PR #205 — chapter publication through training](https://github.com/lorecrafting/lokacore/pull/205), merge `5e5536db` | [Primary](../../reviews/2026-10-05-b5-infirmary-herbs-primary-review.md) and [save/foundation approval](../../reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md), integrated reviewed head `2df52d328adbfdea39a0cde623f6a9f34fffb186`; finite real-item Harvest, no mint/count/regrowth. |
+| B8 Maud's immediate services, [PR #215 — paid room, meal and drink](https://github.com/lorecrafting/lokacore/pull/215), merge `594b8ae1` | Final checked source `8fad8501f066b5a7bc224e90e13618d93c099bcb`; [primary](../../reviews/2026-10-05-b8-maud-services-primary-review.md) and [save/protocol](../../reviews/2026-10-05-b8-maud-services-save-review.md). Capped MV recovery, no actor-held food/Eat. |
+| Q2 stays, [PR #189 — Vesper's message return](https://github.com/lorecrafting/lokacore/pull/189), merge `64b611dd`; Q2 rescue, [PR #190 — Wren's escorted return](https://github.com/lorecrafting/lokacore/pull/190), merge `05b0cb6f` | [Current return clauses](../../system/cartridge.md#q2-c-rescue-return); distinct terminal states, original Wren at Fox Hollow for stays and Ferry Landing after completed rescue, following/separated intermediates remain valid. |
+| A1, [PR #196 — bell-first prior/lost](https://github.com/lorecrafting/lokacore/pull/196), merge `4bae2fe2` | [Current bell clause](../../system/cartridge.md#q3-b-bell-first-prior-and-lost); lost is playable without moving/deleting Wren. |
 
-## PM policies and composition
+B5/B8/Q2/A1 semantic gates are met. Wait for active B9 dream, C3 living hounds
+and D2 Priory books shared-source integration, then re-pin actual reviewed main
+before assignment. Do not change their worktrees. D4 source SHA, release/API,
+hash, allocation oracle, PR and implementation proof remain **null**.
 
-Green w↔smithy e; smithy w↔orchard e; North Gate w↔cottage e. Forge is cold in chapter one; Gareth is flavor, not a repair service. Retain his declared smithy8–18, inn18–22, smithy22–8 schedule and Ada orchard7–17/cottage17–7 using only built destinations. No required quest or supply waits for their arrival.
+## Goal and governing clauses
 
-Select one optional orchard node with **3 initial apples**, **one apple per successful Forage**, each **100g**; optional regrowth after **172800 logical seconds** reuses B5's generation/bounded-job contract. After depletion, refuse without minting or charging; Maud/Peg's all-hours food remains the required supply. Season changes prose only, not required availability. Reuse B8's existing apple Eat benefit without another nutrition model.
+Visit three connected rooms, meet Gareth/Ada and Forage→Carry→Eat useful food,
+with truthful child-state prose. Normative numbers/routes/schedules live in
+[chapter declarations](../../system/cartridge.md#d4-homes-and-orchard-declarations);
+behavior in [mechanics](../../system/mechanics.md#d4-homes-finite-apples-and-eat-selected-contract),
+[protocol](../../system/protocol.md#d4-held-food-composition),
+[save](../../system/save.md#d4-finite-food-and-terminal-custody-recovery) and
+[Book](../../system/book-ui.md#d4-home-details-and-carried-food-eat).
+Archived [00a §§2/4/5/10/11](../../archive/spec/00a-chapter-one-content.md) supplies
+map/cast intent; active [real-cast](../../decisions/owner-decision-real-chapter-cast-2026-10-05.md),
+[no-wait](../../decisions/owner-decision-no-wait-opening-2026-10-05.md), Q2 returns
+and B4 torch supply override prototype cottage-rescue/lantern assumptions.
 
-Cottage/Green local descriptive variants read the exact enum: missing shows unfinished search; rescued shows Wren returned; stays acknowledges his living choice with Vesper; lost shows grief. Never collapse stays into rescued. Wren's **actual** location/follow relation comes from Q2; prose cannot spawn a duplicate child, transfer him from a still-following escort or claim presence where no actor exists. Put the lantern here only if B4 has selected this exact single source; otherwise describe the room without a fake usable lantern.
+## Composition and source boundary
 
-Composition: B5 resource node owns depleted/regrowth state and one custody acquisition; containment/carry admission conserves load. Existing schedules own Gareth/Ada moves. Variant queries are read-only; Q2/child owner remains the sole status writer.
+| Consumer | Shared reads | Typed writes and owner | Missing invariant |
+|---|---|---|---|
+| Orchard Forage | actual three-item custody, reach, carrying and query budget | existing containment Harvest transfer/acquisition | none; reuse B5, including ordinary Take/Drop |
+| Held-food Eat | exact keyed admission, living actor, direct custody, opted edible metadata, settled recovery/headroom | food admission; existing transfer to new terminal holder and capped resource adjustment, one writer group; authority receipt/COMMIT | generated roomless consumed holder, no nonfood entry/escape, exact receipt-backed terminal custody |
+| Gareth/Ada | authored timetable and built rooms | existing schedule NPC transfer/jobs | none; correct dusk initial destinations |
+| Cottage/cot/Green | exact committed child enum | read-only description variants | none; outcome/escort writer stays Q2/A1 |
 
-## Source scope
+The consumed holder is new, not existing reuse: ordinary transfer permits recovery
+from its destinations, and no identity-preserving removal primitive is installed.
+Only the three directly held apples opt into Eat in this slice; do not extend B8
+meals or add nested-food admission. Append its fresh allocation after
+slots; retain identities, derive spent/stock/load from custody and share one pure
+Eat projection/admission query. Extend foundation guards only for the consumed
+subset; preserve two-kernel obligations. Never call another mechanic's verb or
+run a decision to project offers. Use [composition rules](../../system/architecture.md#building-mechanics-by-composition).
 
-Three room files and reciprocal Green/North Gate edges, Gareth/Ada/schedules/flavor dialogue, apple node/item and text; current pin/bundle/oracle; B5 node and B8 apple definitions reused. No new protocol/engine row unless B5 cannot already express this consumer. Out: forging/repair, seasonal starvation, cottage property ownership, Elspeth relocation, new Wren identity, illness/poison/hunger expansion and extra quests.
+Scope: three rooms/reciprocal edges, Gareth/Ada/schedules/flavor, three apples and
+tree/cot/forge details/text; minimal food command/item metadata/terminal-holder
+contracts, compiler/loader/generated files, authority consumed receipt validation,
+existing GameView/Book action flow, current bundle and independent pins. No repairs,
+season model, regrowth, physiology, Elspeth relocation, duplicate Wren/lantern,
+other quests, B9/C3/D2 features or generic create/delete framework.
 
-## Acceptance, mutants and UI/save proof
+## Independent acceptance and red controls
 
-With empty node history and enough carrying room, three distinct successful harvests yield exactly **3×100g** of real usable apples; the fourth yields zero. Full-load Forage leaves node stock/currency/custody/RNG unchanged. Same invocation replay gives one apple, not another. Failed COMMIT does not spend node stock; lost acknowledgement reconciles exactly one acquisition. At selected due boundary regrowth resets once, stale generation jobs do nothing and no catch-up overflow is created.
+Use controlled rows and hand-checked literals; expected answers never come from
+implementation helpers. Before adding a test, plant its break against existing
+focused same-layer tests and reuse one that already fails. Actually record red,
+restore, then green for each new control. No source-text/count-only tests.
 
-Controlled child outcomes must render **four distinct truthful cottage/Green cases** without moving Elspeth or Wren. Wren-alone arrival and the historical stays≠rescued distinction remain enforced. Plant stays→rescued variant condition, omitted harvest debit and premature regrowth if existing B5 tests do not kill them. Expected fruit quantity/mass and exact actor locations come from hand-pinned input rows, not implementation helpers.
+- Empty orchard history and sufficient room: three distinct Forages yield the
+  three pinned IDs and 300g; fourth refuses. Full 12000g load refuses atomically;
+  Drop/Take restores/removes the same ID's availability, never a replacement.
+- At controlled accepted-command MV40/max100, one Eat yields MV46 and removes
+  exactly 100g; at MV98 it yields MV100; at MV100 it consumes nothing. Set elapsed
+  input/clock so ordinary regeneration does not alter these literal answers.
+  Nonfood, nested, foreign, dropped, worn and spent targets refuse with no effects.
+  Retrieve a stored/corpse apple, then Eat the original ID successfully.
+- No ordinary action or forged delta can return consumed food to inventory/room,
+  move nonfood into terminal custody or enter from a foreign holder. Same invocation
+  yields one confirmed receipt/benefit; a fresh Eat of the spent ID refuses.
+- Run four lawful Q2/A1 paths for cottage/cot/Green output, with pinned outcome,
+  original Wren identity/location and unchanged Elspeth at Ferry Landing. Include
+  missing/following and missing/separated escort visits to the cottage. A rescued
+  cottage visit must not assert physical presence there; stays must remain distinct.
+- Controlled schedule boundary/reopen proves Gareth smithy→inn→smithy and Ada
+  orchard→cottage→orchard, correct current dusk initial positions, no arrival gate.
+- Named red controls: omit terminal transfer (repeat benefit), allow transfer out,
+  allow indirect/foreign food, consume at full MV, omit cap, collapse stays into
+  rescued or teleport Wren on cottage arrival. Reuse B5 harvest and schedule
+  controls unless D4 introduces a distinct failure. If generic transfer guards
+  change, independent literal invalid terminal cases must fail in both kernels.
+- Compiler/loader negatives: missing food capability/API, unknown resource,
+  zero/negative/unsafe benefit, malformed catalog/ref, edible container/equipment/
+  fuel/vessel; validate short-ref expansion and exact alias view→invocation.
+  Apply the contract-lesson schema mutant sweep to actual changed schema bounds.
 
-Browser: traverse all three rooms; inspect cot/forge/orchard, meet both actors, Forage→inventory apple→Eat, observe depleted feedback; refresh after harvest and after each terminal-state variant. Actual SQLite reopens depleted, pending regrowth and actor scheduled-movement states and the later Eat consumer. Stop if copied prototype prose makes Gareth offer repair, adds a duplicate lantern/Wren, or B5 stock/ownership cannot safely compose.
+## Save, UI and delivery proof
 
-## Shared delivery and proof contract
+Read `AGENTS.md`, [workflow](../../WORKFLOW.md) and relevant lessons:
+[mechanics](../../lessons/mechanics.md), [storage](../../lessons/storage.md),
+[contracts](../../lessons/contracts.md), [mobile](../../lessons/mobile.md) and
+[evidence](../../lessons/evidence.md). Current-build saves are isolated; never
+reset/re-pin an owner save. No preview/native/save work is authorized by this plan.
 
-This is a **provisional, source-unbuilt PM recommendation**, not a specification amendment, source GO, review approval or completed check. Parent PM must adopt its policy and re-pin the actual merged prerequisites before assigning source work. Initial inspected baseline was clean PM `0fbd2847`/chapter v011/API1.10. Revalidated during final planning: clean PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` records PR190 merged as `05b0cb6f`, chapter `ashmere_missing_child@0.0.12`/API1.11 with the typed escort/fatal-separation/return contract. This is a provisional baseline only; each future A–D prerequisite still needs its own exact merged-source re-pin. Target main/source SHA, release/API version, content hash, allocation oracle and PR number are **null** until that source exists. The branch below is proposed, not created.
+Later source proof uses the existing real-SQLite harness at every committed
+intermediate named in the save clause, including subsequent actual Eat, schedule
+movement and valid escort/child states. Require genuinely failed COMMIT, uncertain
+COMMIT committed/absent branches, lost acknowledgement and receipt replay. Corrupt
+current custody, holder mapping, Eat item/actor/source/destination/benefit linkage
+and stale pins must refuse safely with typed recovery and unchanged file bytes.
+Browser Book traversal/detail/Forage/inventory/Eat/refusal/refresh proof uses an
+isolated run and is distinct from Node/SQLite proof; native remains paused.
 
-Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
+Independently derive successor artifact hash and every allocated ID; keep frozen
+fixtures untouched. Use `mise exec --`, focused kernel/compiler/host/Book checks,
+headless sim and the full `bin/check_all.sh` gate once per required source handoff.
+Require fresh primary plus separate save/protocol review; use foundation review
+routing if generic proposal/identity guards change. Reviewer derives requirements
+and exercises applicable red controls. Stop for a frozen-fixture, protocol/schema
+shape or active spec conflict, save-safety weakening or growth beyond this one
+complete food outcome; return it to PM before proceeding.
 
-For each new test name the distinct realistic break, use literal expected values independent of the code, and reuse an existing test if it already kills that mutant. Actually plant the named mutation, observe red, restore and observe green. No source-text or registry-count tests. New state must pass real SQLite cold reopen at **every legal committed intermediate**, genuinely failed COMMIT, uncertain COMMIT in both committed and absent branches, lost acknowledgement and same-invocation replay; malformed new rows/evidence must yield typed `save_corrupt` with in-place Start over, never an untyped exception or repair. Memory adopts only confirmed changed rows plus receipt, preserving structural sharing.
-
-Use `mise exec --` and the existing focused kernel/host/Book/compiler harnesses; finish with the normal `bin/check_all.sh`/pre-push gate once and exact-head shared CI, retaining the headless TypeScript `sim` engine checks. Browser Book interaction and refresh/persistence are distinct from Node/real-SQLite host proof. Browser-first iteration is the owner's newer direction in the complete map; publish that workflow routing before source work. Native Android/iOS build, Hermes/device lifecycle and physical harness rows remain deferred to prelaunch tightening. Do not start previews/devices or touch owner saves during this planning task; later browser proof uses an isolated run once authorized.
-
-Developer self-reviews correctness and runs Ponytail Review before handoff. Each source PR needs a fresh primary reviewer; add the workflow's independent save/protocol opinion when those contracts change, and Astra for proposal/foundation changes. Fixes return to the same developer/reviewer. PM verifies all started checks on the exact final head, merges a record-bearing PR with a merge commit, updates ROADMAP status only, and preserves the Claude/Codex handoff. Scope growth past one reviewable complete player outcome, a frozen-fixture conflict, owner-save/destructive work, paid services, weakened recovery/no-wait rules, or a new architecture/spec conflict returns to PM before implementation.
-
-Planning audit: Ponytail review found no new framework or dependency needed; each added semantic surface has the named first consumer above. Correctness review retained exact identity, no-wait, actual route, safe corpse recovery and new-shape save/admission proof. These are design checks only; **no implementation tests, mutations, browser/native proof or independent source approval were run or claimed by this planning task**.
+Planning self-review: removed fictional B5 regrowth/B8 Eat reuse, retained finite
+identity/load/recovery and exact child status. Ponytail Review: no new stock ledger,
+physiology, restock or event framework; only the first-consumer terminal invariant
+is added. This task runs docs/diff checks only, with no implementation test,
+mutation, browser/native proof or independent approval claim.

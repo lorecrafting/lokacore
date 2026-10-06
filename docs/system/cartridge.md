@@ -1116,3 +1116,51 @@ cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
 Future integrated release/API/hash/allocated IDs remain null until B8 source and
 review merge and independent current answers are derived.
+
+## D4 homes and orchard declarations
+
+**Selected plan; source pending.** [D4 mechanics](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+uses these three public reciprocal additions from archived
+[00a §§2/4/5/10/11](../archive/spec/00a-chapter-one-content.md):
+
+| Existing/new room and exit | Reciprocal destination and exit |
+|---|---|
+| Village Green / west | Smithy / east |
+| Smithy / west | Orchard / east |
+| North Gate / west | Elspeth Cottage / east |
+
+Forge/anvil/tools, apple trees/beehive and cot/hearth are inspectable details.
+The forge is cold; no repair, honey, property, seasonal system or extra quest is
+advertised. Cottage adds no lantern: B4's actual torch/oil source remains the
+only adopted light supply. Elspeth's Q1/Q2 conversations stay at Ferry Landing.
+Gareth follows smithy 08–18, Drowned Lantern 18–22, smithy 22–08; Ada follows
+orchard 07–17 and cottage 17–07. At the current 64800 dusk start, initialize
+Gareth at Drowned Lantern and Ada at the cottage, then use existing next-hour
+schedule jobs. Neither actor controls orchard food or a required story action.
+
+Author `apple_01`, `apple_02`, `apple_03` initially directly in orchard, each
+**100g**, noncontainer, nonwearable and edible. These three apples are the only
+opted food in this slice; B8 meals remain immediate services. The trees' Harvest label is
+**Forage** and binds exactly these three IDs; it transfers one lowest eligible
+EntityId as B5 does. Ordinary Take shares their supply. Each apple declares
+`edible {resource: mv, amount: 6, label: action.eat,
+narration: narration.eat_apple}`: one whole apple gives up to **6 MV** with no
+partial fruit. Full MV refuses without consuming. No restock or promised future
+nutrition model is required; the finite B8 meal remains a separate optional supply.
+
+Compiler and loader require `food@1` plus the successor API for edible fields,
+local declared recovery-pool references, positive safe-integer amount and valid
+catalog keys, and reject edible containers, equipment, fuel or liquid vessels.
+Expand source short references at the real new field. Edibility belongs to an
+immutable item definition; the terminal holder is generated metadata, never
+cartridge-authored. Successor release/API/hash/IDs remain null until source exists.
+
+Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
+Green's installed terminal variants. Missing means the search is unfinished;
+rescued acknowledges return to Elspeth at the landing; stays acknowledges the
+living child's choice with Vesper and delivered message; lost acknowledges grief.
+Cot prose never asserts current bodily presence. Q2/A1 alone own outcome/location:
+rescued Wren remains at Ferry Landing, stays Wren remains at Fox Hollow, and lost
+neither deletes nor relocates the original Fox Hollow actor. Missing can include
+following/separated escort intermediates anywhere on the route. Do not teleport
+Wren on cottage arrival or turn an unfinished escort into a returned child.

@@ -709,3 +709,21 @@ uses the original invocation and context and shows save not confirmed. Confirmed
 final acknowledgement displays the once-only memory and truthful resolved S10
 journal, also after lost reply/replay/reopen. There is no optimistic dream_seen,
 clock pause, body/map switch, second event transcript or presenter gameplay writer.
+
+## D4 home details and carried-food Eat
+
+**Selected plan; not implemented.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
+use ordinary exits, inspectable details and NPC dialogue. Orchard trees expose
+Forage only through the existing exact Harvest offer; Carrying's actual apple
+detail exposes its declared Eat action and capped MV benefit only when admitted.
+No apple or benefit appears from menu opening or pending save. Confirmed Eat
+removes that identity from Carrying/load and presents its committed narration
+once; full-MV or stale-custody refusal redraws actual inventory/resources. Depleted
+orchard feedback reflects actual custody, including ordinary Take/Drop.
+
+Refresh/reopen renders truthful cottage/cot and Green variants without moving
+Elspeth or Wren. Scheduled absence never becomes a required wait. Browser proof
+traverses all three additions, meets Gareth/Ada on controlled schedule states,
+Forages, stores/retrieves, Eats, exhausts stock and refreshes after each boundary.
+Use an isolated current-build browser save under the web-first policy; Node and
+real-SQLite proof are separate. Native/owner-save proof remains paused.
