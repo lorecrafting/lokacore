@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **16 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, D5, D2). The latest source publication is
-[#226](https://github.com/lorecrafting/lokacore/pull/226), B9 paid Rest, resumable dream and acknowledged memory.
+Local and GitHub `main` have completed **17 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2). The latest source publication is
+[#229](https://github.com/lorecrafting/lokacore/pull/229), C3 persistent Fen hounds and conserved corpse loot.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -271,14 +271,20 @@ Restart are playable. The completed Web save opened cold twice after published
 Browser fatal/Restart remains a named E3 proof obligation.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
-and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
-re-pinned to published B6 v023/API1.21, with
-[independent readiness review](reviews/2026-10-05-c3-source-readiness-review.md)
-approved and published in #211. The earlier equal-time conflict finding was fixed
-in its [plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md).
-C2 is published; C3 source implementation is active in an isolated branch from
-its exact PR head. Final successor pins, reviews and proof remain ahead. C4
-hound aggression, pack assistance and flight is a separate planned slice.
+and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md).
+It is published in [#229](https://github.com/lorecrafting/lokacore/pull/229)
+at chapter 0.0.29/API1.25, hash
+`f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`
+and 140 starting IDs. A bounded hound population persists through day/night replacement;
+their fights create real corpses with conserved pelt loot. Confirmed Take stays on
+the corpse detail, with Back to World. The
+[primary](reviews/2026-10-06-c3-living-hounds-primary-review.md),
+[save/protocol](reviews/2026-10-06-c3-hounds-save-second-review.md) and
+[Astra proposal](reviews/2026-10-06-c3-proposal-astra-review.md) reviews approved
+after remount, receipt-replay and birth-membership findings were fixed. The exact
+source passed the local gate, all six hosted checks and final Astra review;
+the record-only head passed its applicable hosted checks. C4 hound aggression,
+pack assistance and flight remains a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)

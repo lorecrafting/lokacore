@@ -395,3 +395,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B9 integrated save/protocol carryover](2026-10-06-b9-lantern-dream-save-carryover-review.md): combined source `066bfda4`, scoped comment/Book-label corrections through `7bc3f745`, evidence `a39d698c`, independent APPROVE; 17 focused tests, 14 disk-backed receipt forgeries, three mixed Read/dream routes and two red controls verified.
 
 - [C3 published-B9 successor primary carryover](2026-10-06-c3-living-hounds-primary-review.md#b9-integrated-successor-carryover--approve): source `f96e0245`, frozen evidence `33163a1b`, APPROVE; R1/R2 remain closed. Independent v029/API1.25 canonical hash and all 140 actual genesis IDs verified, compiled bytes match, 25 focused and 15 Book polish cases pass, D2 remounts and both dream routes on actual v029 pass; 13 evidence hashes verified. No source edit, preview or native work.
+
+- [C3 publication status](2026-10-06-c3-publication-status-review.md): PM status head `2a809bd3`, independent APPROVE; actual PR229 merge/hosted jobs/review closure and v029 pins verified, 33 issues/17 closed, only C3 transition, portable acyclic export.
