@@ -363,3 +363,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
 
 - [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; scoped fix round 1 `99f757a0`, APPROVE, RKT-01 closed by retained verbatim owner statement and labeled interpretation.
+
+- [D5 dry Deep Fen independent planning review](2026-10-05-d5-deep-fen-plan-review.md): exact planning head `2b0d5a6b29fdaa1573525f1dd404dc03d03c815c`, APPROVE; naturally lit original-Wren recovery, literal reciprocal route, unique message, ordinary no-credit Read and D2/B6 cross-reference verified. No findings; source and gameplay proof remain ahead.

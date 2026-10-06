@@ -709,3 +709,14 @@ uses the original invocation and context and shows save not confirmed. Confirmed
 final acknowledgement displays the once-only memory and truthful resolved S10
 journal, also after lost reply/replay/reopen. There is no optimistic dream_seen,
 clock pause, body/map switch, second event transcript or presenter gameplay writer.
+
+## D5 Deep Fen detail pages
+
+[D5](mechanics.md#d5-dry-deep-fen-exploration-selected-contract) uses the existing
+World exits, adjacent sight, NPC details and [notice-detail flow](#notice-board-details).
+The ward stone opens its exact ordinary Read offer; only confirmed narration
+appears in its detail history, and local Back returns to World. Examine/Read
+never claims message custody, topic learning or child return credit. Landscape
+text describes dry footing and natural den light, without a bottom, far Scan,
+fishing, drift or nest action that the actual projection cannot offer. The
+original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
