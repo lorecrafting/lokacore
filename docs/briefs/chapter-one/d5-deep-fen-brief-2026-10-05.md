@@ -119,6 +119,7 @@ one complete player outcome. Developer self-reviews correctness and Ponytail;
 a fresh reviewer applies the workflow's extra-review triggers if scope changes.
 
 Planning self-review removed the false dark-NPC recovery assumption and optional
-branch-aware prose. No framework/dependency or broad future proof scaffolding is
+branch-aware prose, and corrected B6's stale D2/D5 grant attribution to link
+D2's real Ward grant and D5's descriptive stone. No framework/dependency or broad future proof scaffolding is
 needed. Only documentation/diff checks were run for planning; no implementation,
 mutation, browser/native proof or independent approval is claimed.

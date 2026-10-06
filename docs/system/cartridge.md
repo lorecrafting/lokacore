@@ -854,7 +854,9 @@ His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
 Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
 self-luminous Seek marker and discovered wisp have explicit visibility metadata;
 other details have no exemption. Old Causeway's carved fox is flavor in B6 and
-must not silently grant ward before the riddle; D2/D5 own later discoveries.
+must not silently grant ward before the riddle;
+[D2 held books](#d2-public-priory-and-book-authoring) own the later Ward grant.
+[D5's stone](#d5-deep-fen-route-and-details) remains descriptive.
 Bind one actual authored wisp, resident at every hour, not a timed population.
 
 | Chapter setting | Selected value |
