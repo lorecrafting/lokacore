@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D7 deer final save, protocol and foundation second opinion](2026-10-06-d7-deer-final-save-review.md): PR #253 exact `776742a6`, independent APPROVE; TS/Elixir cancellation fixture parity, 5 real-SQLite deer tests, OR-branch mutant red/restored green, forged deer transfer refused, v036/API1.31/hash/199 IDs rechecked. Primary verdict and PM merge remain separate.
+
 - [D7 deer provisional primary source](2026-10-06-d7-deer-provisional-primary-review.md): original `3d198c17` CHANGES REQUIRED; scoped fix `103fac5a` APPROVE closes hound-sight loader mismatch. Focused 15 kernel and 3 Elixir tests pass; compiler and loader guard mutations red. Final predecessor pin, browser and hosted gates remain pending.
 
 - [D7 equal-time round and sight policy](2026-10-06-d7-equal-time-policy-review.md): exact planning head `8085ce5d`, independent APPROVE; checked narrow matching round-to-sight group handoff, both job orders, stale/fatal/blocked/intervening paths and save/Book proof obligations. No source approval.

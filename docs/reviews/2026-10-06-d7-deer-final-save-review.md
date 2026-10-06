@@ -1,0 +1,15 @@
+# D7 final save, protocol and foundation second opinion
+
+**PR #253 source head:** `776742a611bd5194ac2cdd26968ac76dfcb0333a`. **Verdict: APPROVE.** I authored none of the source or planning. No open findings.
+
+## Obligations checked before the diff
+
+The [D7 composition](../system/protocol.md#d7-sight-flight-composition-planning-contract) requires one generation-bound sight occurrence, exact transfer cause, ordinary equal-time job order and only the checked matching round-to-sight writer-group reuse. The [save clause](../system/save.md#d7-deer-recovery-planning-contract) requires atomic changed rows and receipt, corruption refusal on forged binding or cause, cold reopen across sight, combat, death and replacement, and failed/uncertain COMMIT recovery. The [contract clause](../system/protocol.md#contracts) requires TS/Elixir parity and frozen fixtures; the [brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) requires v036/API1.31 and independently pinned hash/IDs.
+
+## Review and proof
+
+- Inspected the exact diff in `requiredUnless` schema/compiler/TS and Elixir validators, `compose_sight`, both prior/result sight invariants, proposal handoff extraction and callers, typed slot/job/created rows, `sightsValid`, receipt recovery, and real SQLite fault cases. The multi-alternative schema requires identical nonempty fallback lists, and both validators waive the encounter ID when either declared alternative is present. `job.cancel` composition separately rejects mixed identities and checks the pending row. Equal-time group reuse requires a surviving predecessor, matching current successor and sight binding; the foundation and result checks constrain the same pair.
+- Independently ran the TS cancellation fixture and five real-SQLite deer tests: **6/6 pass**. Independently ran the Elixir cancellation fixture: **1/1 pass**. Changed the TS alternative predicate from `some` to `every` in this detached review worktree: the literal fixture failed at `/encounter_id`; restored source passed. A temporary unreceipted deer transfer within its allowed pair was refused as `save_corrupt`; restored the test file. The developer's retained schema sweep reports 32 mutants, 30 fixture reds, two schema refusals, zero survivors; its hashed logs verify. Hosted PR #253 checks on this exact head all completed successfully, including browser, Elixir, TypeScript and headless simulation.
+- The independent oracle extends the frozen v035 artifact with literal deer declarations and separately canonicalizes/hash checks v036; it reports `b0c0da219ee8d19a5d6bf0e9d6a18c138d9c5da1543c28e8b1949d5e17aebfc0` and 199 genesis IDs. The compiler comparison is true. I found no safe simplification of the trust-boundary checks; Ponytail Review: lean enough for this contract.
+
+**Limits:** I did not rerun the full gate or browser in this review worktree; their exact-head hosted jobs and retained local logs are green. This record is a second opinion; the separate primary verdict and PM's exact-head merge gate still apply.
