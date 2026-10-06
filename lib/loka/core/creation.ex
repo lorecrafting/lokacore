@@ -49,6 +49,7 @@ defmodule Loka.Core.Creation do
     origin["kind"] == "death" and owner
   end
 
+  # ponytail: initial room or paired-pelt placement stays one guard. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   def initial?(op, state, overlay) do
     created = overlay[key(%{"kind" => "entity", "entity_id" => op["entity_id"]})]
     group = op["writer_group"]

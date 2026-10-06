@@ -8,13 +8,12 @@ defmodule Loka.Core.InvariantsPopulation do
         false
 
       {rows, changed} ->
-        Enum.all?(changed, fn at ->
-          Enum.any?(result["changes"], fn c ->
-            Compose.key(c["target"]) == at and c["value"] == rows[at]
-          end)
-        end)
+        Enum.all?(changed, &written?(result, &1, rows[&1]))
     end
   end
+
+  defp written?(result, at, row),
+    do: Enum.any?(result["changes"], &(Compose.key(&1["target"]) == at and &1["value"] == row))
 
   defp step(%{"op" => kind} = op, {rows, changed}, state)
        when kind in ~w(population.control population.slot) do

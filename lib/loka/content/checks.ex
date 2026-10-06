@@ -2,7 +2,6 @@
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
-
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
@@ -27,19 +26,8 @@ defmodule Loka.Content.Checks do
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
-  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m) do
-    plan
-    |> Map.put("bundle", ref(b, "population_bundle", m))
-    |> Map.put("home", ref(home, "room", m))
-    |> Map.put("area", Enum.map(area, &ref(&1, "room", m)))
-  end
-
-  def expand(%{"npc" => n, "item" => i, "corpse" => c} = bundle, m) do
-    bundle
-    |> Map.put("npc", ref(n, "npc", m))
-    |> Map.put("item", ref(i, "item", m))
-    |> Map.put("corpse", ref(c, "item", m))
-  end
+  def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
+    do: Loka.Content.Population.expand(value, m)
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))

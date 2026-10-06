@@ -709,12 +709,17 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/population/shared.ts",
-      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/mechanics/population/birth.ts",
+      "kernel/ts/src/foundation/compose_population.ts",
       "kernel/ts/src/runtime/created.ts",
-      "lib/loka/core/compose.ex"
+      "kernel/ts/src/runtime/invariants_population.ts",
+      "lib/loka/core/compose_population.ex",
+      "lib/loka/core/invariants_population.ex"
     ],
     "fixtures": [
-      "protocol/fixtures/population_composition.json"
+      "protocol/fixtures/population_composition.json",
+      "protocol/fixtures/missing_child_v026_hash.json",
+      "protocol/fixtures/missing_child_v026_ids.json"
     ],
     "invariants": [
       "delta_preconditions_hold",

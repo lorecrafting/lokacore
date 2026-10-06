@@ -32,17 +32,11 @@ export function deathSequence(
   validateFatal(world, fatal);
   const { loss, owner_id } = fatal;
   const victim_id = loss.entity_id;
-  const settings = world.cartridge.world!.death!;
   const player = owner_id !== null;
   const room_id = world.state.containers[victim_id];
   const id = mint() as DomainEvent['id'];
   const corpse_id = mint() as EntityId;
-  const spawned = world.state.created?.[victim_id];
-  const population =
-    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
-      ? world.populationSpecs[key(spawned.origin.by)]
-      : undefined;
-  const definition = player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
+  const definition = corpseDefinition(world, victim_id, player);
   const writer_group = loss.writer_group;
   const ops: DeltaOp[] = [
     {
@@ -63,16 +57,40 @@ export function deathSequence(
     },
   ];
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group));
-  if (population && spawned?.origin.kind === 'spawned') {
-    const plan = spawned.origin.by;
-    const slot = spawned.origin.slot;
-    const target = key({ kind: 'population_slot', plan, slot });
-    const before = world.state.population_slots?.[target];
-    if (!before || before.member_id !== victim_id || before.replacement_due !== null)
-      throw new KernelError('precondition_failed');
-    ops.push({
+  ops.push(...populationLoss(world, loss));
+  if (player) ops.push(...returnBody(world, fatal));
+  const died = deathEvent(world, command, fatal, id, corpse_id, player);
+  return { ops, events: [died], corpse_id };
+}
+
+function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
+  const settings = world.cartridge.world!.death!;
+  const spawned = world.state.created?.[victim_id];
+  const population =
+    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
+      ? world.populationSpecs[key(spawned.origin.by)]
+      : undefined;
+  return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
+}
+
+function populationLoss(world: World, loss: Loss): DeltaOp[] {
+  const spawned = world.state.created?.[loss.entity_id];
+  if (spawned?.origin.kind !== 'spawned' || spawned.origin.role !== 'hound') return [];
+  const plan = spawned.origin.by;
+  const population = world.populationSpecs[key(plan)];
+  const slot = spawned.origin.slot;
+  const before = world.state.population_slots?.[key({ kind: 'population_slot', plan, slot })];
+  if (
+    !population ||
+    !before ||
+    before.member_id !== loss.entity_id ||
+    before.replacement_due !== null
+  )
+    throw new KernelError('precondition_failed');
+  return [
+    {
       op: 'population.slot',
-      writer_group,
+      writer_group: loss.writer_group,
       plan,
       slot,
       expected: before,
@@ -80,11 +98,8 @@ export function deathSequence(
         ...before,
         replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
       },
-    });
-  }
-  if (player) ops.push(...returnBody(world, fatal));
-  const died = deathEvent(world, command, fatal, id, corpse_id, player);
-  return { ops, events: [died], corpse_id };
+    },
+  ];
 }
 
 function validateFatal(world: World, fatal: Fatal) {

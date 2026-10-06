@@ -4,6 +4,11 @@ import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
+import {
+  populationTransition,
+  initializePopulationResource,
+  populationRow,
+} from './compose_population.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 // StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
@@ -24,8 +29,8 @@ export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
 
-type Written = { group: number; target: MutationTarget; value: Json };
-type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
+export type Written = { group: number; target: MutationTarget; value: Json };
+export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
 
 const DOOR: Record<string, string[]> = {
@@ -108,14 +113,10 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
+  if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign':
       return assign(op, row, ctx);
-    case 'entity.create':
-      return check(
-        row === undefined && creationValid(op.identity as unknown as Json, ctx.state),
-        op.identity as Json,
-      );
     case 'entity.transfer':
       return transferOp(op, row, ctx);
     case 'quest.activate':
@@ -133,18 +134,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'patrol.transition':
       return transitionPatrol(op, row);
     case 'population.control':
-      return check(
-        same(row ?? null, op.expected) &&
-          (row === undefined ||
-            op.value.next_wander_due >= (row as typeof op.value).next_wander_due) &&
-          (row === undefined || op.value.job_id !== (row as typeof op.value).job_id),
-        op.value as Json,
-      );
     case 'population.slot':
-      return check(
-        same(row ?? null, op.expected) && populationSlot(row, op.value),
-        op.value as Json,
-      );
+      return populationTransition(op, row);
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
@@ -153,31 +144,24 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
-    case 'resource.initialize': {
-      const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
-      const origin = (created?.value as Obj | undefined)?.origin as Obj | undefined;
-      const spec =
-        origin?.kind === 'spawned'
-          ? (section(ctx.state, 'population_specs')[key(origin.by)] as Obj | undefined)
-          : undefined;
-      return check(
-        row === undefined &&
-          created?.group === op.writer_group &&
-          origin?.role === 'hound' &&
-          origin.member_id === op.entity_id &&
-          op.resource.kind === 'resource' &&
-          op.resource.key === 'hp' &&
-          op.at >= ctx.state.clock &&
-          op.at <= ctx.horizon &&
-          op.value === (spec?.hp as Obj | undefined)?.start,
-        { value: op.value, at: op.at },
-      );
-    }
+    case 'resource.initialize':
+      return initializePopulationResource(op, row, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition':
       return barrier(op, row, ctx);
   }
+}
+
+function createEntity(
+  op: Extract<DeltaOp, { op: 'entity.create' }>,
+  row: Json | undefined,
+  state: State,
+): Outcome {
+  return check(
+    row === undefined && creationValid(op.identity as unknown as Json, state),
+    op.identity as Json,
+  );
 }
 
 function encounter(
@@ -237,6 +221,7 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
   const s = ctx.state;
+  if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
   switch (t.kind) {
     case 'fact':
       return get(section(s, 'facts'), key(t));
@@ -254,10 +239,6 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
-    case 'population_plan':
-      return get(section(s, 'population_plans'), key(t.plan));
-    case 'population_slot':
-      return get(section(s, 'population_slots'), key(t));
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
     case 'liquid':
@@ -299,31 +280,4 @@ function barrier(
 function assign(op: Extract<DeltaOp, { op: 'fact.assign' }>, row: Json | undefined, ctx: Ctx) {
   const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
   return check(now !== undefined && same(now, op.expected), op.value);
-}
-
-function populationSlot(
-  row: Json | undefined,
-  next: Extract<DeltaOp, { op: 'population.slot' }>['value'],
-) {
-  if (row === undefined)
-    return (
-      (next.generation === 0 && next.member_id === null && next.replacement_due === null) ||
-      (next.generation === 1 && next.member_id !== null && next.replacement_due === null)
-    );
-  const prior = row as typeof next;
-  if (prior.generation === 0)
-    return next.generation === 1 && next.member_id !== null && next.replacement_due === null;
-  if (prior.replacement_due === null)
-    return (
-      prior.member_id !== null &&
-      next.generation === prior.generation &&
-      next.member_id === prior.member_id &&
-      next.replacement_due !== null
-    );
-  return (
-    next.generation === prior.generation + 1 &&
-    next.member_id !== null &&
-    next.member_id !== prior.member_id &&
-    next.replacement_due === null
-  );
 }

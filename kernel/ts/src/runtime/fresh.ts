@@ -29,6 +29,15 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
   const mint = () => id(context, NIL, ordinal++) as EntityId;
+  return initialPopulation(baseWorld(cartridge, context, seed, mint), mint, NIL as never);
+}
+
+function baseWorld(
+  cartridge: Cartridge,
+  context: WorldContextId,
+  seed: RngState,
+  mint: () => EntityId,
+): World {
   const [character, body] = [mint() as string as CharacterId, mint()];
   const refs = Object.keys(cartridge.rooms).sort(cmp);
   const roomIds = Object.fromEntries(refs.map((r) => [r, mint()]));
@@ -56,17 +65,23 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     capacities,
     liquidSpecs,
     knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character),
-    corpseTemplates: corpseTemplates(cartridge),
-    populationSpecs: populationSpecs(cartridge, roomIds),
+    ...staticSpecs(cartridge, roomIds),
     slots,
-    factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
-    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
     entityResourceSpecs,
-    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
-    attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
     state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel, liquids }) },
   };
-  return initialPopulation(world, mint, NIL as never);
+  return world;
+}
+
+function staticSpecs(cartridge: Cartridge, roomIds: World['roomIds']) {
+  return {
+    corpseTemplates: corpseTemplates(cartridge),
+    populationSpecs: populationSpecs(cartridge, roomIds),
+    factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
+    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
+    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
+    attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
+  };
 }
 
 // A definition map's values by canonical DefinitionRef text, as composition reads them (the

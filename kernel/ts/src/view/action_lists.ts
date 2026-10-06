@@ -23,6 +23,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
@@ -40,7 +41,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-const HIDDEN = ['use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = ['buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -224,7 +225,7 @@ function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site
 function movable(world: World, a: Offered, id?: string): boolean {
   return (
     !id ||
-    !world.state.created?.[id] ||
+    movableItem(world, id as EntityId) ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
 }

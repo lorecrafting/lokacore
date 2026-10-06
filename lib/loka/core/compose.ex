@@ -231,24 +231,8 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
 
-  defp apply_op(%{"op" => "population.control"} = op, t, ctx) do
-    row = read(t, ctx)
-    value = op["value"]
-
-    check(
-      row == op["expected"] and
-        (row == nil or
-           (value["next_wander_due"] >= row["next_wander_due"] and
-              value["job_id"] != row["job_id"])),
-      value
-    )
-  end
-
-  defp apply_op(%{"op" => "population.slot"} = op, t, ctx) do
-    row = read(t, ctx)
-    value = op["value"]
-    check(row == op["expected"] and population_slot?(row, value), value)
-  end
+  defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
+    do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
   defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
     do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
@@ -265,22 +249,8 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "resource.adjust"} = op, t, {state, horizon, _} = ctx),
     do: Loka.Core.Resource.compose_adjustment(op, read(t, ctx), state, horizon)
 
-  defp apply_op(%{"op" => "resource.initialize"} = op, t, {state, horizon, overlay} = ctx) do
-    created = overlay[key(%{"kind" => "entity", "entity_id" => op["entity_id"]})]
-    {group, _, identity} = created || {nil, nil, nil}
-    origin = if identity, do: identity["origin"], else: %{}
-    spec = section(state, "population_specs")[key(origin["by"])]
-
-    check(
-      read(t, ctx) == nil and group == op["writer_group"] and
-        origin["kind"] == "spawned" and origin["role"] == "hound" and
-        origin["member_id"] == op["entity_id"] and
-        op["resource"]["kind"] == "resource" and op["resource"]["key"] == "hp" and
-        op["at"] >= state["clock"] and op["at"] <= horizon and
-        spec != nil and op["value"] == spec["hp"]["start"],
-      %{"value" => op["value"], "at" => op["at"]}
-    )
-  end
+  defp apply_op(%{"op" => "resource.initialize"} = op, t, ctx),
+    do: Loka.Core.ComposePopulation.initialize(op, read(t, ctx), ctx)
 
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
@@ -312,11 +282,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
 
-  defp base(%{"kind" => "population_plan", "plan" => p}, s),
-    do: section(s, "population_plans")[key(p)]
-
-  defp base(%{"kind" => "population_slot"} = t, s),
-    do: section(s, "population_slots")[key(t)]
+  defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
 
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
   defp base(%{"kind" => "liquid", "item_id" => i}, s), do: section(s, "liquids")[i]
@@ -324,35 +290,6 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
   defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]
   defp base(%{"kind" => "barrier"} = t, s), do: section(s, "barriers")[key(t)]
-
-  defp population_slot?(nil, %{"generation" => 0, "member_id" => nil, "replacement_due" => nil}),
-    do: true
-
-  defp population_slot?(nil, %{"generation" => 1, "member_id" => member, "replacement_due" => nil}),
-       do: member != nil
-
-  defp population_slot?(%{"generation" => 0}, %{
-         "generation" => 1,
-         "member_id" => member,
-         "replacement_due" => nil
-       }),
-       do: member != nil
-
-  defp population_slot?(
-         %{"generation" => generation, "member_id" => member, "replacement_due" => nil},
-         %{"generation" => generation, "member_id" => member, "replacement_due" => due}
-       ),
-       do: member != nil and due != nil
-
-  defp population_slot?(
-         %{"generation" => generation, "member_id" => member, "replacement_due" => due},
-         %{"generation" => next_generation, "member_id" => next_member, "replacement_due" => nil}
-       ),
-       do:
-         due != nil and next_generation == generation + 1 and next_member != nil and
-           next_member != member
-
-  defp population_slot?(_, _), do: false
 
   # d is e or inside it. A walk longer than the containment rows means a cyclic base: fail closed.
   defp inside?(nil, _, _, _), do: false

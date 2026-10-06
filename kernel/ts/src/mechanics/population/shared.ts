@@ -13,6 +13,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { passage } from '../movement/shared.ts';
+import { birth } from './birth.ts';
 
 const planRef = (world: World, key: string): DefinitionRef => ({
   cartridge_id: world.cartridge.manifest.id,
@@ -21,121 +22,81 @@ const planRef = (world: World, key: string): DefinitionRef => ({
   key: key as DefinitionRef['key'],
 });
 
-/** A checked birth sequence reused by genesis and the one plan-owned job. */
-export function birth(
-  world: World,
-  plan: DefinitionRef,
-  slot: number,
-  generation: number,
-  occurrence_id: CommandId,
-  at: number,
-  mint: Mint,
-  writer_group = 0,
-): DeltaOp[] {
-  const spec = world.populationSpecs[key(plan)];
-  if (!spec) throw new KernelError('precondition_failed');
-  const member_id = mint() as EntityId;
-  const pelt_id = mint() as EntityId;
-  const origin = {
-    kind: 'spawned' as const,
-    by: plan,
-    bundle: spec.bundle,
-    slot,
-    generation,
-    occurrence_id,
-    member_id,
-  };
-  const resource = { ...plan, kind: 'resource' as const, key: 'hp' as DefinitionRef['key'] };
-  return [
-    {
-      op: 'entity.create',
-      writer_group,
-      identity: {
-        id: member_id,
-        definition: spec.hound,
-        origin: { ...origin, role: 'hound' },
-      },
-    },
-    {
-      op: 'entity.transfer',
-      writer_group,
-      entity_id: member_id,
-      source_id: null,
-      destination_id: spec.home,
-    },
-    {
-      op: 'entity.create',
-      writer_group,
-      identity: {
-        id: pelt_id,
-        definition: spec.pelt,
-        origin: { ...origin, role: 'pelt' },
-      },
-    },
-    {
-      op: 'entity.transfer',
-      writer_group,
-      entity_id: pelt_id,
-      source_id: null,
-      destination_id: member_id,
-    },
-    {
-      op: 'resource.initialize',
-      writer_group,
-      resource,
-      entity_id: member_id,
-      value: spec.hp.start,
-      at,
-    },
-  ];
-}
-
 export function initialPopulation(world: World, mint: Mint, occurrence_id: CommandId): World {
   let current = world;
   for (const plan of Object.values(world.cartridge.populations ?? {})) {
     const ref = planRef(world, plan.key);
-    const hour =
-      Math.floor(current.state.clock / current.cartridge.calendar!.units_per_hour!) %
-      current.cartridge.calendar!.hours_per_day!;
-    const night = hour >= plan.night_start || hour < plan.night_end;
-    const count = night ? plan.night_target : plan.day_target;
-    const ops: DeltaOp[] = [];
-    for (let slot = 1; slot <= plan.cap; slot++) {
-      const made =
-        slot <= count ? birth(current, ref, slot, 1, occurrence_id, current.state.clock, mint) : [];
-      ops.push(...made);
-      ops.push({
-        op: 'population.slot',
-        writer_group: 0,
-        plan: ref,
-        slot,
-        expected: null,
-        value:
-          slot <= count
-            ? {
-                generation: 1,
-                member_id: (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id,
-                replacement_due: null,
-              }
-            : { generation: 0, member_id: null, replacement_due: null },
-      });
-    }
-    const wander = alignedAfter(current.state.clock, plan.wander_interval);
-    const next = Math.min(wander, nightBoundary(current, plan, current.state.clock));
-    const job_id = mint() as JobId;
-    ops.push({ op: 'job.schedule', writer_group: 0, job_id, job: ref, due_time: next });
-    ops.push({
-      op: 'population.control',
-      writer_group: 0,
-      plan: ref,
-      expected: null,
-      value: { job_id, next_wander_due: wander },
-    });
+    const ops = initialOps(current, ref, plan, mint, occurrence_id);
     const result = apply(current, ops);
     if ('fault' in result) throw new KernelError(result.fault.code);
     current = result.world;
   }
   return current;
+}
+
+function initialOps(
+  world: World,
+  ref: DefinitionRef,
+  plan: World['populationSpecs'][string]['plan'],
+  mint: Mint,
+  occurrence_id: CommandId,
+): DeltaOp[] {
+  const hour =
+    Math.floor(world.state.clock / world.cartridge.calendar!.units_per_hour!) %
+    world.cartridge.calendar!.hours_per_day!;
+  const count =
+    hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
+  const ops = genesisSlots(world, ref, plan.cap, count, occurrence_id, mint);
+  const wander = alignedAfter(world.state.clock, plan.wander_interval);
+  const job_id = mint() as JobId;
+  ops.push(
+    {
+      op: 'job.schedule',
+      writer_group: 0,
+      job_id,
+      job: ref,
+      due_time: Math.min(wander, nightBoundary(world, plan, world.state.clock)),
+    },
+    {
+      op: 'population.control',
+      writer_group: 0,
+      plan: ref,
+      expected: null,
+      value: { job_id, next_wander_due: wander },
+    },
+  );
+  return ops;
+}
+
+function genesisSlots(
+  world: World,
+  ref: DefinitionRef,
+  cap: number,
+  count: number,
+  occurrence_id: CommandId,
+  mint: Mint,
+): DeltaOp[] {
+  const ops: DeltaOp[] = [];
+  for (let slot = 1; slot <= cap; slot++) {
+    const made =
+      slot <= count ? birth(world, ref, slot, 1, occurrence_id, world.state.clock, mint) : [];
+    ops.push(...made, {
+      op: 'population.slot',
+      writer_group: 0,
+      plan: ref,
+      slot,
+      expected: null,
+      value:
+        slot <= count
+          ? {
+              generation: 1,
+              member_id: (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id,
+              replacement_due: null,
+            }
+          : { generation: 0, member_id: null, replacement_due: null },
+    });
+  }
+  return ops;
 }
 
 const alignedAfter = (at: number, interval: number) => (Math.floor(at / interval) + 1) * interval;
@@ -159,19 +120,43 @@ export function runPopulation(
   const plan = world.cartridge.populations?.[refString(job.job)];
   const control = world.state.population_plans?.[key(job.job)];
   if (!plan || !control || control.job_id !== job_id) throw new KernelError('precondition_failed');
+  const target = targetAt(world, plan, job.due_time);
+  const slots = slotRows(world, job.job, plan.cap);
+  const born = births(world, command.id, job, target, slots, mint);
+  const ops: DeltaOp[] = [
+    { op: 'job.complete', writer_group: 0, job_id },
+    ...born.ops,
+    ...wanders(world, plan, job, control, slots, born.ids),
+    ...successor(world, plan, job, control, target, slots, mint),
+  ];
+  return accepted<never>(world, 'job_ran', ops, []);
+}
+
+type Plan = World['populationSpecs'][string]['plan'];
+type Slots = { slot: number; row: NonNullable<World['state']['population_slots']>[string] }[];
+function targetAt(world: World, plan: Plan, at: number) {
   const calendar = world.cartridge.calendar!;
-  const hour = Math.floor(job.due_time / calendar.units_per_hour!) % calendar.hours_per_day!;
-  const night = hour >= plan.night_start || hour < plan.night_end;
-  const target = night ? plan.night_target : plan.day_target;
-  const slots = Array.from({ length: plan.cap }, (_, i) => {
+  const hour = Math.floor(at / calendar.units_per_hour!) % calendar.hours_per_day!;
+  return hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
+}
+function slotRows(world: World, plan: DefinitionRef, cap: number): Slots {
+  return Array.from({ length: cap }, (_, i) => {
     const slot = i + 1;
-    const row =
-      world.state.population_slots?.[key({ kind: 'population_slot', plan: job.job, slot })];
+    const row = world.state.population_slots?.[key({ kind: 'population_slot', plan, slot })];
     if (!row) throw new KernelError('precondition_failed');
     return { slot, row };
   });
-  const ops: DeltaOp[] = [{ op: 'job.complete', writer_group: 0, job_id }];
-  const born = new Set<string>();
+}
+function births(
+  world: World,
+  occurrence_id: CommandId,
+  job: JobRow,
+  target: number,
+  slots: Slots,
+  mint: Mint,
+) {
+  const ops: DeltaOp[] = [];
+  const ids = new Set<string>();
   for (const { slot, row } of slots) {
     if (
       slot > target ||
@@ -180,7 +165,7 @@ export function runPopulation(
     )
       continue;
     const generation = row.generation + 1;
-    const made = birth(world, job.job, slot, generation, command.id, job.due_time, mint);
+    const made = birth(world, job.job, slot, generation, occurrence_id, job.due_time, mint);
     const member_id = (made[0] as Extract<DeltaOp, { op: 'entity.create' }>).identity.id;
     ops.push(...made, {
       op: 'population.slot',
@@ -190,35 +175,56 @@ export function runPopulation(
       expected: row,
       value: { generation, member_id, replacement_due: null },
     });
-    born.add(member_id);
+    ids.add(member_id);
   }
-  if (job.due_time === control.next_wander_due) {
-    const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
-    for (const { row } of slots) {
-      const member = row.member_id;
-      if (
-        !member ||
-        row.replacement_due !== null ||
-        born.has(member) ||
-        !living(world, member) ||
-        engaged(world, member as EntityId)
-      )
-        continue;
-      const from = world.state.containers[member];
-      const to = from === home ? nest : from === nest ? home : undefined;
-      const room = world.rooms[from];
-      const edge =
-        to && Object.entries(room.exits).find(([, e]) => world.roomIds[refString(e.to)] === to);
-      if (!to || !edge || passage(world, room, edge[0] as never)) continue;
-      ops.push({
-        op: 'entity.transfer',
-        writer_group: 0,
-        entity_id: member as EntityId,
-        source_id: from,
-        destination_id: to,
-      });
-    }
+  return { ops, ids };
+}
+function wanders(
+  world: World,
+  plan: Plan,
+  job: JobRow,
+  control: NonNullable<World['state']['population_plans']>[string],
+  slots: Slots,
+  born: Set<string>,
+): DeltaOp[] {
+  if (job.due_time !== control.next_wander_due) return [];
+  const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
+  const ops: DeltaOp[] = [];
+  for (const { row } of slots) {
+    const member = row.member_id;
+    if (
+      !member ||
+      row.replacement_due !== null ||
+      born.has(member) ||
+      !living(world, member) ||
+      engaged(world, member as EntityId)
+    )
+      continue;
+    const from = world.state.containers[member];
+    const to = from === home ? nest : from === nest ? home : undefined;
+    const room = world.rooms[from];
+    const edge =
+      to && Object.entries(room.exits).find(([, e]) => world.roomIds[refString(e.to)] === to);
+    if (!to || !edge || passage(world, room, edge[0] as never)) continue;
+    ops.push({
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: member as EntityId,
+      source_id: from,
+      destination_id: to,
+    });
   }
+  return ops;
+}
+function successor(
+  world: World,
+  plan: Plan,
+  job: JobRow,
+  control: NonNullable<World['state']['population_plans']>[string],
+  target: number,
+  slots: Slots,
+  mint: Mint,
+): DeltaOp[] {
   const wander =
     job.due_time === control.next_wander_due
       ? alignedAfter(job.due_time, plan.wander_interval)
@@ -229,16 +235,15 @@ export function runPopulation(
       : [],
   );
   const next = Math.min(wander, nightBoundary(world, plan, job.due_time), ...eligibleDue);
-  const next_job_id = mint() as JobId;
-  ops.push(
-    { op: 'job.schedule', writer_group: 0, job_id: next_job_id, job: job.job, due_time: next },
+  const job_id = mint() as JobId;
+  return [
+    { op: 'job.schedule', writer_group: 0, job_id, job: job.job, due_time: next },
     {
       op: 'population.control',
       writer_group: 0,
       plan: job.job,
       expected: control,
-      value: { job_id: next_job_id, next_wander_due: wander },
+      value: { job_id, next_wander_due: wander },
     },
-  );
-  return accepted<never>(world, 'job_ran', ops, []);
+  ];
 }

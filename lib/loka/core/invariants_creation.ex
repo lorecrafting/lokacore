@@ -71,6 +71,7 @@ defmodule Loka.Core.InvariantsCreation do
 
   defp paired?(_, _), do: false
 
+  # ponytail: keep one independent birth-resource oracle visible; split if another resource joins. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp initialized?(s, op, prior, ops, result) do
     create =
       Enum.find(prior, fn

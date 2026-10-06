@@ -22,6 +22,7 @@ defmodule Loka.Content.Death do
     Enum.flat_map(Entities.all(defs), &template(&1, m, defs, death))
   end
 
+  # ponytail: the one corpse template check keeps its population exception beside death validation. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp template({"item", rel, %{"location" => %{"in" => "template"}} = i}, m, defs, death) do
     item_ref = ref(i["key"], "item", m)
     corpse = death && item_ref in [death["player_corpse"], death["npc_corpse"]]

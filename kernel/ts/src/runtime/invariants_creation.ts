@@ -8,35 +8,8 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
   const made = new Set<string>();
   const identities = new Map<string, Any>();
   for (const [index, op] of ops.entries()) {
-    if (op.op === 'resource.initialize') {
-      const i = identities.get(op.entity_id);
-      const origin = i?.origin;
-      const spec = origin?.kind === 'spawned' && state.population_specs?.[key(origin.by)];
-      const resource = { ...origin?.by, kind: 'resource', key: 'hp' };
-      const target = { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
-      if (
-        !i ||
-        origin.role !== 'hound' ||
-        origin.member_id !== op.entity_id ||
-        !spec ||
-        op.writer_group !==
-          ops.find((x: Any) => x.op === 'entity.create' && x.identity.id === op.entity_id)
-            ?.writer_group ||
-        !same(op.resource, resource) ||
-        op.value !== spec.hp.start ||
-        op.at < state.clock ||
-        op.at >
-          Math.max(
-            state.clock,
-            ...ops.filter((x: Any) => x.op === 'time.advance').map((x: Any) => x.to),
-          ) ||
-        state.resources?.[key(target)] !== undefined ||
-        !result.changes.some(
-          (c: Any) => same(c.target, target) && same(c.value, { value: op.value, at: op.at }),
-        )
-      )
-        return false;
-    }
+    if (op.op === 'resource.initialize' && !initialized(state, ops, result, op, identities))
+      return false;
     if (op.op === 'entity.transfer' && op.source_id === null) {
       const previous = ops[index - 1];
       if (
@@ -69,6 +42,43 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
     made.add(i.id);
     identities.set(i.id, i);
   }
+  return true;
+}
+
+function initialized(
+  state: Any,
+  ops: Any[],
+  result: Any,
+  op: Any,
+  identities: Map<string, Any>,
+): boolean {
+  const i = identities.get(op.entity_id);
+  const origin = i?.origin;
+  const spec = origin?.kind === 'spawned' && state.population_specs?.[key(origin.by)];
+  const resource = { ...origin?.by, kind: 'resource', key: 'hp' };
+  const target = { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
+  if (
+    !i ||
+    origin.role !== 'hound' ||
+    origin.member_id !== op.entity_id ||
+    !spec ||
+    op.writer_group !==
+      ops.find((x: Any) => x.op === 'entity.create' && x.identity.id === op.entity_id)
+        ?.writer_group ||
+    !same(op.resource, resource) ||
+    op.value !== spec.hp.start ||
+    op.at < state.clock ||
+    op.at >
+      Math.max(
+        state.clock,
+        ...ops.filter((x: Any) => x.op === 'time.advance').map((x: Any) => x.to),
+      ) ||
+    state.resources?.[key(target)] !== undefined ||
+    !result.changes.some(
+      (c: Any) => same(c.target, target) && same(c.value, { value: op.value, at: op.at }),
+    )
+  )
+    return false;
   return true;
 }
 
