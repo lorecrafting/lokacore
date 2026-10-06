@@ -138,6 +138,15 @@ supply a death or Restart route. Existing real-host fatal/Restart proof remains
 distinct, and native/Hermes UI verification remains unclaimed. This follow-up changes
 only C2 docs/evidence, and requires its own quick independent evidence review.
 
+## Simulator coverage inventory followup
+
+The later publication check exposed a missing `patrol_transitions_hold` entry in
+the legacy demo simulator’s per-step inventory. The
+[minimal followup](sim-invariant-coverage/README.md) records the spec-first rule,
+existing failing test, one-entry source fix, actual deletion red control and restored
+simulator/patrol/type checks. Frozen artifacts, generator17 and C2 gameplay/pins
+are unchanged; fresh independent review applies to the narrow simulator change.
+
 ## Integrity
 
 Capture sanitizes home/worktree/scratch and device/provisioning identifiers.
