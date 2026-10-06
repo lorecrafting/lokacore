@@ -61,7 +61,8 @@ defmodule Loka.Content.Entities do
             {"slot", "slot"},
             {"shop", "shop"},
             {"fuel", "fuel"},
-            {"readable", "readable"}
+            {"readable", "readable"},
+            {"edible", "edible"}
           ],
           is_map_key(e, f),
           do: {[f], k}

@@ -1,0 +1,28 @@
+Compiling 66 files (.ex)
+Generated loka app
+Running ExUnit with seed: 182107, max_cases: 16
+
+
+
+  1) test held-food source rejects unsafe or unbound consequences (Loka.ContentFoodTest)
+     test/loka/content_food_test.exs:5
+     ** (MatchError) no match of right hand side value:
+
+         {:ok,
+          "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.29:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.29:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.29:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.29:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.29:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"attributes\":{\"ashmere_missing_child@0.0.29:attribute/dex\":{\"key\":\"dex\",\"start\":10},\"ashmere_missing_child@0.0.29:attribute/per\":{\"key\":\"per\",\"start\":5},\"ashmere_missing_child@0.0.29:attribute/str\":{\"key\":\"str\",\"start\":10}},\"barriers\":{\"ashmere_missing_child@0.0.29:barrier/storage_chest_lid\":{\"initial\":\"locked\",\"key\":\"storage_chest_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"storage_chest_lid\"],\"short\":\"barrier.storage_chest_lid.short\"},\"ashmere_missing_child@0.0.29:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"chapters\":[{\"title\":\"chapter.missing_child\"},{\"story_point\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"prologue_completed\",\"kind\":\"story_point\"},\"title\":\"chapter.prologue_complete\"}],\"dialogues\":{\"ashmere_missing_child@0.0.29:dialogue/a_aldric_debt\":{\"choices\":{\"late\":{\"availability\":{\"from\":151201,\"through\":237600},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.late\",\"narration\":\"narration.aldric_debt.late\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"priory_tithe_delivered\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"late\"},{\"amount\":-1,\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"op\":\"fact.adjust\"}]},\"on_time\":{\"availability\":{\"through\":151200},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.on_time\",\"narration\":\"narration.aldric_debt.on_time\",\"payment\":{\"amount\":10,\"from\":\"aldric\",\"resource\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.29\",\"key\":\"pennies\",\"kind\":\"resource\"}},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missi" <> ...,
+          []}
+
+     code: Enum.with_index(cases, fn {file, change}, i ->
+     stacktrace:
+       test/loka/content_food_test.exs:26: anonymous fn/3 in Loka.ContentFoodTest."test held-food source rejects unsafe or unbound consequences"/1
+       (elixir 1.20.4) lib/enum.ex:5079: Enum.with_index_list/3
+       (elixir 1.20.4) lib/enum.ex:5079: Enum.with_index_list/3
+       test/loka/content_food_test.exs:21: (test)
+
+
+Finished in 0.8 seconds (0.8s async, 0.00s sync)
+
+Result: 0/1 passed
+Failed: 1 test
+
+EXIT 2

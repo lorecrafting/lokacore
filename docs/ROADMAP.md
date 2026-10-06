@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **18 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2, D1). The latest source publication is
-[#231](https://github.com/lorecrafting/lokacore/pull/231), D1 paid ferry, free Sedge swim lesson and safe isle return.
+Local and GitHub `main` have completed **19 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, D5, D2, D1, D4). The latest source publication is
+[#233](https://github.com/lorecrafting/lokacore/pull/233), D4 homes, orchard and finite-apple Forage/Eat.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -289,9 +289,9 @@ pack assistance and flight remains a separate planned slice.
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
 and an independently reviewed provisional implementation. Its primary, save and
-portable-foundation findings are closed on the local corrected source; D1
-integration, successor release/API/hash/IDs, accumulated gate and publication
-remain ahead.
+portable-foundation findings are closed on the local corrected source. D1 is
+integrated provisionally; D4 is published. Final successor release/API/hash/IDs,
+accumulated gate and C4 publication remain ahead.
 
 D2 public Priory rooms and held-book Ward/Bell topics have an
 [adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),
@@ -315,6 +315,35 @@ the [primary](reviews/2026-10-06-d1-ferry-isle-primary-review.md) and
 six source-head hosted checks and final Sol review approved. The controlled
 recovery variant supplies a real island death producer for proof; the public
 isle has no attacker or hazard.
+
+D4 homes and orchard has an [adopted contract](decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
+and [brief](briefs/chapter-one/d4-homes-orchard-brief-2026-10-05.md).
+Its integrated v031/API1.27 source opens Gareth's Smithy, the Orchard and
+Elspeth's Cottage, with finite Forage/Take apples and held-item Eat.
+[PR #233](https://github.com/lorecrafting/lokacore/pull/233) merged at
+`536c80bc76882839465aecc330e22e891e1e137d`: fresh
+[primary](https://github.com/lorecrafting/lokacore/blob/e42d467d/docs/reviews/2026-10-06-d4-integrated-primary-review.md) and
+[save/protocol](https://github.com/lorecrafting/lokacore/blob/e42d467d/docs/reviews/2026-10-06-d4-integrated-save-second-review.md) reviews
+approve, the local gate and isolated browser proof pass, and all six hosted
+checks are green on the exact reviewed head.
+
+D3 western Ashmere has a [brief](briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md)
+and independently approved provisional source for five rooms, Hob, and readable
+mill clues. Final predecessor re-pin, accumulated gate and browser proof follow
+D4/C4 integration.
+
+D6 has a [selected D1-base PM contract](decisions/pm-decision-d6-water-depths-2026-10-06.md)
+and [amended brief](briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
+Published D1 v030/API1.26 is re-pinned, and the corrected selected contract
+passed [fresh scoped review](reviews/2026-10-06-d6-water-depths-selected-review.md).
+Provisional water/expiry/recovery source is compiling; focused proof, successor
+pins, source review and publication remain ahead.
+
+D12 practical herbalism and haggle has a [selected contract](decisions/pm-decision-d12-practical-skills-2026-10-06.md)
+and [brief](briefs/chapter-one/d12-practical-skills-brief-2026-10-05.md) that passed
+[fresh scoped review](reviews/2026-10-06-d12-practical-skills-selected-contract-review.md).
+Provisional source passes focused kernel, SQLite and Book checks; final predecessor
+re-pin, source review, browser proof and publication remain ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

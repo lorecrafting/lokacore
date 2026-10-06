@@ -1,0 +1,23 @@
+✔ loader rejects impossible held-food declarations while retaining capped food (459.480792ms)
+✔ three conserved apples share Take/Drop/Forage stock and exact Eat benefit (110.432375ms)
+✔ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (131.945667ms)
+✔ provisional independent fresh IDs include one roomless consumed holder after slots (59.141708ms)
+(node:44009) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/food.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual Book Item Eat returns World once on normal and uncertain settlement and cold remount (160.383375ms)
+✔ real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers (582.040959ms)
+✔ food-only cold-open refuses plausible bounded forgeries without writing bytes (273.514708ms)
+✔ real failed and committed/absent uncertain COMMIT preserve atomic Eat and exact retry (128.310958ms)
+✔ spent apple and another apple in a real fight corpse both reopen before a later Eat (258.271625ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1556.444709
+
+EXIT 0

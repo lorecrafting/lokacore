@@ -1,0 +1,6 @@
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+[slice/d4-homes-orchard 09695b42] Keep portable invariant documentation within existing source budget
+ 1 file changed, 5 insertions(+), 8 deletions(-)
+
+EXIT 0

@@ -20,6 +20,7 @@ export function elapsedHost(
   path = ':memory:',
   clock = { wall: 10000, mono: 0 },
   bundle = elapsedBundle(),
+  kernel_version = `loka-kernel@${'0'.repeat(40)}`,
 ) {
   const sql = new DatabaseSync(path);
   sql.exec('PRAGMA page_size = 512');
@@ -64,7 +65,7 @@ export function elapsedHost(
   };
   let n = 0;
   const host = {
-    kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+    kernel_version,
     newId: () => `aaaaaaaa-0000-4000-8000-${(++n).toString().padStart(12, '0')}`,
     time: { wall: () => clock.wall, monotonic: () => clock.mono },
   };

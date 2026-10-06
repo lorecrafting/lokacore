@@ -1,0 +1,304 @@
+{
+  "bases": {
+    "edible": {
+      "contract": "ItemEdible",
+      "value": {
+        "resource": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.29",
+          "kind": "resource",
+          "key": "mv"
+        },
+        "amount": 6,
+        "label": "action.eat",
+        "narration": "narration.eat_apple"
+      }
+    },
+    "eat": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "eat"
+      },
+      "value": {
+        "type": "eat",
+        "actor_id": "10000000-0000-4000-8000-000000000001",
+        "item_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    "item": {
+      "contract": "ItemDefinition",
+      "value": {
+        "key": "apple",
+        "keywords": [
+          "apple"
+        ],
+        "short": "item.apple.short",
+        "room_line": "item.apple.room",
+        "description": "item.apple.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.29",
+            "kind": "room",
+            "key": "orchard"
+          }
+        },
+        "edible": {
+          "resource": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.29",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 6,
+          "label": "action.eat",
+          "narration": "narration.eat_apple"
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "edible valid",
+      "base": "edible",
+      "valid": true
+    },
+    {
+      "name": "edible missing resource",
+      "base": "edible",
+      "path": [
+        "resource"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "edible missing amount",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "edible missing label",
+      "base": "edible",
+      "path": [
+        "label"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "edible missing narration",
+      "base": "edible",
+      "path": [
+        "narration"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "edible closed",
+      "base": "edible",
+      "path": [
+        "extra"
+      ],
+      "value": true,
+      "valid": false
+    },
+    {
+      "name": "eat valid",
+      "base": "eat",
+      "valid": true
+    },
+    {
+      "name": "eat missing type",
+      "base": "eat",
+      "path": [
+        "type"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "eat missing actor_id",
+      "base": "eat",
+      "path": [
+        "actor_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "eat missing item_id",
+      "base": "eat",
+      "path": [
+        "item_id"
+      ],
+      "omit": true,
+      "valid": false
+    },
+    {
+      "name": "eat closed",
+      "base": "eat",
+      "path": [
+        "extra"
+      ],
+      "value": true,
+      "valid": false
+    },
+    {
+      "name": "item valid",
+      "base": "item",
+      "valid": true
+    },
+    {
+      "name": "amount 0",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": 0,
+      "valid": false
+    },
+    {
+      "name": "amount -1",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": -1,
+      "valid": false
+    },
+    {
+      "name": "amount 9007199254740992",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": 9007199254740992,
+      "valid": false
+    },
+    {
+      "name": "amount 1.5",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": 1.5,
+      "valid": false
+    },
+    {
+      "name": "amount 6",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": "6",
+      "valid": false
+    },
+    {
+      "name": "amount None",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": null,
+      "valid": false
+    },
+    {
+      "name": "amount bound 1",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": 1,
+      "valid": true
+    },
+    {
+      "name": "amount bound 9007199254740991",
+      "base": "edible",
+      "path": [
+        "amount"
+      ],
+      "value": 9007199254740991,
+      "valid": true
+    },
+    {
+      "name": "label wrong type",
+      "base": "edible",
+      "path": [
+        "label"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "label empty",
+      "base": "edible",
+      "path": [
+        "label"
+      ],
+      "value": "",
+      "valid": false
+    },
+    {
+      "name": "narration wrong type",
+      "base": "edible",
+      "path": [
+        "narration"
+      ],
+      "value": 1,
+      "valid": false
+    },
+    {
+      "name": "narration empty",
+      "base": "edible",
+      "path": [
+        "narration"
+      ],
+      "value": "",
+      "valid": false
+    },
+    {
+      "name": "food resource wrong type",
+      "base": "edible",
+      "path": [
+        "resource"
+      ],
+      "value": false,
+      "valid": false
+    },
+    {
+      "name": "Eat item typed",
+      "base": "eat",
+      "path": [
+        "item_id"
+      ],
+      "value": "bad",
+      "valid": false
+    },
+    {
+      "name": "Eat actor typed",
+      "base": "eat",
+      "path": [
+        "actor_id"
+      ],
+      "value": "bad",
+      "valid": false
+    },
+    {
+      "name": "edible object typed",
+      "base": "item",
+      "path": [
+        "edible"
+      ],
+      "value": true,
+      "valid": false
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import { refString, type Entity, type State, type World } from './decision.ts';
 type Identity = NonNullable<State['created']>[string];
 type Draft = {
   entities?: Record<string, Entity>;
-  knownEntities?: Record<string, { kind: string; owner_id?: World['character'] }>;
+  knownEntities?: Record<string, World['knownEntities'][string]>;
   capacities?: Record<string, number>;
   entityResourceSpecs?: Record<string, World['resourceSpecs'][string]>;
 };
@@ -26,7 +26,10 @@ export function hydrate(world: World, state: State, loading = false): World | un
     if (!derive(world, state, id, identity, draft)) return undefined;
   }
   const next = { ...world, state, ...draft };
-  if ((draft.entities || (loading && world.cartridge.world?.death)) && !custodyValid(next))
+  if (
+    (draft.entities || (loading && (world.cartridge.world?.death || world.consumed))) &&
+    !custodyValid(next)
+  )
     return undefined;
   return next;
 }
@@ -63,7 +66,11 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   draft.entities ??= { ...world.entities };
   draft.entities[id] = { ...template, kind: hound ? 'npc' : 'item' } as Entity;
   draft.knownEntities ??= { ...world.knownEntities };
-  draft.knownEntities[id] = { kind: hound ? 'npc' : 'item' };
+  const entity = draft.entities[id];
+  draft.knownEntities[id] = {
+    kind: entity.kind,
+    ...(entity.kind === 'item' && entity.edible && { edible: true as const }),
+  };
   return true;
 }
 
@@ -118,11 +125,17 @@ function custodyValid(world: World): boolean {
   const done = new Set<string>();
   const held: Record<string, number> = {};
   for (const [id, container] of Object.entries(world.state.containers)) {
+    if (
+      id === world.consumed ||
+      (container === world.consumed &&
+        (world.entities[id]?.kind !== 'item' || !world.entities[id].edible))
+    )
+      return false;
     if (!world.knownEntities[id] && !world.state.created?.[id]) return false;
     held[container] = (held[container] ?? 0) + 1;
     const path = new Set<string>();
     let at: string | undefined = id;
-    while (at !== undefined && !world.rooms[at] && !done.has(at)) {
+    while (at !== undefined && !world.rooms[at] && at !== world.consumed && !done.has(at)) {
       if (path.has(at)) return false;
       path.add(at);
       at = world.state.containers[at];

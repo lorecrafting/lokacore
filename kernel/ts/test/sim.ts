@@ -244,6 +244,7 @@ function violated(
     command,
     decision,
     view,
+    world_context_id: before.context,
     resolves: Object.fromEntries(
       Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
     ),

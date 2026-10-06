@@ -1361,7 +1361,7 @@ stale controls cannot skip a beat, change the branch or repeat the consequence.
 
 ## D4 homes, finite apples and Eat (selected contract)
 
-**Planning only; not installed.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
+**D4 source contract.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
 selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
 The orchard detail reuses B5 Harvest over three actual authored item identities.
 Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
@@ -1396,8 +1396,12 @@ food alone admits direct-body to consumed transfer. No transfer out is lawful,
 and nonedible items cannot enter. Containment queries terminate there, deriving
 no inventory, room presence, reach or carried mass. Do not implement this as an
 invisible room, NPC, mutable narrative fact, deleted item or second stock ledger.
-The holder metadata and terminal transition invariant are new contracts; extend
-both foundation validators and their fixture/differential proof where applicable.
+Immutable known-entity metadata tags the holder `consumed` and each opted item
+`edible=true`. Generic transfer composition rejects any consumed source and admits
+consumed destinations only for an opted item directly transferred from a known body.
+The food rule alone admits that transition for its command actor and capped recovery.
+Both foundation validators and independent precondition checks enforce the terminal
+subset; literal fixtures and differential proof cover it.
 Projection and execution share one budgeted pure admission query, including exact
 keyed-action admission. Ordinary uneaten food custody and death remain unchanged.
 
@@ -1424,3 +1428,46 @@ topic, Q2 credit, branch choice, relationship or item. The original protected
 `vesper_message` remains the sole Q2 message with its existing custody, transfer
 and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
 prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.
+
+## D6 water depths and owned-corpse recovery (selected, pending implementation)
+
+**PM-selected contract; selected-docs review approved, implementation pending.** The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
+selects optional `well_bottom` and `pool_bottom` below Well Shaft and the dry
+Black Pool bank. Rescue/bell stays dry and open all hours. Sedge's free D1 lesson
+provides acquired swim before S27. Descending requires currently usable learned
+swim, load≤6000g with nested/worn mass counted once, living/standing/out of
+encounter and MV≥10. Refuse a bound following Wren without moving or separating
+either actor. D1 retains vacuous skill qualification; no CON/DEX gate,
+roll, percentage, tide or new lesson. Entry debits 10 MV instead of ordinary fare.
+Living actors below surface for 0 MV regardless of current skill/load/MV/posture/
+light. Both directions use existing `move` and normal room-entry evidence.
+
+One water occupancy generation binds one absolute submersion deadline and one
+due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation).
+There is no periodic drain: MV 0 alone never drowns, and ordinary fractional
+resource recovery remains unchanged. Surface and every death invalidate water
+occupancy; stale/canceled/re-entry jobs cannot affect a later occupancy.
+At or past the deadline, before admitting an action at equal logical time,
+the current water producer lowers positive HP to 0 and invokes the existing
+same-body fatal sequence atomically. Death carries typed drowning, null killer/
+credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinary
+elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
+No second clock, wetness, drift, ghost mode or global movement rewrite.
+
+At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
+currently in `well_bottom` or `pool_bottom`. Transfer its actual direct corpse roots to
+held body custody in one proposal; preserve descendants and empty corpse
+identity, allow forced overload, never auto-equip/copy or restore rewards/
+deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings at Chapel.
+Ordinary physical corpse recovery remains available, including D1's fare-waived
+isle return. No general remote Take or replacement-gear system.
+
+## D12 practical skill consumers (selected contract)
+
+**PM-adopted policy, pending implementation.** The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
+
+Original living, co-located Sedge and Peg teach their respective skills through bound Talk/Choose, typed `skill.acquire` and conserved `lesson_payment` in one proposal. Acquisition is independent of current qualification. Already acquired refuses before any new fee or grant; exact invocation replay returns the existing accepted receipt. Lessons are optional and all-hours; neither learning nor either benefit gates ferry, recovery, ordinary Harvest, S9 or chapter completion. Sedge's existing free swim choice remains separate and available.
+
+The existing Willow Shade patch opts into careful Harvest. Read current acquired/qualified/usable through the skills query; only usable herbalism permits the careful method. Select the authored number of distinct lowest lexicographic eligible EntityIds still directly held by the patch's room. Reject too few eligible IDs or combined carrying overflow before any transfer, event or allocation. Reuse the shared finite selection and `carryingExchange` query/budget, not independent checks against the original load for each incoming item. On success, transfer every selected identity room→actor body in one writer group and emit exactly one `item_acquired` event per transfer. Drop, storage, ordinary Take, S9 and death retain those same IDs. An omitted method retains ordinary one-item Harvest with no skill prerequisite; careful refusal cannot remove that legal ordinary route. No stock row, mint, regrowth or Herb Garden node is introduced.
+
+Peg's opted Buy quote uses current usable haggle after normal elapsed settlement. The effective quote is `max(minimum, floor(base_buy × numerator / denominator))` when usable, otherwise the authored base; Sell stays authored. The existing shared shelf/admission query supplies the effective price for display, exact invocation and execution. `quoted_price` must equal that current effective price before conserved currency/item transfer; stale cheap or dear quotes refuse without silently changing the charge. Recheck all B3 provider, item, custody, balance/overflow and carrying admission. No RNG, daily counter, reserved price, token, extra ledger or stock replacement is added. Qualification is derived at use and never stored; failed qualification never erases acquired membership.

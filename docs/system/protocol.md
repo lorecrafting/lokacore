@@ -61,6 +61,9 @@ storage half):
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
    (`runtime/proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
+   The headless GameView/admission check classifies a foreign-world envelope
+   against the observed world before comparing its action offer: only `not_found`
+   rejection agrees. A current-world offer refused `not_found` remains a mismatch.
 6. **Propose** (`runtime/proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`mechanics/fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
@@ -1040,9 +1043,10 @@ hash/ID answers are recorded in the [B9 evidence](../evidence/2026-10-05-b9-lant
 Publication remains pending the normal gates.
 ## D4 held-food composition
 
-**Selected plan; not an installed schema.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
-accepted outcome `eaten {item_id: EntityId}` and immutable optional item metadata
+accepted outcome `eaten` with the exact consumed `item_id: EntityId` in the accepted
+envelope (mandatory for this producer; receipt replay binds it), and immutable optional item metadata
 `edible {resource: DefinitionRef(resource), amount: positive safe integer,
 label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
 exact directly held edible item with no input. Its GameView inventory action
@@ -1054,10 +1058,14 @@ then lowers one ordinary conserved `entity.transfer` plus `resource.adjust` in
 one writer group. No new event, fact, food-count row, mint, removal operation or
 service benefit alternative is required. Add generated known-entity kind
 `consumed` and one immutable food-enabled-world holder mapping, appended after
-slot holders in fresh allocation. The terminal transfer guard must reject escape,
+slot holders and before initial population births in fresh allocation. This consumed
+subset requires API1.27. The terminal transfer guard must reject escape,
 nonfood entry and foreign-source entry; food is the sole new admission owner.
-Containment, carry and reach account for this terminal holder explicitly rather
-than treating it as a room/body/container. Derive consumed status from custody.
+Immutable composition context uses existing `known_entities`: the holder has
+`kind=consumed`, opted item entries have `edible=true`, and only known-body source
+entry is admissible. Runtime stores the generated holder ID once in immutable world
+metadata; no saved holder/stock row is added. Containment and carry terminate there
+as unowned custody; reach is false. Derive consumed status from custody.
 Eat's accepted reply supplies its exact command ID for existing narration
 recovery despite having no event. Its receipt-derived narration record is a
 World result with no detail ID; live result routing must not fall back to the
@@ -1068,3 +1076,40 @@ rollback. Compiler/loader, ActionSet/verb, outcome/generated contracts, world/sa
 projection and both generic delta validators must agree on this consumed subset.
 No frozen fixture is rewritten; add independent literal terminal-transfer cases
 and applicable two-kernel differential cases if the foundation changes.
+
+## D6 water movement and corpse selection
+
+**PM-selected contract; selected-docs review approved, implementation pending.** Use installed `move` and
+ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
+`input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
+Trust actor/invocation/freshness fields normally. A shared read-only exact-edge
+admission serves ExitView, execution and captured-invocation proof. Descend reads
+skill/load/life/posture/encounter/MV/no-following-Wren and debits 10 MV instead of
+ordinary fare. Living Up bypasses ordinary posture/fare checks and costs 0 MV.
+Both preserve body transfer and `entity_entered_room`; other exits stay ordinary.
+
+Accepted descent commits one occupancy generation, absolute deadline and due
+job. On delivery, prove the same body remains below in that current generation.
+No per-drain successor exists. Surface/death invalidate it; stale jobs do nothing.
+Current expiry lowers positive HP to 0, passes that applied loss into the existing
+fatal sequence in the same writer group, and emits optional typed drowning cause
+with null killer/credit. MV 0 alone is not fatal. Settlement at the exact deadline
+precedes action admission, including Up; no command-ID tie may grant extra time.
+If existing scheduler ordering cannot express this locally, stop for PM rather
+than change global ordering silently. Compiler/loader/save and event validation
+must define the narrow occupancy/job/cause types before use.
+
+Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
+`target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at
+actual shrine, selected death-origin ownership, nonempty direct roots and
+current corpse location in `well_bottom` or `pool_bottom`. Containment transfers existing roots once in one accepted
+writer group/receipt. Preserve descendants/empty corpse, forced overload, no
+rewearing and no general remote Take. Malformed custody never creates an offer.
+
+## D12 Harvest method and Buy quote composition
+
+**Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) extends only the existing Harvest command and action input with optional literal `method: "careful"`. A projected careful offer is `ActionInvocation {action_key: "gather_carefully", target_ids: [patch_detail_id], input: {method: "careful"}}`, with the ordinary actor/id context; it resolves to `{type: "harvest", actor_id, target_id: patch_detail_id, method: "careful"}`. `ActionInputParameter` registers `method`, and `ActionInput.method` plus `Command.harvest.method` accept only that literal. Ordinary Harvest has `input: {}` and omits the command method. A method requires the exact offered action's input declaration and the target's opted [careful metadata](cartridge.md#d12-practical-skill-declarations); neither an arbitrary detail nor ordinary Harvest input can invoke the benefit by name alone. Unsupported method/shape fails typed wire/admission validation before effects.
+
+Shared keyed target/input admission and the method-aware pure Harvest query drive projection and execution. A loaded alias whose key differs from `harvest` must independently produce the literal invocation and resolved payload above before its successful result. The careful accepted proposal contains the selected distinct custody transfers and matching acquisition events in one writer group, one accepted receipt and the authored careful narration. The budget is shared across action policy, skill policy, selection and combined carrying; fatal exhaustion faults atomically. There is no new foundation op or command capability.
+
+The existing `buy {actor_id, provider_id, item_id, quoted_price}` and ordered provider/item targets stay unchanged. Project and resolve the current effective Buy price through the shared commerce query and `ActionInput.quoted_price`, then compare that bound number again after authority elapsed preflight before any transfer. Qualification is an input to the quote, not a saved quote or acquisition condition. No stale offer may silently charge a newly computed price. The [chapter's optional shop declaration](cartridge.md#d12-practical-skill-declarations) owns the ratio/floor; Buy/Sell custody and checked payment compose exactly as B3. Protocol/schema/generated-contract changes belong to the future source slice and its independent review.
