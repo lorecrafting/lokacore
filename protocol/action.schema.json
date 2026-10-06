@@ -51,6 +51,14 @@
         },
         "service": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "route": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "quoted_fare": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
         }
       },
       "required": [],
@@ -66,6 +74,15 @@
         },
         {
           "until": 0
+        },
+        {
+          "route": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "transport",
+            "key": "return"
+          },
+          "quoted_fare": 0
         }
       ]
     },
@@ -293,7 +310,9 @@
         "line",
         "quoted_price",
         "patrol",
-        "service"
+        "service",
+        "route",
+        "quoted_fare"
       ],
       "examples": [
         "until"

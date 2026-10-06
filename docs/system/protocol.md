@@ -903,6 +903,16 @@ NPC and entitlement/meal/drink benefits. Do not widen that closed union into a
 generic effect interpreter. The exact command key, source-authored action keys,
 target order and input are frozen by the D1 source brief before implementation.
 
+The `use_transport` payload contains `actor_id`, `endpoint_id`, `route` and
+`quoted_fare`. Actions `board_ferry` and `return_ferry` target exactly one current
+boarding detail in `inspectable_details`; captured input contains `route` and
+`quoted_fare`. A `TransportOffer` on that notice projects the base `fare`,
+effective `charge`, `waived` status and shared admitted action. Transport composes
+resource transfer, movement room-entry evidence and escort travel; it introduces
+no new delta operation or save row. A present NPC may project `lessons` as
+original free-bound skill references; the Book reads their acquired/qualified
+status from the same actor's existing `SkillView` entries.
+
 Sedge's lesson stays a C1 dialogue Choose consequence with typed
 `skill.acquire`; it is not a transport benefit or remote grant. Existing
 reserved skill facts, dialogue binding, service/payment histories and movement

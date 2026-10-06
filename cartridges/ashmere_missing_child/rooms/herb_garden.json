@@ -1,0 +1,9 @@
+{
+  "title": "room.herb_garden.title",
+  "description": "room.herb_garden.description",
+  "exits": {
+    "west": {
+      "to": "isle_hut"
+    }
+  }
+}

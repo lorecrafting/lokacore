@@ -129,7 +129,8 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
             s.regen ||
             Object.values(cartridge.services ?? {}).some(
               (service) => service.currency.key === s.key,
-            )) &&
+            ) ||
+            Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === s.key)) &&
           !Object.values(cartridge.services ?? {}).some(
             (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
           ),

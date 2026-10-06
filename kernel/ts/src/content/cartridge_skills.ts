@@ -56,8 +56,9 @@ export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diag
     if (s.op === 'skill.acquire') checks.named(s.skill, 'skill', `${at}.sequence[${i}].skill`);
   const p = o.lesson_payment;
   if (!p) {
-    if ((o.sequence ?? []).some((s: Obj) => s.op === 'skill.acquire'))
-      out.push(diag('SCHEMA_VIOLATION', `${at}.lesson_payment`, { error: 'missing_property' }));
+    const grants = (o.sequence ?? []).filter((s: Obj) => s.op === 'skill.acquire');
+    if (grants.length && (grants.length !== 1 || o.payment))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.lesson_payment`, { error: 'invalid_value' }));
     return out;
   }
   checks.named(p.resource, 'resource', `${at}.lesson_payment.resource`);

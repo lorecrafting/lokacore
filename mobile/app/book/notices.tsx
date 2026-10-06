@@ -62,7 +62,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
-  if (notice.bed || notice.remaining !== undefined)
+  if (notice.bed || notice.transport || notice.remaining !== undefined)
     return (
       <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
         <Text style={{ ...prose, color: paper.accent }}>
@@ -126,6 +126,13 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
           {typeof line === 'string' ? line : line.text}
         </Text>
       ))}
+      {'transport' in detail && detail.transport && (
+        <Text style={note}>
+          {detail.transport.waived
+            ? 'Free passage to recover your belongings on the isle.'
+            : `Fare: ${detail.transport.charge === 0 ? 'free' : `${detail.transport.charge}p`}.`}
+        </Text>
+      )}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
       {!board &&

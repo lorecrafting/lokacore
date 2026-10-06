@@ -6,7 +6,7 @@ import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { visible, fuelView } from '../mechanics/light/shared.ts';
-import { skillViews } from './skills.ts';
+import { skillViews, freeLessons } from './skills.ts';
 import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
@@ -175,6 +175,7 @@ const viewOf = (
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   ...liquidView(world, id),
+  ...(e.kind === 'npc' && freeLessons(world, id)),
   ...(e.kind === 'npc' && e.services && { services: services(world, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),

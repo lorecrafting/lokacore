@@ -29,7 +29,8 @@ defmodule Loka.Content.Source do
              | :skill
              | :topic
              | :liquid
-             | :service, String.t()}
+             | :service
+             | :transport, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -113,7 +114,8 @@ defmodule Loka.Content.Source do
     "skills" => :skill,
     "topics" => :topic,
     "liquids" => :liquid,
-    "services" => :service
+    "services" => :service,
+    "transports" => :transport
   }
 
   defp classify(rel) do

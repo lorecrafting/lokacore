@@ -16,6 +16,8 @@ const INPUTS: readonly string[] = [
   'line',
   'quoted_price',
   'service',
+  'route',
+  'quoted_fare',
   'patrol',
 ];
 
@@ -36,6 +38,11 @@ export function accepts(
   if (
     payload.type === 'use_service' &&
     world.cartridge.services?.[refString(payload.service)]?.action !== a.key
+  )
+    return false;
+  if (
+    payload.type === 'use_transport' &&
+    world.cartridge.transports?.[refString(payload.route)]?.action !== a.key
   )
     return false;
   if (a.engine) return true;
@@ -63,6 +70,7 @@ export function accepts(
 
 export function primaryTarget(payload: CommandPayload): EntityId | undefined {
   if (payload.type === 'use_service') return payload.provider_id;
+  if (payload.type === 'use_transport') return payload.endpoint_id;
   if (payload.type === 'fill' || payload.type === 'pour') return payload.source_id;
   if (payload.type === 'drink') return payload.vessel_id;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };

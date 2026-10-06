@@ -476,6 +476,12 @@
           "items": {
             "$ref": "#/$defs/ServiceOffer"
           }
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
         }
       },
       "additionalProperties": false,
@@ -1794,6 +1800,9 @@
         },
         "bed": {
           "const": true
+        },
+        "transport": {
+          "$ref": "gameview.schema.json#/$defs/TransportOffer"
         }
       },
       "required": [
@@ -2122,6 +2131,76 @@
           }
         }
       ]
+    },
+    "TransportOffer": {
+      "type": "object",
+      "properties": {
+        "route": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "fare": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "charge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "waived": {
+          "type": "boolean"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "action": {
+          "$ref": "gameview.schema.json#/$defs/AdvertisedAction"
+        }
+      },
+      "required": [
+        "route",
+        "fare",
+        "charge",
+        "waived",
+        "label",
+        "action"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "route": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "transport",
+            "key": "return"
+          },
+          "fare": 0,
+          "charge": 0,
+          "waived": false,
+          "label": "transport.return",
+          "action": {
+            "action_key": "return_ferry",
+            "command": "use_transport",
+            "label": "transport.return",
+            "target": {
+              "kind": "entity",
+              "scopes": [
+                "inspectable_details"
+              ]
+            },
+            "input": [
+              "route",
+              "quoted_fare"
+            ],
+            "target_ids": [
+              "11111111-2222-4333-8444-555555555555"
+            ],
+            "available": true
+          }
+        }
+      ],
+      "description": "Exact endpoint route and base quote, effective charge and waiver, and admitted keyed action."
     }
   }
 }

@@ -282,6 +282,15 @@
               "additionalProperties": {
                 "$ref": "service.schema.json#/$defs/ServiceDefinition"
               }
+            },
+            "transports": {
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):transport/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "transport.schema.json#/$defs/TransportDefinition"
+              }
             }
           },
           "required": [
