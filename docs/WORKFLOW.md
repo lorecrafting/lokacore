@@ -145,6 +145,32 @@ from the roadmap or adopted task tracker. The review record stays the evidence;
 other records state only the reusable rule or next action, avoiding copied findings
 and speculative generalizations ([owner decision](decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
+### Beads Rust pilot
+
+The [owner-approved pilot](decisions/owner-decision-beads-rust-pilot-2026-10-06.md)
+tracks a small Chapter 1 subset in `.beads/issues.jsonl`. The PM, whether using
+Codex or Claude Code, owns tracker writes; builders and reviewers report through
+the usual brief and review record. `docs/ROADMAP.md` remains the published status
+and completion count, briefs own scope, reviews own findings, and this workflow
+owns merge gates. Beads holds short current status, links and dependencies only.
+
+Install `br` (pilot version 0.7.4) with
+`brew tap dicklesworthstone/tap && brew install dicklesworthstone/tap/br`,
+then use `br ready --brief --json`,
+`br show <id> --json` and `br blocked --json` for the subset. `br` mutates local
+SQLite and exports Git-tracked JSONL; after a pull use `br sync --import-only`,
+and before a tracker commit use `br sync --flush-only`. Review the JSONL diff
+and verify it contains no local machine path; the installed release writes
+`source_repo_path` on creation, so clear it with
+`br update <id> --source-repo lokacore --source-repo-path ''` before committing.
+Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
+Do not install Beads hooks or let the tracker rewrite `AGENTS.md`.
+
+At the next two source merges, check whether ready/blocked work and Claude/Codex
+handoff remain accurate without duplicating the roadmap. Expand or retire the
+pilot through a reviewed change; the existing Git plans and reviews survive
+either choice. No source merge or CI gate depends on `br` during the pilot.
+
 ## Local edit loop
 
 ### Local draft-PR cadence

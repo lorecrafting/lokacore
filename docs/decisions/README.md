@@ -32,6 +32,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.
 - [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
 - [Review knowledge trail](owner-decision-review-knowledge-trail-2026-10-05.md): retain findings and dispositions; link promoted spec rules, lessons, deterministic checks and deferred tasks to their evidence.
 
