@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D1 ferry/isle save/protocol second opinion](2026-10-06-d1-ferry-save-second-review.md): source `8aa63fa9`, evidence `b0767d2d`, independent APPROVE; no findings. Fifteen file-backed forged-evidence refusals preserve bytes, all twelve file-backed crossing/recovery/lesson COMMIT cases pass, both independent guard mutations are red/restored, and all 44 evidence hashes verify. Final publication pins and browser/native proof remain separate gates.
+
 - [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 
 - [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.
