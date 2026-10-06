@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **25 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3, D12, D6, D7, C5). The latest source publication is
-[#255](https://github.com/lorecrafting/lokacore/pull/255), C5 hound bleeding and bandage cure.
+Local and GitHub `main` have completed **26 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3, D12, D6, D7, C5, D11). The latest source publication is
+[#257](https://github.com/lorecrafting/lokacore/pull/257), D11 character choice and inherited effects.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -348,6 +348,17 @@ independent second opinions approved the final source after the owner's bounded
 extra fix round. The local gate, real SQLite reopen/replay controls, portable
 schema mutations, Book browser routes and exact-head hosted checks passed. The
 independently derived hash is `d995ec92f0e7dcfd45d495504cd008176c04a3fa6c822e4a194b0b127be7fc65`.
+
+D11 one-time character choice and inherited Swim, Haggle, dark sight and faction
+effects are published in [#257](https://github.com/lorecrafting/lokacore/pull/257)
+at chapter v038/API1.33. The [primary review](reviews/2026-10-06-d11-character-choice-primary-review.md)
+and its save/protocol second opinion approved after death/reopen proof and
+present-null composition parity fixes. Full local gates, the isolated Book choice
+journey, real SQLite recovery, schema mutation controls and exact-head hosted
+checks passed. The independently derived hash is
+`69fddb2135ff438c7de008a27f7328426c3511db352890498662e819dad5743e`
+with 199 genesis IDs. Trusted elapsed updates advance before character selection;
+player commands still require selection.
 
 D6 underwater routes, qualified swim, the drowning deadline and owned-bottom-corpse
 Chapel recovery are published in [#247](https://github.com/lorecrafting/lokacore/pull/247)
