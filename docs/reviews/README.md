@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`, evidence `d5c2ea2f0da85f6474f281f10e2145c3f25368d8`, independent CHANGES REQUIRED; D2-P1 pending Read remount confirms history without recovering the actual Book route.
+
 - [C2 preserved terminal reopen evidence](2026-10-05-c2-terminal-reopen-evidence-review.md): exact local docs/evidence head `e29014d54d7e3534838d77ba650301c3f19fb7f7`, independent APPROVE; same preserved terminal save opens twice after published PR213, historical timeout retained, browser fatal/Restart still due by E3; no findings.
 
 - [C2 Watchman's Rounds staged browser proof scope](2026-10-05-c2-watchmans-rounds-docs-scope-review.md): exact local docs/evidence head `a0b77fbf6e80905451448c1351735a9025a8cfce`, independent APPROVE; fresh shared Book and cold reopen proven, browser fatal/Restart due by E3 and preserved terminal Web timeout open, no findings.
