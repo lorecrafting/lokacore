@@ -1,0 +1,36 @@
+{
+  "npc": "sedge",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "sedge"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_herbalism",
+      "equals": false
+    }
+  },
+  "prompt": "sedge.herbalism.prompt",
+  "choices": {
+    "learn": {
+      "label": "sedge.herbalism.choice",
+      "narration": "sedge.herbalism.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "herbalism"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      }
+    }
+  },
+  "label": "sedge.herbalism.choice"
+}

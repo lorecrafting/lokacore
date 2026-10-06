@@ -1,4 +1,4 @@
-// size: allow 305, B9 dream and C3 hound actions compose in the existing view list
+// size: allow 321, method-aware Harvest admission joins the existing composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
@@ -160,19 +160,19 @@ function advertise(
   const target_ids = lightTargets(world, actor, a, id);
   const shown = {
     action_key: a.key,
-    ...(light.VERBS.includes(a.command) && { command: a.command }),
-    label: a.label,
+    ...((light.VERBS.includes(a.command) || a.command === 'harvest') && { command: a.command }),
+    label: patch && !a.input.includes('method') ? patch.label : a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
     ...(target_ids && { target_ids }),
-    ...(patch && { label: patch.label, target_ids: [id as EntityId] }),
+    ...(patch && { target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
   // Step's order: the action's policy, then the talk rule's not_found and talkRefused.
   const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
   const gathered =
     a.command === 'harvest' && target !== undefined
-      ? harvest(world, actor, target, steps)
+      ? harvestOffered(world, actor, a, target, steps)
       : undefined;
   const talk =
     a.command === 'talk' &&
@@ -195,6 +195,23 @@ function advertise(
         ? attackRefused(world, actor, target)
         : undefined);
   return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
+}
+
+function harvestOffered(
+  world: World,
+  actor: CharacterId,
+  a: Offered,
+  target: EntityId,
+  steps: Steps,
+) {
+  const method = a.input.includes('method') ? ('careful' as const) : undefined;
+  const code = refusal(
+    world,
+    { type: 'harvest', actor_id: actor, target_id: target, ...(method && { method }) },
+    steps,
+    a.key,
+  );
+  return code ?? harvest(world, actor, target, steps, method);
 }
 
 const door = (a: Offered) => Object.hasOwn(barrier.MOVES, a.command);
@@ -266,7 +283,9 @@ function putPairs(
 
 function noticeOffer(world: World, a: Offered, id: string) {
   return (
-    (a.command === 'harvest' && !!world.details[id]?.harvest) ||
+    (a.command === 'harvest' &&
+      !!world.details[id]?.harvest &&
+      (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
     !!(
       a.recipe &&
       (world.details[detailOf(world, a.recipe.target)]?.readable ||

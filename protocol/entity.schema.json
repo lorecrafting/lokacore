@@ -492,6 +492,36 @@
         },
         "sold": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "buy_discount": {
+          "type": "object",
+          "properties": {
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "numerator": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "denominator": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "minimum": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "skill",
+            "numerator",
+            "denominator",
+            "minimum"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

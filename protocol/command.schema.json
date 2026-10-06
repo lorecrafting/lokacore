@@ -894,6 +894,11 @@
             },
             "target_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "method": {
+              "enum": [
+                "careful"
+              ]
             }
           },
           "required": [

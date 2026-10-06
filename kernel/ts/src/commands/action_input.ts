@@ -17,6 +17,7 @@ const INPUTS: readonly string[] = [
   'scene',
   'line',
   'quoted_price',
+  'method',
   'service',
   'route',
   'quoted_fare',
@@ -44,7 +45,9 @@ export function accepts(
       ? world.cartridge.services?.[refString(payload.service)]?.action
       : payload.type === 'use_transport'
         ? world.cartridge.transports?.[refString(payload.route)]?.action
-        : a.key;
+        : payload.type === 'harvest' && payload.method
+          ? world.details[payload.target_id]?.harvest?.careful?.action
+          : a.key;
   if (bound !== a.key) return false;
   if (a.engine) return true;
   const id = primaryTarget(payload);

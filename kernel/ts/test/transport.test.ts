@@ -143,7 +143,17 @@ test('Sedge teaches swim once freely through the original present dialogue', () 
   );
   const before = gameView(w).skills!.find((s) => s.skill.key === 'swim')!;
   assert.deepEqual([before.acquired, before.qualified], [false, true]);
-  w = accepted(run(w, { type: 'talk', target_id: entity(w, 'npc', 'sedge') }, 3));
+  w = accepted(
+    run(
+      w,
+      {
+        type: 'talk',
+        target_id: entity(w, 'npc', 'sedge'),
+        dialogue: ref('dialogue', 'sedge_swim'),
+      },
+      3,
+    ),
+  );
   const continuation_id = gameView(w).choice!.continuation_id;
   w = accepted(run(w, { type: 'choose', continuation_id, choice_id: 'learn' }, 4));
   assert.equal(membership(w, w.character, ref('skill', 'swim')), true);
@@ -156,7 +166,15 @@ test('Sedge teaches swim once freely through the original present dialogue', () 
   );
   w = accepted(run(w, { type: 'move', direction: 'west' }, 6));
   assert.equal(
-    run(w, { type: 'talk', target_id: entity(w, 'npc', 'sedge') }, 7).decision.kind,
+    run(
+      w,
+      {
+        type: 'talk',
+        target_id: entity(w, 'npc', 'sedge'),
+        dialogue: ref('dialogue', 'sedge_swim'),
+      },
+      7,
+    ).decision.kind,
     'rejected',
   );
 });
