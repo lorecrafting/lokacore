@@ -239,5 +239,11 @@ function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
     name: world.entities[fight.row.npc_id].short,
+    ...(fight.row.active_ids && {
+      active_opponents: fight.row.active_ids.map((id) => ({
+        id,
+        name: world.entities[id].short,
+      })),
+    }),
   };
 }

@@ -1,0 +1,19 @@
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+1 cycles found. Showing them in decreasing size:
+
+Cycle of length 2:
+
+    lib/loka/core/compose.ex
+    lib/loka/core/compose_pack.ex
+
+** (Mix) Too many cycles (found: 1, permitted: 0)
+
+Full gate exit: 1

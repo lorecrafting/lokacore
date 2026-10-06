@@ -78,7 +78,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       invoke('rent_lantern_room', [entity(a.initial, 'npc', 'maud')], {
         service: {
           cartridge_id: 'ashmere_missing_child',
-          cartridge_version: '0.0.31',
+          cartridge_version: '0.0.32',
           kind: 'service',
           key: 'lantern_room',
         },

@@ -1,6 +1,6 @@
 import { validate } from './validate.ts';
 import { encode, type Json } from './canonical.ts';
-import type { DeltaOp } from '../contracts.gen.ts';
+import type { DeltaOp, EncounterRow, EntityId } from '../contracts.gen.ts';
 import type { State } from './compose.ts';
 type Obj = { readonly [key: string]: Json };
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
@@ -78,7 +78,7 @@ export function initialPlacement(
 
 /** A final proposal must bind each spawned pair, HP and membership in its birth group. */
 // size: allow 60, one final guard checks pair, HP and slot membership together
-export function completeBirths(ops: readonly DeltaOp[]): boolean {
+export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
   const made = ops.filter(
     (op): op is Extract<DeltaOp, { op: 'entity.create' }> =>
       op.op === 'entity.create' && op.identity.origin.kind === 'spawned',
@@ -120,7 +120,7 @@ export function completeBirths(ops: readonly DeltaOp[]): boolean {
     if (related.length !== 1 || slot.length !== 1 || hp.length !== 1) return false;
   }
   return (
-    birthSlotsMatch(slots, hounds) &&
+    birthSlotsMatch(slots, hounds, ops, state) &&
     pelts.every((p) =>
       hounds.some(
         (h) =>
@@ -135,6 +135,8 @@ export function completeBirths(ops: readonly DeltaOp[]): boolean {
 function birthSlotsMatch(
   slots: Extract<DeltaOp, { op: 'population.slot' }>[],
   hounds: Extract<DeltaOp, { op: 'entity.create' }>[],
+  ops: readonly DeltaOp[],
+  state: State,
 ) {
   return slots.every(
     (s) =>
@@ -148,6 +150,86 @@ function birthSlotsMatch(
           key(h.identity.origin.by) === key(s.plan) &&
           h.identity.origin.slot === s.slot &&
           h.identity.origin.generation === s.value.generation,
-      ),
+      ) ||
+      flightSlot(s, ops, state),
+  );
+}
+
+function flightSlot(
+  s: Extract<DeltaOp, { op: 'population.slot' }>,
+  ops: readonly DeltaOp[],
+  state: State,
+) {
+  const id = s.value.member_id;
+  const prior = s.expected;
+  const origin =
+    id && (((state.created ?? {}) as Record<string, Obj>)[id]?.origin as Obj | undefined);
+  const spec = ((state.population_specs ?? {}) as Record<string, Obj>)[key(s.plan as Json)];
+  const due = flightDue(ops, s.writer_group, id!, state);
+  return (
+    id !== null &&
+    prior?.member_id === id &&
+    prior.generation === s.value.generation &&
+    prior.replacement_due === null &&
+    s.value.replacement_due === null &&
+    Number.isSafeInteger(due) &&
+    s.value.last_flight_at === due &&
+    prior.last_flight_at !== due &&
+    origin?.kind === 'spawned' &&
+    origin.role === 'hound' &&
+    origin.member_id === id &&
+    key(origin.by) === key(s.plan as Json) &&
+    origin.slot === s.slot &&
+    origin.generation === s.value.generation &&
+    (spec?.plan as Obj | undefined)?.pack !== undefined &&
+    ops.filter(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.entity_id === id &&
+        op.source_id === ((state.containers ?? {}) as Record<string, Json>)[id] &&
+        op.destination_id !== op.source_id,
+    ).length === 1
+  );
+}
+
+function flightDue(ops: readonly DeltaOp[], group: number, id: EntityId, state: State) {
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === group &&
+      op.expected?.active_ids?.includes(id) &&
+      selectedFlight(op.expected, id, state) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
+  );
+  return round && 'job_id' in round
+    ? ((state.jobs ?? {}) as Record<string, Obj>)[round.job_id]?.due_time
+    : undefined;
+}
+
+function selectedFlight(row: EncounterRow, id: string, state: State) {
+  const containers = (state.containers ?? {}) as Record<string, Json>;
+  const created = (state.created ?? {}) as Record<string, Obj>;
+  const slots = (state.population_slots ?? {}) as Record<string, Obj>;
+  const present =
+    row.active_ids?.filter((member) => {
+      const origin = created[member]?.origin as Obj | undefined;
+      const slot =
+        origin && slots[key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })];
+      return (
+        containers[member] === row.room_id &&
+        origin?.kind === 'spawned' &&
+        origin.role === 'hound' &&
+        origin.member_id === member &&
+        slot?.member_id === member &&
+        slot.generation === origin.generation &&
+        slot.replacement_due === null
+      );
+    }) ?? [];
+  const cursor = row.next_opponent_id!;
+  return (
+    (present.includes(cursor)
+      ? cursor
+      : (present.find((member) => member > cursor) ?? present[0])) === id
   );
 }

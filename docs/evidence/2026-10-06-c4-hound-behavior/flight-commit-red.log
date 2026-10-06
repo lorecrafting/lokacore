@@ -1,0 +1,31 @@
+X
+
+Failed tests:
+
+✖ failed SQLite flight COMMIT keeps the old pack then exact retry flies once (16.735708ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /nothing was saved/. Input:
+  
+  'Error: unexpected elapsed checkpoint; recovery required'
+  
+      at TestContext.<anonymous> (repo/mobile/authority/local-story/c4_pack.test.ts:194:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: unexpected elapsed checkpoint; recovery required
+        at repo/mobile/authority/local-story/save.ts:100:15
+        at reconcile (repo/mobile/authority/local-story/transaction.ts:12:10)
+        at reconciled (repo/mobile/authority/local-story/save.ts:91:10)
+        at s.fence (repo/mobile/authority/local-story/save.ts:73:17)
+        at settle (repo/mobile/authority/local-story/save.ts:111:15)
+        at save (repo/mobile/authority/local-story/save.ts:81:15)
+        at commitElapsed (repo/mobile/authority/local-story/delivery.ts:71:10)
+        at elapsed (repo/mobile/authority/local-story/delivery.ts:55:10)
+        at Object.elapsed (repo/mobile/authority/local-story/authority.ts:133:37)
+        at repo/mobile/authority/local-story/c4_pack.test.ts:194:29,
+    expected: /nothing was saved/,
+    operator: 'throws',
+    diff: 'simple'
+  }

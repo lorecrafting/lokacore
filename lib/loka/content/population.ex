@@ -29,18 +29,18 @@ defmodule Loka.Content.Population do
   def check(nil, _, _, _), do: []
   def check(_, _, nil, _), do: []
 
-  def check(manifest, defs, _, {_, settings}) do
+  def check(manifest, defs, v2, {_, settings}) do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
     for {_key, {rel, steps, plan}} <- plans,
         is_map(plan),
-        error <- plan_errors(manifest, defs, calendar, plan),
+        error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
         do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
   end
 
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp plan_errors(manifest, defs, calendar, p) do
+  defp plan_errors(manifest, defs, calendar, text, p) do
     bundle = value(Refs.resolve(p["bundle"], "population_bundle", manifest, defs))
     rooms = Enum.map(p["area"], &value(Refs.resolve(&1, "room", manifest, defs)))
     home = value(Refs.resolve(p["home"], "room", manifest, defs))
@@ -67,8 +67,28 @@ defmodule Loka.Content.Population do
     |> add(not valid_time, ["wander_interval"])
     |> add(not connected, ["area"])
     |> add(not bundle_ok, ["bundle"])
+    |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
   end
+
+  defp pack_valid?(nil, _, _, _), do: true
+
+  defp pack_valid?(pack, area, rooms, text) do
+    directions =
+      for room <- rooms,
+          is_map(room),
+          {direction, edge} <- room["exits"] || %{},
+          edge["to"] in area,
+          do: direction
+
+    narration = pack["narration"]
+
+    Enum.all?(directions, &Map.has_key?(narration["enemy_fled"], &1)) and
+      Enum.all?(narration_keys(narration), &Map.has_key?(text, &1))
+  end
+
+  defp narration_keys(narration),
+    do: Map.values(Map.delete(narration, "enemy_fled")) ++ Map.values(narration["enemy_fled"])
 
   defp add(errors, true, path), do: [path | errors]
   defp add(errors, false, _), do: errors
