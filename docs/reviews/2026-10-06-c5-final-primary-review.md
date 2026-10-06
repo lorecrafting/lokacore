@@ -141,3 +141,14 @@ Tests and limits:
 - No additional over-engineering finding.
 - No files edited, no comments posted; working tree remains clean.
 ```
+## Scoped fix round 2 — APPROVE
+
+**Exact source:** `0fab02168af6e4047ec179aba5955b3300e1ba23`. Reviewed the remaining FP2/SO5 early-expiry handoff and SO6 binding refusal, their spec amendment, tests and direct consumers. **All primary and second-opinion findings recorded above are closed; no open finding from this scoped review.**
+
+- **FP2/SO5 closed:** both composers inspect the exact completed job's due time. Unchanged cadence is admitted only when that delivery preceded the retained tick; a due tick must still advance. The fixed command27 real-command test asserts canonical round-first ordering at65425, then literal HP3, end65725 and successor/cadence65450. The shared literal fixtures separately admit the early handoff and refuse an unchanged due tick. Temporarily removing the early exception makes the real-command test fail; admitting equality for a due tick makes the portable refusal fail. Both mutations were restored.
+- **SQLite neighbor verified independently:** a temporary controlled real-authority test repeated wound64950, refresh65125/end65425, Flee/re-entry/Attack65250, tick65350 and positive hit65400/end65700, then Flee. Closed the database at65400 and reopened it; the old expiry at65425 committed a nondamaging handoff with HP3 and retained cadence65450. A new authority cold-opened that committed receipt/state, retained end65700/cadence65450, and delivered the real tick65450 to literal HP2. This verifies refresh before the pending expiry, reopen before and after handoff, and its later consumer. The temporary test was removed, not committed.
+- **SO6 closed:** Elixir's bleed schedule branch now rejects an orphan `water_body_id`. The new shared schema-valid mixed-binding fixture returns the same `precondition_failed` job target in both composers. Removing only that Elixir guard makes the focused fixture fail; restored tests pass with `mix test --force`.
+
+Checks on the corrected source: **20/20 focused TypeScript/kernel/real-SQLite tests; 3/3 Elixir bleed tests; independent SQLite handoff/reopen control passes**. Reviewed the fixture extraction as a move of the existing setup, with no changed inputs. Three targeted mutation controls failed as expected. Source and tests were restored before committing this record. Hosted/full-gate results remain the developer/PM evidence; no browser/native runtime or owner save was used in this review.
+
+Ponytail Review: narrow predicates in the existing two composers, one shared test setup and literal regression cases; no framework or dependency added, no complexity finding. **APPROVE** for the exact source above.
