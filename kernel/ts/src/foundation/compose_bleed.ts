@@ -7,16 +7,19 @@ type Op = Extract<DeltaOp, { op: 'bleed.transition' }>;
 function cadence(prior: Op['value'] | undefined, next: Op['value'], overlay: Map<string, Written>) {
   if (!prior?.active || !next.active) return true;
   const oldJob = prior.job_id!;
-  const completed =
+  const job =
     oldJob &&
-    (overlay.get(key({ kind: 'job', job_id: oldJob }))?.value as { status?: string } | undefined)
-      ?.status === 'completed';
+    (overlay.get(key({ kind: 'job', job_id: oldJob }))?.value as
+      { status?: string; due_time?: number } | undefined);
   return (
     same(next.effect, prior.effect) &&
     next.source_id === prior.source_id &&
-    (completed
+    (job?.status === 'completed'
       ? next.job_id !== oldJob &&
-        next.next_tick_at! > prior.next_tick_at! &&
+        (next.next_tick_at! > prior.next_tick_at! ||
+          (next.next_tick_at === prior.next_tick_at &&
+            job.due_time !== undefined &&
+            job.due_time < prior.next_tick_at!)) &&
         next.ends_at === prior.ends_at
       : next.job_id === oldJob &&
         next.next_tick_at === prior.next_tick_at &&

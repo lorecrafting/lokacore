@@ -38,18 +38,20 @@ defmodule Loka.Core.ComposeBleed do
     old_job = prior["job_id"]
     job = %{"kind" => "job", "job_id" => old_job}
 
-    completed =
-      match?({_, _, %{"status" => "completed"}}, overlay[Loka.Core.ComposeTarget.key(job)])
-
-    if completed, do: successor?(prior, next), else: refresh?(prior, next)
+    case overlay[Loka.Core.ComposeTarget.key(job)] do
+      {_, _, %{"status" => "completed", "due_time" => due}} -> successor?(prior, next, due)
+      _ -> refresh?(prior, next)
+    end
   end
 
   defp cadence?(%{"active" => true}, %{"active" => true}, _), do: false
   defp cadence?(_, _, _), do: true
 
-  defp successor?(prior, next),
+  defp successor?(prior, next, due),
     do:
-      next["job_id"] != prior["job_id"] and next["next_tick_at"] > prior["next_tick_at"] and
+      next["job_id"] != prior["job_id"] and
+        (next["next_tick_at"] > prior["next_tick_at"] or
+           (next["next_tick_at"] == prior["next_tick_at"] and due < prior["next_tick_at"])) and
         next["ends_at"] == prior["ends_at"]
 
   defp refresh?(prior, next),

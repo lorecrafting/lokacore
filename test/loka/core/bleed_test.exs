@@ -8,7 +8,7 @@ defmodule Loka.Core.BleedTest do
   # Breaks: an unrelated group edits the same bleed or a bandage transfer reaches no terminal holder.
   test "literal bleed and bandage composition cases" do
     for c <- @cases do
-      if c["id"] == "mixed-bleed-sight-job-refused",
+      if String.starts_with?(c["id"], "mixed-bleed-"),
         do: assert(Contracts.validate("DeltaOp", hd(c["ops"])) == :ok)
 
       assert Compose.compose(c["state"], %{"ops" => c["ops"]}) == c["expected"], c["id"]
