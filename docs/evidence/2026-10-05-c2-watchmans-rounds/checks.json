@@ -28,10 +28,11 @@
   },
   "browser": {
     "route": "completed;4/4 resolved Journal; pause/return/Rejoin; actual surviving combat/Flee",
-    "terminal_reopen": "prior Sync operation timeout;open pending separate Web SQLite fix;preserved save untouched",
+    "terminal_reopen": "passed twice on preserved origin at integration65dabf56 with published Web predecessor d9a05954;prior failure retained",
     "fatal_restart": null,
     "fresh_shared_proof": "fresh-book/checks.json",
-    "verification_scope": "owner-decision-c2-staged-browser-proof-2026-10-05"
+    "verification_scope": "owner-decision-c2-staged-browser-proof-2026-10-05",
+    "terminal_proof": "terminal-reopen/checks.json"
   },
   "full_active": null,
   "hosted_ci": null,

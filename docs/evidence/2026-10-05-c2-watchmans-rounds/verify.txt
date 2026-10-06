@@ -28,4 +28,11 @@ runtime.json: OK
 schema-controls.log: OK
 schema-sweep.log: OK
 schema-sweep.py: OK
+terminal-reopen/checks.json: OK
+terminal-reopen/controls.png: OK
+terminal-reopen/journal-first.png: OK
+terminal-reopen/journal-second.png: OK
+terminal-reopen/trace.log: OK
+terminal-reopen/world-first.png: OK
+terminal-reopen/world-second.png: OK
 ts-size.log: OK
