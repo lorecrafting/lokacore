@@ -15,3 +15,5 @@ The actor and loose-item grouping, detail intent, empty-group omission and futur
 ## Scoped fix recheck
 
 **APPROVE** at exact source head `a4338896bdf248af44ba66dc31c3dc8198ecdc7e`. RI-1 is closed: a link requires a visible current-room identity and detail route from GameView; prose cannot infer one, and a selected description variant must omit concealed text. General scenery links are explicitly future-facing until projection and admission supply a real consumer. RI-2 is closed: fixtures are unconditionally immovable and cannot be taken, dropped, stored or removed; removable objects use the loose-item group. The changed decision record agrees with the canonical Book spec. No other source changed in this fix.
+
+**APPROVE** at final source head `27a5e92964bbbdbe0d1578007f1b4fb4af9a7e63`. The only follow-up changes the component guide's Grammar paragraph to require a current projected detail route and identify general scenery as pending a real projection consumer. It matches the approved normative Book rule; no findings reopened.
