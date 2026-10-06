@@ -147,3 +147,38 @@ Required D1 browser proof is absent. Hosted tests exercise movement and Maud’s
 D1-2 | should-fix | mobile/app/tests/book.e2e.ts:29 @ cf5f8cbe1b2ace387b821cb1482d44fc6e4f266b
 The first hosted attempt reported successful navigation taps but then could not find Maud at line 32. Setup never verifies either destination, and CI discarded the failure screen. This leaves an actionable reliability failure unresolved; the passing rerun does not establish whether navigation input was lost or setup raced. Assert confirmed room transitions and retain failure diagnostics before classifying it as test-only.
 ```
+
+## CI portability recheck — APPROVE
+
+Exact fix source `f06f89a0385d10b3e75bb61af57e57bac1d6a2e4`, frozen
+branch/evidence head `cf5f8cbe1b2ace387b821cb1482d44fc6e4f266b`.
+Scope: the TypeScript CI job and authored-source transport test fixture only.
+The integrated player source and v030/API 1.26/149-ID approval above remain
+unchanged. **No new findings; primary approval carries forward.**
+
+The Node job installs the same commit-pinned BEAM setup and exact OTP/Elixir
+versions used by the existing Elixir jobs, matching the repository toolchain.
+It sets `MIX_ENV=test` and fetches locked dependencies before running the tests.
+The fixture calls `mix` directly, retaining actual cartridge compilation and
+scratch cleanup. This supplies the dependency the test already needs without
+requiring a second toolchain manager on the hosted runner.
+
+Independent bounded verification:
+
+- A controlled child PATH contains the pinned Node, Mix, Elixir and Erlang
+  executables and system utilities; `mise` is independently confirmed absent.
+  An external Node import hook loads the original fixture from the parent of the
+  fix without changing any repository file. The transport test fails at import
+  with `spawnSync mise ENOENT` (exit 1). The fixed fixture in the same environment
+  passes **6/6 transport tests** (exit 0).
+- All five artifacts in the [CI evidence inventory](../evidence/2026-10-06-d1-ci-portability/README.md)
+  match their hashes; the inventory has no missing/unlisted artifact outside its
+  two checksum files. The retained original hosted failure and controlled
+  red/green evidence agree with the independent reproduction.
+- Actual two-file source diff and workflow ordering reviewed. `git diff --check`
+  passes. Ponytail Review: minimal; reuse the existing pinned BEAM setup and direct
+  executable invocation. No new abstraction or dependency is warranted.
+
+This verifies the harness portability repair, not completion of hosted CI or
+publication. No gameplay, persistence, protocol, release pin, owner save,
+browser preview or native/device work is part of this recheck.
