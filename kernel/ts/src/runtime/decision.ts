@@ -24,6 +24,7 @@ import {
   type InspectableDetail,
   type ItemDefinition,
   type Key,
+  type LiquidRow,
   type MutationTarget,
   type NpcDefinition,
   type Owned,
@@ -43,11 +44,8 @@ import type { RngState } from '../foundation/rng.ts';
 
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
-/**
- * Mutable hashed state. Optional sections appear only on first write, preserving untouched
- * world hashes; absent facts/resources/barriers retain their authored defaults.
- */
 export type State = {
+  readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
@@ -104,8 +102,10 @@ const SECTIONS: Readonly<
     | 'created'
     | 'encounters'
     | 'escorts'
+    | 'liquids'
   >
 > = {
+  liquid: 'liquids',
   encounter: 'encounters',
   escort: 'escorts',
   entity: 'created',
@@ -119,28 +119,25 @@ const SECTIONS: Readonly<
   choice: 'choices',
 };
 
-/**
- * Where adopt() keeps a written MutationTarget: its State section and row (not the clock), as
- * foundation/compose.ts reads it: an entity's container by its id, a quest instance, job or continuation by
- * its id, else by canonical target text.
- */
 export const row = (t: MutationTarget) =>
   SECTIONS[t.kind] &&
   ([
     SECTIONS[t.kind]!,
-    t.kind === 'containment' || t.kind === 'entity'
-      ? t.entity_id
-      : t.kind === 'escort'
-        ? t.actor_id
-        : t.kind === 'encounter'
-          ? t.encounter_id
-          : t.kind === 'quest'
-            ? t.instance_id
-            : t.kind === 'job'
-              ? t.job_id
-              : t.kind === 'choice'
-                ? t.continuation_id
-                : key(t),
+    t.kind === 'liquid'
+      ? t.item_id
+      : t.kind === 'containment' || t.kind === 'entity'
+        ? t.entity_id
+        : t.kind === 'escort'
+          ? t.actor_id
+          : t.kind === 'encounter'
+            ? t.encounter_id
+            : t.kind === 'quest'
+              ? t.instance_id
+              : t.kind === 'job'
+                ? t.job_id
+                : t.kind === 'choice'
+                  ? t.continuation_id
+                  : key(t),
   ] as const);
 
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
@@ -165,6 +162,9 @@ export type World = {
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly knownEntities: Readonly<Record<string, { kind: string; owner_id?: CharacterId }>>;
   readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
+  readonly liquidSpecs: Readonly<
+    Record<string, { capacity: number; kinds: readonly DefinitionRef[] }>
+  >;
   readonly capacities: Readonly<Record<string, number>>; // by EntityId: declared limit, or zero for noncontainer items
   readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text

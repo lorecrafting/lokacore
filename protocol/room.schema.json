@@ -159,6 +159,9 @@
             "title"
           ],
           "additionalProperties": false
+        },
+        "liquid_source": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
       "required": [

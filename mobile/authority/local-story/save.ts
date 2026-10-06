@@ -159,7 +159,6 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
 }
 
 // Routing belongs to this receipt's committed command/evidence, never text or current room.
-// size: allow 55, one receipt trust boundary dispatches dialogue and validates Read/recipe identity
 function receiptDetail(
   s: Story,
   r: { command_id: string; command: string },
@@ -180,6 +179,47 @@ function receiptDetail(
   }
   if (d.outcome === 'harvested' && command?.payload.type === 'harvest')
     return command.payload.target_id;
+  const p = command?.payload;
+  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'drink') {
+    if (validate('Command', command).length || command?.id !== r.command_id)
+      throw new Error('malformed JSON: invalid committed liquid action');
+    return p.type === 'drink' ? p.vessel_id : p.source_id;
+  }
+  return readableDetail(s, r, command, d);
+}
+
+// The run is in it, so an old run's token is never current again after newGame.
+export const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
+export const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
+export const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
+export const ids = (s: Story): RunIds => ({
+  content_hash: s.meta.pin.content_hash,
+  kernel_version: s.host.kernel_version,
+  seed: s.meta.seed as number[],
+  run_id: s.meta.run_id,
+});
+
+/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
+export const budget = (s: Story, command_id: string, limit: string) => ({
+  format: 'loka-obs-v1',
+  event: 'evaluation.budget_exceeded',
+  store: 'diagnostics',
+  ids: { ...ids(s), command_id, revision: s.revision },
+  data: { limit },
+});
+
+export function block(s: Story, e: ElapsedRecoveryError): never {
+  s.blocked = e;
+  s.fence = undefined;
+  throw e;
+}
+
+function readableDetail(
+  s: Story,
+  r: { command_id: string },
+  command: Command | null,
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
   if (!['read', 'performed', 'success'].includes(d.outcome)) return;
   if (d.outcome === 'read') {
     if (
@@ -190,6 +230,15 @@ function receiptDetail(
       throw new Error('malformed JSON: invalid committed Read');
     return command.payload.target_id;
   }
+  return recipeDetail(s, r, command, d);
+}
+
+function recipeDetail(
+  s: Story,
+  r: { command_id: string },
+  command: Command | null,
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
   const completed = d.events.filter(
     (e) => e.payload.type === 'action_completed' && e.causation_id === r.command_id,
   );
@@ -217,30 +266,4 @@ function receiptDetail(
   )
     throw new Error('malformed JSON: invalid readable recipe receipt');
   return subject;
-}
-
-// The run is in it, so an old run's token is never current again after newGame.
-export const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
-export const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
-export const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
-export const ids = (s: Story): RunIds => ({
-  content_hash: s.meta.pin.content_hash,
-  kernel_version: s.host.kernel_version,
-  seed: s.meta.seed as number[],
-  run_id: s.meta.run_id,
-});
-
-/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
-export const budget = (s: Story, command_id: string, limit: string) => ({
-  format: 'loka-obs-v1',
-  event: 'evaluation.budget_exceeded',
-  store: 'diagnostics',
-  ids: { ...ids(s), command_id, revision: s.revision },
-  data: { limit },
-});
-
-export function block(s: Story, e: ElapsedRecoveryError): never {
-  s.blocked = e;
-  s.fence = undefined;
-  throw e;
 }

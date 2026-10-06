@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Finite liquid contracts",
+  "description": "B7 exact item contents and authored mass/serving metadata; no clock or resource effects.",
+  "$defs": {
+    "LiquidRow": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "kind",
+        "quantity"
+      ],
+      "additionalProperties": false,
+      "description": "Exact vessel contents: null iff zero, positive declared kind bounded by immutable capacity."
+    },
+    "VesselSpec": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "unit_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "initial": {
+          "$ref": "liquid.schema.json#/$defs/LiquidRow"
+        }
+      },
+      "required": [
+        "capacity",
+        "unit_label",
+        "initial"
+      ],
+      "additionalProperties": false,
+      "description": "Opted finite vessel shell with authored positive capacity and initial contents."
+    },
+    "LiquidDefinition": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "unit_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "grams_per_unit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "drink_amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "unit_label",
+        "grams_per_unit",
+        "drink_amount"
+      ],
+      "additionalProperties": false,
+      "description": "Cartridge-owned mass, integer serving and unit labels for a declared liquid."
+    },
+    "LiquidView": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "unit_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "kind",
+        "quantity",
+        "capacity",
+        "unit_label",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "Confirmed vessel contents and authored capacity/labels, never an optimistic amount."
+    }
+  }
+}

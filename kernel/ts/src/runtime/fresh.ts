@@ -1,6 +1,7 @@
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
 // Initial world ids), split from runtime/world.ts, which re-exports newWorld.
 import type { CharacterId, EntityId, ResourceSpec, WorldContextId } from '../contracts.gen.ts';
+import { initialLiquids } from '../mechanics/liquid/shared.ts';
 import { key } from '../foundation/compose.ts';
 import { refString, type Cartridge, type Detail, type Entity, type World } from './decision.ts';
 import { firstJobs } from '../mechanics/schedule/behavior.ts';
@@ -33,6 +34,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const details = roomDetails(cartridge, refs, roomIds, mint);
   const { entities, entityIds, containers, capacities } = place(cartridge, roomIds, mint);
   containers[body] = roomIds[refString(cartridge.entry)];
+  const { liquids, liquidSpecs } = initialLiquids(cartridge, entities);
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
   const slots = holders(cartridge, mint);
@@ -49,6 +51,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entities,
     entityIds,
     capacities,
+    liquidSpecs,
     knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character),
     corpseTemplates: corpseTemplates(cartridge),
     slots,
@@ -57,7 +60,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityResourceSpecs,
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
-    state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
+    state: { clock, containers, rng: seed, ...written({ jobs, resources, liquids }) },
   };
 }
 

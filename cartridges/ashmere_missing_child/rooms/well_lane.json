@@ -14,5 +14,20 @@
     "west": {
       "to": "chandler"
     }
+  },
+  "details": {
+    "well": {
+      "aliases": [
+        "well",
+        "water"
+      ],
+      "description": "detail.well.description",
+      "liquid_source": "water",
+      "readable": {
+        "title": "detail.well.title",
+        "label": "detail.well.read",
+        "text": "detail.well.description"
+      }
+    }
   }
 }

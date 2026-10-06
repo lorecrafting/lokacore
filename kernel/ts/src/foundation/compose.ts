@@ -1,4 +1,5 @@
 // size: allow 320, typed terminal quest replacement joins portable composition
+import { composeLiquid } from './compose_liquid.ts';
 import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
@@ -63,7 +64,7 @@ export function compose(state: State, delta: StateDelta): Result {
     const k = key(t);
     const prior = ctx.overlay.get(k);
     if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
-    const out = apply(op, t, ctx);
+    const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
@@ -104,8 +105,8 @@ const check = (ok: boolean, value: Json): Outcome =>
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
 // size: allow 42, exhaustive dispatch over the closed delta-op contract
-function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
-  const row = read(t, ctx);
+function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
+  if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign': {
       const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
@@ -270,6 +271,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
+    case 'liquid':
+      return get(section(s, 'liquids'), t.item_id);
     case 'clock':
       return s.clock;
     case 'resource':

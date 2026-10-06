@@ -482,7 +482,13 @@ management screen is required. Local Leave remains navigation only.
 Use the existing ActionInvocation/freshness boundary for the exact displayed
 source/receiver and view context. Revalidate after time/custody/quantity changes;
 a stale pair never silently substitutes another skin. Pending/unknown saves
-show no optimistic quantity or success log. Confirmed action narration reflects
+show no optimistic quantity or success log. Confirmed liquid narration uses a fixed authored sentence followed by a compact
+quantity line (for example `Water · 1 quarter-litre`) from that committed Text's
+`kind`, `unit_label` text-key bindings and integer `quantity`. This bounded B7
+presentation adds no text-template language or catalog placeholder substitution;
+missing bindings produce no invented amount. The saved command routes Fill back
+to its exact source detail, and Pour/Drink to their source vessel.
+Confirmed action narration reflects
 the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
 saved state. Book owns neither liquid math nor a consumption effect producer.
 ## C2 watch patrol details

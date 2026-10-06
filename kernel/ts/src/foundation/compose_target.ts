@@ -1,6 +1,7 @@
 import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
 /** The MutationTarget an op writes (04 §5.1). */
 export function target(op: DeltaOp): MutationTarget {
+  if (op.op === 'liquid.set') return { kind: 'liquid', item_id: op.item_id };
   switch (op.op) {
     case 'fact.assign': {
       const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };

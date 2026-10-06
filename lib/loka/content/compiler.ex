@@ -1,8 +1,7 @@
 defmodule Loka.Content.Compiler do
   @moduledoc """
   Validates the loaded source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21).
-  Each stage runs on the parts the stages before it accepted, so one bad file does not hide
-  the diagnostics of the others.
+  Each stage runs on accepted input so one bad file does not hide diagnostics from other files.
   """
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
   alias Loka.Content.{Entities, Position, Resources, Scenes}
@@ -44,6 +43,7 @@ defmodule Loka.Content.Compiler do
       Resources.check(manifest, defs, v2, located, registry),
       Entities.carry(manifest, defs, located),
       Loka.Content.Commerce.check(manifest, defs),
+      Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -61,11 +61,10 @@ defmodule Loka.Content.Compiler do
   defp final_checks(manifest, defs, v2, registry),
     do: Position.check(manifest, defs) ++ Scenes.check(manifest, defs, v2, registry)
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
-  # entry, a calendar or world, a text catalog, resources.json or attributes.json (CompiledCartridge).
+  # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -146,7 +145,8 @@ defmodule Loka.Content.Compiler do
     {"dialogue", :dialogue, "DialogueDefinition"},
     {"story_point", :story_point, "StoryPointDefinition"},
     {"scene", :scene, "SceneDefinition"},
-    {"skill", :skill, "SkillDefinition"}
+    {"skill", :skill, "SkillDefinition"},
+    {"liquid", :liquid, "LiquidDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -283,6 +283,18 @@ defmodule Loka.Content.Compiler do
   end
 
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
-  defp source_defs,
-    do: Map.update!(Contracts.defs(), "DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+  defp source_defs do
+    defs = Contracts.defs()
+
+    defs
+    |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> Map.update!(
+      "LiquidRow",
+      &put_in(&1, ["properties", "kind", "anyOf"], [
+        %{"type" => "null"},
+        %{"$ref" => "Key"},
+        defs["DefinitionRef"]
+      ])
+    )
+  end
 end

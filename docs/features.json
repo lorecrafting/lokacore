@@ -648,5 +648,34 @@
       "facts_typed"
     ],
     "implemented_in": "C1 Tobin lessons and actual equipped sword/dodge/shield combat (local implementation; independent review pending)"
+  },
+  "liquid": {
+    "spec": "docs/system/mechanics.md B7; docs/system/protocol.md B7 liquid composition",
+    "contracts": [
+      "LiquidDefinition",
+      "LiquidRow",
+      "VesselSpec",
+      "LiquidView",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/liquid/shared.ts",
+      "kernel/ts/src/view/liquid.ts",
+      "kernel/ts/src/foundation/compose_liquid.ts",
+      "lib/loka/core/liquid.ex",
+      "mobile/authority/local-story/liquid-save.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/liquid_composition.json",
+      "protocol/fixtures/missing_child_b7_hash.json"
+    ],
+    "invariants": [
+      "liquid_rows_valid",
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal"
+    ],
+    "implemented_in": "B7 finite Well Lane source and two waterskins (TypeScript; portable liquid.set twins)"
   }
 }

@@ -33,6 +33,9 @@ defmodule Loka.Core.Invariants do
     Loka.Core.InvariantsCreation.custody?(s, ops, r)
   end
 
+  def check("liquid_rows_valid", %{"state" => s, "result" => r}),
+    do: Loka.Core.InvariantsLiquid.rows_valid?(s, r)
+
   def check("containment_acyclic", %{"state" => s, "result" => r}) do
     final = Map.merge(Map.get(s, "containers", %{}), Map.new(moved(r)))
     counts = Enum.frequencies(Map.values(final))
@@ -99,6 +102,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
+      Loka.Core.InvariantsLiquid.holds?(s, ops, result) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 
@@ -127,6 +131,7 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "job." <> _}, _, _, ctx), do: {:cont, ctx}

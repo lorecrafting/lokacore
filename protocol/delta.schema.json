@@ -803,6 +803,34 @@
           ],
           "additionalProperties": false,
           "description": "API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "liquid.set"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "from": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            },
+            "to": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "item_id",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -1197,6 +1225,22 @@
           "required": [
             "kind",
             "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "liquid"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "item_id"
           ],
           "additionalProperties": false
         }

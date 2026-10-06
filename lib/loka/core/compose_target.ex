@@ -25,6 +25,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "escort.transition", "actor_id" => a}),
     do: %{"kind" => "escort", "actor_id" => a}
 
+  def target(%{"op" => "liquid.set", "item_id" => i}),
+    do: %{"kind" => "liquid", "item_id" => i}
+
   def target(%{"op" => "time.advance"}), do: %{"kind" => "clock"}
 
   def target(%{"op" => "resource.adjust"} = op),

@@ -24,6 +24,7 @@ import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
+import { liquids } from './cartridge_liquids.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
 export interface Installed {
@@ -77,7 +78,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => refStage(c),
+    () => [...refStage(c), ...liquids(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -110,26 +111,28 @@ const schemaStage = (doc: Json) =>
 
 // Each map key's cartridge_id, cartridge_version and key against the manifest and definition.
 // The schema's propertyNames pattern already holds the key's shape and kind.
+const DEFINITION_MAPS = [
+  'facts',
+  'policies',
+  'actions',
+  'rooms',
+  'npcs',
+  'items',
+  'recipes',
+  'resources',
+  'attributes',
+  'barriers',
+  'quests',
+  'reactions',
+  'dialogues',
+  'story_points',
+  'scenes',
+  'skills',
+  'liquids',
+];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of [
-    'facts',
-    'policies',
-    'actions',
-    'rooms',
-    'npcs',
-    'items',
-    'recipes',
-    'resources',
-    'attributes',
-    'barriers',
-    'quests',
-    'reactions',
-    'dialogues',
-    'story_points',
-    'scenes',
-    'skills',
-  ]) {
+  for (const map of DEFINITION_MAPS) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [

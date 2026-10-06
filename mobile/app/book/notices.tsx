@@ -130,18 +130,21 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       {!board &&
         ('actions' in detail ? (detail.actions ?? []) : []).map((offer) => {
           const button = p.screen.buttons.find(
-            (b) => b.detail_id === detail.id && b.action_key === offer.action_key,
+            (b) =>
+              b.detail_id === detail.id &&
+              b.action_key === offer.action_key &&
+              JSON.stringify(b.target_ids) === JSON.stringify(offer.target_ids ?? []),
           );
           return button ? (
             <Tap
-              key={offer.action_key}
+              key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
               label={button.label}
               onPress={() => p.press(button, detail.id)}
             >
               <Text style={{ ...prose, color: paper.accent }}>{button.label}</Text>
             </Tap>
           ) : !offer.available ? (
-            <Text key={offer.action_key} style={note}>
+            <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
               {p.screen.text(offer.label)}: {why(offer, p.screen.text)}
             </Text>
           ) : null;
