@@ -60,6 +60,7 @@ defmodule Loka.Content.Position do
         }
   end
 
+  # ponytail: gather reserved names together; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp reserved_names(m, defs) do
     keys = if required?(m), do: ["position"], else: []
 

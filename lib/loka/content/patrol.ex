@@ -3,6 +3,7 @@ defmodule Loka.Content.Patrol do
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [reference: 6, resolve: 4]
 
+  # ponytail: report finite route mismatches together; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   def quest(rel, %{"patrol" => p} = q, ctx) do
     bad = fn field -> diag("OUTCOME_MISMATCH", at(rel, ["patrol", field])) end
 
@@ -105,6 +106,7 @@ defmodule Loka.Content.Patrol do
     end
   end
 
+  # ponytail: keep five conflict scans together; split on growth. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp conflicts(rel, p, q, ctx) do
     other =
       for {_, {_, _, other}} <- ctx.defs["quest"],
@@ -141,6 +143,7 @@ defmodule Loka.Content.Patrol do
     other ++ escorts ++ accepts ++ dialogue ++ reactions
   end
 
+  # ponytail: bound choice stays with its ref check; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   def choice(rel, steps, %{"patrol" => p} = o, d, ctx) do
     refs = reference(rel, steps ++ ["patrol"], "quest", p, ctx.m, ctx.defs)
 

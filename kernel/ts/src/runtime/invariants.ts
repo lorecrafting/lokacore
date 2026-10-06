@@ -3,9 +3,7 @@ import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { patrolsHold } from './invariants_patrol.ts';
 import { escortsHold } from './invariants_escort.ts';
-// Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
-// observation fields). check(id, observation) is true when the invariant holds. The checks
-// after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
+// Pure checks by id, twin of lib/loka/core/invariants.ex; step checks are TypeScript only.
 import { encountersHold } from './invariants_encounter.ts';
 import { creationsHold } from './invariants_creation.ts';
 import { resourceAfter } from './invariants_resource.ts';
@@ -203,12 +201,9 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     if (!Number.isInteger(state.clock) || !retirementsHold(delta.ops)) return false;
     if (!creationsHold(state, delta.ops, result) || !liquidsHold(state, delta.ops, result))
       return false;
-    if (
-      !encountersHold(state, delta.ops, result) ||
-      !escortsHold(state, delta.ops, result) ||
-      !patrolsHold(state, delta.ops, result)
-    )
+    if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
       return false;
+    if (!patrolsHold(state, delta.ops, result)) return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));

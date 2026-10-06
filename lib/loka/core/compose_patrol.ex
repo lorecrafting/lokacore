@@ -13,6 +13,7 @@ defmodule Loka.Core.ComposePatrol do
 
   defp legal?(nil, value), do: value["status"] == "together" and value["credit"] == []
 
+  # ponytail: keep the finite transition table visible; split on growth. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp legal?(before, value) do
     fixed = before["attempt_id"] == value["attempt_id"]
     credit = before["credit"] == value["credit"]

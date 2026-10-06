@@ -40,6 +40,7 @@ defmodule Loka.Content.Requires do
 
   defp b6_minimum(all), do: if(Enum.any?(all, &b6_feature?/1), do: [1, 21], else: [])
 
+  # ponytail: finite wire floors stay ordered here; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp minimum_feature_api(m, all) do
     cond do
       is_map_key(m["requires"]["capabilities"], "patrol") ->
