@@ -4,9 +4,17 @@
 
 Proposed branch: `chapter1/d9-village-reactions`.
 
+**Current source gate, 2026-10-06:** Published main `f24255db` contains D4, but
+C4 hound behavior and D6 water depths are unpublished. Both are prerequisites
+for this brief's full scope. D6's selected Chapel recovery applies only to
+owned nonempty corpses in `well_bottom` or `pool_bottom`; it cannot recover a
+Prior Study corpse. D9 source, successor pins and PR remain null. Before source
+GO, re-pin merged C4/D6, select and independently review a narrow study
+barrier/recovery rule in active system docs, and preserve public S2 delivery.
+
 ## Goal, dependencies and governing clauses
 
-Give the existing cast distinct, truthful child/allegiance responses; project committed bell sound only over its declared area; implement actual selected hound suppression and optional-study closure without stranding delivery/corpses. Re-pin A1–A3 terminal/scene order, B2 relationships/faction/public Aldric, D1 Sedge, D2 Priory, D4 villagers, C3/C4 population and D6 unified corpse recovery **if study closure can strand gear**. Governors: archived00a §§6/8/10/11, current four-state/three-ending owner decision, mechanics reaction/description/dialogue/schedule, protocol event ownership/narration, M14/M16/M22/M23 release families, no-wait and recovery/reading gates.
+Give the existing cast distinct, truthful child/allegiance responses; project committed bell sound only over its declared area; implement actual selected hound suppression and optional-study closure without stranding delivery/corpses. Re-pin A1–A3 terminal/scene order, B2 relationships/faction/public Aldric, D1 Sedge, D2 Priory, D4 villagers, C3/C4 population and D6's actual underwater-only recovery contract. C4 and D6 are unconditional merged prerequisites for full D9 source. D9 must select its own study-corpse retrieval rule before closing the Study. Governors: archived00a §§6/8/10/11, current four-state/three-ending owner decision, mechanics reaction/description/dialogue/schedule, protocol event ownership/narration, M14/M16/M22/M23 release families, no-wait and recovery/reading gates.
 
 ## PM reaction matrix and policies
 
@@ -26,7 +34,7 @@ The declared bell-audible area is **all25 Ashmere rooms plus the10 public Priory
 
 Select descriptive flood at Reed Path/Mire with **no blocked dry/rescue/corpse exit**. Bell suppression lasts **172800 logical seconds**: hound spawning/hostile engagement is disabled; existing living hounds become passive, stay conserved and remain inspectable. No artificial deaths, loot or credit. Resume re-reads suppression generation/population cap, no catch-up burst. Sedge's hostile/warm profile is actual dialogue flavor; swim/herbalism/recovery remain immediately accessible.
 
-Fox closes the **optional Prior Study** through its real barrier policy; public Aldric still accepts S2. Player already inside can leave; an actual owned corpse behind closure remains retrievable through the selected single shrine action. Do not enable closure before this concrete recovery proof. Reuse B2's adopted relationship semantics for named consequences/eligibility; if relationship@1 has no real consumer yet, explicitly close its applicability rather than rename arbitrary facts “relationships.”
+Fox closes the **optional Prior Study** only after D9 selects and proves a real barrier policy and exact-corpse retrieval. Public Aldric still accepts S2, and a player already inside must be able to leave. D6's underwater-only Chapel action does not supply this retrieval. Do not enable closure before an actual owned nonempty Study corpse can be recovered without opening mandatory paths or fabricating custody. Reuse B2's adopted relationship semantics for named consequences/eligibility; if relationship@1 has no real consumer yet, explicitly close its applicability rather than rename arbitrary facts “relationships.”
 
 ## Composition and files
 
@@ -36,7 +44,7 @@ Quest/choice owners remain sole writers of terminal child/allegiance/bell facts.
 
 Run fresh controlled states for all five terminal pairs and base missing/unknown; assert **stays differs from rescued**, exact public Aldric service and unchanged quest/reward/export facts. Test cue from eligible Ashmere/Priory observer and excluded Fen/isle observer; repeated view/read/reopen yields zero new writes. Causal event and observer binding survives receipts and cold-open narration; malformed new evidence is typed corrupt.
 
-At bell commit, suppression removes aggression/spawn availability without deleting hounds/custody; at+172799 remains suppressed, at+172800 resumes once within cap. S2 ledger delivery still works afterfox study closure. Execute actual lethal study/isle/Fen recovery, unique-item custody and Wren return/rejoin through descriptive flood. Plant stays→rescued mapping, cue area leak, render-triggered write, wrong observer binding or stale suppression resume. Browser: five-pair cast/Green/rumor checks, sound boundary, public delivery and actual shrine recovery, with refresh at suppression/closure. Stop for duplicate target writers, mandatory route lock, insufficient receipt observer evidence or unimplemented relationship capability being falsely declared complete.
+At bell commit, suppression removes aggression/spawn availability without deleting hounds/custody; at+172799 remains suppressed, at+172800 resumes once within cap. Check existing hounds, pending population jobs and an open encounter. S2 ledger delivery still works after fox Study closure. Create an actual owned nonempty Study corpse before closure, leave if inside, and recover that exact corpse after closure under the separately selected D9 rule. Execute island/Fen recovery, unique-item custody and Wren return/rejoin through descriptive flood. Plant stays→rescued mapping, cue area leak, render-triggered write, wrong observer binding or stale suppression resume. Browser: five-pair cast/Green/rumor checks, sound boundary, public delivery and actual corpse recovery, with refresh at suppression/closure. Stop for duplicate target writers, mandatory route lock, insufficient receipt observer evidence or unimplemented relationship capability being falsely declared complete.
 
 ## Shared delivery and proof contract
 
