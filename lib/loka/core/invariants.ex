@@ -108,7 +108,8 @@ defmodule Loka.Core.Invariants do
   defp entity_preconditions?(s, ops, result) do
     Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
-      Loka.Core.InvariantsPopulation.holds?(s, ops, result)
+      Loka.Core.InvariantsPopulation.holds?(s, ops, result) and
+      Loka.Core.InvariantsPopulation.crows_hold?(s, ops, result)
   end
 
   defp replay_preconditions(s, ops, result) do
@@ -139,6 +140,7 @@ defmodule Loka.Core.Invariants do
   defp replay_op(%{"op" => "water.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
+  defp replay_op(%{"op" => "crow.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "resource.initialize"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}

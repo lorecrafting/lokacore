@@ -1607,7 +1607,6 @@
       "required": [
         "key",
         "npc",
-        "item",
         "corpse"
       ],
       "additionalProperties": false,
@@ -1686,6 +1685,45 @@
         "wander_interval": {
           "type": "integer",
           "minimum": 1
+        },
+        "scavenge": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "minItems": 1,
+              "maxItems": 8
+            },
+            "drop_rooms": {
+              "type": "array",
+              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "minItems": 1,
+              "maxItems": 8
+            },
+            "nest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "corridor": {
+              "type": "array",
+              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "minItems": 2,
+              "maxItems": 16
+            },
+            "interval": { "type": "integer", "minimum": 1 },
+            "narration": {
+              "type": "object",
+              "properties": {
+                "carrying": { "$ref": "text.schema.json#/$defs/TextKey" },
+                "acquired": { "$ref": "text.schema.json#/$defs/TextKey" },
+                "delivered": { "$ref": "text.schema.json#/$defs/TextKey" },
+                "fallback": { "$ref": "text.schema.json#/$defs/TextKey" },
+                "shoo": { "$ref": "text.schema.json#/$defs/TextKey" }
+              },
+              "required": ["carrying", "acquired", "delivered", "fallback", "shoo"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["items", "drop_rooms", "nest", "corridor", "interval", "narration"],
+          "additionalProperties": false
         },
         "pack": {
           "type": "object",

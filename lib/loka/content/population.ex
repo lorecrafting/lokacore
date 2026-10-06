@@ -12,18 +12,34 @@ defmodule Loka.Content.Population do
     "down" => "up"
   }
 
+  # ponytail: one bounded plan expansion keeps short refs together. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m) do
     plan
     |> Map.put("bundle", ref(b, "population_bundle", m))
     |> Map.put("home", ref(home, "room", m))
     |> Map.put("area", Enum.map(area, &ref(&1, "room", m)))
+    |> then(fn p ->
+      case p["scavenge"] do
+        nil ->
+          p
+
+        s ->
+          Map.put(p, "scavenge", %{
+            s
+            | "items" => Enum.map(s["items"], &ref(&1, "item", m)),
+              "drop_rooms" => Enum.map(s["drop_rooms"], &ref(&1, "room", m)),
+              "nest" => ref(s["nest"], "item", m),
+              "corridor" => Enum.map(s["corridor"], &ref(&1, "room", m))
+          })
+      end
+    end)
   end
 
-  def expand(%{"npc" => n, "item" => i, "corpse" => c} = bundle, m) do
+  def expand(%{"npc" => n, "corpse" => c} = bundle, m) do
     bundle
     |> Map.put("npc", ref(n, "npc", m))
-    |> Map.put("item", ref(i, "item", m))
     |> Map.put("corpse", ref(c, "item", m))
+    |> then(fn b -> if b["item"], do: Map.put(b, "item", ref(b["item"], "item", m)), else: b end)
   end
 
   def check(nil, _, _, _), do: []
@@ -67,6 +83,7 @@ defmodule Loka.Content.Population do
     |> add(not valid_time, ["wander_interval"])
     |> add(not connected, ["area"])
     |> add(not bundle_ok, ["bundle"])
+    |> add(not scavenge_valid?(p["scavenge"], p, bundle, manifest, defs, text), ["scavenge"])
     |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
   end
@@ -96,17 +113,53 @@ defmodule Loka.Content.Population do
   defp value({_, _, v}) when is_map(v), do: v
   defp value(_), do: nil
 
-  # ponytail: exact hound-and-pelt bundle has one linked validation; split on another bundle shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp scavenge_valid?(nil, _, _, _, _, _), do: true
+
+  # ponytail: validate one authored corridor and nest together. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp scavenge_valid?(s, p, bundle, manifest, defs, text) do
+    corridor = s["corridor"]
+    rooms = Enum.map(corridor, &value(Refs.resolve(&1, "room", manifest, defs)))
+    nest = value(Refs.resolve(s["nest"], "item", manifest, defs))
+    items = Enum.map(s["items"], &value(Refs.resolve(&1, "item", manifest, defs)))
+
+    pairs =
+      Enum.zip([
+        Enum.drop(corridor, -1),
+        Enum.drop(corridor, 1),
+        Enum.drop(rooms, -1),
+        Enum.drop(rooms, 1)
+      ])
+
+    is_map(bundle) and bundle["item"] == nil and
+      Enum.all?(Map.values(s["narration"]), &Map.has_key?(text, &1)) and
+      Enum.uniq(corridor) == corridor and
+      Enum.member?(corridor, p["home"]) and
+      Enum.all?(s["drop_rooms"], &Enum.member?(corridor, &1)) and
+      Enum.all?(items, &(is_map(&1) and &1["location"]["in"] == "room")) and
+      is_map(nest) and nest["container"] == true and is_integer(nest["capacity"]) and
+      nest["location"] == %{"in" => "room", "room" => List.last(corridor)} and
+      Enum.all?(rooms, &is_map/1) and
+      Enum.all?(pairs, fn {from, to, a, b} ->
+        Enum.any?(a["exits"] || %{}, fn {direction, edge} ->
+          edge["to"] == to and edge["barrier"] == nil and
+            get_in(b, ["exits", @opposite[direction], "to"]) == from and
+            get_in(b, ["exits", @opposite[direction], "barrier"]) == nil
+        end)
+      end)
+  end
+
+  # ponytail: the optional companion keeps the existing bounded population bundle shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp bundle_valid?(b, manifest, defs, home) do
     npc = value(Refs.resolve(b["npc"], "npc", manifest, defs))
-    item = value(Refs.resolve(b["item"], "item", manifest, defs))
+    item = if b["item"], do: value(Refs.resolve(b["item"], "item", manifest, defs))
     corpse = value(Refs.resolve(b["corpse"], "item", manifest, defs))
 
-    npc && item && corpse &&
+    npc && corpse &&
       npc["spawn_template"] == true && npc["room"] == home &&
       is_map(npc["hp"]) && is_map(npc["attack"]) &&
-      item["location"] == %{"in" => "template"} && item["container"] == nil &&
-      item["capacity"] == nil && item["slot"] == nil && item["barrier"] == nil &&
+      (b["item"] == nil or
+         ((is_map(item) and item["location"] == %{"in" => "template"} and item["container"] == nil and
+             item["capacity"] == nil) && item["slot"] == nil && item["barrier"] == nil)) &&
       corpse["location"] == %{"in" => "template"} && corpse["container"] == true &&
       corpse["capacity"] == nil
   end

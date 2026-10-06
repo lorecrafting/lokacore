@@ -26,6 +26,7 @@ import { npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
 import { packRound, successor, narrate } from './round_flow.ts';
+import { settled as crowSettled } from '../population/behavior.ts';
 
 export type CombatEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'attack_result' | 'entity_died' }>;
@@ -79,6 +80,8 @@ export function roundSequence(
   };
   if (row.active_ids) return packRound(world, command, job, row, encounter_id, r, close, mint);
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
+  if (r.ops.some((op) => op.op === 'encounter.close'))
+    r.ops.push(...crowSettled(prefix(world, r.ops, job.due_time), row.npc_id, mint));
   const narration = narrate(world, row, r.events);
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);

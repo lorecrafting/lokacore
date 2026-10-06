@@ -115,11 +115,16 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   return p.view.entities.map((e) => {
     const name = p.text(e.name);
     return (
-      <Tap key={e.id} label={`${name}, open`} onPress={() => p.open(e.id)}>
+      <Tap
+        key={e.id}
+        label={`${name}${e.carrying ? `, ${p.text(e.carrying)}` : ''}, open`}
+        onPress={() => p.open(e.id)}
+      >
         <Text style={prose}>
           <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>{cap(name)}</Text> is
           here.
         </Text>
+        {e.carrying && <Text style={note}>{p.text(e.carrying)}</Text>}
       </Tap>
     );
   });

@@ -317,6 +317,12 @@
     "definitions": [
       "population",
       "population_bundle"
+    ],
+    "commands": [
+      "shoo"
+    ],
+    "events": [
+      "shooed"
     ]
   },
   {

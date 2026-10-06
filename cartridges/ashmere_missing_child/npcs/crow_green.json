@@ -1,7 +1,7 @@
 {
   "keywords": ["crow", "crow_green"],
   "short": "npc.crow.short",
-  "room_line": "npc.crow.room",
+  "room_line": "npc.crow_green.room",
   "description": "npc.crow.description",
   "room": "village_green",
   "spawn_template": true,

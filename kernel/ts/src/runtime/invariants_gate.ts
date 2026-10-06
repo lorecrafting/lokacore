@@ -6,7 +6,7 @@ import { liquidsHold } from './invariants_liquid.ts';
 import { encountersHold } from './invariants_encounter.ts';
 import { escortsHold } from './invariants_escort.ts';
 import { patrolsHold } from './invariants_patrol.ts';
-import { populationsHold } from './invariants_population.ts';
+import { crowsHold, populationsHold } from './invariants_population.ts';
 
 type Any = any;
 export function gate(state: Any, ops: DeltaOp[], result: Any): boolean {
@@ -19,6 +19,7 @@ export function gate(state: Any, ops: DeltaOp[], result: Any): boolean {
     escortsHold(state, ops, result) &&
     patrolsHold(state, ops, result) &&
     populationsHold(state, ops, result) &&
+    crowsHold(state, ops, result) &&
     watersHold(state, ops, result)
   );
 }

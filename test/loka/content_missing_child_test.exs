@@ -84,6 +84,21 @@ defmodule Loka.ContentMissingChildTest do
            )
   end
 
+  # Breaks: source compiler accepts a one-way crow corridor that strands a return leg.
+  test "crow transport corridor requires its reciprocal edge", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "rooms/well_lane.json")
+    room = path |> File.read!() |> JSON.decode!()
+    File.write!(path, JSON.encode!(update_in(room, ["exits"], &Map.delete(&1, "south"))))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(diagnostics, fn d ->
+             d["code"] == "SCHEMA_VIOLATION" and
+               d["path"] == "populations/crow_green_1.scavenge"
+           end)
+  end
+
   # Breaks: the compiler admits a period that cannot revisit a newly eligible fatal slot in time.
   test "hound wander must be no slower than replacement", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ashmere_missing_child", dir)

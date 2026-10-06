@@ -25,6 +25,7 @@ import type { DeltaOp, JobId } from '../../contracts.gen.ts';
 import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
+import { binding as crowBinding, runCrow } from '../population/behavior.ts';
 
 // size: allow 45, schedule dispatch retains its due job and elapsed clock paths
 export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
@@ -36,6 +37,8 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
+    if (row.job.kind === 'population_bundle')
+      return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint);
     const schedule = scheduleOf(world, row.job);

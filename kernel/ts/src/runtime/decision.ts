@@ -23,6 +23,7 @@ import {
   type PopulationControl,
   type PopulationSlot,
   type PopulationPlan,
+  type CrowTransport,
   type ErrorCode,
   type EventPayload,
   type FactValue,
@@ -56,6 +57,7 @@ export type State = {
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
   readonly population_plans?: Readonly<Record<string, PopulationControl>>; // by plan ref
   readonly population_slots?: Readonly<Record<string, PopulationSlot>>; // by target
+  readonly crows?: Readonly<Record<string, CrowTransport>>; // by plan/slot target
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
@@ -90,6 +92,9 @@ export type ChoiceRow = {
 
 /** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
 export type JobRow = {
+  readonly crow_member_id?: EntityId;
+  readonly crow_generation?: number;
+  readonly crow_phase?: 'acquire' | 'leg' | 'return';
   readonly water_generation?: number;
   readonly water_body_id?: EntityId;
   readonly job: DefinitionRef;
@@ -133,7 +138,7 @@ export type World = {
       {
         readonly bundle: DefinitionRef;
         readonly hound: DefinitionRef;
-        readonly pelt: DefinitionRef;
+        readonly pelt?: DefinitionRef;
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;
@@ -192,7 +197,7 @@ export type Mint = () => string;
 export const COMPOSES = {
   transport: ['movement'],
   action_recipe: ['check'],
-  schedule: ['movement', 'combat', 'death', 'quest'],
+  schedule: ['movement', 'combat', 'death', 'quest', 'containment'],
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement'],
   movement: ['quest'],

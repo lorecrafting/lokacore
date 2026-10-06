@@ -5,6 +5,7 @@ import { add } from '../../foundation/int.ts';
 import { attackRefused, npcRef, encounterId } from './shared.ts';
 import { flee } from './flee.ts';
 import { admission, packPlan } from './behavior.ts';
+import { attacked } from '../population/behavior.ts';
 
 export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) => {
   const { payload } = command;
@@ -41,6 +42,7 @@ export const decide: Rule<'combat'> = (world, command, mint, steps = { n: 0 }) =
         encounter_id,
         due_time: add(world.state.clock, world.cartridge.world!.combat!.interval),
       },
+      ...attacked(world, payload.target_id, encounter_id),
     ],
     [],
     helperNotes(world, payload.target_id, roster),

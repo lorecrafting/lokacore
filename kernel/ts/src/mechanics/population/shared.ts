@@ -202,13 +202,22 @@ function wanders(
   if (job.due_time !== control.next_wander_due) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
-  for (const { row } of slots) {
+  for (const { slot, row } of slots) {
     const member = row.member_id;
     if (
       !member ||
       row.replacement_due !== null ||
       born.has(member) ||
       row.last_flight_at === job.due_time ||
+      (world.state.crows?.[key({ kind: 'crow', plan: job.job, slot })]?.phase ?? 'idle') !==
+        'idle' ||
+      Object.values(world.state.jobs ?? {}).some(
+        (due) =>
+          due.crow_member_id === member &&
+          due.crow_generation === row.generation &&
+          due.due_time === job.due_time &&
+          (due.crow_phase === 'leg' || due.crow_phase === 'return'),
+      ) ||
       !living(world, member) ||
       engaged(world, member as EntityId)
     )

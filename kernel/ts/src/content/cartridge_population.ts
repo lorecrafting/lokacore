@@ -30,6 +30,7 @@ export function population(c: Obj): Diagnostic[] {
     const template = bundle && templateValid(c, bundle, p.home);
     if (!packValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.pack.narration`));
     if (!bundle || !template) out.push(diag('SCHEMA_VIOLATION', `${at}.bundle`));
+    if (!scavengeValid(c, p, bundle)) out.push(diag('SCHEMA_VIOLATION', `${at}.scavenge`));
     if (!area) out.push(diag('SCHEMA_VIOLATION', `${at}.area`));
     if (!validPeriods) out.push(diag('SCHEMA_VIOLATION', `${at}.wander_interval`));
     if (!targets) out.push(diag('SCHEMA_VIOLATION', `${at}.day_target`));
@@ -73,22 +74,60 @@ function periods(p: Obj, calendar?: Obj): boolean {
 
 function templateValid(c: Obj, bundle: Obj, home: Obj): boolean {
   const npc = c.npcs?.[ref(bundle.npc)];
-  const item = c.items?.[ref(bundle.item)];
+  const item = bundle.item && c.items?.[ref(bundle.item)];
   const corpse = c.items?.[ref(bundle.corpse)];
   return (
     npc?.spawn_template === true &&
     ref(npc.room) === ref(home) &&
     !!npc.hp &&
     !!npc.attack &&
-    item?.location.in === 'template' &&
-    !item.container &&
-    !item.capacity &&
-    !item.slot &&
-    !item.barrier &&
+    (!bundle.item ||
+      (item?.location.in === 'template' &&
+        !item.container &&
+        !item.capacity &&
+        !item.slot &&
+        !item.barrier)) &&
     corpse?.location.in === 'template' &&
     corpse.container === true &&
     !corpse.capacity
   );
+}
+
+function scavengeValid(c: Obj, p: Obj, bundle: Obj): boolean {
+  const s = p.scavenge;
+  if (!s) return true;
+  const corridor: Obj[] = s.corridor;
+  const rooms: Obj[] = corridor.map((r) => c.rooms?.[ref(r)]);
+  const nest = c.items?.[ref(s.nest)];
+  const narration = s.narration;
+  if (
+    !bundle ||
+    bundle.item ||
+    !Object.values(narration).every((k) => typeof c.text?.[k as string] === 'string') ||
+    new Set(corridor.map(ref)).size !== corridor.length ||
+    !corridor.some((r) => ref(r) === ref(p.home)) ||
+    !s.drop_rooms.every((r: Obj) => corridor.some((cr) => ref(cr) === ref(r))) ||
+    !s.items.every((r: Obj) => c.items?.[ref(r)]?.location.in === 'room') ||
+    nest?.container !== true ||
+    !Number.isSafeInteger(nest.capacity) ||
+    nest.location.in !== 'room' ||
+    ref(nest.location.room) !== ref(corridor.at(-1)!) ||
+    rooms.some((r) => !r)
+  )
+    return false;
+  return corridor
+    .slice(0, -1)
+    .every((from, i) =>
+      Object.entries(rooms[i].exits ?? {}).some(
+        ([direction, edge]: [string, any]) =>
+          ref(edge.to) === ref(corridor[i + 1]) &&
+          !edge.barrier &&
+          Object.entries(rooms[i + 1].exits ?? {}).some(
+            ([back, reverse]: [string, any]) =>
+              back === opposite[direction] && ref(reverse.to) === ref(from) && !reverse.barrier,
+          ),
+      ),
+    );
 }
 
 function reciprocal([a, b]: Obj[], [ar, br]: Obj[]): boolean {

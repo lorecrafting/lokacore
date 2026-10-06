@@ -36,6 +36,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
+import { carrying } from '../mechanics/population/behavior.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -183,6 +184,8 @@ const viewOf = (
   ...(e.kind === 'npc' && e.services && { services: services(world, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
+  ...(e.kind === 'npc' &&
+    carrying(world, id as EntityId) && { carrying: carrying(world, id as EntityId) }),
 });
 
 type Lists = ReturnType<typeof lists>;

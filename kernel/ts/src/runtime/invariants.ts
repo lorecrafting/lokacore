@@ -209,6 +209,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
         op.op === 'escort.transition' ||
         op.op === 'patrol.transition' ||
         op.op.startsWith('population.') ||
+        op.op === 'crow.transition' ||
         op.op === 'liquid.set' ||
         op.op === 'resource.initialize'
       )

@@ -433,6 +433,9 @@
     },
     "EntityView": {
       "properties": {
+        "carrying": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "contents": {
           "type": "array",
           "items": {

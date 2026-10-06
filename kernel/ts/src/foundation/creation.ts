@@ -92,7 +92,6 @@ export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
   const slots = ops.filter(
     (op): op is Extract<DeltaOp, { op: 'population.slot' }> => op.op === 'population.slot',
   );
-  if (hounds.length !== pelts.length) return false;
   for (const h of hounds) {
     const o = h.identity.origin;
     if (o.kind !== 'spawned') return false;
@@ -117,7 +116,9 @@ export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
         op.writer_group === h.writer_group &&
         op.entity_id === h.identity.id,
     );
-    if (related.length !== 1 || slot.length !== 1 || hp.length !== 1) return false;
+    const spec = section(state, 'population_specs')[key(o.by)] as Obj | undefined;
+    if (related.length !== (spec?.pelt ? 1 : 0) || slot.length !== 1 || hp.length !== 1)
+      return false;
   }
   return (
     birthSlotsMatch(slots, hounds, ops, state) &&

@@ -137,6 +137,9 @@ export function NpcPage(p: NpcProps) {
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
       {description && <Text style={prose}>{plain(p.text(description))}</Text>}
+      {p.npc && 'carrying' in p.npc && p.npc.carrying && (
+        <Text style={note}>{p.text(p.npc.carrying)}</Text>
+      )}
       {p.log.map((line, i) => (
         <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
           {typeof line === 'string' ? line : line.text}

@@ -32,6 +32,7 @@ import * as dialogue from '../mechanics/dialogue/rule.ts';
 import * as light from '../mechanics/light/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
+import * as population from '../mechanics/population/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
 import * as readable from '../mechanics/readable/rule.ts';
@@ -45,6 +46,7 @@ import { newWorld, NIL } from './fresh.ts';
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   movement: movement.decide,
   combat: combat.decide,
+  population: population.decide,
   description_variant: description_variant.decide,
   containment: containment.decide,
   commerce: commerce.decide,
@@ -77,7 +79,6 @@ const RULELESS = [
   'death',
   'escort',
   'patrol',
-  'population',
   'behavior',
   'calendar',
   'reaction',

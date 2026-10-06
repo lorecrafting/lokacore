@@ -1,7 +1,10 @@
 {
   "bundle": "crow_branches",
   "home": "oak_branches",
-  "area": ["oak_branches", "drowned_oak"],
+  "area": [
+    "oak_branches",
+    "drowned_oak"
+  ],
   "cap": 1,
   "day_target": 1,
   "night_target": 1,
@@ -10,10 +13,31 @@
   "replacement_delay": 86400,
   "wander_interval": 3600,
   "scavenge": {
-    "items": ["old_coin"],
-    "drop_rooms": ["village_green", "drowned_oak"],
+    "items": [
+      "old_coin"
+    ],
+    "drop_rooms": [
+      "village_green",
+      "drowned_oak"
+    ],
     "nest": "crow_nest",
-    "corridor": ["village_green", "well_lane", "ferry_landing", "reed_path", "reed_bank", "willow_shade", "drowned_oak", "oak_branches"],
-    "interval": 150
+    "corridor": [
+      "village_green",
+      "well_lane",
+      "ferry_landing",
+      "reed_path",
+      "reed_bank",
+      "willow_shade",
+      "drowned_oak",
+      "oak_branches"
+    ],
+    "interval": 150,
+    "narration": {
+      "carrying": "npc.crow.carrying",
+      "acquired": "narration.crow_acquired",
+      "delivered": "narration.crow_delivered",
+      "fallback": "narration.crow_fallback",
+      "shoo": "narration.crow_shoo"
+    }
   }
 }

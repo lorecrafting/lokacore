@@ -136,6 +136,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
+    case 'crow.transition':
+      return crowTransition(op, row);
     case 'water.transition':
       return transitionWater(op, row, ctx.state, read(containment(op.value.body_id), ctx));
     case 'escort.transition':
@@ -161,6 +163,49 @@ function createEntity(
   return check(
     row === undefined && creationValid(op.identity as unknown as Json, state),
     op.identity as Json,
+  );
+}
+
+function crowTransition(
+  op: Extract<DeltaOp, { op: 'crow.transition' }>,
+  row: Json | undefined,
+): Outcome {
+  const from = op.expected?.phase;
+  const to = op.value.phase;
+  const allowed: Record<string, readonly string[]> = {
+    idle: ['acquire'],
+    acquire: ['leg', 'idle', 'return', 'paused_return'],
+    leg: ['leg', 'return', 'idle', 'paused_return'],
+    return: ['return', 'idle', 'paused_return'],
+    paused_return: ['return', 'idle'],
+  };
+  const v = op.value;
+  const shape =
+    to === 'idle'
+      ? v.item_id === null &&
+        v.nest_id === null &&
+        v.job_id === null &&
+        v.drop_event_id === null &&
+        v.encounter_id === null
+      : to === 'paused_return'
+        ? v.item_id === null &&
+          v.job_id === null &&
+          v.encounter_id !== null &&
+          v.nest_id !== null &&
+          v.drop_event_id !== null
+        : v.job_id !== null &&
+          v.nest_id !== null &&
+          v.drop_event_id !== null &&
+          v.encounter_id === null &&
+          (to === 'return' ? v.item_id === null : v.item_id !== null);
+  return check(
+    same(row ?? null, op.expected) &&
+      (from === undefined ? to === 'acquire' : allowed[from]?.includes(to)) &&
+      (from === 'idle' ||
+        from === undefined ||
+        (op.expected!.member_id === v.member_id && op.expected!.generation === v.generation)) &&
+      shape,
+    v as Json,
   );
 }
 
@@ -260,6 +305,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'crow':
+      return get(section(s, 'crows'), key(t));
     case 'water':
       return get(section(s, 'water'), t.actor_id);
     case 'escort':

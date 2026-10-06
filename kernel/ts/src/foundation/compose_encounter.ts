@@ -224,11 +224,16 @@ export function composeJob(
   if (row?.status !== 'pending') return failed;
   if (op.op === 'job.cancel')
     return (
-      op.water_generation !== undefined
-        ? row.water_generation === op.water_generation &&
-          row.actor_id === op.actor_id &&
-          op.encounter_id === undefined
-        : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
+      op.crow_member_id !== undefined
+        ? row.crow_member_id === op.crow_member_id &&
+          row.crow_generation === op.crow_generation &&
+          op.encounter_id === undefined &&
+          op.water_generation === undefined
+        : op.water_generation !== undefined
+          ? row.water_generation === op.water_generation &&
+            row.actor_id === op.actor_id &&
+            op.encounter_id === undefined
+          : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
     )
       ? { value: { ...row, status: 'cancelled' } }
       : failed;
@@ -236,6 +241,22 @@ export function composeJob(
 }
 
 function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
+  if (
+    op.crow_member_id !== undefined ||
+    op.crow_generation !== undefined ||
+    op.crow_phase !== undefined
+  )
+    return (
+      op.crow_member_id !== undefined &&
+      op.crow_generation !== undefined &&
+      op.crow_phase !== undefined &&
+      op.job.kind === 'population_bundle' &&
+      op.encounter_id === undefined &&
+      op.quest_instance_id === undefined &&
+      op.water_generation === undefined &&
+      op.water_body_id === undefined &&
+      op.actor_id === undefined
+    );
   if (
     (op.quest_instance_id === undefined && op.water_generation === undefined) !==
       (op.actor_id === undefined) ||
@@ -260,6 +281,13 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
     due_time: op.due_time,
     status: 'pending',
     ...(op.encounter_id === undefined ? {} : { encounter_id: op.encounter_id }),
+    ...(op.crow_member_id === undefined
+      ? {}
+      : {
+          crow_member_id: op.crow_member_id,
+          crow_generation: op.crow_generation!,
+          crow_phase: op.crow_phase!,
+        }),
     ...(op.water_generation === undefined
       ? {}
       : {

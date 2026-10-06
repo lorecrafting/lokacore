@@ -26,6 +26,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
+import { dropped as crowDrop, taken as crowTake } from '../mechanics/population/behavior.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
 export type Stepped = { decision: DecisionResult; world: World; limit?: Limit };
@@ -230,6 +231,27 @@ function react(p: P): Admitted | undefined {
         from: 'active',
         to: 'objectives_complete',
       });
+    }
+    if (next.cause.payload.type === 'item_dropped' || next.cause.payload.type === 'item_acquired') {
+      const at = now(p);
+      if (!('cartridge' in at)) return at;
+      const ops =
+        next.cause.payload.type === 'item_dropped'
+          ? crowDrop(at, next.cause, next.mint)
+          : crowTake(at, next.cause);
+      if (ops.length) {
+        if ((p.limit = over({ deliveries: ++p.deliveries }))) return BUDGET;
+        p.group++;
+        const failed = join(
+          p,
+          ops.map((op) => ({ ...op, writer_group: p.group })),
+          [],
+          cause(p, next.cause.logical_time, next.cause.id),
+          next.depth + 1,
+          next.mint,
+        );
+        if (failed) return failed;
+      }
     }
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);

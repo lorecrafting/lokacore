@@ -22,7 +22,16 @@ export function hydrate(world: World, state: State, loading = false): World | un
   if (!loading && state.created === world.state.created) return { ...world, state };
   const draft: Draft = {};
   for (const [id, identity] of ordered(state)) {
-    if (world.state.created?.[id] && same(identity, world.state.created[id])) continue;
+    if (world.state.created?.[id] && same(identity, world.state.created[id])) {
+      if (
+        loading &&
+        identity.origin.kind === 'spawned' &&
+        identity.origin.role === 'hound' &&
+        !houndValid(world, state, id, identity, draft)
+      )
+        return undefined;
+      continue;
+    }
     if (!derive(world, state, id, identity, draft)) return undefined;
   }
   const next = { ...world, state, ...draft };
@@ -78,7 +87,18 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
   if (identity.origin.kind !== 'spawned') return false;
   const spec = world.populationSpecs[key(identity.origin.by)];
   const room = state.containers[id];
-  if (!spec || !spec.plan.area.some((r) => world.roomIds[refString(r)] === room)) return false;
+  if (!spec) return false;
+  const ordinary = spec.plan.area.some((r) => world.roomIds[refString(r)] === room);
+  const crow =
+    state.crows?.[key({ kind: 'crow', plan: identity.origin.by, slot: identity.origin.slot })];
+  const excursion =
+    spec.plan.scavenge &&
+    crow &&
+    crow.phase !== 'idle' &&
+    crow.member_id === id &&
+    crow.generation === identity.origin.generation &&
+    spec.plan.scavenge.corridor.some((r) => world.roomIds[refString(r)] === room);
+  const historical = spec.plan.scavenge?.corridor.some((r) => world.roomIds[refString(r)] === room);
   const hpTarget = key({
     kind: 'resource',
     resource: {
@@ -98,6 +118,8 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
     hp.value > spec.hp.maximum
   )
     return false;
+  // A killed crow stays at its actual corridor room; accepted-history replay proves its path.
+  if (!ordinary && !excursion && !(historical && hp.value === 0)) return false;
   draft.entityResourceSpecs ??= { ...world.entityResourceSpecs };
   draft.entityResourceSpecs[hpTarget] = spec.hp;
   return true;

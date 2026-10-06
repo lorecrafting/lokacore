@@ -12,6 +12,56 @@ defmodule Loka.Core.InvariantsPopulation do
     end
   end
 
+  def crows_hold?(state, ops, result) do
+    case Enum.reduce_while(ops, %{}, &crow_step(&1, &2, state)) do
+      false -> false
+      rows -> Enum.all?(rows, fn {at, row} -> written?(result, at, row) end)
+    end
+  end
+
+  defp crow_step(%{"op" => "crow.transition"} = op, rows, state) do
+    at = Compose.key(Compose.target(op))
+    before = Map.get(rows, at, get_in(state, ["crows", at]))
+    after_row = op["value"]
+
+    if before == op["expected"] and crow_legal?(before, after_row),
+      do: {:cont, Map.put(rows, at, after_row)},
+      else: {:halt, false}
+  end
+
+  defp crow_step(_, rows, _), do: {:cont, rows}
+
+  defp crow_legal?(before, after_row) do
+    phase = after_row["phase"]
+
+    legal = %{
+      "idle" => ~w(acquire),
+      "acquire" => ~w(leg return idle paused_return),
+      "leg" => ~w(leg return idle paused_return),
+      "return" => ~w(return idle paused_return),
+      "paused_return" => ~w(return idle)
+    }
+
+    if(before == nil, do: phase == "acquire", else: phase in Map.get(legal, before["phase"], [])) and
+      (before == nil or
+         (before["member_id"] == after_row["member_id"] and
+            before["generation"] == after_row["generation"])) and
+      crow_shape?(phase, after_row)
+  end
+
+  defp crow_shape?("idle", row),
+    do: Enum.all?(~w(item_id nest_id job_id drop_event_id encounter_id), &(row[&1] == nil))
+
+  defp crow_shape?("paused_return", row),
+    do: row["item_id"] == nil and row["job_id"] == nil and row["encounter_id"] != nil
+
+  defp crow_shape?(phase, row) when phase in ~w(acquire leg return),
+    do:
+      row["job_id"] != nil and row["nest_id"] != nil and row["drop_event_id"] != nil and
+        row["encounter_id"] == nil
+
+  defp crow_shape?(_, _), do: false
+
   defp written?(result, at, row),
     do: Enum.any?(result["changes"], &(Compose.key(&1["target"]) == at and &1["value"] == row))
 

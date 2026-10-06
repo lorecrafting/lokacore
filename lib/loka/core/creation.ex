@@ -86,29 +86,28 @@ defmodule Loka.Core.Creation do
     hounds = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "hound"))
     pelts = Enum.filter(made, &(get_in(&1, ["identity", "origin", "role"]) == "pelt"))
 
-    length(hounds) == length(pelts) and
-      Enum.all?(hounds, fn h ->
-        origin = h["identity"]["origin"]
-        id = h["identity"]["id"]
-        group = h["writer_group"]
+    Enum.all?(hounds, fn h ->
+      origin = h["identity"]["origin"]
+      id = h["identity"]["id"]
+      group = h["writer_group"]
 
+      Enum.count(
+        pelts,
+        &(&1["writer_group"] == group and get_in(&1, ["identity", "origin", "member_id"]) == id)
+      ) == if(get_in(state, ["population_specs", key(origin["by"]), "pelt"]), do: 1, else: 0) and
         Enum.count(
-          pelts,
-          &(&1["writer_group"] == group and get_in(&1, ["identity", "origin", "member_id"]) == id)
+          ops,
+          &(&1["op"] == "resource.initialize" and &1["writer_group"] == group and
+              &1["entity_id"] == id)
         ) == 1 and
-          Enum.count(
-            ops,
-            &(&1["op"] == "resource.initialize" and &1["writer_group"] == group and
-                &1["entity_id"] == id)
-          ) == 1 and
-          Enum.count(ops, fn op ->
-            op["op"] == "population.slot" and op["writer_group"] == group and
-              op["plan"] == origin["by"] and op["slot"] == origin["slot"] and
-              get_in(op, ["value", "generation"]) == origin["generation"] and
-              get_in(op, ["value", "member_id"]) == id and
-              get_in(op, ["value", "replacement_due"]) == nil
-          end) == 1
-      end) and
+        Enum.count(ops, fn op ->
+          op["op"] == "population.slot" and op["writer_group"] == group and
+            op["plan"] == origin["by"] and op["slot"] == origin["slot"] and
+            get_in(op, ["value", "generation"]) == origin["generation"] and
+            get_in(op, ["value", "member_id"]) == id and
+            get_in(op, ["value", "replacement_due"]) == nil
+        end) == 1
+    end) and
       Enum.all?(ops, fn op ->
         op["op"] != "population.slot" or get_in(op, ["value", "member_id"]) == nil or
           get_in(op, ["value", "replacement_due"]) != nil or

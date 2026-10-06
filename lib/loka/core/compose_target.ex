@@ -31,6 +31,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "population.slot", "plan" => p, "slot" => s}),
     do: %{"kind" => "population_slot", "plan" => p, "slot" => s}
 
+  def target(%{"op" => "crow.transition", "plan" => p, "slot" => s}),
+    do: %{"kind" => "crow", "plan" => p, "slot" => s}
+
   def target(%{"op" => "water.transition", "actor_id" => a}),
     do: %{"kind" => "water", "actor_id" => a}
 

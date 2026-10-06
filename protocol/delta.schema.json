@@ -430,6 +430,16 @@
             },
             "water_body_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "crow_phase": {
+              "enum": ["acquire", "leg", "return"]
             }
           },
           "required": [
@@ -767,6 +777,13 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "crow_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_generation": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
@@ -775,6 +792,7 @@
             "job_id"
           ],
           "requiredUnless": {
+            "crow_member_id": ["encounter_id"],
             "water_generation": [
               "encounter_id"
             ]
@@ -986,6 +1004,19 @@
             "from",
             "to"
           ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": { "const": "crow.transition" },
+            "writer_group": { "$ref": "#/$defs/WriterGroup" },
+            "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "slot": { "type": "integer", "minimum": 1, "maximum": 64 },
+            "expected": { "anyOf": [{ "$ref": "relation.schema.json#/$defs/CrowTransport" }, { "type": "null" }] },
+            "value": { "$ref": "relation.schema.json#/$defs/CrowTransport" }
+          },
+          "required": ["op", "writer_group", "plan", "slot", "expected", "value"],
           "additionalProperties": false
         },
         {
@@ -1575,6 +1606,16 @@
             "kind",
             "item_id"
           ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "crow" },
+            "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "slot": { "type": "integer", "minimum": 1, "maximum": 64 }
+          },
+          "required": ["kind", "plan", "slot"],
           "additionalProperties": false
         },
         {

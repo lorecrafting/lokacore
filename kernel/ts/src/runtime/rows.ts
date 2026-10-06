@@ -22,6 +22,7 @@ const SECTIONS: Readonly<
     | 'patrols'
     | 'population_plans'
     | 'population_slots'
+    | 'crows'
   >
 > = {
   water: 'water',
@@ -32,6 +33,7 @@ const SECTIONS: Readonly<
   patrol: 'patrols',
   population_plan: 'population_plans',
   population_slot: 'population_slots',
+  crow: 'crows',
   entity: 'created',
   containment: 'containers',
   fact: 'facts',

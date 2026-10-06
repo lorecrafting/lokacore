@@ -117,14 +117,17 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp keyword("required", r, _, at, _), do: ok(is_list(r) and Enum.all?(r, &is_binary/1), at)
 
-  defp keyword("requiredUnless", r, %{"properties" => ps}, at, _) when is_map(r) do
-    case Map.to_list(r) do
-      [{key, fields}] ->
-        ok(is_map_key(ps, key) and is_list(fields) and Enum.all?(fields, &is_map_key(ps, &1)), at)
+  defp keyword("requiredUnless", r, %{"properties" => ps}, at, _)
+       when is_map(r) and map_size(r) > 0 do
+    entries = Map.to_list(r)
+    fields = r |> Map.values() |> hd()
 
-      _ ->
-        ["#{at}: invalid"]
-    end
+    ok(
+      is_list(fields) and fields != [] and
+        Enum.all?(fields, &is_map_key(ps, &1)) and
+        Enum.all?(entries, fn {key, required} -> is_map_key(ps, key) and required == fields end),
+      at
+    )
   end
 
   defp keyword("exactlyOneRequired", keys, %{"properties" => ps}, at, _) when is_map(ps) do

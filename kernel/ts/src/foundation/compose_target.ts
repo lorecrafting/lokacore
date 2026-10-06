@@ -9,6 +9,7 @@ export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'liquid.set' || op.op === 'fuel.set')
     return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
   if (op.op === 'population.control' || op.op === 'population.slot') return populationTarget(op);
+  if (op.op === 'crow.transition') return { kind: 'crow', plan: op.plan, slot: op.slot };
   switch (op.op) {
     case 'fact.assign':
       return factTarget(op);

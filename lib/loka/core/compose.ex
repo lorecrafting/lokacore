@@ -231,6 +231,50 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
     do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
+  # ponytail: one bounded five-phase CAS row. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp apply_op(%{"op" => "crow.transition", "expected" => expected, "value" => value}, t, ctx) do
+    prior = read(t, ctx)
+    from = expected && expected["phase"]
+    phase = value["phase"]
+
+    allowed = %{
+      "idle" => ~w(acquire),
+      "acquire" => ~w(leg idle return paused_return),
+      "leg" => ~w(leg return idle paused_return),
+      "return" => ~w(return idle paused_return),
+      "paused_return" => ~w(return idle)
+    }
+
+    shape =
+      case phase do
+        "idle" ->
+          Enum.all?(~w(item_id nest_id job_id drop_event_id encounter_id), &(value[&1] == nil))
+
+        "paused_return" ->
+          value["item_id"] == nil and value["job_id"] == nil and
+            value["encounter_id"] != nil and value["nest_id"] != nil and
+            value["drop_event_id"] != nil
+
+        "return" ->
+          value["item_id"] == nil and value["job_id"] != nil and
+            value["encounter_id"] == nil and value["nest_id"] != nil and
+            value["drop_event_id"] != nil
+
+        _ ->
+          value["item_id"] != nil and value["job_id"] != nil and
+            value["encounter_id"] == nil and value["nest_id"] != nil and
+            value["drop_event_id"] != nil
+      end
+
+    check(
+      prior == expected and if(from, do: phase in allowed[from], else: phase == "acquire") and
+        (from in [nil, "idle"] or
+           (expected["member_id"] == value["member_id"] and
+              expected["generation"] == value["generation"])) and shape,
+      value
+    )
+  end
+
   defp apply_op(%{"op" => "water.transition"} = op, t, ctx),
     do: Loka.Core.ComposeWater.transition(op, read(t, ctx), ctx, &read/2)
 
@@ -281,6 +325,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
+  defp base(%{"kind" => "crow"} = t, s), do: section(s, "crows")[key(t)]
 
   defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
 

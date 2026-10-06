@@ -204,7 +204,7 @@ defmodule Loka.Core.InvariantsEncounter do
       do:
         Map.take(
           op,
-          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id)
+          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase)
         )
         |> Map.put("status", "pending")
   end
@@ -226,27 +226,47 @@ defmodule Loka.Core.InvariantsEncounter do
   end
 
   defp cancel_binding?(op, row) do
-    if op["water_generation"],
-      do:
+    cond do
+      op["crow_member_id"] != nil ->
+        row["crow_member_id"] == op["crow_member_id"] and
+          row["crow_generation"] == op["crow_generation"] and op["encounter_id"] == nil
+
+      op["water_generation"] != nil ->
         row["water_generation"] == op["water_generation"] and
-          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
-      else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil
+
+      true ->
+        op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+    end
   end
 
   # Independent permitted binding tuples; no call to the job composer.
   defp binding?(op) do
     present =
       Enum.filter(
-        ~w(encounter_id quest_instance_id actor_id water_generation water_body_id),
+        ~w(encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase),
         &Map.has_key?(op, &1)
       )
 
     case present do
-      [] -> true
-      ["encounter_id"] -> true
-      ["quest_instance_id", "actor_id"] -> get_in(op, ["job", "kind"]) == "quest"
-      ["actor_id", "water_generation", "water_body_id"] -> get_in(op, ["job", "kind"]) == "room"
-      _ -> false
+      [] ->
+        true
+
+      ["encounter_id"] ->
+        true
+
+      ["quest_instance_id", "actor_id"] ->
+        get_in(op, ["job", "kind"]) == "quest"
+
+      ["actor_id", "water_generation", "water_body_id"] ->
+        get_in(op, ["job", "kind"]) == "room"
+
+      ["crow_member_id", "crow_generation", "crow_phase"] ->
+        get_in(op, ["job", "kind"]) == "population_bundle" and
+          op["crow_phase"] in ~w(acquire leg return)
+
+      _ ->
+        false
     end
   end
 end

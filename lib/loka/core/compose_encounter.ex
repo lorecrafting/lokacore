@@ -195,45 +195,64 @@ defmodule Loka.Core.ComposeEncounter do
         {:ok,
          Map.take(
            op,
-           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id)
+           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id crow_member_id crow_generation crow_phase)
          )
          |> Map.put("status", "pending")}
     end
   end
 
+  # ponytail: keep exact binding forms at one cancel boundary. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   def job(op, row, horizon) do
     cancel = op["op"] == "job.cancel"
 
     valid =
-      if cancel,
-        do:
-          if(op["water_generation"],
-            do:
-              row["water_generation"] == op["water_generation"] and
-                row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
-            else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
-          ),
-        else: row["due_time"] <= horizon
+      cond do
+        not cancel ->
+          row["due_time"] <= horizon
+
+        op["crow_member_id"] != nil ->
+          row["crow_member_id"] == op["crow_member_id"] and
+            row["crow_generation"] == op["crow_generation"] and
+            op["encounter_id"] == nil and op["water_generation"] == nil
+
+        op["water_generation"] != nil ->
+          row["water_generation"] == op["water_generation"] and
+            row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil
+
+        true ->
+          op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+      end
 
     if row["status"] == "pending" and valid,
       do: {:ok, Map.put(row, "status", if(cancel, do: "cancelled", else: "completed"))},
       else: {:error, "precondition_failed"}
   end
 
+  # ponytail: one finite job binding admission. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp binding?(op) do
-    case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
-          op["water_body_id"] != nil} do
-      {false, false, false, false} ->
-        true
+    if op["crow_member_id"] != nil or op["crow_generation"] != nil or op["crow_phase"] != nil do
+      op["crow_member_id"] != nil and op["crow_generation"] != nil and
+        op["crow_phase"] in ~w(acquire leg return) and
+        get_in(op, ["job", "kind"]) == "population_bundle" and
+        Enum.all?(
+          ~w(encounter_id quest_instance_id water_generation water_body_id actor_id),
+          &(op[&1] == nil)
+        )
+    else
+      case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
+            op["water_body_id"] != nil} do
+        {false, false, false, false} ->
+          true
 
-      {true, false, true, false} ->
-        get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
+        {true, false, true, false} ->
+          get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
 
-      {false, true, true, true} ->
-        get_in(op, ["job", "kind"]) == "room" and op["encounter_id"] == nil
+        {false, true, true, true} ->
+          get_in(op, ["job", "kind"]) == "room" and op["encounter_id"] == nil
 
-      _ ->
-        false
+        _ ->
+          false
+      end
     end
   end
 end
