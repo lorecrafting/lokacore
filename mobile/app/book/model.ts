@@ -10,6 +10,7 @@ import type { Button } from './presenter.ts';
 import { reason, SENTENCE } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
+const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -138,9 +139,7 @@ export const said = (
 ) =>
   `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
 
-// The status line's time: the double hour's earthly branch, 子 from 23:00 to 01:00, then one
-// per two hours, with English words for VoiceOver (owner decision, untimed Lantern record). The
-// clock is logical seconds; the day's sexagenary name waits for a later status pane.
+// Logical seconds: 子 spans 23:00–01:00; English double-hour names serve VoiceOver.
 const ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ');
 const STARTS = ['eleven', 'one', 'three', 'five', 'seven', 'nine'];
 export const branch = (t: number) => {
@@ -227,7 +226,8 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   ) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
-    ...(a.command === 'refuel' && id && { detail_id: id }),
+    ...(a.command && { command: a.command }),
+    ...(['refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -251,7 +251,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         return button(
           a,
-          ` ${text(e.name)}${destination ? ` ${a.command === 'refuel' ? 'from' : a.action_key === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
+          ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
       }),
@@ -266,7 +266,6 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       placed.push({ ...button(next, ''), input: { scene: v.scene.scene, line: v.scene.index } });
   }
   const notices = noticeButtons(v, button, names, text);
-
   return [
     ...placed,
     ...notices,
@@ -313,7 +312,7 @@ function noticeButtons(
 
 export function actionContext(
   view: GameView,
-  b: Pick<Button, 'action_key' | 'target_ids' | 'input' | 'detail_id'>,
+  b: Pick<Button, 'action_key' | 'command' | 'target_ids' | 'input' | 'detail_id'>,
   generation: number,
 ) {
   const exit = view.exits.find(
@@ -322,6 +321,7 @@ export function actionContext(
   return JSON.stringify([
     generation,
     b.action_key,
+    b.command,
     b.target_ids,
     b.detail_id,
     Object.entries(b.input)
@@ -332,7 +332,7 @@ export function actionContext(
     view.choice,
     view.scene,
     view.combat,
-    ['fill', 'pour', 'drink'].includes(b.action_key)
+    ['fill', 'pour', 'drink'].includes(commandOf(b))
       ? things(view)
           .filter((e) => b.target_ids.includes(e.id))
           .map((e) => [e.id, e.liquid])

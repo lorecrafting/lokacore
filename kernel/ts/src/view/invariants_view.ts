@@ -162,14 +162,17 @@ function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): bool
     p.type === 'fill'
       ? (view.notices ?? []).find((n) => n.id === p.source_id)
       : entityView(view, targets[0]);
-  const offer = source?.actions?.find(
+  const offers = source?.actions?.filter(
     (a) =>
       (key === undefined || a.action_key === key) &&
-      a.action_key === p.type &&
+      (a.command ?? a.action_key) === p.type &&
       JSON.stringify(a.target_ids) === JSON.stringify(targets),
   );
-  if (!offer) return decision.kind !== 'accepted';
-  if (!offer.available)
-    return decision.kind === 'rejected' && decision.error.code === offer.reason.code;
-  return decision.kind === 'accepted' || decision.kind === 'fault';
+  if (!offers?.length) return decision.kind !== 'accepted';
+  if (offers.some((a) => a.available))
+    return decision.kind === 'accepted' || decision.kind === 'fault';
+  return (
+    decision.kind === 'rejected' &&
+    offers.some((a) => !a.available && decision.error.code === a.reason.code)
+  );
 }
