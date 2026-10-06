@@ -1,4 +1,4 @@
-# size: allow 380, patrol refs and bounded topics join the shared checked expansion boundary
+# size: allow 385, patrol refs, bounded topics and dream checks share checked expansion
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -37,6 +37,8 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
+
+  def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -187,7 +189,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "quest", ref(q, "quest", m))
+    do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
   def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
     do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
@@ -355,7 +357,7 @@ defmodule Loka.Content.Checks do
       )
   end
 
-  # Policy trees from named/inline rules, variants, recipes, quests, reactions and dialogues.
+  # Every located policy root from the source definitions.
   defp trees(defs, actions) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),

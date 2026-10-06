@@ -161,6 +161,12 @@
             },
             "patrol": {
               "$ref": "relation.schema.json#/$defs/PatrolDraw"
+            },
+            "dream": {
+              "$ref": "scene.schema.json#/$defs/DreamDraw"
+            },
+            "action_key": {
+              "$ref": "action.schema.json#/$defs/Key"
             }
           },
           "required": [
@@ -188,6 +194,12 @@
             },
             "patrol": {
               "$ref": "relation.schema.json#/$defs/PatrolDraw"
+            },
+            "dream": {
+              "$ref": "scene.schema.json#/$defs/DreamDraw"
+            },
+            "action_key": {
+              "$ref": "action.schema.json#/$defs/Key"
             }
           },
           "required": [
@@ -1794,6 +1806,9 @@
         },
         "bed": {
           "const": true
+        },
+        "dream": {
+          "$ref": "gameview.schema.json#/$defs/DreamView"
         }
       },
       "required": [
@@ -2120,6 +2135,75 @@
               "11111111-2222-4333-8444-555555555555"
             ]
           }
+        }
+      ]
+    },
+    "DreamView": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 64
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "gameview.schema.json#/$defs/UnavailableReason"
+        },
+        "choice": {
+          "$ref": "gameview.schema.json#/$defs/PendingChoice"
+        },
+        "action": {
+          "$ref": "gameview.schema.json#/$defs/AdvertisedAction"
+        },
+        "branch": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "scene",
+        "title",
+        "description",
+        "index",
+        "count",
+        "line",
+        "available"
+      ],
+      "additionalProperties": false,
+      "description": "Bed-local saved checkpoint; safe exact offers never replace ordinary World or dialogue.",
+      "examples": [
+        {
+          "scene": {
+            "cartridge_id": "dream_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "scene",
+            "key": "dream"
+          },
+          "title": "dream.title",
+          "description": "dream.description",
+          "index": 1,
+          "count": 5,
+          "line": "dream.opening",
+          "available": true
         }
       ]
     }

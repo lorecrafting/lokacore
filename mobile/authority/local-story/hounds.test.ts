@@ -17,7 +17,7 @@ import {
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
-const pin = read('protocol/fixtures/missing_child_c3_provisional_hash.json');
+const pin = read('protocol/fixtures/missing_child_v029_hash.json');
 const artifact = { canonical: pin.canonical, sha256: pin.sha256 };
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),

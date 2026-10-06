@@ -258,6 +258,7 @@ function Bottom(p: BottomProps) {
         (p.page ? (
           p.page.kind === 'thing' ||
           p.page.kind === 'dialogue' ||
+          p.page.kind === 'dream' ||
           (notice && view.notices?.some((n) => n.id === notice)) ? null : (
             <Back
               label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}

@@ -186,7 +186,7 @@ function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
 // Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening.
 test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
-  const chapter = bundle('missing_child_c3_provisional_hash');
+  const chapter = bundle('missing_child_v029_hash');
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
@@ -280,7 +280,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
 // Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
 // pickup to World because the new presenter has no press context.
 test('remounted pending pelt Take settles on its exact corpse detail', () => {
-  const chapter = bundle('missing_child_c3_provisional_hash');
+  const chapter = bundle('missing_child_v029_hash');
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);

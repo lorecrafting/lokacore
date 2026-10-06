@@ -6,7 +6,7 @@ import { buttonsOf, group, pagesAfter } from './model.ts';
 
 const pin = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_c3_provisional_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v029_hash.json', import.meta.url),
     'utf8',
   ),
 );

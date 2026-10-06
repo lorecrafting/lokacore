@@ -158,6 +158,9 @@
       "sit",
       "sleep",
       "stand"
+    ],
+    "events": [
+      "rested"
     ]
   },
   {

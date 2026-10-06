@@ -975,7 +975,7 @@ and receipt together before adopting memory or replying; no full-state copy occu
 
 ## B9 Rest occurrence and dream composition
 
-**Selected, source pending.** Register `rested {body_id, room_id}` as a
+**Current consumed source; independent review pending.** Register `rested {body_id, room_id}` as a
 position-owned DomainEvent for accepted `rest` only. Its full actor/player scope,
 world/time, root command cause/correlation and causal position bind the actual
 accepted body/room transition after prior-rate settlement. Root-to-event checks
@@ -1011,6 +1011,23 @@ in one scene-owned writer sequence, with normal `scene_ended`/`quest_resolved`
 evidence, no `story_point_reached`. The authority only commits changed rows and
 receipt; the Book only emits captured invocations.
 
+The consumed wire declarations are `SceneDefinition.control = presentation_only`
+and `on.rest {room, detail, entitlement, credit, quest}`. That one binding owns the
+first-Rest fact, quest activation and cursor start. Its exact steps are three
+`narrate` entries, one `choice {key, prompt, choices}` with two
+`{choice_id, label, text}` alternatives, one `branch`, `await_ack`, and `end`.
+`on_end {assign, quest, outcome}` is the memory/quest-only alternative to the
+existing story-point end. The scene cursor's maximum includes choice and branch.
+The existing choice row binds the scene reference and authored choice key, with
+exact `body` and `anchor` roles; no new row fields or portable operations are used.
+Choose's optional `dream {scene, line, body_id, room_id, expected_revision}` draw
+is mandatory only for scene-owned choices and must match the saved occurrence.
+The real bed's optional `DreamView` carries current saved text, safe availability,
+selected branch and exact Continue/choice offers. These controls preserve action
+keys and captured inputs; scene-owned choices never enter ordinary dialogue
+pending selection. This consumed subset requires API1.25; current integrated release/
+hash/ID answers are recorded in the [B9 evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
+Publication remains pending the normal gates.
 ## D4 held-food composition
 
 **Selected plan; not an installed schema.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)

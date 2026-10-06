@@ -41,14 +41,18 @@ defmodule Loka.Content.Position do
   @spec check(map() | nil, map()) :: [map()]
   def check(m, defs) when m != nil do
     refs = reserved_refs(m, defs)
+    dream_refs = Enum.map(dream_names(defs), &Loka.Content.Source.ref(&1, "fact", m))
 
     for {rel, steps, s} <- sites(defs),
         s["op"] in ["fact.assign", "fact.adjust"],
-        s["fact"] in refs,
+        reserved_write?(s, refs, dream_refs),
         do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
   end
 
   def check(_, _), do: []
+
+  defp reserved_write?(s, refs, dream_refs),
+    do: s["fact"] in refs or (s["fact"] in dream_refs and s["dream_owned"] != true)
 
   defp reserved_refs(m, defs) do
     for key <- reserved_names(m, defs),
@@ -91,6 +95,13 @@ defmodule Loka.Content.Position do
     ])
   end
 
+  defp dream_names(defs) do
+    for {_, {_, _, s}} <- defs["scene"],
+        s["control"] == "presentation_only",
+        r <- [s["on"]["rest"]["credit"] | Enum.map(s["on_end"]["assign"], & &1["fact"])],
+        do: r["key"]
+  end
+
   @doc "The manifest with fact@1 required under position@1, else unchanged."
   @spec requires(map()) :: map()
   def requires(m) do
@@ -119,7 +130,13 @@ defmodule Loka.Content.Position do
   defp lists("scene", s),
     do: [
       {["on_end", "assign"],
-       Enum.map(get_in(s, ["on_end", "assign"]) || [], &Map.put(&1, "op", "fact.assign"))}
+       Enum.map(
+         get_in(s, ["on_end", "assign"]) || [],
+         &Map.merge(&1, %{
+           "op" => "fact.assign",
+           "dream_owned" => s["control"] == "presentation_only"
+         })
+       )}
     ]
 
   defp lists("dialogue", d),

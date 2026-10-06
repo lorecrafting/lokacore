@@ -18,23 +18,12 @@ const invalid = () => {
 // Only authored nonterminal receive of a Give-restricted item establishes this durable custody path.
 // size: allow 56, one load boundary checks the original receive and its current terminal/custody evidence
 export function dialogueSave(world: World, db: Db, meta: Meta) {
-  const starts = Object.entries(world.cartridge.dialogues ?? {}).flatMap(([key, d]) =>
-    d.quest
-      ? []
-      : Object.entries(d.choices).flatMap(([choice, option]) => {
-          const role = option.receive && d.roles[option.receive.item];
-          const item = role?.role === 'item' && world.entityIds[refString(role.item)];
-          const entity = item && world.entities[item];
-          return entity && entity.kind === 'item' && entity.give_allowed === false
-            ? [{ key, d, choice, option, item }]
-            : [];
-        }),
-  );
+  const starts = custodyStarts(world);
   const escortChoices = Object.values(world.cartridge.dialogues ?? {}).some((d) =>
     Object.values(d.choices).some((o) => o.escort),
   );
   if (!starts.length && !escortChoices && !Object.keys(world.state.escorts ?? {}).length) return;
-  const rows = Object.entries(world.state.choices ?? {});
+  const rows = ordinaryRows(world);
   for (const [id, row] of rows) checkRow(world, id, row);
   const actor = world.character;
   const scope = `story/${meta.lineage_id}/${actor}`;
@@ -75,6 +64,24 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
     }
   }
 }
+
+function custodyStarts(world: World) {
+  return Object.entries(world.cartridge.dialogues ?? {}).flatMap(([key, d]) =>
+    d.quest
+      ? []
+      : Object.entries(d.choices).flatMap(([choice, option]) => {
+          const role = option.receive && d.roles[option.receive.item];
+          const item = role?.role === 'item' && world.entityIds[refString(role.item)];
+          const entity = item && world.entities[item];
+          return entity && entity.kind === 'item' && entity.give_allowed === false
+            ? [{ key, d, choice, option, item }]
+            : [];
+        }),
+  );
+}
+
+const ordinaryRows = (world: World) =>
+  Object.entries(world.state.choices ?? {}).filter(([, r]) => r.source.kind === 'dialogue');
 
 export function checkRow(world: World, id: string, row: ChoiceRow) {
   if (

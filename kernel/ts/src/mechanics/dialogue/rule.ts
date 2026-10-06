@@ -1,3 +1,4 @@
+import { chosen } from '../scene/sequence.ts';
 import * as patrol from '../patrol/sequence.ts';
 import { grant } from '../topics/shared.ts';
 import { wrongAnswer } from './behavior.ts';
@@ -57,6 +58,11 @@ export const decide: Rule<'dialogue'> = (world, command, mint, steps = { n: 0 })
   const row = has(choices, p.continuation_id) ? choices[p.continuation_id] : undefined;
   if (!row || row.status !== 'pending' || row.actor_id !== p.actor_id)
     return rejected('invalid_state');
+  if (row.source.kind === 'scene')
+    return p.type === 'choose'
+      ? chosen(world, { ...command, payload: p }, mint, steps)
+      : rejected('invalid_state');
+  if (p.type === 'choose' && p.dream !== undefined) return rejected('invalid_state');
   if (p.type === 'choose') return choose(world, { ...command, payload: p }, mint, row, steps);
   const op = { op: 'choice.close', writer_group: 0, continuation_id: p.continuation_id } as const;
   return accepted(world, 'choice_closed', [op], []);

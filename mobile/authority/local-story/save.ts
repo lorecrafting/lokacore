@@ -3,6 +3,7 @@ import { defenseEvidence } from './combat-receipt.ts';
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
+import { dreamDetail } from './dream-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { bodyOf } from '../../../kernel/ts/src/runtime/decision.ts';
@@ -215,6 +216,8 @@ function receiptDetail(
 ) {
   if (d.kind !== 'accepted') return;
   const command = JSON.parse(r.command) as Command | null;
+  const dream = dreamDetail(s, command);
+  if (dream) return dream;
   if (
     command?.payload?.type === 'choose' ||
     d.outcome === 'riddle_wrong' ||

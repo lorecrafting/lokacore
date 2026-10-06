@@ -155,6 +155,8 @@ continues to follow the existing World recovery rule.
 
 A readable detail's exact-subject recipes appear only in its Notice actions. Available controls
 follow nonempty history and precede Leave; unavailable controls show their real reason.
+Available controls and unavailable notes use the same catalog action-label resolver
+and its existing human-readable fallback. Never display an action TextKey as prose.
 Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
 no-target recipe sends `target_ids: []`. These controls use the shared offer-to-button builder,
 freshness and retry path. Confirmed readable-recipe narration routes to the receipt-linked
@@ -695,7 +697,7 @@ retains its original identity and follows normal refusal/Leave rules.
 
 ## B9 bed and resumable dream details
 
-**Selected, source pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+**Current consumed source; independent review pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
 uses World→actual Inn Rooms bed→Dream nesting. The paid bed's accepted ordinary
 Rest may open its first dream at the confirmed first beat. Rental, menu opening,
 unpaid Rest or a pending save never does. First Rest commits beat1 even if
@@ -711,6 +713,13 @@ delivery stay usable. Close changes only the local route; the durable cursor and
 choice remain. Cold reopen offers Resume through the actual bed rather than forcing
 the dream. Moving away, combat/harm/return or modal precedence exits unavailable
 presentation to the actual current context and preserves its checkpoint.
+
+The shared implementation uses the existing bed notice detail and one nested
+`dream` page keyed by that same real detail ID. Resume and Close edit only the
+Book page stack; the dream uses existing Sheet/Act/Leave controls and its own
+receipt-bound detail history. Live first-Rest confirmation may open that nested
+page; after the ordinary chapter Continue, a cold start retains World and offers Resume at the real bed. A scene-owned
+choice uses its own projected options, never the ordinary conversation page.
 
 Every captured control retains actor, anchor, scene, shown beat and exact choice
 identity/revision where applicable. Freshness cannot be refreshed across a branch,

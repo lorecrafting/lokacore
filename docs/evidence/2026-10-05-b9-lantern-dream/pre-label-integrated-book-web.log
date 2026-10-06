@@ -1,0 +1,26 @@
+command: mise exec -- npm --prefix mobile/app run test:e2e -- --trace on --video
+source_checkpoint: e3517e7efbb3e21a4cb5bd363980ef8f7f2db479
+exit: 0
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --trace on --video
+
+
+ RUN  e2e v0.17.0 [worktree]/mobile/app
+      run 01a110c2-9534-7f15-83e3-15462360d661 · targets: web
+
+ ✓ target "web" command ready 1.70s
+ ✓ |web| tests/book.e2e.ts (2 tests) 24.68s
+   ✓ Book keeps a confirmed move across reload 9.40s
+   ✓ paid Lantern Rest resumes its captured dream choice after browser reload 15.27s
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  00:29:10
+   Duration  27.10s (startup 1.70s)
+     Report  .e2e/report.json
+
