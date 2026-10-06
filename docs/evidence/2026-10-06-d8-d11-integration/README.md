@@ -1,5 +1,9 @@
 # D8 integration checkpoint on published D11
 
+Latest verified source: `b65762f08250b114e959e5dbc73aa8f6811f0ab0`; full local
+gate exit0. Release v039/API1.34,208 starting IDs. D8 schema/conservation/browser
+proof and independent reviews remain pending; no PR or publication.
+
 Preserved D8 source merged published main `80a9a00b9df00fa5370dcefbaba7ee7888781fb6`
 with merge commit `6209b8c6`. D8 is not independently approved or published.
 
@@ -207,3 +211,18 @@ and save refusal. Splits use concrete existing operations without a generic
 framework. The proposal adoption import cycle contains only calls after module
 initialization; focused real execution verifies that path. Final full gate remains
 pending on this source; schema/conservation/browser/review work remains pending.
+
+## Full gate after TypeScript size refactor
+
+`mise exec -- bin/check_all.sh` on clean source
+`b65762f08250b114e959e5dbc73aa8f6811f0ab0`: **exit0**. Every stage completed:
+Elixir393 tests, Credo, generated contracts/features, compiler and lint red controls,
+docs/Beads checks, TypeScript typecheck/full suite including headless simulation,
+kernel admission red controls, TS size/red controls and final formatting. No
+allowance was raised. The gate restored its own planted files normally.
+
+Next required work: D8 schema mutant sweep; controlled30-day live-crow cap4,
+nest-cap8 and coin/property conservation proof with red controls; isolated Book
+browser Drop/carry/follow/nest recovery/full-nest/Shoo/refresh proof; fresh
+independent primary review and save/protocol/proposal second opinion; final pushed
+head CI and PM merge/publication. No source review or publication approval claimed.
