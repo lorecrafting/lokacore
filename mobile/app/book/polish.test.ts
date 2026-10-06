@@ -1,7 +1,7 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 // size: allow 750, Book routes, elapsed completion and carrying note regressions share one real-session adapter
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { DatabaseSync } from 'node:sqlite';
@@ -896,4 +896,26 @@ test('actual trunk detail explains refused Take and restores its button after Re
   assert.ok(h.game.view().view.inventory.some((e) => e.name === 'item.trunk.short'));
   h.unmount();
   h.sql.close();
+});
+
+// Break: a targetless recipe exists only in a self-luminous Notice, so the World detail has no control.
+test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
+  const c = JSON.parse(bundle('missing_child_v030_hash').canonical);
+  c.entry.key = 'marsh_light';
+  c.calendar.start = 0;
+  const canonical = JSON.stringify(c);
+  const h = book({ canonical, sha256: createHash('sha256').update(canonical).digest('hex') });
+  try {
+    assert.ok(h.labels().includes('Marsh glow'));
+    h.tap('Marsh glow');
+    assert.ok(h.text().includes('You follow the glow and find a wisp waiting above the reeds.'));
+    assert.equal(
+      h.p.screen().log.includes('You follow the glow and find a wisp waiting above the reeds.'),
+      false,
+    );
+    assert.ok(h.labels().includes('Leave'));
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
 });

@@ -45,7 +45,10 @@ function noticeOffer(view: GameView, id: string) {
       a.target_ids?.length === 1 &&
       a.target_ids[0] === id,
   );
-  return offers.find((a) => a.available) ?? offers[0];
+  const contextual = offers.length
+    ? offers
+    : (view.notices?.find((n) => n.id === id)?.actions ?? []);
+  return contextual.find((a) => a.available) ?? contextual[0];
 }
 
 function control(screen: Screen, id: string) {
@@ -53,7 +56,8 @@ function control(screen: Screen, id: string) {
   return offer?.available
     ? screen.buttons.find(
         (b) =>
-          b.action_key === offer.action_key && b.target_ids.length === 1 && b.target_ids[0] === id,
+          b.action_key === offer.action_key &&
+          (b.detail_id === id || (b.target_ids.length === 1 && b.target_ids[0] === id)),
       )
     : undefined;
 }

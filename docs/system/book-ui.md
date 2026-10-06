@@ -553,6 +553,9 @@ Book at every hour. Marsh Light shows truthful darkness, known return exits and
 its authored glow marker with Seek Wisp; reveal the actual wisp detail only after
 confirmed discovery. A lit carried source explains unavailable Seek/Talk/answer
 through the same confirmed admission result. Ordinary dark objects stay hidden.
+The marker binds its targetless recipe from its own Notice actions and sends
+`target_ids: []`; the confirmed result belongs to that marker detail. Readable
+details keep their existing Read entry before their contextual recipes.
 
 Wisp detail follows description → committed history → offered controls. Explicit
 Accept leads to the existing letter-bank controls with committed attempts/limit;
