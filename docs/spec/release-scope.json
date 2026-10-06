@@ -330,6 +330,14 @@
       "gates": [
         "WORLD"
       ]
+    },
+    {
+      "id": "transport@1",
+      "first_required": "chapter_one",
+      "phase": "R8",
+      "gates": [
+        "TRANSACTION"
+      ]
     }
   ],
   "features": [

@@ -183,6 +183,7 @@ export type Mint = () => string;
  * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
  */
 export const COMPOSES = {
+  transport: ['movement'],
   action_recipe: ['check'],
   schedule: ['movement', 'combat', 'death', 'quest'],
   combat: ['movement', 'quest'],

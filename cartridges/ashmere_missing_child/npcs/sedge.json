@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "sedge",
+    "mother"
+  ],
+  "short": "npc.sedge.short",
+  "room_line": "npc.sedge.room",
+  "description": "npc.sedge.description",
+  "room": "isle_hut",
+  "resource_starts": {
+    "pennies": 0
+  }
+}

@@ -1,0 +1,69 @@
+recorded by loka-kernel@0000000000000000000000000000000000000000
+replayed on loka-kernel@544f768fa368daf9422af88a68674445b8443f23-dirty
+Ferry Landing
+Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.
+Elspeth stands beside the mooring post, watching each boat come in.
+Exits: north, south, west
+hp 10/10  ma 100/100  mv 100/100  day 1, 18:00  dusk  new moon
+[state 27535db2b14a717048cff81ec407547d7a81ffcc833c61cca6fdcd6f04526cf5]
+Boathouse
+Weathered timbers shelter an unattended rope ferry. A taut cable crosses the fen to the isle.
+Exits: east
+hp 10/10  ma 100/100  mv 99/100  day 1, 18:00  dusk  new moon
+[state 379e844b1e28e11aa67e5287f17be73a0ca9664ef331cab722c5bc1d576b663a  step 0 µs]
+You draw the rope ferry across the fen and step onto Fen Isle Landing.
+hp 10/10  ma 100/100  mv 99/100  day 1, 18:00  dusk  new moon
+[state 6579487144b4046e2a2967f0fb87fd739233249438a9b70e57c732fc2b44611b  step 0 µs]
+Isle Hut
+Bundles of drying herbs hang from the rafters. An open door leads to the garden, and a ladder rises into the loft.
+Mother Sedge sorts dried leaves beside the hearth.
+Exits: east, up, west
+hp 10/10  ma 100/100  mv 98/100  day 1, 18:00  dusk  new moon
+[state 919e2e2d4ef5a7314cba3602e376013b3e32e862b09f11858750a3044079e6f5  step 0 µs]
+Mother Sedge offers to teach you to swim.
+  learn: Learn swim — free
+(choose <option>, or bye)
+hp 10/10  ma 100/100  mv 98/100  day 1, 18:00  dusk  new moon
+[state ced1bddef3ced4e04eb91cc7824801d345972d757de5fd57443c05ade3a25b8c  step 0 µs]
+Mother Sedge teaches you to keep afloat and swim. You have learned swim.
+[sedge.swim.learned: actor 3d4829ad-9e43-81ef-bc10-66b1b267e157, teacher 1d7cfec5-84d1-89df-b0f3-6a9e9852e647]
+hp 10/10  ma 100/100  mv 98/100  day 1, 18:00  dusk  new moon
+[state ec25ce1fb7799a2d157d0921fa184c747a6c6b4b6bf229cf669273e0bdf2ba4e  step 0 µs]
+Hut Loft
+The loft is dark. You know the ladder leads down.
+Exits: down
+hp 10/10  ma 100/100  mv 97/100  day 1, 18:00  dusk  new moon
+[state 91aea0f68892d54f50d04c1b53cb3aacb74494de10308eaa7ecc26d752f11d62  step 0 µs]
+Isle Hut
+Mother Sedge sorts dried leaves beside the hearth.
+Exits: east, up, west
+hp 10/10  ma 100/100  mv 96/100  day 1, 18:00  dusk  new moon
+[state aa6d42185d9654aaa670817e51cda0f50d3a5521a94e74c45e29797c9986b994  step 0 µs]
+Herb Garden
+Herbs fill crooked beds between the reeds. The hut door lies west.
+Exits: west
+hp 10/10  ma 100/100  mv 95/100  day 1, 18:00  dusk  new moon
+[state bcd3095dbd0ccbaead912249987098be721fffbfb0682220e2832bc9aa84a3d2  step 0 µs]
+Isle Hut
+Mother Sedge sorts dried leaves beside the hearth.
+Exits: east, up, west
+hp 10/10  ma 100/100  mv 94/100  day 1, 18:00  dusk  new moon
+[state 065c4bcfd54b173c8e78b0bd9f7ad32b6a08d15bc014abab2b4352ff44eef74e  step 0 µs]
+Fen Isle Landing
+Reeds brush the rope ferry. A narrow path leads east to a hut; south, a shrine stands among the sedge.
+Exits: east, south
+hp 10/10  ma 100/100  mv 93/100  day 1, 18:00  dusk  new moon
+[state 14b308f4a002e7cd3737d461e383905dbef8ce619d3a1e5299cbc5a5b3c581be  step 0 µs]
+Isle Shrine
+A worn stone marks a quiet sanctuary beside the fen. No priest tends it. The path north returns to the landing.
+Exits: north
+hp 10/10  ma 100/100  mv 92/100  day 1, 18:00  dusk  new moon
+[state b22b9a837a62f57ee384ad14c3d84cb3226f12a7975a702f1762a93fb757a13c  step 0 µs]
+Fen Isle Landing
+Exits: east, south
+hp 10/10  ma 100/100  mv 91/100  day 1, 18:00  dusk  new moon
+[state 9fb4fb779d268f7a38ebbb56690472c19d9849335809241393c9c37de470a589  step 0 µs]
+You draw the rope ferry back to the Boathouse.
+hp 10/10  ma 100/100  mv 91/100  day 1, 18:00  dusk  new moon
+[state 4e1e42f579553fc6e9ff5ce8d268a15c9c64ec506a2078e9fe3380064e6c499f  step 0 µs]
+replay: 13 commands identical

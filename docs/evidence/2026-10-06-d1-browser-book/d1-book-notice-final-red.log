@@ -1,0 +1,82 @@
+(node:55012) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/notice_board.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (141.5625ms)
+✔ the south search reaches the oak and returns through visible fox clues (74.675208ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (83.936167ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (20.410458ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (42.339292ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (41.379417ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (129.46125ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (30.611583ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (28.593542ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (51.209875ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (119.376625ms)
+(node:55013) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ corpse Contents Take returns to its detail with one local pickup and Back to World (353.443209ms)
+✔ remounted pending pelt Take settles on its exact corpse detail (147.368458ms)
+✔ room is focused while Map retains directions and every detail returns to the world (57.158916ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (45.839084ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (77.117333ms)
+✔ only World position taps directly cycle the offered states with captured freshness (35.8255ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (22.374542ms)
+✔ only confirmed pickup returns World, including a retry from another page (61.861958ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (19.923708ms)
+✔ inventory Drop returns World with one named event only after confirmation (34.286583ms)
+✔ other item actions retain their detail and show their consequences there (12.803625ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (34.930542ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (35.606667ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (35.99ms)
+✔ actual trunk detail explains refused Take and restores its button after Remove then Drop (72.8225ms)
+✖ self-luminous Notice invokes its projected targetless recipe and retains the result (68.42125ms)
+(node:55014) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/readable.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Read targets retain confirmed detail messages without changing state (91.009333ms)
+✔ uncertain Read recovers its one receipt and narration, then reads again after cold reopen (49.180833ms)
+✔ stale and refused Read retain their target and never narrate an unread body (21.934833ms)
+✔ held Read survives the authored 68350 to 68400 pulse with authority freshness intact (18.100125ms)
+✔ cold reopen refuses a committed Read whose stored target is malformed (117.798958ms)
+✔ invalid Read JSON offers in-place Start over and leaves older pins explicitly refused (142.358833ms)
+(node:55015) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<checkout>/mobile/app/book/riddle.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <checkout>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ NPC detail tiles edit a bounded word and submit retry/correct results after history (243.273875ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 33
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2120.6325
+
+✖ failing tests:
+
+test at book/polish.test.ts:903:1
+✖ self-luminous Notice invokes its projected targetless recipe and retains the result (68.42125ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.labels().includes('Marsh glow'))
+  
+      at TestContext.<anonymous> (file://<checkout>/mobile/app/book/polish.test.ts:906:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

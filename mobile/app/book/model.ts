@@ -8,7 +8,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { serviceButtons, shopButtons } from './offers.ts';
+import { serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
@@ -274,6 +274,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
     ...serviceButtons(v, text),
+    ...transportButtons(v, text),
     ...asked(v, label),
   ];
 }
@@ -319,6 +320,9 @@ export function actionContext(
     view.choice,
     view.scene,
     view.combat,
+    commandOf(b) === 'use_transport'
+      ? view.notices?.find((n) => n.id === b.detail_id)?.transport
+      : null,
     ['fill', 'pour', 'drink', 'use_service'].includes(commandOf(b))
       ? things(view)
           .filter((e) => b.target_ids.includes(e.id))

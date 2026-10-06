@@ -1,4 +1,4 @@
-# size: allow 385, patrol refs, bounded topics and dream checks share checked expansion
+# size: allow 392, transport, population and dream refs join the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -37,6 +37,16 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
+
+  def expand(%{"reverse" => _, "destination" => _, "recipient" => _} = t, m),
+    do: Loka.Content.Transports.expand(t, m)
+
+  def expand(%{"transport" => t} = d, m),
+    do:
+      d
+      |> Map.delete("transport")
+      |> expand(m)
+      |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
 

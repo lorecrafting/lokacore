@@ -25,10 +25,13 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
 }) => {
   await app.clearState();
   await screen.getByRole('button', 'Continue').tap();
+  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go north').tap();
+  await expect(screen.getByRole('button', 'Look, Well Lane')).toBeVisible();
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go east').tap();
+  await expect(screen.getByRole('button', 'Look, The Drowned Lantern')).toBeVisible();
   await screen.getByRole('button', 'Widow Maud, open').tap();
   await screen.getByRole('button', 'Rent room — 3p').tap();
   await screen.getByRole('button', 'Leave').tap();
@@ -58,4 +61,57 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   await screen.getByRole('button', 'Bed').tap();
   await expect(screen.getByText('Dream acknowledged.')).toBeVisible();
   await expect(screen.getByText('Rest: not now')).toBeVisible();
+});
+
+// Break: browser detail routing loses a crossing or lesson, charges the free return, or reload loses confirmed state.
+test('paid ferry and free Sedge lesson survive isle exploration, return and browser reload', async ({
+  app,
+  screen,
+}) => {
+  const go = async (direction: string, room: string) => {
+    await screen.getByRole('button', 'Map').tap();
+    await screen.getByRole('button', `Go ${direction}`).tap();
+    await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
+  };
+  const money = () => screen.getByRole('button', /Contents, Character,.*pennies 18 of 1000/);
+  await app.clearState();
+  await screen.getByRole('button', 'Continue').tap();
+  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
+  await go('west', 'Boathouse');
+  await screen.getByRole('button', 'Rope ferry').tap();
+  await expect(screen.getByText('Fare: 2p.')).toBeVisible();
+  await screen.getByRole('button', 'Board — 2p').doubleTap();
+  await expect(screen.getByRole('button', 'Look, Fen Isle Landing')).toBeVisible();
+  await expect(money()).toBeVisible();
+  await go('east', 'Isle Hut');
+  await screen.getByRole('button', 'Mother Sedge, open').tap();
+  await screen.getByRole('button', 'Learn swim — free Mother Sedge').tap();
+  await screen.getByRole('button', 'Learn swim — free').tap();
+  await expect(
+    screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
+  ).toBeVisible();
+  await expect(money()).toBeVisible();
+  await app.restart();
+  await screen.getByRole('button', 'Continue').tap();
+  await expect(screen.getByRole('button', 'Look, Isle Hut')).toBeVisible();
+  await screen.getByRole('button', 'Mother Sedge, open').tap();
+  await expect(
+    screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
+  ).toBeVisible();
+  await screen.getByRole('button', 'Leave').tap();
+  await go('up', 'Hut Loft');
+  await go('down', 'Isle Hut');
+  await go('east', 'Herb Garden');
+  await go('west', 'Isle Hut');
+  await go('west', 'Fen Isle Landing');
+  await go('south', 'Isle Shrine');
+  await go('north', 'Fen Isle Landing');
+  await screen.getByRole('button', 'Rope ferry').tap();
+  await screen.getByRole('button', 'Return — free').tap();
+  await expect(screen.getByRole('button', 'Look, Boathouse')).toBeVisible();
+  await expect(money()).toBeVisible();
+  await app.restart();
+  await screen.getByRole('button', 'Continue').tap();
+  await expect(screen.getByRole('button', 'Look, Boathouse')).toBeVisible();
+  await expect(money()).toBeVisible();
 });

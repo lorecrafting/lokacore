@@ -1,0 +1,24 @@
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --no-cache
+
+
+ RUN  e2e v0.17.0 <checkout>/mobile/app
+      run 01a1115e-6339-7352-bffc-8d1e290b5980 · targets: web · CI
+
+ ✓ target "web" command ready 1.46s
+ ✓ |web| tests/book.e2e.ts (3 tests) 26.71s
+   ✓ Book keeps a confirmed move across reload 7.46s
+   ✓ paid Lantern Rest resumes its captured dream choice after browser reload 9.03s
+   ✓ paid ferry and free Sedge lesson survive isle exploration, return and browser reload 10.21s
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  03:19:21
+   Duration  28.80s (startup 1.46s)
+     Report  .e2e/report.json
+

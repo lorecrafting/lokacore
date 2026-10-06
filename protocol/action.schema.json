@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Action contracts",
-  "description": "Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 \u00a71, \u00a72, \u00a718, \u00a719; 06 \u00a720; 21 \u00a77).",
+  "description": "Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, §2, §18, §19; 06 §20; 21 §7).",
   "$defs": {
     "Key": {
-      "description": "A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 \u00a72). Used for action keys, directions, choices, outcomes and key-valued facts.",
+      "description": "A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 §2). Used for action keys, directions, choices, outcomes and key-valued facts.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]*$",
       "maxLength": 64,
@@ -15,7 +15,7 @@
       ]
     },
     "ActionInput": {
-      "description": "The validated input of an ActionInvocation (04 \u00a71). Closed: each field is a registered input parameter, and the ActionDefinition's `input` lists which ones the action requires (06 \u00a720). The parameters are those the R6P proof uses (pre-release-proof.md).",
+      "description": "The validated input of an ActionInvocation (04 §1). Closed: each field is a registered input parameter, and the ActionDefinition's `input` lists which ones the action requires (06 §20). The parameters are those the R6P proof uses (pre-release-proof.md).",
       "type": "object",
       "properties": {
         "direction": {
@@ -52,6 +52,14 @@
         "service": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
+        "route": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "quoted_fare": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
         "dream": {
           "$ref": "scene.schema.json#/$defs/DreamDraw"
         }
@@ -69,11 +77,20 @@
         },
         {
           "until": 0
+        },
+        {
+          "route": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "transport",
+            "key": "return"
+          },
+          "quoted_fare": 0
         }
       ]
     },
     "ActionInvocation": {
-      "description": "A host-neutral gameplay intent from an advertised GameView action; not yet an authoritative Command (04 \u00a71, \u00a72). invocation_id is the stable retry identity (03 \u00a714). target_ids is ordered and its order is semantic (03 \u00a714, invocation-intent digest). view_freshness_token is opaque admission metadata, not intent (04 \u00a716). The 8-target and 128-character caps are admission limits of this contract version (not spec numbers); changing them is a contract version change.",
+      "description": "A host-neutral gameplay intent from an advertised GameView action; not yet an authoritative Command (04 §1, §2). invocation_id is the stable retry identity (03 §14). target_ids is ordered and its order is semantic (03 §14, invocation-intent digest). view_freshness_token is opaque admission metadata, not intent (04 §16). The 8-target and 128-character caps are admission limits of this contract version (not spec numbers); changing them is a contract version change.",
       "type": "object",
       "properties": {
         "invocation_id": {
@@ -150,7 +167,7 @@
       ]
     },
     "TargetSpec": {
-      "description": "The candidate scopes an action's target is resolved from (21 \u00a77): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 \u00a76). Accepted kinds and capabilities are added with the capability registry.",
+      "description": "The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.",
       "oneOf": [
         {
           "description": "The action takes no target.",
@@ -212,7 +229,7 @@
       ]
     },
     "TargetResolution": {
-      "description": "The deterministic result of resolving a target (14 \u00a7R3A; 21 \u00a77: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 \u00a718: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.",
+      "description": "The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.",
       "oneOf": [
         {
           "description": "No candidate matched.",
@@ -285,7 +302,7 @@
       ]
     },
     "ActionInputParameter": {
-      "description": "An input parameter an action requires (06 \u00a720), one of the ActionInput fields.",
+      "description": "An input parameter an action requires (06 §20), one of the ActionInput fields.",
       "enum": [
         "direction",
         "choice_id",
@@ -297,6 +314,8 @@
         "quoted_price",
         "patrol",
         "service",
+        "route",
+        "quoted_fare",
         "dream"
       ],
       "examples": [
@@ -304,7 +323,7 @@
       ]
     },
     "ActionDefinition": {
-      "description": "An advertised affordance (04 \u00a719; 06 \u00a720; 21 \u00a77): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
+      "description": "An advertised affordance (04 §19; 06 §20; 21 §7): stable key, localization label, target spec, the portable Command type it resolves to (checked against the command registry when content compiles), presentation priority, required input parameters, policy and accessibility description. Aliases, costs and cooldown hints arrive with the text parser and cost capabilities.",
       "type": "object",
       "properties": {
         "key": {
@@ -394,7 +413,7 @@
       ]
     },
     "ActionContribution": {
-      "description": "One source's contribution to an actor's ActionSet (06 \u00a719; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge recipe; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and recipes (kernel/ts/src/actions.ts).",
+      "description": "One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge recipe; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and recipes (kernel/ts/src/actions.ts).",
       "type": "object",
       "properties": {
         "op": {
@@ -500,7 +519,7 @@
       ]
     },
     "RecipeTarget": {
-      "description": "What an ActionRecipe acts on (06 \u00a720 target; 21 \u00a77 TargetSpec): here, one inspectable detail, by its room and its key in that room's details. The recipe is offered only while the actor is in that room; other target kinds (items, entities by property) join as further variants.",
+      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): here, one inspectable detail, by its room and its key in that room's details. The recipe is offered only while the actor is in that room; other target kinds (items, entities by property) join as further variants.",
       "type": "object",
       "properties": {
         "kind": {
@@ -533,7 +552,7 @@
       ]
     },
     "RecipeStep": {
-      "description": "One registered operation of a recipe outcome's explicit sequence (04 \u00a75.2 step 4, \u00a75.3; 05 \u00a728: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 \u00a75.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (RecipeCost).",
+      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (RecipeCost).",
       "oneOf": [
         {
           "description": "Assign a fact.",
@@ -623,7 +642,7 @@
       ]
     },
     "ActionRecipe": {
-      "description": "A cartridge-local action composed only of registered operations (06 \u00a720 Composed actions / ActionRecipe; 21 \u00a77; 05 \u00a728), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 \u00a75.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 \u00a75.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 \u00a77 Cost, time; 04 \u00a75.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Result bands join later.",
       "type": "object",
       "properties": {
         "key": {
@@ -726,7 +745,7 @@
               "additionalProperties": false
             },
             {
-              "description": "A deterministic threshold (21 \u00a77 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the recipe's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of RecipeCheck apply.",
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the recipe's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of RecipeCheck apply.",
               "type": "object",
               "properties": {
                 "key": {
@@ -1072,7 +1091,7 @@
         "actor"
       ],
       "additionalProperties": false,
-      "description": "A recipe outcome's narration (21 \u00a74 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 \u00a743; text.schema.json Text participants).",
+      "description": "A recipe outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
       "examples": [
         {
           "actor": "narration.coil_rope.actor"
@@ -1170,7 +1189,7 @@
       ]
     },
     "RecipeCheck": {
-      "description": "An ActionRecipe's Check (21 \u00a77 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 \u00a75.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). ActionRecipe.check is this luck shape or a threshold (R5 S6b; see ActionRecipe). Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
+      "description": "An ActionRecipe's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). ActionRecipe.check is this luck shape or a threshold (R5 S6b; see ActionRecipe). Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
       "type": "object",
       "properties": {
         "key": {
@@ -1210,7 +1229,7 @@
       ]
     },
     "RecipeCost": {
-      "description": "One resource cost of an ActionRecipe (21 \u00a77 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 \u00a75.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
+      "description": "One resource cost of an ActionRecipe (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
       "type": "object",
       "properties": {
         "resource": {

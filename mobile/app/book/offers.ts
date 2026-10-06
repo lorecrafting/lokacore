@@ -5,6 +5,23 @@ import { cap } from './model.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 
+export function transportButtons(v: GameView, text: Say): Press[] {
+  return (v.notices ?? []).flatMap((n) =>
+    n.transport?.action.available
+      ? [
+          {
+            label: `${text(n.transport.label)} — ${n.transport.charge === 0 ? 'free' : `${n.transport.charge}p`}${n.transport.waived ? ' (corpse recovery)' : ''}`,
+            action_key: n.transport.action.action_key,
+            command: n.transport.action.command,
+            detail_id: n.id,
+            target_ids: [...(n.transport.action.target_ids ?? [])],
+            input: { route: n.transport.route, quoted_fare: n.transport.fare },
+          },
+        ]
+      : [],
+  );
+}
+
 export function serviceButtons(v: GameView, text: Say): Press[] {
   return v.entities.flatMap((e) =>
     (e.services ?? [])

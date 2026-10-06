@@ -1,0 +1,39 @@
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --repeat-each 3 --no-cache --debug --trace retain-on-failure
+
+
+ RUN  e2e v0.17.0 <checkout>/mobile/app
+      run 01a1114e-b4ed-7f7c-8d6c-678aaa44ddea · targets: web · CI
+
+ ✓ target "web" command ready 1.17s
+ ✓ |web| tests/book.e2e.ts (6 tests) 39.43s
+   ✓ Book keeps a confirmed move across reload 3.59s
+   ✓ Book keeps a confirmed move across reload (repeat #1) 2.77s
+   ✓ Book keeps a confirmed move across reload (repeat #2) 2.68s
+   ✓ paid Lantern Rest resumes its captured dream choice after browser reload 10.22s
+   ✓ paid Lantern Rest resumes its captured dream choice after browser reload (repeat #1) 9.88s
+   ✓ paid Lantern Rest resumes its captured dream choice after browser reload (repeat #2) 10.29s
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+    Repeats  2 of 2 tests passed all 3 runs
+   Start at  03:02:13
+   Duration  41.15s (startup 1.17s)
+     Report  .e2e/report.json
+
+[e2e debug] phase timings (wall 41.4s)
+  phase                            count   total     avg     max
+  scheduler                            1   39.9s   39.9s   39.9s
+  test.body                            6   37.6s  6275ms  9921ms
+  app.start(target "web" command)      1  1173ms  1173ms  1173ms
+  engine.init                          1   267ms   267ms   267ms
+  config.load                          1   227ms   227ms   227ms
+  session.launch                       6    23ms     4ms    10ms
+  session.close                        6    22ms     4ms     7ms
+  collect                              1     4ms     4ms     4ms
+  engine.prepare                       1     2ms     2ms     2ms
