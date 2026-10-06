@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Room interactibles specification](2026-10-06-room-interactables-review.md): exact source `0cc7b7cd` CHANGES REQUIRED; scoped fix `a4338896` and final guide clarification `27a5e929` APPROVE. Docs-only review.
+
 - [D9 dependency correction](2026-10-06-d9-dependency-correction-review.md): exact planning head `0a3673f9`, independent APPROVE; C4/D6 full-scope blockers, underwater-only D6 recovery and the separately pending Study barrier/retrieval rule align across plan, brief and Beads. Docs/export/graph checks pass; source remains gated.
 
 - [Foreign-world simulator envelope](2026-10-06-sim-foreign-world-envelope-review.md): source `381e1f61`, evidence `9731df92`, fresh independent **APPROVE**; no findings. Published seed71 false positive independently reproduced; fixed 200-seed workload, real Maud offer, three oracle mutants, fault/wrong-code controls and all ten evidence hashes verified.
