@@ -607,8 +607,9 @@ Departure/death prunes its detail route and stale Attack revalidates presence/li
 a different generation cannot inherit the old invocation. Adjacent Scan includes
 living spawned members through ordinary movement sight. HP0 hounds are absent.
 
-Attack opens the existing Combat page, with C1 defenses and only its current
-Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
+Attack opens the existing Combat page, with C1 defenses and its current
+Stand/Flee/Look/Scan controls; [C5](#c5-bleeding-and-bandage-details) later adds
+qualified exact Bandage treatment. Committed death closes once; the room then exposes
 the real public hound corpse and its ordinary Contents/Take path. Successful Take
 returns to that corpse detail with Back to World, shows that exact pelt in Carrying,
 and adds committed pickup narration to corpse history once. Refused,
@@ -630,8 +631,8 @@ members, and their own attack results demonstrate real help. Flight names the
 departing member and real direction/destination; a primary change identifies the
 new target. Neither presenter nor elapsed redraw chooses a helper or moves one.
 
-While any opponent remains, keep Combat precedence and its current Flee/Stand/
-Look/Scan ActionSet; do not reveal Attack/Move/equipment or hide Flee behind an
+While any opponent remains, keep Combat precedence and its Flee/Stand/
+Look/Scan ActionSet, with C5's exact treatment exception; do not reveal Attack/Move/equipment or hide Flee behind an
 old NPC conversation. Flee retains current cost/standing refusal semantics.
 Final withdrawal/death/escape restores World and ordinary actions from saved
 state. Enemy flight grants no Carrying entry or corpse; only actual death exposes
@@ -853,3 +854,11 @@ is authorized by this planning adoption; real SQLite faults remain separate proo
 The Willow Shade patch shows current derived finite supply and its ordinary one-item Harvest. A usable opted skill also supplies the authored careful offer and item count through the same pure method-aware admission as execution; insufficient stock/combined carrying has an honest typed refusal and retains ordinary Harvest where legal. The control sends the [exact alias input](protocol.md#d12-harvest-method-and-buy-quote-composition), without presenter-created herbs or skill gating inferred from names. Peg's rows show the effective Buy price and actual Sell price/availability from the shared current query, and bind the displayed Buy number to invocation. Qualification/stock changes refresh or refuse the stale offer before charge.
 
 Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.
+
+## C5 bleeding and bandage details
+
+**Selected planning interaction; source pending.** Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
+
+Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
+
+Confirmed treatment leaves HP and encounter/round state unchanged, removes the condition and item from Carrying, and routes its result to Combat if that encounter remains open or World otherwise. It does not reopen the consumed item detail. Cold reopen and replay recover the exact committed line once using the saved command ID, with no invented success from another receipt. Isolated browser proof follows real Wick teaching, B5 exchange, hound injury, Bandage, tick/expiry and refresh; headless authority and real SQLite proof are separate. Mobile/native and cosmetic UI blur remain deferred.
