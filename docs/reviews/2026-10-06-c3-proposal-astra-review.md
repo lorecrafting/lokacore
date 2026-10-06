@@ -1,0 +1,75 @@
+# C3 proposal and complete-birth audit
+
+Independent second opinion required by [the workflow](../WORKFLOW.md) for
+`runtime/proposal.ts`. Initial source `8e767434425658d27e1b13f7da99744b09302015`,
+evidence `7b8292691c6b5e1a3574163c706bbb41d2ee8e91`; corrected source
+`2dbf55b51cf7ae6bf930a550bb2dd61327a4127e`. Authored none of the implementation.
+Final verdict: **APPROVE**. C3-A1 is closed; no open findings in this audit's scope.
+
+Requirements derived before inspecting source: [complete spawned bundles](../system/protocol.md#c3-spawned-bundles-and-population-composition),
+[population membership](../system/mechanics.md#c3-bounded-living-hounds-selected-contract),
+[save recovery](../system/save.md#c3-living-population-recovery), and the
+[C3 brief](../briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md).
+A birth binds the exact hound/pelt provenance, initial custody, HP and matching
+slot/generation in one writer group. Intermediate proposal reads may use nonfinal
+composition; complete adoption must enforce all birth evidence. Population itself
+must activate receipt replay, with byte-preserving corruption refusal.
+
+## Initial finding — C3-A1, blocker, closed
+
+At `8e767434`, `kernel/ts/src/foundation/creation.ts:143` exempts a slot writer group
+without a newborn; lines 146–149 also omit full plan and generation from reverse
+membership. The same gap occurs at
+`kernel/ts/src/runtime/invariants_creation.ts:98`, `lib/loka/core/creation.ex:115`
+and `lib/loka/core/invariants_creation.ex:99`.
+
+Independent controlled inputs reproduced three wrong final acceptances:
+
+- Append to the literal complete birth a copy of its slot operation with only
+  `plan.key = "other_hounds"`. Both plans claim the newborn.
+- Append a second slot operation with `writer_group = 1` and `slot = 2` to the
+  literal birth in group0/slot1. The newborn occupies two slots.
+- Submit the occupied slot operation without any birth operations. The loaded
+  runtime equivalent assigns an existing living hound to a never-used slot.
+
+Both portable composers returned changes and both independent precondition checks
+accepted the claimed success. On the real loaded C3 world, final `adopt` also
+accepted an extra foreign-plan slot, a second slot in another group, and the
+standalone assignment of an existing living hound. These were complete proposals,
+not permitted unfinished prefixes. Baseline tests still passed.
+
+## Corrected source and independent verification
+
+At `2dbf55b5`, all four reverse guards require the same newborn's full plan, ordinal,
+generation, member ID and writer group for every occupied/no-due slot operation.
+The hound-free-group bypass is gone, with no population-spec compatibility bypass.
+Never-used null-member rows and fatal rows with replacement deadlines retain their
+separate valid shapes. Old row-only birth/replacement fixtures now pin final faults
+and retain their algebra answers solely under explicit nonfinal composition.
+Elixir runs final completeness after ordinary composition, preserving TypeScript's
+fault precedence.
+
+- All three independent malformed inputs now fault `precondition_failed` in both
+  portable kernels; independent preconditions reject their forged successful rows.
+  The complete literal birth still composes and satisfies both invariant checks.
+- The same three loaded-world final-adoption probes now fault atomically; the valid
+  slot5 birth succeeds. Final `adopt` calls `apply` with final validation enabled;
+  only `now` uses the nonfinal path for proposal-local reads.
+- Focused TypeScript spawned-bundle, population composition, hound mechanics and
+  real-SQLite authority checks: **18 passed**. This includes lawful prefix
+  composition, both equal-time delivery orders, night-only replacement, population-only
+  forged-history refusal with unchanged bytes, unknown COMMIT, and fatal/Take reopen.
+- Independently compiled Elixir spawned-bundle and population composition checks:
+  **7 passed**, including literal answers and TypeScript differential checks.
+- The population-only replay activation change remains correct: the existing
+  receipt verifier runs even without vessels or services. No alternate history ledger
+  or save repair was added.
+
+This audit used controlled malformed inputs against both exact source revisions;
+it did not edit production source or an owner save. Developer source-mutation
+controls are separate evidence. No browser/native or hosted-CI claim is made.
+
+Ponytail Review: lean already. The fix tightens existing guard seams and preserves
+explicit prefix handling; no dependency, alternate scheduler, compatibility mode
+or redundant persistence mechanism. Primary/save reviews and publication remain
+separate gates.
