@@ -76,3 +76,43 @@ B8S-03 removes the redundant six-line registry entry. Save/protocol approval
 awaits the listed dispositions at a corrected exact source head. Primary review,
 publication checks and later browser evidence remain separate.
 
+
+## Scoped fix round 1 — APPROVE
+
+Exact corrected source: `552717d50af951d8f5cd4c43533e53b7102d45fd`, including
+correction `1f651d89` and the integrated reviewed C2/Web predecessor. This checks
+the listed dispositions, changed code and direct callers; the original review
+above remains intact.
+
+- **B8S-01 closed.** The existing room-only control now removes vessel/fuel and
+  exchange/patrol history triggers together with their declaration consumers.
+  It uses a real file-backed cold open and asserts both rows and SQLite bytes
+  are unchanged on refusal. Independently reverting `liquid-save.ts:20` to
+  `if (!expected.length) return false` makes that committed test fail with
+  `open` versus `save_corrupt`; restored code passes. Mutation was isolated to a
+  detached throwaway worktree, restored, and the worktree removed.
+- **B8S-02 closed.** The four source files now contain 246/247/285/378 lines
+  within their original 300/300/300/380 limits. Exact input/provider admission,
+  installed-API checks and checked source/bed expansion move into their natural
+  existing seams without changing service/payment/history semantics. No new or
+  raised source-file allowance appears against the integrated pre-B8 base.
+- **B8S-03 closed.** The original registry entry now owns `use_service` and
+  service/bed definitions; exactly one `service@1` remains. Generated contracts
+  check passes.
+
+Independent commands: the scoped service/loader/wire/SQLite commerce/liquid run
+passes **26 tests**; focused service/current-source Elixir compilation and wire
+fixtures pass **6 tests**. Kernel typecheck and corrected TS/Book/Elixir size
+checks pass. The complete current artifact still compiles to the independently
+pinned fixture, and all **111** allocation answers pass. Cartridge source,
+protocol wire schemas/fixtures, save/replay/recovery/transaction implementation
+and candidate hash are unchanged from the reviewed B8 checkpoint.
+
+Evidence head `125ce77740c6516294a8e36cc0a28f4533d6cf7f` changes only the
+B8 evidence folder and is source-identical to the approved checkpoint. All
+**32** evidence hashes verify; its corrected source/predecessor and
+v025/API1.23/hash/111-ID claims agree with the independently checked source.
+
+Ponytail Review: lean extractions preserve validation; no new complexity finding.
+**APPROVE**, no open findings. Publication checks and browser/native evidence
+remain separate from this headless save/protocol opinion.
