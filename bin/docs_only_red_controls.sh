@@ -38,11 +38,24 @@ t run "$gen" "$ren" code "a code file renamed to .md"
 t run "" "$md" code "no before"
 t run "$other" "$md" code "before not an ancestor"
 t run "$md" "$md" code "empty diff"
-# bin/ci_base.sh: a fake gh answers one run with three green jobs, and fails at call $FAIL_AT.
+# bin/ci_base.sh: a fake gh applies the real jq predicate to controlled job records.
 ci=$(dirname "$script")/ci_base.sh
-printf '%s\n' '#!/bin/sh' 'n=$(cat "$CNT" 2>/dev/null || echo 0); echo $((n + 1)) > "$CNT"' \
-  '[ "$((n + 1))" = "${FAIL_AT-0}" ] && exit 1' \
-'case $2 in */jobs) case $ANSWER in missing) echo 0 ;; browser) echo 1 ;; *) echo 3 ;; esac ;; *) echo 7 ;; esac' > fakegh
+cat > fakegh <<'SH'
+#!/bin/sh
+n=$(cat "$CNT" 2>/dev/null || echo 0)
+echo $((n + 1)) > "$CNT"
+[ "$((n + 1))" = "${FAIL_AT-0}" ] && exit 1
+case $2 in
+  */jobs) case $ANSWER in
+    browser) json='{"jobs":[{"name":"browser","conclusion":"success"}]}' ;;
+    skipped) json='{"jobs":[{"name":"browser","conclusion":"skipped"}]}' ;;
+    failed) json='{"jobs":[{"name":"browser","conclusion":"failure"}]}' ;;
+    *) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"}]}' ;;
+  esac ;;
+  *) json='{"workflow_runs":[{"id":7}]}' ;;
+esac
+printf '%s\n' "$json" | jq -r "$4"
+SH
 chmod +x fakegh
 b() { rm -f cnt; got=$(GH=$PWD/fakegh CNT=$PWD/cnt REPO=o/r FAIL_AT=$2 ANSWER=${5-$3} "$ci" "$ren" "$3"); [ "$got" = "$1" ] || { echo "FAIL ci_base $4: want '$1', got '$got'"; fail=1; }; }
 b "$gen" 0 code "code jobs green on parent"
@@ -50,6 +63,7 @@ b "" 1 code "error listing runs"
 b "" 2 code "error reading jobs"
 b "$gen" 0 browser "browser green on parent"
 b "" 2 browser "browser API error"
-b "" 0 browser "a run without passing browser is not a green baseline" missing
+b "" 0 browser "skipped browser is not a green baseline" skipped
+b "" 0 browser "failed browser is not a green baseline" failed
 [ "$fail" = 0 ] && echo "ok   ci_scope: metadata and Book lanes, conservative fallback"
 exit "$fail"
