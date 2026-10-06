@@ -4,7 +4,7 @@ import { expect } from 'e2e';
 // Break: the Book shows a confirmed move, but browser SQLite reopens at the previous room.
 test('Book keeps a confirmed move across reload', async ({ app, screen }) => {
   await app.clearState();
-  await expect(screen.getByRole('button', 'Continue')).toBeVisible();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
 
@@ -24,6 +24,7 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   screen,
 }) => {
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
   await screen.getByRole('button', 'Map').tap();
@@ -75,6 +76,7 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   };
   const money = () => screen.getByRole('button', /Contents, Character,.*pennies 18 of 1000/);
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
   await go('west', 'Boathouse');

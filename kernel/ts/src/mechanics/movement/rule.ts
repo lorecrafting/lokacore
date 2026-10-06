@@ -1,4 +1,5 @@
 import { dark, illuminated } from '../light/shared.ts';
+import { darkSight } from '../attributes/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
@@ -47,7 +48,11 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
     if (barred) return { direction, code: barred };
     if (dark(world, world.character, steps)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
-    if (world.rooms[there].dark_description && !illuminated(world, world.character, steps))
+    if (
+      world.rooms[there].dark_description &&
+      !darkSight(world, world.character) &&
+      !illuminated(world, world.character, steps)
+    )
       return { direction };
     const at = (id: string): id is EntityId =>
       world.state.containers[id] === there && living(world, id);

@@ -12,6 +12,7 @@ import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf } from './calendar.ts';
+import { value as attributeValue } from './attributes/shared.ts';
 
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
@@ -59,9 +60,7 @@ export function holds(
   }
 }
 
-// attributes@1's leaves: the actor's value of the attribute, or the current value of the pool on
-// the actor's body (none without a body), is at least at_least. ponytail: an attribute's value is
-// its start for every actor; per-actor values wait for their first writer (training, ancestry).
+// attributes@1's leaves: the actor's saved value or definition start, or the current body pool.
 function atLeast(
   world: World,
   actor: CharacterId,
@@ -69,7 +68,7 @@ function atLeast(
   steps: { n: number },
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, steps);
-  if (p.op === 'stat_compare') return world.attributes[key(p.attribute)] >= p.at_least;
+  if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
   return body !== undefined && level(world, body, p.resource)! >= p.at_least;
 }

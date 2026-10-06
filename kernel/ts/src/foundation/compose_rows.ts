@@ -17,9 +17,9 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const s = ctx.state;
   if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
   if (t.kind === 'clock') return s.clock;
+  if (t.kind === 'character') return get(section(s, 'characters'), t.character_id);
+  if (t.kind === 'fact') return get(section(s, 'facts'), key(t));
   switch (t.kind) {
-    case 'fact':
-      return get(section(s, 'facts'), key(t));
     case 'entity':
       return get(section(s, 'created'), t.entity_id);
     case 'containment':

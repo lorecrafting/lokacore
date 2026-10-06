@@ -8,11 +8,11 @@ defmodule Loka.ContentDreamsTest do
   } do
     assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
     c = JSON.decode!(bytes)["cartridge"]
-    s = c["scenes"]["ashmere_missing_child@0.0.37:scene/dream_of_the_fen"]
+    s = c["scenes"]["ashmere_missing_child@0.0.38:scene/dream_of_the_fen"]
 
     assert s["on"]["rest"]["room"] == %{
              "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.37",
+             "cartridge_version" => "0.0.38",
              "kind" => "room",
              "key" => "inn_rooms"
            }
@@ -21,7 +21,7 @@ defmodule Loka.ContentDreamsTest do
              %{
                "fact" => %{
                  "cartridge_id" => "ashmere_missing_child",
-                 "cartridge_version" => "0.0.37",
+                 "cartridge_version" => "0.0.38",
                  "kind" => "fact",
                  "key" => "dream_seen"
                },

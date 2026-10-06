@@ -29,7 +29,6 @@ export type State = { readonly clock: number } & { readonly [section: string]: J
 export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
-
 export type Written = { group: number; target: MutationTarget; value: Json };
 export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
@@ -73,7 +72,6 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
-
 export function counts(state: State, ops: readonly DeltaOp[]) {
   const count = (name: string) => ops.filter((o) => o.op === name).length;
   const jobs = Object.values(section(state, 'jobs'));
@@ -94,14 +92,12 @@ export const LIMIT_ORDER = (
 
 export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined =>
   LIMIT_ORDER.find((k) => counts[k]! > LIMITS[k]);
-
 const fault = (code: ErrorCode, t: MutationTarget): Result => ({
   fault: { kind: 'fault', code, target: t },
 });
 export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
-
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
@@ -111,6 +107,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'bleed.transition')
     return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
   switch (op.op) {
+    case 'character.select':
+      return check(row === undefined, op.value);
     case 'fact.assign':
       return assign(op, row, ctx);
     case 'entity.transfer':
@@ -172,7 +170,6 @@ function applyWorld(
       return barrier(op, row, ctx);
   }
 }
-
 function createEntity(
   op: Extract<DeltaOp, { op: 'entity.create' }>,
   row: Json | undefined,

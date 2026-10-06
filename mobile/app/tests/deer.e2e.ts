@@ -16,6 +16,8 @@ test('a visible deer leaves Willow Shade after the sight deadline and stays gone
   });
   await app.clearState();
   await browser.reload();
+  await expect(screen.getByText('Choose your ancestry')).toBeVisible();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   const go = async (direction: string, room: string) => {
     await screen.getByRole('button', 'Map').tap();
@@ -51,6 +53,8 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
   });
   await app.clearState();
   await browser.reload();
+  await expect(screen.getByText('Choose your ancestry')).toBeVisible();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   const go = async (direction: string, room: string) => {
     await screen.getByRole('button', 'Map').tap();

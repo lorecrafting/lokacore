@@ -1,0 +1,32 @@
+{
+  "state": {"clock": 0, "containers": {}},
+  "delta": {"ops": [{
+    "op": "character.select", "writer_group": 0,
+    "character_id": "11111111-2222-4333-8444-555555555555",
+    "value": {"ancestry": "hill_folk", "attributes": {
+      "ashmere_missing_child@0.0.38:attribute/con": 11,
+      "ashmere_missing_child@0.0.38:attribute/dex": 10,
+      "ashmere_missing_child@0.0.38:attribute/int": 10,
+      "ashmere_missing_child@0.0.38:attribute/per": 5,
+      "ashmere_missing_child@0.0.38:attribute/spi": 10,
+      "ashmere_missing_child@0.0.38:attribute/str": 10
+    }}
+  }]},
+  "expected": {"changes": [{
+    "target": {"kind": "character", "character_id": "11111111-2222-4333-8444-555555555555"},
+    "value": {"ancestry": "hill_folk", "attributes": {
+      "ashmere_missing_child@0.0.38:attribute/con": 11,
+      "ashmere_missing_child@0.0.38:attribute/dex": 10,
+      "ashmere_missing_child@0.0.38:attribute/int": 10,
+      "ashmere_missing_child@0.0.38:attribute/per": 5,
+      "ashmere_missing_child@0.0.38:attribute/spi": 10,
+      "ashmere_missing_child@0.0.38:attribute/str": 10
+    }}
+  }]},
+  "repeat": {"fault": {"kind": "fault", "code": "precondition_failed", "target": {
+    "kind": "character", "character_id": "11111111-2222-4333-8444-555555555555"
+  }}},
+  "present_null": {"fault": {"kind": "fault", "code": "precondition_failed", "target": {
+    "kind": "character", "character_id": "11111111-2222-4333-8444-555555555555"
+  }}}
+}
