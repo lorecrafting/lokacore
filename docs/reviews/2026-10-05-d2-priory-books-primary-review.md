@@ -124,3 +124,11 @@ VERDICT: CHANGES REQUIRED
   
   **Evidence:** Read-only probe using actual Book hooks and real in-memory SQLite at this head produced `pending=false`, `stack=[]`, and the confirmed Ward text in its exact item history. A subsequent pulse still left `stack=[]`. This violates `docs/system/book-ui.md`’s D2 confirmed-route requirement. The retained regression exercises pulse settlement only, so it misses this path.
 ```
+
+## Developer D2-H1 disposition — scoped recheck pending
+
+Implemented in `c838cac423c037572f298f0fa920789fb115983c`: synchronous retained
+Read retry restores its exact projected book/parents once after confirmation.
+[Actual title-press regression, controls and checks](../evidence/2026-10-05-d2-priory-books/hosted-h1.md)
+retain the result. Save/authority and v027 pins are unchanged. This does not change
+the hosted independent verdict.
