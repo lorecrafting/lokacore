@@ -96,7 +96,7 @@ function sightClosureValid(
   old: Obj,
   initial: Obj,
 ): boolean {
-  const sightDone = sightCompletion(state, ops, close.writer_group);
+  const sightDone = sightCompletion(state, ops, close.writer_group, initial.npc_id);
   if (sightDone?.op !== 'job.complete') return false;
   const sightJob = section(state, 'jobs')[sightDone.job_id];
   const sight = sightJob.sight;
@@ -129,10 +129,12 @@ function sightClosureValid(
   );
 }
 
-function sightCompletion(state: State, ops: readonly DeltaOp[], group: number) {
+function sightCompletion(state: State, ops: readonly DeltaOp[], group: number, member: string) {
   return ops.find(
     (o) =>
-      o.op === 'job.complete' && o.writer_group > group && section(state, 'jobs')[o.job_id]?.sight,
+      o.op === 'job.complete' &&
+      o.writer_group > group &&
+      section(state, 'jobs')[o.job_id]?.sight?.member_id === member,
   );
 }
 

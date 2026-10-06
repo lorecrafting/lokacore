@@ -1,0 +1,12 @@
+✔ equal-time Oak sight does not consume Willow round handoff (19.51925ms)
+✔ same-time harmless Oak sight and Oak arrival rebind the one slot (9.12975ms)
+✔ two missed rounds hand off only the matching encounter and successor at +300 (6.485666ms)
+✔ an unrelated group still conflicts on the encounter target (6.208167ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 787.382

@@ -13,3 +13,17 @@ The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md), [PM decision]
 I tested the test in this detached review checkout: removing `slot.generation !== sight.generation` from `activeSight` made `generation mismatch makes a sight occurrence harmless` fail. The mutant incorrectly emitted `entity.transfer` and `population.slot` after `job.complete`; the controlled expected answer was only `job.complete`. After restoring source, that focused test passed. The developer's retained controls also cover duplicate hide transfer and stale round cancellation. Source status was restored before the record commit.
 
 The composition stays within existing population, movement, combat, death, custody and authority primitives. Ponytail Review: Lean already. Ship. No additional dependency, generic behavior framework or redundant test was found in the reviewed path. This approval does not replace final exact-head save/protocol review or PM merge checks.
+
+## Required Codex Astra foundation review at `776742a6`
+
+```text
+VERDICT: CHANGES REQUIRED
+
+1. D7-01 | P1 | kernel/ts/src/foundation/compose_sight.ts:135
+   sightCompletion selects the first later sight completion without matching the encounter’s deer. Reproduced with both deer in Drowned Oak, two missed attacks against Willow deer, and equal-time order round → Oak sight → Willow sight: the valid Willow handoff faults precondition_failed because validation selects Oak’s job. Elapsed settlement rolls back and repeats the fault. Match the exact member/binding; the same selection defect exists in invariants_sight.ts:125 and deer-save.ts:114.
+
+2. D7-02 | P1 | kernel/ts/src/mechanics/population/behavior.ts:145
+   Harmless sight completion clears the slot even when a later same-time population arrival must bind it again in another writer group. Reproduced: let Willow deer flee into Drowned Oak at 65100; enter Drowned Oak at 68100, then immediately return north. At 68400, Oak sight clears its binding before Oak population wanders into the player’s room and schedules fresh sight. Final composition faults conflicting_write on Oak’s population_slot, rolling back elapsed settlement. Coordinate these lawful equal-time operations while preserving unrelated conflict refusal.
+```
+
+The developer's [round 1 fixes and retained red controls](../evidence/2026-10-06-d7-deer-round1/README.md) address these findings. The approval above applies to its stated head; fresh exact-head rechecks remain required for the fix head.

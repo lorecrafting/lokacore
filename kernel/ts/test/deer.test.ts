@@ -185,6 +185,64 @@ test('+150 death transfers the one hide to the corpse and replacement waits unti
   );
 });
 
+// Breaks: a different deer's earlier equal-time sight steals the Willow encounter handoff.
+test('equal-time Oak sight does not consume Willow round handoff', () => {
+  let w = walkToWillow(fresh(missSeed));
+  const willow = deer(w, 'willow_deer');
+  w = elapsed(w, 65100).world;
+  w = elapsed(w, 68100).world;
+  w = command(w, 'move', 'south', 8);
+  const sights = Object.entries(w.state.jobs ?? {}).filter(
+    ([, j]) => j.status === 'pending' && j.sight && j.due_time === 68400,
+  );
+  assert.deepEqual(
+    sights.map(([, j]) => j.sight!.member_id),
+    [deer(w, 'oak_deer'), willow],
+  );
+  w = { ...w, state: { ...w.state, rng: missSeed as never } };
+  w = command(w, 'attack', willow, 10);
+  w = elapsed(w, 68250).world;
+  assert.equal(Object.values(w.state.encounters ?? {})[0]?.status, 'open');
+  assert.equal(w.state.jobs?.[Object.values(w.state.encounters ?? {})[0]!.job_id]?.due_time, 68400);
+  const result = elapsed(w, 68400);
+  assert.ok(
+    result.decision.kind === 'accepted' &&
+      result.decision.delta.ops.some((o) => o.op === 'encounter.advance'),
+    JSON.stringify(result.decision),
+  );
+  assert.equal(
+    result.world.state.containers[willow],
+    result.world.roomIds[ref('room', 'willow_shade')],
+  );
+  assert.equal(Object.values(result.world.state.encounters ?? {})[0]?.status, 'closed');
+});
+
+// Breaks: a harmless sight clear conflicts with a later equal-time arrival's new binding.
+test('same-time harmless Oak sight and Oak arrival rebind the one slot', () => {
+  let w = walkToWillow(fresh());
+  const oak = deer(w, 'oak_deer');
+  w = elapsed(w, 65100).world;
+  w = elapsed(w, 68100).world;
+  w = command(w, 'move', 'south', 8);
+  w = command(w, 'move', 'north', 9);
+  const result = elapsed(w, 68400);
+  const row = slot(result.world, oak);
+  assert.equal(
+    result.world.state.containers[oak],
+    result.world.roomIds[ref('room', 'willow_shade')],
+  );
+  assert.equal(row.sight_job_id !== null, true);
+  assert.equal(result.world.state.jobs?.[row.sight_job_id!]?.due_time, 68700);
+  if (result.decision.kind !== 'accepted') return;
+  const unrelated = result.decision.delta.ops.map((op) =>
+    op.op === 'population.slot' && op.value.sight_job_id === row.sight_job_id
+      ? { ...op, writer_group: op.writer_group + 9 }
+      : op,
+  );
+  const fault = compose(base(w), { ops: unrelated } as never);
+  assert.deepEqual('fault' in fault && fault.fault.code, 'conflicting_write');
+});
+
 // Breaks: an equal-due surviving round blocks sight with conflicting_write, or flight leaves its successor active.
 test('two missed rounds hand off only the matching encounter and successor at +300', () => {
   let w = walkToWillow(fresh(missSeed));

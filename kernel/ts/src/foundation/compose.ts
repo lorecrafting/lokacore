@@ -15,6 +15,7 @@ import { openEncounter, changeEncounter, composeJob } from './compose_encounter.
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { sightHandoffValid } from './compose_sight.ts';
+import { sightRebindValid } from './compose_sight_rebind.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -24,9 +25,7 @@ import {
   type MutationTarget,
   type StateDelta,
 } from '../contracts.gen.ts';
-
 import { transitionWater } from './compose_water.ts';
-
 export type Obj = { readonly [key: string]: Json };
 export type State = { readonly clock: number } & { readonly [section: string]: Json };
 export type Change = { target: MutationTarget; value: Json };
@@ -36,7 +35,6 @@ export type Result = { changes: Change[] } | { fault: Fault };
 export type Written = { group: number; target: MutationTarget; value: Json };
 export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
-
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
   open: ['closed'],
@@ -51,7 +49,6 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
 const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
-
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 export function compose(state: State, delta: StateDelta, final = true): Result {
@@ -67,7 +64,12 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
       return fault('precondition_failed', t);
     const k = key(t);
     const prior = ctx.overlay.get(k);
-    if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
+    if (
+      prior &&
+      prior.group !== op.writer_group &&
+      !sightRebindValid(state, ops, index, prior.group)
+    )
+      return fault('conflicting_write', t);
     const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });

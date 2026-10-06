@@ -110,7 +110,9 @@ export function deerSave(world: World, db: Db, meta: Meta) {
       );
       const sightDone = ops.find(
         (x) =>
-          x.op === 'job.complete' && x.writer_group > close.writer_group && jobs[x.job_id]?.sight,
+          x.op === 'job.complete' &&
+          x.writer_group > close.writer_group &&
+          jobs[x.job_id]?.sight?.member_id === world.state.encounters?.[close.encounter_id]?.npc_id,
       );
       const sight = sightDone && jobs[sightDone.job_id]?.sight;
       if (

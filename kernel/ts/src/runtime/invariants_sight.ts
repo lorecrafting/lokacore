@@ -79,7 +79,7 @@ function sightClosureValid(
   round: Any,
   prior: Any,
 ): boolean {
-  const sightDone = sightCompletion(state, ops, close.writer_group);
+  const sightDone = sightCompletion(state, ops, close.writer_group, prior.npc_id);
   const sightJob = sightDone && state.jobs[sightDone.job_id];
   const sight = sightJob?.sight;
   if (!sight) return false;
@@ -119,10 +119,12 @@ function boundSlot(ops: Any[], sightDone: Any, sightJob: Any, sight: Any) {
   );
 }
 
-function sightCompletion(state: Any, ops: Any[], group: number) {
+function sightCompletion(state: Any, ops: Any[], group: number, member: string) {
   return ops.find(
     (row) =>
-      row.op === 'job.complete' && row.writer_group > group && state.jobs?.[row.job_id]?.sight,
+      row.op === 'job.complete' &&
+      row.writer_group > group &&
+      state.jobs?.[row.job_id]?.sight?.member_id === member,
   );
 }
 
