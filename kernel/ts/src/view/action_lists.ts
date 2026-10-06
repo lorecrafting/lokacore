@@ -1,4 +1,4 @@
-// size: allow 312, food projection and method-aware Harvest share the composed view list
+// size: allow 325, food, water, and practical skill offers share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { liquidActions } from './liquid.ts';

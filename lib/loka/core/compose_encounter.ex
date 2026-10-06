@@ -221,14 +221,19 @@ defmodule Loka.Core.ComposeEncounter do
   end
 
   defp binding?(op) do
-    quest = op["quest_instance_id"] != nil
-    water = op["water_generation"] != nil
-    actor = op["actor_id"] != nil
-    body = op["water_body_id"] != nil
+    case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
+          op["water_body_id"] != nil} do
+      {false, false, false, false} ->
+        true
 
-    (quest or water) == actor and water == body and
-      (not quest or (get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil)) and
-      (not water or
-         (get_in(op, ["job", "kind"]) == "room" and not quest and op["encounter_id"] == nil))
+      {true, false, true, false} ->
+        get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
+
+      {false, true, true, true} ->
+        get_in(op, ["job", "kind"]) == "room" and op["encounter_id"] == nil
+
+      _ ->
+        false
+    end
   end
 end

@@ -1,3 +1,4 @@
+// size: allow 310, water transitions join the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { quest, repeatPair } from './compose_quest.ts';

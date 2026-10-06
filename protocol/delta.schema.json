@@ -774,6 +774,11 @@
             "writer_group",
             "job_id"
           ],
+          "requiredUnless": {
+            "water_generation": [
+              "encounter_id"
+            ]
+          },
           "additionalProperties": false,
           "examples": [
             {

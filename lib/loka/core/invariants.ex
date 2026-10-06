@@ -1,4 +1,4 @@
-# size: allow 330, independent patrol and retirement pairing joins precondition replay
+# size: allow 335, patrol, retirement, and water pairing join precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is

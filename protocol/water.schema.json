@@ -62,7 +62,17 @@
         "job_id"
       ],
       "additionalProperties": false,
-      "description": "One actor-owned body and occupancy generation. Active rows bind bottom, entry clock, absolute deadline and one job. Cleared rows retain generation/body and null all occurrence fields."
+      "description": "One actor-owned body and occupancy generation. Active rows bind bottom, entry clock, absolute deadline and one job. Cleared rows retain generation/body and null all occurrence fields.",
+      "examples": [
+        {
+          "generation": 1,
+          "body_id": "22222222-3333-4444-8555-666666666666",
+          "room_id": "33333333-4444-4555-8666-777777777777",
+          "entered_at": 64800,
+          "deadline": 70800,
+          "job_id": "44444444-5555-4666-8777-888888888888"
+        }
+      ]
     },
     "WaterSettings": {
       "type": "object",
@@ -122,7 +132,38 @@
         "routes"
       ],
       "additionalProperties": false,
-      "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only."
+      "description": "D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.",
+      "examples": [
+        {
+          "skill": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "skill",
+            "key": "swim"
+          },
+          "maximum_grams": 6000,
+          "entry_cost": 10,
+          "duration": 6000,
+          "warning": "water.warning",
+          "drowned": "water.drowned",
+          "routes": [
+            {
+              "surface": {
+                "cartridge_id": "water_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "shaft"
+              },
+              "bottom": {
+                "cartridge_id": "water_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "bottom"
+              }
+            }
+          ]
+        }
+      ]
     },
     "WaterView": {
       "type": "object",
@@ -143,7 +184,14 @@
         "remaining_seconds"
       ],
       "additionalProperties": false,
-      "description": "Confirmed deadline, logical time remaining and real seconds rounded up from the authored elapsed rate. Presentation never advances or renews the deadline."
+      "description": "Confirmed deadline, logical time remaining and real seconds rounded up from the authored elapsed rate. Presentation never advances or renews the deadline.",
+      "examples": [
+        {
+          "deadline": 70800,
+          "remaining": 6000,
+          "remaining_seconds": 120
+        }
+      ]
     },
     "CorpseRecoveryView": {
       "type": "object",
@@ -185,7 +233,20 @@
         "roots"
       ],
       "additionalProperties": false,
-      "description": "One actual owned nonempty underwater corpse currently eligible at the shrine, with its current bottom location and original direct-root identities/names."
+      "description": "One actual owned nonempty underwater corpse currently eligible at the shrine, with its current bottom location and original direct-root identities/names.",
+      "examples": [
+        {
+          "corpse_id": "22222222-3333-4444-8555-666666666666",
+          "room_id": "33333333-4444-4555-8666-777777777777",
+          "room_title": "room.bottom",
+          "roots": [
+            {
+              "id": "22222222-3333-4444-8555-666666666666",
+              "name": "item.trunk.short"
+            }
+          ]
+        }
+      ]
     },
     "WaterJob": {
       "type": "object",
@@ -224,7 +285,22 @@
         "water_body_id"
       ],
       "additionalProperties": false,
-      "description": "One bound water occurrence: exact bottom DefinitionRef, due clock, actor/body/generation and pending, completed or cancelled status. Historical rows remain; only the current occurrence may drown."
+      "description": "One bound water occurrence: exact bottom DefinitionRef, due clock, actor/body/generation and pending, completed or cancelled status. Historical rows remain; only the current occurrence may drown.",
+      "examples": [
+        {
+          "job": {
+            "cartridge_id": "water_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "bottom"
+          },
+          "due_time": 70800,
+          "status": "pending",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "water_generation": 1,
+          "water_body_id": "22222222-3333-4444-8555-666666666666"
+        }
+      ]
     }
   }
 }

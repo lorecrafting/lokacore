@@ -120,3 +120,6 @@ review, predecessor re-pin or final browser proof; successor API/release/hash/ID
 [Published-main carryover evidence](../../evidence/2026-10-06-d6-main-carry/README.md)
 records the local reconciliation with D4/C4 and its focused checks. D3, successor pins,
 browser proof and the final gate remain pending.
+
+[Final local integration evidence](../../evidence/2026-10-06-d6-water-final/README.md)
+records v035 proof, the full local gate, browser Book paths and red controls.

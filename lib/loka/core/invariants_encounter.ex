@@ -214,13 +214,7 @@ defmodule Loka.Core.InvariantsEncounter do
       row["status"] != "pending" ->
         nil
 
-      op["op"] == "job.cancel" and
-          if(op["water_generation"],
-            do:
-              row["water_generation"] == op["water_generation"] and
-                row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
-            else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
-          ) ->
+      op["op"] == "job.cancel" and cancel_binding?(op, row) ->
         Map.put(row, "status", "cancelled")
 
       op["op"] == "job.complete" and row["due_time"] <= horizon ->
@@ -229,6 +223,14 @@ defmodule Loka.Core.InvariantsEncounter do
       true ->
         nil
     end
+  end
+
+  defp cancel_binding?(op, row) do
+    if op["water_generation"],
+      do:
+        row["water_generation"] == op["water_generation"] and
+          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
+      else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
   end
 
   # Independent permitted binding tuples; no call to the job composer.
