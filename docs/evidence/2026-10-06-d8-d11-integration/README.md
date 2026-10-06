@@ -79,3 +79,22 @@ Next bounded work is to resolve these actual size failures by extracting existin
 cohesive D8 composition/invariant logic without relaxing limits or checks. All
 remaining browser/schema/simulation/independent review and publication proof is
 still pending.
+
+## Bounded composition size fix
+
+Crow CAS/base now use existing `ComposePopulation`; crow replay participates in
+existing `InvariantsPopulation.holds?`. The row-shape checks use ordinary private
+clauses. Module summaries were shortened. No module, dependency, size allowance
+or semantic exception was added. Ponytail/correctness self-review verified the
+original transition map, exact expected-row/member/generation checks and shapes.
+
+- Red control removes relocated crow expected-row equality: `mix test --force test/loka/core/crow_composition_test.exs` exits2, 4/5 passed; stale-crow-job-cas fails as intended. Restored before final proof.
+- Focused crow/spawned-bundle/general composition: exit0, 22 passed.
+- Sole full gate rerun: exit8, all393 Elixir tests passed, then Credo flagged the initially extracted shape case. Converted that case to guarded clauses afterward.
+- Final focused crow/general composition: exit0, 17 passed.
+- Final `mix credo --strict`: exit0, no issues.
+- Final `elixir bin/check_size.exs`: exit0; all existing limits retained.
+
+Full gate has not been rerun after the final shape-clause fix. Resume with the
+required full gate, then resolve any later TS/lint/schema/headless proof failures.
+Browser, schema sweep, 30-day conservation and independent reviews remain pending.

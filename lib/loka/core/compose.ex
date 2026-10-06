@@ -1,10 +1,6 @@
 # size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
-  @moduledoc """
-  Portable StateDelta composition (04 §5.1-§5.4, 14 §R3A). Preconditions read
-  an overlay over committed state; only changed rows return. Writer-group conflicts
-  fault atomically; budgets precede ops and time.advance sets job/resource time.
-  """
+  @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
   alias Loka.Core.{ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
@@ -238,52 +234,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
 
-  defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
-    do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
-
-  # ponytail: one bounded five-phase CAS row. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp apply_op(%{"op" => "crow.transition", "expected" => expected, "value" => value}, t, ctx) do
-    prior = read(t, ctx)
-    from = expected && expected["phase"]
-    phase = value["phase"]
-
-    allowed = %{
-      "idle" => ~w(acquire),
-      "acquire" => ~w(leg idle return paused_return),
-      "leg" => ~w(leg return idle paused_return),
-      "return" => ~w(return idle paused_return),
-      "paused_return" => ~w(return idle)
-    }
-
-    shape =
-      case phase do
-        "idle" ->
-          Enum.all?(~w(item_id nest_id job_id drop_event_id encounter_id), &(value[&1] == nil))
-
-        "paused_return" ->
-          value["item_id"] == nil and value["job_id"] == nil and
-            value["encounter_id"] != nil and value["nest_id"] != nil and
-            value["drop_event_id"] != nil
-
-        "return" ->
-          value["item_id"] == nil and value["job_id"] != nil and
-            value["encounter_id"] == nil and value["nest_id"] != nil and
-            value["drop_event_id"] != nil
-
-        _ ->
-          value["item_id"] != nil and value["job_id"] != nil and
-            value["encounter_id"] == nil and value["nest_id"] != nil and
-            value["drop_event_id"] != nil
-      end
-
-    check(
-      prior == expected and if(from, do: phase in allowed[from], else: phase == "acquire") and
-        (from in [nil, "idle"] or
-           (expected["member_id"] == value["member_id"] and
-              expected["generation"] == value["generation"])) and shape,
-      value
-    )
-  end
+  defp apply_op(%{"op" => kind} = op, t, ctx)
+       when kind in ~w(population.control population.slot crow.transition),
+       do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
   defp apply_op(%{"op" => "water.transition"} = op, t, ctx),
     do: Loka.Core.ComposeWater.transition(op, read(t, ctx), ctx, &read/2)
@@ -337,9 +290,9 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "bleed", "body_id" => b}, s), do: section(s, "bleeds")[b]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
-  defp base(%{"kind" => "crow"} = t, s), do: section(s, "crows")[key(t)]
 
-  defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
+  defp base(%{"kind" => kind} = t, s) when kind in ~w(population_plan population_slot crow),
+    do: Loka.Core.ComposePopulation.base(t, s)
 
   defp base(%{"kind" => "water", "actor_id" => a}, s), do: section(s, "water")[a]
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]

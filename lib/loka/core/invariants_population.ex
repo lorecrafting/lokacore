@@ -8,7 +8,7 @@ defmodule Loka.Core.InvariantsPopulation do
         false
 
       {rows, changed} ->
-        Enum.all?(changed, &written?(result, &1, rows[&1]))
+        Enum.all?(changed, &written?(result, &1, rows[&1])) and crows_hold?(state, ops, result)
     end
   end
 
