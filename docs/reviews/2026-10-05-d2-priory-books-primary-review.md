@@ -161,3 +161,24 @@ cartridge/API/hash/IDs and Game/authority/save contracts are unchanged.
 Ponytail Review: lean already; no complexity finding. This scoped headless verdict
 does not replace the hosted Sol recheck, exact-head CI or publication gates, and
 adds no browser/native/owner-save proof.
+
+## Final hosted Sol D2-H1 scoped recheck — APPROVE
+
+Verbatim response for source `c838cac423c037572f298f0fa920789fb115983c` through
+evidence `c7927528e57feb12612ffda7e5f9bcfe4bbc6705`:
+
+```text
+VERDICT APPROVE
+
+No findings. D2-H1 is closed at c7927528.
+
+Independently verified actual Book title-press and pulse recovery for Ward/Bell, wrong-target retry, unrelated Look, one-shot recovery, scene/combat precedence and unavailable-target refusal. The new test fails against pre-fix Book and both recovery-deletion and wrong-target mutations; restored focused suite passes 25/25.
+
+Save, authority, contracts and pins are unchanged by the fix. Eight H1 evidence hashes verify. Ponytail Review found no unnecessary complexity.
+
+Proof limits: headless checks only; four file-backed authority tests were blocked by read-only sandbox permissions. Hosted CI was reported green by the requester, not independently rerun.
+```
+
+The four sandbox-blocked file-backed cases do not add fresh save proof here;
+[the independent save/protocol record](2026-10-05-d2-priory-books-save-second-review.md)
+retains its approved carryover, and authority/contracts/pins remain unchanged.
