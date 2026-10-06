@@ -15,3 +15,11 @@ The [archived population row](../archive/spec/00a-chapter-one-content.md#populat
 Focused `kernel/ts` deer tests passed 12/12; Elixir content and portable composition tests passed 14/14. In a throwaway detached checkout, removing the sight generation comparison failed the stale-generation test (11 pass, 1 fail); omitting encounter closure failed the round-first and sight-first controls (9 pass, 3 fail). The throwaway checkout was removed. Source inspection covered plan declarations, paired birth/death, legal transfer, exact equal-time handoff, slot and job guards, save receipt checks, and ordinary Book projection/admission. No other concrete primary finding; the separate save/protocol opinion remains required. Ponytail Review: Lean already. Ship.
 
 The source still carries the published predecessor's release pin, as its evidence states. This verdict does not authorize publication.
+
+## Scoped D7-P1 fix recheck — APPROVE
+
+Reviewed exact clean developer head `103fac5a` only for D7-P1, its compiler/loader tests and direct saved-sight consumer. `lib/loka/content/population.ex` and `kernel/ts/src/content/cartridge_population.ts` now require a deer/hide bundle whenever `sight` is declared. The controlled Fen Hounds source fails compilation, and its hash-correct artifact fails loading; the valid deer content still loads. This matches the deer-only provenance requirement in `mechanics/population/saved.ts`. D7-P1 is closed, with no new finding in the touched path.
+
+Independent focused runs: Elixir content 3/3, kernel deer and wire contracts 15/15. In a throwaway detached checkout at `103fac5a`, removing the loader pair guard made the hash-correct Hounds sight test fail (0/1); removing the compiler pair guard made the invalid-source test fail (2/3 suite), followed by a restored green 3/3 run. The checkout was removed. The developer's additional schema and real-SQLite fault evidence is retained in the provisional evidence folder; this scoped recheck does not independently rerun it. Ponytail Review: Lean already. Ship.
+
+Final D6 carryover, independently derived release pins, Book browser proof, complete final gate and hosted CI remain pending; this local approval is not publication approval.
