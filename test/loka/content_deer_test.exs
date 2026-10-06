@@ -44,4 +44,23 @@ defmodule Loka.ContentDeerTest do
                  &1["path"] == "populations/willow_deer.bundle")
            )
   end
+
+  # Breaks: a hound sight plan compiles even though saved sight validation requires deer provenance.
+  test "sight cannot attach to the hound and pelt role pair", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "populations/fen_hounds.json")
+    plan = path |> File.read!() |> JSON.decode!()
+
+    sight = %{
+      "delay" => 300,
+      "narration" => %{
+        "east" => "combat.deer_fled_east",
+        "west" => "combat.deer_fled_west"
+      }
+    }
+
+    File.write!(path, JSON.encode!(Map.put(plan, "sight", sight)))
+    assert {:error, ds} = Loka.Content.compile(dir)
+    assert Enum.any?(ds, &(&1["path"] == "populations/fen_hounds.sight.narration"))
+  end
 end

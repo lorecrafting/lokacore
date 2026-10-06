@@ -24,18 +24,53 @@ function setup(t: TestContext, seed?: readonly number[]) {
   const path = join(dir, 'save.db');
   const sql = new DatabaseSync(path);
   sql.exec('PRAGMA page_size = 512');
-  const db = adapter(sql);
+  const fault = { kind: '' as '' | 'failed' | 'lost', armed: false, reads: false, inserted: false };
+  const db = {
+    execSync(q: string) {
+      const before = sql.isTransaction;
+      try {
+        sql.exec(q);
+      } catch (e) {
+        if (fault.armed && before) {
+          fault.armed = false;
+          fault.reads = true;
+        }
+        throw e;
+      }
+      if (fault.armed && fault.kind === 'lost' && before && !sql.isTransaction) {
+        fault.armed = false;
+        fault.reads = true;
+        throw Error('lost COMMIT acknowledgement');
+      }
+    },
+    runSync(q: string, ...args: any[]) {
+      if (fault.armed && fault.kind === 'failed' && !fault.inserted) {
+        fault.inserted = true;
+        sql.exec('INSERT INTO child VALUES (1)');
+      }
+      return sql.prepare(q).run(...args);
+    },
+    getFirstSync(q: string, ...args: any[]) {
+      if (fault.reads) sql.prepare('SELECT * FROM unavailable_deer_reads').get();
+      return sql.prepare(q).get(...args) ?? null;
+    },
+    getAllSync(q: string, ...args: any[]) {
+      if (fault.reads) sql.prepare('SELECT * FROM unavailable_deer_reads').get();
+      return sql.prepare(q).all(...args);
+    },
+    isInTransactionSync: () => sql.isTransaction,
+  };
   let next = 0;
   const host = {
     kernel_version: `loka-kernel@${'0'.repeat(40)}`,
     newId: () => `aaaaaaaa-0000-4000-8000-${String(++next).padStart(12, '0')}`,
     time: { wall: () => 10000, monotonic: () => 0 },
   };
-  const p = { sql, db, host };
+  const p = { sql, db, host, fault };
   const selected = seed
     ? ([{ fresh: fresh(seed), content_hash: bundle.sha256 }] as const)
     : releases;
-  const story = openStory(db as never, selected, host);
+  const story = openStory(p.db as never, selected, p.host);
   assert.equal(story.kind, 'open');
   if (story.kind !== 'open') throw Error('open failed');
   return { path, p, story, selected };
@@ -199,4 +234,139 @@ test('fatal deer and its owned hide cold-reopen without replacement', (t) => {
     ).length,
     0,
   );
+});
+
+// Breaks: a failed or uncertain COMMIT adopts only part of a deer sight/death transaction,
+// or retry allocates a second sight occurrence, corpse, or hide transfer.
+test('real COMMIT faults preserve all-prior or all-next deer rows and one replayable receipt', (t) => {
+  for (const transition of ['sight', 'death'] as const)
+    for (const fault of ['known_failed', 'unknown_absent', 'lost'] as const) {
+      const { path, p, story } = setup(t);
+      for (const [i, direction] of ['south', 'south', 'west'].entries())
+        move(story, direction, i + 1);
+      const deer = Object.entries(story.world().state.created ?? {}).find(
+        ([, identity]) =>
+          identity.origin.kind === 'spawned' &&
+          identity.origin.role === 'deer' &&
+          identity.definition.key === 'willow_deer',
+      )![0];
+      if (transition === 'death') {
+        const attack = story.invoke({
+          invocation_id: 'cccccccc-0000-4000-8000-000000000007',
+          actor_id: story.world().character,
+          action_key: 'attack',
+          target_ids: [deer],
+          input: {},
+        });
+        assert.equal(attack.kind, 'saved', `${transition}/${fault}`);
+      }
+      const prior = story.world();
+      const before = encode(prior.state as never);
+      const rows = p.sql
+        .prepare('SELECT section, key, value FROM state_row ORDER BY section, key')
+        .all();
+      const receiptCount = p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+      const exact = {
+        expected_run_id: story.runId(),
+        from: 64800,
+        until: transition === 'death' ? 64950 : 65100,
+      };
+      if (fault !== 'lost')
+        p.sql.exec(
+          'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+        );
+      p.fault.kind = fault === 'lost' ? 'lost' : 'failed';
+      p.fault.armed = true;
+      if (fault === 'known_failed') {
+        const exec = p.db.execSync;
+        p.db.execSync = (operation: string) => {
+          try {
+            exec(operation);
+          } catch (error) {
+            p.fault.reads = false;
+            throw error;
+          }
+        };
+        assert.throws(
+          () => story.elapsed(exact),
+          /COMMIT failed; nothing was saved/,
+          `${transition}/${fault}`,
+        );
+      } else {
+        assert.equal(story.elapsed(exact).kind, 'pending', `${transition}/${fault}`);
+        assert.equal(
+          story.invoke({
+            invocation_id: 'cccccccc-0000-4000-8000-000000000099',
+            actor_id: story.world().character,
+            action_key: 'look',
+            target_ids: [],
+            input: {},
+          }).kind,
+          'pending',
+          `${transition}/${fault}`,
+        );
+      }
+      assert.equal(story.world(), prior, `${transition}/${fault}`);
+      p.fault.reads = false;
+      if (p.sql.isTransaction) p.sql.exec('ROLLBACK');
+      if (fault !== 'lost') {
+        assert.equal(encode(story.world().state as never), before, `${transition}/${fault}`);
+        assert.deepEqual(
+          p.sql.prepare('SELECT section, key, value FROM state_row ORDER BY section, key').all(),
+          rows,
+          `${transition}/${fault}`,
+        );
+        assert.equal(p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, receiptCount);
+      } else
+        assert.equal(
+          p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n,
+          Number(receiptCount) + 1,
+        );
+      p.sql.close();
+      const sql = new DatabaseSync(path);
+      t.after(() => sql.close());
+      const reopened = openStory(adapter(sql) as never, releases, p.host);
+      assert.equal(reopened.kind, 'open', `${transition}/${fault}`);
+      if (reopened.kind !== 'open') continue;
+      assert.equal(
+        fault === 'lost'
+          ? encode(reopened.world().state as never) !== before
+          : encode(reopened.world().state as never) === before,
+        true,
+        `${transition}/${fault}`,
+      );
+      const settled = reopened.elapsed(exact);
+      assert.equal(settled.kind, 'saved', `${transition}/${fault}`);
+      if (settled.kind === 'saved')
+        assert.equal(settled.replay, fault === 'lost', `${transition}/${fault}`);
+      assert.equal(
+        sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n,
+        Number(receiptCount) + 1,
+      );
+      const state = reopened.world().state;
+      if (transition === 'sight') {
+        assert.equal(state.containers[deer], reopened.world().roomIds[ref('room', 'drowned_oak')]);
+        assert.equal(
+          Object.values(state.population_slots ?? {}).find((s) => s.member_id === deer)
+            ?.sight_job_id,
+          null,
+        );
+      } else {
+        const corpse = Object.entries(state.created ?? {}).find(
+          ([, identity]) => identity.origin.kind === 'death' && identity.origin.victim_id === deer,
+        )![0];
+        const hide = Object.entries(state.created ?? {}).find(
+          ([, identity]) =>
+            identity.origin.kind === 'spawned' &&
+            identity.origin.role === 'hide' &&
+            identity.origin.member_id === deer,
+        )![0];
+        assert.equal(state.containers[hide], corpse);
+        assert.equal(
+          Object.values(state.population_slots ?? {}).find((s) => s.member_id === deer)
+            ?.replacement_due,
+          237750,
+        );
+      }
+    }
 });

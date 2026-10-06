@@ -29,7 +29,8 @@ export function population(c: Obj): Diagnostic[] {
       reciprocal(rooms, p.area);
     const template = bundle && templateValid(c, bundle, p.home);
     if (!packValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.pack.narration`));
-    if (!sightValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.sight.narration`));
+    if (!sightValid(c, p, rooms, bundle))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.sight.narration`));
     if (!bundle || !template) out.push(diag('SCHEMA_VIOLATION', `${at}.bundle`));
     if (!area) out.push(diag('SCHEMA_VIOLATION', `${at}.area`));
     if (!validPeriods) out.push(diag('SCHEMA_VIOLATION', `${at}.wander_interval`));
@@ -40,7 +41,7 @@ export function population(c: Obj): Diagnostic[] {
   return out;
 }
 
-function sightValid(c: Obj, p: Obj, rooms: Obj[]): boolean {
+function sightValid(c: Obj, p: Obj, rooms: Obj[], bundle?: Obj): boolean {
   const sight = p.sight;
   if (!sight) return true;
   const directions: string[] = rooms.flatMap((room: Obj) =>
@@ -51,6 +52,8 @@ function sightValid(c: Obj, p: Obj, rooms: Obj[]): boolean {
       : [],
   );
   return (
+    bundle?.member_role === 'deer' &&
+    bundle.loot_role === 'hide' &&
     sight.delay > 0 &&
     directions.every((direction) => sight.narration[direction]) &&
     Object.values(sight.narration).every((key) => c.text?.[key as string])

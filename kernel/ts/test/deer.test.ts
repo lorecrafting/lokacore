@@ -388,3 +388,22 @@ test('loader refuses malformed deer roles and missing flight text', () => {
     assert.equal(loaded.ok, false, changed);
   }
 });
+
+// Breaks: a hash-correct sight-enabled hound cartridge loads but cannot cold-reopen its first world.
+test('loader refuses sight on a hound and pelt bundle', () => {
+  const c = structuredClone(content) as any;
+  c.populations[ref('population', 'fen_hounds')].sight = {
+    delay: 300,
+    narration: {
+      east: 'combat.deer_fled_east',
+      west: 'combat.deer_fled_west',
+    },
+  };
+  const canonical = encode(c);
+  const hash = createHash('sha256').update(canonical).digest('hex');
+  const loaded = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${hash}"}`),
+    INSTALLED,
+  );
+  assert.equal(loaded.ok, false);
+});
