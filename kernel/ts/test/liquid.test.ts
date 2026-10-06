@@ -12,6 +12,7 @@ import {
 import type { CommandPayload, EntityId, LiquidRow } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
 import { liquidActions } from '../src/view/liquid.ts';
 import { transition } from '../src/mechanics/liquid/shared.ts';
 import { read } from './read.ts';
@@ -369,4 +370,72 @@ test('liquid pair projection fails at the same exhausted budget as direct admiss
     () => liquidActions(w, w.character, skin, resolved(w, w.character), { n: 100000 }),
     /budget_exceeded/,
   );
+});
+
+// Breaks: liquid candidates bypass keyed ActionSet target/input/policy admission or lose their primary target.
+test('authored liquid overrides project the same availability as the exact invocation', () => {
+  const base = owned(3, 2);
+  for (const [type, targets, scope] of [
+    ['fill', [well, spare], 'inspectable_details'],
+    ['pour', [skin, spare], 'inventory'],
+    ['drink', [skin], 'inventory'],
+  ] as const) {
+    for (const [variant, target, input, policy, code] of [
+      ['allowed', { kind: 'entity', scopes: [scope] }, [], { op: 'all', items: [] }, undefined],
+      ['target', { kind: 'none' }, [], { op: 'all', items: [] }, 'unsupported_capability'],
+      [
+        'input',
+        { kind: 'entity', scopes: [scope] },
+        ['direction'],
+        { op: 'all', items: [] },
+        'unsupported_capability',
+      ],
+      [
+        'policy',
+        { kind: 'entity', scopes: [scope] },
+        [],
+        { op: 'any', items: [] },
+        'invalid_state',
+      ],
+    ] as const) {
+      const w: World = {
+        ...base,
+        cartridge: {
+          ...base.cartridge,
+          actions: {
+            ...base.cartridge.actions,
+            [type]: {
+              key: type,
+              command: type,
+              label: `action.${type}`,
+              target,
+              input,
+              priority: 0,
+              policy: { policy_version: 1, root: policy },
+            } as never,
+          },
+        },
+      };
+      const shown = liquidActions(w, w.character, targets[0], resolved(w, w.character), {
+        n: 0,
+      }).find(
+        (a) => a.action_key === type && JSON.stringify(a.target_ids) === JSON.stringify(targets),
+      )!;
+      assert.equal(shown.available, code === undefined, `${type}/${variant}`);
+      assert.equal(shown.available ? undefined : shown.reason.code, code, `${type}/${variant}`);
+      const identified = identify('liquid-test', w.character, {
+        invocation_id: 'bbbbbbbb-0000-4000-8000-000000000001',
+        actor_id: w.character,
+        action_key: type,
+        target_ids: targets,
+        input: {},
+      });
+      assert.equal(identified.kind, 'identified');
+      if (identified.kind !== 'identified') throw new Error('identified');
+      const command = resolve(w, identified);
+      const decision = 'id' in command ? step(w, command, 1, shown.action_key).decision : command;
+      assert.equal(decision.kind, code ? 'rejected' : 'accepted', `${type}/${variant}`);
+      if (decision.kind === 'rejected') assert.equal(decision.error.code, code);
+    }
+  }
 });

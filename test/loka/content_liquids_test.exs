@@ -113,12 +113,6 @@ defmodule Loka.ContentLiquidsTest do
            &put_in(&1, ["vessel", "initial", "quantity"], 5), "SCHEMA_VIOLATION"},
           {"unknown kind", "items/lantern.json",
            &put_in(&1, ["vessel", "initial", "kind"], "missing"), "UNRESOLVED_REFERENCE"},
-          {"template vessel", "items/lantern.json",
-           &Map.put(
-             &1,
-             "location",
-             JSON.decode!(File.read!("protocol/fixtures/liquid_template.json"))["location"]
-           ), "SCHEMA_VIOLATION"},
           {"missing mass", "items/lantern.json", &Map.delete(&1, "mass_grams"),
            "SCHEMA_VIOLATION"},
           {"maximum fill", "items/lantern.json", &Map.put(&1, "mass_grams", 2_147_482_648),
@@ -149,5 +143,20 @@ defmodule Loka.ContentLiquidsTest do
       assert {:error, diagnostics} = Loka.Content.compile(case_dir), name
       assert Enum.any?(diagnostics, &(&1["code"] == code)), name
     end
+  end
+
+  # Breaks: a configured corpse template opts into vessel rows without a creation writer.
+  test "compiler rejects a vessel on an otherwise valid corpse template", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    assert {:ok, _, []} = Loka.Content.compile(dir)
+    invalid = JSON.decode!(File.read!("protocol/fixtures/liquid_template.json"))
+
+    update(dir, "items/player_corpse.json", fn corpse ->
+      assert corpse["location"] == invalid["location"]
+      Map.put(corpse, "vessel", invalid["vessel"])
+    end)
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+    assert Enum.any?(diagnostics, &(&1["code"] == "SCHEMA_VIOLATION"))
   end
 end

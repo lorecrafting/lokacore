@@ -46,6 +46,9 @@ const load = (change: (c: any) => void = () => {}) => {
   });
   c.rooms[`${ID}:room/ferry_landing`].details.mooring_post.liquid_source = ref('liquid', 'water');
   change(c);
+  return artifact(c);
+};
+const artifact = (c: any) => {
   const bytes = JSON.stringify(sorted(c));
   return loadCartridge(
     new TextEncoder().encode(
@@ -75,11 +78,6 @@ test('loader validates opted liquid metadata and accepts exact maximum mass', ()
       'UNRESOLVED_REFERENCE',
     ],
     ['wrong kind', (c: any) => (item(c).vessel.initial.kind.kind = 'item'), 'UNRESOLVED_REFERENCE'],
-    [
-      'template vessel',
-      (c: any) => (item(c).location = read('protocol/fixtures/liquid_template.json').location),
-      'SCHEMA_VIOLATION',
-    ],
     ['missing mass', (c: any) => delete item(c).mass_grams, 'SCHEMA_VIOLATION'],
     ['maximum fill', (c: any) => (item(c).mass_grams = 2147482648), 'SCHEMA_VIOLATION'],
     [
@@ -124,4 +122,17 @@ test('loader validates opted liquid metadata and accepts exact maximum mass', ()
     assert.ok(!result.ok, name);
     if (!result.ok) assert.equal(result.diagnostic.code, code, name);
   }
+});
+
+// Breaks: a configured corpse template opts into vessel rows without a creation writer.
+test('loader rejects vessel metadata on an otherwise valid corpse template', () => {
+  const c = structuredClone(read('protocol/fixtures/missing_child_b7_hash.json').value);
+  assert.ok(artifact(c).ok);
+  const invalid = read('protocol/fixtures/liquid_template.json');
+  const corpse = c.items['ashmere_missing_child@0.0.22:item/player_corpse'];
+  assert.deepEqual(corpse.location, invalid.location);
+  corpse.vessel = invalid.vessel;
+  const loaded = artifact(c);
+  assert.ok(!loaded.ok);
+  if (!loaded.ok) assert.equal(loaded.diagnostic.code, 'SCHEMA_VIOLATION');
 });

@@ -172,12 +172,12 @@ function receiptDetail(
     d.events.some((e) => e.causation_id === r.command_id && e.payload.type === 'choice_resolved')
   )
     return dialogueDetail(s, r.command_id, command!, d);
-  if (command?.payload.type === 'buy' || command?.payload.type === 'sell') {
+  if (command?.payload?.type === 'buy' || command?.payload?.type === 'sell') {
     if (validate('Command', command).length || command.id !== r.command_id)
       throw new Error('malformed JSON: invalid committed shop exchange');
     return command.payload.provider_id;
   }
-  if (d.outcome === 'harvested' && command?.payload.type === 'harvest')
+  if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;
   if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'drink') {
@@ -259,8 +259,8 @@ function recipeDetail(
     event.payload.type !== 'action_completed' ||
     event.payload.action !== action ||
     event.payload.subject_id !== subject ||
-    (command?.payload.type === 'perform' && event.actor_id !== command.payload.actor_id) ||
-    (command?.payload.type === 'perform' &&
+    (command?.payload?.type === 'perform' && event.actor_id !== command.payload.actor_id) ||
+    (command?.payload?.type === 'perform' &&
       command.payload.target_id !== undefined &&
       command.payload.target_id !== subject)
   )
