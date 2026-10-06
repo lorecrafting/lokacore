@@ -130,7 +130,7 @@ test('Western rooms and both exact standalone Read histories survive cold SQLite
     a.reopen();
     assert.equal(a.view().place.id, room(a.initial, expected));
   }
-  assert.equal(a.content_hash, '5d48ad7fb4402de91c775dfe9395949ed1c1fe73d4bf0e13f2cb29717c1c1fdf');
+  assert.equal(a.content_hash, 'e2ad69a89f007881eba3ebec925abd63bcb563060dc60b8725d87da13c12a390');
 });
 // Break: Hob's saved schedule transfer or a departed dialogue speaker fails legal reopen.
 test('Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries', (t) => {
