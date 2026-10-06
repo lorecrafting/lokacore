@@ -2,7 +2,7 @@
 
 **Adopted PM assignment; reviewed dependencies re-pinned for source assignment.**
 Suggested source branch `chapter-1/c2-watchmans-rounds`; developer uses its own worktree.
-Source base `cc43d0186e70231d7ba25bf73da61e6838c0bf06` on current GitHub main
+Source base `c85e21ef` on published GitHub main
 contains B1 clock/status, Q2-C-rescue and the independently approved C1 training
 ([primary](../../reviews/2026-10-05-c1-tobin-primary-review.md),
 [save/protocol](../../reviews/2026-10-05-c1-tobin-save-second-review.md)).
@@ -10,7 +10,10 @@ B5 herbs and B4 light are also integrated and reviewed; [the roadmap](../../ROAD
 records their publication. The current chapter artifact is 0.0.21/API1.19,
 hash `a274bb1c6b22306718648bbcb1b967ee017e0420b62589afe10e1009434dbbfa`,
 94 IDs ([known answer](../../../protocol/fixtures/missing_child_v021_hash.json)).
-C2 needs no B6 or B7 behavior. If either lands before C2, merge main and re-pin the
+C2 needs no B7 behavior. During source tracing, B6 exact dialogue selection became
+a shared source dependency: its selector allows patrol controls and C1 lessons at
+the same original Tobin without first-dialogue ambiguity. Integrate the reviewed
+selector and re-pin its artifact before final C2 verification. If either lands before C2, merge main and re-pin the
 source artifact before implementation or publication; serialize shared cartridge,
 protocol and generated-file edits. C2 successor release/API/hash/IDs, source head,
 PR and verdicts remain null. No source, tests, browser/native sessions or save
