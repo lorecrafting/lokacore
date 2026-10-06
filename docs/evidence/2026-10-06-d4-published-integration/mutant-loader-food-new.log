@@ -1,4 +1,4 @@
-✖ loader rejects impossible held-food declarations while retaining capped food (115.418625ms)
+✖ loader rejects impossible held-food declarations while retaining capped food (117.139708ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 0
@@ -6,12 +6,12 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 271.466292
+ℹ duration_ms 271.509416
 
 ✖ failing tests:
 
 test at kernel/ts/test/cartridge_food.test.ts:6:1
-✖ loader rejects impossible held-food declarations while retaining capped food (115.418625ms)
+✖ loader rejects impossible held-food declarations while retaining capped food (117.139708ms)
   AssertionError [ERR_ASSERTION]: unknown
   
   true !== false

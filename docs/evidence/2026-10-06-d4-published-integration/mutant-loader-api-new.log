@@ -1,4 +1,4 @@
-✖ loader rejects impossible held-food declarations while retaining capped food (225.957542ms)
+✖ loader rejects impossible held-food declarations while retaining capped food (411.697375ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 0
@@ -6,13 +6,13 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 440.132333
+ℹ duration_ms 594.596709
 
 ✖ failing tests:
 
 test at kernel/ts/test/cartridge_food.test.ts:6:1
-✖ loader rejects impossible held-food declarations while retaining capped food (225.957542ms)
-  AssertionError [ERR_ASSERTION]: HP
+✖ loader rejects impossible held-food declarations while retaining capped food (411.697375ms)
+  AssertionError [ERR_ASSERTION]: old API
   
   true !== false
   

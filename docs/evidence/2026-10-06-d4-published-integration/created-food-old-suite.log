@@ -1,0 +1,25 @@
+✔ portable creation/custody literals and independent success proof (5.895416ms)
+✔ new contract trust boundaries (0.917ms)
+✔ independent invariants reject counterfeit success with matching identity rows (0.227917ms)
+✔ three conserved apples share Take/Drop/Forage stock and exact Eat benefit (102.900958ms)
+✔ Eat alias binds advertised item and refuses full, foreign, nested, spent and nonfood targets (140.174541ms)
+✔ independent fresh IDs include consumed custody before published population births (53.699333ms)
+✔ loader refuses a one-way hound area with a valid hash (55.041959ms)
+✔ loader refuses a slower wander than replacement with a valid hash (46.29425ms)
+✔ the integrated chapter has the independent genesis identities and one held pelt per hound (8.369541ms)
+✔ hourly wander and night boundary keep four then six bounded living hounds (11.547667ms)
+✔ thirty days of segmented elapsed time retain six members and one plan successor (349.557166ms)
+✔ combat-first and population-first boundaries conserve the same fatal hound slot and pelt (14.940667ms)
+✔ deliberate attack leaves the same pelt in a hound corpse and delays replacement (27.284625ms)
+✔ a due extra-slot death waits for night before its next generation (19.635542ms)
+✔ a lethal hound reply returns the same body and keeps the surviving hound (5.537125ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 845.233375
+
+EXIT 0

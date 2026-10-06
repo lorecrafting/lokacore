@@ -1,0 +1,11 @@
+✔ loader rejects impossible held-food declarations while retaining capped food (439.139416ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 641.320375
+
+EXIT 0

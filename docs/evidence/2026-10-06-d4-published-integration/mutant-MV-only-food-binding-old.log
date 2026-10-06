@@ -1,4 +1,4 @@
-✔ loader refuses service bindings that cannot produce exact immediate outcomes (673.907542ms)
+✔ loader refuses service bindings that cannot produce exact immediate outcomes (863.844792ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 1
@@ -6,6 +6,6 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 831.511417
+ℹ duration_ms 1095.4225
 
 EXIT 0
