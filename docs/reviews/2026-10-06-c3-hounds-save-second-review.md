@@ -67,3 +67,15 @@ Every final occupied/no-due slot now requires a fresh same-group hound with matc
 - D2's published v026/v027 hash/ID files and C3's provisional hash/ID files remain unchanged from the original reviewed source. No final successor pin, publication or new browser/native claim.
 
 Ponytail Review: the existing creation/receipt owners cover these fixes. Four direct predicates and explicit final/nonfinal composition suffice; no compatibility bypass, new ledger or dependency. This scoped approval closes only the save/protocol findings; primary Book findings and the final integration/publication gates retain their separate review ownership.
+
+## Published B9 integration carryover — APPROVE
+
+Exact merged source `f96e0245ab6086dacfaa276e338405f1710a0b8d`; evidence `33163a1bca6de9d8b5e0e0bf0cf45134542b77fb`; published B9 predecessor `b9dd1d9c80cf25d46823f0c3df28830e2af8afdb`. No new save/protocol finding. **S1/S2 remain closed.** Their history activation, full newborn membership predicates and final/nonfinal proposal boundary are unchanged from the approved strict source.
+
+- Twenty-two focused TypeScript/kernel/SQLite checks and thirteen Elixir chapter-compiler/literal/differential checks pass. The compiler matches the independent v029 answer.
+- A separate correctly hashed v029 file-backed control pays for the room, cold-opens every dream checkpoint, runs the real population wander while the dream choice is pending, then chooses/acknowledges the same branch and cold-opens the ended state. Exact branch receipt replay does not repeat effects. Forged dream root actor, Rest-event cause and population-receipt actor each yield typed `save_corrupt` after a real connection close, with byte-identical altered files.
+- All twelve original isolated-population/bundled file forgeries still refuse without modifying bytes. The merged runtime's final `apply`/`adopt` still reject the previously accepted foreign-plan membership; malformed portable bundle controls remain red and lawful complete/prefix controls remain green.
+- Independently reconstructed published B9 v028 plus the frozen C3 content delta yields `0.0.29`/API1.25, SHA-256 `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`, and all 140 UUID answers. The real unmodified v029 `newWorld` matches every ID; B9/C3 text deltas do not overlap. Published B9 v028 and D2 v026/v027 hash/ID fixtures are unchanged.
+- All thirteen retained C3 evidence hash entries verify, with no missing/duplicate target. The evidence head changes only README/hash inventory/full-check output; its retained active gate reports 360 Elixir tests and reaches passing formatting. No source mutation or full-gate rerun during this scoped carryover.
+
+Ponytail Review: the merged save path continues to use one accepted-receipt replay and the existing dream/dialogue/corpse owners. No new machinery is requested. This approves the exact integrated source/pins and retained save/protocol evidence; hosted publication and any new browser/native proof remain separate claims.
