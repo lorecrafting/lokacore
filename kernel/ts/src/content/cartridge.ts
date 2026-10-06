@@ -1,6 +1,5 @@
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
-// stage. Stage order, codes, paths and data: protocol/cartridge.schema.json DiagnosticCode.
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,

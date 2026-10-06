@@ -59,7 +59,7 @@ export function compose(state: State, delta: StateDelta): Result {
     const k = key(t);
     const prior = ctx.overlay.get(k);
     if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
-    const out = apply(op, t, ctx);
+    const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
@@ -102,8 +102,7 @@ export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
-  const row = read(t, ctx);
+function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
