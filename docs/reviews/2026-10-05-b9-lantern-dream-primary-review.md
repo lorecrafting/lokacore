@@ -46,15 +46,15 @@ compiler regression/red control. Keep existing modal duplicate semantics.
 ## Independent verification
 
 - Focused kernel/loader/position/modal/dialogue, real SQLite dream/service/scene and
-  actual Book dream/live-action checks: **64 passed**, exit0. Forced Elixir
-  dream/service/scene/current chapter checks: **12 passed**, exit0.
+  actual Book dream/live-action checks: **64 passed**, exit 0. Forced Elixir
+  dream/service/scene/current chapter checks: **12 passed**, exit 0.
 - Independent mutations removed the typed Rest producer and separately removed the
   exact Continue beat guard. Dream tests exited1 for both; the latter accepted stale
   beat2 at final5. Originals restored; all six kernel dream tests pass again.
-- Controlled duplicate source above: compiler exit0; emitted artifact loader refuses
+- Controlled duplicate source above: compiler exit 0; emitted artifact loader refuses
   `DUPLICATE_DEFINITION`. This is an observed discrepancy, not a source-text test.
 - Final evidence update changes only four evidence files; all **35** retained
-  SHA256SUMS entries verify. Inspected frozen-source full gate records exit0 and
+  SHA256SUMS entries verify. Inspected frozen-source full gate records exit 0 and
   349 Elixir tests. Developer evidence retains schema/import controls and failed
   assertions; no independent full gate rerun was needed for this record.
 - Independently reran candidate pin check: complete compiler bytes and all111 initial
@@ -78,3 +78,31 @@ compiler suites green and this test red. Evidence is retained in the
 [B9 behavior controls](../evidence/2026-10-05-b9-lantern-dream/behavior-controls.log)
 and [failed assertions](../evidence/2026-10-05-b9-lantern-dream/behavior-failing-assertions.log).
 Scoped independent recheck remains required; the original verdict above is preserved.
+
+
+## Scoped B9-P1 fix recheck — APPROVE
+
+Corrected source: `667347ac14c36e996e6c71048dae99e87db4a322`.
+Final evidence-only head: `387c77a47e1b8019fd0cd2ac4d3bd517ec0f1d8a`.
+
+B9-P1 is resolved. Compiler duplicate identity is now the tagged Rest room/detail
+pair, matching the existing TypeScript loader; entitlement/credit/quest differences
+cannot hide a duplicate. Distinct rooms and details remain accepted, and non-Rest
+modal `on` maps retain their previous comparison. The change and direct callers add
+no further scoped finding. Ponytail Review: Lean already.
+
+Independent forced Elixir dream/scene/service run passes all nine tests. Restoring
+the old whole-map comparison leaves eight older tests green with the new case
+excluded; the new tagged regression exits2 at its duplicate-refusal assertion,
+because the compiler incorrectly returns `{:ok, ...}`. Restoring the source yields
+all nine green again. The original primary-review disposable duplicate source now
+exits1 with `DUPLICATE_DEFINITION` at both `dream_again.on` and
+`dream_of_the_fen.on`. No source edits remain.
+
+The final update changes only eight evidence files; all 37 retained SHA256SUMS entries
+verify. Inspected corrected-source full gate records exit 0 and 350 Elixir tests;
+focused evidence records 106 TypeScript and 15 forced Elixir tests passing. Original
+source failures/history remain preserved. Current v026/API1.24 pins remain
+provisional for the actual published-predecessor integration. This scoped approval
+closes B9-P1 and supersedes the original primary verdict for corrected source only;
+no browser/native, owner-save or publication claim is added.
