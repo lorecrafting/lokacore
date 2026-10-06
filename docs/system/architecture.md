@@ -177,10 +177,16 @@ The app shell imports the local authority's session controller
   source worktree; Book UI edits use Fast Refresh, while an existing game retains its
   loaded rules and cartridge until a page reload or a fresh game. The browser uses its
   own origin-scoped SQLite/OPFS save and first-run hints; it never opens or changes a
-  native app save. A current-build game survives a page reload and a closed/reopened tab.
+  native app save. The Web host opens SQLite asynchronously, then reads multi-row results
+  through synchronous SELECT pages of at most 64 rows so growing save/receipt recovery does
+  not send an entire result through the worker's fixed response buffer. Authority queries, row order
+  and validation remain unchanged; the native host keeps its existing connection methods.
+  A current-build game survives a page reload and a closed/reopened tab.
   The preview is for development;
   browser saves have no compatibility promise across chapter builds. The local run and
   worktree-switch procedure is in [web preview](../web-preview.md).
+  The [Web recovery evidence](../evidence/2026-10-05-web-sqlite-stream/README.md)
+  records cold-open verification and the remaining transport limits.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`
