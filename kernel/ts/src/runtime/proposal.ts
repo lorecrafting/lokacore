@@ -1,4 +1,4 @@
-// size: allow 315, typed quest reactions join the existing FIFO admission/causation path
+// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
 // The proposal of one admitted decision (04 §5.1-§5.4): admission of a rule's result, its whole
 // proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
 // order), composition and adoption. runtime/world.ts routes each command here.
@@ -258,11 +258,33 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
+// size: allow 56, exact same-plan deadline pairing keeps ordered jobs in one boundary
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  const paired = new Map<string, string>();
+  for (const [plan, control] of Object.entries(p.world.state.population_plans ?? {})) {
+    const resume = control.suppression?.job_id;
+    const regular = control.job_id;
+    const a = resume && p.world.state.jobs?.[resume];
+    const b = p.world.state.jobs?.[regular];
+    if (
+      resume &&
+      a?.status === 'pending' &&
+      b?.status === 'pending' &&
+      a.due_time === b.due_time &&
+      a.due_time === control.suppression?.ends_at &&
+      a.due_time <= (advance?.to ?? -1) &&
+      encode(a.job) === plan &&
+      encode(b.job) === plan
+    ) {
+      paired.set(resume, regular);
+      paired.set(regular, resume);
+    }
+  }
+  const groups = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -283,8 +305,10 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: p.group + 1 }));
-    p.group++;
+    const partner = paired.get(job_id);
+    const group = (partner && groups.get(partner)) || ++p.group;
+    groups.set(job_id, group);
+    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: group }));
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }

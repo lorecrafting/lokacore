@@ -727,5 +727,6 @@
   "room.reed_path.flooded": "Water laps at the reeds beside the [fox prints](fox_prints). The firm path still runs north to the landing and south to Reed Bank.",
   "room.mire_crossing.flooded": "Water darkens the mud around the [plank](plank), but the firm banks remain passable north and west. The paths south and east remain open.",
   "dialogue.d9.leave": "Take your leave",
-  "narration.d9.leave": "You end the conversation."
+  "narration.d9.leave": "You end the conversation.",
+  "narration.bell_cue": "The bell carries across Ashmere."
 }

@@ -1677,6 +1677,20 @@
         "command_id": {
           "$ref": "identity.schema.json#/$defs/CommandId"
         },
+        "cue": {
+          "type": "object",
+          "properties": {
+            "source_event_id": { "$ref": "event.schema.json#/$defs/EventId" },
+            "command_id": { "$ref": "identity.schema.json#/$defs/CommandId" },
+            "actor_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+            "observer_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+            "room_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "logical_time": { "type": "integer", "minimum": 0 },
+            "key": { "$ref": "text.schema.json#/$defs/TextKey" }
+          },
+          "required": ["source_event_id", "command_id", "actor_id", "observer_id", "room_id", "logical_time", "key"],
+          "additionalProperties": false
+        },
         "lines": {
           "type": "array",
           "items": {

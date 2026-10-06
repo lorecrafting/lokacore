@@ -6,13 +6,14 @@ import { living } from '../death/shared.ts';
 import { exitTo } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
+import { suppressed } from '../population/shared.ts';
 
 /** Exact C3 slot membership at admission; the roster never refills. */
 export function admission(world: World, target: EntityId, steps: Steps): EntityId[] | undefined {
   const origin = world.state.created?.[target]?.origin;
   if (origin?.kind !== 'spawned' || origin.role !== 'hound') return;
   const plan = world.populationSpecs[key(origin.by)]?.plan;
-  if (!plan?.pack) return;
+  if (!plan?.pack || suppressed(world, origin.by)) return;
   const room = world.state.containers[target];
   return Array.from({ length: plan.cap }, (_, i) => i + 1)
     .flatMap((index) => {

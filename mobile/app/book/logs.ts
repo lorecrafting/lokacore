@@ -11,15 +11,22 @@ import type { Button } from './presenter.ts';
 import { withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
-export function narrationLines(last: NarrationRecord | undefined, view: GameView, text: Say) {
-  return [false, true].map((combat) =>
-    withoutHeading(
+export function narrationLines(
+  last: NarrationRecord | undefined,
+  view: GameView,
+  text: Say,
+  past = false,
+) {
+  return [false, true].map((combat) => {
+    const line = withoutHeading(
       (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
       view,
     )
       .map((line) => liquidLine(line, text))
-      .join(' '),
-  );
+      .join(' ');
+    const cue = !combat && last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '';
+    return [line, cue].filter(Boolean).join(' ');
+  });
 }
 
 export type DetailLine = string | { text: string; event: true };
@@ -45,7 +52,7 @@ export function pickupLine(last: NarrationRecord | undefined, text: Say) {
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
-  const [narrated, combat] = narrationLines(last, view, text);
+  const [narrated, combat] = narrationLines(last, view, text, true);
   const restored = pickupLine(last, text) || narrated;
   const log = restored && !view.choice && !last?.detail_id ? [restored] : [];
   const details = new Map<string, DetailLine[]>();

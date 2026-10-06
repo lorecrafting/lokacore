@@ -18,17 +18,24 @@ export const uses = (c: Obj) =>
   each(c).flatMap(([r, at]) => [
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
-    ...r.apply.map((s: Obj, i: number) => [
-      'event',
-      s.op === 'quest.activate'
-        ? 'quest_activated'
-        : s.op === 'quest.resolve'
-          ? 'quest_resolved'
-          : 'fact_changed',
-      `${at}.apply[${i}].op`,
-    ]),
+    ...r.apply.flatMap((s: Obj, i: number) =>
+      s.op === 'population.suppress'
+        ? []
+        : [
+            [
+              'event',
+              s.op === 'quest.activate'
+                ? 'quest_activated'
+                : s.op === 'quest.resolve'
+                  ? 'quest_resolved'
+                  : 'fact_changed',
+              `${at}.apply[${i}].op`,
+            ],
+          ],
+    ),
   ]) as ['definition' | 'event', string, string][];
 
+// size: allow 50, finite reaction API and step references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
@@ -47,6 +54,13 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
+    if (
+      r.apply.some((s: Obj) => s.op === 'population.suppress') &&
+      (major < 1 || (major === 1 && minor < 31))
+    )
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
     if (r.on.fact) named(r.on.fact, 'fact', `${at}.on.fact`);
     if (r.on.room) named(r.on.room, 'room', `${at}.on.room`);
     if (r.on.quest) named(r.on.quest, 'quest', `${at}.on.quest`);
@@ -57,6 +71,10 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'quest.resolve' || s.op === 'quest.fail') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);
+        if (r.on.event !== 'fact_changed')
+          out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
+      } else if (s.op === 'population.suppress') {
+        named(s.plan, 'population', `${at}.apply[${i}].plan`);
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else {

@@ -1,4 +1,4 @@
-# size: allow 400, careful and discounted skill refs join the shared checked expansion boundary
+# size: allow 440, careful skill refs and Study ingress join shared source checking
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -28,6 +28,9 @@ defmodule Loka.Content.Checks do
   @spec expand(term(), map()) :: term()
   def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
     do: Loka.Content.Population.expand(value, m)
+
+  def expand(%{"op" => "population.suppress", "plan" => plan} = step, m),
+    do: Map.put(step, "plan", ref(plan, "population", m))
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
@@ -222,6 +225,17 @@ defmodule Loka.Content.Checks do
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
 
+  def expand(%{"bell_cue" => cue} = world, m),
+    do:
+      world
+      |> Map.delete("bell_cue")
+      |> expand(m)
+      |> Map.put("bell_cue", %{
+        "fact" => ref(cue["fact"], "fact", m),
+        "rooms" => Enum.map(cue["rooms"], &ref(&1, "room", m)),
+        "text" => cue["text"]
+      })
+
   def expand(%{"death_credit" => credits} = world, m) when is_list(credits),
     do:
       world
@@ -350,6 +364,7 @@ defmodule Loka.Content.Checks do
   defp entry(m, ref, defs),
     do: reference("cartridge.json", [], {"entry", "room"}, %{"entry" => ref}, m, defs)
 
+  # ponytail: the one exit check keeps corpse ingress beside barrier and destination refs. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp room({rel, r}, m, defs, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 

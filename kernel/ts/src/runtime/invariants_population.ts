@@ -33,7 +33,10 @@ function legal(kind: string, before: Any, after: Any): boolean {
   if (kind === 'population.control')
     return (
       before === null ||
-      (after.next_wander_due >= before.next_wander_due && after.job_id !== before.job_id)
+      (after.next_wander_due >= before.next_wander_due &&
+        ((after.job_id !== before.job_id && same(after.suppression, before.suppression)) ||
+          (after.next_wander_due === before.next_wander_due &&
+            suppressionChange(before.suppression, after.suppression))))
     );
   if (before === null)
     return (
@@ -60,6 +63,22 @@ function legal(kind: string, before: Any, after: Any): boolean {
     after.member_id !== before.member_id &&
     after.replacement_due === null &&
     after.last_flight_at == null
+  );
+}
+
+function suppressionChange(before: Any, after: Any) {
+  if (!after) return false;
+  if (!before || before.ends_at === null)
+    return (
+      after.generation === (before?.generation ?? 0) + 1 &&
+      after.ends_at !== null &&
+      after.job_id !== null
+    );
+  return (
+    after.generation === before.generation &&
+    after.cause_event_id === before.cause_event_id &&
+    after.ends_at === null &&
+    after.job_id === null
   );
 }
 

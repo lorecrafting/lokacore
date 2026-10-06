@@ -25,6 +25,7 @@ import { starts } from './scene/shared.ts';
 import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
+import { suppress } from './population/shared.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
 
@@ -59,7 +60,7 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  */
 const ACTIVATES = ['quest_resolved', 'rested'];
 
-// size: allow 58, one ordered delivery lowers fact assignments and quest effects
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
 export function sequence(
   world: World,
   actor: CharacterId,
@@ -110,6 +111,8 @@ export function sequence(
             result.payload,
           ),
         );
+    } else if (step.op === 'population.suppress') {
+      ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
     } else {
       const assigned = assignment(world, actor, step, group, set);
       ops.push(assigned);

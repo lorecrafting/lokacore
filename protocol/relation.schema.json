@@ -593,6 +593,17 @@
         "next_wander_due": {
           "type": "integer",
           "minimum": 1
+        },
+        "suppression": {
+          "type": "object",
+          "properties": {
+            "generation": { "type": "integer", "minimum": 1 },
+            "ends_at": { "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+            "job_id": { "anyOf": [{ "$ref": "delta.schema.json#/$defs/JobId" }, { "type": "null" }] },
+            "cause_event_id": { "$ref": "event.schema.json#/$defs/EventId" }
+          },
+          "required": ["generation", "ends_at", "job_id", "cause_event_id"],
+          "additionalProperties": false
         }
       },
       "required": [

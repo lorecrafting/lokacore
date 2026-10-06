@@ -41,21 +41,24 @@ defmodule Loka.Content.Reactions do
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
+  # ponytail: three finite reaction API floors stay in their one declaration check. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp api(r, manifest) do
     needed =
       r["on"]["event"] == "quest_resolved" or
         Enum.any?(r["apply"], &(&1["op"] == "quest.activate"))
 
     terminal = Enum.any?(r["apply"], &(&1["op"] in ~w(quest.resolve quest.fail)))
+    suppression = Enum.any?(r["apply"], &(&1["op"] == "population.suppress"))
 
     version =
       manifest["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if (needed and version < [1, 8]) or (terminal and version < [1, 12]),
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
+    if (needed and version < [1, 8]) or (terminal and version < [1, 12]) or
+         (suppression and version < [1, 31]),
+       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+       else: []
   end
 
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
@@ -75,6 +78,12 @@ defmodule Loka.Content.Reactions do
     restricted = if on["event"] == "fact_changed", do: [], else: [diag("OUTCOME_MISMATCH", path)]
     event = if op == "quest.resolve", do: owned(path, "quest_resolved", ctx.events), else: []
     restricted ++ event ++ reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
+  end
+
+  defp consequence(rel, {%{"op" => "population.suppress"} = s, i}, on, ctx) do
+    path = at(rel, ["apply", i, "op"])
+    restricted = if on["event"] == "fact_changed", do: [], else: [diag("OUTCOME_MISMATCH", path)]
+    restricted ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
   end
 
   defp consequence(rel, {s, i}, _, ctx),

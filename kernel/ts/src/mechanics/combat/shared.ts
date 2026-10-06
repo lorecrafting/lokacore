@@ -9,6 +9,8 @@ import { bodyOf, refString, type Mint, type World } from '../../runtime/decision
 import { living } from '../death/shared.ts';
 import { standing } from '../position/shared.ts';
 import { running } from '../scene/shared.ts';
+import { key } from '../../foundation/compose.ts';
+import { suppressed } from '../population/shared.ts';
 
 /** One finite current encounter, shared by admission, escape, due jobs and projection. */
 export function engaged(world: World, body: EntityId) {
@@ -27,6 +29,14 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   if (!npc) return 'not_found' as const;
   if (npc.kind !== 'npc' || !npc.attack || !world.cartridge.world?.combat)
     return 'invalid_target' as const;
+  const origin = world.state.created?.[target]?.origin;
+  if (
+    origin?.kind === 'spawned' &&
+    origin.role === 'hound' &&
+    world.populationSpecs[key(origin.by)]?.plan.pack &&
+    suppressed(world, origin.by)
+  )
+    return 'invalid_state' as const;
   const room = world.state.containers[body];
   if (!world.rooms[room] || world.state.containers[target] !== room) return 'not_present' as const;
   if (

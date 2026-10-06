@@ -82,7 +82,20 @@ test('fox Study ingress rechecks actual owned nonempty corpse and never closes e
   assert.equal(closed.state.containers[closed.body], room(closed, 'chapel_nave'));
   assert.equal(move(closed, 'west', 2).decision.kind, 'accepted');
   const inside = move(closed, 'west', 2).world;
-  assert.equal(move(inside, 'east', 3).decision.kind, 'accepted');
+  const taken = step(
+    inside,
+    {
+      id: '00000000-0000-4000-8000-000000000003' as CommandId,
+      world_context_id: inside.context,
+      payload: { type: 'take', actor_id: inside.character, item_id: keyItem },
+    } as Command,
+    3,
+  );
+  assert.equal(taken.decision.kind, 'accepted');
+  assert.equal(taken.world.state.containers[keyItem], taken.world.body);
+  const left = move(taken.world, 'east', 4);
+  assert.equal(left.decision.kind, 'accepted');
+  assert.equal(move(left.world, 'west', 5).decision.kind, 'rejected');
   const noRoot: World = {
     ...closed,
     state: { ...closed.state, containers: { ...closed.state.containers, [keyItem]: closed.body } },
