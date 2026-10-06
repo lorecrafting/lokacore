@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { read } from '../../../kernel/ts/test/read.ts';
 import { bundle, fresh, ids } from '../../../kernel/ts/test/priory_fixture.ts';
 import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
@@ -323,4 +324,40 @@ test('Book remount during lost Read acknowledgement waits for confirmation then 
   );
   assert.equal(a.reopen().kind, 'open');
   a.sql.close();
+});
+
+// Break: readable-only cartridges skip historical replay and accept forged Read narration.
+test('readable-only SQLite recovery rejects forged narration without another history consumer', (t) => {
+  const c = structuredClone(read('protocol/fixtures/cartridge_items_hash.json').value);
+  c.manifest.requires.kernel_api.at_least = '1.24';
+  c.manifest.requires.capabilities.readable = c.lock.capabilities.readable = 1;
+  c.items['ashmere_items@0.0.1:item/satchel'].container = true;
+  c.items['ashmere_items@0.0.1:item/lantern'].readable = {
+    label: 'item.lantern.short',
+    text: 'item.lantern.description',
+  };
+  const dir = mkdtempSync(join(tmpdir(), 'loka-d2-readable-only-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'story.db');
+  const a = setup(path, { value: c, canonical: encode(c), sha256: hash(c) });
+  t.after(() => a.sql.close());
+  a.move('north');
+  const book = a.view().entities.find((e) => e.kind === 'item' && e.name === 'item.lantern.short');
+  assert.ok(book);
+  a.ok('take', [book.id]);
+  a.ok('read', [book.id]);
+  assert.equal(a.reopen().kind, 'open');
+  const row = a.sql
+    .prepare(
+      "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='read'",
+    )
+    .get()!;
+  const response = JSON.parse(row.response as string);
+  response.narration[0].key = 'room.ferry_landing.description';
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE command_id=?')
+    .run(JSON.stringify(response), row.command_id as string);
+  const before = readFileSync(path);
+  assert.equal(a.reopen().kind, 'save_corrupt');
+  assert.deepEqual(readFileSync(path), before);
 });

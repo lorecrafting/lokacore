@@ -9,6 +9,8 @@ import type {
 import type { Button } from './presenter.ts';
 import { serviceButtons, shopButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
+import { things } from './item-pages.ts';
+export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
@@ -45,30 +47,6 @@ export function nextPosition(position: GameView['position'], actions: Button[]) 
     const offered = actions.find((b) => b.action_key === next);
     if (offered) return offered;
   }
-}
-
-export const things = (v: GameView): Thing[] =>
-  [
-    ...v.entities,
-    ...v.inventory,
-    ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
-  ].flatMap((e) => [e, ...(e.contents ?? [])]);
-
-export function restoredItemPages(view: GameView, detail: (id: string) => unknown[]): Page[] {
-  if (view.combat || view.scene) return [];
-  const items = things(view);
-  const book = items.find(
-    (e) => detail(e.id).length && e.actions.some((a) => (a.command ?? a.action_key) === 'read'),
-  );
-  if (!book) return [];
-  const parents: Page[] = [];
-  let at: Thing | undefined = book;
-  while (at && 'container_id' in at) {
-    const parent: string = at.container_id;
-    at = items.find((e) => e.id === parent);
-    if (at) parents.unshift({ kind: 'thing', id: at.id });
-  }
-  return [{ kind: 'carrying' }, ...parents, { kind: 'thing', id: book.id }];
 }
 
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {

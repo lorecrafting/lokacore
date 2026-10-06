@@ -2,22 +2,32 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
+import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group, pagesAfter, restoredItemPages } from './model.ts';
 import { presenter } from './presenter.ts';
 import { ids, openChestBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
-const ts = createRequire(import.meta.url)('typescript');
+const require = createRequire(import.meta.url);
+const ts = require('typescript');
+const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
+    if (s === 'react') return { url: 'test:d2-react', shortCircuit: true };
     return s === 'react-native' ? { url: 'test:d2-native', shortCircuit: true } : next(s, c);
   },
   load(url, c, next) {
+    if (url === 'test:d2-react')
+      return {
+        format: 'module',
+        shortCircuit: true,
+        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis.d2Hooks.state(v); export const useRef = v => globalThis.d2Hooks.ref(v); export const useEffect = f => globalThis.d2Hooks.effect(f);`,
+      };
     if (url === 'test:d2-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView';",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View',Value:class {}},PanResponder={create:()=>({panHandlers:{}})};",
       };
     if (!url.endsWith('.tsx')) return next(url, c);
     return {
@@ -30,6 +40,7 @@ registerHooks({
   },
 });
 const { Item } = await import('./Menu.tsx');
+const { default: Book, BookView } = await import('./Book.tsx');
 function nodes(e: any): any[] {
   if (Array.isArray(e)) return e.flatMap(nodes);
   if (!e || typeof e !== 'object') return [];
@@ -129,4 +140,94 @@ test('actual nested book Item opens locally and Read stays between description a
     pagesAfter([...stack, { kind: 'thing', id: ward }], was, p.screen().view),
     stack,
   );
+});
+
+// Break: mounting the actual Book during uncertain Read strands confirmed history on World after Continue.
+test('Book restores the exact settled Ward or Bell through its parents once, beneath chapter Continue', (t) => {
+  for (const key of ['ward_of_the_fen', 'bell_rites']) {
+    const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, openChestBundle());
+    t.after(() => a.sql.close());
+    const p = presenter(a.game);
+    a.game.subscribe(p.update);
+    const book = ids[`item/${key}`],
+      chest = ids['item/storage_chest'];
+    for (const label of [
+      'Go north',
+      'Go north',
+      'Go north',
+      'Go north',
+      'Go north',
+      'Go north',
+      'Go west',
+      `Take ${key === 'bell_rites' ? 'Bell Rites' : 'The Ward of the Fen'}`,
+      'Take a storage chest',
+    ])
+      p.press(p.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
+    p.press(
+      p
+        .screen()
+        .buttons.find(
+          (b) => b.action_key === 'put' && b.target_ids[0] === book && b.target_ids[1] === chest,
+        )!,
+    );
+    a.fault.kind = 'lost';
+    a.fault.armed = true;
+    p.press(
+      p.screen().buttons.find((b) => b.command === 'read' && b.target_ids[0] === book)!,
+      book,
+    );
+    assert.equal(a.game.pending(), true);
+    const slots: any[] = [],
+      cleanups: (() => void)[] = [];
+    let at = 0;
+    (globalThis as any).d2Hooks = {
+      state(v: any) {
+        const i = at++;
+        if (!(i in slots)) slots[i] = typeof v === 'function' ? v() : v;
+        return [
+          slots[i],
+          (next: any) => {
+            slots[i] = typeof next === 'function' ? next(slots[i]) : next;
+          },
+        ];
+      },
+      ref(v: any) {
+        const i = at++;
+        return (slots[i] ??= { current: v });
+      },
+      effect(f: () => () => void) {
+        const i = at++;
+        if (!(i in slots)) {
+          slots[i] = true;
+          cleanups.push(f());
+        }
+      },
+    };
+    const draw = () => {
+      at = 0;
+      return Book({
+        game: a.game,
+        shell: { confirm: (go) => go(), learned: { seen: () => true, see: () => {} } },
+        startOver: () => undefined,
+      });
+    };
+    assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
+    a.fault.reads = false;
+    assert.equal(a.game.pulse('active').kind, 'ready');
+    const settled = draw();
+    assert.equal(settled.props.screen.detail(book).length, 1);
+    assert.equal(settled.props.stack.at(-1).kind, 'chapter');
+    const chapter = BookView(settled.props).props.children[0].props.children;
+    chapter.props.chapterDone();
+    assert.deepEqual(draw().props.stack, [
+      { kind: 'carrying' },
+      { kind: 'thing', id: chest },
+      { kind: 'thing', id: book },
+    ]);
+    draw().props.go([], -1);
+    a.game.pulse('active');
+    assert.deepEqual(draw().props.stack, []);
+    cleanups.forEach((f) => f());
+  }
+  delete (globalThis as any).d2Hooks;
 });

@@ -41,13 +41,14 @@ type BookProps = {
 };
 
 type BookState = {
+  restoreInvocation: { current: string | undefined };
   current: { current: { stack: Page[]; view: ReturnType<Presenter['screen']>['view'] } };
   setStack: (stack: Page[]) => void;
   setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
 function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
-  const { current, setStack, setFlip, redraw } = s;
+  const { current, restoreInvocation, setStack, setFlip, redraw } = s;
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
@@ -56,6 +57,19 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
+      // A remounted pending Read has no local retry context; settle its exact route once.
+      if (update.kind === 'completion' && update.invocation_id === restoreInvocation.current) {
+        restoreInvocation.current = undefined;
+        if (
+          update.reply.kind === 'saved' &&
+          update.reply.decision.kind === 'accepted' &&
+          update.reply.decision.outcome === 'read'
+        )
+          next = [
+            ...restoredItemPages(after.view, after.detail, update.intent.target_ids[0]),
+            ...next,
+          ];
+      }
       if (terminal && after.returnWorld && !after.view.combat) next = [];
       current.current = { stack: next, view: after.view };
       setStack(next);
@@ -104,9 +118,10 @@ export default function Book(p: BookProps) {
   const [, redraw] = useState(0);
   const screen = pr.screen();
   const { view } = screen;
+  const restoreInvocation = useRef(p.game.pendingInvocation());
   const current = useRef({ stack, view });
   current.current = { stack, view };
-  const state = { current, setStack, setFlip, redraw };
+  const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
     const view = pr.screen().view;
