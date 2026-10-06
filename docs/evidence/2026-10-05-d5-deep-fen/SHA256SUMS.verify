@@ -6,4 +6,7 @@ existing-authority.log: OK
 focused.log: OK
 full-check.log: OK
 initial-full-check-red.log: OK
+publication-focused.log: OK
+publication-full.log: OK
+publication-pins.log: OK
 synthetic-fatal-refused.log: OK

@@ -13,6 +13,9 @@ def redact(text):
 
 
 logs = {
+    'publication-pins.log': 'd5-publication-pins.log',
+    'publication-focused.log': 'd5-publication-focused.log',
+    'publication-full.log': 'd5-publication-full.log',
     'focused.log': 'd5-focused.log',
     'existing-authority.log': 'd5-existing-authority.log',
     'compiler.log': 'd5-final-compiler.log',

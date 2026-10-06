@@ -38,4 +38,3 @@ lean already; existing movement, escort, Read, presenter and host harnesses suff
 This approval covers the provisional source only. Browser proof and complete
 successor pins after parallel-source integration remain explicitly pending;
 no publication or owner-save operation was performed.
-

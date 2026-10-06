@@ -1,8 +1,8 @@
 # D5 — Oak canopy, pool edge, deep fox den and shallows
 
 > **Adopted planning:** [PM decision](../../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
-> The adopted plan is approved. [Provisional local source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
-> records implementation; final integrated pins, independent source review and browser proof remain ahead.
+> The adopted plan is approved. [Local source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
+> records implementation, final pins and independent approval; source publication and browser proof remain ahead.
 
 Proposed source branch: `chapter1/d5-deep-fen` (not created by this planning task).
 
@@ -22,8 +22,8 @@ Inspected published main is `c2cf8938a30a65335edc6e5c139c65c61e5105d5`, chapter 
 minimum API1.23. Current independent hash is
 `c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a`,
 allocation oracle has 111 IDs (`protocol/fixtures/missing_child_v025_{hash,ids}.json`).
-Re-pin source main immediately before assignment; D5 successor release/API/hash,
-IDs, source PR/review and gameplay proof remain null.
+This was the planning dependency baseline. [Source evidence](../../evidence/2026-10-05-d5-deep-fen/README.md)
+owns the integrated successor pins, independent source review and controlled proof.
 
 | Installed slice / publication | Source revalidation |
 |---|---|

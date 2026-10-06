@@ -1,18 +1,25 @@
-# D5 deeper Fen — provisional local source evidence
+# D5 deeper Fen — source and publication evidence
 
-Checked source: `b680e4353552f0f1b25ec01785ccfead5c318199`, branch
-`chapter-one/d5-deep-fen`, from published-main `b0bf6c60`.
-Publication PR, independent source review and browser proof: **null**.
+Final integrated source: `191ef29e`, retaining checked gameplay source
+`b680e4353552f0f1b25ec01785ccfead5c318199` on `chapter-one/d5-deep-fen`.
+Published main `1c9b9cf4` was integrated with merge commit `6d2da7fd`;
+its changes were tracker/workflow only. Gameplay, release artifact and independent
+answers are unchanged from the [APPROVE review](../../reviews/2026-10-05-d5-deep-fen-primary-review.md)
+at `550d0027`. The review-only record was incorporated as `191ef29e`, preserving
+both new review-index entries. Source publication and browser proof remain pending.
 No owner save, preview, native build, simulator or device was opened.
 
-Independent provisional answer: `ashmere_missing_child@0.0.26`, API1.23,
+Final independent answer: `ashmere_missing_child@0.0.26`, API1.23,
 SHA-256 `b84cd2475e29341d8b4396b228f86b48c236e7eaa07b3daa783cae954da5e9f9`,
 117 initial IDs. [Generator](../../../protocol/fixtures/generate_missing_child_d5.py),
 [hash](../../../protocol/fixtures/missing_child_d5_hash.json) and
 [allocation oracle](../../../protocol/fixtures/missing_child_d5_ids.json) use
-Python JSON/SHA-256/UUID, independent of compiler/kernel helpers. Merge D2/C3/B9
-source dependencies and regenerate the complete successor before publication
-review. Frozen earlier fixtures are untouched.
+Python JSON/SHA-256/UUID, independent of compiler/kernel helpers. Regeneration on
+integrated main reproduces both files without a diff; [publication pin check](publication-pins.log)
+compares compiled bytes and every actual initial allocation to those answers.
+D2/C3/B9 are not published dependencies of D5; their later source integrations must
+advance and independently re-pin the then-current release. Frozen earlier fixtures
+are untouched.
 
 Governing clauses: [mechanics](../../system/mechanics.md#d5-dry-deep-fen-exploration-selected-contract),
 [authoring](../../system/cartridge.md#d5-deep-fen-route-and-details),
@@ -84,10 +91,23 @@ Ponytail Review: **Lean already. Ship.** No new mechanic, writer, dependency,
 schema, schedule, item or NPC source. Existing authority/presenter/movement/escort/
 Read and test harnesses provide the required behavior.
 
-Fresh independent review must inspect actual source, governing clauses, mutation
-controls and final integrated pins. Shared overlap: manifest/text, App bundle,
-active sim/compiler answer and source-sensitive patrol release literals. No gate
-is closed by this provisional record.
+The independent reviewer approved the actual source, governing clauses and mutation
+controls. The publication checks below confirm unchanged integrated pins. Shared overlap: manifest/text, App bundle,
+active sim/compiler answer and source-sensitive patrol release literals. No milestone gate
+is closed by this source record.
+
+## Publication checks on integrated main
+
+[Focused publication results](publication-focused.log): **89 tests pass**, exit 0,
+combining the five D5 tests with the existing authority/Book checks listed above.
+[Full publication check](publication-full.log): `bin/check_all.sh` **exit 0**;
+active headless simulation remains enabled. Pre-push runs the full check line
+again on the exact candidate; its result and PR are reported in the final handoff.
+
+Correctness and Ponytail self-review after integration: no gameplay-source diff
+from the independently reviewed commit; no new machinery or weakened validation.
+The only record cleanup removes an extra trailing blank line without changing
+review content. Publication does not include native, preview or owner-save work.
 
 [Capture/redaction script](capture.py); retained bytes are covered by
 [SHA256SUMS](SHA256SUMS) and [verification](SHA256SUMS.verify).
