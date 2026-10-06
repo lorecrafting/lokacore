@@ -128,7 +128,7 @@ function render(game: ReturnType<typeof openGame>) {
   };
 }
 
-// Breaks: paid Rest opens a fake/modal page, Close/Resume writes truth, aliases leak to World, final memory appears before ack, or cold narration routes to the wrong place.
+// Breaks: paid Rest opens a fake/modal page, Close/Resume writes truth, aliases leak to World, final memory appears before ack, or cold narration routes to the wrong place, or unavailable bed controls expose raw action keys.
 test('live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed', (t) => {
   const b = bundle(),
     a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, b);
@@ -209,6 +209,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   );
   assert.equal(cold.stack().at(-1).kind, 'notice');
   assert.ok(cold.text().includes('Dream acknowledged.'));
+  assert.ok(cold.text().includes('Rest: not now'));
   assert.ok(!cold.labels().includes('Resume dream'));
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 0);
 });

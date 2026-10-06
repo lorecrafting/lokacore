@@ -155,6 +155,8 @@ continues to follow the existing World recovery rule.
 
 A readable detail's exact-subject recipes appear only in its Notice actions. Available controls
 follow nonempty history and precede Leave; unavailable controls show their real reason.
+Available controls and unavailable notes use the same catalog action-label resolver
+and its existing human-readable fallback. Never display an action TextKey as prose.
 Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
 no-target recipe sends `target_ids: []`. These controls use the shared offer-to-button builder,
 freshness and retry path. Confirmed readable-recipe narration routes to the receipt-linked

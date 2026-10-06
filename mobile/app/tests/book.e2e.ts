@@ -51,9 +51,11 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   await screen.getByRole('button', 'Wake').tap();
   await screen.getByRole('button', 'Acknowledge').tap();
   await expect(screen.getByText('Dream acknowledged.')).toBeVisible();
+  await expect(screen.getByText('Rest: not now')).toBeVisible();
 
   await app.restart();
   await screen.getByRole('button', 'Continue').tap();
   await screen.getByRole('button', 'Bed').tap();
   await expect(screen.getByText('Dream acknowledged.')).toBeVisible();
+  await expect(screen.getByText('Rest: not now')).toBeVisible();
 });

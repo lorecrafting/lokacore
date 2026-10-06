@@ -146,7 +146,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
             </Tap>
           ) : !offer.available ? (
             <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
-              {p.screen.text(offer.label)}: {why(offer, p.screen.text)}
+              {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
             </Text>
           ) : null;
         })}
