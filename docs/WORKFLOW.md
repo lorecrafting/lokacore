@@ -179,6 +179,15 @@ even when the task itself is durable.
 The [export check](CHECKS.md) rejects path, ID and completeness errors in the
 staged commit and CI.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
+When a reviewed brief starts building, the PM marks its ready issue
+`in_progress` with `br update <id> --status in_progress` and keeps its current
+source/review links in the issue. After the source is reviewed and merged to
+`main`, the PM uses `br close <id> --reason "Merged <PR or local merge>"` and
+checks `br ready --brief --json` for newly unblocked work. A provisional review
+or green local test alone does not close a slice. Ad hoc findings that need
+follow-up become linked issues only when they are real work; the review record
+keeps the finding and disposition. Beads gate records are deferred during the
+pilot because the existing CI and review records own the gate evidence.
 The [hook comparison](evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
 `post-merge` and `post-checkout` imports only in the main integration checkout.
 After `git config core.hooksPath .githooks`, opt in there with

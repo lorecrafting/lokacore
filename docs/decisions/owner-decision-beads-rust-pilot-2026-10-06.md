@@ -32,7 +32,9 @@ Use the repo-owned, opt-in Git import hook described in the
 after Git advances the selected integration checkout. Git reviews, source gates,
 roadmap publication and PM-owned task closures stay as before. The same hook
 runs for Claude Code and Codex because it belongs to the checkout, not an agent
-session. The [comparison record](../evidence/2026-10-06-beads-hooks-pilot.md)
+session. The workflow also gives the PM a simple ready → building → merged
+lifecycle using `br update`, `br close` and `br ready`, with reviewed records as
+the evidence. The [comparison record](../evidence/2026-10-06-beads-hooks-pilot.md)
 holds the baseline and post-hook observations; do not claim a speed improvement
 until real merges have supplied comparable data.
 
