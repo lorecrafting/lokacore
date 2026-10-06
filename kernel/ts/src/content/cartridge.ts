@@ -195,7 +195,7 @@ function timeStage(c: Obj): Diagnostic[] {
 // its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
-  const out = mismatched(locked, c.manifest.requires.capabilities);
+  const out = lockDiagnostics(locked, c.manifest.requires.capabilities);
   const use = (kind: 'command' | 'policy' | 'definition' | 'event', name: string, path: string) => {
     const owners = CAPABILITY_OWNERS[kind];
     // The schema closes policy ops, so only a command can be unowned.
@@ -234,8 +234,8 @@ function lockStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// LOCK_MANIFEST_MISMATCH for each capability whose locked and required versions differ.
-function mismatched(locked: Obj, required: Obj): Diagnostic[] {
+// Lock/manifest mismatches and the engine fact dependency of position and scene.
+function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const key of new Set([...Object.keys(locked), ...Object.keys(required)])) {
     if (locked[key] === required[key]) continue;
@@ -244,6 +244,18 @@ function mismatched(locked: Obj, required: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
+  for (const capability of ['position', 'scene'])
+    if (Object.hasOwn(locked, capability) && locked.fact !== 1)
+      out.push(
+        diag(
+          'UNDECLARED_CAPABILITY',
+          `.cartridge.lock.capabilities.${capability}`,
+          {
+            capability: 'fact',
+          },
+          ['fact@1'],
+        ),
+      );
   return out;
 }
 
