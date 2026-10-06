@@ -74,7 +74,9 @@ defmodule Loka.ContentLightTest do
 
   # Break: actual fuel or darkness compiles under API1.18 despite the API1.19 wire fields.
   test "actual light fields enforce the API1.19 floor" do
-    manifest = put_in(source("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.18")
+    manifest = %{
+      "requires" => %{"kernel_api" => %{"at_least" => "1.18"}, "capabilities" => %{"skills" => 1}}
+    }
 
     for {name, fields} <- [
           {"fuel", %{"fuel" => source("items/torch.json")["fuel"]}},
