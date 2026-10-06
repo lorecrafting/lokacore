@@ -24,3 +24,11 @@ Independent checks at the source above:
 - `git diff --check` passes for both the source integration and evidence-only commit. No developer source, native device or owner save was changed or used by this review.
 
 Ponytail Review: lean already; the added fixtures can reuse the existing contract corpus and validator, with no helper or new framework. Correctness review found no other open save/protocol issue in this scope. Publication remains pending C4-D4-S1's fix and scoped recheck.
+
+## Scoped schema fix recheck — APPROVE
+
+Corrected source `749a1705d41ddd86273231ac8661793b7f5a19ce`, frozen evidence-only head `635363806f3529c987f7f1625dcb2bfe3b80a827`. **C4-D4-S1 is closed; no open save/protocol finding in this scoped recheck.** The original finding above remains the historical round-one result.
+
+The new C4 contract cases use the frozen v032 pack and literal composition operations as valid inputs, then independently specify malformed threshold, missing declaration, 65-member roster, malformed CombatView member and negative flight-clock inputs. I reran the corrected TypeScript C4/combat line: **23/23** pass. The Elixir content/compiler and composition line passes **9/9** after installing the locked dependencies in the isolated review checkout. I independently executed the retained schema sweep: all **23/23** individual guard deletions fail, with the same six generator refusals and 17 named literal assertion failures recorded in the developer's log. The sweep restored every schema/generated file; `elixir bin/contracts.exs --check` and a clean checkout passed afterward.
+
+All **29** frozen raw-log hashes verify. The corrected exact-source full gate records exit **0** with **368** ExUnit tests, and the prior v032/API1.28 canonical hash, all 167 ID answers, integrated SQLite reopen/failed-COMMIT behavior, browser roster red control and simulator proof remain unchanged by the scoped test-only source diff. `git diff --check` passes for the fix and evidence commits. Ponytail Review: four direct contract tests and the retained sweep use the existing validator and fixtures; no extra production machinery. No native device, owner save, developer source or developer branch was changed by this review.
