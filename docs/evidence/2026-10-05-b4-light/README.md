@@ -130,7 +130,13 @@ text assertions.
 
 Final round checks: 584 kernel tests, 168 Elixir core/compiler tests, 47 authority/
 Book tests; typecheck, generated contracts, pure lint, active TS/Elixir size and
-strict Credo. The interface adds optional `AdvertisedAction.command` with shared
+strict Credo. Final guard-order/Credo follow-up reran 18 focused kernel/wire/
+Book/SQLite tests and seven compiler/pin tests, plus the keyed-admission and
+compiler-floor red controls. The supply lookup precedes admission without building
+a fuel transition; the ordinary transition runs only after keyed admission.
+The compiler takes the standard maximum of its existing feature floor and the
+actual light floor, preserving any higher successor requirement.
+The interface adds optional `AdvertisedAction.command` with shared
 valid/invalid literal wire cases; no cartridge content/pin or mutable save row
 changed. Ponytail Review reuses ordinary admission, semantic keys and existing UI
 ownership metadata; no new selector, target/input checker or alias catalog.

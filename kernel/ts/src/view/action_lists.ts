@@ -258,7 +258,7 @@ function noticeOffer(world: World, a: Offered, id: string) {
 }
 
 function lightOffered(world: World, actor: CharacterId, a: Offered, item: EntityId, steps: Steps) {
-  const supply = a.command === 'refuel' ? light.refillSupply(world, actor, item) : undefined;
+  const supply = a.command === 'refuel' ? light.sourceSupply(world, item) : undefined;
   const payload = {
     type: a.command,
     actor_id: actor,

@@ -23,18 +23,23 @@ defmodule Loka.Content.Requires do
   def features(nil, _), do: []
 
   def features(m, all) do
-    minimum = minimum_feature_api(m, all)
+    minimum = max(minimum_feature_api(m, all), light_minimum(all))
 
     if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
 
+  defp light_minimum(all) do
+    if Enum.any?(all, fn {_, _, d} ->
+         is_map_key(d, "fuel") or is_map_key(d, "dark_description")
+       end),
+       do: [1, 19],
+       else: []
+  end
+
   defp minimum_feature_api(m, all) do
     cond do
-      Enum.any?(all, fn {_, _, d} -> light_feature?(d) end) ->
-        [1, 19]
-
       is_map_key(m["requires"]["capabilities"], "skills") ->
         [1, 18]
 
@@ -54,8 +59,6 @@ defmodule Loka.Content.Requires do
         []
     end
   end
-
-  defp light_feature?(d), do: is_map_key(d, "fuel") or is_map_key(d, "dark_description")
 
   defp variant_feature?(d),
     do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
