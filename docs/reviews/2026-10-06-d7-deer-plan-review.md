@@ -17,3 +17,13 @@ The archived chapter-one population row requires three instance deer with fresh 
 The three paired rooms are reciprocal in the actual cartridge; the plan can support separate original identities, legal refuge, a +150 combat round before +300 sight flight, exact +172800 eligibility and ordinary corpse/hide custody. HP1 and 100g are selected.
 
 Ponytail Review: lean already; the three one-slot plans reuse C3 and avoid a new multi-home scheduler. No additional complexity finding. Docs-only review: no tests or mutation runs required. `git diff --check e9db5bdf fec51d6d` passed.
+
+## Scoped fix recheck — APPROVE
+
+Reviewed only the three findings and their direct clauses at corrected planning head `bd10b857` (the original review was retained there as `38a69d77`).
+
+1. Closed: `docs/system/cartridge.md:1274` now selects `night_start: 20`, `night_end: 6` for each plan. Equal day/night target one makes the window count-neutral under the existing `targetAt` and `nightBoundary` code.
+2. Closed: `docs/system/mechanics.md:1479` and `docs/system/protocol.md:1121` now bind a population-job sight schedule/reset to a checked deer transfer into the player's room in that same writer group. The due-job occurrence and transfer provide the cause; new-birth slot binding is coalesced into the birth transition, avoiding a duplicate slot write. Save validation names both entry and transfer causes. This specifies the narrow source seam; its execution and reconciliation remain for source review.
+3. Closed: `docs/system/cartridge.md:1274` selects chance zero and damage one-to-one. `protocol/entity.schema.json:388-404` admits zero chance and positive damage; `kernel/ts/src/mechanics/combat/round_attack.ts:50-55` uses `draw(100) < chance`, so a deer opportunity misses while player Attack remains legal.
+
+No new finding in the touched clauses. Ponytail Review: lean already. `git diff --check fec51d6d bd10b857` passed. Docs-only recheck; no runtime tests or source approval claimed.
