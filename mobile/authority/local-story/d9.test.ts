@@ -230,17 +230,28 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
     room(p.story.world(), 'chapel_nave'),
   );
   const item = entity(p.story.world(), 'item', 'brass_key');
+  const request = (n: number, action_key: string, target_ids: string[], input: object) => ({
+    invocation_id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
+    actor_id: p.story.world().character,
+    action_key,
+    target_ids,
+    input,
+  });
   const invoke = (n: number, action_key: string, target_ids: string[], input: object) => {
-    const result = p.story.invoke({
-      invocation_id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
-      actor_id: p.story.world().character,
-      action_key,
-      target_ids,
-      input,
-    });
+    const result = p.story.invoke(request(n, action_key, target_ids, input));
     assert.equal(result.kind, 'saved');
     if (result.kind === 'saved')
       assert.equal((result.decision as { kind: string }).kind, 'accepted');
+  };
+  const reopen = () => {
+    const opened = openStory(
+      p.db,
+      [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
+      p.host,
+    );
+    assert.equal(opened.kind, 'open');
+    if (opened.kind !== 'open') throw new Error('saved Study world did not reopen');
+    p.story = opened;
   };
   let n = 1;
   const ok = (action: string, target_ids: string[] = [], input: object = {}) =>
@@ -286,30 +297,54 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
     ok('continue', [], { scene: scene.scene, line: scene.index });
   }
   move('down', 'down');
-  invoke(301, 'move', [], { direction: 'west' });
+  reopen();
+  p.sql.exec(
+    'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+  );
+  const west = request(301, 'move', [], { direction: 'west' });
+  const chapel = room(p.story.world(), 'chapel_nave');
+  p.fault.kind = 'failed';
+  p.fault.armed = true;
+  assert.equal(p.story.invoke(west).kind, 'pending');
+  assert.equal(p.story.world().state.containers[p.story.world().body], chapel);
+  p.fault.reads = false;
+  const retriedWest = p.story.invoke(west);
+  assert.equal(retriedWest.kind, 'saved');
+  if (retriedWest.kind === 'saved') assert.equal(retriedWest.replay, false);
+  const replayedWest = p.story.invoke(west);
+  assert.equal(replayedWest.kind, 'saved');
+  if (replayedWest.kind === 'saved') assert.equal(replayedWest.replay, true);
+  reopen();
   assert.equal(
     p.story.world().state.containers[p.story.world().body],
     room(p.story.world(), 'prior_study'),
   );
-  invoke(302, 'take', [item], {});
+  const corpse = p.story.world().state.containers[item];
+  const take = request(302, 'take', [item], {});
+  p.fault.kind = 'lost';
+  p.fault.armed = true;
+  assert.equal(p.story.invoke(take).kind, 'pending');
+  assert.equal(p.story.world().state.containers[item], corpse);
+  p.fault.reads = false;
+  const retriedTake = p.story.invoke(take);
+  assert.equal(retriedTake.kind, 'saved');
+  if (retriedTake.kind === 'saved') assert.equal(retriedTake.replay, true);
+  const replayedTake = p.story.invoke(take);
+  assert.equal(replayedTake.kind, 'saved');
+  if (replayedTake.kind === 'saved') assert.equal(replayedTake.replay, true);
+  reopen();
   assert.equal(p.story.world().state.containers[item], p.story.world().body);
   invoke(303, 'move', [], { direction: 'east' });
-  const reopened = openStory(
-    p.db,
-    [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
-    p.host,
-  );
-  assert.equal(reopened.kind, 'open');
-  if (reopened.kind !== 'open') return;
-  assert.equal(reopened.world().state.containers[item], reopened.world().body);
-  const west = reopened.invoke({
+  reopen();
+  assert.equal(p.story.world().state.containers[item], p.story.world().body);
+  const refused = p.story.invoke({
     invocation_id: 'aaaaaaaa-0000-4000-8000-000000000304',
-    actor_id: reopened.world().character,
+    actor_id: p.story.world().character,
     action_key: 'move',
     target_ids: [],
     input: { direction: 'west' },
   });
-  assert.equal(west.kind, 'saved');
-  if (west.kind === 'saved')
-    assert.deepEqual(west.decision, { kind: 'rejected', error: { code: 'exit_closed' } });
+  assert.equal(refused.kind, 'saved');
+  if (refused.kind === 'saved')
+    assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'exit_closed' } });
 });

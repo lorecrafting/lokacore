@@ -8,6 +8,8 @@ import { allocator } from '../src/runtime/decision.ts';
 import { activation } from '../src/mechanics/quest/lifecycle.ts';
 import { key } from '../src/foundation/compose.ts';
 import { bellCue } from '../src/mechanics/bell/cue.ts';
+import { engaged } from '../src/mechanics/combat/shared.ts';
+import { suppress } from '../src/mechanics/population/shared.ts';
 import { deathSequence } from '../src/mechanics/death/sequence.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Command, EntityId, FactValue } from '../src/contracts.gen.ts';
@@ -161,6 +163,61 @@ test('population ticks stay quiet until the exact two-day deadline', () => {
     ).length,
     1,
   );
+});
+
+// Breaks: a cause-bound suppression leaves a scheduled hound round open or deletes its member.
+test('suppression closes an open hound encounter without reward or deleting the member', () => {
+  const base = ready();
+  const bell = run(base, { type: 'perform', action: 'ring_bell' }, 1);
+  assert.equal(bell.decision.kind, 'accepted');
+  if (bell.decision.kind !== 'accepted') return;
+  const cause = bell.decision.events.find(
+    (e) => e.payload.type === 'fact_changed' && e.payload.fact.key === 'chapel_bell_rung',
+  )!;
+  const [hound] = Object.entries(base.state.created ?? {}).find(
+    ([, row]) =>
+      row.origin.kind === 'spawned' && row.origin.role === 'hound' && row.origin.slot === 1,
+  )!;
+  const transferred = apply(base, [
+    {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: hound as EntityId,
+      source_id: base.state.containers[hound],
+      destination_id: room(base, 'belfry'),
+    },
+  ]);
+  assert.ok('world' in transferred);
+  const attack = run(transferred.world, { type: 'attack', target_id: hound }, 2);
+  assert.equal(attack.decision.kind, 'accepted');
+  const fight = engaged(attack.world, attack.world.body)!;
+  assert.equal(fight.row.status, 'open');
+  const command = {
+    id: '00000000-0000-4000-8000-000000000092' as Command['id'],
+    world_context_id: attack.world.context,
+    payload: { type: 'look', actor_id: attack.world.character },
+  } as const satisfies Command;
+  const ops = suppress(
+    attack.world,
+    attack.world.character,
+    ref('population', 'fen_hounds'),
+    172800,
+    cause,
+    1,
+    allocator(attack.world, command),
+  );
+  const closed = apply(attack.world, ops);
+  assert.ok('world' in closed);
+  assert.equal(closed.world.state.encounters![fight.id]?.status, 'closed');
+  assert.equal(closed.world.state.jobs![fight.row.job_id]?.status, 'cancelled');
+  assert.equal(
+    closed.world.state.population_slots![
+      key({ kind: 'population_slot', plan: ref('population', 'fen_hounds'), slot: 1 })
+    ]!.member_id,
+    hound,
+  );
+  assert.deepEqual(closed.world.state.created, attack.world.state.created);
+  assert.deepEqual(closed.world.state.facts, attack.world.state.facts);
 });
 
 // Breaks: projection treats all rooms as audible or reconstructs a new cue from later fact state.
