@@ -41,11 +41,11 @@ Reopen before choice, after choice, after training/temporary qualification chang
 
 Plant missing override→policy linkage, body-owned values erased on death, double selection or fey spell grant. Browser: select each offered choice on isolated fresh runs, display saved values/known skills and actual qualified/refused consumer, refresh/Continue/death with no renewed picker. Stop for C1 unit conflict, new formula beyond this table, invented Legend percentages or reduction of the planned ancestry scope without a reviewed disposition.
 
-The [provisional browser and faction evidence](../../evidence/2026-10-06-d11-provisional-browser/README.md) records visible consumer checks and the current fey faction observability limit; final C5-based proof remains pending.
+The [provisional browser and faction evidence](../../evidence/2026-10-06-d11-provisional-browser/README.md) records the D7-based check and fey faction observability limit. [C5-based integration evidence](../../evidence/2026-10-06-d11-c5-integration/README.md) records the successor pin and focused checks; independent reviews and publication remain pending.
 
 ## Shared delivery and proof contract
 
-This is a **selected, source-unbuilt PM plan**, not source GO, review approval or completed check. D11 follows the published D6/D12 alongside B2/B4/B6/C1. The selection and active clauses require fresh independent planning review before source assignment. Re-pin at source start; this brief certifies no implementation proof. D11 target/source SHA, successor release/API/hash/allocation oracle and PR remain **null**.
+This section records the original selected PM plan and proof requirements. D11 follows the published D6/D12 alongside B2/B4/B6/C1. Source integration and the successor pin are recorded in the evidence linked above; this planning section does not claim independent source approval or publication.
 
 Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
 
