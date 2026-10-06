@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): original source `de1ea634`, CHANGES REQUIRED; scoped fix/integration source `de756710ea10322bd36ec339bd1d9abf1850067b`, evidence `c7139a67`, independent APPROVE, D2-P1 closed. Actual Book recovery red/green, 28 focused checks, route refusal/precedence and v027/D5 pins verified; headless proof only.
+- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): original CHANGES REQUIRED; scoped fix source `c838cac423c037572f298f0fa920789fb115983c`, evidence `c7927528`, independent APPROVE, D2-P1/D2-H1 closed. Actual Book pulse/title retry red/green, 40 focused checks, exact history/route refusal and unchanged integrated pins verified; headless proof only.
 - [Corpse-loot Take detail](2026-10-06-corpse-loot-take-detail-review.md): exact docs head `44fbff3bb4c9480d4f48093ea5ec62a5ed7cd5ca`, independent APPROVE; no findings, no runtime proof claimed.
 - [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 

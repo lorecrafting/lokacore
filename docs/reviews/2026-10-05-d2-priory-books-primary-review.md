@@ -1,7 +1,7 @@
 # D2 public Priory and held books — independent primary review
 
-**Current scoped verdict: APPROVE.** D2-P1 is closed by the independent round-1
-fix recheck below.
+**Current scoped verdict: APPROVE.** D2-P1 and D2-H1 are closed by the independent
+scoped fix rechecks below.
 
 **Initial verdict: CHANGES REQUIRED.** Fresh independent Codex primary reviewer; authored
 none of the implementation. Source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`,
@@ -132,3 +132,32 @@ Read retry restores its exact projected book/parents once after confirmation.
 [Actual title-press regression, controls and checks](../evidence/2026-10-05-d2-priory-books/hosted-h1.md)
 retain the result. Save/authority and v027 pins are unchanged. This does not change
 the hosted independent verdict.
+
+
+## Independent D2-H1 scoped recheck — APPROVE
+
+Exact source `c838cac423c037572f298f0fa920789fb115983c`, evidence/disposition head
+`c7927528`; same independent primary reviewer in a separate detached checkout.
+**D2-H1 closed; no new findings.** The synchronous title retry now restores the
+accepted receipt's exact Ward/Bell identity and projected parent chain after
+chapter Continue; pulse retains restoration beneath chapter. Recovery consumes
+the captured invocation once, and committed Read history appends once.
+
+Independent `mise exec -- node --test` across Book/authority Priory, presenter,
+Lantern, kernel Priory/contracts/Deep Fen and App chapter files: 40/40 pass on
+restored exact source. App `tsc --noEmit`: exit 0. Removing only the synchronous
+route in the throwaway checkout fails the actual title-Pressable regression with
+`[]` after confirmation; pulse remains green. Source was restored before the
+passing run; no mutant or temporary probe is retained.
+
+Additional actual-Book controlled Ward/Bell probes pass for both settlement
+paths: subsequent Look stays on World with no old Read target; closing the real
+container and pressing stale Read cannot reopen it or duplicate its literal Read
+text. Refusal history may append normally. The exact-target route helper retains
+scene/combat precedence and refuses missing/unavailable targets without fallback.
+All eight H1 evidence hashes verify. Integration of `010dc994` is docs-only;
+cartridge/API/hash/IDs and Game/authority/save contracts are unchanged.
+
+Ponytail Review: lean already; no complexity finding. This scoped headless verdict
+does not replace the hosted Sol recheck, exact-head CI or publication gates, and
+adds no browser/native/owner-save proof.
