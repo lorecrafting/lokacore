@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D7 equal-time round and sight policy](2026-10-06-d7-equal-time-policy-review.md): exact planning head `8085ce5d`, independent APPROVE; checked narrow matching round-to-sight group handoff, both job orders, stale/fatal/blocked/intervening paths and save/Book proof obligations. No source approval.
+
 - [Pre-production CI scope](2026-10-06-preproduction-ci-scope-review.md): initial head `0e3f49a1` CHANGES REQUIRED; scoped fix recheck at `92b0c864` APPROVE closes CI-S1/CI-S2. Browser-success mutation now fails both skipped and failed controls and restores green; active owner rules link the decision. Four local hook cases independently checked.
 
 - [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; scoped Beads pilot integration recheck at `8049a5f0` APPROVE. Docs and word-budget checks pass; the checkpoint prompt remains a future PM action.
