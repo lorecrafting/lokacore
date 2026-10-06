@@ -77,7 +77,15 @@ export function deerSave(world: World, db: Db, meta: Meta) {
             x.op === 'job.complete' &&
             x.writer_group === op.writer_group &&
             jobs[x.job_id]?.job?.kind === 'population' &&
+            jobs[x.job_id].sight == null &&
             jobs[x.job_id].due_time === sight.seen_at &&
+            ops.some(
+              (control) =>
+                control.op === 'population.control' &&
+                control.writer_group === op.writer_group &&
+                same(control.plan, op.job) &&
+                control.expected?.job_id === x.job_id,
+            ) &&
             jobCommandId(x.job_id, sight.seen_at) === sight.cause_id,
         );
         if (!cause) invalid();

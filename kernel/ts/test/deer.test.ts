@@ -1,9 +1,11 @@
+// size: allow 525, deer same-clock behavior and counterfeit cause share the controlled journey
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, step, stepElapsed, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { elapsedCommandId, jobCommandId } from '../src/foundation/id_source.ts';
+import { sightRebindValid } from '../src/foundation/compose_sight_rebind.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
@@ -241,6 +243,44 @@ test('same-time harmless Oak sight and Oak arrival rebind the one slot', () => {
   );
   const fault = compose(base(w), { ops: unrelated } as never);
   assert.deepEqual('fault' in fault && fault.fault.code, 'conflicting_write');
+});
+
+// Breaks: a second sight job masquerades as the current population control occurrence.
+test('sight-only completion cannot authorize an equal-time slot rebind', () => {
+  let w = walkToWillow(fresh());
+  w = elapsed(w, 65100).world;
+  w = elapsed(w, 68100).world;
+  w = command(w, 'move', 'south', 8);
+  w = command(w, 'move', 'north', 9);
+  const oak = deer(w, 'oak_deer');
+  const [oldId, oldJob] = Object.entries(w.state.jobs ?? {}).find(
+    ([, job]) => job.status === 'pending' && job.sight?.member_id === oak,
+  )!;
+  const control = Object.entries(w.state.population_plans ?? {}).find(
+    ([, row]) => w.state.jobs?.[row.job_id]?.job.key === 'oak_deer',
+  )![1];
+  const fake = '00000000-0000-4000-8000-000000000099';
+  assert.notEqual(fake, oldId);
+  const result = elapsed(w, 68400);
+  assert.equal(result.decision.kind, 'accepted');
+  if (result.decision.kind !== 'accepted') return;
+  const ops = result.decision.delta.ops.map((op) => {
+    if (op.op === 'job.complete' && op.job_id === control.job_id) return { ...op, job_id: fake };
+    if (op.op === 'job.schedule' && op.sight?.member_id === oak)
+      return { ...op, sight: { ...op.sight, cause_id: jobCommandId(fake, 68400) } };
+    return op;
+  });
+  const index = ops.findIndex(
+    (op) =>
+      op.op === 'population.slot' && op.value.sight_job_id != null && op.value.member_id === oak,
+  );
+  const clear = ops.find(
+    (op) =>
+      op.op === 'population.slot' && op.value.sight_job_id == null && op.value.member_id === oak,
+  );
+  assert.ok(index > 0 && clear?.op === 'population.slot');
+  const state = { ...base(w), jobs: { ...w.state.jobs, [fake]: oldJob } };
+  assert.equal(sightRebindValid(state, ops as never, index, clear.writer_group), false);
 });
 
 // Breaks: an equal-due surviving round blocks sight with conflicting_write, or flight leaves its successor active.

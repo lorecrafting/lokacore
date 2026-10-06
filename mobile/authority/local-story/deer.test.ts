@@ -6,6 +6,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, fresh, ref } from '../../../kernel/ts/test/deer_fixture.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
+import { deerSave } from './deer-save.ts';
 import { openStory } from './authority.ts';
 
 const releases = [{ fresh: fresh(), content_hash: bundle.sha256 }] as const;
@@ -162,6 +164,67 @@ test('missed round and +300 flight cold-reopen with closed combat', (t) => {
   assert.equal(reopened.kind, 'open');
   if (reopened.kind === 'open')
     assert.equal(encode(reopened.world().state as never), encode(story.world().state as never));
+});
+
+// Breaks: historical recovery treats a second sight completion as the population arrival cause.
+test('sight-only receipt cannot justify a later deer binding', (t) => {
+  const { p, story } = setup(t);
+  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
+  for (const [from, until] of [
+    [64800, 65100],
+    [65100, 68100],
+  ]) {
+    const saved = story.elapsed({ expected_run_id: story.runId(), from, until });
+    assert.equal(saved.kind, 'saved', JSON.stringify(saved));
+  }
+  move(story, 'south', 8);
+  move(story, 'north', 9);
+  const saved = story.elapsed({ expected_run_id: story.runId(), from: 68100, until: 68400 });
+  assert.equal(saved.kind, 'saved', JSON.stringify(saved));
+  const oak = Object.entries(story.world().state.created ?? {}).find(
+    ([, identity]) => identity.origin.kind === 'spawned' && identity.definition.key === 'oak_deer',
+  )![0];
+  const receipts = p.sql.prepare('SELECT scope, invocation_id, response FROM receipt').all();
+  const receipt = receipts.find((row) => {
+    const response = JSON.parse(row.response as string);
+    return response.delta?.ops?.some(
+      (op: any) =>
+        op.op === 'job.schedule' && op.sight?.member_id === oak && op.sight.seen_at === 68400,
+    );
+  })!;
+  const response = JSON.parse(receipt.response as string);
+  const ops = response.delta.ops as any[];
+  const scheduled = ops.find(
+    (op) => op.op === 'job.schedule' && op.sight?.member_id === oak && op.sight.seen_at === 68400,
+  )!;
+  const bound = ops.find(
+    (op) => op.op === 'population.slot' && op.value?.sight_job_id === scheduled.job_id,
+  )!;
+  const oldId = bound.expected.sight_job_id;
+  assert.ok(oldId);
+  const fakeCause = jobCommandId(oldId, 68400);
+  scheduled.sight.cause_id = fakeCause;
+  ops.push({ op: 'job.complete', writer_group: scheduled.writer_group, job_id: oldId });
+  p.sql
+    .prepare('UPDATE receipt SET response=? WHERE scope=? AND invocation_id=?')
+    .run(JSON.stringify(response), receipt.scope as string, receipt.invocation_id as string);
+  const world = story.world();
+  const current = world.state.jobs![scheduled.job_id]!;
+  const forged = {
+    ...world,
+    state: {
+      ...world.state,
+      jobs: {
+        ...world.state.jobs,
+        [scheduled.job_id]: { ...current, sight: { ...current.sight!, cause_id: fakeCause } },
+      },
+    },
+  };
+  const lineage = p.sql.prepare('SELECT lineage_id FROM save').get()!.lineage_id as string;
+  assert.throws(
+    () => deerSave(forged as never, adapter(p.sql) as never, { lineage_id: lineage } as never),
+    /inconsistent deer sight receipt/,
+  );
 });
 
 // Breaks: a forged sight binding is accepted as a playable save or overwritten during recovery.

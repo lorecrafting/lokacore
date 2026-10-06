@@ -54,13 +54,9 @@ function priorSight(state: State, ops: readonly DeltaOp[], index: number, group:
 }
 
 function arrivalValid(state: State, ops: readonly DeltaOp[], bind: Slot, old: Obj, sight: Obj) {
-  const population = ops.find(
-    (o) =>
-      o.op === 'job.complete' &&
-      o.writer_group === bind.writer_group &&
-      (state.jobs as Obj | undefined)?.[o.job_id]?.due_time === old.due_time &&
-      same((state.jobs as Obj)[o.job_id]?.job, bind.plan),
-  );
+  const control = (state.population_plans as Obj | undefined)?.[encode(bind.plan as Json)];
+  const controlJob = control && (state.jobs as Obj | undefined)?.[control.job_id];
+  const population = ops.find((o) => o.op === 'job.complete' && o.job_id === control?.job_id);
   const scheduled = ops.find(
     (o) =>
       o.op === 'job.schedule' &&
@@ -71,6 +67,11 @@ function arrivalValid(state: State, ops: readonly DeltaOp[], bind: Slot, old: Ob
   const fresh = scheduled?.op === 'job.schedule' && scheduled.sight;
   return (
     population?.op === 'job.complete' &&
+    population.writer_group === bind.writer_group &&
+    controlJob?.status === 'pending' &&
+    controlJob.sight == null &&
+    controlJob.due_time === old.due_time &&
+    same(controlJob.job, bind.plan) &&
     !!fresh &&
     fresh.cause_kind === 'population_transfer' &&
     fresh.cause_id === jobCommandId(population.job_id, old.due_time) &&
