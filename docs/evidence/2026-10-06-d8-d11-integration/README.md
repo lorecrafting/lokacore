@@ -138,3 +138,15 @@ Resume with a full gate on the corrected oracle. D8-specific schema sweep and cr
 30-day cap/nest/coin conservation remain unperformed. The existing deer 30-day
 proof does not certify crow conservation. Browser and independent review remain
 pending. All working files are committed, with no retained mutant or gate process.
+
+## Gate after corrected 208-ID oracle
+
+`mise exec -- bin/check_all.sh` on clean source `8aa70155`: exit1. All393
+Elixir tests, Credo and Elixir size passed. First failure was
+`bin/red_controls.exs:135`: “refusing to overwrite red-control file:
+`tmp/red-features.json`”. This ignored planted file was left by the earlier
+explicitly interrupted gate. Confirmed it is the script's own exclusive temporary
+fixture and removed it; tracked source remained clean. No gate result is claimed
+past that failure. Resume with a full gate from this cleaned checkpoint.
+
+Schema sweep, crow 30-day proof, browser and independent review remain pending.
