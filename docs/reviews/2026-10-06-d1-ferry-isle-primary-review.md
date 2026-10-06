@@ -183,6 +183,29 @@ This verifies the harness portability repair, not completion of hosted CI or
 publication. No gameplay, persistence, protocol, release pin, owner save,
 browser preview or native/device work is part of this recheck.
 
+## Final read-only Sol re-review at PR #231 head `a11cea9d` — APPROVE
+
+The PM ran the required fresh read-only review after all applicable hosted checks
+on the review-only head were green. Its answer is preserved verbatim below.
+
+```text
+APPROVE
+
+No findings at a11cea9d905ddf57c7b1a187e8d23166aa669b56. D1-1 and D1-2 are closed.
+
+Verified remote PR head and published main 1b269871; compared the actual diff. Final head changes only the scoped review record after evidence commit cd84ff6d; production source remains b0f37b07.
+
+Inspected AGENTS.md, workflow, D1 brief, all five governing D1 clauses, prior reviews, browser tests, controlled generator/fixture/import seam, screenshots, diagnostics workflow, Notice projection/buttons/invocation/freshness/history paths, and retained regression controls.
+
+The production browser route asserts paid double-tap boarding with one debit, original Sedge’s free lesson and restored history, all six rooms, free return and reload. Controlled recovery exercises real lethal combat, Chapel reopen without belongings, penniless waived boarding, dark-Loft nested corpse Take, recovered inventory reload and empty-corpse fare refusal. Independently reconstructed the declared fixture exactly and recomputed its canonical hash.
+
+Maud setup now asserts each confirmed destination; failure diagnostics retain redacted reports/screens/logs. Notice entry preserves Read precedence and exact projected recipe targets, using existing pending/stale/refused handling. Retained pre-fix Notice and missing-Board controls fail the relevant tests. Ponytail review found no unnecessary machinery or concrete player-blocking issue.
+
+Independently verified 29 browser, 25 publication and five portability artifact hashes. Exact-head hosted CI and browser workflows completed successfully; code jobs were skipped for the review-only head.
+
+Proof limits: browser runs and red controls were inspected, not repeated. Recovery uses a declared authored variant; the public isle has no death producer. Exact body/item identities and SQLite fault behavior rely on separate source/SQLite evidence. Two screenshots contain page-turn frames. Original Maud failure cause remains unknown. No edits, owner saves or native sessions.
+```
+
 ## Final browser findings scoped recheck — APPROVE
 
 Fresh independent replacement primary reviewer; authored none of D1. Exact
