@@ -357,3 +357,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C2 publication-check fixes](2026-10-05-c2-publication-checks-review.md): exact source `595ef10f46cc7abb7c4c272759de23535b17dca9`, independent scoped APPROVE; citation/examples, isolated test controls, function-scoped Credo exceptions and TS trims checked. 36 Elixir/35 TS tests and generation/typecheck/Credo/size/format pass; two independent controls fail and restore green. No findings.
 
 - [B8 Maud services final example-only recheck](2026-10-05-b8-maud-services-primary-review.md#final-integration-example-only-recheck--approve): exact source `56d40a22`, APPROVE; only literal benefit/offer examples and generated metadata change, global example gate and focused malformed controls pass. Prior source approval retained; no findings.
+
+- [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
