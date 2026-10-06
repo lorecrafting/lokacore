@@ -3,6 +3,14 @@ dead-cursor-ts-red.log: OK
 even-flight-red.log: OK
 flight-commit-red.log: OK
 helper-identity-red.log: OK
+integrated-full-credo-red.log: OK
+integrated-full-cycle-red.log: OK
+integrated-full-format-red.log: OK
+integrated-full-interrupted.log: OK
+integrated-full-size-red.log: OK
+integrated-full-temp-red.log: OK
+integrated-full-ts-size-red.log: OK
+integrated-full.log: OK
 late-endpoint-ex-red.log: OK
 late-endpoint-ts-red.log: OK
 pack-shape-ex-red.log: OK
