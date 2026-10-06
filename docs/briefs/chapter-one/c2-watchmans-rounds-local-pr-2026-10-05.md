@@ -36,6 +36,9 @@ reset, exact drawn input, quest/trust atomicity, event positions and lawful late
 travel. This self-review is not independent approval.
 
 Runtime proposal, creation hydration and corpse custody were not changed. Native
-build/simulator work and blur polish remain deferred. A fresh primary review and
-independent save/protocol opinion are required; full active checks run at accumulated
-publication under the normal workflow. Published C2 source/PR/verdicts remain null.
+build/simulator work and blur polish remain deferred. The [primary](../../reviews/2026-10-05-c2-watchmans-rounds-primary-review.md) and
+[save/protocol](../../reviews/2026-10-05-c2-watchmans-rounds-save-second-review.md)
+reviews approve exact source `74711349`. The later
+[UI proof scope](../../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)
+changes verification only and requires its separate docs review. Full active checks
+run at accumulated publication under the normal workflow. Published C2 source/PR/verdicts remain null.

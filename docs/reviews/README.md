@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [C2 Watchman's Rounds staged browser proof scope](2026-10-05-c2-watchmans-rounds-docs-scope-review.md): exact local docs/evidence head `a0b77fbf6e80905451448c1351735a9025a8cfce`, independent APPROVE; fresh shared Book and cold reopen proven, browser fatal/Restart due by E3 and preserved terminal Web timeout open, no findings.
+
 - [C2 Watchman's Rounds save/protocol second opinion](2026-10-05-c2-watchmans-rounds-save-second-review.md): exact local source `747113496572892a01224c47cddc0bf4f63d0fdc`, independent scoped APPROVE; no findings. Real SQLite cold/COMMIT/retry, 21 unchanged-file forgeries, actual Wren combat/Flee/death, both-kernel literals/differential and v024/API1.22/all 109 pins pass; causal/identity red controls fail. Terminal browser-host cold-open remains unverified.
 
 - [B9 Lantern Rest and dream plan](2026-10-05-b9-lantern-dream-plan-review.md): exact planning head `83ec4c3a08de11eda83f6e495f98f6e7126af0b0`, independent APPROVE; no findings, source dependency re-pins and later primary/save reviews remain required.
@@ -340,3 +342,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B7 waterskins and liquid actions save/protocol second opinion](2026-10-05-b7-waterskin-save-second-review.md): initial source `d31b47d8` APPROVE; scoped Book fix `d24b6f8` APPROVE, no findings, 49 focused tests and live-quantity red control pass. Current API/hash/all 96 IDs independently verified; save/protocol/pins unchanged by the fix. Headless proof only; primary review and publication gates remain separate.
 
 - [C2 Watchman’s Rounds primary implementation](2026-10-05-c2-watchmans-rounds-primary-review.md): exact local source `747113496572892a01224c47cddc0bf4f63d0fdc`, independent APPROVE; no source/complexity finding, 34 C2 plus 116 neighboring TS/SQLite/Book and 22 Elixir checks pass, two independent mutations fail and restored controls pass. Browser proof, separate save/protocol opinion and publication checks remain distinct requirements.
+- [Web SQLite bounded reads primary review](2026-10-05-web-sqlite-primary-review.md): exact source/evidence head `812a9367`, independent APPROVE; current SELECT semantics, native isolation and retained cold-reopen proof checked; six focused tests, typecheck and two independent red controls pass. No open findings.
+- [Web SQLite bounded reads save/recovery opinion](2026-10-05-web-sqlite-save-review.md): exact source `812a9367cb7b04c574d87658a078914f7516630a`, independent APPROVE; no findings, page/history and real-SQLite COMMIT/replay/refusal probes pass, both independent paging mutants red. Primary review and publication gates remain separate.
