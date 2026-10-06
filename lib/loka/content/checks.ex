@@ -355,9 +355,7 @@ defmodule Loka.Content.Checks do
       )
   end
 
-  # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
-  # dialogue's.
+  # Every located policy root from the source definitions.
   defp trees(defs, actions) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
