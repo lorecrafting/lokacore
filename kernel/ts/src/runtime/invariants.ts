@@ -14,7 +14,6 @@ import { validate } from '../foundation/validate.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
-
 const moved = (r: Result): [string, Json][] =>
   ('changes' in r ? r.changes : [])
     .filter((c) => c.target.kind === 'containment')

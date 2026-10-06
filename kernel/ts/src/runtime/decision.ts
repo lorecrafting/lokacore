@@ -50,7 +50,6 @@ import { id } from '../foundation/id_source.ts';
 import type { RngState } from '../foundation/rng.ts';
 
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
-
 export type State = {
   readonly bleeds?: Readonly<Record<string, BleedRow>>;
   readonly water?: Readonly<Record<string, WaterOccupancy>>;
