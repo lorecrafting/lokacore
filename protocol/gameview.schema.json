@@ -1861,7 +1861,23 @@
         "qualified",
         "usable"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "A skill's permanent acquisition and current qualification as projected for the actor.",
+      "examples": [
+        {
+          "skill": {
+            "cartridge_id": "training",
+            "cartridge_version": "1.0.0",
+            "kind": "skill",
+            "key": "swords"
+          },
+          "label": "skill.swords",
+          "requirement": "skill.swords_requirement",
+          "acquired": true,
+          "qualified": false,
+          "usable": false
+        }
+      ]
     },
     "AttributeView": {
       "type": "object",
@@ -1877,7 +1893,19 @@
         "attribute",
         "value"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "An authored attribute reference and the actor's current value.",
+      "examples": [
+        {
+          "attribute": {
+            "cartridge_id": "training",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "value": 9
+        }
+      ]
     }
   }
 }

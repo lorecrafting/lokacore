@@ -1351,6 +1351,60 @@
             "player_died": "combat.player_died",
             "npc_died": "combat.npc_died"
           }
+        },
+        {
+          "player_attack": {
+            "chance": 75,
+            "damage_min": 1,
+            "damage_max": 2
+          },
+          "interval": 150,
+          "sleep_multiplier": 2,
+          "flee_multiplier": 2,
+          "narration": {
+            "player_hit": "combat.player_hit",
+            "player_miss": "combat.player_miss",
+            "npc_hit": "combat.npc_hit",
+            "npc_miss": "combat.npc_miss",
+            "player_died": "combat.player_died",
+            "npc_died": "combat.npc_died"
+          },
+          "dodge": {
+            "skill": {
+              "cartridge_id": "training",
+              "cartridge_version": "1.0.0",
+              "kind": "skill",
+              "key": "dodge"
+            },
+            "chance": 0
+          }
+        },
+        {
+          "player_attack": {
+            "chance": 75,
+            "damage_min": 1,
+            "damage_max": 2
+          },
+          "interval": 150,
+          "sleep_multiplier": 2,
+          "flee_multiplier": 2,
+          "narration": {
+            "player_hit": "combat.player_hit",
+            "player_miss": "combat.player_miss",
+            "npc_hit": "combat.npc_hit",
+            "npc_miss": "combat.npc_miss",
+            "player_died": "combat.player_died",
+            "npc_died": "combat.npc_died"
+          },
+          "dodge": {
+            "skill": {
+              "cartridge_id": "training",
+              "cartridge_version": "1.0.0",
+              "kind": "skill",
+              "key": "dodge"
+            },
+            "chance": 100
+          }
         }
       ],
       "description": "Cartridge-owned attack profile, round interval, position multipliers and combat narration keys. Compiler and loader enforce its executable capability and death-setting dependencies."
@@ -1420,7 +1474,28 @@
         "requirement",
         "qualification"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "An acquired skill with authored display text and a policy for current qualification.",
+      "examples": [
+        {
+          "key": "swords",
+          "label": "skill.swords",
+          "requirement": "skill.swords_requirement",
+          "qualification": {
+            "policy_version": 1,
+            "root": {
+              "op": "stat_compare",
+              "attribute": {
+                "cartridge_id": "training",
+                "cartridge_version": "1.0.0",
+                "kind": "attribute",
+                "key": "str"
+              },
+              "at_least": 10
+            }
+          }
+        }
+      ]
     }
   }
 }

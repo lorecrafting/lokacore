@@ -18,7 +18,7 @@ const dir = mkdtempSync(join(tmpdir(), 'r5s2-transcripts-'));
 const kats = [
   ...globSync('protocol/fixtures/cartridge_*hash.json', { cwd: ROOT }),
   ...globSync('protocol/fixtures/containers_*hash.json', { cwd: ROOT }),
-  'protocol/fixtures/missing_child_v003_hash.json',
+  ...globSync('protocol/fixtures/missing_child_*hash.json', { cwd: ROOT }),
 ].map(read);
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
