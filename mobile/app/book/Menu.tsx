@@ -142,6 +142,25 @@ export function NpcPage(p: NpcProps) {
           {typeof line === 'string' ? line : line.text}
         </Text>
       ))}
+      {p.view.skills
+        ?.filter(
+          (s) =>
+            p.npc &&
+            'lessons' in p.npc &&
+            p.npc.lessons?.some(
+              (r) =>
+                r.cartridge_id === s.skill.cartridge_id &&
+                r.cartridge_version === s.skill.cartridge_version &&
+                r.kind === s.skill.kind &&
+                r.key === s.skill.key,
+            ),
+        )
+        .map((s) => (
+          <Text key={s.skill.key} style={note}>
+            {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
+            {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
+          </Text>
+        ))}
       {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
       {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}

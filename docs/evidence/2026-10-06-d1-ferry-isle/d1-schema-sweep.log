@@ -1,0 +1,145 @@
+RED TransportDefinition required key endpoint missing key
+
+true !== false
+
+RED TransportDefinition required room endpoint missing room
+
+true !== false
+
+RED TransportDefinition required detail endpoint missing detail
+
+true !== false
+
+RED TransportDefinition required destination endpoint missing destination
+
+true !== false
+
+RED TransportDefinition required reverse endpoint missing reverse
+
+true !== false
+
+RED TransportDefinition required recipient endpoint missing recipient
+
+true !== false
+
+RED TransportDefinition required currency endpoint missing currency
+
+true !== false
+
+RED TransportDefinition required fare endpoint missing fare
+
+true !== false
+
+RED TransportDefinition required recovery_rooms endpoint missing recovery_rooms
+
+true !== false
+
+RED TransportDefinition required action endpoint missing action
+
+true !== false
+
+RED TransportDefinition required label endpoint missing label
+
+true !== false
+
+RED TransportDefinition required narration endpoint missing narration
+
+true !== false
+
+RED CommandPayload oneOf.39.required type command missing type variant
+
+true !== false
+
+RED CommandPayload oneOf.39.required actor_id command missing actor_id
+
+true !== false
+
+RED CommandPayload oneOf.39.required endpoint_id command missing endpoint_id
+
+true !== false
+
+RED CommandPayload oneOf.39.required route command missing route
+
+true !== false
+
+RED CommandPayload oneOf.39.required quoted_fare command missing quoted_fare
+
+true !== false
+
+RED TransportOffer required route offer missing route
+
+true !== false
+
+RED TransportOffer required fare offer missing fare
+
+true !== false
+
+RED TransportOffer required charge offer missing charge
+
+true !== false
+
+RED TransportOffer required waived offer missing waived
+
+true !== false
+
+RED TransportOffer required label offer missing label
+
+true !== false
+
+RED TransportOffer required action offer missing action
+
+true !== false
+
+RED InspectableDetail properties.transport.required route detail missing route
+
+true !== false
+
+RED InspectableDetail properties.transport.required title detail missing title
+
+true !== false
+
+RED TransportDefinition properties.fare.minimum  endpoint fare -1
+
+true !== false
+
+RED TransportDefinition properties.fare.maximum  endpoint fare 2147483648
+
+true !== false
+
+RED CommandPayload oneOf.39.properties.quoted_fare.minimum  command quoted_fare -1
+
+true !== false
+
+RED CommandPayload oneOf.39.properties.quoted_fare.maximum  command quoted_fare 2147483648
+
+true !== false
+
+RED ActionInput properties.quoted_fare.minimum  input quoted_fare -1
+
+true !== false
+
+RED ActionInput properties.quoted_fare.maximum  input quoted_fare 2147483648
+
+true !== false
+
+RED TransportOffer properties.fare.minimum  offer fare -1
+
+true !== false
+
+RED TransportOffer properties.fare.maximum  offer fare 2147483648
+
+true !== false
+
+RED TransportOffer properties.charge.minimum  offer charge -1
+
+true !== false
+
+RED TransportOffer properties.charge.maximum  offer charge 2147483648
+
+true !== false
+
+RED TransportDefinition properties.recovery_rooms.maxItems  recovery room bound
+
+true !== false
+
+GREEN restored: 36 schema guards; no survivors

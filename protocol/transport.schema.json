@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ferry transport",
+  "description": "Exact paired boarding endpoints, conserved fare and actor-owned corpse recovery.",
+  "$defs": {
+    "TransportDefinition": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "room": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "detail": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "destination": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "reverse": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "recipient": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "currency": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "fare": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "recovery_rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "maxItems": 64
+        },
+        "action": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "narration": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "key",
+        "room",
+        "detail",
+        "destination",
+        "reverse",
+        "recipient",
+        "currency",
+        "fare",
+        "recovery_rooms",
+        "action",
+        "label",
+        "narration"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "outbound",
+          "room": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shore"
+          },
+          "detail": "ferry",
+          "destination": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "isle"
+          },
+          "reverse": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "transport",
+            "key": "return"
+          },
+          "recipient": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "sedge"
+          },
+          "currency": {
+            "cartridge_id": "ferry_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "pennies"
+          },
+          "fare": 2,
+          "recovery_rooms": [],
+          "action": "board_ferry",
+          "label": "transport.board",
+          "narration": "transport.crossed"
+        }
+      ],
+      "description": "Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms."
+    }
+  }
+}

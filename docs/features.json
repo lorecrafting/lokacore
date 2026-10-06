@@ -808,5 +808,31 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "B8 exact Maud room, meal and finite B7 ale services"
+  },
+  "transport": {
+    "spec": "docs/system/mechanics.md D1; docs/system/protocol.md D1 ferry transport composition",
+    "contracts": [
+      "TransportDefinition",
+      "TransportOffer",
+      "CommandPayload",
+      "ActionInput",
+      "InspectableDetail"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/transport/shared.ts",
+      "kernel/ts/src/view/transports.ts",
+      "kernel/ts/src/content/cartridge_transports.ts",
+      "lib/loka/content/transports.ex",
+      "mobile/authority/local-story/receipt-history.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/transport_contracts.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
   }
 }

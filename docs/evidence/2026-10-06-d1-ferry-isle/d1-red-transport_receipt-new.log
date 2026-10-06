@@ -1,0 +1,26 @@
+......X
+
+Failed tests:
+
+✖ a transport-only cartridge validates crossing receipts without another producer (171.0725ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'open'
+  - 'save_corrupt'
+  
+      at TestContext.<anonymous> (file://<worktree>/mobile/authority/local-story/transport.test.ts:512:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'open',
+    expected: 'save_corrupt',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

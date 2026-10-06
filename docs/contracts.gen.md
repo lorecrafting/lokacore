@@ -48,6 +48,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | sense_cue@1 | portable | portable_capability |  |
 | escort@1 | portable | portable_capability |  |
 | patrol@1 | portable | portable_capability |  |
+| transport@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -217,6 +218,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `douse`
   - `refuel`
   - `use_service`
+  - `use_transport`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -431,6 +433,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **ShopItemView**: An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).
 - **SightView**: What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.
 - **SkillView**: A skill's permanent acquisition and current qualification as projected for the actor.
+- **TransportOffer**: Exact endpoint route and base quote, effective charge and waiver, and admitted keyed action.
 - **UnavailableReason**: Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.
 - **WornSlotView**: One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.
 
@@ -671,3 +674,9 @@ Localized text as string ids plus bindings (04 §15; 05 §18; 06 §43), shared b
 - **TextCatalog**: The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler and loader report a missing one as UNRESOLVED_REFERENCE.
 - **TextKey**: A localization string id, never display text (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Text carries its interpolation bindings.
 - **TextValue**: A value interpolated into localized text (04 §15 'interpolation data'; 06 §43 'bindings'): a TextKey (localized in turn, so a Key such as a direction also fits), an integer (a count, a time) or a boolean.
+
+## Ferry transport (`protocol/transport.schema.json`)
+
+Exact paired boarding endpoints, conserved fare and actor-owned corpse recovery.
+
+- **TransportDefinition**: Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.

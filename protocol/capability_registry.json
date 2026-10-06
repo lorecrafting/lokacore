@@ -463,5 +463,17 @@
     "definitions": [
       "patrol"
     ]
+  },
+  {
+    "key": "transport",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "use_transport"
+    ],
+    "definitions": [
+      "transport"
+    ]
   }
 ]

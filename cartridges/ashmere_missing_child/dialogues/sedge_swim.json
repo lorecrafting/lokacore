@@ -1,0 +1,31 @@
+{
+  "npc": "sedge",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "sedge"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_swim",
+      "equals": false
+    }
+  },
+  "prompt": "sedge.swim.prompt",
+  "choices": {
+    "learn": {
+      "label": "sedge.swim.choice",
+      "narration": "sedge.swim.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "swim"
+        }
+      ]
+    }
+  },
+  "label": "sedge.swim.choice"
+}

@@ -1,0 +1,25 @@
+{
+  "title": "room.fen_isle_landing.title",
+  "description": "room.fen_isle_landing.description",
+  "exits": {
+    "east": {
+      "to": "isle_hut"
+    },
+    "south": {
+      "to": "isle_shrine"
+    }
+  },
+  "details": {
+    "ferry": {
+      "aliases": [
+        "ferry",
+        "rope_ferry"
+      ],
+      "description": "detail.fen_return.description",
+      "transport": {
+        "route": "fen_return",
+        "title": "detail.ferry.title"
+      }
+    }
+  }
+}

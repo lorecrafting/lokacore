@@ -1,0 +1,9 @@
+{
+  "title": "room.isle_shrine.title",
+  "description": "room.isle_shrine.description",
+  "exits": {
+    "north": {
+      "to": "fen_isle_landing"
+    }
+  }
+}
