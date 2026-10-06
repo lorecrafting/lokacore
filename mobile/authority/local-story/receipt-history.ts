@@ -1,5 +1,6 @@
 // Validate saved truth with the same pure rules that produced its accepted receipts.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import { commandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { step, stepElapsed } from '../../../kernel/ts/src/runtime/world.ts';
@@ -7,6 +8,7 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
 type Row = {
+  invocation_id: string;
   command_id: string;
   actor_id: string;
   command: string;
@@ -23,7 +25,7 @@ export function receiptHistory(fresh: World, saved: World, db: Db, meta: Meta, r
   let world = { ...fresh, state: { ...fresh.state, rng: meta.seed as World['state']['rng'] } },
     previous = 0;
   for (const row of db.getAllSync<Row>(
-    `SELECT command_id,actor_id,command,response,revision FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision`,
+    `SELECT invocation_id,command_id,actor_id,command,response,revision FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision`,
     `story/${meta.lineage_id}/${saved.character}`,
   )) {
     if (row.revision !== previous + 1 || row.revision > revision) invalid();
@@ -50,7 +52,10 @@ function acceptedReceipt(row: Row, world: World, meta: Meta) {
     row.actor_id !== world.character ||
     !('actor_id' in command.payload) ||
     command.payload.actor_id !== world.character ||
-    (command.payload.type === 'elapsed' && command.payload.run_id !== meta.run_id)
+    (command.payload.type === 'elapsed' && command.payload.run_id !== meta.run_id) ||
+    (command.payload.type !== 'elapsed' &&
+      (validate('InvocationId', row.invocation_id).length ||
+        command.id !== commandId(`story/${meta.lineage_id}/${world.character}`, row.invocation_id)))
   )
     invalid();
   return { command, decision };

@@ -394,3 +394,33 @@ test('actual fatal combat cold reopens the filled shell on its corpse then ordin
     a.sql.close();
   }
 });
+// Breaks: a consistently rewritten command and event identity evades the stored invocation binding.
+test('cold open rejects consistent command/event rewrites that cannot derive from the original invocation', () => {
+  const a = setup();
+  try {
+    buySkins(a);
+    const [original] = skins(a);
+    a.invoke('fill', [a.well, original]);
+    const row = a.sql
+      .prepare(
+        "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.type')='fill'",
+      )
+      .get()!;
+    const command = JSON.parse(row.command as string),
+      decision = JSON.parse(row.response as string);
+    // Independent SHA-256/UUID answer for [loka-id-v1, fixed context, this forged command, 0].
+    const forged = 'dddddddd-0000-4000-8000-000000009999';
+    command.id = forged;
+    decision.events[0].id = '689a81a1-db31-8424-aca5-368536dbd152';
+    decision.events[0].causation_id = forged;
+    decision.events[0].correlation_id = forged;
+    a.sql
+      .prepare('UPDATE receipt SET command_id=?,command=?,response=? WHERE invocation_id=?')
+      .run(forged, JSON.stringify(command), JSON.stringify(decision), row.invocation_id);
+    const before = disk(a);
+    assert.equal(a.refuse().kind, 'save_corrupt');
+    assert.deepEqual(disk(a), before);
+  } finally {
+    a.sql.close();
+  }
+});
