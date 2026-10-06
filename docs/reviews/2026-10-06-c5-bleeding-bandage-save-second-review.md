@@ -23,3 +23,12 @@ The generic saved-history replay is valuable and must be retained. I changed a s
 - Reviewed exact bandage custody, job cancel/complete, managed elapsed tick succession, same-due pairing, receipt replay and TS/Elixir compose paths. No separate source defect found in those paths at this provisional head. This is not final predecessor or exact-head publication approval.
 
 Ponytail Review: lean already. The schema can express the two closed variants with the existing discriminated `oneOf` subset; use the current transaction fault harness rather than adding a C5-specific save engine. No dependency or general status framework is warranted.
+
+## Scoped fix recheck — APPROVE
+
+Corrected source `97b5b94e4f02d81ea329b640c9a94fdbdf37fbad`. **C5-S1 and C5-S2 are closed for this provisional source.** The historical findings above remain the initial result.
+
+- **S1:** `BleedRow` is now two closed `active`-discriminated object variants. The active one requires effect, producer, end, next tick and owned job; the inactive one permits only generation and `active:false`. Direct probes of both generic validators returned the same five `missing_property` paths for `{active:true,generation:1}` and for a containing `bleed.transition`; both rejected an inactive row with `job_id` as `unknown_property`. Focused TS 2/2 and Elixir 2/2 tests pass. The corrected source adds per-field missing-property controls in both kernels.
+- **S2:** The real SQLite test now exercises both an active tick and an exact held-item cure under three COMMIT outcomes each: deferred foreign-key failure, uncertain absent COMMIT, and committed COMMIT with lost acknowledgement. It checks pending fences for another input and elapsed, old or new head/state rows/receipts, HP, bleed activity, current job, item custody, cold reopen and same-command replay. All six cases pass; the two C5 SQLite tests pass together. The ordinary managed catch-up and cured replay controls remain green.
+
+The two validators, receipt replay and changed-row transaction remain the existing owners; no C5 save engine or general status layer was added. I inspected only the corrected schema, validator dispatch, fault fixture, save narration change and their direct callers. The required complete changed-schema sweep, broader full gate, final D7 predecessor integration/pins and hosted exact-head checks remain publication gates outside this scoped approval. No source was edited by this reviewer.
