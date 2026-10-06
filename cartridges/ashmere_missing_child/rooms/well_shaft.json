@@ -1,0 +1,19 @@
+{
+  "title": "room.well_shaft.title",
+  "description": "room.well_shaft.description",
+  "dark_description": "room.well_shaft.dark",
+  "details": {
+    "masonry": {
+      "aliases": [
+        "masonry",
+        "stonework"
+      ],
+      "description": "detail.masonry.description"
+    }
+  },
+  "exits": {
+    "up": {
+      "to": "well_lane"
+    }
+  }
+}

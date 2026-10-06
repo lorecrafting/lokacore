@@ -162,7 +162,7 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **8 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5, C1).
+Local `main` has completed **9 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B4, B5, C1).
 GitHub `main` has all eight through [#205](https://github.com/lorecrafting/lokacore/pull/205)
 (A1, B1, A2, B2, A3, B3, B5, C1).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
@@ -181,10 +181,13 @@ B3 Peg's finite shop is implemented at chapter 0.0.18/API1.16 and independently
 approved after its ID-pin and schema-example findings were fixed
 ([primary review](reviews/2026-10-05-b3-pegs-shop-primary-review.md),
 [save review](reviews/2026-10-05-b3-pegs-shop-save-second-review.md)). It is published in #205. B4 refillable light and
-safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md)
-and [independent plan approval](reviews/2026-10-05-b4-light-plan-review.md);
-source implementation is provisionally merged on local `main` while independent
-primary and save/protocol reviews run.
+safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md),
+[independent plan approval](reviews/2026-10-05-b4-light-plan-review.md),
+[primary source review](reviews/2026-10-05-b4-light-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-b4-light-save-second-review.md).
+All source findings closed on local `main` at chapter 0.0.21/API1.19, hash
+`a274bb1c6b22306718648bbcb1b967ee017e0420b62589afe10e1009434dbbfa`
+and 94 IDs. The accumulated local check passed; GitHub publication remains ahead.
 
 B5 Infirmary Herbs is implemented on local `main` at chapter 0.0.19/API1.17.
 Its finite fenwort harvest, four bandage exchanges and bounded Priory contribution

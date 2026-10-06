@@ -1,3 +1,5 @@
+import { readActions } from './read_actions.ts';
+import * as light from '../mechanics/light/shared.ts';
 import { harvest } from '../mechanics/containment/harvest.ts';
 import { escapeDirections } from '../mechanics/combat/flee.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
@@ -12,7 +14,7 @@ import type {
   TargetSpec,
 } from '../contracts.gen.ts';
 import { admission, detailOf, refusal, resolved, type Offered } from '../commands/actions.ts';
-import { bodyOf, type World } from '../runtime/decision.ts';
+import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -21,8 +23,6 @@ import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
-import { readRefused } from '../mechanics/readable/rule.ts';
-import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 /**
@@ -59,7 +59,8 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   };
   const here = (a: Offered) =>
     !a.recipe ||
-    world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
+    (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
+      light.visible(world, actor, detailOf(world, a.recipe.target), steps));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && a.command !== 'read' && !MODAL.includes(a.command))
@@ -84,6 +85,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           !readableRecipe(a) &&
           !door(a) &&
           !equip(a) &&
+          !light.VERBS.includes(a.command) &&
           a.command !== current,
       ),
       ...readActions(world, actor, set, steps),
@@ -92,8 +94,9 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
         set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
     ),
     of: (scope: string, id: string, nested = false) =>
-      listed((a) => entityOffered(world, actor, a, scope, id, nested), id, scope),
-    worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
+      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope),
+    worn: (id: string) =>
+      listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
 }
@@ -105,7 +108,16 @@ function entityOffered(
   scope: string,
   id: string,
   nested: boolean,
+  steps: Steps,
 ) {
+  if (scope === 'worn' && !light.VERBS.includes(a.command))
+    return a.command === 'remove' && fits(world, actor, a, id);
+  if (light.VERBS.includes(a.command))
+    return (
+      ['inventory', 'worn'].includes(scope) &&
+      !nested &&
+      lightOffered(world, actor, a, id as EntityId, steps)
+    );
   return door(a)
     ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
     : nested
@@ -129,11 +141,14 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
+  const target_ids = lightTargets(world, actor, a, id);
   const shown = {
     action_key: a.key,
+    ...(light.VERBS.includes(a.command) && { command: a.command }),
     label: a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
+    ...(target_ids && { target_ids }),
     ...(patch && { label: patch.label, target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
@@ -231,43 +246,6 @@ function putPairs(
   return pairs;
 }
 
-// ponytail: reuse the flat detail table used by target resolution; index only if measured.
-function readActions(
-  world: World,
-  actor: CharacterId,
-  set: ReturnType<typeof resolved>,
-  steps: { n: number },
-): AdvertisedAction[] {
-  const actions = Object.values(set).filter(
-    (a) =>
-      a.command === 'read' &&
-      a.target.kind === 'entity' &&
-      a.target.scopes.includes('inspectable_details'),
-  );
-  if (!actions.length) return [];
-  const result: AdvertisedAction[] = [];
-  for (const id in world.details) {
-    if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
-    const target_id = id as EntityId;
-    if (readRefused(world, actor, target_id)) continue;
-    for (const a of actions) {
-      if (result.length >= LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
-      const code = refusal(world, { type: 'read', actor_id: actor, target_id }, steps, a.key, set);
-      const shown = {
-        action_key: a.key,
-        label: world.details[id].readable!.label,
-        target: a.target,
-        input: a.input,
-        target_ids: [target_id],
-      };
-      result.push(
-        code ? { ...shown, available: false, reason: { code } } : { ...shown, available: true },
-      );
-    }
-  }
-  return result;
-}
-
 function noticeOffer(world: World, a: Offered, id: string) {
   return (
     (a.command === 'harvest' && !!world.details[id]?.harvest) ||
@@ -277,4 +255,24 @@ function noticeOffer(world: World, a: Offered, id: string) {
       detailOf(world, a.recipe.target) === id
     )
   );
+}
+
+function lightOffered(world: World, actor: CharacterId, a: Offered, item: EntityId, steps: Steps) {
+  const supply = a.command === 'refuel' ? light.sourceSupply(world, item) : undefined;
+  const payload = {
+    type: a.command,
+    actor_id: actor,
+    item_id: item,
+    ...(supply && { supply_id: supply }),
+  } as CommandPayload;
+  return (
+    !refusal(world, payload, steps, a.key) &&
+    typeof light.transition(world, actor, a.command, item, supply) !== 'string'
+  );
+}
+
+function lightTargets(world: World, actor: CharacterId, a: Offered, id?: string) {
+  return id && light.VERBS.includes(a.command)
+    ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
+    : undefined;
 }

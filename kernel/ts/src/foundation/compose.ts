@@ -1,4 +1,5 @@
-// size: allow 320, typed terminal quest replacement joins portable composition
+import { quest, repeatPair } from './compose_quest.ts';
+import { composeFuel } from './fuel.ts';
 import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
@@ -14,7 +15,7 @@ import {
   type StateDelta,
 } from '../contracts.gen.ts';
 
-type Obj = { readonly [key: string]: Json };
+export type Obj = { readonly [key: string]: Json };
 export type State = { readonly clock: number } & { readonly [section: string]: Json };
 export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
@@ -22,15 +23,8 @@ export type Result = { changes: Change[] } | { fault: Fault };
 
 type Written = { group: number; target: MutationTarget; value: Json };
 type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
-type Outcome = { value: Json } | { code: ErrorCode };
+export type Outcome = { value: Json } | { code: ErrorCode };
 
-const LEGAL: Record<string, string[]> = {
-  active: ['objectives_complete', 'failed', 'abandoned'],
-  objectives_complete: ['resolved', 'failed', 'abandoned'],
-  failed: ['active'],
-  abandoned: ['active'],
-};
-const OPEN = ['active', 'objectives_complete'];
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
   open: ['closed'],
@@ -39,7 +33,7 @@ const DOOR: Record<string, string[]> = {
 
 export const key = (value: unknown): string => encode(value as Json);
 export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
-const get = (o: Json | undefined, k: string): Json | undefined =>
+export const get = (o: Json | undefined, k: string): Json | undefined =>
   o !== null && typeof o === 'object' && !Array.isArray(o) && Object.hasOwn(o, k)
     ? (o as Obj)[k]
     : undefined;
@@ -99,7 +93,7 @@ export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined 
 const fault = (code: ErrorCode, t: MutationTarget): Result => ({
   fault: { kind: 'fault', code, target: t },
 });
-const check = (ok: boolean, value: Json): Outcome =>
+export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
@@ -107,10 +101,8 @@ const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as O
 function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
   switch (op.op) {
-    case 'fact.assign': {
-      const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
-      return check(now !== undefined && same(now, op.expected), op.value);
-    }
+    case 'fact.assign':
+      return assign(op, row, ctx);
     case 'entity.create':
       return check(
         row === undefined && creationValid(op.identity as unknown as Json, ctx.state),
@@ -121,7 +113,7 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'quest.activate':
     case 'quest.retire':
     case 'quest.transition':
-      return quest(op, row, ctx);
+      return quest(op, row, () => rows('quest', 'quests', 'instance_id', ctx));
     case 'choice.open':
     case 'choice.resolve':
     case 'choice.close':
@@ -138,6 +130,8 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return transitionEscort(op, row);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
+    case 'fuel.set':
+      return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
     case 'cooldown.start':
@@ -181,39 +175,6 @@ function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined)
     default:
       return check(get(row, 'status') === 'pending', put(row, { status: 'closed' }));
   }
-}
-
-function quest(op: DeltaOp & { op: `quest.${string}` }, row: Json | undefined, ctx: Ctx): Outcome {
-  if (op.op === 'quest.retire')
-    return check(
-      get(row, 'state') === 'resolved' &&
-        same(get(row, 'quest'), op.quest) &&
-        same(get(row, 'scope'), op.scope),
-      null,
-    );
-  if (op.op === 'quest.activate') {
-    const taken = rows('quest', 'quests', 'instance_id', ctx).some(
-      ([, r]) =>
-        same(get(r, 'quest'), op.quest) &&
-        same(get(r, 'scope'), op.scope) &&
-        OPEN.includes(get(r, 'state') as string),
-    );
-    const created = {
-      quest: op.quest,
-      scope: op.scope,
-      state: 'active',
-      ...(op.bindings && { bindings: op.bindings }),
-    };
-    return check(row === undefined && !taken, created as unknown as Json);
-  }
-  const outcomeOk =
-    op.to === 'resolved'
-      ? op.outcome !== undefined
-      : op.to === 'failed' || op.outcome === undefined;
-  const { outcome: _, ...rest } = (row ?? {}) as Obj;
-  const next = op.outcome === undefined ? rest : { ...rest, outcome: op.outcome };
-  const legal = (LEGAL[op.from] ?? []).includes(op.to);
-  return check(get(row, 'state') === op.from && legal && outcomeOk, { ...next, state: op.to });
 }
 
 function transferOp(
@@ -272,6 +233,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'escorts'), t.actor_id);
     case 'clock':
       return s.clock;
+    case 'fuel':
+      return get(section(s, 'fuel'), t.item_id);
     case 'resource':
       return get(section(s, 'resources'), key(t));
     case 'cooldown':
@@ -302,15 +265,7 @@ function barrier(
   );
 }
 
-function repeatPair(op: DeltaOp, next: DeltaOp | undefined): boolean {
-  return (
-    op.op !== 'quest.retire' ||
-    !!(
-      next?.op === 'quest.activate' &&
-      next.writer_group === op.writer_group &&
-      next.instance_id !== op.instance_id &&
-      same(next.quest, op.quest) &&
-      same(next.scope, op.scope)
-    )
-  );
+function assign(op: Extract<DeltaOp, { op: 'fact.assign' }>, row: Json | undefined, ctx: Ctx) {
+  const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
+  return check(now !== undefined && same(now, op.expected), op.value);
 }

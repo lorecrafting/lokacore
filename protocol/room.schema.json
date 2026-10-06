@@ -297,6 +297,9 @@
         },
         "sanctuary": {
           "type": "boolean"
+        },
+        "dark_description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [

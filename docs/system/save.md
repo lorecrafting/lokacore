@@ -527,7 +527,7 @@ Only that typed operation deletes a row; receipts retain prior occurrence proof.
 
 ## B4 fuel and dark recovery
 
-Planned [B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the
+[B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the
 pinned current release (authored charge, unlit, at the fresh-world clock), then
 persist independently of custody. Source/supply
 changes and their bound receipt commit together before memory adoption or success
@@ -545,8 +545,10 @@ command's burn/ignite/douse/refill semantics; the resulting stored rows must mat
 the current save. Reject a missing debit, fabricated refill, wrong participant,
 reordered receipt or unexplained bounded charge as `save_corrupt`. Read historical
 fuel at its commit, not at today's clock; time/custody receipts do not refill rows.
-Reuse the pure fuel transition verifier at this trust boundary rather than create
-a second writer or generic event ledger.
+Reuse the existing accepted-receipt replay through the kernel's pure fuel transition
+at this trust boundary. Its activation includes a declared fuel source or supply,
+including cartridges without a repeated exchange. No second replay writer or
+additional event ledger is created.
 
 Real SQLite proof covers fresh/unlit, lit, doused, partially refueled, exhausted,
 sold/bought-back, nested and corpse-held states. Failed COMMIT retains all prior

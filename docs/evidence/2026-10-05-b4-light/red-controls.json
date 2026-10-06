@@ -1,0 +1,56 @@
+[
+  {
+    "mutation": "old_interval_settlement",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "omitted_supply_debit",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "nested_illumination",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "raw_id_visibility_bypass",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "missing_owned_corpse_exemption",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "foreign_corpse_exemption",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "custody_triggered_refill",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "ignored_fuel_prior",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  },
+  {
+    "mutation": "omitted_light_only_replay",
+    "old_focused_exit": 0,
+    "new_focused_exit": 1,
+    "killed": true
+  }
+]

@@ -170,6 +170,8 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
  * invoked `action`, only that action of the set is matched. A projection may supply the already
  * composed `set` to reuse it across targets.
  */
+import { visible } from '../mechanics/light/shared.ts';
+
 export function refusal(
   world: World,
   payload: CommandPayload,
@@ -183,6 +185,7 @@ export function refusal(
     !fighting(world, payload.actor_id)
   )
     return 'permission_denied';
+  if (hiddenTarget(world, payload, steps)) return 'not_present';
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(set ?? resolved(world, actor)).filter(
@@ -202,7 +205,9 @@ export function refusal(
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const target = (a: Offered) =>
     a.recipe ? detailOf(world, a.recipe.target) : (p.target_id ?? p.item_id);
-  const ok = (a: Offered) => holds(world, actor, a.policy.root, { target: target(a), steps });
+  const ok = (a: Offered) =>
+    (!a.recipe || visible(world, actor, detailOf(world, a.recipe.target), steps)) &&
+    holds(world, actor, a.policy.root, { target: target(a), steps });
   return matching.some(ok) ? undefined : 'invalid_state';
 }
 
@@ -279,4 +284,13 @@ export function admission(
     return 'cooldown' as const;
   const paid = pay(world, body, recipe.costs ?? []);
   return paid ? { paid, last, from } : ('insufficient_resource' as const);
+}
+
+function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
+  const p = payload as { actor_id: CharacterId } & Partial<
+    Record<'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id', EntityId>
+  >;
+  return [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id].some(
+    (id) => id && !visible(world, p.actor_id, id, steps),
+  );
 }

@@ -5,13 +5,13 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { buttonsOf, group } from './model.ts';
 const pin = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v020_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v021_hash.json', import.meta.url),
     'utf8',
   ),
 );
 const ids = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v020_ids.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v021_ids.json', import.meta.url),
     'utf8',
   ),
 );

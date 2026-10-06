@@ -25,6 +25,7 @@ import * as commerce from '../mechanics/commerce/rule.ts';
 import * as containment from '../mechanics/containment/rule.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 import * as dialogue from '../mechanics/dialogue/rule.ts';
+import * as light from '../mechanics/light/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
@@ -48,6 +49,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   barrier: barrier.decide,
   quest: quest.decide,
   dialogue: dialogue.decide,
+  light: light.decide,
   equipment: equipment.decide,
   position: position.decide,
   scene: scene.decide,
@@ -76,7 +78,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.18',
+  kernel_api: '1.19',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

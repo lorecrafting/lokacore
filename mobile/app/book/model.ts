@@ -103,7 +103,8 @@ export function group(buttons: Button[]) {
         !OWN.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
-    on: (id: string) => buttons.filter((b) => b.detail_id === id || b.target_ids.includes(id)),
+    on: (id: string) =>
+      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
   };
 }
 
@@ -236,12 +237,13 @@ function travel(v: GameView): Press[] {
 // size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
-    a: { action_key: string; label: string; target_ids?: readonly string[] },
+    a: { action_key: string; label: string; target_ids?: readonly string[]; command?: string },
     name: string,
     id?: string,
   ) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
+    ...(a.command === 'refuel' && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -263,7 +265,11 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        return button(a, ` ${text(e.name)}${destination ? ` in ${text(destination)}` : ''}`, e.id);
+        return button(
+          a,
+          ` ${text(e.name)}${destination ? ` ${a.command === 'refuel' ? 'from' : 'in'} ${text(destination)}` : ''}`,
+          e.id,
+        );
       }),
   );
   const placed = place.map((a) => ({

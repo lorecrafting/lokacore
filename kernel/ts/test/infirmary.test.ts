@@ -177,7 +177,7 @@ test('exchange retains original Wick bindings after definition mapping drift', (
   const w = a.world();
   a.replace({
     ...w,
-    entityIds: { ...w.entityIds, 'ashmere_missing_child@0.0.20:npc/wick': id('room', 'cloister') },
+    entityIds: { ...w.entityIds, 'ashmere_missing_child@0.0.21:npc/wick': id('room', 'cloister') },
   });
   a.choose('exchange');
   assert.equal(a.world().state.containers[herbs[0]], wick);
