@@ -1,0 +1,36 @@
+Compiling 66 files (.ex)
+     warning: function selected_flight?/3 is unused
+     │
+ 153 │   defp selected_flight?(row, id, state) do
+     │        ~
+     │
+     └─ lib/loka/core/creation.ex:153:8: Loka.Core.Creation (module)
+
+     warning: function flight_member_present?/3 is unused
+     │
+ 160 │   defp flight_member_present?(id, room, state) do
+     │        ~
+     │
+     └─ lib/loka/core/creation.ex:160:8: Loka.Core.Creation (module)
+
+Generated loka app
+Running ExUnit with seed: 736994, max_cases: 16
+
+
+
+  1) test literal exact pack admission and refusals agree with both independent guards (Loka.Core.C4PackCompositionTest)
+     test/loka/core/c4_pack_composition_test.exs:19
+     flight-stamp-cannot-name-unselected-member
+     code: for c <- @fixture["cases"] do
+     stacktrace:
+       test/loka/core/c4_pack_composition_test.exs:23: anonymous fn/2 in Loka.Core.C4PackCompositionTest."test literal exact pack admission and refusals agree with both independent guards"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/c4_pack_composition_test.exs:20: (test)
+
+.
+Finished in 0.04 seconds (0.04s async, 0.00s sync)
+
+Result: 1/2 passed
+Failed: 1 test
+
+Mutant exit: 2

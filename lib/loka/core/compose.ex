@@ -1,41 +1,12 @@
 # size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
-  StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of `kernel/ts/src/foundation/compose.ts`.
-  Both run the portable composition fixtures. Contract-valid ops apply in semantic order to
-  an overlay; preconditions read overlay over base. Different writer groups sharing a target
-  fault `conflicting_write`. The committed base is never copied.
-
-  Base state, a JSON object (absent sections are empty):
-
-  - `"clock"`: required integer logical time; otherwise faults `precondition_failed` on clock;
-  - `"facts"`: canonical fact MutationTarget text => FactValue (compared as opaque values);
-  - `"fact_defaults"`: canonical DefinitionRef text => FactValue for unset facts;
-  - `"containers"`: EntityId => its one container (03 §23); `"capacities"`: EntityId =>
-    the most entities it may contain;
-  - `"quests"`: QuestInstanceId => `quest`, `scope`, `state`, optional `outcome`;
-  - `"choices"`: ContinuationId => the `choice.open` fields plus `status` and the
-    host-assigned `opened_revision`;
-  - `"jobs"`: JobId => `job`, `due_time`, `status`, optional `encounter_id`;
-  - `"encounters"`: EncounterId => EncounterRow (participants, room, status, round and job);
-  - `"resource_specs"`: canonical DefinitionRef => ResourceSpec (`minimum`, `maximum`, `start`,
-    `gain`, optional `regen`); `"resources"`: canonical resource target => `value`, `at`, plus
-    required `rate`, `remainder` for opted recovery; `current/3` reads its current value;
-  - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started;
-  - `"barrier_initial"`: canonical DefinitionRef text => BarrierState for unset barriers;
-    `"barriers"`: canonical barrier MutationTarget text => BarrierState;
-  - `"liquid_specs"`: ItemId => immutable `capacity`, declared `kinds`;
-    `"liquids"`: ItemId => exact `kind`, `quantity` row.
-
-  Result: `%{"changes" => rows}` sorted by canonical target text, one `%{"target", "value"}`
-  per target (ADR-072), or `%{"fault" => fault}` naming the failed op's target when present.
-  Continuations lack `opened_revision` until commit. Budgets precede ops, conflicts precede
-  preconditions. An overlay failure discards the whole proposal.
-
-  An explicit advance is a delta with `time.advance`; its target (the last `to`) is the
-  visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
+  Portable StateDelta composition (04 §5.1-§5.4, 14 §R3A). Preconditions read
+  an overlay over the committed base; only changed rows are returned. Different
+  writer groups sharing a target fault atomically. Budgets precede operations,
+  and an explicit time.advance sets the visited time for jobs and resources.
   """
-  alias Loka.Core.Creation
+  alias Loka.Core.{ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -61,7 +32,7 @@ defmodule Loka.Core.Compose do
       true ->
         result = apply_all(state, ops)
 
-        if final and Map.has_key?(result, "changes") and not Creation.complete?(ops),
+        if final and Map.has_key?(result, "changes") and not Creation.complete?(ops, state),
           do: fault("precondition_failed", %{"kind" => "clock"}),
           else: result
     end
@@ -238,7 +209,21 @@ defmodule Loka.Core.Compose do
       )
 
   defp apply_op(%{"op" => "encounter." <> _} = op, t, ctx),
-    do: Loka.Core.ComposeEncounter.change(op, read(t, ctx))
+    do:
+      Loka.Core.ComposeEncounter.change(
+        op,
+        read(t, ctx),
+        fn id, room ->
+          ComposePack.remains?(
+            id,
+            room,
+            op["writer_group"],
+            get_in(elem(ctx, 0), ["jobs", op["job_id"], "due_time"]),
+            ctx
+          )
+        end,
+        fn id, room -> ComposePack.initially_present?(id, room, elem(ctx, 0)) end
+      )
 
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))

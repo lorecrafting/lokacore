@@ -1,0 +1,21 @@
+worktree: GREEN
+home: GREEN
+private scratch: GREEN
+ordinary scratch: GREEN
+Darwin scratch: GREEN
+private Darwin scratch: GREEN
+adb serial: GREEN
+Android serial key: GREEN
+adb devices row: GREEN
+iPhone UDID: GREEN
+iPhone ECID: GREEN
+iPhone serial: GREEN
+device name: GREEN
+device name key: GREEN
+team ID: GREEN
+certificate: GREEN
+signing certificate: GREEN
+provisioning: GREEN
+app-container UUID: GREEN
+TOTAL=19 FAILED=0
+EXIT=0

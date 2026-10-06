@@ -28,6 +28,7 @@ export function population(c: Obj): Diagnostic[] {
       rooms.every(Boolean) &&
       reciprocal(rooms, p.area);
     const template = bundle && templateValid(c, bundle, p.home);
+    if (!packValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.pack.narration`));
     if (!bundle || !template) out.push(diag('SCHEMA_VIOLATION', `${at}.bundle`));
     if (!area) out.push(diag('SCHEMA_VIOLATION', `${at}.area`));
     if (!validPeriods) out.push(diag('SCHEMA_VIOLATION', `${at}.wander_interval`));
@@ -36,6 +37,27 @@ export function population(c: Obj): Diagnostic[] {
       out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'population' }, ['population@1']));
   }
   return out;
+}
+
+function packValid(c: Obj, p: Obj, rooms: Obj[]): boolean {
+  const narration = p.pack?.narration;
+  if (!narration) return true;
+  const directions: string[] = rooms.flatMap((room: Obj) =>
+    room
+      ? Object.entries(room.exits ?? {})
+          .filter(([, edge]: [string, any]) => p.area.some((r: Obj) => ref(r) === ref(edge.to)))
+          .map(([direction]) => direction)
+      : [],
+  );
+  return (
+    directions.every((direction) => narration.enemy_fled[direction]) &&
+    [
+      ...Object.values(narration.enemy_fled),
+      narration.helper_joined,
+      narration.primary_changed,
+      narration.pack_withdrew,
+    ].every((key) => c.text?.[key as string])
+  );
 }
 
 function periods(p: Obj, calendar?: Obj): boolean {
