@@ -423,6 +423,13 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "water_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "water_body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
@@ -753,14 +760,25 @@
             },
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
+            },
+            "water_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
             }
           },
           "required": [
             "op",
             "writer_group",
-            "job_id",
-            "encounter_id"
+            "job_id"
           ],
+          "requiredUnless": {
+            "water_generation": [
+              "encounter_id"
+            ]
+          },
           "additionalProperties": false,
           "examples": [
             {
@@ -1077,6 +1095,41 @@
             "entity_id",
             "value",
             "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "water.transition"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "water.schema.json#/$defs/WaterOccupancy"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "water.schema.json#/$defs/WaterOccupancy"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "actor_id",
+            "expected",
+            "value"
           ],
           "additionalProperties": false
         }
@@ -1559,6 +1612,22 @@
             "kind",
             "plan",
             "slot"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "water"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id"
           ],
           "additionalProperties": false
         }

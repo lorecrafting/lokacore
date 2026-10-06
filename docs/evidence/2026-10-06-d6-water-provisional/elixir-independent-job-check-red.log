@@ -1,0 +1,81 @@
+Compiling 70 files (.ex)
+Generated loka app
+Running ExUnit with seed: 986090, max_cases: 16
+
+.
+
+  1) test independent job invariant rejects partial actor/body/generation success (Loka.Core.WaterCompositionTest)
+     test/loka/core/water_composition_test.exs:26
+     Expected false or nil, got true
+     code: refute Invariants.check("delta_preconditions_hold", %{
+             "state" => c["state"],
+             "delta" => %{"ops" => c["ops"]},
+             "result" => fake
+           })
+     arguments:
+
+         # 1
+         "delta_preconditions_hold"
+
+         # 2
+         %{
+           "delta" => %{
+             "ops" => [
+               %{
+                 "actor_id" => "11111111-2222-4333-8444-555555555555",
+                 "due_time" => 70800,
+                 "job" => %{
+                   "cartridge_id" => "water_probe",
+                   "cartridge_version" => "1.0.0",
+                   "key" => "bottom",
+                   "kind" => "room"
+                 },
+                 "job_id" => "44444444-5555-4666-8777-888888888888",
+                 "op" => "job.schedule",
+                 "water_generation" => 1,
+                 "writer_group" => 0
+               }
+             ]
+           },
+           "result" => %{
+             "changes" => [
+               %{
+                 "target" => %{
+                   "job_id" => "44444444-5555-4666-8777-888888888888",
+                   "kind" => "job"
+                 },
+                 "value" => %{
+                   "actor_id" => "11111111-2222-4333-8444-555555555555",
+                   "due_time" => 70800,
+                   "job" => %{
+                     "cartridge_id" => "water_probe",
+                     "cartridge_version" => "1.0.0",
+                     "key" => "bottom",
+                     "kind" => "room"
+                   },
+                   "status" => "pending",
+                   "water_generation" => 1
+                 }
+               }
+             ]
+           },
+           "state" => %{"clock" => 64800}
+         }
+
+     stacktrace:
+       test/loka/core/water_composition_test.exs:35: anonymous fn/3 in Loka.Core.WaterCompositionTest."test independent job invariant rejects partial actor/body/generation success"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/water_composition_test.exs:29: (test)
+
+.
+Finished in 0.2 seconds (0.2s async, 0.00s sync)
+
+Result: 2/3 passed
+Failed: 1 test
+     warning: function binding?/1 is unused
+     │
+ 136 │   defp binding?(op) do
+     │        ~
+     │
+     └─ lib/loka/core/invariants_encounter.ex:136:8: Loka.Core.InvariantsEncounter (module)
+

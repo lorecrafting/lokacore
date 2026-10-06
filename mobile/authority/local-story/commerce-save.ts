@@ -222,6 +222,14 @@ function custodyEvidence(
 ) {
   const p = command.payload;
   if (p.type === 'buy' || p.type === 'sell') return true; // shopReceipt checked the entire exchange.
+  // liquidSave already replayed the owned bottom corpse and every original root.
+  if (p.type === 'recover_corpse')
+    return (
+      d.outcome === 'corpse_recovered' &&
+      op.writer_group === 0 &&
+      op.source_id === p.corpse_id &&
+      op.destination_id === world.body
+    );
   if (['take', 'drop', 'put', 'give', 'wear', 'remove'].includes(p.type)) {
     if (!('item_id' in p) || p.item_id !== op.entity_id || op.writer_group !== 0) return false;
     if (p.type === 'take') return op.destination_id === world.body;

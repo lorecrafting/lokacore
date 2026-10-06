@@ -11,6 +11,7 @@
 // entity_entered_room (mechanics/schedule/behavior.ts entered), its id the second. A job that is not pending is
 // invalid_state.
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
+import { expiry } from '../water/expiry.ts';
 import { roundSequence } from '../combat/round.ts';
 import {
   accepted,
@@ -31,6 +32,8 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending') return rejected('invalid_state');
+    if (row.water_generation !== undefined)
+      return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     if (row.job.kind === 'population')

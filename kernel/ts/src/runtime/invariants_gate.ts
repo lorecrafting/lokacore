@@ -1,3 +1,4 @@
+import { watersHold } from './invariants_water.ts';
 import { same } from '../foundation/compose.ts';
 import type { DeltaOp } from '../contracts.gen.ts';
 import { creationsHold } from './invariants_creation.ts';
@@ -17,7 +18,8 @@ export function gate(state: Any, ops: DeltaOp[], result: Any): boolean {
     encountersHold(state, ops, result) &&
     escortsHold(state, ops, result) &&
     patrolsHold(state, ops, result) &&
-    populationsHold(state, ops, result)
+    populationsHold(state, ops, result) &&
+    watersHold(state, ops, result)
   );
 }
 

@@ -1,0 +1,15 @@
+Compiling 70 files (.ex)
+Generated loka app
+Running ExUnit with seed: 141361, max_cases: 16
+
+............
+Finished in 4.6 seconds (4.6s async, 0.00s sync)
+
+Result: 12 passed
+    warning: variable "row" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+  3 │   def transition(op, row, {state, _, _} = ctx, read) do
+    │                      ~~~
+    │
+    └─ lib/loka/core/compose_water.ex:3:22: Loka.Core.ComposeWater.transition/4
+

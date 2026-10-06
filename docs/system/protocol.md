@@ -1099,7 +1099,22 @@ with null killer/credit. MV 0 alone is not fatal. Settlement at the exact deadli
 precedes action admission, including Up; no command-ID tie may grant extra time.
 If existing scheduler ordering cannot express this locally, stop for PM rather
 than change global ordering silently. Compiler/loader/save and event validation
-must define the narrow occupancy/job/cause types before use.
+must define the narrow occupancy/job/cause types before use. An underwater Up
+reservation retains its original occupancy generation through elapsed preflight;
+invalidating that generation returns `stale_view` before the movement rule,
+leaving the same body at Chapel with one corpse. A clock tick within the same
+occupancy does not invalidate the captured free Up. Global scheduler order stays.
+
+Provisional source shape: [water contracts](../../protocol/water.schema.json)
+define content `WaterSettings`, actor-keyed `WaterOccupancy`, bound `WaterJob`,
+confirmed `WaterView` and selected `CorpseRecoveryView`. D6 content opts into
+`real_elapsed`; the view carries logical remaining time and confirmed real
+seconds derived from the cartridge rate, without a presenter clock. `water.transition`
+compares the full prior row and increments the generation on entry or clear.
+An active row binds body, bottom room, entry clock, absolute deadline and job;
+a cleared row retains generation/body and has null room/entry/deadline/job.
+The job binds actor/body/generation to the exact bottom DefinitionRef and due
+clock. These are source candidates, not a successor API/release/hash/ID freeze.
 
 Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
 `target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at

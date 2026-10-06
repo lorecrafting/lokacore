@@ -1,4 +1,4 @@
-// size: allow 312, food projection and method-aware Harvest share the composed view list
+// size: allow 325, food, water, and practical skill offers share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { liquidActions } from './liquid.ts';
@@ -33,7 +33,18 @@ import { reach } from '../mechanics/lookups.ts';
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
-const HIDDEN = ['eat', 'buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = [
+  'recover_corpse',
+  'eat',
+  'buy',
+  'sell',
+  'use_service',
+  'read',
+  'fill',
+  'pour',
+  'drink',
+  ...MODAL,
+];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);

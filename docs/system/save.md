@@ -931,7 +931,10 @@ Cold reopen preserves the original deadline/current occurrence and settles
 trusted elapsed debt. At/past expiry, death settles before any subsequent action;
 reopen never renews the deadline. Canceled jobs cannot kill a surfaced or later
 re-entered body. Unknown COMMIT fences later input/elapsed delivery until the
-committed or absent branch is reconciled.
+committed or absent branch is reconciled. A captured underwater Up reservation
+binds the original occupancy generation: expiration during elapsed preflight
+returns `stale_view` at Chapel with one corpse, without executing Chapel Up.
+Ordinary same-generation clock settlement preserves the reserved Surface.
 
 Recovery receipt binds original actor/actual corpse, its eligible underwater
 room location at acceptance, existing roots and their source/destination custody. Replay transfers nothing twice. Later movement or
