@@ -1,0 +1,10 @@
+{
+  "keywords": ["crow", "crow_branches"],
+  "short": "npc.crow.short",
+  "room_line": "npc.crow.room",
+  "description": "npc.crow.description",
+  "room": "oak_branches",
+  "spawn_template": true,
+  "hp": { "minimum": 0, "maximum": 1, "start": 1, "gain": 0 },
+  "attack": { "chance": 0, "damage_min": 1, "damage_max": 1 }
+}
