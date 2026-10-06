@@ -324,3 +324,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C2 Watchman's Rounds source-assignment re-pin](2026-10-05-c2-watchmans-rounds-source-repin-review.md): source `b3790b7299a05b128f1dc3f3a74813c31914e36b` against published main `cc43d018`, independent docs-only APPROVE; current 0.0.21/API1.19/hash/94-ID pin and reviewed C1/B5/B4 integration verified, no findings.
 
 - [Action availability lesson](2026-10-05-action-availability-lesson-review.md): exact local source `1b2afed9`, independent docs-only APPROVE; B4 history and existing shared admission guidance verified, no findings; docs check and normal commit hook pass.
+- [Action admission workflow](2026-10-05-action-admission-workflow-review.md): exact local source `6a11647a`, independent docs-only APPROVE; future mechanic briefs and reviewers check exact offered invocations against keyed admission, reusing existing same-layer proof; no findings.
