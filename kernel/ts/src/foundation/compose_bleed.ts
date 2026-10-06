@@ -44,7 +44,6 @@ export function transitionBleed(
       next.effect !== undefined &&
       next.ends_at > now &&
       next.next_tick_at >= now &&
-      next.next_tick_at <= next.ends_at &&
       known[next.source_id]?.kind === 'npc' &&
       created[next.source_id]?.origin?.role === 'hound'
     : Object.keys(next).length === 2;

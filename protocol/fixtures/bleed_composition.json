@@ -661,6 +661,157 @@
           }
         }
       }
+    },
+    {
+      "id": "mixed-bleed-sight-job-refused",
+      "state": {
+        "clock": 100
+      },
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "a0000000-0000-4000-8000-000000000007",
+          "job": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.35",
+            "kind": "bleed",
+            "key": "bleeding"
+          },
+          "bleed_body_id": "a0000000-0000-4000-8000-000000000002",
+          "bleed_generation": 1,
+          "sight": {
+            "member_id": "a0000000-0000-4000-8000-000000000002",
+            "player_id": "a0000000-0000-4000-8000-000000000002",
+            "slot": 1,
+            "generation": 1,
+            "seen_at": 100,
+            "cause_kind": "player_entry",
+            "cause_id": "a0000000-0000-4000-8000-000000000002",
+            "source_id": null,
+            "destination_id": "a0000000-0000-4000-8000-000000000002"
+          },
+          "due_time": 200
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      }
+    },
+    {
+      "id": "expiry-before-next-cadence",
+      "state": {
+        "clock": 100,
+        "bleeds": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "active": false,
+            "generation": 1
+          }
+        },
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          },
+          "a0000000-0000-4000-8000-000000000006": {
+            "kind": "npc"
+          }
+        },
+        "created": {
+          "a0000000-0000-4000-8000-000000000006": {
+            "origin": {
+              "role": "hound"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "bleed.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "expected": {
+            "active": false,
+            "generation": 1
+          },
+          "value": {
+            "active": true,
+            "generation": 2,
+            "effect": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.35",
+              "kind": "bleed",
+              "key": "bleeding"
+            },
+            "source_id": "a0000000-0000-4000-8000-000000000006",
+            "job_id": "a0000000-0000-4000-8000-000000000007",
+            "next_tick_at": 250,
+            "ends_at": 200
+          }
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "a0000000-0000-4000-8000-000000000007",
+          "job": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.35",
+            "kind": "bleed",
+            "key": "bleeding"
+          },
+          "bleed_body_id": "a0000000-0000-4000-8000-000000000002",
+          "bleed_generation": 2,
+          "due_time": 200
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "bleed",
+              "body_id": "a0000000-0000-4000-8000-000000000002"
+            },
+            "value": {
+              "active": true,
+              "generation": 2,
+              "effect": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.35",
+                "kind": "bleed",
+                "key": "bleeding"
+              },
+              "source_id": "a0000000-0000-4000-8000-000000000006",
+              "job_id": "a0000000-0000-4000-8000-000000000007",
+              "next_tick_at": 250,
+              "ends_at": 200
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.35",
+                "kind": "bleed",
+                "key": "bleeding"
+              },
+              "due_time": 200,
+              "status": "pending",
+              "bleed_body_id": "a0000000-0000-4000-8000-000000000002",
+              "bleed_generation": 2
+            }
+          }
+        ]
+      }
     }
   ]
 }

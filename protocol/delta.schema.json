@@ -881,6 +881,14 @@
             "bleed_body_id": [
               "encounter_id"
             ]
+          },
+          "dependentRequired": {
+            "bleed_body_id": [
+              "bleed_generation"
+            ],
+            "bleed_generation": [
+              "bleed_body_id"
+            ]
           }
         },
         {

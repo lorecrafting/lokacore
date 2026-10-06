@@ -6,8 +6,11 @@ import { read } from './read.ts';
 
 // Breaks: a foreign writer shares a body bleed target, or a spent bandage cannot enter the terminal holder.
 test('literal bleed and terminal composition cases', () => {
-  for (const c of read('protocol/fixtures/bleed_composition.json').cases)
+  for (const c of read('protocol/fixtures/bleed_composition.json').cases) {
+    if (c.id === 'mixed-bleed-sight-job-refused')
+      assert.deepEqual(validate('DeltaOp', c.ops[0]), []);
     assert.deepEqual(compose(c.state, { ops: c.ops }), c.expected, c.id);
+  }
 });
 
 // Breaks: generic admission accepts an active wound missing any one owned occurrence field.
@@ -43,4 +46,18 @@ test('bleed cancellation is the fourth exclusive job binding', () => {
   assert.deepEqual(validate('DeltaOp', { ...op, sight_member_id: op.bleed_body_id }), [
     { path: '', code: 'exclusive_properties' },
   ]);
+  const { bleed_generation: _generation, ...partial } = op;
+  assert.deepEqual(validate('DeltaOp', partial), [
+    { path: '/bleed_generation', code: 'missing_property' },
+  ]);
+  assert.deepEqual(
+    validate('DeltaOp', {
+      op: 'job.cancel',
+      writer_group: 0,
+      job_id: op.job_id,
+      encounter_id: op.job_id,
+      bleed_generation: 1,
+    }),
+    [{ path: '/bleed_body_id', code: 'missing_property' }],
+  );
 });

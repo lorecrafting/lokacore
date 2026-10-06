@@ -8,6 +8,9 @@ defmodule Loka.Core.BleedTest do
   # Breaks: an unrelated group edits the same bleed or a bandage transfer reaches no terminal holder.
   test "literal bleed and bandage composition cases" do
     for c <- @cases do
+      if c["id"] == "mixed-bleed-sight-job-refused",
+        do: assert(Contracts.validate("DeltaOp", hd(c["ops"])) == :ok)
+
       assert Compose.compose(c["state"], %{"ops" => c["ops"]}) == c["expected"], c["id"]
     end
   end
@@ -41,5 +44,15 @@ defmodule Loka.Core.BleedTest do
 
     assert Contracts.validate("DeltaOp", Map.put(op, "sight_member_id", op["bleed_body_id"])) ==
              {:error, [%{path: "", code: :exclusive_properties}]}
+
+    assert Contracts.validate("DeltaOp", Map.delete(op, "bleed_generation")) ==
+             {:error, [%{path: "/bleed_generation", code: :missing_property}]}
+
+    assert Contracts.validate(
+             "DeltaOp",
+             op
+             |> Map.delete("bleed_body_id")
+             |> Map.put("encounter_id", op["job_id"])
+           ) == {:error, [%{path: "/bleed_body_id", code: :missing_property}]}
   end
 end

@@ -237,7 +237,7 @@ defmodule Loka.Core.ComposeEncounter do
     op["bleed_body_id"] != nil and op["bleed_generation"] != nil and
       get_in(op, ["job", "kind"]) == "bleed" and op["encounter_id"] == nil and
       op["quest_instance_id"] == nil and op["water_generation"] == nil and
-      op["actor_id"] == nil
+      op["actor_id"] == nil and op["sight"] == nil
   end
 
   defp other_binding?(op) do

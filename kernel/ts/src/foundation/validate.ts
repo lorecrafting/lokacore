@@ -119,6 +119,8 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
             Object.hasOwn(v, field) ? [] : err(child(path, field), 'missing_property'),
           );
     }
+    case 'dependentRequired':
+      return dependentRequired(arg as Record<string, string[]>, v, path, defs);
     case 'exactlyOneRequired':
       return check(
         (arg as string[]).filter((key) => Object.hasOwn(v, key)).length === 1,
@@ -135,6 +137,12 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
     default:
       return [];
   }
+}
+
+function dependentRequired(r: Record<string, string[]>, v: Obj, path: string, defs: Defs) {
+  return Object.entries(r).flatMap(([key, fields]) =>
+    Object.hasOwn(v, key) ? keyword('required', fields, v, path, defs) : [],
+  );
 }
 
 const jsonType = (s: Schema, defs: Defs): string =>

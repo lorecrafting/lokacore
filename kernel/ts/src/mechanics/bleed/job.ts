@@ -29,6 +29,7 @@ function fatalBleed(
       owner_id: world.character,
       killer_id: row.source_id!,
       credited_character_id: null,
+      cause: 'bleeding',
     },
     mint,
   );

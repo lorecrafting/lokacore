@@ -34,7 +34,7 @@ defmodule Loka.Core.Contracts.Schema do
   @annotations ~w($schema $id title description examples)
   @by_type %{
     "object" =>
-      ~w(type properties required requiredUnless exactlyOneRequired additionalProperties propertyNames maxProperties),
+      ~w(type properties required requiredUnless dependentRequired exactlyOneRequired additionalProperties propertyNames maxProperties),
     "array" => ~w(type items minItems maxItems),
     "string" => ~w(type enum const pattern minLength maxLength),
     "integer" => ~w(type enum const minimum maximum),
@@ -130,6 +130,11 @@ defmodule Loka.Core.Contracts.Schema do
     )
   end
 
+  defp keyword("dependentRequired", r, %{"properties" => ps}, at, _)
+       when is_map(r) and map_size(r) > 0 do
+    ok(Enum.all?(r, &dependent_entry?(&1, ps)), at)
+  end
+
   defp keyword("exactlyOneRequired", keys, %{"properties" => ps}, at, _) when is_map(ps) do
     ok(
       is_list(keys) and length(keys) >= 2 and keys == Enum.uniq(keys) and
@@ -180,10 +185,16 @@ defmodule Loka.Core.Contracts.Schema do
   defp keyword(k, n, _, at, _) when k in ~w(minimum maximum), do: ok(is_integer(n), at)
 
   defp keyword(k, _, _, at, _)
-       when k in ~w(properties oneOf propertyNames anyOf exactlyOneRequired requiredUnless),
+       when k in ~w(properties oneOf propertyNames anyOf exactlyOneRequired requiredUnless dependentRequired),
        do: ["#{at}: invalid"]
 
   defp keyword(_, _, _, _, _), do: []
+
+  defp dependent_entry?({key, fields}, ps) do
+    is_map_key(ps, key) and is_list(fields) and fields != [] and
+      fields == Enum.uniq(fields) and
+      Enum.all?(fields, &(is_binary(&1) and &1 != key and is_map_key(ps, &1)))
+  end
 
   defp ok(true, _), do: []
   defp ok(false, at), do: ["#{at}: invalid"]

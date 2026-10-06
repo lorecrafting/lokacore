@@ -150,6 +150,79 @@ test('only a surviving positive hound strike applies one owned bleed', () => {
   }
 });
 
+// Breaks: the next pack hound replaces the wound's original producer and faults its real round.
+test('a second hound hit refreshes the original source and pending cadence', () => {
+  const { world, target } = fixture();
+  const begun = command(world, 1, { type: 'attack', target_id: target }, 1);
+  const first = elapsed(begun.world, 64950, 2);
+  const row = first.world.state.bleeds![world.body]!;
+  assert.ok(row.active);
+  const tick = elapsed(first.world, 65050, 3);
+  assert.equal(tick.decision.kind, 'accepted');
+  const next = elapsed(tick.world, 65100, 4);
+  assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));
+  assert.ok(
+    next.decision.kind === 'accepted' &&
+      next.decision.events.some(
+        (e) =>
+          e.payload.type === 'attack_result' &&
+          e.payload.loss > 0 &&
+          e.payload.attacker_id !== row.source_id,
+      ),
+  );
+  const refreshed = next.world.state.bleeds![world.body]!;
+  assert.ok(refreshed.active);
+  assert.equal(refreshed.source_id, row.source_id);
+  assert.equal(refreshed.next_tick_at, 65150);
+  const ticking = tick.world.state.bleeds![world.body]!;
+  assert.ok(ticking.active);
+  assert.equal(refreshed.job_id, ticking.job_id);
+});
+
+// Breaks: a final cadence later than the refreshed end rejects its lawful expiry job.
+test('off-cadence re-engagement reaches the earlier expiry without an extra hit', () => {
+  const { world, target, room } = fixture();
+  const first = elapsed(
+    command(world, 1, { type: 'attack', target_id: target }, 1).world,
+    64950,
+    2,
+  );
+  const fled = command(first.world, 2, { type: 'flee' }, 3);
+  assert.equal(fled.decision.kind, 'accepted');
+  const waited = elapsed(fled.world, 64975, 4);
+  const from = waited.world.state.containers[world.body];
+  const direction = Object.entries(waited.world.rooms[from].exits).find(
+    ([, edge]) => waited.world.roomIds[refString(edge.to)] === room,
+  )?.[0];
+  assert.ok(direction);
+  const returned = command(waited.world, 3, { type: 'move', direction }, 5);
+  assert.equal(returned.decision.kind, 'accepted');
+  const engaged = command(returned.world, 4, { type: 'attack', target_id: target }, 6);
+  assert.equal(engaged.decision.kind, 'accepted');
+  const tick = elapsed(engaged.world, 65050, 7);
+  assert.equal(tick.decision.kind, 'accepted', JSON.stringify(tick.decision));
+  const second = elapsed(tick.world, 65125, 8);
+  assert.equal(second.decision.kind, 'accepted', JSON.stringify(second.decision));
+  const bleed = second.world.state.bleeds![world.body]!;
+  assert.ok(bleed.active);
+  assert.equal(bleed.ends_at, 65425);
+  const escaped = command(second.world, 5, { type: 'flee' }, 9);
+  assert.equal(escaped.decision.kind, 'accepted');
+  let before = escaped;
+  for (const [i, at] of [65150, 65250, 65350].entries()) {
+    before = elapsed(before.world, at, i + 10);
+    assert.equal(before.decision.kind, 'accepted', JSON.stringify(before.decision));
+  }
+  const pending = before.world.state.bleeds![world.body]!;
+  assert.ok(pending.active);
+  assert.equal(pending.next_tick_at, 65450);
+  assert.equal(before.world.state.jobs![pending.job_id!].due_time, 65425);
+  const end = elapsed(before.world, 65425, 13);
+  assert.equal(end.decision.kind, 'accepted', JSON.stringify(end.decision));
+  assert.equal(end.world.state.bleeds![world.body]!.active, false);
+  assert.equal(hp(end.world), hp(before.world));
+});
+
 // Breaks: a real tick damages after cure, expiry damages at its exclusive end, or a held item is spent without qualified active treatment.
 test('one held qualified bandage cures after one tick and keeps exact HP', () => {
   const { world, target } = fixture();
@@ -242,16 +315,25 @@ test('fatal tick closes bleed before same-body Chapel return', () => {
   );
   assert.equal(first.decision.kind, 'accepted', JSON.stringify(first.decision));
   assert.equal(hp(first.world), 1);
+  const applied = first.world.state.bleeds![world.body]!;
+  assert.ok(applied.active);
+  const source = applied.source_id;
   const fled = command(first.world, 2, { type: 'flee' }, 3);
   assert.equal(fled.decision.kind, 'accepted');
   const fatal = elapsed(fled.world, 65050, 4);
   assert.equal(fatal.decision.kind, 'accepted', JSON.stringify(fatal.decision));
   assert.equal(fatal.world.state.bleeds![world.body]!.active, false);
   assert.equal(hp(fatal.world), 10);
-  assert.equal(
-    fatal.decision.kind === 'accepted' &&
-      fatal.decision.events.filter((e) => e.payload.type === 'entity_died').length,
-    1,
+  const deaths =
+    fatal.decision.kind === 'accepted'
+      ? fatal.decision.events.filter((e) => e.payload.type === 'entity_died')
+      : [];
+  assert.equal(deaths.length, 1);
+  const died = deaths[0]?.payload;
+  assert.ok(died && died.type === 'entity_died');
+  assert.deepEqual(
+    [died.cause, died.killer_id, died.credited_character_id],
+    ['bleeding', source, null],
   );
   const later = elapsed(fatal.world, 65150, 5);
   assert.equal(later.decision.kind, 'accepted');

@@ -10,6 +10,7 @@ export const currentBleed = (world: World, body: EntityId) => {
 
 export function clearBleed(world: World, body: EntityId): DeltaOp[] {
   const row = currentBleed(world, body);
+  const status = row && world.state.jobs?.[row.job_id!]?.status;
   return row
     ? [
         {
@@ -19,13 +20,17 @@ export function clearBleed(world: World, body: EntityId): DeltaOp[] {
           expected: row,
           value: { generation: row.generation, active: false },
         },
-        {
-          op: 'job.cancel',
-          writer_group: 0,
-          job_id: row.job_id!,
-          bleed_body_id: body,
-          bleed_generation: row.generation,
-        },
+        ...(status !== 'completed' && status !== 'cancelled'
+          ? [
+              {
+                op: 'job.cancel' as const,
+                writer_group: 0,
+                job_id: row.job_id!,
+                bleed_body_id: body,
+                bleed_generation: row.generation,
+              },
+            ]
+          : []),
       ]
     : [];
 }
@@ -74,7 +79,7 @@ export function wound(world: World, source_id: EntityId, body: EntityId, mint: M
     active: true,
     generation,
     effect,
-    source_id,
+    source_id: active?.source_id ?? source_id,
     ends_at,
     next_tick_at,
     job_id,

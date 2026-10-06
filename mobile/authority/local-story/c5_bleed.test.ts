@@ -15,16 +15,14 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
-import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import type { Db } from './store.ts';
 import { bleedingLine, buttonsOf, group } from '../../app/book/model.ts';
 
-// Breaks: the managed elapsed driver skips the newly scheduled second tick or expiry in one
-// offline catch-up, or cold reopen loses the resulting HP and inactive condition.
-test('managed offline catch-up commits each bleed tick and expiry through real SQLite', (t) => {
+function managedBleedBundle() {
   const content = structuredClone(
     read('kernel/ts/test/fixtures/c5-provisional-artifact.json').cartridge,
   );
@@ -54,6 +52,13 @@ test('managed offline catch-up commits each bleed tick and expiry through real S
       initial.state.containers[id] === initial.state.containers[initial.body],
   )?.[0];
   assert.ok(target);
+  return { bundle, initial, target };
+}
+
+// Breaks: the managed elapsed driver skips the newly scheduled second tick or expiry in one
+// offline catch-up, or cold reopen loses the resulting HP and inactive condition.
+test('managed offline catch-up commits each bleed tick and expiry through real SQLite', (t) => {
+  const { bundle, initial, target } = managedBleedBundle();
   const dir = mkdtempSync(join(tmpdir(), 'loka-c5-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
@@ -80,6 +85,56 @@ test('managed offline catch-up commits each bleed tick and expiry through real S
   const after = b.game.view().view;
   assert.equal(after.bleeding, undefined);
   assert.equal(after.resources?.find((r) => r.resource.key === 'hp')?.current, 7);
+});
+
+// Breaks: a cold-opened off-cadence expiry stalls behind its future next_tick_at.
+test('off-cadence final bleed job survives real SQLite reopen and expires', (t) => {
+  const { bundle, initial, target } = managedBleedBundle();
+  const dir = mkdtempSync(join(tmpdir(), 'loka-c5-phase-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) =>
+    a.game.invoke({ action_key: action_key as never, target_ids: target_ids as never, input });
+  const pulse = (seconds: number) => {
+    a.clock.wall += seconds * 20;
+    a.clock.mono += seconds * 20;
+    assert.equal(a.game.pulse().kind, 'ready');
+  };
+  assert.equal(invoke('attack', [target]).kind, 'saved');
+  pulse(150);
+  assert.equal(invoke('flee').kind, 'saved');
+  pulse(25);
+  const from = a.game.view().view.place.id;
+  const room = initial.state.containers[target];
+  const direction = Object.entries(initial.rooms[from].exits).find(
+    ([, edge]) => initial.roomIds[refString(edge.to)] === room,
+  )?.[0];
+  assert.ok(direction);
+  assert.equal(invoke('move', [], { direction }).kind, 'saved');
+  assert.equal(invoke('attack', [target]).kind, 'saved');
+  pulse(75);
+  pulse(75);
+  assert.equal(a.game.view().view.bleeding?.ends_at, 65425);
+  assert.equal(invoke('flee').kind, 'saved');
+  pulse(25);
+  pulse(100);
+  pulse(100);
+  const before = a.game.view().view;
+  assert.equal(before.bleeding?.next_tick_at, 65450);
+  assert.equal(before.bleeding?.ends_at, 65425);
+  const hpBefore = before.resources?.find((r) => r.resource.key === 'hp')?.current;
+  a.sql.close();
+  const b = elapsedHost(path, { wall: a.clock.wall, mono: a.clock.mono }, bundle);
+  t.after(() => b.sql.close());
+  assert.equal(b.game.view().view.bleeding?.next_tick_at, 65450);
+  b.clock.wall += 75 * 20;
+  b.clock.mono += 75 * 20;
+  assert.equal(b.game.pulse().kind, 'ready');
+  const after = b.game.view().view;
+  assert.equal(after.time, 65425);
+  assert.equal(after.bleeding, undefined);
+  assert.equal(after.resources?.find((r) => r.resource.key === 'hp')?.current, hpBefore);
 });
 
 // Breaks: failed or uncertain tick/cure COMMIT leaks half of HP, wound, job or item custody;

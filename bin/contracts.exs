@@ -71,11 +71,12 @@ defmodule Gen do
 
   defp type(%{"type" => "object", "properties" => ps, "exactlyOneRequired" => keys} = s) do
     required = Map.get(s, "required", [])
+    dependencies = Map.get(s, "dependentRequired", %{})
 
     Enum.map_join(keys, " | ", fn chosen ->
       fields =
         Enum.map_join(Enum.sort(ps), "; ", fn {k, sub} ->
-          exclusive_field(k, sub, keys, required, chosen)
+          exclusive_field(k, sub, keys, required, chosen, dependencies)
         end)
 
       "{ #{fields} }"
@@ -95,12 +96,19 @@ defmodule Gen do
 
   defp type(%{"type" => t}), do: %{"string" => "string", "integer" => "number"}[t] || t
 
-  defp exclusive_field(k, sub, keys, required, chosen) do
+  defp exclusive_field(k, sub, keys, required, chosen, dependencies) do
     cond do
-      k == chosen -> "readonly #{lit(k)}: #{type(sub)}"
-      k in keys -> "readonly #{lit(k)}?: never"
-      k in required -> "readonly #{lit(k)}: #{type(sub)}"
-      true -> "readonly #{lit(k)}?: #{type(sub)}"
+      k == chosen or k in Map.get(dependencies, chosen, []) ->
+        "readonly #{lit(k)}: #{type(sub)}"
+
+      k in keys or Enum.any?(Map.get(dependencies, k, []), &(&1 in keys and &1 != chosen)) ->
+        "readonly #{lit(k)}?: never"
+
+      k in required ->
+        "readonly #{lit(k)}: #{type(sub)}"
+
+      true ->
+        "readonly #{lit(k)}?: #{type(sub)}"
     end
   end
 end

@@ -71,7 +71,9 @@ function extra(contract,base,guardPath,invalid,path,code,removeField) {
   const defs=structuredClone(DEFS);
   let node=defs[contract]; for (const step of guardPath.slice(0,-1)) node=node[step];
   const last=guardPath.at(-1);
-  if (removeField) node[last]=node[last].filter(x=>x!==removeField); else delete node[last];
+  if (removeField && Array.isArray(node[last])) node[last]=node[last].filter(x=>x!==removeField);
+  else if (removeField) delete node[last][removeField];
+  else delete node[last];
   const after=validate(contract,invalid,defs);
   if (after.some(e=>e.path===path && e.code===code)) survivors.push({contract,guardPath,reason:'survived',after});
   else killed++;
@@ -109,6 +111,20 @@ const ambiguous={...cancel,sight_member_id:id};
 extra('DeltaOp',cancel,cancelPath.concat('exactlyOneRequired'),ambiguous,'','exclusive_properties');
 const absent={op:'job.cancel',writer_group:0,job_id:id};
 extra('DeltaOp',cancel,cancelPath.concat('requiredUnless'),absent,'/encounter_id','missing_property');
+const partial={op:'job.cancel',writer_group:0,job_id:id,bleed_body_id:id};
+extra('DeltaOp',cancel,cancelPath.concat('dependentRequired'),partial,'/bleed_generation','missing_property','bleed_body_id');
+const orphan={op:'job.cancel',writer_group:0,job_id:id,encounter_id:id,bleed_generation:1};
+extra('DeltaOp',cancel,cancelPath.concat('dependentRequired'),orphan,'/bleed_body_id','missing_property','bleed_generation');
+const deathPath=['oneOf',branch('EventPayload','entity_died')];
+const died={type:'entity_died',victim_id:id,room_id:id,killer_id:null,credited_character_id:null,corpse_id:id,cause:'bleeding'};
+total++;
+if (validate('EventPayload',died).length) survivors.push({contract:'EventPayload',reason:'bleeding cause not admitted'});
+else {
+ const defs=structuredClone(DEFS);
+ at(defs.EventPayload,deathPath.concat('properties','cause')).enum=['drowning'];
+ if (validate('EventPayload',died,defs).some(e=>e.path==='/cause'&&e.code==='not_in_enum')) killed++;
+ else survivors.push({contract:'EventPayload',reason:'cause enum mutant survived'});
+}
 const target={kind:'bleed',body_id:id};
 const targetPath=['oneOf',branch('MutationTarget','bleed')];
 const missingBody={kind:'bleed'};
