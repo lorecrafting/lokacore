@@ -99,4 +99,20 @@ defmodule Loka.ContentMissingChildTest do
                  &1["path"] == "populations/fen_hounds.wander_interval")
            )
   end
+
+  # Break: a zero flight threshold compiles, so no living hound can ever flee.
+  test "hound flight threshold must be positive", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "populations/fen_hounds.json")
+    plan = path |> File.read!() |> JSON.decode!()
+    File.write!(path, JSON.encode!(put_in(plan, ["pack", "flight_below_percent"], 0)))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             diagnostics,
+             &(&1["code"] == "SCHEMA_VIOLATION" and
+                 &1["path"] == "populations/fen_hounds.pack.flight_below_percent")
+           )
+  end
 end
