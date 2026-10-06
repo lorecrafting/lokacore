@@ -145,7 +145,8 @@
       "EventPayload",
       "Policy",
       "ContentView",
-      "WorldSettings"
+      "WorldSettings",
+      "CorpseRecoveryView"
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
@@ -153,12 +154,14 @@
       "kernel/ts/src/mechanics/lookups.ts",
       "kernel/ts/src/view/view.ts",
       "kernel/ts/src/mechanics/containment/shared.ts",
-      "kernel/ts/src/view/action_lists.ts"
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/mechanics/containment/recovery.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_items_hash.json",
       "protocol/fixtures/cartridge_locks_hash.json",
-      "protocol/fixtures/cartridge_sampler_hash.json"
+      "protocol/fixtures/cartridge_sampler_hash.json",
+      "protocol/fixtures/water_contracts.json"
     ],
     "invariants": [
       "one_container_per_item",
