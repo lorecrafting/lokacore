@@ -64,3 +64,30 @@ Ponytail Review: **Lean already. Ship.** Necessary typed rows and independent gu
 reuse current machinery; no added dependency, ledger or speculative abstraction.
 The deliberate linear cold-recovery limit is documented beside its implementation.
 No unnecessary test finding; new controls cover distinct realistic breaks.
+
+## Scoped Book fix recheck — 2026-10-05
+
+Exact source `d24b6f8917fa46e171fbf1791e3ed2c3bd848109`: **APPROVE. No findings.**
+This recheck covers the fix's liquid projection/admission, Book model and live
+saved-result routing, with their direct callers. The original review remains
+historical; this is the current source approval.
+
+Receipt/history reconstruction, SQLite writes/adoption, protocol/foundation,
+mechanics and release/hash/identity pins are unchanged from approved `d31b47d8`.
+Book retains the authored action key for invocation and uses existing command
+metadata for ownership/freshness. Live accepted results use the exact command's
+saved narration bindings, preserving the committed amount and original detail
+after reconciliation and reopen; rendering adds no quantity writer.
+
+Independent focused kernel liquid/Book/SQLite tests: **19/19 passed**. Presenter,
+live-action, Read and Refuel direct-caller tests: **30/30 passed**. Loaded aliases
+exercise exact Fill/Pour/Drink, target/input/policy refusal, committed event amounts,
+lost-COMMIT-acknowledgement pending/replay, single detail narration and reopen.
+Existing genuine failed-COMMIT, historical forgery and invocation-binding controls
+still pass. Changed quantities make an aliased pair stale and retain both rows.
+Restoring the former live narration branch makes the committed-quantity regression
+fail; the mutation was removed and restored Book tests pass **4/4**.
+
+Ponytail Review: **Lean already. Ship.** Existing metadata and saved narration serve
+the fix without a new receipt field or helper framework. No native/browser proof
+or new full-publication check is claimed by this focused recheck.
