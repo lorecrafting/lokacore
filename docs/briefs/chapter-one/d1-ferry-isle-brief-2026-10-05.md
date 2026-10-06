@@ -35,3 +35,5 @@ Browser-first proof on an **isolated save**: World → boarding detail → Board
 ## Delivery
 
 Follow [the workflow](../../WORKFLOW.md): developer works in its own branch/worktree, amends active clauses if implementation changes the selected behavior, runs focused checks and required `bin/check_all.sh`/publication gate, self-reviews correctness and Ponytail simplicity, then hands off exact head and evidence. A fresh independent primary reviewer covers the source, with a separate save/protocol opinion if those contracts change. The PM verifies exact-head checks and CI before any merge. Preserve release mismatch refusal, in-place Start over and structural sharing. One PR must deliver the complete usable crossing/lesson/return; split only if review scope requires a separately complete player outcome. Target PR number and successor pins remain null.
+
+[Provisional source and red-control evidence](../../evidence/2026-10-06-d1-ferry-isle/README.md); publication proof and final successor pins remain pending PM integration.
