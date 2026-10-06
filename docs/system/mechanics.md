@@ -1359,6 +1359,48 @@ Boolean is the durable local memory `player.dream_seen`; no second export marker
 Exact accepted replay retains its receipt before current-state admission; new
 stale controls cannot skip a beat, change the branch or repeat the consequence.
 
+## D4 homes, finite apples and Eat (selected contract)
+
+**Planning only; not installed.** [PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)
+selects the [chapter declarations](cartridge.md#d4-homes-and-orchard-declarations).
+The orchard detail reuses B5 Harvest over three actual authored item identities.
+Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
+resource node, random roll, regrowth job or seasonal availability gate is added.
+Gareth and Ada use ordinary schedules and flavor dialogue, with no repair service
+or required waiting. Elspeth remains at Ferry Landing. Cottage and Green variants
+read the exact committed child enum; they do not move or create Wren, complete
+an escort, write a child outcome or claim that Wren is in the cottage.
+
+D4 is the first held-food consumer: B8 supplies resource recovery semantics,
+not an installed Eat verb. Add the narrow `food@1` capability with `eat
+{actor_id, item_id}` and accepted `eaten {item_id}`. Admission requires the exact
+opted edible item directly in the living actor's body and positive headroom in
+its declared recovery pool. An unknown item is `not_found`, a nonfood target is
+`invalid_target`, indirect/foreign/room/spent custody is `not_owned`, and no
+headroom is `invalid_state`. Existing scene/combat admission wins. At the admitted
+clock, settle recovery and use checked arithmetic to cap the authored positive
+increment at the current maximum; atomically transfer the same item to terminal consumed custody and
+adjust the pool in one writer group. D4 adds no currency, time skip, RNG, hunger, HP
+healing, acquisition event or new consumable issuance.
+
+Ordinary transfer alone cannot express consumption: existing destinations retain
+recoverable custody and permit a later transfer back. There is no installed item
+removal or spent-item pattern; erasing an authored identity would also weaken
+identity/receipt validation. Add terminal custody rather than weakening the
+existing one-container invariant. The missing primitive is one reserved
+roomless consumed holder per food-enabled world, minted after existing slot
+holders in the fresh allocation order and recorded as known kind `consumed`.
+It has no body/room parent, capacity limit, public entity definition or actions.
+Existing `entity.transfer` retains each food identity and one-container invariant;
+food alone admits direct-body to consumed transfer. No transfer out is lawful,
+and nonedible items cannot enter. Containment queries terminate there, deriving
+no inventory, room presence, reach or carried mass. Do not implement this as an
+invisible room, NPC, mutable narrative fact, deleted item or second stock ledger.
+The holder metadata and terminal transition invariant are new contracts; extend
+both foundation validators and their fixture/differential proof where applicable.
+Projection and execution share one budgeted pure admission query, including exact
+keyed-action admission. Ordinary uneaten food custody and death remain unchanged.
+
 ## D5 dry Deep Fen exploration (selected contract)
 
 Selected under the [D5 PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md).

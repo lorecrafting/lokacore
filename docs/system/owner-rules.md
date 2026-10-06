@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
+
 - D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
   waiver; Sedge teaches swim immediately for free while the Chapel remains the
   death destination ([PM adoption](../decisions/pm-decision-d1-ferry-isle-2026-10-05.md)).

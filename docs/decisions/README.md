@@ -240,3 +240,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C4 hound response, pack help and flight](pm-decision-c4-hound-behavior-2026-10-05.md): deliberate Attack admission, one rotating enemy opportunity, same-clock wander protection and conserved wounded retreat.
 
 - [D5 dry Deep Fen PM decision](pm-decision-d5-deep-fen-2026-10-05.md): five safe reciprocal rooms, naturally lit den for actual Wren Rejoin and fixed no-credit ward Read; no second message, far Scan or bottom before D6.
+- [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.
