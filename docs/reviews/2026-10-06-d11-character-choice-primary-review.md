@@ -104,3 +104,18 @@ posted comments. Later training and death/corpse-recovery reopen were not
 independently executed.
 ```
 Open findings after the second opinion: **D11-P1, D11-SP-01**. Verdict remains **CHANGES REQUIRED**.
+
+## Fix round 1 — scoped re-review
+
+Source reviewed: `1cb0f6fb48df47cc2bfa4901cce9f284f2692419` against the
+record-bearing `328e60b5e096a5586b2755da4ca180eb48840e53`.
+Verdict: **APPROVE**. **D11-P1 and D11-SP-01 closed; no open findings.**
+
+- **D11-P1:** the new real SQLite test chooses fen-born, uses an ordinary controlled lethal hound encounter and trusted elapsed delivery, confirms shrine return and one death corpse, closes the database connection, opens it anew, and asserts literal ancestry/six attribute values, inherited Swim, Priory/Fen −2, no picker and rejected second choice. The test uses the existing host rather than a test-only production hook. Existing death tests retain corpse custody/recovery proof. Replanted deletion of `state.characters` on the player's death corpse now fails this new test at cold reopen (`save_corrupt`); restoring the source passes.
+- **D11-SP-01:** Elixir now checks absence with `Map.fetch` in both committed character rows and the composition overlay. This distinguishes a present null row and also preserves once-only selection within a delta; writer-group conflicts still run first. Both kernels independently assert the shared literal `present_null` refusal fixture. Reinstating the old nil comparison makes the new Elixir null-row test fail; restored source passes.
+- Focused scoped tests: **19 TypeScript/SQLite passed** and **2 Elixir passed**. Elixir mutation and restoration used `mix test --force`. Source restored; actual diff contains only the review record/index update.
+- Read the modified composer dispatch/overlay writer and the new test's real authority/clock/database callers. No additional correctness or Ponytail complexity finding. No broad review, browser/native rerun or unrelated nits.
+
+The developer reports the full/pre-push gate green. Hosted exact source-head CI
+and the independent scoped save/protocol recheck remain PM-owned. This metadata
+commit is held locally until the PM authorizes its push after hosted source CI.

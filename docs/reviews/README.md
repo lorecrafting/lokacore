@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D11 character choice primary source](2026-10-06-d11-character-choice-primary-review.md): PR #257 exact `73d3d972`, CHANGES REQUIRED for D11-P1 and independent save/protocol D11-SP-01 (Elixir accepts a present null character row): selected-character death loss survives 21 focused tests; stale-policy and repeat-selection mutants red, restored 27 TypeScript/SQLite and 9 Elixir tests green.
+- [D11 character choice primary source](2026-10-06-d11-character-choice-primary-review.md): PR #257 initial `73d3d972` CHANGES REQUIRED for D11-P1 and independent D11-SP-01; scoped fix `1cb0f6fb` APPROVE closes death/cold-reopen proof and portable present-null refusal. Both replanted mutants red; restored 19 TypeScript/SQLite and 2 Elixir tests green. No open findings.
 
 - [D7 deer final save, protocol and foundation second opinion](2026-10-06-d7-deer-final-save-review.md): PR #253 original `776742a6` APPROVE; round-1 `6b626769` CHANGES REQUIRED for D7-S3; round-2 `c446bee0` APPROVE closes the sight-only cause in composer and cold receipt. Focused kernel 3/3 and SQLite 2/2, red controls verified. Hosted exact-head merge gate remains PM-owned.
 
