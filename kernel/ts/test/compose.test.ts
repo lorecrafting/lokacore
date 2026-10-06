@@ -117,6 +117,13 @@ test('character selection has the same one-row portable composition answer', () 
   assert.equal(encode(compose(selected, c.delta) as Json), encode(c.repeat));
 });
 
+// Breaks: an existing malformed null character row is mistaken for an absent selection.
+test('present null character row refuses selection', () => {
+  const c = read('protocol/fixtures/character_composition.json');
+  const state = { ...c.state, characters: { [c.delta.ops[0].character_id]: null } };
+  assert.equal(encode(compose(state, c.delta) as Json), encode(c.present_null));
+});
+
 test('invariant checks known answers, a holding and a violated case per invariant checked in both kernels', () => {
   const covered = new Set<string>();
   for (const c of [

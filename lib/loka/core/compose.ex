@@ -2,9 +2,8 @@
 defmodule Loka.Core.Compose do
   @moduledoc """
   Portable StateDelta composition (04 §5.1-§5.4, 14 §R3A). Preconditions read
-  an overlay over the committed base; only changed rows are returned. Different
-  writer groups sharing a target fault atomically. Budgets precede operations,
-  and an explicit time.advance sets the visited time for jobs and resources.
+  an overlay over committed state; only changed rows return. Writer-group conflicts
+  fault atomically; budgets precede ops and time.advance sets job/resource time.
   """
   alias Loka.Core.{ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
@@ -114,8 +113,13 @@ defmodule Loka.Core.Compose do
     check(now == op["expected"], op["value"])
   end
 
-  defp apply_op(%{"op" => "character.select", "value" => value}, t, ctx),
-    do: check(read(t, ctx) == nil, value)
+  defp apply_op(%{"op" => "character.select", "value" => value}, t, {state, _, overlay}),
+    do:
+      check(
+        Map.fetch(section(state, "characters"), t["character_id"]) == :error and
+          Map.fetch(overlay, key(t)) == :error,
+        value
+      )
 
   defp apply_op(%{"op" => "entity.create", "identity" => identity}, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == nil and Creation.valid?(identity, state), identity)

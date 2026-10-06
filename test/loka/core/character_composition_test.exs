@@ -11,4 +11,12 @@ defmodule Loka.Core.CharacterCompositionTest do
     selected = put_in(c, ["state", "characters"], %{op["character_id"] => op["value"]})
     assert Compose.compose(selected["state"], c["delta"]) == c["repeat"]
   end
+
+  # Breaks: an existing malformed null character row is mistaken for an absent selection.
+  test "present null character row refuses selection" do
+    c = @fixture
+    [op] = c["delta"]["ops"]
+    state = Map.put(c["state"], "characters", %{op["character_id"] => nil})
+    assert Compose.compose(state, c["delta"]) == c["present_null"]
+  end
 end

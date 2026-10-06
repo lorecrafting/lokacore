@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,6 +12,7 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
+import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
@@ -115,6 +117,114 @@ test('fey choice saves and reopens its initial faction with creation receipt', (
       .map((row) => JSON.parse(row.value as string)),
     [-2],
   );
+});
+
+// Breaks: a real corpse commit drops the selected character row, so cold reopen revives the
+// picker or loses the six values and inherited effects.
+test('chosen character and effects survive corpse death and cold reopen', (t) => {
+  const content = structuredClone(read('protocol/fixtures/missing_child_v038_hash.json').value);
+  content.entry.key = 'hound_run';
+  content.world.combat.player_attack.chance = 0;
+  delete content.world.combat.dodge;
+  for (const npc of Object.values(content.npcs) as { key: string; attack?: object }[])
+    if (npc.key === 'fen_hound')
+      Object.assign(npc.attack!, { chance: 100, damage_min: 10, damage_max: 10 });
+  const canonical = encode(content),
+    sha256 = createHash('sha256').update(canonical).digest('hex');
+  const bundle = { canonical, sha256 };
+  const dir = mkdtempSync(join(tmpdir(), 'd11-death-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  assert.equal(
+    a.game.invoke({
+      action_key: 'choose_ancestry' as never,
+      target_ids: [],
+      input: { ancestry: 'fen_born' as never },
+    }).kind,
+    'saved',
+  );
+  const target = a.game.view().view.entities[0]?.id;
+  assert.ok(target);
+  assert.equal(
+    a.game.invoke({ action_key: 'attack' as never, target_ids: [target], input: {} }).kind,
+    'saved',
+  );
+  a.clock.wall += 3000;
+  a.clock.mono += 3000;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(a.game.view().view.place.id, '2ef35eee-f837-8b28-bea7-9748a332940a');
+  a.sql.close();
+
+  const cold = elapsedHost(path, { wall: a.clock.wall, mono: a.clock.mono }, bundle);
+  t.after(() => cold.sql.close());
+  const view = cold.game.view().view;
+  assert.equal(view.ancestry, 'fen_born');
+  assert.equal(view.ancestry_choices, undefined);
+  assert.deepEqual(
+    view.attributes?.map((x) => [x.attribute.key, x.value]),
+    [
+      ['con', 10],
+      ['dex', 10],
+      ['int', 10],
+      ['per', 6],
+      ['spi', 10],
+      ['str', 10],
+    ],
+  );
+  assert.equal(view.skills?.find((s) => s.skill.key === 'swim')?.acquired, true);
+  assert.deepEqual(
+    cold.sql
+      .prepare(
+        "SELECT value FROM state_row WHERE section='facts' AND json_extract(key,'$.fact.key')='priory_fen_axis'",
+      )
+      .all()
+      .map((row) => JSON.parse(row.value as string)),
+    [-2],
+  );
+  assert.deepEqual(
+    cold.sql
+      .prepare("SELECT value FROM state_row WHERE section='characters'")
+      .all()
+      .map((row) => JSON.parse(row.value as string).ancestry),
+    ['fen_born'],
+  );
+  assert.equal(
+    cold.sql
+      .prepare(
+        "SELECT count(*) AS n FROM state_row WHERE section='created' AND json_extract(value,'$.origin.kind')='death'",
+      )
+      .get()!.n,
+    1,
+  );
+  const loaded = loadCartridge(
+    new TextEncoder().encode(JSON.stringify({ cartridge: content, content_hash: sha256 })),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  if (!loaded.ok) return;
+  const fresh = newWorld(
+    loaded.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const reopened = openStory(cold.db, [{ fresh, content_hash: sha256 }], cold.host);
+  assert.equal(reopened.kind, 'open');
+  if (reopened.kind !== 'open') return;
+  const second = reopened.invoke({
+    invocation_id: 'dddddddd-0000-4000-8000-000000000013',
+    actor_id: fresh.character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'road_born' },
+  });
+  assert.equal(second.kind, 'saved');
+  if (second.kind === 'saved')
+    assert.deepEqual(second.decision, {
+      kind: 'rejected',
+      error: { code: 'unsupported_capability' },
+    });
+  assert.equal(gameView(reopened.world()).ancestry_choices, undefined);
 });
 
 // Breaks: a valid-looking row with a forged ancestry opens despite contradicting its accepted receipt.
