@@ -862,3 +862,13 @@ invocation replay preserves the original result and adds no credit/branch/memory
 Confirmed narration restores to the actual bed/dream nesting by committed command
 identity; when away, retain honest history and Resume availability on legal return,
 never an invented Inn Rooms backdrop or unconfirmed completion.
+
+## D5 route and Read recovery
+
+[D5](mechanics.md#d5-dry-deep-fen-exploration-selected-contract) adds no state
+schema or new writer. Ordinary current-room custody, original Q2 message/escort
+rows and exact Read receipts remain authoritative under the new source pin.
+Reopen must retain every new location, original separated Wren at its actual
+location, and original message custody without granting knowledge or Q2 credit.
+A failed/uncertain movement or Read COMMIT and exact invocation replay use the
+existing receipt rules; no source-change migration or repair is selected.

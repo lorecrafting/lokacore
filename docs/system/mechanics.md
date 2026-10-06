@@ -1358,3 +1358,27 @@ Boolean is the durable local memory `player.dream_seen`; no second export marker
 `prologue_completed` point/report, account transfer or numerical reward is added.
 Exact accepted replay retains its receipt before current-state admission; new
 stale controls cannot skip a beat, change the branch or repeat the consequence.
+
+## D5 dry Deep Fen exploration (selected contract)
+
+Selected under the [D5 PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md).
+Five optional rooms reuse ordinary reciprocal movement, detail Read and Q2 escort.
+[Cartridge authoring](cartridge.md#d5-deep-fen-route-and-details) declares the exact
+route. Every new room is dry traversable ground and naturally lit at all hours,
+including the shallow fox den; none declares `dark_description`. No swim, tide,
+light, time, topic, bell, faction or quest gate applies. The existing B4 dark-room
+rules and B6 glow exception remain unchanged elsewhere.
+
+A following original Wren travels on these ordinary edges. Fatal player death
+leaves that same Wren separated in the actual death room; the gear-free shrine
+route must expose ordinary Talk/Rejoin there, then permit the existing Elspeth
+rescue. A reachable owned corpse alone does not prove a reachable Wren: darkness
+would conceal the ordinary NPC even though B4 reveals the corpse. No new NPC
+visibility exception, escort teleport, replacement or schedule is selected.
+
+The ward stone is a fixed ordinary readable detail: Read narrates its authored
+inscription only and Examine describes the stone. Neither grants a Ward/Bell
+topic, Q2 credit, branch choice, relationship or item. The original protected
+`vesper_message` remains the sole Q2 message with its existing custody, transfer
+and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
+prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.

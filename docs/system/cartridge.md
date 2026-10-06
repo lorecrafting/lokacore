@@ -1116,3 +1116,37 @@ cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
 Future integrated release/API/hash/allocated IDs remain null until B8 source and
 review merge and independent current answers are derived.
+
+## D5 Deep Fen route and details
+
+The [D5 contract](mechanics.md#d5-dry-deep-fen-exploration-selected-contract)
+selects these additions; preserve all installed Oak/Hollow/Mire/B6 exits.
+
+| Room / outward direction | Neighbor / return direction |
+|---|---|
+| Drowned Oak / up | Oak Branches / down |
+| Oak Branches / up | Oak Crown / down |
+| Drowned Oak / south | Black Pool / north |
+| Black Pool / east | Fox Hollow / west |
+| Black Pool / south | Fishing Shallows / north |
+| Fox Hollow / down | Fox Den Deep / up |
+
+New keys are `oak_branches`, `oak_crown`, `black_pool`, `fox_den_deep`,
+`fishing_shallows`. Pool and shallows mean the dry bank and reed edge; prose makes
+that footing explicit. The shallow den admits natural light at all hours and has
+no dark metadata. This deliberately supersedes archived 00a §§2/5/8/11 darkness,
+Vesper relocation, duplicate readable message, stone topic, far Scan, crow nest
+and next-day water-drift candidates for D5. Wren/Vesper retain their original
+instances and installed locations except for existing legal Wren escort travel.
+
+Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward stone`,
+a noun title, description and ordinary readable label/text/title. Its fixed
+inscription describes the worn carving without asserting who holds the message,
+which return was selected or what Wren has done. Use the installed Fox Hollow
+readable detail shape, not an item-readable/topic extension or conditional page.
+Other landscape details are descriptive and advertise only projected actions.
+Do not add a bottom exit, room placeholder, underwater loot, fishing operation,
+crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
+D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
+current location. Release/hash/IDs advance independently when source exists;
+this plan assigns no successor pin or API increment.
