@@ -257,6 +257,7 @@ defmodule Loka.Content.Dialogues do
     actor ++ reference(rel, ["roles", name], kind, r, ctx.m, ctx.defs)
   end
 
+  # ponytail: retain ordered choice diagnostics; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp choice(rel, {id, o}, d, ctx) do
     steps = ["choices", id]
 

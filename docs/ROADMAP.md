@@ -162,10 +162,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **11 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, C1). The latest source publication is
-[#210](https://github.com/lorecrafting/lokacore/pull/210), B6 Wisp riddle and ward;
-it also carries the reviewed B8 Maud-services brief re-pin.
+Local and GitHub `main` have completed **12 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, C1, C2). The latest source publication is
+[#214](https://github.com/lorecrafting/lokacore/pull/214), C2 Watchman's Rounds patrol and recovery.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -224,18 +223,18 @@ and [independently approved plan](reviews/2026-10-05-b8-maud-services-plan-revie
 The [brief](briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) now pins
 published B7's reviewed source and publication base `547f809c`, chapter
 0.0.22/API1.20 with 96 independent IDs. B3/B7/Rest behavioral dependencies are met.
-Full source assignment queues behind published B6 Wisp and active C2 Tobin patrol shared
-contract/save/Book/release integration, then re-pins latest reviewed main; these
-are scheduling predecessors, not additional chapter dependencies. This docs-only
-re-pin received a [short independent approval](reviews/2026-10-05-b8-services-source-repin-review.md)
-and was published in #210. B8 source, successor pins and
-playable service proof remain null.
+B8 source is implemented provisionally at `552717d5`, with primary and separate
+save/protocol scoped reviews both APPROVE after findings were fixed. Its review
+records are merged on the clean B8 branch at `50a92de5`. C2 is now published;
+B8 must integrate that predecessor, verify successor pins and full checks, then
+publish through its own reviewed PR. No B8 playable-publication claim yet.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
-on local base `10b023e8`. A3 is integrated; B8 has an approved plan but no source.
-B8 source/review re-pins, [independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md) approved; implementation and successor
-release/API/hash/ID/proof pins remain ahead; no playable S10 is claimed here.
+on local base `10b023e8`. A3 is integrated; B8 has approved provisional source
+and awaits final C2-base publication. The [independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md)
+approved; implementation and successor release/API/hash/ID/proof pins remain ahead.
+No playable S10 is claimed here.
 
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
@@ -251,11 +250,15 @@ C2 Watchman's Rounds has an [adopted finite-patrol contract](decisions/pm-decisi
 [focused source brief](briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
 re-pinned for source assignment, and
 [independent plan approval](reviews/2026-10-05-c2-watchmans-rounds-plan-review.md).
-B1, Q2-C-rescue and reviewed C1 are integrated. C2 source work is active in an
-isolated worktree. The shared exact-Talk selector is published with B6 in #210;
-C2 has merged that source and current main locally while resolving its patrol
-release. Shared cartridge, protocol and generated edits require final combined
-checks. C2 source reviews and playable proof remain ahead.
+B1, Q2-C-rescue and C1 are integrated. C2 is published in
+[#214](https://github.com/lorecrafting/lokacore/pull/214) at chapter 0.0.24/API1.22
+with 109 independent IDs. Its primary, save/protocol, staged browser scope,
+terminal cold-reopen evidence, simulator invariant and publication-gate reviews
+approved; the exact final head passed the local gate and all six hosted checks.
+Tobin's finite four-checkpoint patrol, detour/Rejoin, fatal failure and immediate
+Restart are playable. The completed Web save opened cold twice after published
+[#213](https://github.com/lorecrafting/lokacore/pull/213), bounded SQLite reads.
+Browser fatal/Restart remains a named E3 proof obligation.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
@@ -263,8 +266,8 @@ re-pinned to published B6 v023/API1.21, with
 [independent readiness review](reviews/2026-10-05-c3-source-readiness-review.md)
 approved and published in #211. The earlier equal-time conflict finding was fixed
 in its [plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md).
-C2 integration precedes C3 source release pinning; successor pins,
-implementation and proof remain ahead. C4
+C2 is published; C3 source implementation is active in an isolated branch from
+its exact PR head. Final successor pins, reviews and proof remain ahead. C4
 hound aggression, pack assistance and flight is a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)

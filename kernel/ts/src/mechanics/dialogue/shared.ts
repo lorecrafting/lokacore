@@ -1,4 +1,3 @@
-// size: allow 320, choice projection captures exact patrol attempt input beside existing dialogue contracts
 import * as patrol from '../patrol/shared.ts';
 import { pending } from './selection.ts';
 import { validAttempts } from './behavior.ts';
@@ -228,7 +227,6 @@ export function choiceView(
     }),
     choices: row.choice_ids.map((choice_id) => {
       const option = d.choices[choice_id]!;
-      const { label, accept } = option;
       const q = option.patrol && questOf(world, actor, option.patrol.quest);
       const saved = q && world.state.patrols?.[q[0]];
       const draw = saved && patrol.drawn(saved);
@@ -250,10 +248,10 @@ export function choiceView(
       const why =
         code ??
         (typeof quest === 'string' ? quest : undefined) ??
-        (accept && acceptRefused(world, actor, accept, steps));
+        (option.accept && acceptRefused(world, actor, option.accept, steps));
       return why
-        ? { ...state, available: false, choice_id, label, reason: { code: why } }
-        : { ...state, available: true, choice_id, label };
+        ? { ...state, available: false, choice_id, label: option.label, reason: { code: why } }
+        : { ...state, available: true, choice_id, label: option.label };
     }),
   };
 }

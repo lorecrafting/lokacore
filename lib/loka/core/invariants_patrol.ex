@@ -33,6 +33,7 @@ defmodule Loka.Core.InvariantsPatrol do
   defp replay(_, rows, _), do: {:cont, rows}
   defp valid?(nil, after_row), do: after_row["status"] == "together" and after_row["credit"] == []
 
+  # ponytail: keep the finite independent oracle; split on growth. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp valid?(before, after_row) do
     edge = {before["status"], after_row["status"]}
     fatal = edge in [{"together", "failed"}, {"awaiting", "failed"}, {"paused", "failed"}]

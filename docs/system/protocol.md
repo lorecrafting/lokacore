@@ -731,7 +731,8 @@ is `patrol`. Bound dialogue choices declare `patrol {quest, npc, transition}`.
 Non-start Choose input carries `patrol {quest_instance_id, attempt_id, cursor, status}`
 from the drawn PendingChoice. Shared read-only admission checks that exact value
 before execution or GameView eligibility. Bounds are at most 64 route occurrences
-and checkpoints; the authored count never exceeds its unique subset.
+and checkpoints; the authored count never exceeds its unique subset. The patrol
+status, stored row and drawn-input schemas each have a literal valid example.
 
 ## B6 bounded sitting and topic composition
 
