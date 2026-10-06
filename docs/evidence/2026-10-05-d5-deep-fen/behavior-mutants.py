@@ -4,7 +4,9 @@ pin=Path('protocol/fixtures/missing_child_d5_hash.json')
 original=pin.read_bytes()
 summary=[]
 def redact(text):
- return re.sub(r'(?:/Users/|/private/var/|/var/folders/|/tmp/)[^\s]+', '[redacted-path]', text)
+    text = re.sub(r'(?i)\b(?:adb[_ ]serial|udid|ecid|device[_ ]name|team[_ ]id|certificate[_ ]id|provisioning[_ ]id)\s*[:=]\s*\S+', '[redacted-device]', text)
+    return re.sub(r'(?:/Users/|/private/var/|/var/folders/|/tmp/)[^\s]+', '[redacted-path]', text)
+
 
 def run(name,paths):
  r=subprocess.run(['mise','exec','--','node','--test',*paths],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)

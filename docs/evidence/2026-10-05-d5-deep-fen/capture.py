@@ -8,7 +8,9 @@ source = Path(sys.argv[1])
 here = Path(__file__).parent
 
 def redact(text):
+    text = re.sub(r'(?i)\b(?:adb[_ ]serial|udid|ecid|device[_ ]name|team[_ ]id|certificate[_ ]id|provisioning[_ ]id)\s*[:=]\s*\S+', '[redacted-device]', text)
     return re.sub(r'(?:/Users/|/private/var/|/var/folders/|/tmp/)[^\s]+', '[redacted-path]', text)
+
 
 logs = {
     'focused.log': 'd5-focused.log',
