@@ -1478,7 +1478,9 @@ never changes them, reopens an ending or pays a reward. A missing child or
 unknown allegiance retains truthful search/base text.
 
 The actual accepted bell occurrence emits one committed cue for the actor's
-observer frame only when it is in the chapter's declared audible area. The
+observer frame only when it is in the chapter's declared audible area. In the
+installed single-body chapter this frame is Belfry; other room eligibility is
+proved with controlled projection frames over that occurrence. The
 cue retains its event/command cause, actor, room and logical time; a later
 Look, Read, reopen or travel cannot generate another sound. The ordinary bell
 scene remains the initiating actor's immediate narration. Reed Path and Mire

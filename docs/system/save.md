@@ -957,8 +957,10 @@ release pin and hound plan; malformed or mismatched rows are typed
 `save_corrupt`, with in-place Start over and no repair or item deletion.
 
 The Study gate is derived from fox history and current corpse rows/containment,
-not a second saved door state or recovery ledger. Validate each legal
-intermediate: owner corpse created in Study with roots, owner entrance, each
+not a second saved door state or recovery ledger. Use a controlled valid world
+or isolated seeded save to produce the Study corpse; ordinary chapter play has
+no Study death producer. Validate each legal intermediate: owner corpse
+created in Study with roots, owner entrance, each
 ordinary physical Take, emptied corpse, egress and later re-entry refusal.
 Receipt replay cannot create a second root transfer or reopen the gate from
 historical custody. D6 underwater recovery remains location-specific. Prove

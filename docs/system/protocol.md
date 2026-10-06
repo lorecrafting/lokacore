@@ -1139,8 +1139,10 @@ before changing the proposal conflict rule.
 
 The bell cue is bound to one accepted source event, its command/actor and the
 observer's room at that logical instant. Only an observer in the cartridge's
-explicit audible area receives it. Subsequent projection is read-only and may
-render retained history as a past cue, never as a fresh sound or second event.
+explicit audible area receives it. The current accepted player command has a
+Belfry observer; controlled frames prove other area boundaries without adding
+another body or remote observer delivery. Subsequent projection is read-only
+and may render retained history as a past cue, never as a fresh sound or second event.
 No global sound bus, remote Scan or fabricated actor movement is selected.
 
 Share one read-only Study ingress check between direct `move` admission,
