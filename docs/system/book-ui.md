@@ -212,6 +212,10 @@ and Leave, without invented Use/Equip actions, Take while held, or a custom gest
 These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
+When Take removes an item from a corpse's Contents, the confirmed result returns to
+that corpse detail, puts the named pickup line in its local history once, and keeps
+Back to World available. The taken item appears in Carrying. An unavailable corpse
+closes its detail through the ordinary stale-route rule; no success is inferred.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**. It invokes nothing; available actions retain their
@@ -219,7 +223,8 @@ existing buttons. The note follows the latest GameView, including Take aliases a
 and disappears when shedding held load makes Take legal.
 
 
-Successful Take/Drop are the specific exceptions to item-page retention. Other same-room item actions
+Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content
+Take follows the corpse-detail rule above. Other same-room item actions
 retain the page and route their results to that item's local chronological history while the
 item remains projected; leaving the room or losing the item closes
 obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
@@ -576,9 +581,10 @@ living spawned members through ordinary movement sight. HP0 hounds are absent.
 Attack opens the existing Combat page, with C1 defenses and only its current
 Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
 the real public hound corpse and its ordinary Contents/Take path. Successful Take
-shows that exact pelt in Carrying, with committed custody narration once. Refused,
+returns to that corpse detail with Back to World, shows that exact pelt in Carrying,
+and adds committed pickup narration to corpse history once. Refused,
 pending or faulted commands claim no spawn, kill or loot. Reopen uses structured
-receipt routing, keeping combat history on Combat and Take history on item detail.
+receipt routing, keeping combat history on Combat and Take history on the corpse detail.
 No ecology status screen, countdown, Skin verb or next-day instruction is needed.
 An all-hours fresh-game Book walk uses existing initial hounds in either allowed
 room, following adjacent sight now when home is empty. Required story, loot/corpse
