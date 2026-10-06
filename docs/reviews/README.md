@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D4 published integration save/protocol second opinion](2026-10-06-d4-integrated-save-second-review.md): exact source `ad7300fa`, frozen evidence `61fd1615`, independent APPROVE, no findings. Terminal custody/atomic Eat, created C3 food admission, D1/C3 authority neighbors, real failed/unknown COMMIT and exact replay pass; independent v031/API1.27/hash/all 167 IDs and all 114 final hashes verify. Own metadata/replay-trigger mutants fail; exact full release gate is green. Hosted publication remains separate.
+
 - [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
 
 - [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
