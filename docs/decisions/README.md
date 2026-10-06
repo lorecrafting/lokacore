@@ -243,3 +243,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [D5 dry Deep Fen PM decision](pm-decision-d5-deep-fen-2026-10-05.md): five safe reciprocal rooms, naturally lit den for actual Wren Rejoin and fixed no-credit ward Read; no second message, far Scan or bottom before D6.
 - [D4 homes, finite orchard food and truthful child prose](pm-decision-d4-homes-orchard-2026-10-05.md): reuse finite Harvest; first held-food Eat with conserved terminal custody, exact return-state prose and independent save proof.
+
+- [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.

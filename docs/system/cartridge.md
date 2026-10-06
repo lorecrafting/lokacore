@@ -1211,3 +1211,27 @@ crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
 D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
 current location. Release/hash/IDs advance independently when source exists;
 this plan assigns no successor pin or API increment.
+
+## D12 practical skill declarations
+
+**Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
+
+| Chapter parameter | Selected value |
+|---|---|
+| Herbalism qualification | `all`: INT `stat_compare` at least 10 and MV `resource_compare` at least 5 |
+| Haggle qualification | `all`: DEX `stat_compare` at least 10 and MV `resource_compare` at least 5 |
+| Each new lesson | 2 pennies, actor→original bound teacher; all-hours, no duration/cooldown |
+| Herbalism teacher | Sedge in Isle Hut, existing declared penny start |
+| Haggle teacher | Peg in Chandler, existing declared penny start |
+| Careful yield | 2 existing eligible fenwort IDs from Willow Shade |
+| Buy discount | numerator 9 / denominator 10, minimum 1 penny |
+
+Add `dialogues/sedge_herbalism.json` and `dialogues/peg_haggle.json`, each binding the original teacher, with a direct `learn` choice, `skill.acquire`, and existing `lesson_payment`; the dialogue policy offers learning only while its reserved acquired fact is false, never based on qualification. No item gift or extra teacher registry is declared. Their text describes the actual fee/qualification/benefit without promising a ferry or story gate.
+
+The optional closed `harvest.careful` object on Willow Shade's existing `fenwort_patch` is `{skill: "herbalism", count: 2, action: "gather_carefully", narration: "narration.gather_carefully"}` in source. `skill` expands to the declared skill DefinitionRef, `count` is the required eligible-item count, `action` is the declared action key, and `narration` is a TextKey. Retain the existing `harvest.items`, ordinary label/title/narration and all twelve authored herb definitions. Define `actions/gather_carefully.json` with `command: "harvest"`, `target: {kind: "entity", scopes: ["inspectable_details"]}`, `input: ["method"]`, priority 0, declared label/accessibility, and vacuous `all` action policy; the shared method-aware Harvest admission owns skill, patch, stock and carrying eligibility. No other patch opts in. The [wire contract](protocol.md#d12-harvest-method-and-buy-quote-composition) binds only literal `method: "careful"` to this declaration.
+
+The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerator: 9, denominator: 10, minimum: 1}` in Peg's existing shop. `skill` expands to the declared skill DefinitionRef; the other fields are positive ResourceInts. It applies to all that shop's declared Buy offers, and never Sell. Existing bases torch3/oil2/waterskin4/satchel5/sword8/shield4/spare-waterskin4 therefore quote2/1/3/4/7/3/3 when usable; unchanged Sell is1/1/2/2/4/2/2. Existing exact items, balances and currency bounds remain in their owning B3/C1/B7 declarations.
+
+Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
+
+D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
