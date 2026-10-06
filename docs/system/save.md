@@ -459,6 +459,12 @@ and changed-row trust boundary, not a second money ledger or save migration.
 Receipt replay cannot pay or move the item again; malformed current-build truth
 leaves the save intact.
 
+## D11 character choice recovery
+
+**Selected planning contract; source pending.** D11's once-only selection belongs to the character identity, not the body returned from death. The selected ancestry, six values, initial acquired skill and initial Priory/Fen value commit with one command receipt through the existing changed-row transaction. No partially selected state may be adopted or rendered. Initial no-choice is legal only before that command and admits no ordinary gameplay. Reopen and reconciliation validate the pinned declaration against the exact character and selected effects; missing/null/malformed or contradictory rows and accepted receipt evidence return typed `save_corrupt` without repair or deletion. An inherited acquired skill needs that exact creation receipt as its alternate provenance under [C1 recovery](#c1-learned-skill-and-lesson-recovery); it is not a forged teacher grant. The starting faction change likewise needs the exact creation receipt as its alternate provenance under B2's revision-ordered faction validation, not an unexplained change from zero. Later lessons and faction changes retain their existing evidence rules. The existing explicit Start over remains available. A mismatch with a release not carried still refuses by pin, never reinterprets a previous character choice.
+
+Failed COMMIT leaves no selected state. For an uncertain COMMIT, fence input until receipt reconciliation proves either the full choice or its absence. Lost acknowledgement and same-invocation retry replay the one committed result; a new invocation with a different choice refuses without changing attribute, skill or faction rows. Cold reopen is required before and after choice, after later training, after death and owned-corpse recovery, and after a refused incompatible pin. The source PR selects the narrow row and receipt validation shape; it must prove these boundaries with real SQLite faults and keep structural sharing.
+
 ## C1 learned-skill and lesson recovery
 
 **API1.18 recovery contract.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)
@@ -945,6 +951,29 @@ entry/surface/expiry/recovery intermediate, genuinely failed COMMIT, uncertain
 committed/absent COMMIT, lost acknowledgment and replay using real SQLite;
 browser refresh is separate proof.
 
+## D9 village consequence recovery
+
+**Selected, pending implementation.** The accepted bell receipt and causal
+event bind exact actor, room, time and one cue occurrence. Cold reopen can
+reproduce its retained past narration without emitting a new cue or reapplying
+consequences. Persist the hound suppression generation/deadline, resume job,
+actual encounter cancellation and population state with the ordinary changed
+rows plus receipt. Reopen validates them against the committed bell cause,
+release pin and hound plan; malformed or mismatched rows are typed
+`save_corrupt`, with in-place Start over and no repair or item deletion.
+
+The Study gate is derived from fox history and current corpse rows/containment,
+not a second saved door state or recovery ledger. Use a controlled valid world
+or isolated seeded save to produce the Study corpse; ordinary chapter play has
+no Study death producer. Validate each legal intermediate: owner corpse
+created in Study with roots, owner entrance, each
+ordinary physical Take, emptied corpse, egress and later re-entry refusal.
+Receipt replay cannot create a second root transfer or reopen the gate from
+historical custody. D6 underwater recovery remains location-specific. Prove
+real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
+acknowledgement and same-invocation replay at bell suppression/resume and
+Study recovery boundaries; input/elapsed stays fenced until reconciliation.
+
 ## D12 lesson, careful Harvest and discount recovery
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) uses C1 reserved acquired facts and dialogue choice/history, B3 participating balances and B5 ordinary item custody. Each lesson, careful Harvest or Buy commits its complete changed rows, head and one receipt before memory adoption/reply; no skill table, saved qualification, quote row, stock count or extra money ledger is introduced.
@@ -973,3 +1002,15 @@ silently repaired. Failed COMMIT keeps prior knowledge, both uncertain COMMIT ou
 reconcile to exactly prior or next knowledge, and lost acknowledgement/retry creates no
 second visit or newer invented observation. Pinned-release mismatch remains explicit
 refusal with no silent deletion or migration.
+
+## C6 expedition recovery
+
+**Planning contract, pending C5 source and C6 implementation.** Save the exact S27 quest occurrence, `ExpeditionAttempt` row, player location/body/life, optional C4 encounter, terminal fact/faction changes and one receipt through the existing changed-row transaction. Reconcile Start/Restart to their accepted command IDs and original actor/quest; cursor advancement to revision-ordered accepted player Move/Flee transfers over the exact declared edge; failure with cursor0/shelter false to an accepted outside-footprint transfer or the actual same-body fatal event; and completion to the fifth transfer, resolved quest, one `fen.night_survived` assignment and one bounded −1 faction adjustment. The current room alone is never proof of past entries, shelter or survival. A lawful later exit, death, faction change or Sedge conversation cannot invalidate historical completion.
+
+Cold reopen at Start with/without an eligible hound, each cursor, wrong in-footprint travel, outside-footprint failure, fatal return, immediate Restart and final completion. A corpse remains reachable by ordinary routes; S27 never changes D6 underwater or D1 isle recovery. Forged movement, swapped actor/attempt/quest, impossible cursor/status, duplicate completion, missing death invalidation or fact/faction without terminal cause yield typed `save_corrupt` without reset or byte deletion. Real SQLite failed COMMIT, uncertain absent/committed outcomes, lost acknowledgement and exact-invocation replay prove all-old/all-new attempt, movement, combat, quest, fact, faction, head and receipt; fence input/elapsed until reconciliation. A new invocation cannot spend a historical receipt to grant credit again. Unsupported release/API/hash refuses explicitly with in-place Start over. Headless simulation and isolated browser refresh supplement the real save proof; native/owner-save access remains paused.
+
+## D8 crow coin and nest recovery (selected planning contract)
+
+The ordinary changed-row transaction commits Drop intent, each acquired/leg/deposit or fallback job, Shoo/Attack release, corpse transfer, nest custody, head and receipt before memory adopts or replies. Reconciliation binds the real D6 coin definition and one exact EntityId through direct room→crow→nest custody, or room/corpse fallback. The occurrence has the exact item only during acquisition/transport and a null item during return. Its phase, crow member generation and current pending job or paused encounter trace to revision-ordered committed Drop/job/combat evidence. Historical lawful custody stays lawful after later player Take, nest movement, death or replacement. A new Drop may bind a crow only after its return ends at authored home; a different crow may take a later Drop while the first returns. No save-time job repair, coin mint, deletion or guessed provenance.
+
+Cold reopen accepts each complete intermediate: dropped before acquisition with job-bound intent, crow-held at every corridor room, original nest taken/closed/full, delivered, each return leg, ordinary recovered, Shoo/Attack release, paused combat and resumed return, fatal corpse custody and replacement. Missing/duplicate custody, forged job generation or cause, a coin held by two crows, a crow outside its two-room pair without an exact current or historical corridor-leg cause, a return step away from home, missing/extra return job, live return during combat, ninth direct nest root or postdeath live transport is typed `save_corrupt`, preserving bytes and in-place Start over. Actual failed COMMIT leaves all old state; both uncertain COMMIT branches and lost acknowledgement reconcile whole old or new state while input/elapsed are fenced; exact invocation/job replay transfers once. Real SQLite fault/reopen proof is separate from browser refresh. Unsupported predecessor/release/API/hash refuses explicitly with no silent migration or owner-save access.
