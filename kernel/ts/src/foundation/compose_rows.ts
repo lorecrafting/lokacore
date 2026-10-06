@@ -1,0 +1,62 @@
+import { encode, type Json } from './canonical.ts';
+import { populationRow } from './compose_population.ts';
+import type { MutationTarget } from '../contracts.gen.ts';
+import type { Ctx, Obj, State } from './compose.ts';
+
+export const key = (value: unknown): string => encode(value as Json);
+export const get = (o: Json | undefined, k: string): Json | undefined =>
+  o !== null && typeof o === 'object' && !Array.isArray(o) && Object.hasOwn(o, k)
+    ? (o as Obj)[k]
+    : undefined;
+export const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
+export const containment = (e: string): MutationTarget =>
+  ({ kind: 'containment', entity_id: e }) as MutationTarget;
+export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
+  const w = ctx.overlay.get(key(t));
+  if (w) return w.value;
+  const s = ctx.state;
+  if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
+  if (t.kind === 'clock') return s.clock;
+  switch (t.kind) {
+    case 'fact':
+      return get(section(s, 'facts'), key(t));
+    case 'entity':
+      return get(section(s, 'created'), t.entity_id);
+    case 'containment':
+      return get(section(s, 'containers'), t.entity_id);
+    case 'quest':
+      return get(section(s, 'quests'), t.instance_id);
+    case 'choice':
+      return get(section(s, 'choices'), t.continuation_id);
+    case 'job':
+      return get(section(s, 'jobs'), t.job_id);
+    case 'bleed':
+      return get(section(s, 'bleeds'), t.body_id);
+    case 'encounter':
+      return get(section(s, 'encounters'), t.encounter_id);
+    case 'patrol':
+      return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'water':
+      return get(section(s, 'water'), t.actor_id);
+    case 'escort':
+      return get(section(s, 'escorts'), t.actor_id);
+    case 'fuel':
+    case 'liquid':
+      return get(section(s, t.kind === 'fuel' ? 'fuel' : 'liquids'), t.item_id);
+    case 'resource':
+      return get(section(s, 'resources'), key(t));
+    case 'cooldown':
+      return get(section(s, 'cooldowns'), key(t));
+    case 'barrier':
+      return get(section(s, 'barriers'), key(t));
+  }
+}
+
+// ponytail: scans the whole section; add a contents/scope index when a cartridge has many rows.
+export function rows(kind: string, name: string, id: string, ctx: Ctx): [string, Json][] {
+  const changed = new Map<string, Json>();
+  for (const w of ctx.overlay.values())
+    if (w.target.kind === kind) changed.set(get(w.target as Json, id) as string, w.value);
+  const base = Object.entries(section(ctx.state, name)).filter(([k]) => !changed.has(k));
+  return [...base, ...changed];
+}

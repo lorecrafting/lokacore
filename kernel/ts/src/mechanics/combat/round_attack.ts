@@ -115,9 +115,7 @@ function injure(
   close: DeltaOp,
 ) {
   const player = attacker_id === row.body_id;
-  const hp = resourceRef(world, 'hp');
-  const fatalLoss = { ...adjust(world, target_id, hp, -loss, {}).op, at: r.due_time };
-  r.ops.push(fatalLoss);
+  const fatalLoss = damage(world, target_id, loss, r);
   if (fatalLoss.to === 0) {
     const closing = target_id === row.body_id || !row.active_ids || row.active_ids.length === 1;
     const closingOps = [
@@ -140,17 +138,26 @@ function injure(
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
   } else {
-    if (target_id === row.body_id) {
-      const prior = currentBleed(world, target_id);
-      const applied = wound(world, attacker_id, target_id, mint);
-      r.ops.push(...applied);
-      const effect = applied.find((op) => op.op === 'bleed.transition');
-      if (effect?.op === 'bleed.transition' && effect.value.active) {
-        const spec = world.cartridge.bleeds![refString(effect.value.effect!)];
-        r.notes.push({ key: prior ? spec.narration.refreshed : spec.narration.applied });
-      }
-    }
+    if (target_id === row.body_id) recordBleed(world, attacker_id, target_id, mint, r);
     if (sleeping) wake(prefix(world, [fatalLoss], r.due_time), row, r);
+  }
+}
+
+function damage(world: World, target: EntityId, loss: number, r: Round) {
+  const hp = resourceRef(world, 'hp');
+  const op = { ...adjust(world, target, hp, -loss, {}).op, at: r.due_time };
+  r.ops.push(op);
+  return op;
+}
+
+function recordBleed(world: World, attacker: EntityId, body: EntityId, mint: Mint, r: Round) {
+  const prior = currentBleed(world, body);
+  const applied = wound(world, attacker, body, mint);
+  r.ops.push(...applied);
+  const effect = applied.find((op) => op.op === 'bleed.transition');
+  if (effect?.op === 'bleed.transition' && effect.value.active) {
+    const spec = world.cartridge.bleeds![refString(effect.value.effect!)];
+    r.notes.push({ key: prior ? spec.narration.refreshed : spec.narration.applied });
   }
 }
 

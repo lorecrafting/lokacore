@@ -1,10 +1,8 @@
-// size: allow 315, typed quest reactions join the existing FIFO admission/causation path
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
-import { counts, over, same, target, type Limit } from '../foundation/compose.ts';
+import { counts, over, target, type Limit } from '../foundation/compose.ts';
 import {
-  CAPABILITY_OWNERS,
   type CommandId,
   type DecisionResult,
   type DeltaOp,
@@ -13,7 +11,7 @@ import {
   type QuestInstanceId,
   type Text,
 } from '../contracts.gen.ts';
-import { allocator, COMPOSES, event, type Mint, type Steps, type World } from './decision.ts';
+import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { earned } from '../mechanics/quest/lifecycle.ts';
@@ -22,9 +20,10 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
-import { currentBleed } from '../mechanics/bleed/shared.ts';
-import { living } from '../mechanics/death/shared.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
+import { bleedRoundPair } from './proposal_bleed.ts';
+import { admit, type Admitted } from './proposal_admit.ts';
+export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -298,62 +297,3 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (failed) return failed;
   }
 }
-
-/** Only current bleed and encounter occurrences of the same living body at one due time pair. */
-function bleedRoundPair(
-  world: World,
-  job_id: JobId,
-  job: NonNullable<World['state']['jobs']>[string],
-) {
-  const round = job.encounter_id && currentRound(world, job_id, job);
-  const body = round?.body_id ?? job.bleed_body_id;
-  if (!body || !living(world, body)) return;
-  const bleed = currentBleed(world, body);
-  if (!bleed || !bleed.job_id || !bleed.effect || !bleed.source_id) return;
-  const bleedId = bleed.job_id;
-  const bleedJob = world.state.jobs?.[bleedId];
-  const encounter =
-    round ??
-    Object.values(world.state.encounters ?? {}).find(
-      (r) => r.status === 'open' && r.body_id === body,
-    );
-  const roundId = encounter?.job_id;
-  const roundJob = roundId && world.state.jobs?.[roundId];
-  if (
-    !roundId ||
-    !roundJob ||
-    !bleedJob ||
-    !currentRound(world, roundId, roundJob) ||
-    bleedJob.status !== 'pending' ||
-    roundJob.status !== 'pending' ||
-    bleedJob.bleed_body_id !== body ||
-    bleedJob.bleed_generation !== bleed.generation ||
-    !same(bleedJob.job, bleed.effect) ||
-    bleedJob.due_time !== roundJob.due_time ||
-    job.due_time !== bleedJob.due_time ||
-    (job_id !== bleedId && job_id !== roundId)
-  )
-    return;
-  return job_id === bleedId ? roundId : bleedId;
-}
-
-// The capability owning a command or event type; own keys only, so `constructor` names none.
-export const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>
-  Object.hasOwn(owners, type) ? owners[type]!.split('@')[0] : undefined;
-
-/**
- * An accepted rule result as the host admits it (04 §5.2 step 7): an event type neither the
- * owning capability nor one it COMPOSES owns faults unowned_event, which discards the whole
- * proposal. adopt() checks the output budget once the host's events are added.
- */
-export function admit(owner: string, decision: DecisionResult): Admitted {
-  if (decision.kind !== 'accepted') return decision as Admitted;
-  const may: readonly unknown[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
-  if (decision.events.some((e) => !may.includes(ownerOf(CAPABILITY_OWNERS.event, e.payload.type))))
-    return { kind: 'fault', code: 'unowned_event' } as Admitted;
-  return decision as Admitted;
-}
-
-declare const ADMITTED: unique symbol;
-/** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
-export type Admitted = DecisionResult & { readonly [ADMITTED]: true };

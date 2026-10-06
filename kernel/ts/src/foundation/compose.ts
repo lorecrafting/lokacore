@@ -1,4 +1,3 @@
-// size: allow 310, water transitions join the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
@@ -6,18 +5,16 @@ import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
-import {
-  populationTransition,
-  initializePopulationResource,
-  populationRow,
-} from './compose_population.ts';
+import { populationTransition, initializePopulationResource } from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
-import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
+import { openEncounter, changeEncounter } from './compose_encounter.ts';
+import { composeJob } from './compose_job.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { sightHandoffValid } from './compose_sight.ts';
 import { sightRebindValid } from './compose_sight_rebind.ts';
-import { encode, type Json } from './canonical.ts';
+import type { Json } from './canonical.ts';
+import { key, get, section, containment, read, rows } from './compose_rows.ts';
 import { composeAdjustment } from './resource.ts';
 import {
   LIMITS,
@@ -41,15 +38,8 @@ const DOOR: Record<string, string[]> = {
   open: ['closed'],
   locked: ['closed'],
 };
-export const key = (value: unknown): string => encode(value as Json);
+export { key, get } from './compose_rows.ts';
 export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
-export const get = (o: Json | undefined, k: string): Json | undefined =>
-  o !== null && typeof o === 'object' && !Array.isArray(o) && Object.hasOwn(o, k)
-    ? (o as Obj)[k]
-    : undefined;
-const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
-const containment = (e: string): MutationTarget =>
-  ({ kind: 'containment', entity_id: e }) as MutationTarget;
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 export function compose(state: State, delta: StateDelta, final = true): Result {
@@ -112,13 +102,14 @@ export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-// size: allow 44, exhaustive dispatch over closed liquid, choice and patrol operations
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
   if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
+  if (op.op === 'bleed.transition')
+    return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
   switch (op.op) {
     case 'fact.assign':
       return assign(op, row, ctx);
@@ -132,14 +123,36 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.complete':
     case 'job.cancel':
       return composeJob(op, row, ctx.horizon);
-    case 'bleed.transition':
-      return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);
+  }
+  return applyWorld(op, row, ctx);
+}
+
+function applyWorld(
+  op: Extract<
+    DeltaOp,
+    {
+      op:
+        | 'population.control'
+        | 'population.slot'
+        | 'water.transition'
+        | 'escort.transition'
+        | 'time.advance'
+        | 'resource.adjust'
+        | 'resource.initialize'
+        | 'cooldown.start'
+        | 'barrier.transition';
+    }
+  >,
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  switch (op.op) {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
@@ -253,58 +266,6 @@ function inside(d: string, e: string, ctx: Ctx): boolean {
     seen.add(at);
   }
   return false;
-}
-
-function read(t: MutationTarget, ctx: Ctx): Json | undefined {
-  const w = ctx.overlay.get(key(t));
-  if (w) return w.value;
-  const s = ctx.state;
-  if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
-  switch (t.kind) {
-    case 'fact':
-      return get(section(s, 'facts'), key(t));
-    case 'entity':
-      return get(section(s, 'created'), t.entity_id);
-    case 'containment':
-      return get(section(s, 'containers'), t.entity_id);
-    case 'quest':
-      return get(section(s, 'quests'), t.instance_id);
-    case 'choice':
-      return get(section(s, 'choices'), t.continuation_id);
-    case 'job':
-      return get(section(s, 'jobs'), t.job_id);
-    case 'bleed':
-      return get(section(s, 'bleeds'), t.body_id);
-    case 'encounter':
-      return get(section(s, 'encounters'), t.encounter_id);
-    case 'patrol':
-      return get(section(s, 'patrols'), t.quest_instance_id);
-    case 'water':
-      return get(section(s, 'water'), t.actor_id);
-    case 'escort':
-      return get(section(s, 'escorts'), t.actor_id);
-    case 'liquid':
-      return get(section(s, 'liquids'), t.item_id);
-    case 'clock':
-      return s.clock;
-    case 'fuel':
-      return get(section(s, 'fuel'), t.item_id);
-    case 'resource':
-      return get(section(s, 'resources'), key(t));
-    case 'cooldown':
-      return get(section(s, 'cooldowns'), key(t));
-    case 'barrier':
-      return get(section(s, 'barriers'), key(t));
-  }
-}
-
-// ponytail: scans the whole section; add a contents/scope index when a cartridge has many rows.
-function rows(kind: string, name: string, id: string, ctx: Ctx): [string, Json][] {
-  const changed = new Map<string, Json>();
-  for (const w of ctx.overlay.values())
-    if (w.target.kind === kind) changed.set(get(w.target as Json, id) as string, w.value);
-  const base = Object.entries(section(ctx.state, name)).filter(([k]) => !changed.has(k));
-  return [...base, ...changed];
 }
 
 function barrier(
