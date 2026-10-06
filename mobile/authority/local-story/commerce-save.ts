@@ -52,7 +52,7 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
           spec.maximum,
         );
       } else if (money.length) {
-        const payment = dialoguePayment(world, command);
+        const payment = dialoguePayment(world, command, shop.resource);
         checkPayment(
           money,
           shop.resource,
@@ -174,8 +174,19 @@ function shopReceipt(
     invalid();
 }
 
-function dialoguePayment(world: World, command: Command) {
+function dialoguePayment(world: World, command: Command, currency: DefinitionRef) {
   const p = command.payload;
+  if (p.type === 'use_service') {
+    const service = world.cartridge.services?.[refString(p.service)];
+    if (
+      !service ||
+      !same(service.currency, currency) ||
+      p.quoted_price !== service.price ||
+      world.entityIds[refString(service.provider)] !== p.provider_id
+    )
+      invalid();
+    return { payer: world.body, recipient: p.provider_id, amount: service.price };
+  }
   if (p.type !== 'choose') invalid();
   const choice = world.state.choices?.[p.continuation_id];
   const dialogue = choice && world.cartridge.dialogues?.[refString(choice.source)];

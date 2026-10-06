@@ -28,7 +28,8 @@ defmodule Loka.Content.Source do
              | :scene
              | :skill
              | :topic
-             | :liquid, String.t()}
+             | :liquid
+             | :service, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -111,7 +112,8 @@ defmodule Loka.Content.Source do
     "scenes" => :scene,
     "skills" => :skill,
     "topics" => :topic,
-    "liquids" => :liquid
+    "liquids" => :liquid,
+    "services" => :service
   }
 
   defp classify(rel) do
@@ -195,5 +197,21 @@ defmodule Loka.Content.Source do
         else: {seg, is_map(v) && v[seg]}
     end)
     |> elem(0)
+  end
+
+  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
+  def contracts do
+    defs = Loka.Core.Contracts.defs()
+
+    defs
+    |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> Map.update!(
+      "LiquidRow",
+      &put_in(&1, ["properties", "kind", "anyOf"], [
+        %{"type" => "null"},
+        %{"$ref" => "Key"},
+        defs["DefinitionRef"]
+      ])
+    )
   end
 end

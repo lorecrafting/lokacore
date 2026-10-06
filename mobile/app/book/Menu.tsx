@@ -143,23 +143,14 @@ export function NpcPage(p: NpcProps) {
         </Text>
       ))}
       {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
-      {!choice &&
-        p.npc &&
-        'shop' in p.npc &&
-        p.npc.shop?.map((o) => (
-          <Text key={o.item_id} style={note}>
-            {p.text(o.name)}: Buy {o.buy.price}p
-            {o.buy.available
-              ? ''
-              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
-            ; Sell {o.sell.price}p
-            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
-          </Text>
-        ))}
+      {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
-      {actions.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
-      ))}
+      {actions
+        .filter((b) => b.command !== 'use_service')
+        .map((b) => (
+          <Act key={b.label} b={b} press={p.press} />
+        ))}
+      <ServiceOptions {...p} actions={actions} />
       <Leave leave={close ? () => p.press({ ...close, label: 'Leave' }) : p.leave} />
     </ScrollView>
   );
@@ -209,6 +200,41 @@ export function Item(p: {
       leave={p.world}
     />
   );
+}
+
+function ShopOptions(p: NpcProps) {
+  return (
+    <>
+      {p.npc &&
+        'shop' in p.npc &&
+        p.npc.shop?.map((o) => (
+          <Text key={o.item_id} style={note}>
+            {p.text(o.name)}: Buy {o.buy.price}p
+            {o.buy.available
+              ? ''
+              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
+            ; Sell {o.sell.price}p
+            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
+          </Text>
+        ))}
+    </>
+  );
+}
+
+function ServiceOptions(p: NpcProps & { actions: Button[] }) {
+  const offers = p.npc && 'services' in p.npc ? p.npc.services : undefined;
+  return offers?.map((s) => {
+    const b = p.actions.find((b) => b.action_key === s.action.action_key);
+    return b ? (
+      <Act key={s.service.key} b={b} press={p.press} />
+    ) : (
+      <Text key={s.service.key} style={note}>
+        {p.text(s.label)}: {s.price}p
+        {s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}
+        {!s.action.available && ` (${why(s.action, p.text)})`}
+      </Text>
+    );
+  });
 }
 
 export function NpcDetail(p: {

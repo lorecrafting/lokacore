@@ -177,6 +177,15 @@ function receiptDetail(
       throw new Error('malformed JSON: invalid committed shop exchange');
     return command.payload.provider_id;
   }
+  if (command?.payload?.type === 'use_service') {
+    if (
+      validate('Command', command).length ||
+      command.id !== r.command_id ||
+      d.outcome !== 'service_used'
+    )
+      throw new Error('malformed JSON: invalid committed service');
+    return command.payload.provider_id;
+  }
   if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;

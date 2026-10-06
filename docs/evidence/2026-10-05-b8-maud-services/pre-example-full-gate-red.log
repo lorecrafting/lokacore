@@ -1,0 +1,32 @@
+Resolving Hex dependencies...
+Resolution completed in 0.024s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+Compiling 7 files (.ex)
+No cycles found
+Running ExUnit with seed: 741445, max_cases: 16
+
+................................................................................................................................................................................
+
+  1) test every contract has examples and every example validates (Loka.Core.ContractsTest)
+     test/loka/core/contracts_test.exs:17
+     ** (MatchError) no match of right hand side value:
+
+         nil
+
+     code: for {name, schema} <- @defs do
+     stacktrace:
+       test/loka/core/contracts_test.exs:19: anonymous fn/2 in Loka.Core.ContractsTest."test every contract has examples and every example validates"/1
+       (stdlib 8.0.4) maps.erl:894: :maps.fold_1/4
+       test/loka/core/contracts_test.exs:18: (test)
+
+...........................................................................................................................................................................
+Finished in 18.7 seconds (18.7s async, 0.06s sync)
+
+Result: 347/348 passed
+Failed: 1 test

@@ -7,6 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
+import { serviceButtons, shopButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -35,7 +36,7 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
 const POSITIONS = ['standing', 'sitting', 'resting', 'sleeping'];
-const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
+export const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
 export function nextPosition(position: GameView['position'], actions: Button[]) {
   const at = POSITIONS.indexOf(position ?? '');
   if (at < 0) return;
@@ -88,7 +89,9 @@ export function group(buttons: Button[]) {
       buttons.filter((b) => !['move', 'flee'].includes(b.action_key) && dir(b) === direction),
     flee: buttons.filter((b) => b.action_key === 'flee'),
     continue: buttons.find((b) => b.action_key === 'continue'),
-    position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
+    position: buttons.filter(
+      (b) => !b.detail_id && ['stand', 'sit', 'rest', 'sleep'].includes(commandOf(b)),
+    ),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     place: buttons.filter(
       (b) =>
@@ -281,23 +284,9 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...doors,
     ...held,
     ...shopButtons(v, text),
+    ...serviceButtons(v, text),
     ...asked(v, label),
   ];
-}
-
-function shopButtons(v: GameView, text: Say): Press[] {
-  return v.entities.flatMap((e) =>
-    (e.shop ?? []).flatMap((o) =>
-      (['buy', 'sell'] as const)
-        .filter((verb) => o[verb].available)
-        .map((verb) => ({
-          label: `${cap(verb)} ${text(o.name)} — ${o[verb].price}p`,
-          action_key: verb,
-          target_ids: [e.id, o.item_id],
-          input: { quoted_price: o[verb].price },
-        })),
-    ),
-  );
 }
 
 function noticeButtons(
@@ -340,10 +329,10 @@ export function actionContext(
     view.choice,
     view.scene,
     view.combat,
-    ['fill', 'pour', 'drink'].includes(commandOf(b))
+    ['fill', 'pour', 'drink', 'use_service'].includes(commandOf(b))
       ? things(view)
           .filter((e) => b.target_ids.includes(e.id))
-          .map((e) => [e.id, e.liquid])
+          .map((e) => [e.id, e.liquid, 'services' in e ? e.services : undefined])
       : null,
     ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key) ? view.position : null,
     exit ? [exit.sight?.room, exit.door?.state] : null,

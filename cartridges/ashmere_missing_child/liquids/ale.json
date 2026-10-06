@@ -1,0 +1,6 @@
+{
+  "label": "liquid.ale",
+  "unit_label": "liquid.units",
+  "grams_per_unit": 250,
+  "drink_amount": 1
+}

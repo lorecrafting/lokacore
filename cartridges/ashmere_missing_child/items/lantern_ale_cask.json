@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "cask",
+    "ale"
+  ],
+  "short": "item.ale_cask.short",
+  "room_line": "item.ale_cask.room",
+  "description": "item.ale_cask.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "npc",
+    "npc": "maud"
+  },
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "ale",
+      "quantity": 4
+    }
+  }
+}

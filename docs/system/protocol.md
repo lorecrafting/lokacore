@@ -882,7 +882,7 @@ per-hound job, whole-state copy, receipt ledger or actor assumption is introduce
 
 ## B8 immediate service composition
 
-**Selected, pending implementation.** A service invocation binds actor, exact
+**Implemented locally, publication pending.** A service invocation binds actor, exact
 provider EntityId, declared service DefinitionRef and displayed positive quoted
 price. The selected command is `use_service {actor_id, provider_id, service,
 quoted_price}`, with `service` the authored DefinitionRef and accepted outcome
@@ -906,6 +906,17 @@ is needed. No new service DomainEvent is required: existing fact/resource/liquid
 consequences and the bound receipt command prove the result. Register the actual
 command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
 original provider/service for confirmed narration routing and save validation.
+
+`service@1` requires kernel API **1.23**. `ServiceDefinition` binds its original
+provider, exact authored action key, currency, price, label/narration and one
+closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
+vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
+projects the captured provider target, service reference/quote, declared benefit
+and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
+valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
+paid, full MV, sold out and unavailable exact payment without changing error codes.
+The actual bed is an inspectable detail with `bed {title, entitlement}`; its
+local projection emits ordinary targetless Rest and never changes raw Rest admission.
 
 ## D2 held-readable composition
 
