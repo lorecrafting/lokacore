@@ -82,3 +82,62 @@ Temporarily allowing equality in that predicate makes this exact real-command co
 Verification on unchanged fix head: **19/19 focused TypeScript/kernel/real-SQLite tests; 12/12 Elixir bleed/contracts tests; schema sweep59/59**. Individually reverting FP1, ordinary FP2, FP3, FP4, SO3 and SO4 made their focused tests fail; Elixir used `mix test --force`. The independent remaining-FP2 control fails on the exact fix head. All mutations and temporary tests were restored; only this record/index are committed. No browser, native runtime or owner save was used in this re-review.
 
 Ponytail Review: the fixes reuse the existing provenance, death, delta and schema owners. No separate complexity finding. Keep the remaining fix within the current cadence check and its real job consumer.
+
+## Independent second opinion on fix round 1
+
+The following answer is retained verbatim for source `c04a5c0f`. SO5 corroborates the remaining FP2 expiry handoff; SO6 adds an adjacent portable binding parity defect to the open fix list.
+
+```text
+CHANGES REQUIRED
+Head: c04a5c0fd962c8e6fd9e79c5a99c472c1c33c940
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+All locations refer to the exact head.
+
+C5-SO5 | blocker | kernel/ts/src/foundation/compose_bleed.ts:19; lib/loka/core/compose_bleed.ex:52
+Refreshing a pending off-cadence expiry still stalls elapsed.
+Reproduced with final v037 content and controlled real commands:
+wound at 64950; Flee/re-engage; refresh at 65125 gives end65425.
+Flee, return and attack at 65250. Tick65350 leaves next_tick65450
+and expiry job65425. Hound hit65400 extends end to65700 while
+retaining that job. At65425, runBleed correctly attempts a
+nondamaging successor at65450, retaining next_tick65450.
+Both composers require a strictly increased cadence after job
+completion, so TypeScript returns fault/precondition_failed.
+Permit this checked nondamaging handoff in both composers and
+cover refresh before a pending expiry, including cold reopen.
+
+C5-SO6 | blocker | lib/loka/core/compose_encounter.ex:236
+The bleed binding branch misses orphan water_body_id.
+A schema-valid job.schedule with complete bleed binding plus
+water_body_id, without water_generation, is rejected by TypeScript
+with precondition_failed. Elixir's job composer accepts it and
+retains water_body_id. Reproduced in both runtimes. Reject this
+competing partial binding and add a shared refusal fixture.
+
+Prior findings:
+- Different-hound refresh: original scenario fixed.
+- Off-cadence expiry: original scenario fixed; SO5 remains.
+- Drowning death cleanup: fixed; real short-duration water expiry
+  cancels bleeding before Chapel return.
+- Typed bleed death cause: fixed; bleeding, original source and
+  null kill credit asserted.
+- Mixed bleed+sight: original refusal now agrees; SO6 is adjacent.
+- Partial cancellation bindings: missing generation and orphan
+  generation beside encounter binding are rejected.
+
+Tests and limits:
+- Exact-head sources loaded from Git into memory; 16 focused
+  TypeScript tests passed.
+- Five in-memory reversions caused the expected tests to fail:
+  provenance, cadence bound, death cleanup, typed cause and
+  dependentRequired. Removing Elixir's sight guard reproduced
+  acceptance of the forbidden mixed schedule.
+- Schema sweep: 59 mutations, 59 killed, zero survivors.
+- Inspected literal HP/time/schema expectations and SQLite
+  transaction, fencing, replay and off-cadence reopen tests.
+  Existing tests miss SO5 and SO6.
+- Did not rerun disk-backed SQLite tests, full Mix/CI gates,
+  browser/native tests or owner-save operations.
+- No additional over-engineering finding.
+- No files edited, no comments posted; working tree remains clean.
+```

@@ -489,3 +489,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 final save/protocol second opinion](2026-10-06-c5-final-primary-review.md#independent-saveprotocol-second-opinion): verbatim CHANGES REQUIRED at source `93f7bb25`; confirms FP1/FP2 and adds SO3 Elixir mixed bleed/sight binding parity and SO4 partial cancellation binding validation.
 
 - [C5 scoped fix round 1](2026-10-06-c5-final-primary-review.md#scoped-fix-round-1--changes-required): source `c04a5c0f`, CHANGES REQUIRED; FP1/FP3/FP4/SO3/SO4 closed, FP2 remains in round-first refresh of an off-cadence expiry. Independent real-command reproduction and six focused mutation controls; TS/SQLite19/19, Elixir12/12, schema59/59.
+
+- [C5 second opinion on fix round 1](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-fix-round-1): verbatim CHANGES REQUIRED at `c04a5c0f`; SO5 corroborates the pending-expiry cadence blocker and SO6 identifies Elixir acceptance of an orphan water body in a bleed schedule.
