@@ -17,10 +17,13 @@ and [R5 deferral](../archive/decisions/owner-decision-r5-deferred-mechanics-2026
 motivate this slice; current source and active system contracts govern exact behavior.
 
 Visits are character-owned accepted entries. Static drawing coordinates have no
-authority over exits. Where reports current presence or saved last observation,
-and never a remote live NPC location. Accepted entry/Look owns visible NPC
-observations; Map and Where only read them. One initially open physical Chapel
-door makes Knock a real local action and preserves the public route. The
+authority over exits. Where reports `here` only for currently visible presence under
+Look's gate, otherwise saved last observation or unknown; it never exposes a hidden
+co-located or remote live NPC location. Accepted entry/Look owns visible NPC
+observations; Map and Where only read them. Remote visited Map links make no live
+traversal promise; current-room Move admission alone supplies availability.
+One initially open physical Chapel door makes Knock a real local action and
+preserves the public route. The
 current chapter's Watch Cell is expressly open and has no physical exit
 barrier, so the archived keyed-cell candidate is deferred rather than faked.
 D9's planned Study ingress restriction is not a door and Knock cannot bypass it.

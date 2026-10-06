@@ -1498,12 +1498,17 @@ adjacent sight, a refused or stale move and opening Map do not visit a room. The
 relation is monotone for that character and never grants an exit, changes a barrier or
 teleports an actor. The view joins visited room identities with static cartridge map
 positions and actual exits; it shows a connection only when both ends are visited. A
-visited connection may be blocked now, so its displayed current availability comes from
-ordinary Move admission, not the stored visit row. No automatic travel is selected.
+visited connection outside the actor's current room is only a known static link, not a
+promise of current traversal. Only exits from the actor's current room show live
+availability from ordinary Move admission, including the D9 Study ingress rule. No
+remote admission simulation or automatic travel is selected.
 
-`where {target_id}` resolves an exact currently present NPC or a previously
-observed exact NPC ID belonging to this character. A currently present target is
-reported as here. A prior observation reports its **last observed** room and logical
+`where {target_id}` resolves an exact currently **visible and present** NPC or a previously
+observed exact NPC ID belonging to this character. `Here` requires the same current
+visibility gate as Look and direct target admission, whether the request arrived as a
+raw ID, alias or touch selection. A co-located NPC hidden by darkness or another
+visibility rule is not `here`: use the actor's saved last observation, or `unknown`
+when there is none. A prior observation reports its **last observed** room and logical
 time, never its live location. The observation is recorded only at a successful body
 entry or an accepted `look` in the actor's current room, for NPCs actually visible
 to that actor at that point; `look {target_id}` also observes its actual visible target.

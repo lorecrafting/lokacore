@@ -1151,9 +1151,11 @@ projecting. Observation retains exact entity ID, last visible room and logical t
 The loader rejects unknown room/NPC refs and evidence inconsistent with character
 ownership or visible committed observation. GameView carries only the actor's known
 rooms, observed targets and current-room door options, with no hidden coordinates,
-unobserved NPC names or live remote positions. Where resolves an exact present or
-remembered target through the host and returns `here`, `last_seen` or `unknown` from
-the same current state. Ambiguity retains sorted exact IDs; no unseen candidate enters
-the list. Knock's ActionSet key resolves to its door command with the exact local
+unobserved NPC names or live remote positions. Where applies Look/direct-target current
+visibility before returning `here` for an exact present NPC; hidden co-location falls
+back to the actor's saved `last_seen` or `unknown`, for raw IDs, aliases and touch alike.
+Ambiguity retains sorted exact IDs; no unseen candidate enters the list. Remote known
+Map links carry no live Move availability; only current-room exits do. Knock's ActionSet
+key resolves to its door command with the exact local
 direction. View availability and invocation share that admission; narration belongs
 to the accepted command receipt, and retry does not produce a second response.

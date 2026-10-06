@@ -130,11 +130,15 @@ currently offered door/place actions. It invents no discovered multiroom coordin
 The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
 replaces this current-room-only Map after D10 source is installed. Then Map draws only
 visited rooms at their authored level/position and links whose two endpoints were visited.
+Remote visited links are drawn as known static connections without a current traversal
+claim; only exits from the actor's current room show live availability/refusal from
+ordinary Move admission, including D9's Study ingress rule.
 The current-room marker and a level stepper are visible; a room detail names that known
 room and its known exits. An unvisited endpoint, NPC or item is never drawn merely because
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
-controls retain live admission. Where labels distinguish `here`, `last seen` with the saved
-place/time, and `unknown`; a stale observation is never phrased as a current location.
+controls retain live admission. Where labels distinguish currently visible `here`,
+`last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
+become `here`, and a stale observation is never phrased as a current location.
 Knock appears on the actual local door's context card and uses its exact direction and
 freshness token. It leaves that card and Map reachable after its reply.
 
