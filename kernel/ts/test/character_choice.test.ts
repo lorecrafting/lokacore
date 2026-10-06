@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { gameView, newWorld, step } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { status } from '../src/mechanics/skills.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
@@ -66,6 +67,41 @@ const command = (w: ReturnType<typeof fresh>, type: string, ancestry?: string) =
     world_context_id: w.context,
     payload: { type, actor_id: w.character, ...(ancestry && { ancestry }) },
   }) as never;
+
+// Breaks: a character-choice guard blocks trusted time or due jobs, or elapsed opens player play.
+test('trusted elapsed drains a due job before ancestry choice without admitting player movement', () => {
+  const w = fresh();
+  const run = '6f6f6f6f-1111-4222-8333-444444444444';
+  const until = 68400;
+  const advanced = stepElapsed(
+    w,
+    {
+      id: elapsedCommandId(run, w.context, w.state.clock, until),
+      world_context_id: w.context,
+      payload: { type: 'elapsed', actor_id: w.character, run_id: run, from: w.state.clock, until },
+    } as never,
+    1,
+  );
+  assert.equal(advanced.decision.kind, 'accepted');
+  assert.equal(advanced.world.state.clock, 68400);
+  assert.equal(
+    Object.values(advanced.world.state.jobs ?? {}).find(
+      (job) => job.job.key === 'fen_hounds' && job.due_time === 68400,
+    )?.status,
+    'completed',
+  );
+  assert.equal(advanced.world.state.characters?.[w.character], undefined);
+  const movement = step(
+    advanced.world,
+    {
+      ...command(advanced.world, 'move'),
+      payload: { type: 'move', actor_id: w.character, direction: 'north' },
+    } as never,
+    2,
+  );
+  assert.deepEqual(movement.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.equal(movement.world, advanced.world);
+});
 
 // Breaks: a fresh actor can play without a choice, a choice writes only part of the character,
 // or a second selection rerolls the six saved values and inherited effects.

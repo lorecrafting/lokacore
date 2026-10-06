@@ -23,6 +23,8 @@ The +1 amount and added CON/SPI starts are PM values, not recovered owner choice
 
 Selection is a normal initial authority-owned committed choice before movement/other gameplay; do not silently choose on a timer or browser refresh. New game replacement uses existing confirmation/pin rules. One choice commits ancestry, attribute values, learned skill and starting faction atomically. No free later reset or equipment-derived extra writers.
 
+The later [owner ruling on trusted elapsed](../../decisions/owner-decision-d11-prechoice-elapsed-2026-10-06.md) permits clock and due-job advancement before selection; this does not admit any ordinary player command or silently select an ancestry.
+
 D6 supplies an inherited-skill consumer, not a CON consumer. The selected D11 promise is six saved/displayed attributes with existing real checks for STR, DEX, INT and PER; it does not require every attribute to have a Chapter 1 check.
 
 ## Composition and scope
