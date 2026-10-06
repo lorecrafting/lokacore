@@ -3,6 +3,22 @@ import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
+function checkItems(c: Obj, defs: Obj, items: [string, Obj][], out: Diagnostic[]) {
+  for (const [ref, i] of items) {
+    const at = `.cartridge.items${step(ref)}.bandage`;
+    if (
+      !defs[refString(i.bandage.effect)] ||
+      !c.skills?.[refString(i.bandage.skill)] ||
+      i.bandage.action !== 'bandage' ||
+      !c.text?.[i.bandage.narration] ||
+      i.container === true ||
+      i.slot ||
+      i.edible
+    )
+      out.push(diag('SCHEMA_VIOLATION', at));
+  }
+}
+
 /** Checked C5 declarations in the loaded artifact, independent of source compilation. */
 export function bleed(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -35,18 +51,6 @@ export function bleed(c: Obj): Diagnostic[] {
     )
       out.push(diag('SCHEMA_VIOLATION', at));
   }
-  for (const [ref, i] of items) {
-    const at = `.cartridge.items${step(ref)}.bandage`;
-    if (
-      !defs[refString(i.bandage.effect)] ||
-      !c.skills?.[refString(i.bandage.skill)] ||
-      i.bandage.action !== 'bandage' ||
-      !c.text?.[i.bandage.narration] ||
-      i.container === true ||
-      i.slot ||
-      i.edible
-    )
-      out.push(diag('SCHEMA_VIOLATION', at));
-  }
+  checkItems(c, defs, items, out);
   return out;
 }

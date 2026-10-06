@@ -30,6 +30,25 @@ export function clearBleed(world: World, body: EntityId): DeltaOp[] {
     : [];
 }
 
+function scheduleBleed(
+  body: EntityId,
+  effect: DefinitionRef,
+  job_id: JobId,
+  generation: number,
+  next_tick_at: number,
+  ends_at: number,
+): DeltaOp {
+  return {
+    op: 'job.schedule',
+    writer_group: 0,
+    job_id,
+    job: effect,
+    bleed_body_id: body,
+    bleed_generation: generation,
+    due_time: Math.min(next_tick_at, ends_at),
+  };
+}
+
 /** Called only after an actual surviving positive hound HP loss. */
 export function wound(world: World, source_id: EntityId, body: EntityId, mint: Mint): DeltaOp[] {
   const spawned = world.state.created?.[source_id];
@@ -69,18 +88,7 @@ export function wound(world: World, source_id: EntityId, body: EntityId, mint: M
   };
   return active
     ? [change]
-    : [
-        change,
-        {
-          op: 'job.schedule',
-          writer_group: 0,
-          job_id,
-          job: effect,
-          bleed_body_id: body,
-          bleed_generation: generation,
-          due_time: Math.min(next_tick_at, ends_at),
-        },
-      ];
+    : [change, scheduleBleed(body, effect, job_id, generation, next_tick_at, ends_at)];
 }
 
 export function matching(world: World, body: EntityId, effect: DefinitionRef, generation: number) {
