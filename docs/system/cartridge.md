@@ -1266,6 +1266,30 @@ Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
+## D9 village reaction content (selected, pending implementation)
+
+The five valid child/allegiance pairs and the Study rule are defined in
+[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
+Author distinct child responses for Elspeth and Bram, five truthful Maud rumor
+variants and Green descriptions, prior/fox Aldric and Vesper responses, and
+bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave.
+The Study remains the existing reciprocal Nave-west/Study-east edge; no new
+door/barrier definition or key is authored. Only its west ingress gets the
+conditional fox policy. No new room, NPC, token relationship fact or synthetic
+ferryman instance is needed.
+
+The audible area is the existing **25 Ashmere rooms and ten public Priory
+rooms**, excluding Fen and isle rooms. Author the area as explicit chapter
+room references with loader validation; a room's ordinary descriptive tags do
+not become sound authority. Flood variants affect Reed Path and Mire text only.
+The bell's hound suppression duration is **172800 logical seconds**, owned by
+the cartridge. Author its population-plan reference and resume bound against
+the existing hound plan; no new population cap, catch-up count or creature is
+declared. The published D6 predecessor is chapter v035/API1.30,
+[hash/190 IDs](../../protocol/fixtures/missing_child_v035_hash.json).
+D9 source successor release/API/hash/IDs remain null until its actual source
+is independently pinned.
+
 ## D12 practical skill declarations
 
 **Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
@@ -1305,3 +1329,15 @@ Compiler and loader validate the closed positive safe-integer duration, interval
 The chapter names one original player-scoped quest and one original player Boolean `fen.night_survived`, initially false. Completion sets that fact true and applies **−1** to the existing bounded Priory/Fen axis at most once. It offers a Sedge acknowledgement of surviving the marsh; her D1 swim lesson remains free, independently accessible before S27 and idempotent if already acquired. No duplicate `skill.acquire`, second swim lesson, fee, item or attribute reward is granted by S27. Sedge's recognition is a fact-selected dialogue/text variant at her existing all-hours location, not a new NPC schedule or persistent behavior profile.
 
 At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. Release/API/hash and allocated IDs remain null until source is derived from its final published predecessor.
+
+## D8 crows, coin and reachable nest (selected planning contract)
+
+**D6 predecessor published; D8 source pending.** Published main `f57f1a8c` includes D6 [#247](https://github.com/lorecrafting/lokacore/pull/247), merge `61f4200c`, chapter `ashmere_missing_child@0.0.35`, API1.30, hash `560e16712f3c04538343e9a3ac767604093656bc527864360ccad6a8ab719581`, and 190 starting IDs in the frozen v035 fixtures. The installed sole `old_coin` is a 10g room item at dark Well Bottom, with reciprocal Up to Well Shaft; Pool Bottom instead holds the chest/ring. D5's Oak Branches route and all seven reciprocal dry corridor legs remain installed. D8's allowlist names that exact item definition in the new compiled chapter; its successor release/API/hash/ID answers and source head remain null until implementation.
+
+Declare four C3-style **cap-one two-room plans**: two with Green home and Well Lane as ordinary wander neighbor; one with Drowned Oak home and Willow Shade neighbor; one with Oak Branches home and Drowned Oak neighbor. Thus genesis has two Green, one Oak and one Branches crow. Each plan has day/night target one, no aggression window, **86400 logical second** replacement after actual death and **3600** ordinary wander interval. Existing two-room wander remains two-room; a crow on an evidenced transport or return excursion keeps its living slot while that plan skips its wander. After deposit, fallback or Shoo, a checked return job takes one adjacent corridor leg toward the member's authored home every **150 logical seconds** and finishes there in at most seven legs; ordinary wander resumes on a later boundary. Accepted combat pauses return until the encounter closes with the crow alive. This is a narrow crow corridor/location admission, not an N-room wander redesign. Crows have authored HP **1**, attack chance **0** and damage range **1..1**, so they do not initiate a fight. Their exact plan/bundle/corpse references, runtime generation, HP and room must be validated as for C3; one direct held coin goes to the crow's public corpse on death, without crow loot or player credit. Cap is the sum of the four cap-one plans, never historical dead identities.
+
+The C3 bundle currently requires and mints a directly held pelt. Crow bundles instead require the same NPC/corpse roles with the companion item **absent**; birth creates only the crow and HP. Compiler, loader, genesis, population invariants and save validate this closed optional shape. Do not mint a fake feather, marker or duplicate coin. Two Green plans may share the Green template/bundle; Oak and Branches use home-matched crow templates under the current home validation. No unrelated hound/deer bundle changes are selected.
+
+The one permitted transport corridor is Village Green → Well Lane → Ferry Landing → Reed Path → Reed Bank → Willow Shade → Drowned Oak → Oak Branches, using actual reciprocal exits one leg at a time; no path into underwater rooms. A selected acquisition or transport leg has an authored **150 logical second** delay. The nest is one real portable **250g** item, initially empty in Oak Branches, explicitly `container: true` with **8 direct-item roots** capacity and an authored lid initially open. Its text/barrier use the ordinary item declaration; do not create a detail-only or remote holder. If taken or moved, the original nest identity remains the target, but delivery falls back to the present dry room until it is again open in Oak Branches. The player can reach Branches and Take the delivered original coin by ordinary controls.
+
+Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonempty ordered reciprocal corridor with every declared adjacent edge, positive safe integer delays, each referenced plan's legal slot/home/bundle shape, container eligibility and declared capacity, and the allowlisted item's safe role. They validate this D8 declaration's actual references and relationships, without an engine rule that all cartridges have four cap-one plans, an eight-root nest or one shiny definition. Controlled chapter behavior and simulation assert the selected **4/8/one-coin** answers. D8 does not revise D6's coin source or frozen fixtures. These selected world values belong to this cartridge; no engine defaults or migration are added.

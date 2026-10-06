@@ -851,6 +851,25 @@ original light/fare/key. Later isolated browser proof covers remaining-time/Up o
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
 is authorized by this planning adoption; real SQLite faults remain separate proof.
 
+## D9 village reactions and bell cue
+
+**Selected, pending implementation.** Show current fact-derived cast dialogue,
+rumors and Green description for each of the five valid child/bell pairs,
+keeping `stays` distinct from `rescued`. The bell cue appears once in the
+eligible observer's confirmed chronological history; redisplay and refresh
+label it as past, with no new sound or consequence. Fen/isle frames do not
+claim they heard the bell. Flooded Fen text cannot hide a real dry exit.
+
+The Nave's west ExitView reports `exit_closed` after fox allegiance unless the
+actual player owns a nonempty corpse in the Study. While eligible, it offers
+ordinary Move with truthful fare; Study east remains offered when otherwise
+movable. Direct commands and captured taps use the same current admission.
+Show the actual reachable corpse and its contents through ordinary physical
+pages/Take; never advertise D6 Chapel `recover_corpse` for a Study corpse.
+Public Aldric/S2, Sedge lessons, Wren return and existing corpse routes remain
+available. A retained bell or death line is presented from confirmed receipts,
+not an optimistic display callback.
+
 ## D12 practical lessons and benefits
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
@@ -872,3 +891,9 @@ Confirmed treatment leaves HP and encounter/round state unchanged, removes the c
 **Selected planning interaction; source pending.** At any hour Hound Run's gnawed-bones detail offers one explicit Start or Restart when the shared kernel admission accepts it. The Journal shows the active attempt's next named route edge or immediate retry after failure, then one confirmed completion. It does not ask the player to wait for night or a replacement hound. If a present eligible hound is provoked at Start, the existing Combat page shows the actual encounter and its current Flee/Bandage options; no scripted hit or guaranteed safety is narrated. Ordinary hounds remain passive outside that opt-in.
 
 Map/World use confirmed player transfers for the five ordered entries. A wrong in-footprint move retains the honest next edge; a departure outside the footprint or death shows the attempt failed and the immediate Hound Run retry. The Drowned Oak midpoint may offer Use shelter once for this attempt, without Rest or a time jump. The fifth entry returns to Reed Bank. Only the accepted fifth entry can show `fen.night_survived`, the exact faction consequence and Sedge's later acknowledgement. Her earlier free swim lesson remains independently available. Pending/refused/stale/replayed actions produce no duplicate progress, reward or success line. Browser interaction and refresh prove the route, failure/retry, Book commands and resulting journal; headless and SQLite proof remain separate. Mobile sessions and cosmetic UI blur are deferred.
+
+## D8 crow carrying and nest recovery (selected planning interaction)
+
+World shows the actual crow in its current room and, while held, a truthful authored carrying line for the exact coin. It does not expose the crow's inventory as player-reachable Take. The current crow detail offers Shoo only when the shared kernel admission would accept that exact member/item; confirmed Shoo names the dropped same item once, then ordinary World item Take may recover it. Attack release, death and fallback likewise show only committed custody, with no promised nest loot. During a checked return, World shows the original crow at its actual room; no Shoo offer or second acquisition is promised. On home arrival it can again be selected for a later dropped coin.
+
+The player follows ordinary exits from Green through the authored corridor to Oak Branches. The real nest item has the existing item detail/Contents and open/Take admission, including full and moved states; original coin retrieval uses ordinary Take and carrying limits. Pending/refused/stale actions claim no move, deposit or acquisition. Isolated browser proof covers Drop→crow-held observation→legal route→nest Contents→Take, Shoo, full-nest fallback, lawful return home and a later Green Drop using the same living crow, plus refresh during crow custody and return. Headless TypeScript and real SQLite checks remain separate; mobile, owner save and cosmetic blur remain deferred.

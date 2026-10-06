@@ -1467,6 +1467,46 @@ deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings a
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
 
+## D9 village consequences and Prior Study access (selected, pending implementation)
+
+**PM selection, not installed behavior.** The five valid terminal pairs are
+`rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
+`lost/fox` remains invalid. Child and bell quest owners alone write their
+terminal facts. Elspeth, Bram, Maud, the Green, Aldric, Vesper and Sedge read
+those committed facts for distinct authored responses; reading or rendering
+never changes them, reopens an ending or pays a reward. A missing child or
+unknown allegiance retains truthful search/base text.
+
+The actual accepted bell occurrence emits one committed cue for the actor's
+observer frame only when it is in the chapter's declared audible area. In the
+installed single-body chapter this frame is Belfry; other room eligibility is
+proved with controlled projection frames over that occurrence. The
+cue retains its event/command cause, actor, room and logical time; a later
+Look, Read, reopen or travel cannot generate another sound. The ordinary bell
+scene remains the initiating actor's immediate narration. Reed Path and Mire
+may describe flood after the bell, but their dry exits, rescue and corpse routes
+stay passable.
+
+The bell suppresses Fen hound spawning and aggression for the cartridge's
+172800 logical seconds from the accepted occurrence. Existing hounds remain
+living, present and loot-free; any open hound encounter closes without an
+attack/reward and cancels its current round. Suppressed population jobs
+advance harmlessly. At the exact deadline normal bounded population resumes
+from actual living count and current generation, with no accumulated spawn
+debt or duplicate job. Sedge's hostile/warm response never disables her
+existing lessons or recovery route.
+
+Fox allegiance restricts only **Nave west → Prior Study** ingress. The shared
+barrier state remains unchanged and no door Open/Unlock bypass is invented.
+Ordinary ingress refuses `exit_closed`. The owning living actor may enter when
+an actual actor-owned corpse is still in the Study with at least one direct
+item root. The opposite **Study east → Nave** exit always admits ordinary
+movement (subject to unrelated normal life/posture rules); taking the corpse's
+last root removes the ingress exception on the next decision. There is no
+remote Study recovery, duplicate item, item teleport or resurrection. The
+public Nave and Aldric's S2 turn-in remain accessible. The gate does not close
+Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm-decision-d9-village-reactions-2026-10-06.md).
+
 ## D12 practical skill consumers (selected contract)
 
 **PM-adopted policy, pending implementation.** The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
@@ -1498,3 +1538,11 @@ At any hour a standing living player at Hound Run deliberately starts S27 once. 
 The opt-in Start also provokes the lowest-ID currently living co-present unengaged C3 hound, if one exists, through C4's bounded encounter admission in that same proposal; the player may fight, use C5's legal bandage or Flee under existing combat rules. This is the sole all-hours S27 hostility exception. An absent, dead, engaged or wandered-away hound does not block Start or cause a replacement wait. Outside an active Start, C4's passive hounds and ordinary safe corpse retrieval remain unchanged. No extra opponent opportunity, free strike, hound spawn or forced damage is granted. A real qualifying hound hit may cause C5 bleeding; S27 never writes a bleed directly.
 
 An accepted departure from the declared expedition footprint before completion fails only this attempt, retaining the quest active. A fatal event for the bound player body invalidates the attempt before Chapel return; death does not erase other quest progress. Either failure allows an immediate explicit Restart at Hound Run with a new attempt identity, cursor zero and the same quest occurrence. Old attempts cannot grant credit or rewards. No hound kill, item, swim qualification, clock, bell or faction state is a start/route gate. Completion is once only; Start/Restart disappear after resolution. At Drowned Oak after the third entry, one optional Use shelter action records a bound sheltered flag and narration; it is neither a completion gate nor Rest, healing or a time skip. The fifth entry returns to safe Reed Bank.
+
+## D8 crow scavenging (selected planning contract)
+
+[D8's PM decision](../decisions/pm-decision-d8-crow-scavenge-2026-10-06.md) selects one bounded consumer of C3 population, D5's real canopy, ordinary containment and scheduled jobs. Only a directly room-held `old_coin` dropped by the player in Village Green or Drowned Oak is eligible. It must be the exact D6 item, not a keyword match; no quest item, corpse, descendant, worn or nested item, container, or NPC-held item is eligible. A committed `item_dropped` can bind one living, co-located, idle crow (lowest EntityId) and that item to one acquisition job. The player can Take the coin before the job; the job then completes harmlessly. An idle crow carries at most one acquired root. There is no reservation or new ownership ledger.
+
+At the authored acquisition deadline, revalidate the exact drop cause, item custody, crow identity, life, room and idle job. Transfer that same item room→crow, emit `item_acquired` with the crow as actual holder and `run_job` cause, and schedule one transport leg. Never credit the player with Take, a quest acquisition or a reward. Each subsequent job revalidates current custody, member generation, life, location and original nest identity, then moves the crow by one legal adjacent exit along the authored Green-to-Branches corridor. That transport excursion is the only reason a live crow may be outside its plan's two-room ordinary wander pair; the plan retains its slot and ordinary wander skips that member while the transport or return occurrence is active. Deposit transfers crow→the open original nest in Oak Branches only while the nest is there and below its direct-root capacity. Successful deposit starts a bounded return to that crow's authored home, even if the player later Takes and drops the coin again. A return job moves the same living crow one checked adjacent corridor edge toward home every authored interval, with no item transfer; it ends at home and ordinary two-room wander resumes on a later boundary. From any corridor room, at most seven return legs are needed. The crow may be observed holding the coin between committed legs. No teleport, remote Take, pathfinder, item mint or clock skip is added.
+
+If a leg or deposit becomes impossible because the original nest is absent, closed or full, or the next edge is blocked, transfer the held coin to the crow's present dry room and start its return. A stale job after Take, Shoo, combat, death or generation replacement moves nothing. Shoo is a living co-located player action only on a crow currently carrying the eligible root; it moves that exact root to the present room and changes the current transport to a return, atomically. Accepted Attack on a carrying or returning crow releases any held coin to the present room, cancels its due job and pauses return while the encounter is open; a refused Attack changes neither. At encounter close, a surviving crow resumes return with one new job unless already home, when it becomes idle; actual death clears return and uses C3's ordinary same-ID corpse transfer for any still held property. The crow cannot acquire another drop while carrying, returning or paused. Ordinary population work skips a member that had a due transport/return job at the same clock even if that job ran first and reached home; writer groups stay distinct. Return never silently teleports or retires a live crow. This is one crow-item transport state, bounded by the four live population slots; no general scavenger system is selected.
