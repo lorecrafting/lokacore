@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [C4 portable foundation second opinion](2026-10-06-c4-foundation-second-review.md): provisional source `252eb456`, evidence `11fa7579`, CHANGES REQUIRED; C4-A1 pack-admission bypass and C4-A2 stationary flight stamp. Independent 22 TS/SQLite and 12 Elixir checks pass; controlled malformed proposals reproduce in both kernels and final adoption. D1 integration/pins/full gate remain pending.
+- [C4 portable foundation second opinion](2026-10-06-c4-foundation-second-review.md): initial provisional source `252eb456` CHANGES REQUIRED; corrected source `251b0bff`, evidence `7b38aa14`, scoped APPROVE closes C4-A1/A2. Independent 31 TS/SQLite and 13 Elixir checks pass; malformed final proposals refuse, selected-flight and dead/absent cursor repair agree across twins, all 12 evidence hashes verify. D1 integration/pins/full gate remain pending.
 
 - [C3 living hounds save/protocol second opinion](2026-10-06-c3-hounds-save-second-review.md): original `a692a2b8` CHANGES REQUIRED; first fix `8e767434` retains residual S2; strict source `2dbf55b5` APPROVE closes S1/S2. Published-B9 carryover source `f96e0245`, evidence `33163a1b`, scoped APPROVE: 22 TS/SQLite and 13 Elixir checks pass; integrated dream/population cold recovery and fifteen byte-preserving forgeries pass, all 140 v029/API1.25 IDs/hash and thirteen evidence hashes verify. Separate Astra approval; hosted publication remains ahead.
 

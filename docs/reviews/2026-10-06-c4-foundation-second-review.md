@@ -2,7 +2,9 @@
 
 Independent provisional review of source `252eb45624a27d5eb90c89a2eff7159e09f9b613`,
 evidence `11fa757947061b4fa077847d85c3a05b1cb100cf`, branch `chapter-1/c4-hound-behavior`.
-Authored none of the implementation. Verdict: **CHANGES REQUIRED**.
+Authored none of the implementation. Initial verdict: **CHANGES REQUIRED**.
+Scoped corrected-source verdict below: **APPROVE**, with D1 integration and final
+publication evidence still pending.
 
 Requirements derived before inspecting the diff: [C4 mechanics](../system/mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract),
 [portable composition](../system/protocol.md#c4-pack-encounter-and-flight-composition),
@@ -79,3 +81,46 @@ records a failed full gate at the stale content pin; that is not a passing final
 gate. Published D1 integration, independent successor pins, complete full gate and
 scoped review carryover remain required. Primary gameplay and save reviews remain
 separate from this second opinion.
+
+
+## Scoped corrected-source recheck — APPROVE
+
+Corrected source `251b0bff4f90b7e89cf327f11effe60282791574`, evidence
+`7b38aa1428eef28068b96b7e2e6e770ca3d8829c`. **APPROVE** within this provisional
+foundation scope. C4-A1 and C4-A2 are closed; no open findings here.
+
+Both composers now derive required pack shape from the admitted member's plan and
+require initial cursor equality with the attacked hound. Final flight completeness
+binds actual same-group departure, exact slot provenance, removal/closure and the
+bound round job's due time. It also proves the flier is the selected opponent after
+repairing the initial cursor over present, current, nonfatal members. A dead hound
+still occupying the room is excluded through its retired slot. The nominal valid
+flight fixture now selects its flier; a separate wrong-member fixture refuses.
+
+Independent verification on the exact corrected tree:
+
+- **31 TypeScript/SQLite tests** and **13 independently compiled Elixir tests** pass,
+  including C4, ordinary encounter/population composition and C3 complete births.
+- Re-ran the original missing-roster, wrong-initial-cursor, stationary-transfer and
+  exit-free stamp inputs. Both portable kernels fault, and both independent
+  preconditions reject their previously accepted forged results. Loaded-world
+  final adoption also refuses the original three runtime probes atomically.
+- Checked literal wrong-member refusal, dead-cursor repair and flight before a
+  later elapsed endpoint. An additional controlled living-but-absent cursor input
+  repairs with canonical wrap and permits the survivor's flight. All complete
+  results agree between the portable twins; literal expected rows remain the
+  oracle, rather than one kernel supplying the other's answers.
+- Explicit nonfinal transfer/stamp prefixes remain legal in both kernels. Combat's
+  direct prefix caller uses nonfinal application at the occurrence clock; final
+  proposal adoption retains complete validation. Inspected changed composer and
+  independent-invariant callers; no bypass was added to runtime proposal adoption.
+- Verified all **12 retained log checksums**. Read the selected-ID, dead-cursor,
+  pack-shape and late-endpoint mutation failures: they name the intended literal
+  cases; selected-ID, dead-cursor and late-endpoint logs also retain explicit
+  nonzero exits. These are developer-run source mutants; this
+  reviewer independently ran controlled inputs without changing production code.
+
+Ponytail recheck: narrow existing guard/caller changes, no new framework, dependency
+or compatibility machinery. This approval does not promote the provisional v029
+pin or failed earlier full gate. Published D1 integration, independently derived
+successor pins, a complete passing gate and scoped carryover review remain due.
