@@ -44,3 +44,21 @@ Self-review of this integration diff: Ponytail found no new framework/dependency
 correctness found and fixed ancestry fixture receipt setup, removed the stale count
 change detector, and corrected the feature evidence path. Full original D8 source
 review remains pending and includes proposal/protocol/save surfaces.
+
+## Bounded parity fix checkpoint
+
+The frozen C3 population fixture declares `pelt` without runtime-only `loot_role`
+metadata. D8's TypeScript final birth guard incorrectly treated this as a bundle
+with no companion; Elixir correctly read the declared `pelt`. The guard now reads
+the member's declared `pelt`/`hide` reference directly. Frozen fixtures remain
+unchanged. Ponytail/correctness self-review found no additional machinery needed;
+missing companion, HP and slot refusals remain covered by existing behavior tests.
+
+- Existing TypeScript spawned-bundle behavior suite on the prior code: exit1 (red control).
+- After the fix, `mise exec -- node --test kernel/ts/test/spawned_bundle.test.ts kernel/ts/test/crow.test.ts`: exit0, 15 passed.
+- `mise exec -- mix test test/loka/core/spawned_bundle_test.exs`: exit0, 5 passed.
+- Sole post-fix `mise exec -- bin/check_all.sh`: exit8. All 393 Elixir tests passed, then Credo failed at `lib/loka/core/compose_encounter.ex:214` (`cancel_binding?` complexity13/max9 and ABC39/max30). Later gate stages, including full TypeScript/headless simulation, did not execute.
+
+Next concrete blocker: simplify the existing D8 `cancel_binding?` additions while
+preserving cancellation binding checks; rerun the required gate after that change.
+The scoped parity fix is complete; publication and remaining proof stay pending.

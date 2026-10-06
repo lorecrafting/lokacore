@@ -125,7 +125,7 @@ export function completeBirths(ops: readonly DeltaOp[], state: State): boolean {
     );
     const spec = section(state, 'population_specs')[key(o.by)] as Obj | undefined;
     if (
-      related.length !== (spec?.[spec.loot_role as string] ? 1 : 0) ||
+      related.length !== (spec?.[o.role === 'deer' ? 'hide' : 'pelt'] ? 1 : 0) ||
       slot.length !== 1 ||
       hp.length !== 1
     )
