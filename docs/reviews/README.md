@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D6 water depths final integrated primary review](2026-10-06-d6-water-final-primary-review.md): exact local `3245550d`, CHANGES REQUIRED for evidence capture path redaction; runtime/source integration and bought-torch cold-reopen mutant otherwise pass. Final fix recheck, second opinion, hosted CI and publication remain open.
+
 - [D12 practical skills final integrated primary review](2026-10-06-d12-final-primary-review.md): exact local `9830cece`, independent APPROVE, no findings; v034/API1.29/hash/184 IDs, 370-test full gate, focused SQLite and 2/2 isolated browser proof verified; independent two-herb mutant red/restored green. Hosted CI/PR/publication remain PM gates.
 
 - [D3 Western Ashmere final integrated source](2026-10-06-d3-western-ashmere-final-review.md): exact `559ae690`, independent APPROVE, no findings; v033/API1.28/hash/184 IDs rechecked, retained full gate and isolated two-route browser proof verified, six focused tests pass, independent return-route mutant red. Remote CI/PR/publication remain PM gates.
