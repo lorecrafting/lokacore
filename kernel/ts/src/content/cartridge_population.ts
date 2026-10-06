@@ -27,7 +27,7 @@ export function population(c: Obj): Diagnostic[] {
       p.area.some((r: Obj) => ref(r) === ref(p.home)) &&
       rooms.every(Boolean) &&
       reciprocal(rooms, p.area);
-    const template = bundle && templateValid(c, bundle, p.home);
+    const template = bundle && templateValid(c, bundle, p.home, !!p.scavenge);
     if (!packValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.pack.narration`));
     if (!sightValid(c, p, rooms, bundle))
       out.push(diag('SCHEMA_VIOLATION', `${at}.sight.narration`));
@@ -93,13 +93,14 @@ function periods(p: Obj, calendar?: Obj): boolean {
   );
 }
 
-function templateValid(c: Obj, bundle: Obj, home: Obj): boolean {
+function templateValid(c: Obj, bundle: Obj, home: Obj, allowEmpty: boolean): boolean {
   const npc = c.npcs?.[ref(bundle.npc)];
   const item = bundle.item && c.items?.[ref(bundle.item)];
   const corpse = c.items?.[ref(bundle.corpse)];
   return (
     ((bundle.member_role === undefined && bundle.loot_role === undefined) ||
       (bundle.member_role === 'deer' && bundle.loot_role === 'hide')) &&
+    (!!bundle.item || allowEmpty) &&
     npc?.spawn_template === true &&
     ref(npc.room) === ref(home) &&
     !!npc.hp &&

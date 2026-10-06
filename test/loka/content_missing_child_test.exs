@@ -84,6 +84,21 @@ defmodule Loka.ContentMissingChildTest do
            )
   end
 
+  # Breaks: relaxing crow companion items also accepts a deer bundle without its hide.
+  test "deer bundle still requires its hide", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "population_bundles/willow_deer.json")
+    bundle = path |> File.read!() |> JSON.decode!() |> Map.delete("item")
+    File.write!(path, JSON.encode!(bundle))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             diagnostics,
+             &String.ends_with?(&1["path"], "populations/willow_deer.bundle")
+           )
+  end
+
   # Breaks: source compiler accepts a one-way crow corridor that strands a return leg.
   test "crow transport corridor requires its reciprocal edge", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ashmere_missing_child", dir)

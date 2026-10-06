@@ -76,7 +76,8 @@ defmodule Loka.Content.Population do
       home && Enum.uniq(p["area"]) == p["area"] && Enum.member?(p["area"], p["home"]) &&
         Enum.all?(rooms, &is_map/1) && reciprocal?(rooms, p["area"])
 
-    bundle_ok = is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"])
+    bundle_ok =
+      is_map(bundle) and bundle_valid?(bundle, manifest, defs, p["home"], p["scavenge"] != nil)
 
     []
     |> add(not targets, ["day_target"])
@@ -165,17 +166,16 @@ defmodule Loka.Content.Population do
   end
 
   # ponytail: the optional companion keeps the existing bounded population bundle shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp bundle_valid?(b, manifest, defs, home) do
+  defp bundle_valid?(b, manifest, defs, home, allow_empty) do
     npc = value(Refs.resolve(b["npc"], "npc", manifest, defs))
     item = if b["item"], do: value(Refs.resolve(b["item"], "item", manifest, defs))
     corpse = value(Refs.resolve(b["corpse"], "item", manifest, defs))
 
     roles_ok =
       (b["member_role"] == nil and b["loot_role"] == nil) or
-        (b["member_role"] == "deer" and b["loot_role"] == "hide") or
-        (b["member_role"] == "crow" and b["loot_role"] == nil)
+        (b["member_role"] == "deer" and b["loot_role"] == "hide")
 
-    roles_ok && npc && corpse &&
+    roles_ok && (b["item"] != nil or allow_empty) && npc && corpse &&
       npc["spawn_template"] == true && npc["room"] == home &&
       is_map(npc["hp"]) && is_map(npc["attack"]) &&
       (b["item"] == nil or

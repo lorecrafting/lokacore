@@ -489,12 +489,14 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
 });
 
 // Breaks: a hash-correct untrusted cartridge bypasses the deer role pair or sight route checks.
-test('loader refuses malformed deer roles and missing flight text', () => {
-  for (const changed of ['role', 'narration']) {
+test('loader refuses malformed deer roles, missing hide and flight text', () => {
+  for (const changed of ['role', 'narration', 'missing_item']) {
     const c = structuredClone(content) as any;
     if (changed === 'role')
       c.population_bundles[ref('population_bundle', 'willow_deer')].loot_role = 'pelt';
-    else delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
+    else if (changed === 'narration')
+      delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
+    else delete c.population_bundles[ref('population_bundle', 'willow_deer')].item;
     const canonical = encode(c);
     const hash = createHash('sha256').update(canonical).digest('hex');
     const loaded = loadCartridge(
