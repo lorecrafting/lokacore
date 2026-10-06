@@ -80,3 +80,48 @@ cross-language fixture tests were rerun here.
 
 No owner save, browser, native simulator, push or merge was performed. A separate
 save/protocol opinion and the publication check line remain separate gates.
+
+
+## Scoped fix round 1 — APPROVE
+
+**Exact corrected source:** `552717d50af951d8f5cd4c43533e53b7102d45fd`,
+source correction `1f651d890b74ccb44752201365ca9ca6366fb255`, with the combined
+reviewed C2/Web predecessor and simulator inventory correction merged. Recheck
+covers the two findings, the cohesive extractions and their direct callers;
+the original source review above remains historical.
+
+- **Finding 1 closed:** added/raised source ceilings are removed. Action target/
+  input admission, installed-artifact validation, chapter/journal projection,
+  source reference contracts and Book page/provider-offer presentation were
+  moved into cohesive modules; the actual predicates, writer/budget identity,
+  projection order and captured invocations are preserved. Against the original
+  combined base, there are no new or raised source allowances. Touched TypeScript
+  and Elixir size checks pass, including shared Book source.
+- **Finding 2 closed:** the existing `service@1` entry now owns `use_service`,
+  `service` and `bed`; there is exactly one row. Generated catalogue/contracts
+  and features are current. Cartridge source and v025 hash/ID fixture bytes are
+  unchanged from the original reviewed source.
+
+Verification rerun at this exact checkpoint: **59 TypeScript/Book/SQLite and
+regression tests pass**, including generic simulator inventory and the active
+chapter's 32 controlled seeds; **11 Elixir compiler/contract tests pass**.
+Kernel and app TypeScript checks, generated contracts/features, touched size,
+all 14 lint valid/invalid controls and new extracted-source lint pass.
+The earlier pre-existing simulator inventory failure is corrected in the merged
+predecessor. The lint controls use the repository's `--skip-snapshot-tests`
+mode; a preliminary bare invocation reported absent snapshots, not rule failures.
+
+Independent throwaway controls: deleting provider-cask custody admission fails
+`service refusal rolls back every row and respects exact provider, quote and
+complete serving`; skipping service-only accepted-history verification fails
+`forged bounded service rows and swapped/omitted historical service evidence
+refuse without repair`. Both exit 1, originals restored and throwaway removed;
+the unchanged suite exits 0. Commands are `mise exec -- node --test` with,
+respectively, `kernel/ts/test/service.test.ts` and
+`mobile/authority/local-story/service.test.ts`.
+
+Ponytail Review: lean; the required extractions preserve existing behavior and
+remove limit inflation without adding a framework or dependency. **No open
+primary findings.** Save/protocol opinion, publication checks and any separately
+required browser proof remain separate. No push, merge, native simulator or
+owner-save operation was performed.
