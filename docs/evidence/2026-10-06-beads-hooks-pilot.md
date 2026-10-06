@@ -36,3 +36,8 @@ new hook while the destination branch did not yet contain its Python helper.
 The shell wrapper now exits successfully when the helper is absent. The actual
 separate worktree passed this control after the fix. No tracker file in that
 worktree was changed.
+
+An independent reviewer also used real `br 0.7.4` in isolated repositories:
+two successive newer JSONL generations imported to healthy sync status, while
+a dirty local index with newer JSONL was preserved and import skipped. These
+are functional controls, not yet a measured integration-checkout merge.

@@ -27,7 +27,8 @@ def main():
         if status["dirty_count"] or status["db_newer"]:
             print("Beads has unexported local changes; inspect br sync --status before import.")
         elif status["jsonl_newer"]:
-            subprocess.run(["br", "sync", "--import-only"], check=True)
+            subprocess.run(["br", "sync", "--import-only"], capture_output=True, check=True)
+            print("Beads index refreshed from reviewed JSONL.")
     except (KeyError, ValueError, subprocess.CalledProcessError):
         print("Beads import needs attention; inspect br sync --status and import manually.")
     return 0  # A post-Git hook cannot undo the completed checkout or merge.
