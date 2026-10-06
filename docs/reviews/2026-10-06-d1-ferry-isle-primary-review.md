@@ -74,3 +74,59 @@ pin the successor and rerun the accumulated active line. Browser/native proof is
 explicitly null in the evidence. The independent component route above supplies
 behavior evidence; it certifies no browser layout, final release pin, hosted CI or
 native/device session. No primary implementation finding is open.
+
+
+## Integrated C3 carryover — APPROVE
+
+Exact source `4e217f608189eb42420b08508e1f4f7980ea64b4`, frozen evidence
+`8de184eee8df05972073addd5115433a8a906c05`. Published C3/status base
+`1b269871275c900343f9e2dcfcadc5c856880589` is an ancestor. The evidence
+commit changes no source. Scope: final D1 delta, combined C3 consumers, exact
+view/command bindings, shared Book combat/pickup routing and release evidence.
+
+**No findings; primary approval carries forward.** Paid/free/recovery transport
+and original Wren/Sedge semantics are unchanged. Compiler/loader require API 1.26
+and the exact declared action shape; projection reuses that validated shape while
+shared admission still binds the actual authored key, route, endpoint and base
+quote. Both transport and population independently activate accepted-history
+validation. Actual dark-loft death, penniless recovery, original nested belongings,
+following/separated Wren and once-only free swim survive integrated cold reopen.
+
+The three-line presenter fix preserves an intentionally empty routed World line
+with nullish fallback. The named corpse pickup still takes precedence. This keeps
+confirmed escape narration on Combat, preserves pending/refused combat foreground,
+and retains corpse Take/detail/history/Back and ordinary pickup/Drop behavior.
+It adds no new routing abstraction or duplicate test.
+
+Independent exact-source verification:
+
+- Python-only reconstruction from published v029 and the frozen D1 literals
+  matches v030/API 1.26 canonical bytes and SHA-256
+  `dbff57ba20305dffa4a0679ab58d480574fbc3fd93fddeb3bf08d48d78e057b9`.
+  Independent UUID allocation matches all 149 fixture answers and all 149 actual
+  fresh-world identities, including C3 member/pelt pairs/job. Authored source
+  compiles byte-for-byte to that answer. Frozen v029 files remain unchanged.
+- Ferry kernel, real-SQLite transport/hounds, Book polish/hounds and app chapter:
+  **38/38 pass**. Current C3 kernel: **9/9 pass**, including both real equal-time
+  job orders, night-only replacement and conserved original pelt. Combat Book:
+  **6/6 pass**.
+- A temporary Node import hook outside the repository loads the unchanged
+  published C3 presenter against the current combat controls: **5 pass/1 fail**
+  at the World escape-line assertion. Running the current presenter restores
+  **6/6 pass**. No source file is changed by this red control. The separate pickup/
+  remount cases remain green.
+- A temporary copy of the independent real Book route harness outside the repo
+  passes on the compiled current source: exact 2p boarding detail/control,
+  destination World, refresh, Sedge’s free lesson/acquired qualification and
+  restored history, Loft/Garden/Shrine exploration and free return. This is
+  component/session behavior proof, not browser layout evidence.
+- All 25 final evidence hashes match; inventory has no missing/unlisted artifact
+  outside its two checksum files. The retained logs explicitly preserve the
+  earlier size failure and correction, published-main/pre-fix combat red,
+  post-cleanup direct-status tail green, and final full app result: 522 tests,
+  521 pass, one intentional skip, zero failures. `git diff --check` passes.
+
+Earlier provisional pin failures are resolved. Ponytail Review: lean; conserved
+owners and fixed checked transport shape suffice, and the escape fix is one
+operator change. No source edit, owner save, preview or native session occurred.
+Hosted CI/publication and browser layout remain separately gated.
