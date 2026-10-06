@@ -74,7 +74,12 @@ function underBody(
   const { world, body, owned } = c;
   const path = new Set<string>();
   let at = id;
-  while (at !== body && !Object.hasOwn(world.rooms, at) && !owned.has(at)) {
+  while (
+    at !== body &&
+    at !== world.consumed &&
+    !Object.hasOwn(world.rooms, at) &&
+    !owned.has(at)
+  ) {
     if (path.has(at)) return 'containment_cycle';
     if (!charge(c)) return 'budget_exceeded';
     path.add(at);

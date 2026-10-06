@@ -1,5 +1,6 @@
-// size: allow 321, method-aware Harvest admission joins the existing composed view list
+// size: allow 312, food projection and method-aware Harvest share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
+import { foodActions } from './food.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
@@ -29,21 +30,10 @@ import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
-/**
- * The GameView lists of `actor`'s set: `listed(fits)` is each action that `fits` in presentation
- * order (highest priority first, then key), available when its policy holds and, for a recipe,
- * its admission passes, else shown with invalid_state or admission's code (00 §4.10); a talk in
- * step's order: invalid_state when its policy fails, not_found when its target speaks no
- * dialogue, invalid_state when talkRefused. A recipe is listed with the place while its detail is
- * in the actor's room. The door verbs (barrier@1) are listed not with the place but on an exit,
- * `door(direction)`, and on an item with a barrier (a container, c1-locks): only those step would
- * accept there now (refusal, then barrier.transition).
- * Likewise wear and remove (equipment@1) are listed on an item only when step would accept them
- * (refusal, then equipment.transfer), never with the place; `worn(id)` lists only those that
- * resolve to remove. The place never lists an action resolving to the verb of the actor's current
- * position (position@1), which step refuses invalid_state.
- */
-const HIDDEN = ['buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+// Shared query context projects exact offers in priority/key order. Recipes bind their detail;
+// door/equipment/light/food helpers use the same admission as their command rules.
+// An actor's current position is not offered again.
+const HIDDEN = ['eat', 'buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -92,6 +82,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     of: (scope: string, id: string, nested = false) =>
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
+        foodActions(world, actor, id, set, steps),
         readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>

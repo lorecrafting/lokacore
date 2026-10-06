@@ -876,7 +876,7 @@ After the ordinary chapter Continue, cold launch stays at World. Resume is offer
 only at the projected safe bed, and retained history appears in its dream child.
 ## D4 finite food and terminal custody recovery
 
-**Selected plan; not implemented.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
+**D4 source recovery contract.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 persists ordinary item containment and the adjusted recovery row with the Eat
 receipt in the existing changed-row transaction. The immutable consumed-holder
 ID/kind is reconstructed from the current cartridge and independent allocation;
@@ -916,6 +916,31 @@ Reopen must retain every new location, original separated Wren at its actual
 location, and original message custody without granting knowledge or Q2 credit.
 A failed/uncertain movement or Read COMMIT and exact invocation replay use the
 existing receipt rules; no source-change migration or repair is selected.
+
+## D6 water and owned-corpse recovery
+
+**PM-selected contract; selected-docs review approved, implementation pending.** Accepted descent atomically
+commits entry MV debit, bottom custody, occupancy generation/absolute deadline/
+one due job, room-entry evidence, head and receipt before memory adopts/replies.
+Ordinary resource recovery continues; no periodic MV drain is stored. Current
+expiry commits positive-to-zero HP loss, drowning event, corpse roots and
+same-body Chapel return together and invalidates occupancy. Surface commits
+free movement/entry evidence and generation invalidation together.
+
+Cold reopen preserves the original deadline/current occurrence and settles
+trusted elapsed debt. At/past expiry, death settles before any subsequent action;
+reopen never renews the deadline. Canceled jobs cannot kill a surfaced or later
+re-entered body. Unknown COMMIT fences later input/elapsed delivery until the
+committed or absent branch is reconciled.
+
+Recovery receipt binds original actor/actual corpse, its eligible underwater
+room location at acceptance, existing roots and their source/destination custody. Replay transfers nothing twice. Later movement or
+another death cannot invalidate valid historical custody; emptied corpse remains.
+Malformed occupancy/deadline/job/cause/ownership yields typed `save_corrupt` with
+in-place Start over, no reset/repair/deletion. Prove cold reopen at every committed
+entry/surface/expiry/recovery intermediate, genuinely failed COMMIT, uncertain
+committed/absent COMMIT, lost acknowledgment and replay using real SQLite;
+browser refresh is separate proof.
 
 ## D12 lesson, careful Harvest and discount recovery
 

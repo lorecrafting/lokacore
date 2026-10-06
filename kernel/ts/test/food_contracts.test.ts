@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { DEFS } from '../src/contracts.gen.ts';
+import { validate, type Defs } from '../src/foundation/validate.ts';
+import { read } from './read.ts';
+const fixture = read('protocol/fixtures/food_contracts.json');
+// Breaks: Food wire shapes lose required participant/binding fields, exact numeric bounds or closed consequences.
+test('food contracts reject independent malformed boundaries and retain valid controls', () => {
+  for (const c of fixture.cases) {
+    const b = fixture.bases[c.base];
+    let v = structuredClone(b.value_fixture ? read(b.value_fixture).value : b.value);
+    let at = v;
+    if (c.path?.length) {
+      for (const field of c.path.slice(0, -1)) at = at[field];
+      const last = c.path.at(-1);
+      if (c.omit) delete at[last];
+      else at[last] = c.value;
+    } else if (c.path) v = c.value;
+    assert.equal(validate(b.contract, v).length === 0, c.valid, c.name);
+    if (b.variant) {
+      const schema = (DEFS[b.contract as keyof typeof DEFS] as any).oneOf.find(
+        (s: any) => s.properties[b.variant.field]?.const === b.variant.value,
+      );
+      const defs = { ...DEFS, FoodVariant: schema } as Defs;
+      assert.equal(validate('FoodVariant', v, defs).length === 0, c.valid, c.name);
+    }
+  }
+});

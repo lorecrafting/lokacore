@@ -1,0 +1,17 @@
+Auto-merging docs/reviews/README.md
+Merge made by the 'ort' strategy.
+ .beads/issues.jsonl                                | 16 ++---
+ docs/MISSING-CHILD-PLAN.md                         |  2 +-
+ docs/ROADMAP.md                                    | 31 ++++++---
+ ...ter-one-c5-bleeding-bandage-brief-2026-10-05.md |  6 +-
+ .../d8-crow-scavenge-brief-2026-10-05.md           |  2 +-
+ .../2026-10-06-c5-consumption-readiness-review.md  | 18 +++++
+ ...-10-06-chapter-one-integration-status-review.md | 78 ++++++++++++++++++++++
+ .../2026-10-06-d8-real-coin-dependency-review.md   |  7 ++
+ docs/reviews/README.md                             |  4 ++
+ 9 files changed, 141 insertions(+), 23 deletions(-)
+ create mode 100644 docs/reviews/2026-10-06-c5-consumption-readiness-review.md
+ create mode 100644 docs/reviews/2026-10-06-chapter-one-integration-status-review.md
+ create mode 100644 docs/reviews/2026-10-06-d8-real-coin-dependency-review.md
+
+EXIT 0

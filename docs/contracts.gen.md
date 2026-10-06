@@ -49,6 +49,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | escort@1 | portable | portable_capability |  |
 | patrol@1 | portable | portable_capability |  |
 | transport@1 | portable | portable_capability |  |
+| food@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -219,6 +220,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `refuel`
   - `use_service`
   - `use_transport`
+  - `eat`: Eat one directly held opted edible item; its identity enters terminal custody.
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -325,6 +327,7 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
   - `source`
   - `supply`
 - **ItemDefinition**: A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.
+- **ItemEdible**: D4 held-food metadata; a complete original item grants capped recovery when Eat commits.
 - **ItemLocation**: Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).
   - `room`
   - `npc`

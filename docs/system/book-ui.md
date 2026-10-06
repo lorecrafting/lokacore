@@ -734,7 +734,7 @@ clock pause, body/map switch, second event transcript or presenter gameplay writ
 
 ## D4 home details and carried-food Eat
 
-**Selected plan; not implemented.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
+**D4 source interaction contract.** [D4 declarations](cartridge.md#d4-homes-and-orchard-declarations)
 use ordinary exits, inspectable details and NPC dialogue. Orchard trees expose
 Forage only through the existing exact Harvest offer; Carrying's actual apple
 detail exposes its declared Eat action and capped MV benefit only when admitted.
@@ -776,6 +776,32 @@ never claims message custody, topic learning or child return credit. Landscape
 text describes dry footing and natural den light, without a bottom, far Scan,
 fishing, drift or nest action that the actual projection cannot offer. The
 original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
+
+## D6 water exits and Chapel recovery
+
+**PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
+shared admission's actual availability/refusal. Show authored entry cost and
+submersion/drowning warning before descent. Bottom pages use ordinary World and
+item/container details, with remaining submersion time visible from confirmed
+water projection. Deadline and logical time belong to the authority; presentation
+must not renew time or create its own gameplay clock. Extend the existing status
+language/controls rather than add a new timer framework.
+
+Offer free Up on every underwater page, including item/container details, for a
+living body before expiry despite altered skill/load/MV/posture/light. Bind the
+captured `move` Up offer with normal freshness/pending/refusal. At equality the
+authority settles expiry before Up; an old view never promises rescue. Confirmed
+entry/surface has one room change/current MV, without an unconfirmed safety claim.
+Sedge remains the existing free pre-S27 lesson; no second training control.
+
+At Chapel, list actual owned nonempty corpses currently in either underwater
+bottom room and bind the chosen ID; show actual
+corpse location and confirmed returned items once, retaining empty corpse. Held
+recovery may overload Carrying. Pending/stale/refused/replayed actions claim no
+extra transfer. Drowning shows one actual death/same-body return and recoverable
+original light/fare/key. Later isolated browser proof covers remaining-time/Up on
+every bottom page, expiry, Chapel selection and refresh. No preview or owner save
+is authorized by this planning adoption; real SQLite faults remain separate proof.
 
 ## D12 practical lessons and benefits
 

@@ -1,0 +1,23 @@
+{
+  "prompt": "dialogue.ada.prompt",
+  "choices": {
+    "leave": {
+      "label": "dialogue.ada.leave",
+      "narration": "dialogue.ada.leave_narration"
+    }
+  },
+  "npc": "ada",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "roles": {
+    "ada": {
+      "role": "npc",
+      "npc": "ada"
+    }
+  }
+}

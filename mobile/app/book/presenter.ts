@@ -69,7 +69,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const now = game.view().view;
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
-  const itemChanged = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
+  const itemChanged = !!accepted && ['taken', 'dropped', 'eaten'].includes(accepted.outcome);
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const command_id =
@@ -100,7 +100,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const fallback =
-    itemChanged && attempt.item
+    itemChanged && accepted?.outcome !== 'eaten' && attempt.item
       ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${attempt.item}.`
       : accepted?.outcome === 'choice_closed'
         ? ''
