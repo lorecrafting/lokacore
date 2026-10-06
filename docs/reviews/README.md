@@ -325,3 +325,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Action availability lesson](2026-10-05-action-availability-lesson-review.md): exact local source `1b2afed9`, independent docs-only APPROVE; B4 history and existing shared admission guidance verified, no findings; docs check and normal commit hook pass.
 - [Action admission workflow](2026-10-05-action-admission-workflow-review.md): exact local source `6a11647a`, independent docs-only APPROVE; future mechanic briefs and reviewers check exact offered invocations against keyed admission, reusing existing same-layer proof; no findings.
+- [Chapter 1 architecture audit plan](2026-10-05-chapter-one-architecture-audit-plan-review.md): exact source `c35713b0`, independent docs-only APPROVE; one-time post-A–D/pre-E3 seam audit, reviewed fixes, tracked debt and bounded claims checked; no findings.
