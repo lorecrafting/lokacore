@@ -887,7 +887,7 @@ new schemas need their actual negative fixtures and planted guard controls.
 
 ## C3 hound population and loot
 
-**Selected, pending implementation.** The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
+The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
 adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
 chapter values, not engine/presenter constants or claimed owner preferences.
 
@@ -926,8 +926,8 @@ compile/load; inspect actual slot bounds before traversal or allocation.
 No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
 in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
 S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
-must amend their actual additional contracts. Successor release/API/hash/fresh IDs
-remain null until the reviewed integrated predecessor is known.
+must amend their actual additional contracts. The published C3 release answer is
+recorded in the [roadmap](../ROADMAP.md); C4 owns its separate successor pin.
 
 ## C4 pack response and wounded flight
 
@@ -957,8 +957,8 @@ immunity flag, temporary safe mode, extra return action or night wait is needed.
 C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
 without crossing the strict below25% live flight threshold; misses/defenses retain
 their actual resolver semantics. No weapon/loot is required by the main story.
-C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
-and intervening shared release edits are reviewed and independently re-pinned.
+C4 successor release/API/hash/fresh IDs remain null until its source is reviewed
+and independently pinned against the published predecessor.
 
 ## D1 ferry and Isle declarations
 

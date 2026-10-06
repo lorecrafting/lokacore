@@ -776,7 +776,7 @@ commit/adopt/response ordering retain their existing contracts.
 
 ## C3 spawned bundles and population composition
 
-**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+[C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
 requires a checked extension to death-only creation, not permission to trust the
 currently schema-only `spawned` origin. Register separately keyed full-prior-row
 transitions: target `{kind: population_plan, plan}` contains only current job ID

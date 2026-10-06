@@ -572,7 +572,7 @@ unrelated latest receipt or treat selected tiles as a grant.
 
 ## C3 living hound and loot details
 
-**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+[C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
 projects each co-present living hound as its own existing NPC detail/action target,
 with its exact EntityId and current HP condition. Shared blueprint names may be
 the same; selecting an entry binds that instance, never the first definition match.

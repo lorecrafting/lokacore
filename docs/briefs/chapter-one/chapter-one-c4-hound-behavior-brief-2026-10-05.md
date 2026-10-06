@@ -1,15 +1,17 @@
 # C4 — Hound response to aggression, real pack help and wounded flight
 
-**Adopted PM plan; independent plan review and dependency re-pin required before
-source GO.** Source branch `chapter-1/c4-hound-behavior`, isolated developer worktree.
-Planning base `10b023e827cba4f056aa82870764afb07236938c` has chapter0.0.19 declaring
-kernel API at least1.17. C1 and C3 source are not complete. [C3's independent plan
-review](../../reviews/2026-10-05-c3-living-hounds-plan-review.md) approved corrected
-fix `0127bf4c9c02f944941008d3962982c1144fd2e2`;
-[C1 plan review](../../reviews/2026-10-05-c1-tobin-plan-review.md) is approved.
-Re-pin actual integrated reviewed C1/C3 source and intervening release edits before
-assignment. C4 successor release/API/hash/fresh IDs, source head, PR, independent
-verdicts and runtime/browser/SQLite/native proof: null. This is docs-only planning.
+**Adopted PM plan; published dependencies re-pinned, fresh independent plan review
+required before source GO.** Source branch `chapter-1/c4-hound-behavior`, isolated
+developer worktree. Readiness base `1b269871275c900343f9e2dcfcadc5c856880589`
+contains published [C1 #205](https://github.com/lorecrafting/lokacore/pull/205),
+[B9 #226](https://github.com/lorecrafting/lokacore/pull/226) and
+[C3 #229](https://github.com/lorecrafting/lokacore/pull/229), including C3's
+record-only status merge. The active chapter is `0.0.29` / kernel API `1.25`,
+independent SHA-256 `f49de549377f7068fac51896ccd1f177241712ed064baaef0fefc14c6c05d67e`
+with 140 genesis IDs. C4's successor release/API/hash/fresh IDs, source head, PR,
+new plan verdict and runtime/browser/SQLite/native proof remain null. The
+[original plan approval](../../reviews/2026-10-05-c4-hound-behavior-plan-review.md)
+precedes these source publications; this readiness revision needs its own review.
 
 ## Player outcome and governing contract
 
@@ -39,8 +41,8 @@ Ponytail Review and actual-diff correctness self-review. Native work stays pause
 
 ## Immediate Book fight, flight and custody path
 
-Use C1's all-hours swords lesson and exact gifted rusty sword; if C2 integrated,
-use original Tobin's reachable Watch Post route. Equip before Attack. Ferry Landing
+Use C1's all-hours swords lesson and exact gifted rusty sword via published C2's
+original Tobin and reachable Watch Post route. Equip before Attack. Ferry Landing
 south → Reed Path south → Reed Bank east → Hound Run, then east to Adder Nest if
 adjacent Scan shows the existing hounds there. Their current C3 members, not a
 replacement/day wait, provide the first proof. Inspect separate instance entries,
@@ -235,7 +237,7 @@ Fresh primary and separate protocol/save/foundation review are required for sour
 Astra audits `runtime/proposal.ts` if touched. Docs-only plan gets one fresh short
 independent review. No implementation, merge, push or native action in this task.
 
-Stop/escalate unresolved C1/C3 predecessor/release order, unplanned automatic
+Stop/escalate a changed predecessor/release order after this re-pin, unplanned automatic
 hostility/late joining/pursuit/per-helper swings, new jobs/framework, failure to
 accept a lawful saved prefix or reconcile whole flight/encounter state, same-time
 writer collisions, unbounded historical scans, or a required journey/owned recovery

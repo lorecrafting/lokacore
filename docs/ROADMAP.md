@@ -288,9 +288,10 @@ pack assistance and flight remains a separate planned slice.
 
 C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
-against local main `10b023e8`. C1/C3 source and intervening shared release edits
-must be reviewed and re-pinned before assignment. C4 independent plan review,
-implementation, successor release/API/hash/IDs and proof remain ahead.
+re-pinned against published main `1b269871` with C1, B9 and C3 and chapter
+`0.0.29`/API `1.25`. A fresh independent readiness review remains required before
+source assignment. C4 implementation, successor release/API/hash/IDs and proof
+remain ahead.
 
 D2 public Priory rooms and held-book Ward/Bell topics have an
 [adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md),

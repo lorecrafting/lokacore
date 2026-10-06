@@ -669,7 +669,7 @@ silent counter repair or save deletion is authorized.
 
 ## C3 living population recovery
 
-**Selected, pending implementation.** [C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
+[C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
 saves immutable spawned identities, containment, HP, separately keyed slot rows
 and plan control/current job, RNG, encounter/death changes, head and receipt through
 the existing changed-row
