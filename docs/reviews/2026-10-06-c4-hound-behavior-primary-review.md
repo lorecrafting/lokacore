@@ -126,3 +126,60 @@ scoped carryover review remain required after findings close. Preserve C3 corpse
 Take/detail recovery and D1's shared World/Combat routing during integration.
 The evidence README's full-gate result is developer-reported and unavailable as
 raw retained bytes at this exact head. Browser/native/owner-save work was not run.
+
+
+## Scoped fix recheck — APPROVE
+
+Exact corrected source `251b0bff4f90b7e89cf327f11effe60282791574`, frozen
+evidence/head `7b38aa1428eef28068b96b7e2e6e770ca3d8829c`.
+**C4-R1, C4-R2 and C4-R3 are closed; no new primary finding.** The original
+review and its findings above remain historical evidence. Scope: the three
+primary fixes, their direct round consumer and the selected-ID/dead-cursor guard
+where needed to assess round selection. Separate save/foundation reviews retain
+ownership of their findings.
+
+R1 now continues after an enemy flight and independently revalidates the target
+for each opportunity. The player's opportunity resolves a living current primary,
+or the canonical remaining member after primary removal; the locked NPC slot
+still cannot be inherited by a helper. Empty/closed occurrences stop safely.
+R2's retained two-round control asserts the actual attacker/target pairs, literal
+HP answers and independent S4, so persisting a rotating cursor while attacking
+only as the primary is no longer sufficient to pass. Due-time partial prefix
+composition uses existing structural sharing and preserves final proposal
+validation. Reviewed the direct schedule dispatch caller, unchanged attack/death
+consumer and relevant selected-ID repair/occurrence-time checks; no unplanned
+opportunity, helper refill or new scheduler path was introduced.
+
+R3's evidence now retains the focused outputs and restored source red controls
+with a checksum inventory and verification. The README explicitly corrects the
+earlier retention claim: the initial broad gate and early mutants were observed
+without captured raw output, and are not retained evidence or a final passing
+gate. This preserves the unknown instead of inventing a replacement result.
+
+Independent bounded verification:
+
+- Both original independent literal probes pass on the corrected runtime:
+  **30/30** cases across their two external copies, including even-helper flight
+  with the remaining player attack and actual two-round helper identity/S4.
+- New retained R1/R2 controls pass **2/2**. Source-free import-hook reintroduction
+  of the flight `break` fails the even-round player-attack assertion; substitution
+  of the primary for the selected NPC fails the real helper-identity assertion.
+  Each mutated run has one pass/one behavioral failure, and restored source
+  returns **2/2 pass**. No repository source file is edited.
+- Corrected pack runtime/composition, actual Combat and real-SQLite flight/failure/
+  reopen tests pass **27/27**. The shared prefix change also preserves the original
+  single-opponent combat and encounter line: **14/14 pass**. No broad suite was run.
+- All **12 raw-log hashes** match. The inventory includes every `.log` artifact;
+  only README and the checksum inventory/verification documents are outside it.
+  Inspected the exact retained R1/R2 failures and the focused green command exits,
+  including its eight ExUnit cases. `git diff --check` passes.
+
+Ponytail Review: lean; opportunity-local target validation and the existing round,
+slot, receipt and composition paths suffice. No separate complexity finding.
+Only this record/index is changed by the recheck; no native/device session,
+browser preview or owner save was accessed.
+
+Approval is scoped to the corrected provisional source. Published D1 integration,
+independent successor pins, combined full gate and integrated carryover review
+remain pending as described above; this does not approve a final C4 release or
+replace the separate save/foundation verdicts.
