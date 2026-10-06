@@ -919,7 +919,7 @@ existing receipt rules; no source-change migration or repair is selected.
 
 ## D6 water and owned-corpse recovery
 
-**PM-selected contract; implementation and fresh scoped review pending.** Accepted descent atomically
+**PM-selected contract; selected-docs review approved, implementation pending.** Accepted descent atomically
 commits entry MV debit, bottom custody, occupancy generation/absolute deadline/
 one due job, room-entry evidence, head and receipt before memory adopts/replies.
 Ordinary resource recovery continues; no periodic MV drain is stored. Current

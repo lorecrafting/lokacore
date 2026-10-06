@@ -1071,7 +1071,7 @@ and applicable two-kernel differential cases if the foundation changes.
 
 ## D6 water movement and corpse selection
 
-**PM-selected contract; implementation and fresh scoped review pending.** Use installed `move` and
+**PM-selected contract; selected-docs review approved, implementation pending.** Use installed `move` and
 ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
 `input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
 Trust actor/invocation/freshness fields normally. A shared read-only exact-edge

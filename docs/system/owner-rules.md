@@ -293,4 +293,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Q2-A staged first search lead: [PM adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
 
-- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); fresh scoped review, publication and source proof remain pending.
+- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); selected-docs review is approved; publication and source proof remain pending.

@@ -32,7 +32,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
-- [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; fresh scoped review and source proof remain pending.
+- [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; selected-docs review approved, source proof pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
 - [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.

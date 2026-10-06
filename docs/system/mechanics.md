@@ -1427,7 +1427,7 @@ prose adds no far Scan, fish interaction, crow holder, drift or bottom-room acce
 
 ## D6 water depths and owned-corpse recovery (selected, pending implementation)
 
-**PM-selected contract; implementation and fresh scoped review pending.** The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
+**PM-selected contract; selected-docs review approved, implementation pending.** The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
 selects optional `well_bottom` and `pool_bottom` below Well Shaft and the dry
 Black Pool bank. Rescue/bell stays dry and open all hours. Sedge's free D1 lesson
 provides acquired swim before S27. Descending requires currently usable learned

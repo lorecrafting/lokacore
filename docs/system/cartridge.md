@@ -980,7 +980,7 @@ policy: D1 has no water action or new attribute to qualify. Sedge's direct
 free dialogue choice uses `skill.acquire` and does not issue D6 water access
 early. D1 defines no underwater admission. [D6's selected admission](mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation)
 uses acquired swim plus current load/MV, without an attribute floor;
-fresh scoped review and publication remain required before source. The optional
+selected-docs review is approved; source publication and proof remain pending. The optional
 dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
@@ -1215,7 +1215,7 @@ this plan assigns no successor pin or API increment.
 
 ## D6 bottom rooms and water tuning (selected, pending implementation)
 
-**PM-selected contract; implementation and fresh scoped review pending.** Reciprocal exits:
+**PM-selected contract; selected-docs review approved, implementation pending.** Reciprocal exits:
 `well_shaft` down ↔ `well_bottom` up and `black_pool` down ↔ `pool_bottom` up.
 Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
 loot needs B4 light. Well Bottom owns one actual old coin and carved initials;

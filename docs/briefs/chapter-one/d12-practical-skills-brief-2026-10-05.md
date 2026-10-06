@@ -1,7 +1,7 @@
 # D12 — Practical herbalism and haggle
 
-**PM-adopted policy, re-pinned 2026-10-06; implementation/source GO pending.** Proposed branch `chapter1/d12-practical-skills`.
-The [PM decision](../../decisions/pm-decision-d12-practical-skills-2026-10-06.md) adopts this policy under mechanics delegation. The active clauses/data below are selected, pending implementation and fresh scoped review of the adoption amendment.
+**PM-adopted policy, re-pinned 2026-10-06; implementation proof and publication pending.** Proposed branch `chapter1/d12-practical-skills`.
+The [PM decision](../../decisions/pm-decision-d12-practical-skills-2026-10-06.md) adopts this policy under mechanics delegation. The active clauses/data below are selected, independently reviewed and pending implementation.
 
 ## Baseline and dependency gate
 
@@ -27,6 +27,6 @@ Use literal controlled expectations independent of the implementation. First app
 
 Read the relevant [mechanics](../../lessons/mechanics.md), [storage](../../lessons/storage.md), [contracts](../../lessons/contracts.md), [mobile](../../lessons/mobile.md) and [evidence](../../lessons/evidence.md) lessons before those surfaces. Use focused compiler/kernel/Book/host checks, applicable schema mutants and the normal `mise exec -- bin/check_all.sh`/pre-push gate at source handoff. Developer self-review and Ponytail Review precede fresh independent primary review and the workflow's second save/protocol opinion if those contracts change. No native/device or owner-save work is part of this plan.
 
-Stop at PM for a re-pinned predecessor mismatch, spec conflict, unbound displayed quote, required path gated by training, new generic framework or portable foundation/proposal change. The policy is adopted, but this active-spec amendment requires fresh scoped review before publication/source GO; no D12 source, test, browser or save proof is claimed.
+Stop at PM for a re-pinned predecessor mismatch, spec conflict, unbound displayed quote, required path gated by training, new generic framework or portable foundation/proposal change. The policy is adopted, but this active-spec amendment passed [fresh scoped review](../../reviews/2026-10-06-d12-practical-skills-selected-contract-review.md) before source work; no D12 source, test, browser or save proof is claimed.
 
 Planning self-review: Ponytail finds no new framework, stock ledger, quote token, currency store or dependency. Correctness preserves acquire≠qualify≠use, literal alias input, current post-settlement pricing, combined carry and atomic finite-ID/payment custody. These are design checks only; no runtime tests, mutations or browser/native proof were run. Independent approval covers the prior policy draft only; this adoption amendment awaits scoped review.

@@ -779,7 +779,7 @@ original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
 
 ## D6 water exits and Chapel recovery
 
-**PM-selected contract; implementation and fresh scoped review pending.** Shaft/bank show Down with
+**PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed

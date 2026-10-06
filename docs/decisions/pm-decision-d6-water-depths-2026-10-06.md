@@ -1,6 +1,6 @@
 # PM decision: D6 water depths and recoverable drowning — 2026-10-06
 
-**PM-selected contract; fresh scoped review, publication and source assignment remain pending.**
+**PM-selected contract; selected-docs review approved, publication and source proof pending.**
 The PM adopts this replacement water/recovery contract under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
 The prior local [plan review](../reviews/2026-10-06-d6-water-depths-plan-review.md)
 and [adoption review](../reviews/2026-10-06-d6-water-depths-adoption-review.md)
@@ -14,7 +14,7 @@ Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](../system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
 [D6 brief](../briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
-These clauses select behavior; they do not claim installed source or new independent approval.
+These clauses select behavior; the [scoped independent review](../reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) approves the corrected selected contract, not installed source or publication.
 
 ## Published dependency re-pin
 
@@ -109,8 +109,7 @@ or wet-fuel system. Both bottoms are dark with known Up and ordinary light rules
 
 ## Assignment gates and self-review
 
-Fresh independent scoped review of this selected D1-base/deadline/loot contract
-and reviewed publication precede source assignment. The active-spec/owner-rules
+The corrected selected D1-base/deadline/loot contract passed [fresh independent scoped review](../reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve); reviewed publication and source proof remain pending. The active-spec/owner-rules
 record accompanies this planning adoption. Re-pin
 latest published main again after ongoing D4/C4 changes; inspect their actual
 movement/job/proposal/save consumers, never use local unreviewed source as a

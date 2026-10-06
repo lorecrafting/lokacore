@@ -1,6 +1,6 @@
 # D6 — Real underwater access, qualified swim and recoverable drowning
 
-> **Selected PM contract, 2026-10-06.** The [PM decision](../../decisions/pm-decision-d6-water-depths-2026-10-06.md) adopts the replacement deadline, admission, loot and recovery policy. Historical local reviews cover only their old heads; fresh independent scoped review and publication remain pending. This planning adoption claims no source implementation or player proof.
+> **Selected PM contract, 2026-10-06.** The [PM decision](../../decisions/pm-decision-d6-water-depths-2026-10-06.md) adopts the replacement deadline, admission, loot and recovery policy. Historical local reviews cover only their old heads; the [corrected selected contract](../../reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) passed fresh independent scoped review. Publication and source proof remain pending.
 
 Proposed source branch: `chapter1/d6-water-depths` (not created by this task).
 
