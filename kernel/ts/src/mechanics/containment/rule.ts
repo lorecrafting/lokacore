@@ -89,14 +89,25 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   one_container_per_item: (world) =>
     keys(world.entities).every((id) => {
       const c = world.state.containers[id];
-      return has(world.rooms, c) || has(world.state.containers, c);
+      return (
+        has(world.rooms, c) ||
+        has(world.state.containers, c) ||
+        (c === world.consumed && world.entities[id].kind === 'item' && !!world.entities[id].edible)
+      );
     }),
   // Every container is a room or a contained entity, so with no cycle (the linear observation
   // check, which also holds each declared capacity) every chain of containers ends at a room.
   containment_acyclic: (world) =>
-    values(world.state.containers).every(
-      (c) => has(world.rooms, c) || has(world.state.containers, c),
-    ) &&
+    keys(world.state.containers).every((id) => {
+      const c = world.state.containers[id];
+      const e = world.entities[id];
+      return (
+        id !== world.consumed &&
+        (has(world.rooms, c) ||
+          has(world.state.containers, c) ||
+          (c === world.consumed && e?.kind === 'item' && !!e.edible))
+      );
+    }) &&
     check('containment_acyclic', {
       state: { containers: world.state.containers, capacities: world.capacities },
       result: { changes: [] },

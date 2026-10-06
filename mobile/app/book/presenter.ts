@@ -69,7 +69,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
   const itemChanged = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
-  s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
+  s.returnWorld = itemChanged || ['eaten', 'choice_closed'].includes(accepted?.outcome ?? '');
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const command_id =
@@ -80,8 +80,10 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
       : undefined;
   const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
-    readableDetail ??
-    (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail);
+    accepted?.outcome === 'eaten'
+      ? undefined
+      : (readableDetail ??
+        (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail));
   s.confirmedRead = accepted?.outcome === 'read' ? detail : undefined;
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length

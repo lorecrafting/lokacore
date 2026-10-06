@@ -150,5 +150,7 @@ complete food outcome; return it to PM before proceeding.
 Planning self-review: removed fictional B5 regrowth/B8 Eat reuse, retained finite
 identity/load/recovery and exact child status. Ponytail Review: no new stock ledger,
 physiology, restock or event framework; only the first-consumer terminal invariant
-is added. This task runs docs/diff checks only, with no implementation test,
+is added. The planning checkpoint ran docs/diff checks only, with no implementation test,
 mutation, browser/native proof or independent approval claim.
+
+Provisional source and current proofs are tracked in the [D4 evidence record](../../evidence/2026-10-06-d4-homes-orchard/README.md). Final pins and source approvals remain conditional on published C3/D1 integration.

@@ -175,6 +175,14 @@ function transferOp(
 }
 
 function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
+  const known = section(ctx.state, 'known_entities') as Record<string, Obj>;
+  if (
+    known[e]?.kind === 'consumed' ||
+    known[source]?.kind === 'consumed' ||
+    (known[d]?.kind === 'consumed' &&
+      (known[e]?.kind !== 'item' || known[e]?.edible !== true || known[source]?.kind !== 'body'))
+  )
+    return { code: 'precondition_failed' };
   if (row !== source) return { code: 'precondition_failed' };
   if (inside(d, e, ctx)) return { code: 'containment_cycle' };
   const cap = get(section(ctx.state, 'capacities'), d) as number | undefined;

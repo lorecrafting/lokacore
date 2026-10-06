@@ -24,6 +24,7 @@ import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
 import { services } from './cartridge_services.ts';
+import { food } from './cartridge_food.ts';
 import { liquids } from './cartridge_liquids.ts';
 
 import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
@@ -72,7 +73,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => [...refStage(c), ...liquids(c), ...services(c)],
+    () => [...refStage(c), ...liquids(c), ...services(c), ...food(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {

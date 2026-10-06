@@ -10,6 +10,9 @@
     },
     "east": {
       "to": "watch_post"
+    },
+    "west": {
+      "to": "elspeth_cottage"
     }
   }
 }

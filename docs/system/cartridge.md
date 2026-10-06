@@ -1154,8 +1154,8 @@ partial fruit. Full MV refuses without consuming. No restock or promised future
 nutrition model is required; the finite B8 meal remains a separate optional supply.
 
 Compiler and loader require `food@1` plus the successor API for edible fields,
-local declared recovery-pool references, positive safe-integer amount and valid
-catalog keys, and reject edible containers, equipment, fuel or liquid vessels.
+local declared MV recovery-pool references, positive safe-integer amount and valid
+catalog keys, and reject edible containers, equipment (slot, weapon or block metadata), fuel or liquid vessels.
 Expand source short references at the real new field. Edibility belongs to an
 immutable item definition; the terminal holder is generated metadata, never
 cartridge-authored. Successor release/API/hash/IDs remain null until source exists.

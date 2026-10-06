@@ -1052,6 +1052,27 @@
             "quoted_price"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Eat one directly held opted edible item; its identity enters terminal custody.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "eat"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "description": "The registered Command types; an unknown type fails before game rules (04 \u00a73). Invocation-derived types carry the actor; run_job is authority-internal (04 \u00a71) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md)."

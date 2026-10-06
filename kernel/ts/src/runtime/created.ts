@@ -31,7 +31,10 @@ export function hydrate(world: World, state: State, loading = false): World | un
   }
   const next = { ...world, state, ...(entities && { entities }) };
   // One-time load/new-corpse validation; ordinary resource/timer steps retain derived maps.
-  if ((entities || (loading && world.cartridge.world?.death)) && !custodyValid(next))
+  if (
+    (entities || (loading && (world.cartridge.world?.death || world.consumed))) &&
+    !custodyValid(next)
+  )
     return undefined;
   return next;
 }
@@ -40,11 +43,17 @@ function custodyValid(world: World): boolean {
   const done = new Set<string>();
   const held: Record<string, number> = {};
   for (const [id, container] of Object.entries(world.state.containers)) {
+    if (
+      id === world.consumed ||
+      (container === world.consumed &&
+        (world.entities[id]?.kind !== 'item' || !world.entities[id].edible))
+    )
+      return false;
     if (!world.knownEntities[id] && !world.state.created?.[id]) return false;
     held[container] = (held[container] ?? 0) + 1;
     const path = new Set<string>();
     let at: string | undefined = id;
-    while (at !== undefined && !world.rooms[at] && !done.has(at)) {
+    while (at !== undefined && !world.rooms[at] && at !== world.consumed && !done.has(at)) {
       if (path.has(at)) return false;
       path.add(at);
       at = world.state.containers[at];

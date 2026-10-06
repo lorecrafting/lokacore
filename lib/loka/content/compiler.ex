@@ -44,6 +44,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Services.check(manifest, defs, v2),
+      Loka.Content.Food.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),

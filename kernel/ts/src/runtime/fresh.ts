@@ -17,7 +17,7 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * room order and detail-key order, then each NPC, then each item, both in DefinitionRefString
  * order, then one job per NPC with a non-empty daily schedule, in the same NPC order, then one
  * slot holder per distinct item slot, in slot-key order: numeric profile, Initial world ids and
- * Slot holder ids), each holder in the body with capacity 1 and not an entity, the body in the entry room, each NPC in its room and each item at
+ * Slot holder ids), then one roomless consumed holder under food@1, each slot holder in the body with capacity 1 and not an entity, the body in the entry room, each NPC in its room and each item at
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (mechanics/schedule/behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
@@ -38,6 +38,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
   const slots = holders(cartridge, mint);
+  const consumed = cartridge.lock.capabilities.food ? mint() : undefined;
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
   const { fuelSpecs, fuel } = initialFuel(entities, clock);
@@ -54,14 +55,12 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityIds,
     capacities,
     liquidSpecs,
-    knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character),
+    knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character, consumed),
     corpseTemplates: corpseTemplates(cartridge),
     slots,
-    factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
-    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
+    ...(consumed && { consumed }),
     entityResourceSpecs,
-    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
-    attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
+    ...defaults(cartridge),
     state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel, liquids }) },
   };
 }
@@ -171,12 +170,19 @@ function pinnedEntities(
   slots: World['slots'],
   body: EntityId,
   character: CharacterId,
+  consumed?: EntityId,
 ): World['knownEntities'] {
   return {
     ...Object.fromEntries(Object.keys(roomIds).map((r) => [roomIds[r], { kind: 'room' }])),
     ...Object.fromEntries(Object.keys(details).map((id) => [id, { kind: 'detail' }])),
-    ...Object.fromEntries(Object.entries(entities).map(([id, e]) => [id, { kind: e.kind }])),
+    ...Object.fromEntries(
+      Object.entries(entities).map(([id, e]) => [
+        id,
+        { kind: e.kind, ...(e.kind === 'item' && e.edible && { edible: true as const }) },
+      ]),
+    ),
     ...Object.fromEntries(Object.values(slots).map((id) => [id, { kind: 'slot' }])),
+    ...(consumed && { [consumed]: { kind: 'consumed' } }),
     [body]: { kind: 'body', owner_id: character },
   };
 }
@@ -222,4 +228,13 @@ function initialFuel(entities: World['entities'], clock: number) {
     ]),
   );
   return { fuelSpecs, fuel };
+}
+
+function defaults(cartridge: Cartridge) {
+  return {
+    factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
+    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
+    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
+    attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
+  };
 }

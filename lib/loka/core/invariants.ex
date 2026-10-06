@@ -104,6 +104,7 @@ defmodule Loka.Core.Invariants do
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
       Loka.Core.InvariantsPatrol.holds?(s, ops, result) and
       Loka.Core.InvariantsLiquid.holds?(s, ops, result) and
+      Loka.Core.InvariantsFood.holds?(s, ops) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 

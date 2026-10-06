@@ -1026,7 +1026,8 @@ Publication remains pending the normal gates.
 
 **D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
 adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
-accepted outcome `eaten {item_id: EntityId}` and immutable optional item metadata
+accepted outcome `eaten` with the exact consumed `item_id: EntityId` in the accepted
+envelope (mandatory for this producer; receipt replay binds it), and immutable optional item metadata
 `edible {resource: DefinitionRef(resource), amount: positive safe integer,
 label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
 exact directly held edible item with no input. Its GameView inventory action

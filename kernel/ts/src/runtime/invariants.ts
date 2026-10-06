@@ -1,3 +1,4 @@
+import { foodTransferValid } from './invariants_food.ts';
 // size: allow 315, independent retirement pairing joins precondition replay
 import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
@@ -133,7 +134,7 @@ function extra(
     case 'fuel.set':
       return fuelValid(op, s);
     case 'entity.transfer':
-      return transferValid(op, containers, s.capacities);
+      return foodTransferValid(op, s) && transferValid(op, containers, s.capacities);
     case 'quest.retire':
     case 'quest.activate':
     case 'quest.transition':

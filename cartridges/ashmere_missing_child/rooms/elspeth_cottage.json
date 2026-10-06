@@ -1,0 +1,93 @@
+{
+  "title": "room.elspeth_cottage.title",
+  "description": "room.elspeth_cottage.description",
+  "exits": {
+    "east": {
+      "to": "north_gate"
+    }
+  },
+  "details": {
+    "cot": {
+      "aliases": [
+        "cot"
+      ],
+      "description": "detail.elspeth_cottage.cot.description",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            }
+          },
+          "description": "detail.elspeth_cottage.cot.rescued"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            }
+          },
+          "description": "detail.elspeth_cottage.cot.stays"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "lost"
+            }
+          },
+          "description": "detail.elspeth_cottage.cot.lost"
+        }
+      ]
+    },
+    "hearth": {
+      "aliases": [
+        "hearth"
+      ],
+      "description": "detail.elspeth_cottage.hearth.description"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "rescued"
+        }
+      },
+      "description": "room.elspeth_cottage.rescued"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "stays"
+        }
+      },
+      "description": "room.elspeth_cottage.stays"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "lost"
+        }
+      },
+      "description": "room.elspeth_cottage.lost"
+    }
+  ]
+}
