@@ -8,7 +8,7 @@ export function transports(c: Obj): Diagnostic[] {
     check = checkers(c, out),
     routes = c.transports ?? {};
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (Object.keys(routes).length && (major < 1 || (major === 1 && minor < 24)))
+  if (Object.keys(routes).length && (major < 1 || (major === 1 && minor < 26)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, t] of Object.entries(routes as Obj)) definition(c, t, ref, check, out);
   for (const [ref, room] of Object.entries((c.rooms ?? {}) as Obj))

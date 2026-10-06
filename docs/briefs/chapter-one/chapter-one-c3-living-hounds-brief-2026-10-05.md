@@ -150,9 +150,11 @@ combat precedence, visibility and Take carrying/custody. No new population verb.
 
 One loaded alias case must run the advertised view→ActionInvocation→command and
 observe the literal admitted/refused result; reuse existing same-layer checks when
-they catch it. Combat owns hit/fatal history; item detail owns confirmed Take history.
+they catch it. Combat owns hit/fatal history; the corpse detail owns confirmed pelt Take history.
 A departing/dead generation prunes its exact route; a new same-named hound cannot
-inherit the old target. Pelt Back returns to its corpse, then World; combat closure
+inherit the old target. Opening the pelt may show its child detail; confirmed Take
+returns to the corpse detail with Back to World, not to World or a stale pelt child.
+Combat closure
 restores World. Walk this complete browser interaction with two same-named hounds,
 actual pelt Take and refresh, plus lost-ack/refused controls. Fix misleading results,
 stale targeting and dead-end nested returns in this slice; the later chapter polish
@@ -292,6 +294,8 @@ rat R; production IDs remain null until allocation is independently checked.
    focused journey fail. This is C3 proof, not complete R8/R10/native certification.
 
 ## Checks, review and stop trigger
+
+The provisional developer run is recorded in [C3 local evidence](../../evidence/2026-10-05-c3-living-hounds/README.md); independent source review and publication remain separate gates.
 
 Run focused compiler/loader/short-ref/schema, both creation/composition twins and
 population/clock/combat/death/target tests, changed Book tests and real SQLite

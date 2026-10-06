@@ -1,3 +1,5 @@
+// size: allow 305, B9 dream and C3 hound actions compose in the existing view list
+import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
@@ -23,6 +25,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
@@ -40,7 +43,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-const HIDDEN = ['use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = ['buy', 'sell', 'use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -52,9 +55,11 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     !a.recipe ||
     (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
       light.visible(world, actor, detailOf(world, a.recipe.target), steps));
+  const hidden = (a: Offered) =>
+    HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && !HIDDEN.includes(a.command))
+      .filter((a) => fits(a) && here(a) && !hidden(a))
       .filter((a) => movable(world, a, id))
       .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
@@ -87,6 +92,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     of: (scope: string, id: string, nested = false) =>
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
+        readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
@@ -224,7 +230,7 @@ function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site
 function movable(world: World, a: Offered, id?: string): boolean {
   return (
     !id ||
-    !world.state.created?.[id] ||
+    movableItem(world, id as EntityId) ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
 }

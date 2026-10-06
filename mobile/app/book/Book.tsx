@@ -9,6 +9,7 @@ import {
   POSITION_ACTIONS,
   pagesAfter,
   initialPages,
+  restoredItemPages,
   npcPage,
   nextPosition,
   type Hint,
@@ -40,13 +41,23 @@ type BookProps = {
 };
 
 type BookState = {
+  restoreInvocation: { current: string | undefined };
   current: { current: { stack: Page[]; view: ReturnType<Presenter['screen']>['view'] } };
   setStack: (stack: Page[]) => void;
   setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
+
+function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
+  if (screen.returnWorld && !screen.view.combat) return [];
+  if (!screen.returnDetail) return next;
+  const index = next.findIndex((p) => p.kind === 'thing' && p.id === screen.returnDetail);
+  if (index >= 0) return next.slice(0, index + 1);
+  const corpse: Page[] = [{ kind: 'thing', id: screen.returnDetail }];
+  return pagesAfter(corpse, screen.view, screen.view);
+}
 function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
-  const { current, setStack, setFlip, redraw } = s;
+  const { current, restoreInvocation, setStack, setFlip, redraw } = s;
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
@@ -55,7 +66,43 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
-      if (terminal && after.returnWorld && !after.view.combat) next = [];
+      // A remounted pending Read or corpse Take has no local retry context.
+      if (update.kind === 'completion' && update.invocation_id === restoreInvocation.current) {
+        restoreInvocation.current = undefined;
+        if (
+          update.reply.kind === 'saved' &&
+          update.reply.decision.kind === 'accepted' &&
+          update.reply.decision.outcome === 'read'
+        )
+          next = [
+            ...restoredItemPages(after.view, after.detail, update.intent.target_ids[0]),
+            ...next,
+          ];
+        if (
+          update.reply.kind === 'saved' &&
+          update.reply.decision.kind === 'accepted' &&
+          update.reply.decision.outcome === 'taken'
+        ) {
+          let receipt: ReturnType<Game['lastNarration']>;
+          try {
+            receipt = p.game.lastNarration(update.reply.command_id);
+          } catch {
+            receipt = undefined; // presenter owns the storage fault shown to the player
+          }
+          if (
+            receipt &&
+            receipt.command_id === update.reply.command_id &&
+            receipt.pickup_name &&
+            receipt.detail_id
+          )
+            next = resultPages(next, {
+              ...after,
+              returnDetail: receipt.detail_id,
+              returnWorld: false,
+            });
+        }
+      }
+      if (terminal) next = resultPages(next, after);
       current.current = { stack: next, view: after.view };
       setStack(next);
       if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
@@ -71,13 +118,27 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
 }
 
 function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+  const restoring =
+    s.restoreInvocation.current === p.game.pendingInvocation()
+      ? s.restoreInvocation.current
+      : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
   let next = pagesAfter(before.stack, before.view, after.view);
-  if (after.returnWorld && !after.view.combat) next = [];
+  if (
+    restoring &&
+    s.restoreInvocation.current === restoring &&
+    !p.game.pending() &&
+    pr.recovered()
+  ) {
+    s.restoreInvocation.current = undefined;
+    if (after.confirmedRead)
+      next = [...restoredItemPages(after.view, after.detail, after.confirmedRead), ...next];
+  }
+  next = resultPages(next, after);
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);
@@ -96,15 +157,17 @@ export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState<Page[]>(() => [
     ...restoredNoticePages(pr.screen()),
+    ...restoredItemPages(pr.screen().view, pr.screen().detail),
     ...initialPages(pr.screen().view),
   ]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
   const screen = pr.screen();
   const { view } = screen;
+  const restoreInvocation = useRef(p.game.pendingInvocation());
   const current = useRef({ stack, view });
   current.current = { stack, view };
-  const state = { current, setStack, setFlip, redraw };
+  const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
     const view = pr.screen().view;
@@ -195,6 +258,7 @@ function Bottom(p: BottomProps) {
         (p.page ? (
           p.page.kind === 'thing' ||
           p.page.kind === 'dialogue' ||
+          p.page.kind === 'dream' ||
           (notice && view.notices?.some((n) => n.id === notice)) ? null : (
             <Back
               label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}

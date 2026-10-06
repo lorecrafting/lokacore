@@ -204,6 +204,7 @@ export function Item(p: {
   press: (b: Button, detail?: string) => void;
   open: (p: Page) => void;
   world: () => void;
+  back?: () => void;
 }) {
   const items = things(p.screen.view);
   const thing = items.find((e) => e.id === p.id);
@@ -217,6 +218,7 @@ export function Item(p: {
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
       open={(id) => p.open({ kind: 'thing', id })}
       leave={p.world}
+      back={thing && 'container_id' in thing ? p.back : undefined}
     />
   );
 }

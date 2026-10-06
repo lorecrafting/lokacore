@@ -38,7 +38,7 @@ defmodule Loka.ContentTransportsTest do
     File.cp_r!(@source, dir)
 
     for {path, change} <- [
-          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.23")},
+          {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.25")},
           {"transports/fen_return.json", &Map.put(&1, "destination", "missing")},
           {"transports/fen_outbound.json", &Map.put(&1, "recipient", "missing")},
           {"npcs/sedge.json", &Map.delete(&1, "resource_starts")},

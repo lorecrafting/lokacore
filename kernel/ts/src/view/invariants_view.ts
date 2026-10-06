@@ -36,6 +36,8 @@ export const gameview_agrees_with_admission = ({
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type;
+  if (type === 'continue' || (type === 'choose' && command.payload.dream))
+    return dreamAgrees(view, command.payload, decision, action_key);
   if (type === 'use_service') return serviceAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
     return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
@@ -192,4 +194,29 @@ function serviceAgrees(view: GameView, payload: Any, decision: Any, action_key?:
   return offer.action.available
     ? decision.kind === 'accepted' || decision.kind === 'fault'
     : decision.kind === 'rejected' && decision.error.code === offer.action.reason.code;
+}
+
+function dreamAgrees(view: Any, p: Any, decision: Any, key?: string) {
+  if (p.type === 'continue' && view.scene) {
+    const matched = same(view.scene.scene, p.scene) && view.scene.index === p.line;
+    return matched ? decision.kind !== 'rejected' : decision.kind !== 'accepted';
+  }
+  const dream = view.notices
+    ?.map((n: Any) => n.dream)
+    .find((d: Any) => d && same(d.scene, p.type === 'continue' ? p.scene : p.dream?.scene));
+  const entry =
+    p.type === 'continue'
+      ? dream?.index === p.line
+        ? dream?.action
+        : undefined
+      : dream?.choice?.choices.find(
+          (c: Any) =>
+            c.choice_id === p.choice_id &&
+            dream.choice.continuation_id === p.continuation_id &&
+            same(c.dream, p.dream),
+        );
+  if (!entry || (key && entry.action_key !== key)) return decision.kind !== 'accepted';
+  return entry.available
+    ? decision.kind === 'accepted' || decision.kind === 'fault'
+    : decision.kind === 'rejected' && decision.error.code === entry.reason.code;
 }

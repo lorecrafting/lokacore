@@ -3898,7 +3898,7 @@
         "path": ".cartridge.scenes[\"ashmere_scene@0.0.1:scene/bell_rung\"].control",
         "message_key": "diagnostics.schema_violation",
         "data": {
-          "error": "const_mismatch"
+          "error": "unknown_variant"
         },
         "suggested_capabilities": []
       }

@@ -32,18 +32,29 @@ export function reserved(c: Obj): Diagnostic[] {
   const serviceRefs = Object.values((c.services ?? {}) as Obj).flatMap((s) =>
     s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
   );
+  const dreamRefs = Object.values((c.scenes ?? {}) as Obj).flatMap((s) =>
+    s.control === 'presentation_only'
+      ? [refString(s.on.rest.credit), ...s.on_end.assign.map((a: Obj) => refString(a.fact))]
+      : [],
+  );
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
   for (const [i, ref] of refs.entries())
     if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))
       out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
-  const write = (s: Obj, at: string) => {
+  const write = (s: Obj, at: string, allowed?: string) => {
     if (
       (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
-      [...refs, ...patrolRefs, ...serviceRefs].includes(refString(s.fact))
+      ([...refs, ...patrolRefs, ...serviceRefs].includes(refString(s.fact)) ||
+        (dreamRefs.includes(refString(s.fact)) && refString(s.fact) !== allowed))
     )
       out.push(diag('RESERVED_FACT', `${at}.fact`));
   };
+  writes(c, write);
+  return out;
+}
+
+function writes(c: Obj, write: (s: Obj, at: string, allowed?: string) => void) {
   const each = (map: string) => Object.entries((c[map] ?? {}) as Obj);
   for (const [k, r] of each('recipes'))
     for (const [name, o] of Object.entries(r.outcomes as Obj))
@@ -59,16 +70,22 @@ export function reserved(c: Obj): Diagnostic[] {
       );
   for (const [k, s] of each('scenes'))
     (s.on_end?.assign ?? []).forEach((a: Obj, i: number) =>
-      write({ ...a, op: 'fact.assign' }, `.cartridge.scenes${step(k)}.on_end.assign[${i}]`),
+      write(
+        { ...a, op: 'fact.assign' },
+        `.cartridge.scenes${step(k)}.on_end.assign[${i}]`,
+        s.control === 'presentation_only' ? refString(a.fact) : undefined,
+      ),
     );
-  return out;
 }
 
 function expectedFacts(c: Obj): Obj {
   const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
   if (Object.hasOwn(c.lock.capabilities, 'scene'))
     Object.values((c.scenes ?? {}) as Obj).forEach((s) => {
-      const lines = s.steps.filter((x: Obj) => x.type === 'narrate').length;
+      const lines =
+        s.control === 'presentation_only'
+          ? s.steps.length - 2
+          : s.steps.filter((x: Obj) => x.type === 'narrate').length;
       expected[`scene_${s.key}`] = spec(s.key, lines);
     });
   for (const p of Object.values((c.story_points ?? {}) as Obj))

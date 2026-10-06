@@ -60,7 +60,8 @@ defmodule Loka.Content.Entities do
             {"daily_schedule", "schedule"},
             {"slot", "slot"},
             {"shop", "shop"},
-            {"fuel", "fuel"}
+            {"fuel", "fuel"},
+            {"readable", "readable"}
           ],
           is_map_key(e, f),
           do: {[f], k}
@@ -96,6 +97,11 @@ defmodule Loka.Content.Entities do
 
   defp fuel_texts(_), do: []
 
+  defp readable_texts(%{"readable" => r}),
+    do: for(f <- ~w(label text), do: {["readable", f], r[f]})
+
+  defp readable_texts(_), do: []
+
   defp shop_texts(%{"shop" => s}), do: for(f <- ~w(bought sold), do: {["shop", f], s[f]})
   defp shop_texts(_), do: []
 
@@ -109,10 +115,14 @@ defmodule Loka.Content.Entities do
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]
   def text_keys(defs) do
     for {_, rel, e} <- all(defs),
-        {steps, key} <-
-          for(f <- @text, do: {[f], e[f]}) ++ variant_texts(e) ++ shop_texts(e) ++ fuel_texts(e),
+        {steps, key} <- definition_texts(e),
         do: {rel, e["key"], steps, key}
   end
+
+  defp definition_texts(e),
+    do:
+      for(f <- @text, do: {[f], e[f]}) ++
+        variant_texts(e) ++ shop_texts(e) ++ fuel_texts(e) ++ readable_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

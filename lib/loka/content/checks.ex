@@ -1,8 +1,7 @@
-# size: allow 390, transport refs join patrol and topic refs at the checked expansion boundary
+# size: allow 392, transport, population and dream refs join the shared checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
-
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
@@ -27,6 +26,9 @@ defmodule Loka.Content.Checks do
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
+  def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
+    do: Loka.Content.Population.expand(value, m)
+
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
 
@@ -45,6 +47,11 @@ defmodule Loka.Content.Checks do
       |> Map.delete("transport")
       |> expand(m)
       |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
+
+  def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
+
+  def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
+    do: Map.put(readable, "topic", ref(topic, "topic", m))
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
@@ -136,8 +143,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"items" => _, "label" => _, "narration" => _} = h, m),
     do: Map.update!(h, "items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
 
-  # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
-  # map may have a detail keyed resource, whose value is a map).
+  # Recipe costs and thresholds expand only their owned reference fields.
   def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
@@ -193,7 +199,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "quest", ref(q, "quest", m))
+    do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
   def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
     do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
@@ -361,9 +367,7 @@ defmodule Loka.Content.Checks do
       )
   end
 
-  # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
-  # dialogue's.
+  # Every located policy root from the source definitions.
   defp trees(defs, actions) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),

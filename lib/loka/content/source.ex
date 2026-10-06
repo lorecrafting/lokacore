@@ -29,6 +29,8 @@ defmodule Loka.Content.Source do
              | :skill
              | :topic
              | :liquid
+             | :population
+             | :population_bundle
              | :service
              | :transport, String.t()}
 
@@ -114,6 +116,8 @@ defmodule Loka.Content.Source do
     "skills" => :skill,
     "topics" => :topic,
     "liquids" => :liquid,
+    "populations" => :population,
+    "population_bundles" => :population_bundle,
     "services" => :service,
     "transports" => :transport
   }

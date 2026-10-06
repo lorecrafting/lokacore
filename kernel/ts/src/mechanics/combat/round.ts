@@ -31,6 +31,7 @@ type Round = {
   draws: number;
   position: number;
   steps: { n: number };
+  due_time: number;
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -57,6 +58,7 @@ export function roundSequence(
     draws: 0,
     position: 0,
     steps,
+    due_time: job.due_time,
   };
   if (bodyOf(world, row.character_id) !== row.body_id || !same(npcRef(world, row.npc_id), job.job))
     throw new KernelError('precondition_failed');
@@ -216,7 +218,7 @@ function injure(
 ) {
   const player = attacker_id === row.body_id;
   const hp = resourceRef(world, 'hp');
-  const fatalLoss = adjust(world, target_id, hp, -loss, {}).op;
+  const fatalLoss = { ...adjust(world, target_id, hp, -loss, {}).op, at: r.due_time };
   r.ops.push(fatalLoss);
   if (fatalLoss.to === 0) {
     r.ops.push(close);

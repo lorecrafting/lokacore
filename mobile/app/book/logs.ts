@@ -32,14 +32,21 @@ export type Logs = {
   status: ElapsedStatus;
   recovered?: boolean;
   narrationId?: string;
+  confirmedRead?: string;
   returnWorld?: boolean;
+  returnDetail?: string;
   fault?: string;
 };
+
+export function pickupLine(last: NarrationRecord | undefined, text: Say) {
+  return last?.pickup_name ? `You pick up ${text(last.pickup_name)}.` : '';
+}
 
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
-  const [restored, combat] = narrationLines(last, view, text);
+  const [narrated, combat] = narrationLines(last, view, text);
+  const restored = pickupLine(last, text) || narrated;
   const log = restored && !view.choice && !last?.detail_id ? [restored] : [];
   const details = new Map<string, DetailLine[]>();
   if (restored && last?.detail_id) details.set(last.detail_id, [restored]);

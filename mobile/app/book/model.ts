@@ -1,3 +1,4 @@
+import { dreamPages, dreamButtons, dreamAt } from './dreams.ts';
 // size: allow 350, current shop quotes join the shared button/freshness builder
 import type {
   ActionInput,
@@ -9,6 +10,8 @@ import type {
 import type { Button } from './presenter.ts';
 import { serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
+import { things } from './item-pages.ts';
+export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
@@ -28,37 +31,22 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing' | 'board' | 'notice'; id: string }
+  | { kind: 'thing' | 'board' | 'notice' | 'dream'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
 
-const POSITIONS = ['standing', 'sitting', 'resting', 'sleeping'];
-export const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
-export function nextPosition(position: GameView['position'], actions: Button[]) {
-  const at = POSITIONS.indexOf(position ?? '');
-  if (at < 0) return;
-  for (let step = 1; step < 4; step++) {
-    const next = POSITION_ACTIONS[(at + step) % 4];
-    const offered = actions.find((b) => b.action_key === next);
-    if (offered) return offered;
-  }
-}
-
-export const things = (v: GameView): Thing[] =>
-  [
-    ...v.entities,
-    ...v.inventory,
-    ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
-  ].flatMap((e) => [e, ...(e.contents ?? [])]);
+export { nextPosition, POSITION_ACTIONS } from './positions.ts';
 
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
   if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
   if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
   if (before.place.id !== after.place.id) return [];
+  const dreaming = dreamPages(stack, before, after);
+  if (dreaming) return dreaming;
   const visible = things(after);
   const boards = after.notice_boards ?? [];
   const notices = [...(after.notices ?? []), ...boards.flatMap((b) => b.notices)];
@@ -238,7 +226,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -283,6 +271,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...travel(v),
     ...doors,
     ...held,
+    ...dreamButtons(v, label),
     ...shopButtons(v, text),
     ...serviceButtons(v, text),
     ...transportButtons(v, text),
@@ -325,6 +314,7 @@ export function actionContext(
     Object.entries(b.input)
       .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
       .sort(([a], [z]) => a.localeCompare(z)),
+    b.detail_id?.startsWith('dream:') ? dreamAt(view, b.detail_id.slice('dream:'.length)) : null,
     view.actor_id,
     view.place.id,
     view.choice,

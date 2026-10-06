@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "ash",
+    "novice_ash",
+    "novice"
+  ],
+  "short": "npc.ash.short",
+  "room_line": "npc.ash.room",
+  "description": "npc.ash.description",
+  "room": "cloister",
+  "daily_schedule": {
+    "6": "scriptorium",
+    "12": "cloister",
+    "20": "scriptorium"
+  }
+}

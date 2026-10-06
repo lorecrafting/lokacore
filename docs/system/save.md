@@ -822,10 +822,13 @@ custody changes. Retained Read narration routes once to that exact book detail;
 restore its currently reachable parent chain only when projected, with normal
 scene/chapter precedence. An unavailable book yields no invented visible route or
 World/other-book narration fallback. Current-release pin refusal remains explicit.
+Historical replay must also run when readable items are the only content requiring
+it; the isolated gate control is traced in the
+[D2-S1 review](../reviews/2026-10-05-d2-priory-books-save-second-review.md).
 
 ## B9 dream recovery
 
-**Selected, source pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+**Current consumed source; independent review pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
 uses existing fact, quest, choice and receipt tables. There is no snapshot, new
 save format, dream ledger or save-on-display. First-Rest credit, S10 activation
 and scene beat1 start commit together even when presentation is deferred.
@@ -863,6 +866,14 @@ Confirmed narration restores to the actual bed/dream nesting by committed comman
 identity; when away, retain honest history and Resume availability on legal return,
 never an invented Inn Rooms backdrop or unconfirmed completion.
 
+The consumed source uses the installed revision-ordered accepted-receipt replay,
+already required by the real B8 entitlement producer. It introduces no second
+history checker. Ordinary dialogue/finale validators select dialogue-owned
+choices and leave the scene-owned row to that replay. Continue/Choose narration
+recovers to the UI-only `dream:<actual bed id>` detail owner from the retained
+scene binding; this is local history routing, not a saved row or invented entity.
+After the ordinary chapter Continue, cold launch stays at World. Resume is offered
+only at the projected safe bed, and retained history appears in its dream child.
 ## D4 finite food and terminal custody recovery
 
 **Selected plan; not implemented.** [D4 food](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)

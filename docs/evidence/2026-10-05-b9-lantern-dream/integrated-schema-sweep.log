@@ -1,0 +1,7 @@
+command: python3 docs/evidence/2026-10-05-b9-lantern-dream/schema-sweep.py
+source_checkpoint: 066bfda44dfe2947467d1a36eb93ee0c80d7fe68
+exit: 0
+Checked 20/73 schema controls; survivors 0
+Checked 40/73 schema controls; survivors 0
+Checked 60/73 schema controls; survivors 0
+Schema sweep: 73 controls, 0 survivors

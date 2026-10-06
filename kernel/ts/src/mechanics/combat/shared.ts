@@ -51,6 +51,13 @@ export function closeEncounter(world: World, body: EntityId): DeltaOp[] {
 
 /** Authored NPC definition corresponding to an exact fresh instance. */
 export function npcRef(world: World, id: EntityId) {
+  const created = world.state.created?.[id];
+  if (
+    created?.origin.kind === 'spawned' &&
+    created.origin.role === 'hound' &&
+    created.origin.member_id === id
+  )
+    return created.definition;
   const npc = world.entities[id];
   const ref = {
     cartridge_id: world.cartridge.manifest.id,

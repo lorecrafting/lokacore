@@ -1,0 +1,6 @@
+command: mise exec -- npm --prefix kernel/ts run typecheck
+exit: 0
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+

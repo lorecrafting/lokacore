@@ -1,0 +1,3 @@
+command: mise exec -- mobile/app/node_modules/.bin/tsc -p mobile/app
+source_checkpoint: 7bc3f745658b6727ce252c639ea9116a637c833a
+exit: 0

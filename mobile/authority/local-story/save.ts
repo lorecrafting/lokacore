@@ -3,8 +3,10 @@ import { defenseEvidence } from './combat-receipt.ts';
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
+import { dreamDetail } from './dream-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
+import { bodyOf } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
@@ -126,36 +128,84 @@ export function adopt(s: Story) {
  */
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
-  const r = s.db.getFirstSync<{ command_id: string; command: string; response: string }>(
-    `SELECT command_id, command, response FROM receipt WHERE scope = ?
-     AND json_array_length(response, '$.narration') > 0
-     AND (? IS NULL OR command_id = ?) ORDER BY revision DESC LIMIT 1`,
-    scope(s),
-    command_id ?? null,
-    command_id ?? null,
-  );
-  if (!r) return undefined;
-  const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
-  if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
-    throw new Error('malformed JSON: invalid committed event evidence');
-  defenseEvidence(d.events);
-  const root =
-    ['engaged', 'fled'].includes(d.outcome) &&
-    d.delta.ops.some(
-      (o) => o.writer_group === 0 && (o.op === 'encounter.open' || o.op === 'encounter.close'),
+  let before: number | null = null;
+  while (true) {
+    const r: {
+      revision: number;
+      command_id: string;
+      command: string;
+      response: string;
+    } | null = s.db.getFirstSync(
+      `SELECT revision, command_id, command, response FROM receipt WHERE scope = ?
+       AND (json_array_length(response, '$.narration') > 0
+         OR json_extract(response, '$.outcome') = 'taken')
+       AND (? IS NULL OR command_id = ?)
+       AND (? IS NULL OR revision < ?) ORDER BY revision DESC LIMIT 1`,
+      scope(s),
+      command_id ?? null,
+      command_id ?? null,
+      before,
+      before,
     );
-  const keys = d.events.some((e) => e.payload.type === 'attack_result')
-    ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
-    : [];
-  const lines = d.narration!;
-  const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
-  const detail_id = receiptDetail(s, r, d);
-  return {
-    command_id: r.command_id,
-    lines,
-    ...(combat_lines.length && { combat_lines }),
-    ...(detail_id && { detail_id }),
-  } as NarrationRecord;
+    if (!r) return undefined;
+    const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
+    if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
+      throw new Error('malformed JSON: invalid committed event evidence');
+    defenseEvidence(d.events);
+    const root =
+      ['engaged', 'fled'].includes(d.outcome) &&
+      d.delta.ops.some(
+        (o) => o.writer_group === 0 && (o.op === 'encounter.open' || o.op === 'encounter.close'),
+      );
+    const keys = d.events.some((e) => e.payload.type === 'attack_result')
+      ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
+      : [];
+    const lines = d.narration ?? [];
+    const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
+    const pickup = corpsePickup(s, r, d);
+    if (!lines.length && !pickup) {
+      if (command_id) return undefined;
+      before = r.revision;
+      continue;
+    }
+    const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
+    return {
+      command_id: r.command_id,
+      lines,
+      ...(combat_lines.length && { combat_lines }),
+      ...(detail_id && { detail_id }),
+      ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
+    } as NarrationRecord;
+  }
+}
+
+function corpsePickup(
+  s: Story,
+  r: { command_id: string; command: string },
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
+  if (d.kind !== 'accepted' || d.outcome !== 'taken') return;
+  const command = JSON.parse(r.command) as Command;
+  const p = command?.payload;
+  if (validate('Command', command).length || command.id !== r.command_id || p.type !== 'take')
+    throw new Error('malformed JSON: invalid committed Take');
+  const transfer = d.delta.ops.find((o) => o.op === 'entity.transfer' && o.entity_id === p.item_id);
+  if (transfer?.op !== 'entity.transfer' || !transfer.source_id) return;
+  const corpse = s.world.state.created?.[transfer.source_id];
+  if (corpse?.origin.kind !== 'death') return;
+  const body = bodyOf(s.world, p.actor_id);
+  if (
+    transfer.destination_id !== body ||
+    !d.events.some(
+      (e) =>
+        e.causation_id === r.command_id &&
+        e.payload.type === 'item_acquired' &&
+        e.payload.item_id === p.item_id &&
+        e.payload.holder_id === body,
+    )
+  )
+    throw new Error('malformed JSON: invalid corpse pickup evidence');
+  return { corpse_id: transfer.source_id, item_id: p.item_id };
 }
 
 // Routing belongs to this receipt's committed command/evidence, never text or current room.
@@ -166,6 +216,8 @@ function receiptDetail(
 ) {
   if (d.kind !== 'accepted') return;
   const command = JSON.parse(r.command) as Command | null;
+  const dream = dreamDetail(s, command);
+  if (dream) return dream;
   if (
     command?.payload?.type === 'choose' ||
     d.outcome === 'riddle_wrong' ||

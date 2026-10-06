@@ -9,6 +9,7 @@ import { wornIn } from '../equipment/rule.ts';
 import { fail } from '../patrol/sequence.ts';
 import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { key } from '../../foundation/compose.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
@@ -31,12 +32,11 @@ export function deathSequence(
   validateFatal(world, fatal);
   const { loss, owner_id } = fatal;
   const victim_id = loss.entity_id;
-  const settings = world.cartridge.world!.death!;
   const player = owner_id !== null;
   const room_id = world.state.containers[victim_id];
   const id = mint() as DomainEvent['id'];
   const corpse_id = mint() as EntityId;
-  const definition = player ? settings.player_corpse : settings.npc_corpse;
+  const definition = corpseDefinition(world, victim_id, player);
   const writer_group = loss.writer_group;
   const ops: DeltaOp[] = [
     {
@@ -57,9 +57,49 @@ export function deathSequence(
     },
   ];
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group));
+  ops.push(...populationLoss(world, loss));
   if (player) ops.push(...returnBody(world, fatal));
   const died = deathEvent(world, command, fatal, id, corpse_id, player);
   return { ops, events: [died], corpse_id };
+}
+
+function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
+  const settings = world.cartridge.world!.death!;
+  const spawned = world.state.created?.[victim_id];
+  const population =
+    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
+      ? world.populationSpecs[key(spawned.origin.by)]
+      : undefined;
+  return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
+}
+
+function populationLoss(world: World, loss: Loss): DeltaOp[] {
+  const spawned = world.state.created?.[loss.entity_id];
+  if (spawned?.origin.kind !== 'spawned' || spawned.origin.role !== 'hound') return [];
+  const plan = spawned.origin.by;
+  const population = world.populationSpecs[key(plan)];
+  const slot = spawned.origin.slot;
+  const before = world.state.population_slots?.[key({ kind: 'population_slot', plan, slot })];
+  if (
+    !population ||
+    !before ||
+    before.member_id !== loss.entity_id ||
+    before.replacement_due !== null
+  )
+    throw new KernelError('precondition_failed');
+  return [
+    {
+      op: 'population.slot',
+      writer_group: loss.writer_group,
+      plan,
+      slot,
+      expected: before,
+      value: {
+        ...before,
+        replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
+      },
+    },
+  ];
 }
 
 function validateFatal(world: World, fatal: Fatal) {

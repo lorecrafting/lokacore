@@ -57,6 +57,8 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  * for `actor`, expecting the value the proposal and the steps before it leave. Each policy leaf
  * the `when` evaluates adds one to `steps.n`.
  */
+const ACTIVATES = ['quest_resolved', 'rested'];
+
 // size: allow 58, one ordered delivery lowers fact assignments and quest effects
 export function sequence(
   world: World,
@@ -79,7 +81,7 @@ export function sequence(
   let position = 0;
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
-      if (rule.on.event !== 'quest_resolved') return { kind: 'fault', code: 'precondition_failed' };
+      if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
       if (questOf(world, actor, step.quest) || activated.has(refString(step.quest))) continue;
       const started = activation(mint, actor, step.quest);
       activated.add(refString(step.quest));

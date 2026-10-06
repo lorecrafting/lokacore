@@ -1046,7 +1046,7 @@ full gate and independent pin recheck. B8 publication remains pending.
 
 ## D2 public Priory and book authoring
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
+[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
 `prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
 rooms. Every row below is reciprocal and ungated; preserve existing exits.
 
@@ -1118,13 +1118,16 @@ full/short references, exact anchor/detail membership, Boolean player fact
 scopes/defaults, unique trigger and consequence ownership, position/scene/quest
 capability dependencies, bounded reachable beat graph, exactly declared choices,
 choice source/actor/anchor bindings and final-only memory/quest consequence.
+A Rest trigger is identified by its room/detail pair, independently of entitlement,
+credit, memory or quest references; different room/detail pairs remain distinct.
 Reject unknown targets/branches, repeated/unreachable consequence beats, modal
 choice mixing, body/container operations and a dream end declaring a completion
 report. Reserve engine cursor/choice ownership as for existing scenes; content
 cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
-Future integrated release/API/hash/allocated IDs remain null until B8 source and
-review merge and independent current answers are derived.
+B9 integrates the published D5/D2 predecessor. Independent current release/API/hash/
+allocated-ID answers and the retained provisional fixtures are recorded in the
+[source evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
 
 ## D4 homes and orchard declarations
 

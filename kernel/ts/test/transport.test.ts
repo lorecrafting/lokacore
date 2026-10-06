@@ -163,7 +163,7 @@ test('Sedge teaches swim once freely through the original present dialogue', () 
 // Breaks: compiler-shaped endpoint omissions, nonreciprocal routes, bypass exits or a gift disguised as a free skill lesson loads.
 test('loader rejects invalid endpoint, funding, action and free lesson bindings', () => {
   for (const change of [
-    (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23'),
+    (c: any) => (c.manifest.requires.kernel_api.at_least = '1.25'),
     (c: any) => delete c.transports[`${c.manifest.id}@${c.manifest.version}:transport/fen_return`],
     (c: any) =>
       (c.transports[`${c.manifest.id}@${c.manifest.version}:transport/fen_outbound`].recipient =

@@ -138,6 +138,7 @@ export function ThingPage(p: {
   contents: Thing[];
   open: (id: string) => void;
   leave: () => void;
+  back?: () => void;
 }) {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
@@ -158,6 +159,11 @@ export function ThingPage(p: {
       {p.actions.map((b) => (
         <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
+      {p.back && (
+        <Tap label="Back to container" onPress={p.back}>
+          <Text style={prose}>Back to container</Text>
+        </Tap>
+      )}
       <Leave leave={p.leave} />
       {p.contents.length > 0 && <Text style={titleStyle}>Inside</Text>}
       {p.contents.map((e) => (

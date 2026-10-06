@@ -36,7 +36,7 @@ defmodule Loka.Content.Scenes do
     value =
       case scene do
         {_, _, s} ->
-          {"cartridge.json", [], spec(key, Enum.count(s["steps"], &(&1["type"] == "narrate")))}
+          {"cartridge.json", [], spec(key, count(s))}
 
         :invalid ->
           :invalid
@@ -44,6 +44,9 @@ defmodule Loka.Content.Scenes do
 
     {Map.put(facts, name, value), ds ++ authored}
   end
+
+  defp count(%{"control" => "presentation_only", "steps" => steps}), do: length(steps) - 2
+  defp count(s), do: Enum.count(s["steps"], &(&1["type"] == "narrate"))
 
   defp spec(key, n),
     do: %{
@@ -93,6 +96,9 @@ defmodule Loka.Content.Scenes do
     ctx = %{m: m, defs: defs, text: text, required: required}
     Enum.flat_map(scenes, &scene(&1, ctx)) ++ duplicates(scenes)
   end
+
+  defp scene({_, _, %{"control" => "presentation_only"}} = s, ctx),
+    do: Loka.Content.Dreams.check(s, ctx)
 
   defp scene({rel, steps, s}, ctx) do
     owned(at(rel, steps), "scene", ctx.required) ++
@@ -288,7 +294,12 @@ defmodule Loka.Content.Scenes do
 
   defp duplicates(scenes) do
     scenes
-    |> Enum.group_by(fn {_, _, s} -> s["on"] end)
+    |> Enum.group_by(fn {_, _, s} ->
+      case s["on"] do
+        %{"rest" => rest} -> {"rest", rest["room"], rest["detail"]}
+        on -> on
+      end
+    end)
     |> Enum.flat_map(fn {_, sites} -> colliding(sites) end)
   end
 

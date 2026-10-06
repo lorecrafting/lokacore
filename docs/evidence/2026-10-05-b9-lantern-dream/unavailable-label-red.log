@@ -1,0 +1,38 @@
+command: node --test mobile/app/book/dream.test.ts (new controlled label assertion, old production)
+exit: 1
+(node:46792) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (361.76625ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (189.098ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 968.116
+
+✖ failing tests:
+
+test at mobile/app/book/dream.test.ts:132:1
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (361.76625ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(cold.text().includes('Rest: not now'))
+  
+      at TestContext.<anonymous> (file://[worktree]/mobile/app/book/dream.test.ts:212:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

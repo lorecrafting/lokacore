@@ -1,0 +1,5 @@
+('topic-on-examine', 1, ['✖ only deliberate exact held Read teaches its declared topic and keeps time RNG and other membership (4.40375ms)', '✖ failing tests:'])
+('ordinary-notice-topic', 1, ['✖ ordinary notice Read remains eventless and teaches no topic in the active book cartridge (2.799584ms)', '✖ failing tests:'])
+('novice-label-conflation', 1, ['✖ literal novice schedules keep distinct cards and exact departure contexts (4.773417ms)', '✖ failing tests:'])
+('remount-unconfirmed-read', 1, ['✖ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (75.593375ms)', '✖ failing tests:'])
+('remount-world-fallback', 1, ['✖ Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page (92.838209ms)', '✖ failing tests:'])

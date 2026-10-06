@@ -2,7 +2,7 @@ import type { AdvertisedAction, CharacterId, EntityId } from '../contracts.gen.t
 import { LIMITS } from '../contracts.gen.ts';
 import { refusal, resolved } from '../commands/actions.ts';
 import type { World } from '../runtime/decision.ts';
-import { readRefused } from '../mechanics/readable/rule.ts';
+import { readRefused, writing } from '../mechanics/readable/rule.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { KernelError } from '../foundation/error.ts';
 
@@ -12,26 +12,30 @@ export function readActions(
   actor: CharacterId,
   set: ReturnType<typeof resolved>,
   steps: { n: number },
+  item?: EntityId,
 ): AdvertisedAction[] {
   const actions = Object.values(set).filter(
     (a) =>
       a.command === 'read' &&
       a.target.kind === 'entity' &&
-      a.target.scopes.includes('inspectable_details'),
+      ((item && a.engine) || a.target.scopes.includes(item ? 'inventory' : 'inspectable_details')),
   );
   if (!actions.length) return [];
   const result: AdvertisedAction[] = [];
-  for (const id in world.details) {
+  for (const id of item ? [item] : Object.keys(world.details)) {
     if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
     const target_id = id as EntityId;
-    if (readRefused(world, actor, target_id) || !visible(world, actor, target_id, steps)) continue;
+    if (readRefused(world, actor, target_id, steps) || !visible(world, actor, target_id, steps))
+      continue;
     for (const a of actions) {
       if (result.length >= LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
       const code = refusal(world, { type: 'read', actor_id: actor, target_id }, steps, a.key, set);
       const shown = {
         action_key: a.key,
-        label: world.details[id].readable!.label,
-        target: a.target,
+        label: writing(world, target_id)!.label,
+        ...(item && { command: a.command }),
+        target:
+          item && a.engine ? { kind: 'entity' as const, scopes: ['inventory' as const] } : a.target,
         input: a.input,
         target_ids: [target_id],
       };

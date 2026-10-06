@@ -63,6 +63,22 @@
                 "outcome"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "rested"
+                },
+                "room": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event",
+                "room"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -112,21 +128,41 @@
               {
                 "type": "object",
                 "properties": {
-                  "op": { "const": "quest.resolve" },
-                  "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+                  "op": {
+                    "const": "quest.resolve"
+                  },
+                  "quest": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "outcome": {
+                    "$ref": "action.schema.json#/$defs/Key"
+                  }
                 },
-                "required": ["op", "quest", "outcome"],
+                "required": [
+                  "op",
+                  "quest",
+                  "outcome"
+                ],
                 "additionalProperties": false
               },
               {
                 "type": "object",
                 "properties": {
-                  "op": { "const": "quest.fail" },
-                  "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+                  "op": {
+                    "const": "quest.fail"
+                  },
+                  "quest": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "outcome": {
+                    "$ref": "action.schema.json#/$defs/Key"
+                  }
                 },
-                "required": ["op", "quest", "outcome"],
+                "required": [
+                  "op",
+                  "quest",
+                  "outcome"
+                ],
                 "additionalProperties": false
               }
             ]

@@ -37,7 +37,7 @@ defmodule Loka.Content.Transports do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if routes != [] and minimum < [1, 24],
+    if routes != [] and minimum < [1, 26],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
   end

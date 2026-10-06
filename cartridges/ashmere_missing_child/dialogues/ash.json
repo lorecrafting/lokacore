@@ -1,0 +1,23 @@
+{
+  "prompt": "dialogue.ash.prompt",
+  "choices": {
+    "leave": {
+      "label": "dialogue.ash.leave",
+      "narration": "dialogue.ash.prompt"
+    }
+  },
+  "npc": "ash",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "roles": {
+    "ash": {
+      "role": "npc",
+      "npc": "ash"
+    }
+  }
+}

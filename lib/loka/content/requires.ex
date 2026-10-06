@@ -23,12 +23,21 @@ defmodule Loka.Content.Requires do
   def features(nil, _), do: []
 
   def features(m, all) do
-    minimum = Enum.max([minimum_feature_api(m, all), light_minimum(all), b6_minimum(all)])
+    minimum =
+      Enum.max([
+        minimum_feature_api(m, all),
+        light_minimum(all),
+        b6_minimum(all),
+        book_minimum(all)
+      ])
 
     if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
+
+  defp book_minimum(all),
+    do: if(Enum.any?(all, fn {_, _, d} -> d["readable"] != nil end), do: [1, 24], else: [])
 
   defp light_minimum(all) do
     if Enum.any?(all, fn {_, _, d} ->

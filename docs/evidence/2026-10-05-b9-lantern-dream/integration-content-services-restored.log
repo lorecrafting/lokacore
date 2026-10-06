@@ -1,0 +1,11 @@
+command: mise exec -- mix test --force test/loka/content_services_test.exs
+source_checkpoint: e3517e7efbb3e21a4cb5bd363980ef8f7f2db479
+exit: 0
+Compiling 63 files (.ex)
+Generated loka app
+Running ExUnit with seed: 92461, max_cases: 16
+
+.
+Finished in 2.9 seconds (2.9s async, 0.00s sync)
+
+Result: 1 passed

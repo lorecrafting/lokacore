@@ -476,6 +476,15 @@ test('a transport-only cartridge validates crossing receipts without another pro
   const a = setup(':memory:', (c) => {
     delete c.services;
     delete c.liquids;
+    delete c.populations;
+    delete c.population_bundles;
+    delete c.items[`${prefix}:item/hound_pelt`];
+    delete c.items[`${prefix}:item/hound_corpse`];
+    c.scenes = Object.fromEntries(
+      Object.entries(c.scenes).filter(([, scene]: any) => !scene.on?.rest),
+    );
+    for (const [key, npc] of Object.entries(c.npcs) as [string, any][])
+      if (npc.spawn_template) delete c.npcs[key];
     for (const npc of Object.values(c.npcs) as any[]) delete npc.services;
     for (const item of Object.values(c.items) as any[]) {
       delete item.vessel;

@@ -31,10 +31,12 @@ defmodule Loka.Content.Artifact do
 
     optional =
       for k <-
-            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport),
+            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle),
           defs[k] != %{},
           into: %{},
-          do: {k <> "s", keyed(m, k, defs)}
+          do:
+            {if(k == "population_bundle", do: "population_bundles", else: k <> "s"),
+             keyed(m, k, defs)}
 
     cartridge(m, defs, nil)
     |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})
