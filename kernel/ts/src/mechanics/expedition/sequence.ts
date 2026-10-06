@@ -21,13 +21,10 @@ import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { add } from '../../foundation/int.ts';
-import { questOf } from '../lookups.ts';
 import { activation, resolution } from '../quest/lifecycle.ts';
-import { scopeOf, value } from '../fact.ts';
-import { living } from '../death/shared.ts';
-import { standing } from '../position/shared.ts';
+import { assigned, adjusted } from '../fact.ts';
 import { admission } from '../combat/behavior.ts';
-import { attackRefused, engaged, encounterId, npcRef } from '../combat/shared.ts';
+import { attackRefused, encounterId, npcRef } from '../combat/shared.ts';
 import { jobId } from '../schedule/behavior.ts';
 
 type ExpeditionEvent = DomainEvent & {
@@ -35,80 +32,7 @@ type ExpeditionEvent = DomainEvent & {
 };
 
 type Command = { readonly id: CommandId; readonly payload: { readonly actor_id: CharacterId } };
-type Spec = NonNullable<NonNullable<World['cartridge']['quests']>[string]['expedition']>;
-
-export function definition(world: World) {
-  const entries = Object.entries(world.cartridge.quests ?? {}).filter(([, q]) => q.expedition);
-  if (entries.length !== 1) throw new KernelError('precondition_failed');
-  const [text, quest] = entries[0]!;
-  return {
-    ref: {
-      cartridge_id: world.cartridge.manifest.id,
-      cartridge_version: world.cartridge.manifest.version,
-      kind: 'quest' as const,
-      key: quest.key,
-    },
-    spec: quest.expedition!,
-    text,
-  };
-}
-
-export function current(world: World, actor: CharacterId) {
-  if (!Object.values(world.cartridge.quests ?? {}).some((q) => q.expedition)) return undefined;
-  const { ref } = definition(world);
-  const found = questOf(world, actor, ref);
-  return (
-    found && {
-      instance_id: found[0],
-      quest: found[1],
-      attempt: world.state.expeditions?.[found[0]],
-    }
-  );
-}
-
-export function detailFor(world: World, spec: Spec, transition: 'start' | 'restart' | 'shelter') {
-  const room = transition === 'shelter' ? spec.shelter_room : spec.start_room;
-  const detail = transition === 'shelter' ? spec.shelter_detail : spec.start_detail;
-  return Object.entries(world.details).find(
-    ([, d]) => d.room === world.roomIds[refString(room)] && d.key === detail,
-  )?.[0] as EntityId | undefined;
-}
-
-/** Shared read-only admission for keyed projection and direct commands. */
-export function refused(
-  world: World,
-  actor: CharacterId,
-  transition: 'start' | 'restart' | 'shelter',
-  detail_id: EntityId,
-  instance_id?: QuestInstanceId,
-  attempt_id?: CommandId,
-  cursor?: number,
-) {
-  const { spec } = definition(world);
-  const body = bodyOf(world, actor);
-  if (!body || actor !== world.character) return 'not_found' as const;
-  if (detailFor(world, spec, transition) !== detail_id) return 'invalid_target' as const;
-  const room =
-    world.roomIds[refString(transition === 'shelter' ? spec.shelter_room : spec.start_room)];
-  if (world.state.containers[body] !== room) return 'not_present' as const;
-  if (!living(world, body) || !standing(world, actor) || engaged(world, body))
-    return 'invalid_state' as const;
-  const now = current(world, actor);
-  if (transition === 'start') return now ? ('invalid_state' as const) : undefined;
-  if (!now || now.instance_id !== instance_id || now.attempt?.attempt_id !== attempt_id)
-    return 'invalid_state' as const;
-  if (transition === 'restart')
-    return now.quest.state === 'active' && now.attempt?.status === 'failed'
-      ? undefined
-      : ('invalid_state' as const);
-  return now.quest.state === 'active' &&
-    now.attempt?.status === 'active' &&
-    now.attempt.cursor === 3 &&
-    cursor === 3 &&
-    !now.attempt.sheltered
-    ? undefined
-    : ('invalid_state' as const);
-}
+import { current, definition, refused, type Spec } from './shared.ts';
 
 const transition = (
   before: ExpeditionAttempt | null,
@@ -122,28 +46,19 @@ const transition = (
   value: after,
 });
 
-export function choose(
-  world: World,
-  command: Command & {
-    payload: Command['payload'] & {
-      transition: 'start' | 'restart' | 'shelter';
-      detail_id: EntityId;
-      quest_instance_id?: QuestInstanceId;
-      attempt_id?: CommandId;
-      cursor?: number;
-    };
-  },
-  mint: Mint,
-  steps: Steps,
-) {
-  const {
-    actor_id,
-    transition: action,
-    detail_id,
-    quest_instance_id,
-    attempt_id,
-    cursor,
-  } = command.payload;
+type Choice = Command & {
+  payload: Command['payload'] & {
+    transition: 'start' | 'restart' | 'shelter';
+    detail_id: EntityId;
+    quest_instance_id?: QuestInstanceId;
+    attempt_id?: CommandId;
+    cursor?: number;
+  };
+};
+
+export function choose(world: World, command: Choice, mint: Mint, steps: Steps) {
+  const { actor_id, transition: action } = command.payload;
+  const { detail_id, quest_instance_id, attempt_id, cursor } = command.payload;
   const error = refused(world, actor_id, action, detail_id, quest_instance_id, attempt_id, cursor);
   if (error) return { error };
   const { ref, spec } = definition(world);
@@ -248,8 +163,7 @@ export function travel(
   mint: Mint,
   steps: Steps,
 ) {
-  const now = current(world, command.payload.actor_id);
-  const before = now?.attempt;
+  const before = current(world, command.payload.actor_id)?.attempt;
   if (
     !before ||
     before.status !== 'active' ||
@@ -278,34 +192,36 @@ export function travel(
     status: final ? 'completed' : 'active',
   });
   if (!final) return { ops: [op], events: [] as ExpeditionEvent[], narration: [] };
-  const applied = apply(world, [...prefix, op]);
+  return complete(world, command, before, [...prefix, op], op, mint, steps);
+}
+
+function complete(
+  world: World,
+  command: Command,
+  before: ExpeditionAttempt,
+  prefix: readonly DeltaOp[],
+  op: DeltaOp,
+  mint: Mint,
+  steps: Steps,
+) {
+  const { spec, ref } = definition(world);
+  const applied = apply(world, prefix);
   if ('fault' in applied) throw new KernelError(applied.fault.code);
   const resolved = resolution(applied.world, before.actor_id, ref, 'completed' as Key, 0, steps);
   if (typeof resolved === 'string') throw new KernelError(resolved);
-  const fact: DeltaOp = {
-    op: 'fact.assign',
-    writer_group: 0,
-    fact: spec.survived_fact,
-    scope: scopeOf(world, before.actor_id, spec.survived_fact),
-    expected: value(world, before.actor_id, spec.survived_fact),
-    value: true,
-  };
-  const f = spec.faction;
-  const prior = value(world, before.actor_id, f) as number;
-  const factionType = world.cartridge.facts[refString(f)].value_type;
-  if (factionType.type !== 'int' || factionType.minimum === undefined)
-    throw new KernelError('precondition_failed');
-  const floor = factionType.minimum;
-  const faction: DeltaOp = {
-    op: 'fact.assign',
-    writer_group: 0,
-    fact: f,
-    scope: scopeOf(world, before.actor_id, f),
-    expected: prior,
-    value: Math.max(floor, prior + spec.faction_delta),
-  };
+  const credited = assigned(
+    world,
+    before.actor_id,
+    { ops: [op, ...resolved.ops], position: 0, facts: {} },
+    { fact: spec.survived_fact, value: true },
+  );
+  const rewarded = adjusted(world, before.actor_id, credited, {
+    fact: spec.faction,
+    amount: spec.faction_delta,
+  });
+  if (!rewarded) throw new KernelError('precondition_failed');
   return {
-    ops: [op, ...resolved.ops, fact, faction],
+    ops: rewarded.ops,
     events: [event(world, command, mint, 2, resolved.payload)],
     narration: [{ key: spec.narration.completed, participants: { actor: before.body_id } }],
   };

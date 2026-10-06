@@ -6,7 +6,7 @@ import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
-import { definition as expeditionDefinition } from '../mechanics/expedition/sequence.ts';
+import { definition as expeditionDefinition } from '../mechanics/expedition/shared.ts';
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
 const INPUTS: readonly string[] = [

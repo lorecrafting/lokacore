@@ -2,6 +2,8 @@
 
 > **Publication note:** PM-selected planning brief, pending independent review and C5 publication. Re-pin current main and predecessors before C6 source; this draft is no claim of implementation or proof.
 
+[Provisional source checks and remaining blockers](../../evidence/2026-10-06-c6-source/README.md) record development proof; final release integration and independent review remain pending.
+
 2026-10-06. Row C6 of [the public plan](../../MISSING-CHILD-PLAN.md); proposed branch `chapter1/c6-marsh-expedition`. [PM decision](../../decisions/pm-decision-c6-night-marsh-2026-10-06.md) and [active C6 mechanics](../../system/mechanics.md#c6-s27-night-in-the-marsh-selected-planning-contract) select the contract. Planning base `a56787439c5319763c1d2da82356fc02ff7e3ef5`, Chapter 1 **23/33**. D6 water depths is published; C5 real bleed/bandage source is provisional. C6 release/API/hash/IDs/source/PR: **null**. No owner-save, mobile/browser or source proof is claimed.
 
 ## Player outcome and dependencies

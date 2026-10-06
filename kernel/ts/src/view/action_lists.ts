@@ -29,7 +29,7 @@ import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
-import * as expedition from '../mechanics/expedition/sequence.ts';
+import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
