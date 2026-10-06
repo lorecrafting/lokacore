@@ -533,7 +533,7 @@ native verification remains paused under the owner decision.
 
 ## B6 Seek, retry and ward details
 
-Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) uses the shared
+[B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) uses the shared
 Book at every hour. Marsh Light shows truthful darkness, known return exits and
 its authored glow marker with Seek Wisp; reveal the actual wisp detail only after
 confirmed discovery. A lit carried source explains unavailable Seek/Talk/answer

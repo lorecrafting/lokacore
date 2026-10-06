@@ -1,3 +1,5 @@
+import { pending } from './selection.ts';
+import { validAttempts } from './behavior.ts';
 import { membership } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
@@ -72,12 +74,6 @@ export function answerFits(bank: readonly string[], answer: string): boolean {
 /** The ids of `d`'s choices, in key order. */
 export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
 
-/** `actor`'s pending choice, if it has one (at most one: talk refuses a second). */
-export const pending = (world: World, actor: CharacterId) =>
-  Object.entries(world.state.choices ?? {}).find(
-    ([, c]) => c.status === 'pending' && c.actor_id === actor,
-  ) as [ContinuationId, ChoiceRow] | undefined;
-
 /**
  * Why no option of `row` can be chosen now: invalid_state when the pinned policy no longer
  * holds; then revalidate actual custody and presence (06 §43): not_present while a bound NPC is not in the actor's room, else not_owned while a
@@ -87,6 +83,8 @@ export const pending = (world: World, actor: CharacterId) =>
 export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, steps: Steps) {
   const body = bodyOf(world, row.actor_id);
   const d = definition(world, row.source);
+  if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
+    return 'invalid_state' as const;
   const target = row.roles.find((r) => {
     const role = d.roles[r.role];
     return role?.role === 'npc' && same(role.npc, d.npc);
@@ -130,6 +128,19 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   }
 }
 
+function boundSitting(world: World, row: ChoiceRow, d: DialogueDefinition, option: DialogueChoice) {
+  const names = row.roles
+    .filter((r) => !option.exchange || !/^(outgoing|incoming)_\d{2}$/.test(r.role))
+    .map((r) => r.role)
+    .sort(cmp);
+  if (!same(names, Object.keys(d.roles).sort(cmp))) return false;
+  return (
+    validAttempts(row, d) &&
+    (d.riddle?.wrong_limit === undefined ||
+      (!!d.quest && row.quest_instance_id === questOf(world, row.actor_id, d.quest)?.[0]))
+  );
+}
+
 function roleBlocked(
   world: World,
   row: ChoiceRow,
@@ -144,6 +155,8 @@ function roleBlocked(
     if (option.exchange && /^(outgoing|incoming)_\d{2}$/.test(r.role)) continue;
     const entity = world.entities[r.entity_id];
     if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
+    if (entity.key !== (expected.role === 'npc' ? expected.npc : expected.item).key)
+      return 'invalid_state' as const;
     const needed =
       allRolesNeeded ||
       r.role ===
@@ -193,7 +206,13 @@ export function choiceView(
     prompt: { key: d.prompt },
     speaker_id: row.roles.find((r) => r.role === speaker)!.entity_id,
     closable: true,
-    ...(d.riddle && { riddle: { choice_id: d.riddle.choice_id, bank: d.riddle.bank } }),
+    ...(d.riddle && {
+      riddle: {
+        choice_id: d.riddle.choice_id,
+        bank: d.riddle.bank,
+        ...(row.attempts && { attempts: row.attempts }),
+      },
+    }),
     choices: row.choice_ids.map((choice_id) => {
       const option = d.choices[choice_id]!;
       const { label, accept } = option;
@@ -210,54 +229,7 @@ export function choiceView(
   };
 }
 
-/** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
-const spoken = (world: World, target: EntityId | undefined) =>
-  Object.values(world.cartridge.dialogues ?? {})
-    .filter(
-      (d) =>
-        target !== undefined &&
-        living(world, target) &&
-        world.entityIds[refString(d.npc)] === target,
-    )
-    .sort((a, b) => cmp(a.key, b.key));
-
-/** Whether `target` speaks any dialogue (else its talk is not_found). */
-export const speaks = (world: World, target: EntityId | undefined) =>
-  spoken(world, target).length > 0;
-
-/**
- * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds, if any. Each policy leaf it evaluates adds one to `steps` (04 §5.4).
- */
-export const spokenBy = (
-  world: World,
-  actor: CharacterId,
-  target: EntityId | undefined,
-  steps: Steps = { n: 0 },
-) => spoken(world, target).find((d) => holds(world, actor, d.policy.root, { target, steps }));
-
-/**
- * Whether `target`'s dialogues refuse `actor`'s talk now, no policy of theirs holding or the actor
- * having a pending choice (one per actor): the GameView's check for every talk listed on the
- * target, since a cartridge action with command talk (an alias) is admitted on its own policy.
- */
-export const talkRefused = (world: World, actor: CharacterId, target: EntityId | undefined) =>
-  speaks(world, target) && (!spokenBy(world, actor, target) || !!pending(world, actor));
-
-/**
- * The talk of each dialogue whose speaker is in `actor`'s room, keyed by the dialogue's key: its
- * policy, the speaker its only target (commands/actions.ts accepts).
- */
-export function talks(world: World, actor: CharacterId): [string, Offered][] {
-  const here = world.state.containers[bodyOf(world, actor)!];
-  return Object.values(world.cartridge.dialogues ?? {}).flatMap(({ key, npc, policy }) => {
-    const speaker = world.entityIds[refString(npc)]!;
-    if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
-    const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
-    const talk = { key, label: 'action.talk' as TextKey, target, input: [], priority: 0, policy };
-    return [[key, { ...talk, command: 'talk' as Key, speaker }]];
-  });
-}
+export { speaks, spokenBy, talkRefused, talks, pending } from './selection.ts';
 
 export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */

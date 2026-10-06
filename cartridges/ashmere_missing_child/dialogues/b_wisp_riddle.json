@@ -1,0 +1,62 @@
+{
+  "npc": "wisp",
+  "label": "actions.ask_wisp",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "light_off"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_wisp_discovered",
+          "equals": true
+        },
+        {
+          "op": "quest_state",
+          "quest": "wisp_ward",
+          "state": "active"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.wisp.riddle",
+  "roles": {
+    "wisp": {
+      "role": "npc",
+      "npc": "wisp"
+    }
+  },
+  "quest": "wisp_ward",
+  "choices": {
+    "answer": {
+      "label": "dialogue.wisp.answer",
+      "narration": "narration.wisp.correct",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fen_wisp_answered",
+          "value": true
+        },
+        {
+          "op": "topic.grant",
+          "topic": "ward"
+        }
+      ]
+    }
+  },
+  "riddle": {
+    "choice_id": "answer",
+    "answer": "tide",
+    "bank": [
+      "T",
+      "I",
+      "D",
+      "E"
+    ],
+    "wrong": "narration.wisp.wrong",
+    "wrong_limit": 3
+  }
+}

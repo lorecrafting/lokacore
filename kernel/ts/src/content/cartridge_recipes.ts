@@ -51,7 +51,7 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     }
     text(r, ['label'], at);
   }
-  return [...out, ...contributions(c)];
+  return [...out, ...contributions(c), ...attributes(c, { named, text, typedValue })];
 }
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
@@ -76,4 +76,11 @@ function contributions(c: Obj): Diagnostic[] {
       }),
     );
   return out;
+}
+
+function attributes(c: Obj, { named }: Checks) {
+  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj))
+    if (r.check?.attribute)
+      named(r.check.attribute, 'attribute', `.cartridge.recipes${step(ref)}.check.attribute`);
+  return [];
 }

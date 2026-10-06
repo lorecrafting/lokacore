@@ -7,6 +7,11 @@ import { prose, note } from './paper.ts';
 export function SkillDetails(p: { view?: GameView; text: (key: string) => string }) {
   return (
     <>
+      {p.view?.topics?.map((t) => (
+        <Text key={t.topic.key} style={prose}>
+          {p.text(t.label)}
+        </Text>
+      ))}
       {p.view?.attributes?.map((a) => (
         <Text key={a.attribute.key} style={prose}>
           {a.attribute.key.toUpperCase()} {a.value}

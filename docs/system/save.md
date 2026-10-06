@@ -635,7 +635,7 @@ no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
 
 ## B6 discovery, sitting and ward recovery
 
-Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) retains discovery,
+[B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) retains discovery,
 S4 state and topic knowledge in ordinary typed player facts/quest rows; only an
 opted riddle adds its typed continuation count. Persist changed rows and receipt
 atomically. Cold reopen at zero/one/two mistakes restores the exact continuation,

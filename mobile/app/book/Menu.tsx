@@ -32,6 +32,12 @@ function Choice(p: {
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
     <View style={{ marginTop: 12 }}>
+      {p.choice.riddle?.attempts && (
+        <Text style={note}>
+          {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
+          sitting.
+        </Text>
+      )}
       {absent(p.view) !== '' && <Text style={note}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);

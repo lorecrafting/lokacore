@@ -1,0 +1,121 @@
+{
+  "stage": "ready Q1",
+  "offers": [
+    {
+      "available": false,
+      "action_key": "a_elspeth_lost",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": [],
+      "reason": {
+        "code": "invalid_state"
+      }
+    },
+    {
+      "available": true,
+      "action_key": "a_elspeth_report",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": []
+    },
+    {
+      "available": false,
+      "action_key": "a_elspeth_rescue",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": [],
+      "reason": {
+        "code": "invalid_state"
+      }
+    },
+    {
+      "available": false,
+      "action_key": "a_elspeth_return",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": [],
+      "reason": {
+        "code": "invalid_state"
+      }
+    },
+    {
+      "available": false,
+      "action_key": "b_elspeth_rescued",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": [],
+      "reason": {
+        "code": "invalid_state"
+      }
+    },
+    {
+      "available": false,
+      "action_key": "b_elspeth_stays",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": [],
+      "reason": {
+        "code": "invalid_state"
+      }
+    },
+    {
+      "available": true,
+      "action_key": "elspeth",
+      "label": "action.talk",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "room_occupants"
+        ]
+      },
+      "input": []
+    }
+  ],
+  "unlabelled_elspeth": {
+    "id": "eeeeeeee-0000-4000-8000-000000000001",
+    "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f",
+    "payload": {
+      "type": "talk",
+      "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+      "target_id": "aee0aa7b-c6a9-8407-98aa-26c5384f4bea"
+    }
+  },
+  "generic_talk": {
+    "kind": "rejected",
+    "error": {
+      "code": "unsupported_capability"
+    }
+  }
+}
+[{"key":"first_lead","state":"resolved"},{"key":"missing_child","state":"active"}]
+Q1 report -> active Q2: confirmed

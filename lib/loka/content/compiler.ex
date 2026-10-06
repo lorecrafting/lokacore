@@ -1,8 +1,5 @@
 defmodule Loka.Content.Compiler do
-  @moduledoc """
-  Validates the loaded source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21).
-  Each stage runs on accepted input so one bad file does not hide diagnostics from other files.
-  """
+  @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
   alias Loka.Content.{Entities, Position, Resources, Scenes}
   alias Loka.Core.Contracts
@@ -44,6 +41,7 @@ defmodule Loka.Content.Compiler do
       Entities.carry(manifest, defs, located),
       Loka.Content.Fuel.check(manifest, defs),
       Loka.Content.Commerce.check(manifest, defs),
+      Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
@@ -146,6 +144,7 @@ defmodule Loka.Content.Compiler do
     {"story_point", :story_point, "StoryPointDefinition"},
     {"scene", :scene, "SceneDefinition"},
     {"skill", :skill, "SkillDefinition"},
+    {"topic", :topic, "TopicDefinition"},
     {"liquid", :liquid, "LiquidDefinition"}
   ]
 

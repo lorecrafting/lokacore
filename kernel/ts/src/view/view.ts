@@ -1,3 +1,4 @@
+import { knownTopics } from '../mechanics/topics/shared.ts';
 import { liquidView } from './liquid.ts';
 import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
@@ -76,6 +77,7 @@ export function gameView(world: World): GameView {
   const view: GameView = {
     actor_id: world.character,
     ...skillViews(world, steps),
+    ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door, steps),

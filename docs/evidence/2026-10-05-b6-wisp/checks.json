@@ -1,0 +1,37 @@
+{
+  "source": "e7aeace7f369254e3fb4b3f197dc1b641b6e6e87",
+  "full": {
+    "command": "MISE_STATE_DIR=<redacted> bin/check_all.sh",
+    "exit": 0,
+    "elixir_passed": 340
+  },
+  "focused": {
+    "command": "mise exec -- node --test mobile/authority/local-story/wisp.test.ts mobile/authority/local-story/wren_riddle.test.ts mobile/app/book/riddle.test.ts kernel/ts/test/wisp.test.ts kernel/ts/test/wisp_contracts.test.ts kernel/ts/test/cartridge_wisp.test.ts",
+    "exit": 0,
+    "passed": 24
+  },
+  "broad": {
+    "source": "34dfa745d40ee9266819457b316f91bd9bf39032",
+    "command": "mise exec -- node --test mobile/authority/local-story/*.test.ts mobile/app/book/*.test.ts",
+    "exit": 0,
+    "passed": 451,
+    "skipped": 1
+  },
+  "app_types": {
+    "command": "mise exec -- npx tsc --noEmit",
+    "directory": "mobile/app",
+    "exit": 0
+  },
+  "behavior_mutants": {
+    "killed": 14,
+    "survivors": 0
+  },
+  "schema_mutants": {
+    "guards": 46,
+    "fixture_detected": 28,
+    "generator_rejected": 18,
+    "ts_elixir_agree": true
+  },
+  "capture_redaction_control": "passed",
+  "hosted_ci": null
+}

@@ -712,11 +712,11 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-The current local successor is `ashmere_missing_child@0.0.21`, API1.19:
+B4 introduced `ashmere_missing_child@0.0.21`, API1.19:
 [independent payload](../../protocol/fixtures/missing_child_v021_hash.json),
 [94-ID answer](../../protocol/fixtures/missing_child_v021_ids.json),
 [derivation](../../protocol/fixtures/generate_missing_child_v021.py).
-Independent B4 review and final C1 dependency fixes remain pending.
+B4 is reviewed; its successor pins are retained as frozen answers.
 
 The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
 adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
@@ -828,7 +828,15 @@ reviewed C1/B5 integration is re-pinned and independently derived.
 
 ## B6 marsh route and tuning
 
-The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+The current local source release is `ashmere_missing_child@0.0.23`, API1.21,
+with [independent payload](../../protocol/fixtures/missing_child_v023_hash.json),
+[103 initial IDs](../../protocol/fixtures/missing_child_v023_ids.json) and
+[derivation from reviewed B7 v022](../../protocol/fixtures/generate_missing_child_v023.py).
+Its SHA-256 is `e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`.
+Independent B6 source and save/protocol reviews remain pending.
+
+
+The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
 public path on existing firm footing; preserve the already always-passable mire
 and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
@@ -964,8 +972,10 @@ Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
 detail at `inn_rooms` with free/paid description variants and a paid ordinary
 Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
 bounded ResourceSpec initialized only for Maud, not a second inventory count.
-Add one real provider-held ale vessel with capacity4, initial ale4, drink_amount1,
-shell mass500g; declare `ale` density250g/unit (the B7 quarter-litre unit).
+Add one real provider-held ale vessel with capacity4, initial ale4 and shell
+mass500g; declare liquid kind `ale` with drink_amount1 and density250g/unit
+(the B7 quarter-litre unit). The serving amount is liquid-kind metadata, as in
+the installed B7 contract, not a vessel field.
 Empty shell persists as null/0; no Fill source for ale is authored. The cask is
 Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
 slice. No dead Maud stock resurrection/refill occurs.
@@ -981,7 +991,8 @@ service keys, absent balances, regenerating stock/currency, mismatched stock
 owner, non-MV recovery declarations and unbounded/unknown consequences. The
 minimal service subset covers only these consumed consequences, not an arbitrary
 Effect interpreter. Independently re-pin the integrated bundled release/API and
-known answers after B7 source merges; future hashes/IDs/versions are null now.
+known answers after the shared-source scheduling predecessors integrate; future
+B8 hashes/IDs/versions are null now.
 
 ## D2 public Priory and book authoring
 

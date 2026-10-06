@@ -215,6 +215,18 @@ fixed. Local `main` carries chapter 0.0.22/API1.20, hash
 `0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`
 and 96 IDs. Accumulated local and all six hosted checks passed; it is published in #209.
 
+B8 Maud's paid room, food and drink services have an
+[adopted immediate-benefit contract](decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+and [independently approved plan](reviews/2026-10-05-b8-maud-services-plan-review.md).
+The [brief](briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) now pins
+published B7's reviewed source and current GitHub main `547f809c`, chapter
+0.0.22/API1.20 with 96 independent IDs. B3/B7/Rest behavioral dependencies are met.
+Full source assignment queues behind active B6 Wisp and C2 Tobin patrol shared
+contract/save/Book/release integration, then re-pins latest reviewed main; these
+are scheduling predecessors, not additional chapter dependencies. This docs-only
+re-pin still needs a short independent review. B8 source, successor pins and
+playable service proof remain null.
+
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
 on local base `10b023e8`. A3 is integrated; B8 has an approved plan but no source.

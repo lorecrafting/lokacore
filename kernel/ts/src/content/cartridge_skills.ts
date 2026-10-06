@@ -77,6 +77,10 @@ export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diag
 export function sequence(o: Obj, path: string, c: Obj, { named, typedValue, text }: Checks) {
   const out: Diagnostic[] = [];
   (o.sequence ?? []).forEach((s: Obj, i: number) => {
+    if (s.op === 'topic.grant') {
+      named(s.topic, 'topic', `${path}.sequence[${i}].topic`);
+      return;
+    }
     if (s.op === 'skill.acquire') {
       named(s.skill, 'skill', `${path}.sequence[${i}].skill`);
       return;

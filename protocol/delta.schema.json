@@ -1,398 +1,52 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "StateDelta contracts",
+  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json.",
   "$defs": {
-    "WriterGroup": {
-      "description": "Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.",
-      "type": "integer",
-      "minimum": 0,
-      "examples": [
-        0,
-        1
-      ]
-    },
-    "MutationTarget": {
-      "examples": [
-        {
-          "kind": "fact",
-          "fact": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "fact",
-            "key": "search_plan"
-          },
-          "scope": {
-            "kind": "player",
-            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
-          }
-        },
-        {
-          "kind": "containment",
-          "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
-        },
-        {
-          "kind": "quest",
-          "instance_id": "55555555-6666-8777-8888-999999999999"
-        },
-        {
-          "kind": "choice",
-          "continuation_id": "44444444-5555-8666-8777-888888888888"
-        },
-        {
-          "kind": "job",
-          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
-        },
-        {
-          "kind": "clock"
-        },
-        {
-          "kind": "resource",
-          "resource": {
-            "cartridge_id": "ashmere_dusk",
-            "cartridge_version": "0.0.1",
-            "kind": "resource",
-            "key": "mv"
-          },
-          "entity_id": "11111111-2222-4333-8444-555555555555"
-        },
-        {
-          "kind": "cooldown",
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "action": "pick_lock"
-        },
-        {
-          "kind": "barrier",
-          "barrier": {
-            "cartridge_id": "ashmere_gate",
-            "cartridge_version": "0.0.1",
-            "kind": "barrier",
-            "key": "cell_door"
-          }
-        },
-        {
-          "kind": "escort",
-          "actor_id": "11111111-2222-4333-8444-555555555555"
-        }
-      ],
-      "oneOf": [
-        {
-          "description": "A scoped fact.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "fact"
-            },
-            "fact": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "scope": {
-              "$ref": "scope.schema.json#/$defs/StateScope"
-            },
-            "subject_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "fact",
-            "scope"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "An entity's one container.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "containment"
-            },
-            "entity_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "entity_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "A QuestInstance's lifecycle.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "quest"
-            },
-            "instance_id": {
-              "$ref": "#/$defs/QuestInstanceId"
-            }
-          },
-          "required": [
-            "kind",
-            "instance_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "A continuation.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "choice"
-            },
-            "continuation_id": {
-              "$ref": "#/$defs/ContinuationId"
-            }
-          },
-          "required": [
-            "kind",
-            "continuation_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "A scheduled job.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "job"
-            },
-            "job_id": {
-              "$ref": "#/$defs/JobId"
-            }
-          },
-          "required": [
-            "kind",
-            "job_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "The logical clock.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "clock"
-            }
-          },
-          "required": [
-            "kind"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "A body's resource.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "resource"
-            },
-            "resource": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "entity_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "resource",
-            "entity_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "An actor's cooldown of one action.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "cooldown"
-            },
-            "actor_id": {
-              "$ref": "identity.schema.json#/$defs/CharacterId"
-            },
-            "action": {
-              "$ref": "action.schema.json#/$defs/Key"
-            }
-          },
-          "required": [
-            "kind",
-            "actor_id",
-            "action"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "description": "A barrier's one shared state.",
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "barrier"
-            },
-            "barrier": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            }
-          },
-          "required": [
-            "kind",
-            "barrier"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "entity"
-            },
-            "entity_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "entity_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "encounter"
-            },
-            "encounter_id": {
-              "$ref": "delta.schema.json#/$defs/EncounterId"
-            }
-          },
-          "required": [
-            "kind",
-            "encounter_id"
-          ],
-          "additionalProperties": false,
-          "examples": [
-            {
-              "kind": "encounter",
-              "encounter_id": "11111111-2222-4333-8444-555555555555"
-            }
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "escort"
-            },
-            "actor_id": {
-              "$ref": "identity.schema.json#/$defs/CharacterId"
-            }
-          },
-          "required": [
-            "kind",
-            "actor_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "liquid"
-            },
-            "item_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "item_id"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "kind": {
-              "const": "fuel"
-            },
-            "item_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            }
-          },
-          "required": [
-            "kind",
-            "item_id"
-          ],
-          "additionalProperties": false
-        }
-      ],
-      "description": "Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5)."
-    },
-    "EncounterId": {
-      "description": "One finite combat encounter, minted from the Attack command IdSource.",
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-      "examples": [
-        "11111111-2222-4333-8444-555555555555"
-      ]
-    },
-    "EncounterRow": {
-      "type": "object",
-      "properties": {
-        "character_id": {
-          "$ref": "identity.schema.json#/$defs/CharacterId"
-        },
-        "body_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "npc_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "room_id": {
-          "$ref": "identity.schema.json#/$defs/EntityId"
-        },
-        "status": {
-          "enum": [
-            "open",
-            "closed"
-          ]
-        },
-        "round": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "job_id": {
-          "$ref": "delta.schema.json#/$defs/JobId"
-        }
-      },
-      "required": [
-        "character_id",
-        "body_id",
-        "npc_id",
-        "room_id",
-        "status",
-        "round",
-        "job_id"
-      ],
-      "additionalProperties": false,
-      "examples": [
-        {
-          "character_id": "11111111-2222-4333-8444-555555555555",
-          "body_id": "11111111-2222-4333-8444-555555555555",
-          "npc_id": "11111111-2222-4333-8444-555555555555",
-          "room_id": "11111111-2222-4333-8444-555555555555",
-          "status": "open",
-          "round": 1,
-          "job_id": "11111111-2222-4333-8444-555555555555"
-        }
-      ],
-      "description": "Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job."
-    },
     "QuestInstanceId": {
       "description": "A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
         "55555555-6666-8777-8888-999999999999"
+      ]
+    },
+    "ContinuationId": {
+      "description": "A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "44444444-5555-8666-8777-888888888888"
+      ]
+    },
+    "JobId": {
+      "description": "A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "66666666-7777-8888-8999-aaaaaaaaaaaa"
+      ]
+    },
+    "FactValue": {
+      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.",
+      "anyOf": [
+        {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "examples": [
+        "player_led",
+        1,
+        0,
+        -9007199254740991,
+        true,
+        false
       ]
     },
     "RoleBinding": {
@@ -418,20 +72,13 @@
         }
       ]
     },
-    "JobId": {
-      "description": "A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.",
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    "WriterGroup": {
+      "description": "Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.",
+      "type": "integer",
+      "minimum": 0,
       "examples": [
-        "66666666-7777-8888-8999-aaaaaaaaaaaa"
-      ]
-    },
-    "ContinuationId": {
-      "description": "A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.",
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-      "examples": [
-        "44444444-5555-8666-8777-888888888888"
+        0,
+        1
       ]
     },
     "StateDelta": {
@@ -483,179 +130,7 @@
       ]
     },
     "DeltaOp": {
-      "examples": [
-        {
-          "op": "fact.assign",
-          "writer_group": 0,
-          "fact": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "fact",
-            "key": "search_plan"
-          },
-          "scope": {
-            "kind": "player",
-            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
-          },
-          "subject_id": "11111111-2222-4333-8444-555555555555",
-          "expected": "undecided",
-          "value": "party_led"
-        },
-        {
-          "op": "quest.activate",
-          "writer_group": 0,
-          "quest": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "quest",
-            "key": "find_the_lantern"
-          },
-          "scope": {
-            "kind": "player",
-            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
-          },
-          "instance_id": "55555555-6666-8777-8888-999999999999"
-        },
-        {
-          "op": "quest.transition",
-          "writer_group": 1,
-          "instance_id": "55555555-6666-8777-8888-999999999999",
-          "from": "objectives_complete",
-          "to": "resolved",
-          "outcome": "carry"
-        },
-        {
-          "op": "choice.open",
-          "writer_group": 0,
-          "continuation_id": "44444444-5555-8666-8777-888888888888",
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "source": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "quest",
-            "key": "find_the_lantern"
-          },
-          "beat": "choose_search_plan",
-          "roles": [
-            {
-              "role": "search_leader",
-              "entity_id": "11111111-2222-4333-8444-555555555555"
-            }
-          ],
-          "choice_ids": [
-            "carry",
-            "leave"
-          ]
-        },
-        {
-          "op": "choice.open",
-          "writer_group": 0,
-          "continuation_id": "44444444-5555-8666-8777-888888888888",
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "source": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "quest",
-            "key": "find_the_lantern"
-          },
-          "beat": "b",
-          "roles": [],
-          "choice_ids": [
-            "carry"
-          ]
-        },
-        {
-          "op": "choice.resolve",
-          "writer_group": 0,
-          "continuation_id": "44444444-5555-8666-8777-888888888888",
-          "choice_id": "carry",
-          "expected_revision": 1
-        },
-        {
-          "op": "choice.close",
-          "writer_group": 0,
-          "continuation_id": "44444444-5555-8666-8777-888888888888"
-        },
-        {
-          "op": "job.schedule",
-          "writer_group": 0,
-          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa",
-          "job": {
-            "cartridge_id": "ferrymans_lantern",
-            "cartridge_version": "0.1.0",
-            "kind": "schedule",
-            "key": "bram_to_green"
-          },
-          "due_time": 19
-        },
-        {
-          "op": "job.complete",
-          "writer_group": 0,
-          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
-        },
-        {
-          "op": "time.advance",
-          "writer_group": 0,
-          "from": 0,
-          "to": 19
-        },
-        {
-          "op": "resource.adjust",
-          "writer_group": 0,
-          "resource": {
-            "cartridge_id": "ashmere_dusk",
-            "cartridge_version": "0.0.1",
-            "kind": "resource",
-            "key": "mv"
-          },
-          "entity_id": "11111111-2222-4333-8444-555555555555",
-          "from": 82,
-          "to": 81
-        },
-        {
-          "op": "cooldown.start",
-          "writer_group": 0,
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "action": "pick_lock",
-          "at": 3600
-        },
-        {
-          "op": "cooldown.start",
-          "writer_group": 0,
-          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
-          "action": "pick_lock",
-          "from": 3600,
-          "at": 7200
-        },
-        {
-          "op": "barrier.transition",
-          "writer_group": 0,
-          "barrier": {
-            "cartridge_id": "ashmere_gate",
-            "cartridge_version": "0.0.1",
-            "kind": "barrier",
-            "key": "cell_door"
-          },
-          "from": "locked",
-          "to": "closed"
-        },
-        {
-          "op": "escort.transition",
-          "writer_group": 0,
-          "actor_id": "11111111-2222-4333-8444-555555555555",
-          "expected": null,
-          "value": {
-            "kind": "escort",
-            "actor_id": "11111111-2222-4333-8444-555555555555",
-            "body_id": "22222222-2222-4333-8444-555555555555",
-            "npc_id": "33333333-2222-4333-8444-555555555555",
-            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
-            "continuation_id": "55555555-2222-4333-8444-555555555555",
-            "choice_id": "rescue",
-            "status": "following"
-          }
-        }
-      ],
+      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition.",
       "oneOf": [
         {
           "description": "Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).",
@@ -853,6 +328,9 @@
             },
             "quest_instance_id": {
               "$ref": "#/$defs/QuestInstanceId"
+            },
+            "attempts": {
+              "$ref": "delta.schema.json#/$defs/ChoiceAttempts"
             }
           },
           "required": [
@@ -1333,34 +811,6 @@
           "type": "object",
           "properties": {
             "op": {
-              "const": "liquid.set"
-            },
-            "writer_group": {
-              "$ref": "delta.schema.json#/$defs/WriterGroup"
-            },
-            "item_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            },
-            "from": {
-              "$ref": "liquid.schema.json#/$defs/LiquidRow"
-            },
-            "to": {
-              "$ref": "liquid.schema.json#/$defs/LiquidRow"
-            }
-          },
-          "required": [
-            "op",
-            "writer_group",
-            "item_id",
-            "from",
-            "to"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "op": {
               "const": "fuel.set"
             },
             "writer_group": {
@@ -1385,33 +835,653 @@
           ],
           "additionalProperties": false,
           "description": "Replace one declared item fuel history with exact whole-row precondition at the authoritative clock."
-        }
-      ],
-      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition."
-    },
-    "FactValue": {
-      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.",
-      "anyOf": [
-        {
-          "$ref": "action.schema.json#/$defs/Key"
         },
         {
-          "type": "integer"
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice.attempt"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "source": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "expected_revision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prior_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "continuation_id",
+            "actor_id",
+            "source",
+            "quest_instance_id",
+            "expected_revision",
+            "prior_count"
+          ],
+          "additionalProperties": false
         },
         {
-          "type": "boolean"
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "liquid.set"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "from": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            },
+            "to": {
+              "$ref": "liquid.schema.json#/$defs/LiquidRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "item_id",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
-        "player_led",
-        1,
-        0,
-        -9007199254740991,
-        true,
-        false
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "subject_id": "11111111-2222-4333-8444-555555555555",
+          "expected": "undecided",
+          "value": "party_led"
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          },
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 1,
+          "instance_id": "55555555-6666-8777-8888-999999999999",
+          "from": "objectives_complete",
+          "to": "resolved",
+          "outcome": "carry"
+        },
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "source": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "beat": "choose_search_plan",
+          "roles": [
+            {
+              "role": "search_leader",
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            }
+          ],
+          "choice_ids": [
+            "carry",
+            "leave"
+          ]
+        },
+        {
+          "op": "choice.open",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "source": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_lantern"
+          },
+          "beat": "b",
+          "roles": [],
+          "choice_ids": [
+            "carry"
+          ]
+        },
+        {
+          "op": "choice.resolve",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888",
+          "choice_id": "carry",
+          "expected_revision": 1
+        },
+        {
+          "op": "choice.close",
+          "writer_group": 0,
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa",
+          "job": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram_to_green"
+          },
+          "due_time": 19
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 0,
+          "to": 19
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "11111111-2222-4333-8444-555555555555",
+          "from": 82,
+          "to": 81
+        },
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock",
+          "at": 3600
+        },
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock",
+          "from": 3600,
+          "at": 7200
+        },
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "from": "locked",
+          "to": "closed"
+        },
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
       ]
+    },
+    "MutationTarget": {
+      "examples": [
+        {
+          "kind": "fact",
+          "fact": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "search_plan"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+          }
+        },
+        {
+          "kind": "containment",
+          "entity_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "kind": "quest",
+          "instance_id": "55555555-6666-8777-8888-999999999999"
+        },
+        {
+          "kind": "choice",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        },
+        {
+          "kind": "job",
+          "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+        },
+        {
+          "kind": "clock"
+        },
+        {
+          "kind": "resource",
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "kind": "cooldown",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock"
+        },
+        {
+          "kind": "barrier",
+          "barrier": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "barrier",
+            "key": "cell_door"
+          }
+        },
+        {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555"
+        }
+      ],
+      "oneOf": [
+        {
+          "description": "A scoped fact.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fact"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "scope": {
+              "$ref": "scope.schema.json#/$defs/StateScope"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "fact",
+            "scope"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An entity's one container.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "containment"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A QuestInstance's lifecycle.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "quest"
+            },
+            "instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            }
+          },
+          "required": [
+            "kind",
+            "instance_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A continuation.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "choice"
+            },
+            "continuation_id": {
+              "$ref": "#/$defs/ContinuationId"
+            }
+          },
+          "required": [
+            "kind",
+            "continuation_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A scheduled job.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "job"
+            },
+            "job_id": {
+              "$ref": "#/$defs/JobId"
+            }
+          },
+          "required": [
+            "kind",
+            "job_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The logical clock.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "clock"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A body's resource.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "resource"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "resource",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An actor's cooldown of one action.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "cooldown"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "action": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id",
+            "action"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A barrier's one shared state.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "barrier"
+            },
+            "barrier": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "kind",
+            "barrier"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "entity"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "encounter"
+            },
+            "encounter_id": {
+              "$ref": "delta.schema.json#/$defs/EncounterId"
+            }
+          },
+          "required": [
+            "kind",
+            "encounter_id"
+          ],
+          "additionalProperties": false,
+          "examples": [
+            {
+              "kind": "encounter",
+              "encounter_id": "11111111-2222-4333-8444-555555555555"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "escort"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "liquid"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fuel"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "item_id"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5)."
+    },
+    "EncounterId": {
+      "description": "One finite combat encounter, minted from the Attack command IdSource.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "examples": [
+        "11111111-2222-4333-8444-555555555555"
+      ]
+    },
+    "EncounterRow": {
+      "type": "object",
+      "properties": {
+        "character_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "npc_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "room_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "job_id": {
+          "$ref": "delta.schema.json#/$defs/JobId"
+        }
+      },
+      "required": [
+        "character_id",
+        "body_id",
+        "npc_id",
+        "room_id",
+        "status",
+        "round",
+        "job_id"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "character_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "11111111-2222-4333-8444-555555555555",
+          "npc_id": "11111111-2222-4333-8444-555555555555",
+          "room_id": "11111111-2222-4333-8444-555555555555",
+          "status": "open",
+          "round": 1,
+          "job_id": "11111111-2222-4333-8444-555555555555"
+        }
+      ],
+      "description": "Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job."
+    },
+    "ChoiceAttempts": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "count",
+        "limit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "count": 0,
+          "limit": 3
+        }
+      ],
+      "description": "Pinned wrong-answer count and authored positive limit for one conversational sitting."
     }
-  },
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "The StateDelta algebra: typed operations, their mutation targets and preconditions (04 §1, §5.1, §5.3; 14 §R3A). Composition (overlay, conflicts, invariant checks) is kernel behavior with known answers in protocol/fixtures/composition.json."
+  }
 }
