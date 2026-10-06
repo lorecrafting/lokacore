@@ -49,10 +49,10 @@ receipts, both choice offers, captured Wake, final acknowledgment and cold recei
 history. After the existing chapter Continue, cold launch remains at World and the
 actual safe bed offers Resume. Native leaves are test substitutes, not layout proof.
 
-`bin/check_all.sh` is exit 0, including all 349 Elixir tests and the full TypeScript
-suite, source boundaries, size, controls, docs and formatting. The last assertion-only
-strengthening was checked afterward by the final focused capture: 106 TypeScript tests,
-14 forced Elixir tests, both type checks and all other recorded jobs pass. `checks.json`
+`bin/check_all.sh` is exit 0 on the frozen source (see `full-gate-frozen.log`),
+including all 349 Elixir tests and the full TypeScript suite, source boundaries, size,
+controls, docs and formatting. The final focused capture has 106 TypeScript tests,
+14 forced Elixir tests, both type checks and all other recorded jobs passing. `checks.json`
 records the final focused commands and exits; complete compiler bytes and all 111
 independent allocations match the provisional candidate. The developer
 [correctness and Ponytail self-review](self-review.md) records the current audit.

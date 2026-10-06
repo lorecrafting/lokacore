@@ -144,5 +144,13 @@
       "exit": 0,
       "seconds": 1.195
     }
-  ]
+  ],
+  "full_gate": {
+    "command": [
+      "bin/check_all.sh"
+    ],
+    "exit": 0,
+    "source_checkpoint": "8b9e5b52fffdffd34569cb0f6aa837090a7478df",
+    "log": "full-gate-frozen.log"
+  }
 }
