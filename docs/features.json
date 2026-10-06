@@ -743,5 +743,32 @@
       "fault_discards_whole_proposal"
     ],
     "implemented_in": "B7 finite Well Lane source and two waterskins (TypeScript; portable liquid.set twins)"
+  },
+  "service": {
+    "spec": "docs/system/mechanics.md B8; docs/system/protocol.md B8 immediate service composition",
+    "contracts": [
+      "ServiceDefinition",
+      "ServiceOffer",
+      "CommandPayload",
+      "ActionInput",
+      "InspectableDetail"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/service/shared.ts",
+      "kernel/ts/src/view/services.ts",
+      "kernel/ts/src/content/cartridge_services.ts",
+      "lib/loka/content/services.ex",
+      "mobile/authority/local-story/receipt-history.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/missing_child_v025_hash.json",
+      "protocol/fixtures/missing_child_v025_ids.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "B8 exact Maud room, meal and finite B7 ale services"
   }
 }

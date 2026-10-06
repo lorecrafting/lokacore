@@ -1,4 +1,4 @@
-# size: allow 380, patrol refs and bounded topics join the shared checked expansion boundary
+# size: allow 420, patrol, topic and precise service refs join the existing checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -25,6 +25,18 @@ defmodule Loka.Content.Checks do
     "resource_compare" => "resource"
   }
   @enclosing 3
+  defp service_benefit(b, m) do
+    fields =
+      case b["kind"] do
+        "entitlement" -> [{"fact", "fact"}]
+        "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
+        "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
+      end
+
+    Enum.reduce(fields, b, fn {field, kind}, result ->
+      Map.update!(result, field, &ref(&1, kind, m))
+    end)
+  end
 
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
@@ -33,6 +45,20 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"kind" => "source", "capacity" => _, "supply" => supply} = f, m),
     do: Map.put(f, "supply", ref(supply, "item", m))
+
+  def expand(%{"benefit" => b, "provider" => p, "currency" => c} = s, m) do
+    s
+    |> Map.put("provider", ref(p, "npc", m))
+    |> Map.put("currency", ref(c, "resource", m))
+    |> Map.put("benefit", service_benefit(b, m))
+  end
+
+  def expand(%{"bed" => %{"entitlement" => _} = b} = d, m),
+    do:
+      d
+      |> Map.delete("bed")
+      |> expand(m)
+      |> Map.put("bed", Map.update!(b, "entitlement", &ref(&1, "fact", m)))
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
@@ -89,6 +115,11 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     npc
+    |> Map.merge(
+      if npc["services"],
+        do: %{"services" => Enum.map(npc["services"], &ref(&1, "service", m))},
+        else: %{}
+    )
     |> Map.delete("shop")
     |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))

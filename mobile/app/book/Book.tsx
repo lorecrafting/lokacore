@@ -1,4 +1,4 @@
-// size: allow 325, notice routes join the existing Book shell without another controller
+// size: allow 330, notice routes and targetless bed Rest share the existing Book shell
 // The Book draws GameView through its presenter; App injects the shell.
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
@@ -7,6 +7,7 @@ import { Combat } from './Combat.tsx';
 import { Footer, Status } from './Footer.tsx';
 import {
   group,
+  POSITION_ACTIONS,
   pagesAfter,
   conversation,
   initialPages,
@@ -92,7 +93,9 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);
-  const inline = npcPage(before.stack.at(-1), before.view) || group([b]).position.length > 0;
+  const inline =
+    npcPage(before.stack.at(-1), before.view) ||
+    POSITION_ACTIONS.includes(b.command ?? b.action_key);
   if (next === before.stack && inline && !before.view.scene && !after.view.scene)
     s.redraw((n) => n + 1);
   else {

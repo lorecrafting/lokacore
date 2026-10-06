@@ -604,7 +604,7 @@ lethal loss/owned recovery and exact loot through Book; native work remains paus
 
 ## B8 Maud and bed details
 
-**Selected, source pending.** Original Maud's detail follows the canonical
+**Implemented locally, publication pending.** Original Maud's detail follows the canonical
 [detail order](#detail-page-order), with authored description, nonempty committed
 history, then current S1 dialogue and separate Room/Meal/Drink service offers.
 Each offer states its projected exact price and declared benefit, including

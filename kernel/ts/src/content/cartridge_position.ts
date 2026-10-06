@@ -24,7 +24,7 @@ const SPEC = {
   meaning: "The character's position (position@1): only its rule writes it.",
 };
 
-// size: allow 50, one existing write-site walk checks scene, skill and patrol trust ownership
+// size: allow 55, one existing write-site walk checks scene, skill, patrol trust and paid-entitlement ownership
 export function reserved(c: Obj): Diagnostic[] {
   const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
   if (Object.hasOwn(c.lock.capabilities, 'scene'))
@@ -40,6 +40,9 @@ export function reserved(c: Obj): Diagnostic[] {
   const patrolRefs = Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   );
+  const serviceRefs = Object.values((c.services ?? {}) as Obj).flatMap((s) =>
+    s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
+  );
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
   for (const [i, ref] of refs.entries())
@@ -48,7 +51,7 @@ export function reserved(c: Obj): Diagnostic[] {
   const write = (s: Obj, at: string) => {
     if (
       (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
-      [...refs, ...patrolRefs].includes(refString(s.fact))
+      [...refs, ...patrolRefs, ...serviceRefs].includes(refString(s.fact))
     )
       out.push(diag('RESERVED_FACT', `${at}.fact`));
   };

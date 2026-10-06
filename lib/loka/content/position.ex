@@ -81,6 +81,11 @@ defmodule Loka.Content.Position do
       scenes,
       markers,
       patrols,
+      for(
+        {_, {_, _, s}} <- defs["service"],
+        s["benefit"]["kind"] == "entitlement",
+        do: s["benefit"]["fact"]["key"]
+      ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1))
     ])
   end

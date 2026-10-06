@@ -1184,7 +1184,7 @@ retry of a surviving hound need no time gate. No behavior framework is required.
 
 ## B8 Maud's immediate services (selected contract)
 
-**Selected, source implementation pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+**Implemented locally, publication pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
 selects three all-hours services from the original living, co-located Maud at the
 Drowned Lantern. Each accepted service immediately exchanges the exact quoted
 pennies for its declared benefit in one proposal. A meal is eaten and a serving
@@ -1196,7 +1196,9 @@ Room grants one durable actor-scoped Boolean `lantern_bed_paid` for the current
 save lineage. Its immediate consumer is the actual bed detail in Inn Rooms,
 whose paid description and ordinary Rest offer become available. Renting changes
 no position, rate, clock, HP/MV, slept fact, quest or dream state. A new rental
-when already entitled refuses without payment. Ordinary unpaid Rest and all
+when already entitled refuses without payment. Only service writes its opted
+entitlement fact; ordinary authored assignments cannot grant or revoke paid truth.
+Ordinary unpaid Rest and all
 upstairs, attic, cellar and corpse routes remain legal. Entitlement survives
 death/reopen and has no night expiry or automatic renewal. B9 alone owns the
 first qualifying actual accepted Rest at Inn Rooms after payment; earlier unpaid

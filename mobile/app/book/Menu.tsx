@@ -117,6 +117,7 @@ type NpcProps = {
   leave: () => void;
 };
 
+// size: allow 60, one ordered NPC detail joins description, history, dialogue and finite service offers
 export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
@@ -157,9 +158,12 @@ export function NpcPage(p: NpcProps) {
           </Text>
         ))}
       {choice && <Choice {...p} choice={choice} />}
-      {actions.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
-      ))}
+      {actions
+        .filter((b) => b.command !== 'use_service')
+        .map((b) => (
+          <Act key={b.label} b={b} press={p.press} />
+        ))}
+      <ServiceOptions {...p} actions={actions} />
       <Leave leave={close ? () => p.press({ ...close, label: 'Leave' }) : p.leave} />
     </ScrollView>
   );
@@ -209,6 +213,22 @@ export function Item(p: {
       leave={p.world}
     />
   );
+}
+
+function ServiceOptions(p: NpcProps & { actions: Button[] }) {
+  const offers = p.npc && 'services' in p.npc ? p.npc.services : undefined;
+  return offers?.map((s) => {
+    const b = p.actions.find((b) => b.action_key === s.action.action_key);
+    return b ? (
+      <Act key={s.service.key} b={b} press={p.press} />
+    ) : (
+      <Text key={s.service.key} style={note}>
+        {p.text(s.label)}: {s.price}p
+        {s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}
+        {!s.action.available && ` (${why(s.action, p.text)})`}
+      </Text>
+    );
+  });
 }
 
 export function NpcDetail(p: {

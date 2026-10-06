@@ -1,6 +1,6 @@
 # B8 — Maud's room, food and drink services
 
-**Adopted plan, dependencies re-pinned; source implementation pending.**
+**Adopted plan; local source in review, publication pending.**
 Original planning branch `planning/b8-maud-services` was independently
 [approved](../../reviews/2026-10-05-b8-maud-services-plan-review.md) at
 `bfab9ffd4375bba7db21eefb471b3b539d5c4f07`. This docs-only re-pin uses
@@ -18,11 +18,23 @@ API1.20, SHA-256
 `0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`,
 with [independent hash](../../../protocol/fixtures/missing_child_b7_hash.json)
 and [96 IDs](../../../protocol/fixtures/missing_child_b7_ids.json).
-Inn/meal/Eat/service source remains absent. Suggested implementation branch
+At that docs-only re-pin, Inn/meal/Eat/service source was absent. Suggested implementation branch
 `chapter-1/b8-maud-services` is not created by this plan. B8 successor
 release/API/hash/allocated IDs, implementation head, PR and source verdicts:
 null. The dependency gate is satisfied; the scheduling gate below remains.
-No source, merge/push, browser/native or owner-save work is authorized here.
+That planning re-pin authorized no source, merge/push, browser/native or owner-save work;
+the later local source assignment is recorded below.
+
+## Local source checkpoint (publication pending)
+
+The PM assigned source on provisional combined `eb92d23c`, then authorized the
+reviewed C2 predecessor `e15c420b` (C2 source `74711349`, approved primary and
+save/protocol reviews). Local branch `slice/b8-maud-paid-services` implements
+the vertical service/paid-bed outcome. The v025/API1.23 known answers are local
+candidates; final release pins must be rechecked after C2 publication. No browser,
+web infrastructure, native simulator or owner-save proof is claimed by this lane.
+Shared kernel, compiler/loader, SQLite authority and Book proofs govern the source;
+[local evidence](../../evidence/2026-10-05-b8-maud-services/README.md) records them.
 
 ## Consumer, dependencies and governing clauses
 

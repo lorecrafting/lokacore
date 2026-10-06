@@ -11,6 +11,7 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 // registry entry when a second capability contributes a verb outside VERBS (dialogue's talk,
 // choose and close_choice come from mechanics/dialogue/shared.ts).
 export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
+  use_service: [{ kind: 'entity', scopes: ['room_occupants'] }, ['service', 'quoted_price']],
   fill: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],
   pour: [entity('inventory'), []],
   drink: [entity('inventory'), []],

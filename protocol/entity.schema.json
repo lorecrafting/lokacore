@@ -334,6 +334,14 @@
             "discovered"
           ],
           "additionalProperties": false
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1,
+          "maxItems": 8
         }
       },
       "required": [

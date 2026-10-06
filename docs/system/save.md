@@ -745,7 +745,7 @@ reload remains separate from real SQLite transaction/fault evidence.
 
 ## B8 service recovery
 
-**Selected, source pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
+**Implemented locally, publication pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
 stores only changed balances, entitlement, meal stock, ale row and settled MV
 plus head/receipt in the existing transaction. No service ledger/table, save
 migration or reset-on-open exists. Reopen/reconciliation validates the exact

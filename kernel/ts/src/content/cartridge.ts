@@ -1,3 +1,4 @@
+// size: allow 310, the artifact loader includes the consumed service definitions and validation stage
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
@@ -23,6 +24,7 @@ import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
+import { services } from './cartridge_services.ts';
 import { liquids } from './cartridge_liquids.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
@@ -77,7 +79,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
-    () => [...refStage(c), ...liquids(c)],
+    () => [...refStage(c), ...liquids(c), ...services(c)],
     () => installedStage(c, installed),
   ];
   for (const stage of stages) {
@@ -129,6 +131,7 @@ const DEFINITION_MAPS = [
   'skills',
   'topics',
   'liquids',
+  'services',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

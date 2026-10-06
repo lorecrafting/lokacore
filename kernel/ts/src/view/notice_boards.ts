@@ -1,9 +1,13 @@
+import { value } from '../mechanics/fact.ts';
+import { resolved, refusal } from '../commands/actions.ts';
+import { positionOf } from '../mechanics/position/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { selected } from '../mechanics/containment/stock.ts';
 import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.gen.ts';
 import type { Steps, World } from '../runtime/decision.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 
+// size: allow 45, standalone detail projection includes the paid bed with ordinary Rest
 export function noticeViews(
   world: World,
   here: EntityId,
@@ -15,7 +19,7 @@ export function noticeViews(
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
     visible(world, world.character, id, steps) &&
-    (detail.readable || detail.harvest || detail.perception) &&
+    (detail.readable || detail.harvest || detail.perception || detail.bed) &&
     !grouped.has(id as EntityId)
       ? [
           {
@@ -34,7 +38,8 @@ export function noticeViews(
               })(),
             }),
             description: description_variant.describe(world, world.character, detail, steps),
-            ...offered(actions(id)),
+            ...(detail.bed && { bed: true as const }),
+            ...offered(detail.bed ? bedActions(world, detail, steps) : actions(id)),
           },
         ]
       : [],
@@ -83,7 +88,35 @@ function noticeBoards(
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
 
 const detailTitle = (detail: World['details'][string]) =>
+  detail.bed?.title ??
   detail.harvest?.title ??
   detail.perception?.title ??
   detail.readable!.title ??
   detail.readable!.label;
+
+function bedActions(
+  world: World,
+  detail: World['details'][string],
+  steps: Steps,
+): AdvertisedAction[] {
+  if (!detail.bed || value(world, world.character, detail.bed.entitlement) !== true) return [];
+  const p = { type: 'rest', actor_id: world.character } as const;
+  return Object.values(resolved(world, world.character))
+    .filter((a) => a.command === 'rest')
+    .map((a) => {
+      const code =
+        refusal(world, p, steps, a.key) ??
+        (positionOf(world, world.character) === 'resting' ? ('invalid_state' as const) : undefined);
+      const offer = {
+        action_key: a.key,
+        command: a.command,
+        label: a.label,
+        target: a.target,
+        input: a.input,
+        target_ids: [],
+      };
+      return typeof code === 'string'
+        ? { ...offer, available: false, reason: { code } }
+        : { ...offer, available: true };
+    });
+}

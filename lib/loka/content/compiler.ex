@@ -1,3 +1,4 @@
+# size: allow 310, service declarations join the existing source-kind and validation registry
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
@@ -43,6 +44,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Commerce.check(manifest, defs),
       Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Liquids.check(manifest, defs, v2),
+      Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -63,7 +65,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -145,7 +147,8 @@ defmodule Loka.Content.Compiler do
     {"scene", :scene, "SceneDefinition"},
     {"skill", :skill, "SkillDefinition"},
     {"topic", :topic, "TopicDefinition"},
-    {"liquid", :liquid, "LiquidDefinition"}
+    {"liquid", :liquid, "LiquidDefinition"},
+    {"service", :service, "ServiceDefinition"}
   ]
 
   defp definitions(files, m) do

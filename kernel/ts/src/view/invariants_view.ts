@@ -1,6 +1,7 @@
 // The GameView invariant of runtime/invariants.ts (registered in protocol/invariants.json): a STEP check
 // of the actor's view before a command against the decision on it; `resolves` maps each action key
 // of the actor's set to the Command type it resolves to (commands/actions.ts resolved).
+import { same } from '../foundation/compose.ts';
 import type {
   AdvertisedAction,
   ContentView,
@@ -35,6 +36,7 @@ export const gameview_agrees_with_admission = ({
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type;
+  if (type === 'use_service') return serviceAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
     return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
@@ -175,4 +177,19 @@ function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): bool
     decision.kind === 'rejected' &&
     offers.some((a) => !a.available && decision.error.code === a.reason.code)
   );
+}
+
+function serviceAgrees(view: GameView, payload: Any, decision: Any, action_key?: string) {
+  const offer = view.entities
+    .find((e: EntityView) => e.id === payload.provider_id)
+    ?.services?.find(
+      (s: any) =>
+        same(s.service, payload.service) &&
+        s.price === payload.quoted_price &&
+        (action_key === undefined || s.action.action_key === action_key),
+    );
+  if (!offer) return decision.kind !== 'accepted';
+  return offer.action.available
+    ? decision.kind === 'accepted' || decision.kind === 'fault'
+    : decision.kind === 'rejected' && decision.error.code === offer.action.reason.code;
 }

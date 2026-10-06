@@ -470,6 +470,12 @@
         },
         "liquid": {
           "$ref": "liquid.schema.json#/$defs/LiquidView"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ServiceOffer"
+          }
         }
       },
       "additionalProperties": false,
@@ -1785,6 +1791,9 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 64
+        },
+        "bed": {
+          "const": true
         }
       },
       "required": [
@@ -2042,6 +2051,37 @@
           "value": 9
         }
       ]
+    },
+    "ServiceOffer": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "benefit": {
+          "$ref": "service.schema.json#/$defs/ServiceBenefit"
+        },
+        "action": {
+          "$ref": "#/$defs/AdvertisedAction"
+        }
+      },
+      "required": [
+        "service",
+        "label",
+        "price",
+        "benefit",
+        "action"
+      ],
+      "additionalProperties": false,
+      "description": "Current exact keyed provider quote, declared capped benefit and shared availability; no reservation."
     }
   }
 }

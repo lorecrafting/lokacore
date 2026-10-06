@@ -51,6 +51,12 @@
       "maximum": 1000,
       "start": 20,
       "gain": 0
+    },
+    "lantern_meals": {
+      "minimum": 0,
+      "maximum": 4,
+      "start": 0,
+      "gain": 0
     }
   }
 }

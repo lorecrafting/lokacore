@@ -1,0 +1,7 @@
+lib/loka/content/checks.ex:1: info: size: allow 420, patrol, topic and precise service refs join the existing checked expansion boundary
+lib/loka/content/compiler.ex:1: info: size: allow 310, service declarations join the existing source-kind and validation registry
+lib/loka/content/dialogues.ex:1: info: size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+lib/loka/content/scenes.ex:1: info: size: allow 320, action-started scenes validate source and end exports beside modal rules
+lib/loka/core/compose.ex:1: info: size: allow 330, typed patrol and terminal quest replacement joins portable composition
+lib/loka/core/invariants.ex:1: info: size: allow 330, independent patrol and retirement pairing joins precondition replay
+test/loka/core/compose_test.exs:1: info: size: allow 520, patrol and liquid cases share the existing randomized differential pool

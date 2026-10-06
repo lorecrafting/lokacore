@@ -40,7 +40,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-const HIDDEN = ['read', 'fill', 'pour', 'drink', ...MODAL];
+const HIDDEN = ['use_service', 'read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);

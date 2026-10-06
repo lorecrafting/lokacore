@@ -1,6 +1,7 @@
-// size: allow 320, current GameView includes bounded patrol journal projection
+// size: allow 330, current GameView includes bounded patrol and exact provider-service projection
 import * as patrol from '../mechanics/patrol/shared.ts';
 import { knownTopics } from '../mechanics/topics/shared.ts';
+import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
 import { resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
@@ -123,7 +124,7 @@ function within(
       const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
       const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope, steps) : [];
       return {
-        ...viewOf(world, id, e, worn ? worn(id) : actions.of(scope, id)),
+        ...viewOf(world, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
       };
     });
@@ -153,13 +154,19 @@ function inside(
   return Object.entries(world.entities)
     .filter(([id]) => under(id) && visible(world, world.character, id, steps))
     .map(([id, e]) => ({
-      ...viewOf(world, id, e, actions.of(scope, id, true)),
+      ...viewOf(world, id, e, actions.of(scope, id, true), steps),
       container_id: world.state.containers[id],
     }));
 }
 
 // An entity as the view names it, with its barrier's state if it has one.
-const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]) => ({
+const viewOf = (
+  world: World,
+  id: string,
+  e: Entity,
+  actions: AdvertisedAction[],
+  steps: Steps,
+) => ({
   id: id as EntityId,
   name: e.short,
   description: e.description,
@@ -175,6 +182,7 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   ...liquidView(world, id),
+  ...(e.kind === 'npc' && e.services && { services: services(world, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });

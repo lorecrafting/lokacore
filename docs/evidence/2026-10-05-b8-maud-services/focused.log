@@ -1,0 +1,103 @@
+✔ loader refuses service bindings that cannot produce exact immediate outcomes (2833.164ms)
+✔ buy at the carrying ceiling, sell and buyback conserve forty pennies and one identity (24.99175ms)
+✔ projection and direct exchange refuse too-heavy, poor, absent and changed-quote purchases atomically (7.656584ms)
+✔ sell requires direct eligible custody and funded Peg (5.182208ms)
+✔ loader independently rejects malformed shop stock and funding (388.096042ms)
+✔ two real shop offers cost eight pennies and retain two empty shell identities (5.260917ms)
+✔ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (10.584375ms)
+✔ liquid refusal participants and custody leave every row unchanged while open nested skins work (15.2105ms)
+✔ Fill includes liquid mass, admits equality, and owned Pour/Drink remain legal while overloaded (1.376625ms)
+✔ Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs (55.993792ms)
+✔ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (3.238292ms)
+✔ closed owned nested vessels and exact out-of-room sources refuse without a write (1.178417ms)
+✔ liquid pair projection fails at the same exhausted budget as direct admission (2.8395ms)
+✔ authored liquid overrides project the same availability as the exact invocation (232.19225ms)
+✔ the active Missing Child release keeps the simulator invariants on controlled seeds (7849.0965ms)
+✔ original leader earns zero until real player joins four unique checkpoints (99.766417ms)
+✔ ordinary detour requires explicit Rejoin and fresh drawn continuation state (48.213ms)
+✔ fatal combat invalidates together and awaiting attempts before immediate Restart (26.086916ms)
+✔ original Wren follow composes independently with leader-only Continue and one joined Move (48.270125ms)
+✔ public watch rooms, readables and Start remain usable at dusk, late night and next morning (22.344625ms)
+✔ literal room/meal/ale outcomes conserve exact money, stock and capped MV (751.507166ms)
+✔ service refusal rolls back every row and respects exact provider, quote and complete serving (2241.32625ms)
+✔ loaded differently named service keys project exactly the captured invocation admission (338.3525ms)
+✔ old-rate elapsed settlement precedes meal and actual targetless bed Rest (298.384458ms)
+✔ bound second provider pays and consumes its own stock; only service can assign entitlement (84.61575ms)
+✔ the complete integrated B8 initial identities match the Python known answer (60.8435ms)
+✔ service contracts reject independent malformed boundaries and retain valid controls (299.737833ms)
+✔ unqualified learning persists distinct acquisition and one-time exact payment and custody (93.427333ms)
+✔ lesson rechecks teacher, exact original gift, money and carry atomically (68.872417ms)
+✔ only qualified learned wield custody selects the sword at the due opportunity (88.253292ms)
+✔ strict dodge then shield block stop later draws on independent S3/S4 answers (34.181708ms)
+✔ sleeping cannot defend and lethal armed hits close before retaliation (103.321ms)
+(node:17398) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/liquid.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves exact water pairs and invalidates changed quantities in displayed context (563.363ms)
+✔ Book restores liquid narration on the exact saved source detail after SQLite reopen (619.462667ms)
+✔ loaded liquid aliases reach exact Book presses and matching target/input/policy refusal (2603.316791ms)
+✔ aliased liquid freshness refuses a stale pair after another committed drink (140.853083ms)
+(node:17400) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/training.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Character draws projected attributes and acquired qualification with authored labels (8.753625ms)
+✔ item equipment detail copies current typed slot/profile/requirement and block chance (2.1605ms)
+✔ Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once (840.326958ms)
+✔ shared item detail draws confirmed fuel for lit and exhausted items (0.399125ms)
+✔ production empty, filled, partial Pour, empty, nested, ground and shop custody reopen exactly (2841.048167ms)
+✔ cold open refuses missing, extra, malformed and plausible bounded liquid rows without repair (1091.275291ms)
+✔ cold open binds every liquid receipt to its historical command, source and complete ordered rows (1522.81325ms)
+✔ Pour failed COMMIT and lost acknowledgement fence liquid then reconcile and replay once (246.319917ms)
+✔ actual fatal combat cold reopens the filled shell on its corpse then ordinary recovery (441.842375ms)
+✔ cold open rejects consistent command/event rewrites that cannot derive from the original invocation (116.996625ms)
+(node:17407) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ real SQLite reopens every finite leg and explicit pause boundary (2679.958125ms)
+✔ actual cellar death separates concurrent Wren, resets patrol, and permits Restart after cold reopen (1767.462167ms)
+▶ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite
+  ✔ actor_id (141.899542ms)
+  ✔ body_id (148.170542ms)
+  ✔ npc_id (134.638334ms)
+  ✔ quest_instance_id (135.640667ms)
+  ✔ continuation_id (199.801666ms)
+  ✔ attempt_id (169.462333ms)
+  ✔ cursor (139.010125ms)
+  ✔ credit (162.357375ms)
+  ✔ status (130.463791ms)
+  ✔ fractional (116.821709ms)
+  ✔ missing (118.921666ms)
+  ✔ scope (119.665416ms)
+  ✔ cause (124.819ms)
+  ✔ source (130.837541ms)
+  ✔ lost-transition (135.356042ms)
+✔ full retained receipt replay refuses forged patrol rows and proofs without rewriting SQLite (2110.090084ms)
+▶ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry
+  ✔ failed (139.812792ms)
+  ✔ lost (156.421792ms)
+✔ real failed and acknowledged-lost COMMIT reconcile one leader departure and exact Book retry (296.720375ms)
+▶ final player join commits movement, terminal quest and trust together across both uncertain outcomes
+  ✔ failed (265.559292ms)
+  ✔ lost (283.215583ms)
+✔ final player join commits movement, terminal quest and trust together across both uncertain outcomes (549.3925ms)
+✔ real original-Tobin C1 lessons reopen during patrol and completion grants trust alone (561.466417ms)
+(node:17465) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (1148.248ms)
+✔ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (1551.012ms)
+✔ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (797.712041ms)
+✔ real Book captured alias press and lost acknowledgement restore one original-Maud line (439.203583ms)
+✔ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (475.62475ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 76
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10436.160875
