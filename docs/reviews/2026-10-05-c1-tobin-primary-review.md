@@ -198,3 +198,32 @@ Ponytail Review: **Lean already. Ship.** The shared event predicate removes dupl
 validation, ordered `Enum.concat` uses the standard library, and clause grouping adds
 no machinery. Original blockers and the round-1 compiler warning are closed. The normal
 review-only commit hook checks the restored historical record plus this append and index.
+
+
+## Post-approval size-only scoped review
+
+**Verdict: APPROVE. No open primary findings.** Exact source reviewed:
+`277925bb3fd8c9eb4ffc561e4ecf9ac907c8e2a0`, one-file child of approved
+`11a61c851f42c1b22389626d6b5a405d8efcd90c`. Scope is the five additions/seven
+removals in `kernel/ts/src/content/cartridge_position.ts`, whose `reserved()`
+exceeded the active function line limit during accumulated publication checks.
+
+The scene declaration loop still traverses the same dense `Object.values` array
+in order, calculates the same narration count and writes the same generated FactSpec.
+The reserved-declaration diagnostic loop still traverses each reference/index once
+in order, compares the same canonical specs and emits the same diagnostic path.
+The recipe/reaction/dialogue/scene-ending writer walks are untouched. No ownership
+check, missing-fact check, type check or diagnostic is removed.
+
+Independent exact-head verification, all through `mise exec --`, passes: **104 focused tests**
+covering training loader, scene, position, cartridge and item checks; kernel source/test/play
+typechecks; active core TypeScript size check; and `git diff --check 11a61c85..277925bb`.
+A supplemental controlled input omits six reserved facts, with intentionally ordered
+scene keys `b`, then `a`. It returns six `RESERVED_FACT` diagnostics in the independently
+specified order: position, scene_b, scene_a, story_point_final, skill_swords, skill_dodge.
+No test, probe or source edit is retained. This is a scoped size-repair approval;
+the accumulated publication gate remains separate.
+
+Ponytail Review: **Lean already. Ship.** Two lines removed, existing iteration and
+standard library only, no abstraction or new escape hatch. Prior findings remain closed.
+The normal review-only commit hook checks this append and its index disposition.
