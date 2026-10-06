@@ -880,6 +880,34 @@ narration binds actual runtime IDs and committed room/membership changes. Stale 
 cancelled round occurrences never move, hit, draw or revive membership. No new
 per-hound job, whole-state copy, receipt ledger or actor assumption is introduced.
 
+## D1 ferry transport composition
+
+The Boathouse and Fen Isle Landing boarding details offer exact keyed outbound
+and return actions. A bound transport invocation carries actor, endpoint detail,
+authored route reference and displayed base fare; the authority derives the
+destination and recipient. GameView and direct execution share one
+admission query after ordinary elapsed, scene, combat, posture, life and freshness
+checks. The query checks current endpoint room, authored route, Sedge's exact
+recipient identity and balance, and the owned-corpse recovery exception. A
+captured offer cannot substitute another endpoint or quote.
+
+Transport lowers positive payment through B3's existing conserved two-party
+resource transfer, then transfers the body and any eligible Wren through the
+existing movement/escort consequence in one proposal/writer group. The outbound
+base quote remains 2p when an owned-corpse waiver makes the charge zero.
+Zero-fare crossings omit payment operations. Emit the normal accepted room-entry evidence
+for the body; do not call Move as a second command, add a clock jump, or credit
+Q2 return merely for crossing. A new narrow transport command/action/offer and
+receipt owner is allowed because published B8 `service@1` is bound to a present
+NPC and entitlement/meal/drink benefits. Do not widen that closed union into a
+generic effect interpreter. The exact command key, source-authored action keys,
+target order and input are frozen by the D1 source brief before implementation.
+
+Sedge's lesson stays a C1 dialogue Choose consequence with typed
+`skill.acquire`; it is not a transport benefit or remote grant. Existing
+reserved skill facts, dialogue binding, service/payment histories and movement
+admission keep their separate writers.
+
 ## B8 immediate service composition
 
 **Implemented locally, publication pending.** A service invocation binds actor, exact

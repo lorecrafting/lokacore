@@ -610,6 +610,27 @@ targets revalidate after due settlement; a clock redraw cannot resurrect a dead,
 departed or replaced member. Prove real helper attacks, flight, whole-pack Flee,
 lethal loss/owned recovery and exact loot through Book; native work remains paused.
 
+## D1 ferry and Sedge details
+
+World opens the present boarding detail at Boathouse or Fen Isle Landing. Its
+canonical detail page places confirmed history before the current **Board** or
+**Return** offer, showing the exact fare or an actual owned-corpse waiver and
+unavailable reason from the shared transport admission. The control captures
+the endpoint, route and base quote; the authority derives destination and
+effective charge. Accepted crossing appends one bound result,
+returns to World in the destination and refreshes confirmed money, room and
+follower state. Pending, stale and refused attempts claim no crossing or charge;
+double tap/replay yields one move. The ordinary Book back/Leave path remains open.
+
+Sedge's present NPC detail offers her direct **Learn swim — free** dialogue choice
+before S27. It shows acquired and current qualification separately, and a
+confirmed grant once; repeat interaction cannot promise a new grant. History
+belongs to the original Sedge choice and survives cold reopen. The existing
+World, NPC detail, dialogue, Character skill and detail stack patterns suffice.
+The browser Book route covers boarding, lesson, exploration, return, refresh and
+safe corpse recovery. Browser refresh is separate from real SQLite fault proof;
+native builds/sessions remain paused.
+
 ## B8 Maud and bed details
 
 **Implemented locally, publication pending.** Original Maud's detail follows the canonical

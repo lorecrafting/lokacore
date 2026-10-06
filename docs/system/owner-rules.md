@@ -8,6 +8,10 @@ and not repeated here.
 
 ## Product and scope
 
+- D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
+  waiver; Sedge teaches swim immediately for free while the Chapel remains the
+  death destination ([PM adoption](../decisions/pm-decision-d1-ferry-isle-2026-10-05.md)).
+
 - B9 credits only the first accepted paid Inn Rooms Rest, preserves a closable anchored dream/branch, and commits S10 plus its once-only local memory only on final acknowledgement ([PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)).
 
 - B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).

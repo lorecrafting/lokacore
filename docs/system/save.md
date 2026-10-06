@@ -743,6 +743,28 @@ jobs, head and receipt. Fence input and elapsed until resolved. Pin mismatch is
 explicit refusal, with no silent deletion or compatibility adapter. Browser Book
 reload remains separate from real SQLite transaction/fault evidence.
 
+## D1 ferry and lesson recovery
+
+One accepted crossing commits changed actor/Sedge penny balances when positive,
+body and eligible follower custody, normal room-entry evidence, head and receipt
+together before memory adoption/reply. Free return and owned-corpse recovery
+crossings have no penny write. Reopen and reconciliation validate the original
+endpoint/route/quote/recipient, prior/result balances, corpse ownership and
+nonempty isle custody at the original accepted revision, and exact body/follower
+transfer from one source room to one destination. Later corpse retrieval, death,
+Wren separation or other payments cannot invalidate a valid prior crossing.
+Missing charge, charge without move, extra charge, wrong-owner waiver, forged
+recipient/endpoint, or fabricated room entry yields typed `save_corrupt` with
+in-place Start over; no repair or silent deletion.
+
+Sedge's free lesson uses C1's skill/dialogue receipt and reserved acquired fact
+validation. A replay cannot teach twice; an unlearned or learned fact cannot be
+inferred from dialogue prose. Check a real failed COMMIT and both uncertain
+COMMIT branches at paid outbound, free return, recovery and lesson boundaries.
+Until resolution, input remains fenced and the visible Book claims no success.
+Cold-open every legal committed stage, including death at the isle and actual
+owned-item recovery from the current Chapel Nave shrine route.
+
 ## B8 service recovery
 
 **Implemented locally, publication pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
