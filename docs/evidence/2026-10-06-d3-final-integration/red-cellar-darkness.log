@@ -1,0 +1,70 @@
+command: mise exec -- node --test kernel/ts/test/western_ashmere.test.ts mobile/authority/local-story/western_ashmere.test.ts
+✖ literal Western Ashmere route visits all five rooms and returns through the preserved east exit (135.137875ms)
+✔ original Hob starts at dusk in the loft and alternates at literal next-day schedule boundaries (199.957375ms)
+✔ illuminated Mill Cellar has no new NPC or rat population (84.554541ms)
+(node:50149) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Western rooms and both exact standalone Read histories survive cold SQLite reopen without story credit (1318.752334ms)
+✔ Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries (828.977292ms)
+✖ actual death returns gearless through Chapel and recovers original nested possessions in both dark mill branches (1275.811333ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 4
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4742.310667
+
+✖ failing tests:
+
+test at kernel/ts/test/western_ashmere.test.ts:13:1
+✖ literal Western Ashmere route visits all five rooms and returns through the preserved east exit (135.137875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'room.mill_cellar.description'
+  - 'room.mill_cellar.dark'
+                       ^
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/western_ashmere.test.ts:33:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'room.mill_cellar.description',
+    expected: 'room.mill_cellar.dark',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/western_ashmere.test.ts:181:1
+✖ actual death returns gearless through Chapel and recovers original nested possessions in both dark mill branches (1275.811333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'room.mill_cellar.description'
+  - 'room.mill_cellar.dark'
+                       ^
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/mobile/authority/local-story/western_ashmere.test.ts:239:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'room.mill_cellar.description',
+    expected: 'room.mill_cellar.dark',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+exit: 1

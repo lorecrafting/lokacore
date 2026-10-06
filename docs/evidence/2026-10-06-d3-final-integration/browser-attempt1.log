@@ -1,0 +1,25 @@
+command: cd mobile/app && mise exec -- npm run test:e2e -- tests/western_ashmere.e2e.ts --workers 1 --output <SCRATCH> --trace off --video off
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run tests/western_ashmere.e2e.ts --workers 1 --output <SCRATCH> --trace off --video off
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Run Errors 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ ERROR  configuration error INVALID_CONFIG (config)
+--output "<SCRATCH> is outside the project root <WORKTREE>/mobile/app; name a directory inside it
+
+
+ Test Files  no test files
+      Tests  no tests executed
+     Errors  1 error
+   Start at  07:19:34
+   Duration  6ms
+     Report  (not written)
+
+
+exit: 2

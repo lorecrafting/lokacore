@@ -1,0 +1,46 @@
+{
+  "title": "room.old_mill.title",
+  "description": "room.old_mill.description",
+  "exits": {
+    "north": {
+      "to": "boathouse"
+    },
+    "south": {
+      "to": "empty_cottage"
+    },
+    "up": {
+      "to": "mill_loft"
+    },
+    "down": {
+      "to": "mill_cellar"
+    }
+  },
+  "details": {
+    "millstone": {
+      "aliases": [
+        "millstone",
+        "stone"
+      ],
+      "description": "detail.old_mill.millstone.description"
+    },
+    "grain_sacks": {
+      "aliases": [
+        "grain_sacks",
+        "sacks"
+      ],
+      "description": "detail.old_mill.grain_sacks.description"
+    },
+    "ledger": {
+      "aliases": [
+        "ledger",
+        "hob_ledger"
+      ],
+      "description": "detail.old_mill.ledger.description",
+      "readable": {
+        "title": "detail.old_mill.ledger.title",
+        "label": "actions.read_book",
+        "text": "readable.old_mill.ledger"
+      }
+    }
+  }
+}

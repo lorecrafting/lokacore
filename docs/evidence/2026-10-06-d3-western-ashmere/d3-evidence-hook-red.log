@@ -1,0 +1,8 @@
+COMMAND: normal evidence git commit hook
+EXIT: 1
+Checking formatting...
+All matched files use Prettier code style!
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+unreachable docs/evidence/2026-10-06-d3-western-ashmere/README.md
+648 docs, 0 broken link(s), 1 unreachable

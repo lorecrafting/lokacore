@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "hob",
+    "miller"
+  ],
+  "short": "npc.hob.short",
+  "room_line": "npc.hob.room",
+  "description": "npc.hob.description",
+  "room": "mill_loft",
+  "daily_schedule": {
+    "6": "old_mill",
+    "18": "mill_loft"
+  }
+}

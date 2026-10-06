@@ -1,0 +1,33 @@
+{
+  "title": "room.empty_cottage.title",
+  "description": "room.empty_cottage.description",
+  "exits": {
+    "north": {
+      "to": "old_mill"
+    },
+    "up": {
+      "to": "cottage_loft"
+    }
+  },
+  "details": {
+    "sign": {
+      "aliases": [
+        "sign",
+        "for_sale_sign"
+      ],
+      "description": "detail.empty_cottage.sign.description",
+      "readable": {
+        "title": "detail.empty_cottage.sign.title",
+        "label": "actions.read_book",
+        "text": "readable.empty_cottage.sign"
+      }
+    },
+    "hearth": {
+      "aliases": [
+        "hearth",
+        "cold_hearth"
+      ],
+      "description": "detail.empty_cottage.hearth.description"
+    }
+  }
+}

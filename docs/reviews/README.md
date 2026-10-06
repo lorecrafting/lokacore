@@ -1,5 +1,8 @@
 # Independent reviews
 
+- [D3 Western Ashmere final integrated source](2026-10-06-d3-western-ashmere-final-review.md): exact `559ae690`, independent APPROVE, no findings; v033/API1.28/hash/184 IDs rechecked, retained full gate and isolated two-route browser proof verified, six focused tests pass, independent return-route mutant red. Remote CI/PR/publication remain PM gates.
+
+- [D3 Western Ashmere provisional source](2026-10-06-d3-western-ashmere-source-review.md): exact source/evidence head `7865ac52`, independent provisional-source APPROVE, no findings; 6 new/40 existing/41 compiler/1 carry checks pass, two independent mutants red/restored green, all 33 evidence hashes verify. D4/C4 integration, successor pins/assets, publication checks/CI/browser and the separate seed71 sim-oracle fix remain mandatory.
 - [Pre-production CI scope](2026-10-06-preproduction-ci-scope-review.md): initial head `0e3f49a1` CHANGES REQUIRED; scoped fix recheck at `92b0c864` APPROVE closes CI-S1/CI-S2. Browser-success mutation now fails both skipped and failed controls and restores green; active owner rules link the decision. Four local hook cases independently checked.
 
 - [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; scoped Beads pilot integration recheck at `8049a5f0` APPROVE. Docs and word-budget checks pass; the checkpoint prompt remains a future PM action.

@@ -1,0 +1,91 @@
+COMMAND: node --test kernel/ts/test/western_ashmere.test.ts mobile/authority/local-story/western_ashmere.test.ts
+EXIT: 1
+✖ literal Western Ashmere route visits all five rooms and returns through the preserved east exit (95.771209ms)
+✔ original Hob starts at dusk in the loft and alternates at literal next-day schedule boundaries (144.044208ms)
+✔ illuminated Mill Cellar has no new NPC or rat population (59.845167ms)
+(node:5534) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ Western rooms and both exact standalone Read histories survive cold SQLite reopen without story credit (895.6035ms)
+✔ Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries (678.484125ms)
+✖ actual death returns gearless through Chapel and recovers original nested possessions in both dark mill branches (557.732791ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 3
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2936.04975
+
+✖ failing tests:
+
+test at kernel/ts/test/western_ashmere.test.ts:13:1
+✖ literal Western Ashmere route visits all five rooms and returns through the preserved east exit (95.771209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'b0711280-2a6c-8b4e-844c-3e902e0c2184'
+  - '6a70d262-b6ea-8b64-9809-ec7f79d1521e'
+  
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/western_ashmere.test.ts:30:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'b0711280-2a6c-8b4e-844c-3e902e0c2184',
+    expected: '6a70d262-b6ea-8b64-9809-ec7f79d1521e',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/western_ashmere.test.ts:78:1
+✖ Western rooms and both exact standalone Read histories survive cold SQLite reopen without story credit (895.6035ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'b0711280-2a6c-8b4e-844c-3e902e0c2184'
+  - '6a70d262-b6ea-8b64-9809-ec7f79d1521e'
+  
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/western_ashmere.test.ts:129:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'b0711280-2a6c-8b4e-844c-3e902e0c2184',
+    expected: '6a70d262-b6ea-8b64-9809-ec7f79d1521e',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/western_ashmere.test.ts:181:1
+✖ actual death returns gearless through Chapel and recovers original nested possessions in both dark mill branches (557.732791ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":22,"decision":{"kind":"rejected","error":{"code":"not_found"}}}
+  + actual - expected
+  
+  + 'rejected'
+  - 'accepted'
+  
+      at invoke (file://[worktree]/mobile/authority/local-story/western_ashmere.test.ts:38:12)
+      at file://[worktree]/mobile/authority/local-story/western_ashmere.test.ts:42:39
+      at Array.forEach (<anonymous>)
+      at Object.move (file://[worktree]/mobile/authority/local-story/western_ashmere.test.ts:42:16)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/western_ashmere.test.ts:250:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'rejected',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
