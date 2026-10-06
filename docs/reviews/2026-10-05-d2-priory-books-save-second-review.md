@@ -63,3 +63,39 @@ and independent v027 pins is `de756710ea10322bd36ec339bd1d9abf1850067b`.
 [Exact-source checks, controls and integration evidence](../evidence/2026-10-05-d2-priory-books/round-1.md)
 retain the fix and its observed red/green controls. This disposition does not
 change the independent verdict.
+
+## Scoped fix round 1 — APPROVE
+
+Reviewed corrected source `de756710ea10322bd36ec339bd1d9abf1850067b`
+and evidence head `c7139a6797484f7ef77eb48640e7d426ec805d09`.
+**Final independent verdict: APPROVE. D2-S1 closed; no open save/protocol findings.**
+
+The retained readable-only test at
+[priory.test.ts:330](../../mobile/authority/local-story/priory.test.ts#L330)
+uses file-backed SQLite without another history consumer. It first reopens valid
+Take/Read, then rejects a schema-valid forged narration key as `save_corrupt` while
+preserving file bytes. Independently deleting only
+[exchange-save.ts:16](../../mobile/authority/local-story/exchange-save.ts#L16)
+makes that exact case fail: actual `open`, expected `save_corrupt`; restoration
+passes. A separate disposable controlled probe replaces the historical Take with
+a lawful Look receipt and restores ground custody: current source rejects the
+subsequent unheld Read history without rewriting the file; the same gate deletion
+opens it. Both controls fail together and restore green. No new save machinery is
+needed; the one retained test closes the shared guard regression.
+
+D5 integration changes the active chapter/fixture pins without changing the
+reviewed save, history, grant-attribution or Game confirmation implementation.
+Independent integrated kernel/D2/D5/SQLite checks pass 21 cases, Book/App consumers
+pass 7, current compiler/Priory/patrol checks pass 7, and contracts are current.
+Restored authority/probe checks pass 8; final isolated controls pass 2.
+The independent v027 oracle regenerates the identical hash
+`2fda0a7f0a571c080c3d9d3969324a1a4920881ea48adab178684fc9330f94de`
+and 127 IDs. Published D5 and provisional D2 v026 fixtures remain byte-identical.
+The [round-1 raw evidence](../evidence/2026-10-05-d2-priory-books/round-1.md)
+contains the matching red/restored outcomes, full active-check result and integrated
+pin result; its hashes independently verify. All reviewer mutations and probes
+were removed. Ponytail Review: lean fixture/helper reuse; no complexity finding.
+
+This closes the separate save/protocol opinion only. Primary review and exact-head
+hosted CI retain their workflow gates; no browser, native or owner-save proof is
+claimed by this recheck.
