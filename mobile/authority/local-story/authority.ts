@@ -196,7 +196,8 @@ function replaceable(s: Story) {
       : s.meta && (s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy))
         ? { format: s.meta.format, run_id: s.meta.run_id }
         : undefined;
-  if (expected === undefined) return 'ready' as const;
+  if (expected === undefined && (!s.corruptFile || !s.world.cartridge.manifest.time_policy))
+    return 'ready' as const;
   try {
     return reconcile(s.db, () => {
       const current = identityOf(s.db);
