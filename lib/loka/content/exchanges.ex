@@ -9,7 +9,7 @@ defmodule Loka.Content.Exchanges do
     patches = patches(defs)
 
     Enum.flat_map(patches, &patch(m, defs, &1)) ++
-      Enum.flat_map(defs["quest"], fn {_, {rel, [], q}} -> quest(m, defs, patches, rel, q) end) ++
+      for({_, {rel, [], q}} <- defs["quest"], d <- quest(m, defs, patches, rel, q), do: d) ++
       dialogue_choices(m, defs)
   end
 
