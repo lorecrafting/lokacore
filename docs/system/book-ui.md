@@ -827,7 +827,8 @@ native verification remains paused.
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
-water projection. Deadline and logical time belong to the authority; presentation
+water projection, with remaining real seconds derived by the authority from
+the cartridge elapsed rate. Deadline and logical time belong to the authority; presentation
 must not renew time or create its own gameplay clock. Extend the existing status
 language/controls rather than add a new timer framework.
 
@@ -836,6 +837,9 @@ living body before expiry despite altered skill/load/MV/posture/light. Bind the
 captured `move` Up offer with normal freshness/pending/refusal. At equality the
 authority settles expiry before Up; an old view never promises rescue. Confirmed
 entry/surface has one room change/current MV, without an unconfirmed safety claim.
+If elapsed preflight expires the captured Up occupancy, show `stale_view` with
+the same body at Chapel and one corpse; do not turn the old Surface control
+into Chapel Up. Same-generation elapsed settlement keeps Surface usable.
 Sedge remains the existing free pre-S27 lesson; no second training control.
 
 At Chapel, list actual owned nonempty corpses currently in either underwater

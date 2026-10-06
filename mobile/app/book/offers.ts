@@ -51,3 +51,13 @@ export function shopButtons(v: GameView, text: Say): Press[] {
     ),
   );
 }
+
+export function corpseButtons(v: GameView, text: Say): Press[] {
+  return (v.corpse_recovery ?? []).map((c) => ({
+    label: `Recover belongings from ${text(c.room_title)}: ${c.roots.map((r) => text(r.name)).join(', ')}`,
+    action_key: 'recover_corpse',
+    target_ids: [c.corpse_id],
+    input: {},
+    place: true,
+  }));
+}

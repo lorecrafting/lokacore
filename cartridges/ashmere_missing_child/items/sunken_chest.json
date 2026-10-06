@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "sunken_chest"
+  ],
+  "short": "item.sunken_chest.short",
+  "room_line": "item.sunken_chest.room",
+  "description": "item.sunken_chest.description",
+  "mass_grams": 2000,
+  "location": {
+    "in": "room",
+    "room": "pool_bottom"
+  },
+  "container": true,
+  "capacity": 1
+}

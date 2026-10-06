@@ -200,8 +200,13 @@ defmodule Loka.Core.InvariantsEncounter do
   end
 
   defp job(%{"op" => "job.schedule"} = op, row, horizon) do
-    if row == nil and op["due_time"] > horizon,
-      do: Map.take(op, ~w(job due_time encounter_id)) |> Map.put("status", "pending")
+    if row == nil and op["due_time"] > horizon and binding?(op),
+      do:
+        Map.take(
+          op,
+          ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id)
+        )
+        |> Map.put("status", "pending")
   end
 
   defp job(op, row, horizon) do
@@ -209,7 +214,7 @@ defmodule Loka.Core.InvariantsEncounter do
       row["status"] != "pending" ->
         nil
 
-      op["op"] == "job.cancel" and row["encounter_id"] == op["encounter_id"] ->
+      op["op"] == "job.cancel" and cancel_binding?(op, row) ->
         Map.put(row, "status", "cancelled")
 
       op["op"] == "job.complete" and row["due_time"] <= horizon ->
@@ -217,6 +222,31 @@ defmodule Loka.Core.InvariantsEncounter do
 
       true ->
         nil
+    end
+  end
+
+  defp cancel_binding?(op, row) do
+    if op["water_generation"],
+      do:
+        row["water_generation"] == op["water_generation"] and
+          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
+      else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+  end
+
+  # Independent permitted binding tuples; no call to the job composer.
+  defp binding?(op) do
+    present =
+      Enum.filter(
+        ~w(encounter_id quest_instance_id actor_id water_generation water_body_id),
+        &Map.has_key?(op, &1)
+      )
+
+    case present do
+      [] -> true
+      ["encounter_id"] -> true
+      ["quest_instance_id", "actor_id"] -> get_in(op, ["job", "kind"]) == "quest"
+      ["actor_id", "water_generation", "water_body_id"] -> get_in(op, ["job", "kind"]) == "room"
+      _ -> false
     end
   end
 end

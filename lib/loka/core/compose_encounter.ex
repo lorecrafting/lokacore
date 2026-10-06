@@ -182,9 +182,22 @@ defmodule Loka.Core.ComposeEncounter do
   @spec job(map(), term(), integer()) :: {:ok, map()} | {:error, String.t()}
   def job(%{"op" => "job.schedule"} = op, row, horizon) do
     cond do
-      row != nil -> {:error, "precondition_failed"}
-      op["due_time"] <= horizon -> {:error, "nonfuture_job"}
-      true -> {:ok, Map.take(op, ~w(job due_time encounter_id)) |> Map.put("status", "pending")}
+      row != nil ->
+        {:error, "precondition_failed"}
+
+      op["due_time"] <= horizon ->
+        {:error, "nonfuture_job"}
+
+      not binding?(op) ->
+        {:error, "precondition_failed"}
+
+      true ->
+        {:ok,
+         Map.take(
+           op,
+           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id)
+         )
+         |> Map.put("status", "pending")}
     end
   end
 
@@ -192,10 +205,35 @@ defmodule Loka.Core.ComposeEncounter do
     cancel = op["op"] == "job.cancel"
 
     valid =
-      if cancel, do: row["encounter_id"] == op["encounter_id"], else: row["due_time"] <= horizon
+      if cancel,
+        do:
+          if(op["water_generation"],
+            do:
+              row["water_generation"] == op["water_generation"] and
+                row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil,
+            else: op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+          ),
+        else: row["due_time"] <= horizon
 
     if row["status"] == "pending" and valid,
       do: {:ok, Map.put(row, "status", if(cancel, do: "cancelled", else: "completed"))},
       else: {:error, "precondition_failed"}
+  end
+
+  defp binding?(op) do
+    case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
+          op["water_body_id"] != nil} do
+      {false, false, false, false} ->
+        true
+
+      {true, false, true, false} ->
+        get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
+
+      {false, true, true, true} ->
+        get_in(op, ["job", "kind"]) == "room" and op["encounter_id"] == nil
+
+      _ ->
+        false
+    end
   end
 end

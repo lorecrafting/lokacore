@@ -80,6 +80,13 @@ export function RoomPage(p: {
       </View>
       <ScrollView style={[{ flex: 1 }, scrollPaper]} contentContainerStyle={{ padding: 24 }}>
         <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
+        {p.view.exits
+          .filter((e) => e.warning)
+          .map((e) => (
+            <Text key={e.direction} style={note}>
+              {p.text(e.warning!)}
+            </Text>
+          ))}
         <Here view={p.view} text={p.text} open={p.open} />
         {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
           <Tap label="Continue conversation" onPress={p.openChoice}>

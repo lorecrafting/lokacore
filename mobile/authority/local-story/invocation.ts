@@ -45,7 +45,7 @@ export function sessionInvoke(
 const intentBytes = (i: ActionInvocation) =>
   encode([i.action_key, i.actor_id, i.target_ids, i.input] as never);
 
-type Reservation = { id: Identified; run_id: string; target: number };
+type Reservation = { id: Identified; run_id: string; target: number; surface_generation?: number };
 const reservations = new WeakMap<Story, Reservation>();
 export function invoke(s: Story, value: unknown, driver?: ClockDriver): Reply {
   s.beforeWorld = s.world;
@@ -91,7 +91,20 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
     if (!held) {
       // Copy only bounded intent data so callers cannot mutate a preflighted reservation.
       const privateId = { ...id, invocation: copied(i) };
-      reservations.set(s, { id: privateId, run_id: s.meta.run_id, target: -1 });
+      const occupancy = s.world.state.water?.[i.actor_id];
+      const surface_generation =
+        i.action_key === 'move' &&
+        i.target_ids.length === 0 &&
+        i.input.direction === 'up' &&
+        occupancy?.room_id
+          ? occupancy.generation
+          : undefined;
+      reservations.set(s, {
+        id: privateId,
+        run_id: s.meta.run_id,
+        target: -1,
+        ...(surface_generation !== undefined && { surface_generation }),
+      });
     }
     const reserved = reservations.get(s)!;
     const result =
@@ -107,6 +120,13 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
     }
     if (reserved.target < 0 || s.world.state.clock < reserved.target)
       return { kind: 'catching_up', invocation_id: i.invocation_id };
+    if (
+      reserved.surface_generation !== undefined &&
+      s.world.state.water?.[i.actor_id]?.generation !== reserved.surface_generation
+    ) {
+      reservations.delete(s);
+      return { kind: 'stale_view' };
+    }
     return finish(s, reserved.id);
   }
   return finish(s, id);
