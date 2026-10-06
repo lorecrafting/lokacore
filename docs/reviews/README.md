@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [Chapter 1 aggregate docs and Beads](2026-10-06-chapter-one-aggregate-docs-beads-review.md): frozen local integration `822c1c06` against published `536c80bc`; CHANGES REQUIRED for C1A-1, the roadmap's 19/33 list omitting D4 and stale latest-publication sentence. Docs, Beads and whitespace checks pass; no source approval.
+- [Chapter 1 aggregate docs and Beads](2026-10-06-chapter-one-aggregate-docs-beads-review.md): frozen local integration `822c1c06` against published `536c80bc`; initial CHANGES REQUIRED for C1A-1, scoped fix `cf9d357f` APPROVE. Docs, Beads and whitespace checks pass; no source approval.
 
 - [D3 Western Ashmere predecessor re-pin](2026-10-06-d3-western-ashmere-repin-review.md): exact planning head `fc2a3e9d`, independent APPROVE; published PR231/v030/API1.26 canonical hash/149-ID fixture and actual Boathouse declarations verified; provisional assignment and D4/C4 final integration gates retained. No findings; docs/whitespace checks pass, no source approval.
 - [D4 published integration save/protocol second opinion](2026-10-06-d4-integrated-save-second-review.md): exact source `ad7300fa`, frozen evidence `61fd1615`, independent APPROVE, no findings. Terminal custody/atomic Eat, created C3 food admission, D1/C3 authority neighbors, real failed/unknown COMMIT and exact replay pass; independent v031/API1.27/hash/all 167 IDs and all 114 final hashes verify. Own metadata/replay-trigger mutants fail; exact full release gate is green. Hosted publication remains separate.

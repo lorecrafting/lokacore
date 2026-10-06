@@ -36,3 +36,13 @@ Ponytail Review (docs/board scope): the status defect comes from duplicating the
 completed/latest publication summary within the roadmap. Correct the existing
 two sentences; no new status layer or checker is needed. No separate complexity
 finding. Lean already. Ship after C1A-1 is fixed.
+
+## Scoped C1A-1 recheck — APPROVE
+
+Reviewed the one-file fix at local integration head `cf9d357f` against frozen
+`822c1c06`. **APPROVE — C1A-1 closed; no remaining findings.** The roadmap's
+completed list now has all 19 slice codes including D4, and its latest-source
+sentence names merged #233/D4. The later D1 and D4 records retain their
+historical detail. The fix changes only those two sentences; the already
+verified Beads count and selected planning contracts are unaffected. This
+approval covers documentation/status publication only, not provisional source.
