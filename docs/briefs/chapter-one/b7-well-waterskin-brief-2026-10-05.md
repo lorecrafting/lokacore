@@ -1,6 +1,6 @@
 # B7 — Well and waterskin: fill, pour and drink conserved liquid
 
-**Adopted planning brief, source implementation pending.** Planning branch
+**Adopted brief, local source implemented; fresh review pending.** Planning branch
 `planning/b7-waterskin`, inspected local base `4bfe252e75f2cc6ab556c1dd2601d5d8ca85bdb7`.
 B3 is locally implemented and independently approved at chapter
 `ashmere_missing_child@0.0.18`/API1.16; its accumulated-head publication remains
@@ -9,8 +9,9 @@ and review heads must be re-pinned against the actual integration base before
 assignment. Implementation branch: `b7-well-waterskin`.
 Implementation base explicitly re-pinned to integration `1898dbb5`, chapter
 `ashmere_missing_child@0.0.20`/API1.18 (C1), replacing the planning B3-only pin.
-Successor release/API/hash/item IDs, implementation head, PR and verdicts: null.
-This plan changes docs only; it does not authorize merge/push or certify play.
+Successor release/API/hash/item IDs, exact source head and local checks live in the
+[B7 evidence](../../evidence/2026-10-05-b7-waterskin/README.md). PR and fresh verdicts
+remain null; this brief does not authorize merge/push or certify native play.
 
 ## Consumer, dependencies and governing clauses
 

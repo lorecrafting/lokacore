@@ -1,0 +1,77 @@
+(node:79095) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/liquid.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves exact water pairs and invalidates changed quantities in displayed context (345.545083ms)
+✔ liquid narration displays authored labels and the original committed amount (199.705625ms)
+✔ Book restores liquid narration on the exact saved source detail after SQLite reopen (275.944958ms)
+(node:79096) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/readable.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ production Read targets retain confirmed detail messages without changing state (182.994584ms)
+✔ uncertain Read recovers its one receipt and narration, then reads again after cold reopen (53.959584ms)
+✔ stale and refused Read retain their target and never narrate an unread body (45.34475ms)
+✔ held Read survives the authored 68350 to 68400 pulse with authority freshness intact (26.539792ms)
+✔ cold reopen refuses a committed Read whose stored target is malformed (109.456416ms)
+✔ invalid Read JSON offers in-place Start over and leaves older pins explicitly refused (98.516625ms)
+✔ production empty, filled, partial Pour, empty, nested, ground and shop custody reopen exactly (1544.630875ms)
+✔ cold open refuses missing, extra, malformed and plausible bounded liquid rows without repair (619.643459ms)
+✔ cold open binds every liquid receipt to its historical command, source and complete ordered rows (958.257708ms)
+✔ Pour failed COMMIT and lost acknowledgement fence liquid then reconcile and replay once (227.097334ms)
+✔ actual fatal combat cold reopens the filled shell on its corpse then ordinary recovery (292.176333ms)
+✔ cold open rejects consistent command/event rewrites that cannot derive from the original invocation (78.574583ms)
+(node:79098) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ active chapter five actual kills, shrine return, Maud reward and cold-reopen storage (447.01125ms)
+✔ Q1 explicit acceptance, held drawing gate, report priority and durable once-only resolution (139.618458ms)
+✔ picking up the clue first starts no quest and acceptance is immediately ready (19.887875ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is unaccepted (116.671167ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is active (81.569292ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is ready (72.28775ms)
+✔ Maud offer and earned turn-in stay usable while Q1 is resolved (74.760208ms)
+✔ Q1 acceptance, Green pickup, report and Maud offer work throughout the day (487.287333ms)
+✔ Mire Crossing and Fox Hollow offer both approaches and cold return at every hour (2602.575916ms)
+✔ Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead (20.796958ms)
+✔ SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history (107.680542ms)
+✔ malformed Study receipt evidence offers typed Start over on reopen (319.422875ms)
+✔ a leftover transaction is settled before the trace catches up (27.816542ms)
+✔ a file that is not a database or has a corrupt page is save_corrupt (26.811917ms)
+✔ a head with a damaged column is save_corrupt; its new game recreates the head (48.1995ms)
+✔ at the cap a new game deletes the oldest run whole and keeps the current one (388.3715ms)
+✔ a run alone at the cap keeps its beginning and appends no more entries (221.251292ms)
+✔ a new game at the cap makes room for its header by deleting the old run (214.289709ms)
+✔ a run that drops an entry pair below the cap writes nothing more (293.346708ms)
+✔ catch-up at the cap boundary writes a missed entry at 4,998 rows and not at 4,999 (332.407375ms)
+(node:79100) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a scripted session survives a restart and plays on (108.605333ms)
+✔ an invalid press before a save does not make the next id collide after a restart (49.97425ms)
+✔ an unknown COMMIT shows pending, not a success; a restart shows what committed (30.177292ms)
+✔ a pending press is retried with its own id and replays what committed (34.944166ms)
+✔ a same-scope receipt from another allocator does not move the id counter (31.050666ms)
+✔ a failed write is not claimed unsaved; the next press retries it (20.094375ms)
+✔ a read error after a durable commit does not commit the press twice (20.846541ms)
+✔ a confirmed receipt that is not a decision is a conflict and ends the attempt (23.3625ms)
+✔ start over replaces a file that does not open with a fresh game (53.417375ms)
+✔ start over of a damaged identity keeps the file and its old run (24.554666ms)
+✔ a damaged receipt index fails the open with start over, which gives a fresh game (35.713958ms)
+✔ a newer app's save is never started over (22.91925ms)
+✔ a start over whose delete failed can be tried again (18.460542ms)
+✔ an open that fails but not as corrupt is never started over (9.825459ms)
+✔ a start over that fails during play keeps the game and its retry (15.398333ms)
+✔ a pending start over leaves no game to play until it settles (22.567333ms)
+✔ the gate tap script ends at its declared state, wherever the kills fall (89.417208ms)
+﹣ the save copied from the phone equals the reference (0.220083ms) # SKIP
+ℹ tests 53
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 4967.532625

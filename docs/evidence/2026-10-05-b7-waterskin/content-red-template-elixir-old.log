@@ -1,0 +1,11 @@
+Template guard mutant elixir-old exit 0
+Compiling 56 files (.ex)
+Generated loka app
+Running ExUnit with seed: 938774, max_cases: 16
+Excluding tags: [:test]
+Including tags: [location: {"test/loka/content_liquids_test.exs", 54}, location: {"test/loka/content_liquids_test.exs", 105}]
+
+.
+Finished in 0.07 seconds (0.07s async, 0.00s sync)
+
+Result: 1 passed, 2 excluded

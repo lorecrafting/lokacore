@@ -1,0 +1,36 @@
+✔ buy at the carrying ceiling, sell and buyback conserve forty pennies and one identity (5.659625ms)
+✔ projection and direct exchange refuse too-heavy, poor, absent and changed-quote purchases atomically (3.54225ms)
+✔ sell requires direct eligible custody and funded Peg (0.973041ms)
+✔ loader independently rejects malformed shop stock and funding (126.937791ms)
+✔ a fresh world mints NPCs then items after the details and places each (6.713541ms)
+✔ take proposes one transfer to the body and item_acquired, at the Python state hash (3.726583ms)
+✔ drop leaves the item in the room with item_dropped; give hands it to the NPC (0.865875ms)
+✔ each bad take, drop and give is rejected with its code and consumes nothing (3.200041ms)
+✔ the containment invariants fail on a broken world (0.295333ms)
+✔ containment_acyclic is linear in the items of one room (38.834667ms)
+✔ a transfer past a capacity or into its own contents faults and commits nothing (0.536459ms)
+✔ has_item holds for an item the actor carries, also inside a carried container (0.622792ms)
+✔ target resolution names items and NPCs in the room and items the actor holds (0.72375ms)
+✔ look with a target_id examines an item or NPC here or held, else not_present (1.389417ms)
+✔ scan lists the NPCs and items in each room beyond, and changes nothing (0.494625ms)
+✔ nested Take fits equality and reports the same carrying refusal in the view (1.743542ms)
+✔ forced overload preserves owned extraction, Give and Drop while blocking positive Take (0.55225ms)
+✔ large masses and repeated definitions stay exact by item identity (0.702459ms)
+✔ zero subtree is neutral but positive contents and malformed mass remain distinct (0.48825ms)
+✔ carrying charges prior policy work before accumulation and event allocation (0.253667ms)
+✔ slot-holder indexing shares the carrying budget before inspecting worn mass (0.258333ms)
+✔ cached owned and zero neutral results survive later budget exhaustion (0.38725ms)
+✔ a Take alias advertises too_heavy and cannot evade the view admission invariant (0.614958ms)
+✔ earned key unlocks the empty chest; Put/Close/Open/Take preserves the stored identity (15.870458ms)
+✔ capacity one accepts one deposit only; an unlimited own bag permits overloaded rearrangement (3.241875ms)
+✔ Put refuses worn/nonheld, missing/non-item, inaccessible, self and descendant destinations (2.815625ms)
+✔ Put enumeration and pair admission obey the shared query limit with no partial pair list (37.258625ms)
+✔ only authored receptacles accept Put pairs and conserved transfers (3.043291ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 413.328
