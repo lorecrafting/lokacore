@@ -2,54 +2,47 @@
 
 Every milestone slice (one PR) runs through three roles. Claude Code runs them as the
 main session plus the subagents in [`.claude/agents/`](../.claude/agents/developer.md).
-Other agents (Codex and others) use those two files as the role prompt, for example "act as
-the reviewer in `.claude/agents/reviewer.md` for PR #N"; a reviewer from another vendor is
-a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every role.
+[AGENTS.md](../AGENTS.md) rules apply to every role.
 
 | Role | Who | Model | Owns |
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
-| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). Codex: [routing below](decisions/pm-decision-codex-model-routing-2026-10-05.md). | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable only as codex stand-in (see below). Codex: [routing below](decisions/pm-decision-codex-model-routing-2026-10-05.md). | independent review, review record |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable for E1–E3 gate closures. | independent review, review record |
 
-**Claude models** ([owner decision](archive/decisions/owner-decisions-review-flow-2026-09-30.md)):
-a Claude-led slice is reviewed once, with a narrow fix check, by a reviewer
-on the highest Opus. Codex-led slices use the [Codex routing](decisions/pm-decision-codex-model-routing-2026-10-05.md)
-with the same independent-review requirements.
+**Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
+Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
+reviewer on the highest Opus; Fable reviews only the E1–E3 gate closures. Codex and
+other cross-vendor reviews are retired. Every `Agent` spawn names its `model`:
+
+| Work | Claude Code default | Escalate when |
+|---|---|---|
+| Lookup or broad search | `Explore` agent | never for judgment |
+| Bounded copy, content or docs edit from a fixed brief | `developer`, Sonnet | spec conflict or cross-layer behavior: Opus |
+| Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only | — |
+| Independent review, fix re-check | fresh `reviewer`, Opus | E1–E3 gate closure: Fable |
+| Hard PM call | `advisor` tool | still unresolved and consequential: Fable, then the owner |
+
+An authored brief narrows exploration but never makes save, receipt or protocol work
+mechanical. Run independent agents in the background and in parallel (one message,
+several spawns); resume an agent with `SendMessage` only for its own scoped fix or
+re-check, otherwise spawn fresh with a self-contained brief (worktree, exact base/head,
+governing sections, acceptance checks, open findings). Agents keep full logs in a
+scratch file and return failing lines or counts.
 **Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
 one fresh independent reviewer is the default for a mechanics PR. Add a separate
-second opinion when the change alters save/reconciliation behavior, protocol or
+second opinion (another fresh reviewer) when the change alters save/reconciliation behavior, protocol or
 portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a milestone
 gate; the PM may add one for a concrete risk found in the first review. Small content,
 copy and docs changes receive one short review. A second opinion supplements the
-independent reviewer; it never replaces that reviewer. Prefer another vendor when
-available. For a hosted PR, after CI is green, the PM runs `codex exec`
-(read-only; `-m` Astra on the gate audit and on changes to
-`kernel/ts/src/runtime/proposal.ts`, Sol for every other review and every fix re-check;
-[owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
-PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
-severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
-answer verbatim to the review record, and adds its findings to the fix list. During
-provisional local development, start the fresh Codex second opinion in a separate
-worktree after focused checks; hosted CI waits for remote publication. A second concurrent
-codex run uses a temporary `../lokacore-codex2` worktree.
-Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
-contract-freeze slice's head, never on fix re-reviews
-([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
+independent reviewer; it never replaces that reviewer.
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
-
-For new Codex work, explicitly select the [Codex model routing](decisions/pm-decision-codex-model-routing-2026-10-05.md)
-in each subagent spawn. Sol is the default for substantive implementation;
-Luna handles bounded edits. A planned brief does not lower a save or contract
-change to a mechanical task. Keep the current independent-review and second-opinion
-rules; reserve Astra for the gate and `runtime/proposal.ts` audits or a consequential
-unresolved architecture decision. Existing active agents keep their context.
 
 ## Loop
 
 **Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
 merge without asking permission at each step, and settles judgment calls itself. When a
-decision is hard, escalate in order: the `advisor` tool; then codex Sol by hand; only if both fail to settle it, or it is
+decision is hard, escalate in order: the `advisor` tool; then a Fable subagent; only if both fail to settle it, or it is
 critical, stop for the owner ([owner decision](archive/decisions/owner-decision-autonomy-2026-09-30.md)).
 A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
 never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions
@@ -121,10 +114,10 @@ Report at the end of the slice, not at every step.
    published head, and every job started on that head has completed successfully
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
-   Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
-   whose CI you confirmed green, so a later push makes the merge fail instead of landing
-   unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
-   appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
+   Merge with `gh pr merge <N> --auto --merge --match-head-commit <sha>` as soon as the
+   verdict lands on head `<sha>`: `main` requires the CI jobs, so GitHub merges when they
+   pass and nobody waits on hosted CI; a later push makes the merge fail instead of landing
+   unchecked. The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
    other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
@@ -147,19 +140,18 @@ and speculative generalizations ([owner decision](decisions/owner-decision-revie
 Once the work closes, fold any recurring class into its lesson; the record may then be
 deleted and linked by permalink ([move forward](decisions/owner-decision-move-forward-2026-10-07.md)).
 
-### Beads Rust pilot
+### Beads Rust
 
-The [owner-approved pilot](decisions/owner-decision-beads-rust-pilot-2026-10-06.md)
-tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`; the export may also
+Beads Rust ([adopted](decisions/owner-decision-beads-rust-pilot-2026-10-06.md), made permanent by the
+[owner](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)) tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`; the export may also
 contain concrete, evidence-linked audit follow-ups under the [owner's extension](decisions/owner-decision-beads-audit-followups-2026-10-06.md).
-The PM, whether using
-Codex or Claude Code, owns tracker writes; builders and reviewers report through
+The PM owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
 It replaces the retired `bin/board` and `$board` dashboards; `bv` is the board view.
 
-Install `br` (pilot version 0.7.4) with
+Install `br` (version 0.7.4) with
 `brew tap dicklesworthstone/tap && brew install dicklesworthstone/tap/br`,
 then use `br ready --brief --json`,
 `br show <id> --json` and `br blocked --json`. Install the optional viewer with
@@ -185,6 +177,10 @@ The [export check](CHECKS.md) rejects path, ID and completeness errors in the
 staged commit and CI. All 33 plan slices must remain present exactly once;
 additional tasks need a concrete audit finding and evidence link.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
+`br` run from any worktree reads and writes the integration checkout's database and
+JSONL (`br where` shows it), so commit tracker changes from that checkout, not a slice
+branch. A Claude Code session starts with `bin/session_status.sh` (in-progress, ready
+and blocked issues plus open PRs), so Beads, not a memory file, holds current status.
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to
@@ -192,23 +188,19 @@ source/review links in the issue. After the source is reviewed and merged to
 checks `br ready --brief --json` for newly unblocked work. A provisional review
 or green local test alone does not close a slice. Ad hoc findings that need
 follow-up become linked issues only when they are real work; the review record
-keeps the finding and disposition. Beads gate records are deferred during the
-pilot because the existing CI and review records own the gate evidence.
-The [hook comparison](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
+keeps the finding and disposition. Beads gate records are not used; CI and
+review records own the gate evidence.
+The [hook comparison](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-beads-hooks-pilot.md) set up repo-owned
 `post-merge` and `post-checkout` imports only in the main integration checkout.
 After `git config core.hooksPath .githooks`, opt in there with
 `git config --local loka.beads.integrationRoot "$(pwd -P)"`; remove that setting
 with `git config --local --unset loka.beads.integrationRoot`. The hook checks for
 unexported local changes before importing and never stages, commits, pushes or
 closes an issue. A failed import prints a recovery instruction; Git's completed
-merge/checkout cannot be rolled back by a post-hook. These Git hooks run with
-either Codex or Claude Code in that checkout. Do not install Beads-provided hooks
+merge/checkout cannot be rolled back by a post-hook. Do not install Beads-provided hooks
 or let the tracker rewrite `AGENTS.md`.
 
-At the next two source merges, check whether ready/blocked work and Claude/Codex
-handoff remain accurate without duplicating the roadmap. Retire the pilot through
-a reviewed change if it does not help; the existing Git plans and reviews survive.
-No source merge or CI gate depends on `br` during the pilot.
+No source merge or CI gate depends on `br`; the export check guards the JSONL.
 
 ## Local edit loop
 
@@ -294,31 +286,22 @@ re-pin a save when that happens.
   history; keep a visited path/revision list while following doc links. Reuse
   developer and reviewer context for scoped fixes only while it stays small.
 
-**Codex.** Spawn each new slice with `fork_turns: "none"` and a concise brief
-containing the worktree, exact base/head, governing sections, acceptance checks
-and open findings. Reuse an agent only for its own narrow fix or recheck; a new
-slice gets a fresh agent. Cap tool output, store complete check logs outside the
-conversation and report the failing lines or final counts. At a checkpoint,
-give the owner a copyable continuation prompt pointing to the current shared
-handoff and live Git/Beads state; a fresh session does not reset usage limits.
-
-**Claude Code.** Start a fresh developer and independent reviewer for each new
+Start a fresh developer and independent reviewer for each new
 slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
 handoff; read the index once on takeover and reopen only changed sections.
 
-Both routes preserve the brief, review records and failing evidence on disk;
+This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
 silently closes unfinished work.
 
 ## Milestone gate
 
 A gate is slim ([owner decision](decisions/owner-decision-slim-gates-2026-10-02.md)): the owner's
-play or test when the stage has something touchable; one codex Astra audit of the stage's riskiest
-code; and a short checklist, checked by one reviewer without narrative (no separate Opus-plus-Astra
-review of a docs-only gate PR). The checklist: every spec proof linked, every carry in a stage row,
+play or test when the stage has something touchable; one fresh Opus audit (Fable for E1–E3) of the stage's riskiest
+code; and a short checklist, checked by one reviewer without narrative (no second review of a docs-only gate PR). The checklist: every spec proof linked, every carry in a stage row,
 and the docs tidy pass over the docs changed during the milestone (not `docs/archive/`, nor review
 or decision records, which are history): a fact stated
 in two places (keep one, link to it), a lesson that is stale or now enforced by a check, a doc

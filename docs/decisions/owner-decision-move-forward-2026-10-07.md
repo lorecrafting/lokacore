@@ -4,7 +4,7 @@ Owner direction, verbatim:
 
 > please delete all old branches we dont need, we want a 'move forward' policy to move forward faster and dont want to keep old legacy things that dont have anything to do with the newer directions we are morphing into, old fixtures, old historic stuff etc, the only thnig we want to keep are valuable lessons that can be surfaced in the future to design system saround it to prevent similar classes of things from happening and stuff like that, do you understand our direction ?  Lets do a branch hygiene run and lean on the discarding side if we dont need it.  Lets start anew, afresh!
 
-> And yes for repo cleanup please propsoe owner-decision PR that trims old evidence archived specs and upserseded review records.  And first pull those lessons into docs/lessons
+> ANd yes for repo cleanup please propsoe owner-decision PR that trims old evidence archived specs and upserseded review records.  And first pull those lessons into docs/lessons
 
 On the frozen conformance fixtures, the owner delegated the call, verbatim:
 
