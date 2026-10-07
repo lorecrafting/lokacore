@@ -506,3 +506,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 second opinion on owner-approved fix round 3](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-owner-approved-fix-round-3): verbatim APPROVE on corrected exact source `0e7bbfe8`; SO7/SO8 closed, no open findings. Both independent reviews approve; exact-head hosted CI remains the merge gate.
 
 - [D8 primary review](2026-10-06-d8-primary-review.md): source `41e86ee7`, CHANGES REQUIRED; combat escape, safe allowlist admission, replacement invariant and remaining save/browser proof.
+
+- [D8 primary scoped fix round 1](2026-10-06-d8-primary-review.md#scoped-fix-round-1--p1p3-closed-p4-open): source `ec0f2dd3`, P1–P3 closed; P4 save/browser acceptance remains open. TypeScript24/24, Elixir16/16, three focused mutations red and restored.

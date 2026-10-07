@@ -35,3 +35,26 @@ From the D8 brief and active mechanics/cartridge/protocol/save/Book D8 clauses:
 - Ponytail Review: no additional framework/dependency or actionable excess found in inspected implementation. Correctness fixes remain necessary.
 
 Open: D8-P1 through D8-P4. The same reviewer should check the scoped fix commits.
+
+
+## Scoped fix round 1 — P1–P3 closed; P4 open
+
+Exact source reviewed: `ec0f2dd3ac6acda1a0f0e8a9028e8c97642df45c`.
+Scope: P1–P3 dispositions, changed direct callers and focused tests. No broad
+re-review or second-opinion finding disposition is implied.
+
+- **D8-P1 CLOSED.** Movement closure now composes the existing crow settlement with encounter closure/cancellation. The same live member resumes its checked return, the released coin stays in the original room, and ordinary home arrival clears the occurrence. Kernel Flee regression plus real SQLite paused/resumed reopen and invocation replay pass. Existing round closure remains unchanged.
+- **D8-P2 CLOSED.** Compiler and loader now reject eligible definitions with container/capacity, wearable slot, barrier or protected-Give roles, while requiring room provenance. Controlled container, protected and wearable negatives pass through their actual compiler/loader boundaries; no new chapter literal was added to the engine.
+- **D8-P3 CODE/INVARIANT FIX CLOSED.** Both independent invariants permit a changed member/generation only when the exact prior occurrence is idle, matching composition. Independent literal fixtures prove lawful replacement acquisition and reject active rebinding, including counterfeit successful invariant input. The full death→replacement→new-Drop SQLite scenario remains explicitly in P4.
+- **D8-P4 OPEN.** The expanded suite proves all17 literal outbound/deposit/return/home checkpoints and10 failed-COMMIT/lost-acknowledgement cases, plus paused/Flee-resumed reopen. Recorded browser full-nest fallback is now supplied. Remaining proof: original nest moved/closed/full and Shoo SQLite checkpoints; death→replacement→new Drop reopen; failed/uncertain commits at those additional boundaries including combat pause/Flee resume; actual browser carrying, held refresh and Shoo. No browser observation was inferred from headless results.
+
+Checks independently run: TypeScript kernel/loader/composition/real-SQLite24/24;
+Elixir compiler/composition16/16. Reverted each P1 movement settlement, P2 safe-role
+validation and P3 idle-generation exception separately: each focused regression
+fails exit1. Restored source and reran the24-test suite green. Only this record and
+its index change are committed. Ponytail/correctness scoped audit found no new
+issue; existing settlement and validator patterns suffice.
+
+Overall verdict remains **CHANGES REQUIRED**, solely for open primary finding
+D8-P4. Final-head CI and required independent second-opinion closure remain PM
+merge gates.
