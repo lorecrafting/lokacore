@@ -16,6 +16,6 @@ schemas and invariants follow spec-first implementation, applicable two-kernel o
 focused behavior proof, normal checks and fresh independent review. Cartridge numbers,
 pure proposals, changed-row transactions and host/presenter boundaries remain in force.
 
-The [dated audit evidence](../evidence/2026-10-04-primitive-composition/README.md) informs future
+The [dated audit evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-04-primitive-composition/README.md) informs future
 briefs; its static findings are not runtime reproductions or implemented fixes. This
 docs change authorizes no production-source refactor and certifies no queued mechanic.

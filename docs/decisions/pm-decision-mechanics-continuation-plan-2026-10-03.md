@@ -38,4 +38,4 @@ Mandatory noninterruptible reading is authored in safe contexts before engagemen
 
 Groups are official **planned** work, not completed features or promised single PRs. PM selects a concrete letter brief and independent literal oracles before code. Shared protocol/registry/generated outputs, foundation twins, proposal/admission and GameView integration serialize; scratch planning and frozen-schema content may run in parallel. Existing [C1 carries](../ROADMAP.md#c1-carry-checkpoints) retain their own triggers.
 
-The [M1-A brief](../briefs/m1-a-clock.md) is the first concrete developer assignment once its merged baseline is pinned. Its final schemas/ID vectors belong in that implementation PR. Cosmetic polish, simulator automation and owner save resets are outside this adoption.
+The [M1-A brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m1-a-clock.md) is the first concrete developer assignment once its merged baseline is pinned. Its final schemas/ID vectors belong in that implementation PR. Cosmetic polish, simulator automation and owner save resets are outside this adoption.

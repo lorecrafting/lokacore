@@ -1,8 +1,0 @@
-Phase: final Book fix
-Action: press label="Put a brass key in a storage chest" --settle
-Exit: 0
-Tapped label="Put a brass key in a storage chest" (201, 343)
-settled after 912ms: +2 -1 (~12 unchanged)
-- @e8 [button] "Put a brass key in a storage chest"
-+ @e10~s892539 [text] "Inside"
-+ @e11~s892539 [button] "a brass key, open"

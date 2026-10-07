@@ -34,4 +34,4 @@ contract corpus amendment. Existing valid examples without the field remain vali
 Independent source review and combined native proof are still required; this record is
 PM adoption, not a review verdict or device evidence.
 
-[Headless evidence](../evidence/c1-description-projection/README.md) distinguishes actual focused controls from pending source/native review.
+[Headless evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-description-projection/README.md) distinguishes actual focused controls from pending source/native review.

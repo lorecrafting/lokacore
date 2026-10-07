@@ -1,3 +1,0 @@
-COMMAND: mise exec -- node docs/evidence/2026-10-06-d3-western-ashmere/sim-envelope-repro.mjs
-EXIT: 0
-{"baseline":"published v030","moves":["north","east"],"offer":"lantern_meal","available":true,"foreign_world_decision":{"kind":"rejected","error":{"code":"not_found"}},"world_unchanged":true,"oracle_for_foreign":false,"lawful_world_decision":"accepted"}

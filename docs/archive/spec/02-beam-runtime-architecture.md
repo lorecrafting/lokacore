@@ -30,7 +30,7 @@ Account/progress service arrives at R12A; gameplay hosting at R14. Review owners
 
 ## 1. Proposed repository shape
 
-Use one Mix application (`:loka`) whose top-level namespaces are compile-checked boundaries (the `boundary` library in strict mode) to make dependency direction mechanically obvious. *(Amended 2026-09-24 by [proposed ADR-073](../decisions/adr-073-single-app.md); previously a Mix umbrella.)* In the rules below, `loka_core` means the `Loka.Core` boundary, and likewise `Loka.Content`, `Loka.Store`, `Loka.Platform`, `Loka.Runtime`, `Loka.Builder` and `LokaWeb`.
+Use one Mix application (`:loka`) whose top-level namespaces are compile-checked boundaries (the `boundary` library in strict mode) to make dependency direction mechanically obvious. *(Amended 2026-09-24 by [proposed ADR-073](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/adr-073-single-app.md); previously a Mix umbrella.)* In the rules below, `loka_core` means the `Loka.Core` boundary, and likewise `Loka.Content`, `Loka.Store`, `Loka.Platform`, `Loka.Runtime`, `Loka.Builder` and `LokaWeb`.
 
 ```text
 loka/

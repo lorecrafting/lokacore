@@ -1,9 +1,0 @@
-Phase: final Book fix
-Action: press @e6 --settle
-Exit: 0
-Tapped @e6 (201, 283)
-settled after 729ms: +3 -1 (~9 unchanged)
-- @e6 [button] "“I’ll deal with the rats.”"
-+ @e6~s892392 [text] "You agree to clear Maud’s cellar."
-+ @e7~s892392 [text] "Journal updated"
-+ @e8~s892392 [button] "Talk to Widow Maud"

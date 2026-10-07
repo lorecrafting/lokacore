@@ -1,6 +1,0 @@
-kernel/ts/src/view/action_lists.ts:45: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
-kernel/ts/src/view/action_lists.ts:145: info: size: allow 50, exact detail harvest joins shared action admission and projection
-mobile/app/book/model.ts:2: info: size: allow 350, current shop quotes join the shared button/freshness builder
-mobile/app/book/model.ts:224: info: size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
-mobile/app/book/Book.tsx:186: info: size: allow 45, footer keeps standalone Leave and nested Back alongside status and faults
-mobile/app/book/notices.tsx:112: info: size: allow 45, ordered description/history/Notice options share one detail page

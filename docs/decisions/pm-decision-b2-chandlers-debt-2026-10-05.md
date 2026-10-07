@@ -1,7 +1,7 @@
 # PM decision: B2 Chandler's Debt — 2026-10-05
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
-the PM adopts the [B2 brief](../briefs/chapter-one/b2-chandlers-debt-brief-2026-10-05.md)
+the PM adopts the [B2 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b2-chandlers-debt-brief-2026-10-05.md)
 for the real Missing Child chapter. The selected contract is in
 [mechanics](../system/mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 This is planning and specification, not implementation proof or permission to merge source.

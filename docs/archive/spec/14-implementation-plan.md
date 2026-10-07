@@ -242,7 +242,7 @@ docs/
 
 ### Tasks
 
-- one Mix application with strict compile-checked boundaries (amended 2026-09-24 by [proposed ADR-073](../decisions/adr-073-single-app.md); previously a Mix umbrella);
+- one Mix application with strict compile-checked boundaries (amended 2026-09-24 by [proposed ADR-073](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/adr-073-single-app.md); previously a Mix umbrella);
 - strict compile/dependency boundaries;
 - Rust workspace if accepted;
 - one minimal Expo app with strict Story/Realm feature and authority-module boundaries, plus shared UI/GameView packages;

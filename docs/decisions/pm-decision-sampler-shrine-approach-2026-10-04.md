@@ -16,7 +16,7 @@ nave's altar is the actual planned shrine. Prototype `playable-src/data.js`
 was inspected after structural outline: room definitions at lines 38–41, 68–72,
 82–84 and 173–178 agree with these room identities and connections. Its inspected
 SHA-256 is `06dfb6242bbec0eaab5309c95226dff92aa3d1b972bc20dfea7ceed96524168c`.
-[Provenance](../evidence/m5-shrine-approach/provenance.json) records the exact
+[Provenance](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/m5-shrine-approach/provenance.json) records the exact
 prototype title/description adaptations without private source paths. The prototype
 is the approved prose base, not an executable engine specification.
 
@@ -51,4 +51,4 @@ and M6 remains the live lethal producer. This slice composes installed movement,
 Look and room projection with the unchanged lantern errand.
 
 Effect: [cartridge contract](../system/cartridge.md), sampler source and current
-known-answer pin. Delivery scope and evidence are in the [brief](../briefs/m5-shrine-approach-content.md).
+known-answer pin. Delivery scope and evidence are in the [brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m5-shrine-approach-content.md).

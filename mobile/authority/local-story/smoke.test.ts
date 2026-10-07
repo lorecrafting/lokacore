@@ -432,7 +432,7 @@ test('a pending start over leaves no game to play until it settles', () => {
   assert.deepEqual(a.now().log, []);
 });
 
-// Gate R6 (docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on
+// Gate R6 (https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on
 // the phone, its three kill points (a kill after tap N is a close and reopen), and the end state
 // declared in advance. The state literals are hand-checked: seven accepted commands, so revision
 // 7; the satchel dropped at the Village Green, the player back at the Ferry Landing.

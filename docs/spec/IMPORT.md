@@ -12,7 +12,7 @@ files were written after R0 and are imported as they stand at `997a7a8`.
 **Cutover record** (required by the R0 record's `cutover_destination`): destination
 repository <https://github.com/lorecrafting/lokacore>, import commit `b968a8f`. The R0
 acceptance record itself is imported unchanged as
-[decisions/r0-acceptance.json](../archive/decisions/r0-acceptance.json) (legacy
+[decisions/r0-acceptance.json](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/r0-acceptance.json) (legacy
 `prep/after-pr-10/r0-acceptance.pending.json`, SHA-256
 `ceb006ce826ec0765594d226c9d6517520637a4a6b7acd622459d96e425066b5`). Its `normative_files`
 defines the R0-accepted file set (all imported here) and its `architecture_index` is the
@@ -37,7 +37,7 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 
 The table below describes the files as imported. Later amendments are in git history:
 
-- 2026-09-24, [ADR-073](../archive/decisions/adr-073-single-app.md): documents 02 §1 and
+- 2026-09-24, [ADR-073](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/adr-073-single-app.md): documents 02 §1 and
   14 §R2, one Mix application instead of an umbrella; 14's shape names `kernel/ts/`.
 - 2026-09-24, R3 PR 1: [conformance/numeric-profile.md](conformance/numeric-profile.md)
   frozen as `loka-numeric-v1` (owner-approved 2026-09-24), adding the parse, encode,
@@ -58,7 +58,7 @@ The table below describes the files as imported. Later amendments are in git his
   for composite contracts arrive with their first Elixir consumer, generated from or
   checked against `protocol/` at that point. Document 14's text is unchanged.
 - 2026-09-24, [ADR-074](../archive/decisions/adr-074-ts-first-proposal.md)
-  ([owner record](../archive/decisions/owner-decision-adr-074-2026-09-24.md)): TypeScript-first
+  ([owner record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-adr-074-2026-09-24.md)): TypeScript-first
   `portable_capability` rules until the ADR-074 trigger, per its appendix crosswalk.
   Historical failed and unmeasured results stand.
   - 16 ADR-004 and ADR-068: C's Elixir rules arrive at the trigger; ADR-074 added. The
@@ -81,10 +81,10 @@ The table below describes the files as imported. Later amendments are in git his
     (R1 procedure). Retained unchanged: 05 §6 last paragraph (how the trigger is checked),
     09 §31.
 - 2026-09-24, document 16 gains entries for the owner-accepted proposals ADR-070
-  ([A2 record](../archive/decisions/owner-decision-a2-2026-09-23.md)), ADR-071
-  ([record](../archive/decisions/owner-decisions-2026-09-24.md)), ADR-072
+  ([A2 record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a2-2026-09-23.md)), ADR-071
+  ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-2026-09-24.md)), ADR-072
   ([record](../archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3) and
-  ADR-073 ([R2 record](../archive/decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
+  ADR-073 ([R2 record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
   proposal.
 - 2026-09-24, [owner decision](../archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md),
   dotted fact names: the R4 compiler maps each `.` in an authored fact name to `_`; two
@@ -94,7 +94,7 @@ The table below describes the files as imported. Later amendments are in git his
 - 2026-09-25, R4 S1 ([owner decision](../archive/decisions/owner-decisions-r4-2026-09-25.md)):
   notes in 05 §2 (source is JSON for now, YAML later) and 00a §12 (R4 compiles the hello
   fixture's frozen subset; the rest after R5/R7/R8).
-- 2026-09-25, R5 S1 ([review](../archive/reviews/2026-09-25-r5-s1-review.md) F4, F8, Astra A6):
+- 2026-09-25, R5 S1 ([review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-25-r5-s1-review.md) F4, F8, Astra A6):
   [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the initial world
   ids rule beside IdSource (additive; the nil CommandId reserved for world creation, one
   allocation counter per decision); 00a §12 notes the frozen room, text and entry shapes.
@@ -178,11 +178,11 @@ at `997a7a8` on GitHub. Nothing else changed. `rewrites` counts changed links.
 | Imported file | Legacy source | SHA-256 of source at `997a7a8` | rewrites |
 | --- | --- | --- | --- |
 | [decisions/adr-071-072-proposal.md](../archive/decisions/adr-071-072-proposal.md) | `docs/rewrite-v3/prep/adr-071-072-proposal.md` | `c7c46570b47b13e97a2494433860ea378101ee6a9d1a22bb5785f5e8c51dfa42` | 5 |
-| [decisions/owner-decision-a2-2026-09-23.md](../archive/decisions/owner-decision-a2-2026-09-23.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a2-2026-09-23.md` | `40b33035646008135795c4e8d10f487397fb138e55df88397aa15b6246b68f2a` | 2 |
-| [decisions/owner-decision-a3-2026-09-24.md](../archive/decisions/owner-decision-a3-2026-09-24.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a3-2026-09-24.md` | `69981f5ecba046a18d243509c7157be9562b2e0c580013e460a40ce23c781d0a` | 0 |
+| [decisions/owner-decision-a2-2026-09-23.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a2-2026-09-23.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a2-2026-09-23.md` | `40b33035646008135795c4e8d10f487397fb138e55df88397aa15b6246b68f2a` | 2 |
+| [decisions/owner-decision-a3-2026-09-24.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a3-2026-09-24.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a3-2026-09-24.md` | `69981f5ecba046a18d243509c7157be9562b2e0c580013e460a40ce23c781d0a` | 0 |
 | [decisions/owner-decision-prep-03-2026-09-24.md](../archive/decisions/owner-decision-prep-03-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-prep-03-2026-09-24.md` | `6bf1d6f8ec5b40fb46620d789d33a00875d2eedfe1248584f7aa4cf34489dd6c` | 1 |
 | [decisions/owner-decision-reviewers-2026-09-24.md](../archive/decisions/owner-decision-reviewers-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-reviewers-2026-09-24.md` | `8b84a1b3f0aebfd517de8bac737a971744c20ccfd76a7d1956aeb8761d73e88b` | 0 |
-| [decisions/owner-decisions-2026-09-24.md](../archive/decisions/owner-decisions-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decisions-2026-09-24.md` | `a2a383dc52159e53c43f3bbfd9b94f55c6b2bb49c8f2cb2ae1ec0a61c68dadb7` | 0 |
+| [decisions/owner-decisions-2026-09-24.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decisions-2026-09-24.md` | `a2a383dc52159e53c43f3bbfd9b94f55c6b2bb49c8f2cb2ae1ec0a61c68dadb7` | 0 |
 | [spec/00-first-cartridge-design.md](../archive/spec/00-first-cartridge-design.md) | `docs/rewrite-v3/00-first-cartridge-design.md` | `809ba8073b05e1df9839a40800f06c2af712fb688e7148dc44762f5f98375ac9` | 0 |
 | [spec/00a-chapter-one-content.md](../archive/spec/00a-chapter-one-content.md) | `docs/rewrite-v3/00a-chapter-one-content.md` | `85aba34f031ec590cb5b68b4f12352a26183199bb38b8016285213a491748d42` | 0 |
 | [spec/01-core-principles.md](../archive/spec/01-core-principles.md) | `docs/rewrite-v3/01-core-principles.md` | `ad575cd2762a5e1eee41508179cff45360e7cbd891b68e5d1cb440c99e85956c` | 0 |

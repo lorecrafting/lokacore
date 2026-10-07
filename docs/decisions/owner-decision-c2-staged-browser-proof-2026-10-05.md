@@ -5,7 +5,7 @@ playtesting surface until the game is complete; mobile follows later. Native
 verification remains deferred under the existing
 [mobile pause](owner-decision-web-first-mobile-pause-2026-10-05.md).
 
-The [fresh C2 Book proof](../evidence/2026-10-05-c2-watchmans-rounds/README.md#fresh-shared-book-proof-and-open-gaps)
+The [fresh C2 Book proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-c2-watchmans-rounds/README.md#fresh-shared-book-proof-and-open-gaps)
 records Start, leader-only departure, player join, explicit pause/Rejoin, committed
 success narration, resolved checkpoint Journal and a fresh-save cold reopen.
 That focused interaction evidence is accepted at C2 slice scope. Actual five-rat
@@ -20,7 +20,7 @@ native or Hermes UI verification.
 
 At staging, the preserved terminal browser save still timed out during Web SQLite
 startup and remained open pending the separate Web fix. After published PR213,
-[twice-reopened C2 evidence](../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
+[twice-reopened C2 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
 proves that same observed save opens without reset or repair; the earlier failure
 remains historical evidence. The bridge’s worker limit itself was not changed.
 Browser fatal/Restart remains the E3 gap above. C2 gameplay and reviewed source are

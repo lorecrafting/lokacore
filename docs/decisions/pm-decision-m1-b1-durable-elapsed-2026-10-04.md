@@ -1,6 +1,6 @@
 # PM adoption: M1-B1 durable elapsed host — 2026-10-04
 
-The root PM adopts the [B1 brief](../briefs/m1-b1-clock-driver.md) under the
+The root PM adopts the [B1 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m1-b1-clock-driver.md) under the
 [owner’s mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
 The reviewed M1-A merge is `78425930581cede4ebfe8269beff66dac193734e`.
 Astra driver advice informed planning; it is not independent implementation review.

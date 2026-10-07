@@ -1,8 +1,0 @@
-The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-Removed element IDs: 11, 15
-~					47 button Description: Look, Chapel Nave, Secondary Actions: Cancel
-~					48 text Description: The nave is cold and high. A fresco covers the east wall, and the altar is plain stone., Secondary Actions: Cancel
-~					49 button Description: Map, Secondary Actions: Cancel, activate, Go south
-+					50 button Description: Position, standing, Secondary Actions: Cancel
-+					14 button Description: Contents, Character, hp 10 of 10, is in perfect health, ma 7 of 100, mv 100 of 100, Secondary Actions: Cancel
-+					51 text Description: Hour of the Rooster, five to seven, Secondary Actions: Cancel

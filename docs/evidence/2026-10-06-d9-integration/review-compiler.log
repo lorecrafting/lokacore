@@ -1,9 +1,0 @@
-$ mise exec -- mix test test/loka/content_missing_child_test.exs test/loka/content_d9_test.exs test/loka/core/population_composition_test.exs
-Running ExUnit with seed: 470026, max_cases: 16
-
-...............
-Finished in 8.7 seconds (8.7s async, 0.00s sync)
-
-Result: 15 passed
-
-exit: 0

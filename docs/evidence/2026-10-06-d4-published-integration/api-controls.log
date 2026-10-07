@@ -1,4 +1,0 @@
-loader: original case GREEN, immediate-predecessor case RED, restored source GREEN
-compiler: original case GREEN, immediate-predecessor case RED, restored source GREEN
-
-EXIT 0

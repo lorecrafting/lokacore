@@ -4,7 +4,7 @@ Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.
 the PM adopts Tobin's immediate swords/dodge lessons and their real cellar-fight
 consumer. The selected contract is in [mechanics](../system/mechanics.md#c1-training-and-armed-defense-selected-contract),
 production values in [cartridge](../system/cartridge.md#c1-tobin-and-equipment), and
-the assignment in the [C1 brief](../briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
+the assignment in the [C1 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md).
 This is planning adoption, not implementation, review approval or playable proof.
 
 Acquisition is a skills-owned, reserved typed Boolean fact; current qualification

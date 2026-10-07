@@ -127,7 +127,7 @@ and not repeated here.
 
 - C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
 
-- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](../reviews/2026-10-06-c3-publication-status-review.md).
+- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md).
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the

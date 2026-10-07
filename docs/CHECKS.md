@@ -2,11 +2,11 @@
 
 The active checks run in CI; pre-push runs the relevant local lane selected by
 [`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md).
-The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
+The [scope audit](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
 which every agent loads every session.
-The [post-D10 fixture repair evidence](evidence/2026-10-06-post-d10-fixture-repair.md) records
+The [post-D10 fixture repair evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-post-d10-fixture-repair.md) records
 a separate targeted Node authority check.
 The [E1 bleed job oracle evidence](evidence/2026-10-06-encounter-bleed-oracle/README.md)
 records its focused baseline, corrected tests and six independent red controls.
@@ -98,6 +98,6 @@ records its focused baseline, corrected tests and six independent red controls.
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
-  (r1-acceptance-envelope.md §3). [Foreign-world envelope oracle evidence](evidence/2026-10-06-sim-foreign-world-envelope/README.md)
+  (r1-acceptance-envelope.md §3). [Foreign-world envelope oracle evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-sim-foreign-world-envelope/README.md)
   retains the published-v030 failure and its focused fix controls, all run on Node. Separately, the historical simulator sample (seeds 1-19) ran on Hermes in
-  [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074); it does not certify the later foreign-world oracle fix.
+  [R6P P6b](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074); it does not certify the later foreign-world oracle fix.

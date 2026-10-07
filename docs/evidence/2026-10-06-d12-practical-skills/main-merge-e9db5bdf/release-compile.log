@@ -1,3 +1,0 @@
-$ mise exec -- mix loka.compile cartridges/ashmere_missing_child <SCRATCH>
-
-exit_status=0

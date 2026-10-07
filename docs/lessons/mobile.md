@@ -79,7 +79,7 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
   [forward-development rule](../decisions/owner-decision-forward-development-2026-10-05.md)
   permits current pins to advance while preserving that explicit refusal.
 - The retained M1-B2 Release walk follows [Book navigation](../system/book-ui.md) and
-  [M1-B2 native evidence](../evidence/2026-10-04-m1-b2-lifecycle/README.md), including status
+  [M1-B2 native evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-04-m1-b2-lifecycle/README.md), including status
   Contents, full NPC details, Conversation/Leave after departure, and saved continuation
   recovery. Copy exact current labels from `snapshot -i`; selectors with spaces are one
   shell argument, with their quotes inside. Keep map gestures below the scrolling page;

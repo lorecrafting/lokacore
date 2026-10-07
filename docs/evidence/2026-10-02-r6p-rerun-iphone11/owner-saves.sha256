@@ -1,9 +1,0 @@
-# sha256 of the owner's saves (names only). pre: before the first harness install; after-harness: after the rerun, planted and mutant runs; after-clean-install: after the clean Release install; after-launch: after its one launch (no press). No -journal or -wal existed at any copy.
-fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  pre/loka-lantern.db
-1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  pre/loka-save.db
-fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  after-harness/loka-lantern.db
-1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  after-harness/loka-save.db
-fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  after-clean-install/loka-lantern.db
-1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  after-clean-install/loka-save.db
-fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  after-launch/loka-lantern.db
-1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  after-launch/loka-save.db

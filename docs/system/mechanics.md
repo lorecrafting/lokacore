@@ -305,7 +305,7 @@ Under the [owner's elapsed ruling](../decisions/owner-decision-d11-prechoice-ela
 `stat_compare` and `attribute_threshold` read the selected character value after choice on each check; neither caches qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate, both in their current room and when ordinary Scan projects a legal adjacent dark destination. It does not create a lit source or change `illuminated`; B6 `light_off` therefore retains its physical-light answer, including Seek and Talk for a hill-folk character. Barred passages still stop Scan, and hidden-exit, closed-door, custody and other perception checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
 
 Compiler, loader, command admission and composition reject unknown choices, partial or
-contradictory effects, malformed values and attempts to change identity. The [D11 source review](../reviews/2026-10-06-d11-character-choice-primary-review.md)
+contradictory effects, malformed values and attempts to change identity. The [D11 source review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d11-character-choice-primary-review.md)
 records the independent checks and fixed findings. Preproduction pin mismatch refuses
 explicitly without deleting or retargeting a save. Obsolete development compatibility follows
 [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
@@ -507,9 +507,9 @@ The final continue acknowledges the last line and runs end: await_ack adds no wa
 All continuation uses the command's actor. No running scene is the rule's defensive
 `invalid_state`; ordinary admission refuses continue as `unsupported_capability`.
 SCENE-01 has headless line-2 reopen and actual Release Simulator terminate/relaunch
-proof in the [touch review](../reviews/2026-10-03-c1-touch-review.md) and its
-[native evidence](../evidence/c1-touch/README.md). SCENE-03 and QUESTSCENE-01's
-start-once half are covered by the [scene review](../reviews/2026-10-03-c1-scenes-modal-review.md).
+proof in the [touch review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md) and its
+[native evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-touch/README.md). SCENE-03 and QUESTSCENE-01's
+start-once half are covered by the [scene review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-scenes-modal-review.md).
 Every Continue binds the scene identity and the line actually shown
 when the control was drawn. Admission and the scene rule require both to equal the current
 durable scene and line, including for a fresh invocation id or direct Command. An exact

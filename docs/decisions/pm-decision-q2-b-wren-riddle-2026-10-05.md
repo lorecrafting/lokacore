@@ -23,4 +23,4 @@ Full rollback/unknown-COMMIT controls remain applicable. API1.9 and chapter0.0.1
 independent release/allocation pins; historical fixtures stay frozen. Headless behavior,
 schema mutation controls and full checks precede independent primary and protocol/save reviews.
 
-Developer validation: [headless checks and deliberate-break controls](../evidence/2026-10-05-q2-b-wren-riddle/README.md).
+Developer validation: [headless checks and deliberate-break controls](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-q2-b-wren-riddle/README.md).

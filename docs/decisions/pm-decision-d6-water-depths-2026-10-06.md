@@ -2,8 +2,8 @@
 
 **PM-selected contract; selected-docs review approved, publication and source proof pending.**
 The PM adopts this replacement water/recovery contract under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
-The prior local [plan review](../reviews/2026-10-06-d6-water-depths-plan-review.md)
-and [adoption review](../reviews/2026-10-06-d6-water-depths-adoption-review.md)
+The prior local [plan review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-depths-plan-review.md)
+and [adoption review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-depths-adoption-review.md)
 remain historical evidence at their named heads. Their final approval predates
 published D1 and covers the old logical timer; it does not approve this replacement contract,
 the replacement deadline, new source or publication.
@@ -13,8 +13,8 @@ Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-
 [protocol](../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](../system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
-[D6 brief](../briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
-These clauses select behavior; the [scoped independent review](../reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) approves the corrected selected contract, not installed source or publication.
+[D6 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
+These clauses select behavior; the [scoped independent review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) approves the corrected selected contract, not installed source or publication.
 
 ## Published dependency re-pin
 
@@ -37,8 +37,8 @@ D6 release is independently pinned; no historic fixture is regenerated.
 | Job dispatch | `kernel/ts/src/runtime/proposal.ts`, `kernel/ts/src/mechanics/schedule/rule.ts` | Time advance drains pending jobs with due_time≤target; dispatch supports encounter/quest/population/NPC jobs. Water binding/dispatch is new typed work. One deadline needs no recurring successor/catch-up loop. |
 | Death/custody | `kernel/ts/src/mechanics/death/sequence.ts`, containment shared owner | Existing fatal input requires positive-to-zero HP already applied; nullable killer/credit are supported. Existing direct/worn roots move to one corpse; same body returns to Chapel with HP 10/MV 100. No MV-only fatal interface or remote shrine recovery is installed. |
 
-[Final source/SQLite evidence](../evidence/2026-10-06-d1-ferry-isle-publication/README.md)
-and [actual Book lesson/reopen/recovery evidence](../evidence/2026-10-06-d1-browser-book/README.md)
+[Final source/SQLite evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d1-ferry-isle-publication/README.md)
+and [actual Book lesson/reopen/recovery evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d1-browser-book/README.md)
 provide D1 dependency proof; their dated local-publication caveats remain history.
 The current roadmap records publication. Public isle death is not claimed: its
 recovery proof uses a declared controlled hazard.
@@ -69,7 +69,7 @@ A later entry gets its own generation/deadline. Surface/refusal/posture/recovery
 Read/reopen never extends the current deadline. Remaining time is visible on
 every underwater page alongside a captured free Up action.
 
-[Independent Astra pacing advice](../reviews/2026-10-06-d6-water-pacing-astra-advice.md)
+[Independent Astra pacing advice](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-pacing-astra-advice.md)
 is preserved at advice commit **0bdbd879ce1b9630fbe7b40b902b4826776b25bc**.
 It recommends a single deadline with an initial 3000-second tuning suggestion;
 PM selects 6000 for more chapter-one reading runway. Advice is not
@@ -109,7 +109,7 @@ or wet-fuel system. Both bottoms are dark with known Up and ordinary light rules
 
 ## Assignment gates and self-review
 
-The corrected selected D1-base/deadline/loot contract passed [fresh independent scoped review](../reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve); reviewed publication and source proof remain pending. The active-spec/owner-rules
+The corrected selected D1-base/deadline/loot contract passed [fresh independent scoped review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve); reviewed publication and source proof remain pending. The active-spec/owner-rules
 record accompanies this planning adoption. Re-pin
 latest published main again after ongoing D4/C4 changes; inspect their actual
 movement/job/proposal/save consumers, never use local unreviewed source as a

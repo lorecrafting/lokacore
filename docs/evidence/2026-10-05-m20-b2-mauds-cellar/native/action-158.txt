@@ -1,5 +1,0 @@
-Phase: final Book fix
-Action: open com.lorecrafting.loka
-Exit: 0
-Opened: com.lorecrafting.loka
-Session state: <local-path>

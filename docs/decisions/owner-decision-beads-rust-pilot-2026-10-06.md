@@ -34,7 +34,7 @@ roadmap publication and PM-owned task closures stay as before. The same hook
 runs for Claude Code and Codex because it belongs to the checkout, not an agent
 session. The workflow also gives the PM a simple ready → building → merged
 lifecycle using `br update`, `br close` and `br ready`, with reviewed records as
-the evidence. The [comparison record](../evidence/2026-10-06-beads-hooks-pilot.md)
+the evidence. The [comparison record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-beads-hooks-pilot.md)
 holds the baseline and post-hook observations; do not claim a speed improvement
 until real merges have supplied comparable data.
 

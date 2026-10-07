@@ -3,7 +3,7 @@
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects the [B4 light contract](../system/mechanics.md#b4-light-and-darkness-selected-contract)
 and [cartridge tuning](../system/cartridge.md#b4-well-and-fuel). This replaces the
-candidate policies in the [B4 brief](../briefs/chapter-one/b4-light-fuel-recovery-brief-2026-10-05.md).
+candidate policies in the [B4 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b4-light-fuel-recovery-brief-2026-10-05.md).
 It is planned behavior, not source proof or a publication verdict.
 
 B3 supplies a torch and oil, but no lantern. Make that real torch an oil-soaked

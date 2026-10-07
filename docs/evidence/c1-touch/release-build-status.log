@@ -1,5 +1,0 @@
-Exact production head 9732b0ec58f81ae74b7ca4e4cf8dd736d4cd409a
-Actual local xcodebuild Release / iphonesimulator, CODE_SIGNING_ALLOWED=NO.
-Extracted terminal status from retained complete redacted native build log:
-** BUILD SUCCEEDED **
-EXIT=0

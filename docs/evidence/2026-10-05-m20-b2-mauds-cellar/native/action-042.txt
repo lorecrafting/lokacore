@@ -1,8 +1,0 @@
-Action: press label="“I’ll deal with the rats.”" --settle
-Exit: 0
-Tapped label="“I’ll deal with the rats.”" (201, 283)
-settled after 761ms: +3 -1 (~9 unchanged)
-- @e6 [button] "“I’ll deal with the rats.”"
-+ @e6~s528158 [text] "You agree to clear Maud’s cellar."
-+ @e7~s528158 [text] "Journal updated"
-+ @e8~s528158 [button] "Talk to Widow Maud"

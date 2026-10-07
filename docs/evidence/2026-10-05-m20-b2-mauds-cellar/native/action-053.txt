@@ -1,7 +1,0 @@
-Action: press label="“Your cellar is clear.”" --settle
-Exit: 0
-Tapped label="“Your cellar is clear.”" (201, 423)
-settled after 770ms: +2 -1 (~14 unchanged)
-- @e11 [button] "“Your cellar is clear.”"
-+ @e11~s528207 [text] "Maud sets an iron key in your palm. “For the storage chest upstairs. You’ve earned it.”"
-+ @e12~s528207 [text] "Journal updated"

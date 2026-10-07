@@ -7,9 +7,9 @@ only as codex stand-in, no longer a rare backstop) by the
 Relayed verbatim by the PM (Claude Code) from the owner's chat. No checker can verify these
 quotes against the chat.
 
-Supersedes the [all-reviews-on-Opus decision](owner-decision-opus-reviews-2026-09-25.md), the
-Fable and Astra parts of the [review lever](owner-decision-review-lever-2026-09-25.md), and §2
-of the [observability/Astra decisions](owner-decisions-observability-astra-2026-09-25.md).
+Supersedes the [all-reviews-on-Opus decision](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-opus-reviews-2026-09-25.md), the
+Fable and Astra parts of the [review lever](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-review-lever-2026-09-25.md), and §2
+of the [observability/Astra decisions](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-observability-astra-2026-09-25.md).
 
 Owner's words:
 

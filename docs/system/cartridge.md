@@ -29,10 +29,10 @@ The shared app bundles `ashmere_missing_child@0.0.42` (v042), titled
 content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
 with 57 rooms and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
 [allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) and
-[independent derivation review](../reviews/2026-10-06-d10-primary-source-review.md) establish those answers.
+[independent derivation review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) establish those answers.
 D10 is published in [PR #263](https://github.com/lorecrafting/lokacore/pull/263), with
-[source review](../reviews/2026-10-06-d10-primary-source-review.md) and
-[save/protocol review](../reviews/2026-10-06-d10-save-protocol-review.md). A–D source is
+[source review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) and
+[save/protocol review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-save-protocol-review.md). A–D source is
 installed; E1–E3 acceptance remains open in the [roadmap](../ROADMAP.md), including
 chapter review and the browser/UI consistency gate. Native verification and known blur
 remain deferred under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
@@ -86,7 +86,7 @@ The chapter retains its authored calendar/status, typed bell reaction and scene 
 real_elapsed rate50/start64800, HP10, MV100, carrying ceiling12000, move cost1 and
 position recovery18/36 per3600 logical seconds. The current release and independent
 answers are [above](#current-bundled-chapter). Historical sampler/proof sources,
-release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
+release pins and [sampler evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
 [explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
@@ -471,7 +471,7 @@ known answer is retained as history, not added to the bundled release list: an u
 pin follows the established [missing-pin refusal](save.md#opening-a-story). Pre-production
 releases have no compatibility adapter or migration. Native evidence must identify the
 exact release; older fight captures do not prove this reward/storage consumer.
-The [M20-B2 evidence](../evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
+The [M20-B2 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
 0.0.10 Release quest/storage walk, independent pin and behavior red controls.
 
 ## Q2-C stays return
@@ -844,13 +844,13 @@ write a patrol quest independently of its row. World route/count values are
 cartridge data, never presenter/engine chapter literals; existing safety budgets
 bound all validation/traversal. C2 is installed in the
 [current bundled chapter](#current-bundled-chapter); original selection and
-proof remain in the [C2 brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
+proof remain in the [C2 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
 
 ## B6 marsh route and tuning
 
 B6 is installed in the [current bundled chapter](#current-bundled-chapter).
 Its original release derivation remains in the dated
-[B6 evidence](../evidence/2026-10-05-b6-wisp/README.md).
+[B6 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b6-wisp/README.md).
 
 
 The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
@@ -943,7 +943,7 @@ S1 credits retain their declared consumer. Additional installed consumers are
 [D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
 and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
 The [current bundled chapter](#current-bundled-chapter) owns release answers;
-[C3's publication review](../reviews/2026-10-06-c3-publication-status-review.md)
+[C3's publication review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md)
 retains its original independent source/save proof.
 
 ## C4 pack response and wounded flight
@@ -1053,7 +1053,7 @@ known answers after the shared-source scheduling predecessors integrate.
 
 B8 is installed in the [current bundled chapter](#current-bundled-chapter);
 its source and real SQLite acceptance are recorded in the
-[B8 evidence](../evidence/2026-10-05-b8-maud-services/README.md).
+[B8 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b8-maud-services/README.md).
 
 ## D2 public Priory and book authoring
 
@@ -1138,7 +1138,7 @@ cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
 B9 is installed in the [current bundled chapter](#current-bundled-chapter). Its
 original predecessor and provisional answers remain dated
-[source evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
+[source evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b9-lantern-dream/README.md).
 
 ## D4 homes and orchard declarations
 
@@ -1177,7 +1177,7 @@ catalog keys, and reject edible containers, equipment (slot, weapon or block met
 Expand source short references at the real new field. Edibility belongs to an
 immutable item definition; the terminal holder is generated metadata, never
 cartridge-authored. The integrated v031/API1.27 answers are independently derived over
-published C3/D1 in the [D4 integration evidence](../evidence/2026-10-06-d4-published-integration/README.md).
+published C3/D1 in the [D4 integration evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d4-published-integration/README.md).
 
 Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
 Green's installed terminal variants. Missing means the search is unfinished;
@@ -1225,7 +1225,7 @@ current location. D5 is installed in the [current bundled chapter](#current-bund
 
 ## D3 Western Ashmere declarations
 
-Selected under the [approved D3 brief](../briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
+Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
 with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
 as the content basis. Boathouse south/north connects to Old Mill while retaining
 its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
@@ -1248,9 +1248,9 @@ and scheduled departure retain existing admission. Movement, readable details,
 light perception and schedule jobs keep their existing state writers. No new
 command, capability or save shape is selected.
 
-The [final D3 integration proof](../evidence/2026-10-06-d3-final-integration/README.md)
+The [final D3 integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-final-integration/README.md)
 records the independently pinned successor and checks; the
-[provisional proof](../evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
+[provisional proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
 
 <a id="d6-bottom-rooms-and-water-tuning-selected-pending-implementation"></a>
 
@@ -1321,7 +1321,7 @@ declared. The cue source is a Boolean fact. A suppression declaration requires
 API1.35, a Boolean fact-change source and a population plan with the installed pack behavior; compiler and
 loader reject an unresolved or non-pack plan rather than admitting a runtime fault. The integrated D9 release follows published D8 v039/API1.34. Its independent
 v040/API1.35 hash and209 allocation answers are retained with
-[the integration proof](../evidence/2026-10-06-d9-integration/README.md).
+[the integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d9-integration/README.md).
 
 ## D12 practical skill declarations
 
@@ -1346,8 +1346,8 @@ The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerat
 Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
 
 D12 is installed in the [current bundled chapter](#current-bundled-chapter). Its
-[final primary review](../reviews/2026-10-06-d12-final-primary-review.md) and
-[save/protocol opinion](../reviews/2026-10-06-d12-final-save-review.md) record the
+[final primary review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d12-final-primary-review.md) and
+[save/protocol opinion](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d12-final-save-review.md) record the
 independent source, pin and recovery proof. Current-behavior conformance guards remain required; obsolete development fixtures follow the
 [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md). Explicit incompatible-pin refusal preserves saves without an
 adapter, migration or deletion.
@@ -1356,7 +1356,7 @@ adapter, migration or deletion.
 
 ## D7 deer declarations
 
-The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+The [D7 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
 
 | Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
 |---|---|---|---|---|---|---|

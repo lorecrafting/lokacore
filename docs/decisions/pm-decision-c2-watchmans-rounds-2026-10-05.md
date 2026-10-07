@@ -7,7 +7,7 @@ route/content in [cartridge](../system/cartridge.md#c2-watch-route-and-trust),
 [composition](../system/protocol.md#c2-patrol-composition-and-admission),
 [save recovery](../system/save.md#c2-patrol-attempt-recovery),
 [Book](../system/book-ui.md#c2-watch-patrol-details) and the
-[implementation brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
+[implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
 At adoption this was a selected planning contract, pending independent approval
 and source re-pin; it was not runtime proof.
 
@@ -41,9 +41,9 @@ are installed there; C1 source and B5 source are concurrent and not dependencies
 by this record. Re-pin their reviewed integrated head and artifact before source GO;
 C2 successor release/API/hash/IDs, source head, PR and verdicts remain null.
 
-Source-assignment re-pin: [the implementation brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
+Source-assignment re-pin: [the implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
 now records current GitHub main, the reviewed C1/B5 integration and chapter artifact.
-The [independent plan review](../reviews/2026-10-05-c2-watchmans-rounds-plan-review.md)
+The [independent plan review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-c2-watchmans-rounds-plan-review.md)
 approved the selected contract. C2 source may be assigned independently of B6/B7;
 an intervening merge requires a fresh source/artifact pin. Implementation and its
 independent reviews remain ahead.

@@ -1,2 +1,0 @@
-The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-~					9 button Description: Contents, Character, hp 10 of 10, is in perfect health, ma 7 of 100, mv 99 of 100, Secondary Actions: Cancel

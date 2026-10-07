@@ -1,3 +1,0 @@
-Phase: final Book fix
-Action: install
-Exit: 0

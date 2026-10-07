@@ -8,7 +8,7 @@ Recorded by Codex from this session. Owner wording, verbatim:
 
 Resume the already-approved [c1-touch slice](owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
 It extends the existing book presenter for installed mechanics and the sampler; the earlier
-[touch deferral](owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)
+[touch deferral](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)
 is superseded for this slice. Mechanics planning continues alongside it. This direction adds no
 clock, combat or broader UI redesign and does not approve the later six-candidate mechanics plan.
 

@@ -132,7 +132,7 @@ before E3; no new index framework is needed.
   pins alone are not false certification claims. The world-parameter table labels
   its original inventory as dated, with remaining proof routed through E1.
 - Older cartridge fixtures remain inputs to transcript discovery and the simulator
-  corpus. The [published B9/D4 orphan disposition](../decisions/pm-decision-orphan-fixtures-2026-10-06.md)
+  corpus. The [published B9/D4 orphan disposition](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-orphan-fixtures-2026-10-06.md)
   records its consumer assessment and recovery source. No additional fixture was
   established as safe to delete. Preserve frozen conformance and current regression
   proof; do not infer deletion safety from a missing literal filename reference.

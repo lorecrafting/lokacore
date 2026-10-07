@@ -10,7 +10,7 @@ Hard-won lessons for evidence capture and privacy.
   Owner decisions are retained verbatim in a file.
 - Record each independent check's exit status before summarizing a batch. A successful
   final command does not prove earlier checks passed; use fail-fast capture or inspect
-  every result. The [D1 retained size log](../evidence/2026-10-06-d1-ferry-isle/d1-final-size.log)
+  every result. The [D1 retained size log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d1-ferry-isle/d1-final-size.log)
   contained three failures that its initial summary mistakenly called green.
 - A README that claims a retained result must name a file present and hashed at the frozen
   head, with counts recomputed from that file. Claimed raw evidence was absent at review

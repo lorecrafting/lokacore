@@ -10,13 +10,13 @@ contract amendment. Evidence:
 ## Owner decisions these rest on (verbatim, relayed)
 
 - Quick A3 then R2: "yes lets go with the quick a3 then r2, the thing you
-  recommend" ([owner-decision-a3-2026-09-24.md](owner-decision-a3-2026-09-24.md)).
+  recommend" ([owner-decision-a3-2026-09-24.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a3-2026-09-24.md)).
 - Rebuild the phone path before R2: "okay lets do option 1" (retained in
   [variant-touched-declaration.md](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/r1-a3-quick-evidence/variant-touched-declaration.md)).
 - Save design: "idk i leave it up to you" (the owner delegated the persistence
   shape to the assistant; ADR-072 is the assistant's decision under that delegation).
 - Owner quotes of 2026-09-24 without their own file are retained in
-  [owner-decisions-2026-09-24.md](owner-decisions-2026-09-24.md).
+  [owner-decisions-2026-09-24.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-2026-09-24.md).
 - Accept C with the checkpoint risk recorded: asked "Accept C with the checkpoint
   risk recorded, and proceed?", the owner answered "yes please go ahead".
 

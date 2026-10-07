@@ -1,8 +1,0 @@
-README.md: OK
-capture.py: OK
-focused.log: OK
-full-gate.log: OK
-member-red.log: OK
-slot-red.log: OK
-sqlite.log: OK
-exit 0

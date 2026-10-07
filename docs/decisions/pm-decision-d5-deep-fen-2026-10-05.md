@@ -5,7 +5,7 @@ the PM adopts [D5 mechanics](../system/mechanics.md#d5-dry-deep-fen-exploration-
 [route/detail authoring](../system/cartridge.md#d5-deep-fen-route-and-details),
 [Book](../system/book-ui.md#d5-deep-fen-detail-pages),
 [save](../system/save.md#d5-route-and-read-recovery) and the
-[implementation brief](../briefs/chapter-one/d5-deep-fen-brief-2026-10-05.md).
+[implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d5-deep-fen-brief-2026-10-05.md).
 This is docs-only planning; implementation, independent plan approval and player
 proof remain ahead.
 
