@@ -218,6 +218,9 @@ labeled when needed for a controlled admission or fault boundary.
 Independently checked chapter routes enter the recorder as named fresh cases only with
 their literal result assertions intact; their committed steps must pass the same semantic
 replay, SQLite observation and candidate/source checks as the ending cases.
+For the [Maud cellar contract](cartridge.md#mauds-cellar-content-m20-b2), the combat
+route keeps each distinct earned death credit and the final atomic reward visible
+across cold reopens; authored resource recovery occurs through trusted elapsed input.
 
 Coverage names actual committed room visits, quest transitions/outcomes, resolved dialogue
 choices, scene beats/consequences and command paths. An offer or a definition count is not
