@@ -1,0 +1,8 @@
+old-suite-mutant.log: OK
+new-test-mutant.log: OK
+focused.log: OK
+typecheck.log: OK
+docs.log: OK
+capture.log: OK
+case.jsonl: OK
+summary.json: OK

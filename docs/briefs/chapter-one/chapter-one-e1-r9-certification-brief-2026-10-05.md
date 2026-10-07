@@ -93,3 +93,5 @@ Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../.
 [Dialogue and selected choice binding](../../evidence/2026-10-07-e1-dialogue-binding/README.md) is a bounded checkpoint; other authored paths and final certification remain pending.
 
 [Reviewed Watch, Wisp and herb route registration](../../evidence/2026-10-07-e1-route-registration/README.md) records a corrected-source 16-case replay with 609 authored obligations still pending.
+
+[Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint; recorder registration and E1 certification remain pending.
