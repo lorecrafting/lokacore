@@ -103,3 +103,19 @@ until `gh pr view <N> --json headRefOid -q .headRefOid` equals `<sha>`. Not repr
 created `browser` at 19:13:55, also the second `changes` completed. During that gap `lint` (independent) or the other workflow's
 jobs are normally still pending, so the watch does not exit early. A sub-second window remains only if every
 other check is already done. On the PR's own head, `gh pr checks 292` listed `browser` as pending, so the watch covers it when it runs.
+
+## R1 re-check — `30ab9d50`
+
+**Verdict: APPROVE.** Nothing open. Q1 is settled by the S1 fix, and N2's assume-unchanged gap is a stated, pre-existing limit.
+
+- **R1 fixed** at `docs/WORKFLOW.md:118-121`. The `until … headRefOid = <sha>` loop runs before the watch, so the first
+  read cannot see the previous head's checks. Source for installed gh 2.101.0
+  ([checks.go](https://github.com/cli/cli/blob/v2.101.0/pkg/cmd/pr/checks/checks.go)):
+  - every poll re-reads `statusCheckRollup: commits(last: 1)` of the PR (`api/query_builder.go:280`);
+  - zero contexts return the error "no checks reported on the '<branch>' branch" (`checks.go:302-303`). That error,
+    on the first read or on any watch poll, makes the command exit non-zero, so the `&&` never reaches `gh pr merge`.
+    The claim "fails, not merge" holds.
+  - `SKIPPED`/`NEUTRAL` count as skipping, not pending or failed (`aggregate.go:76-78`).
+- **Head moves later:** if another push lands after the loop exits, the watch reads the newer head, but
+  `--match-head-commit <sha>` then refuses the merge. If the head never reaches `<sha>`, the loop just keeps
+  waiting in the background and nothing merges.
