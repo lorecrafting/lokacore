@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Simulator complete world inputs and quest retirement](2026-10-06-simulator-world-inputs-review.md): exact source `c299195c` against published `747c252d`, independent **APPROVE**, no in-scope findings; 2 new/20 existing focused checks pass, both actual adapter mutants fail the new cases while the old suite misses them. Separate lawful bleed-job replay omission retained as SIM-CARRY-01; no invariant skipped.
+
 
 - [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, initially CHANGES REQUIRED; scoped fix `388c430e` APPROVE closes BASE-R1 remaining C3/D12 published-status contradictions. Docs check and all 25 historical heading aliases pass.
 - [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
