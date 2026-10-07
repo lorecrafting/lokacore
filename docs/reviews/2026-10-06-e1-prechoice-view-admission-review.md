@@ -25,3 +25,11 @@ The three `needsAncestry` call sites preserve their original actor arguments and
 Exact-head validation: `npm run typecheck` in `kernel/ts` exits 0; `elixir bin/check_docs.exs` reports 776 docs, zero broken links/unreachable files; the focused character-choice suite passes 7/7. Removing only the amended shared guard with the read-only Node load hook again fails the exit-reason assertion (6 pass, 1 fail). Selected-v042 seed 360 passes 55 steps with unchanged digest `e8fe5a1d9bd7df962945ab9ab264e7971a3a6bc33f2e31b0a9e7a8a630c500ae`.
 
 No open findings. Ponytail Review: Lean already. Reviewer authored no source. The original final-head simulation failure remains retained; 10,000-sequence candidate proof remains pending.
+
+## Scoped size refinement re-review — APPROVE
+
+Reviewed exact source `6e18e144375ea32947c9ca1588242e6bddd6a6d0`. The only source change names the two command-type exemptions `choiceGated` and checks that Boolean before the unchanged pure ancestry predicate. For admitted kernel world data, this is equivalent to the previous conjunction and preserves `invalid_state` priority over ordinary matching. Choose ancestry, trusted elapsed, selected characters and legacy cartridges retain their prior behavior. No open findings.
+
+The prior scoped review did not run the size checker; its statement that the helper satisfied the function-size limit was premature. The developer's full local gate found refusal at 43 lines. This refinement reduces the function below the limit without changing admission.
+
+Independently at the new exact source: the focused character-choice suite passes 7/7; `npm run typecheck` in `kernel/ts` exits 0; `node bin/check_ts_size.mjs kernel/ts/src/commands/actions.ts` exits 0. Ponytail Review: Lean already. Source was not edited by the reviewer. Full local/CI publication gates and the final selected-v042 10,000-sequence proof remain separate obligations.
