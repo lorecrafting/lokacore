@@ -2,7 +2,7 @@ import { identify, resolve } from '../src/commands/invocation.ts';
 import { read } from './read.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { gameView, step, stepElapsed } from '../src/index.ts';
+import { gameView, newWorld, step, stepElapsed, type Cartridge } from '../src/index.ts';
 import { assigned, value } from '../src/mechanics/fact.ts';
 import { key } from '../src/foundation/compose.ts';
 import { transition } from '../src/mechanics/service/shared.ts';
@@ -64,6 +64,24 @@ test('service view compares only a current-actor, nonnil invocation with its off
   } as Command;
   assert.deepEqual(agrees(foreign).decision, { kind: 'rejected', error: { code: 'not_found' } });
   assert.equal(agrees(foreign).agrees, true);
+  assert.equal(
+    gameview_agrees_with_admission({
+      view,
+      command: foreign,
+      decision: { kind: 'accepted', receipt_id: 'counterfeit' },
+      world_context_id: w.context,
+    }),
+    false,
+  );
+  assert.equal(
+    gameview_agrees_with_admission({
+      view,
+      command: foreign,
+      decision: { kind: 'rejected', error: { code: 'permission_denied' } },
+      world_context_id: w.context,
+    }),
+    false,
+  );
   const nil = {
     ...foreign,
     id: '00000000-0000-0000-0000-000000000000',
@@ -82,6 +100,37 @@ test('service view compares only a current-actor, nonnil invocation with its off
     gameview_agrees_with_admission({ view, command: nil, decision: agrees(foreign).decision }),
     false,
   );
+});
+
+// Breaks: removing pre-choice precedence makes a nil-ID foreign invocation accept permission_denied instead of Step's invalid_state.
+test('pre-choice service envelope agrees only with Step invalid_state before identity checks', () => {
+  const cartridge = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
+  const w = newWorld(cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const view = gameView(w);
+  assert.equal(view.ancestry_choices?.length, 4);
+  const command = {
+    id: '00000000-0000-0000-0000-000000000000',
+    world_context_id: 'bbbbbbbb-0000-4000-8000-000000000002',
+    payload: {
+      type: 'use_service',
+      actor_id: 'bbbbbbbb-0000-4000-8000-000000000001',
+      provider_id: w.entityIds['ashmere_missing_child@0.0.42:npc/maud'],
+      service: ref('service', 'lantern_meal'),
+      quoted_price: 2,
+    },
+  } as Command;
+  const decision = step(w, command, 1).decision;
+  assert.deepEqual(decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.equal(gameview_agrees_with_admission({ view, command, decision }), true);
+  for (const code of ['permission_denied', 'not_found'] as const)
+    assert.equal(
+      gameview_agrees_with_admission({
+        view,
+        command,
+        decision: { kind: 'rejected', error: { code } },
+      }),
+      false,
+    );
 });
 
 // Breaks: rental performs Rest/recovery, repeats charge, or immediate meal/drink lose conserved payment/stock.
