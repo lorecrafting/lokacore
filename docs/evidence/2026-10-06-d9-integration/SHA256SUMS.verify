@@ -1,0 +1,5 @@
+compiler.log: OK
+focused.log: OK
+headless-sim.log: OK
+red-controls.log: OK
+typecheck.log: OK

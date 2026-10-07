@@ -90,7 +90,13 @@ defmodule Loka.Content.Reactions do
         _ -> [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]))]
       end
 
-    restricted ++ pack ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
+    typed =
+      if on["fact"],
+        do: reference(rel, ["on"], "fact", Map.put(on, "value", true), ctx.m, ctx.defs),
+        else: []
+
+    restricted ++
+      typed ++ pack ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
   end
 
   defp consequence(rel, {s, i}, _, ctx),

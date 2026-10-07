@@ -66,14 +66,14 @@ binding. Ordinary receipt replay still validates every operation; deer handoff
 guards remain intact. D9 plus existing deer checks:10 passed after the fix.
 
 Compiler/loader checks now refuse a non-Boolean cue fact, non-pack suppression
-plan and suppression below API1.35. Actual guard removals fail the source test;
+plan and suppression below API1.35. Seven actual guard removals fail their focused tests;
 restored compiler checks pass. Kernel typecheck and Credo pass.
 
 **Publication hold:** preserved D9 adds a Bram NPC, but the newer owner real-cast
 ruling excludes Old Bram while the D9 plan requires his reactions. PM has raised
 the governing conflict with the owner. This provisional209-ID pin is not final.
-Full pre-push gate, headless simulator, final browser matrix and independent
-review remain pending.
+Headless simulator:19 tests passed (regression seeds and500 fresh sequences).
+Full pre-push gate, final browser matrix and independent review remain pending.
 No native device, owner save or deferred UI blur work is part of this proof.
 
 ## Authored sound correction
@@ -87,3 +87,8 @@ Ponytail self-review: reuse pinned recipe resolution and existing receipt replay
 no adapter, new scheduler or generic sound/relationship framework. Correctness
 self-review caught the targetless Bell receipt mismatch, deadline/deer guard
 interaction, declaration admission gaps and the unresolved cast conflict.
+
+Final nondependent checkpoint checks are retained in [focused.log](focused.log),
+[compiler.log](compiler.log), [typecheck.log](typecheck.log) and
+[headless-sim.log](headless-sim.log), with explicit exit status for the final focused,
+compiler and typecheck commands. All retained logs have SHA-256 verification.

@@ -76,6 +76,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'population.suppress') {
         named(s.plan, 'population', `${at}.apply[${i}].plan`);
+        if (r.on.fact) typedValue(r.on.fact, true, `${at}.on.fact`);
         if (!c.populations?.[refString(s.plan)]?.pack)
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')

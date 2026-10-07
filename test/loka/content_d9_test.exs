@@ -16,7 +16,8 @@ defmodule Loka.ContentD9Test do
           {manifest_path, manifest,
            put_in(manifest, ["requires", "kernel_api", "at_least"], "1.34")},
           {reaction_path, reaction,
-           put_in(reaction, ["apply", Access.at(0), "plan"], "willow_deer")}
+           put_in(reaction, ["apply", Access.at(0), "plan"], "willow_deer")},
+          {reaction_path, reaction, put_in(reaction, ["on", "fact"], "chapel_allegiance")}
         ] do
       File.write!(path, JSON.encode!(changed))
       assert {:error, _} = Loka.Content.compile(dir)

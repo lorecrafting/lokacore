@@ -28,6 +28,7 @@ print('GREEN: restored core checks exit', result.returncode)
 
 for label, filename, old, new in [
     ('cue fact type', 'lib/loka/content/bell_cue.ex', 'Map.put(cue, "value", true)', 'cue'),
+    ('suppression fact type', 'lib/loka/content/reactions.ex', 'Map.put(on, "value", true)', 'on'),
     ('suppression API floor', 'lib/loka/content/reactions.ex', 'version < [1, 35]', 'version < [1, 31]'),
     ('suppression plan kind', 'lib/loka/content/reactions.ex', '_ -> [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]))]', '_ -> []'),
 ]:

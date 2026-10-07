@@ -43,6 +43,11 @@ test('D9 cue references and typed suppression declaration fail closed', () => {
         Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
       ].apply[0].plan = ref('population', 'willow_deer');
     },
+    (c: any) => {
+      c.reactions[
+        Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
+      ].on.fact = ref('fact', 'chapel_allegiance');
+    },
   ]) {
     const c = structuredClone(source);
     change(c);
