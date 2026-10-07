@@ -6,6 +6,8 @@ import { DEFS, type Policy, type ResourceSpec } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { current } from '../src/foundation/resource.ts';
+import { compose, key } from '../src/foundation/compose.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { loadCartridge } from '../src/content/cartridge.ts';
 import { hourOf, nextHour, status } from '../src/mechanics/calendar.ts';
 import { holds } from '../src/mechanics/policy.ts';
@@ -195,6 +197,36 @@ test('legacy resource gain uses its authored interval; opted fractional recovery
   assert.equal(current({ value: 4, at: 95 }, spec, 205), 8);
   const opted = { ...spec, regen: { every: 60, by_position: { standing: 2 } } } as never;
   assert.equal(current({ value: 4, at: 95, rate: 2, remainder: 0 }, opted, 205), 7);
+});
+
+// Breaks: hourly invariant replay rejects an authored-interval debit and accepts a forged stale from-value.
+test('independent resource replay honors authored gain boundaries', () => {
+  const { resource, target } = read('protocol/fixtures/resource_recovery.json');
+  const spec = { key: 'hp', minimum: 0, maximum: 20, start: 4, gain: 2, gain_every: 100 };
+  const state = {
+    clock: 205,
+    resource_specs: { [key(resource)]: spec },
+    resources: { [key(target)]: { value: 4, at: 95 } },
+  };
+  const op = {
+    op: 'resource.adjust',
+    writer_group: 0,
+    resource,
+    entity_id: target.entity_id,
+    from: 8,
+    to: 7,
+  };
+  const delta = { ops: [op] } as never;
+  const result = { changes: [{ target, value: { value: 7, at: 205 } }] };
+  assert.deepEqual(compose(state, delta), result);
+  const forged = { ops: [{ ...op, from: 4 }] };
+  assert.deepEqual(
+    [
+      check('delta_preconditions_hold', { state, delta, result }),
+      check('delta_preconditions_hold', { state, delta: forged, result }),
+    ],
+    [true, false],
+  );
 });
 
 // Breaks: malformed calendar or impossible schedule/window reaches runtime arithmetic.

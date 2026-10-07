@@ -95,6 +95,13 @@ Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
 fenced; settling it moves play to the new run").
 
+The browser SQLite bridge uses a five-second elapsed deadline for each synchronous worker
+reply, checking a monotonic clock periodically while preserving the SDK's pause/fallback
+loop. Its deadline must not shrink with CPU speed. A missing reply throws the existing
+timeout into the save boundary above; the bridge never retries uncertain SQL or resets
+the save. The version- and source-guarded install patch and delayed/silent-worker checks
+live in `mobile/app/patch-sqlite-web.cjs` and `mobile/app/sqlite-web-worker.test.ts`.
+
 The [M20-B1 reward and Put](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
 use these same changed containers/facts/quests/choices/head/receipt rows, with no new table or format.
 
