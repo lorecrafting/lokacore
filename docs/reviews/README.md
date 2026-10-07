@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E1 child issues](2026-10-07-e1-child-issues-review.md): PR #295 at `888f7b40`, independent tracker-only **APPROVE**, no findings; 6 rows only, each parent-linked to E1 with recorder/PR #288/`ff63b598` evidence, 157 disjoint paths, `--complete` passes; recorder not re-run.
+
 - [Beads/PR drift check](2026-10-07-beads-drift-check-review.md): PR #294 at `75708e4c`, independent **APPROVE WITH NOTES**; 1 should-fix (two surviving mutants: CLOSED branch untested, open issue with open PR untested), 1 nit (`none` after an incomplete note). Hook exits 0 with and without br/gh; 5 of 7 mutants red; all external_ref values match the merging PR; `--complete` passes. Fix `0aef9be5` re-checked: **APPROVE**, should-fix (both mutants now red) and nit closed, nothing open.
 
 - [Chapter one playable mock restore](2026-10-07-chapter-one-playable-mock-review.md): PR #293 at `fd9939e7`, independent **APPROVE WITH NOTES**; size/title match (no Artifact read, so byte identity unproved), privacy grep clean, README informative and consistent, check_docs passes. 1 question (unverified 2026-10-01 date / effects-lab wording).
