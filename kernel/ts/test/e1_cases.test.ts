@@ -107,18 +107,19 @@ test('E1 binds only the witnessed study_tracks consequence after semantic replay
           row.command.payload.action === 'study_tracks',
       );
     assert.equal(committed.decision.kind, 'accepted');
-    assert.deepEqual(
-      witnessedObligations(a.story.world(), a.story.world(), committed.command, committed.decision),
-      [],
+    assert.equal(
+      witnessedObligations(
+        a.story.world(),
+        a.story.world(),
+        committed.command,
+        committed.decision,
+      ).includes(path),
+      false,
     );
     const replay = replayCase(bytes, text, source);
     assert.equal(replay.obligations.includes(path), true);
     const pending = gaps(loaded, coverage(), new Set(replay.obligations)).authored_obligations;
     assert.equal(pending.includes(path), false);
-    assert.equal(
-      pending.includes('/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks'),
-      true,
-    );
     for (const replacement of [undefined, [], ['/world/carry']]) {
       const rows = text
         .trim()
@@ -132,6 +133,48 @@ test('E1 binds only the witnessed study_tracks consequence after semantic replay
         true,
       );
     }
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: accepted recipe admission leaves its definition or required policy predicates gapped.
+test('E1 binds the exact study_tracks recipe and required policy from committed performance', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-recipe-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    { case_id: 'rescued-prior', source, fault_schedule: [] },
+  );
+  const base = '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks';
+  const expected = [
+    base,
+    `${base}/policy/root`,
+    `${base}/policy/root/items/0`,
+    `${base}/policy/root/items/1`,
+  ];
+  try {
+    const observed: string[][] = [];
+    a.watch((before, after, command, decision) => {
+      if (command.payload.type === 'perform' && command.payload.action === 'study_tracks')
+        observed.push(witnessedObligations(before, after, command, decision));
+    });
+    search(a);
+    assert.deepEqual(observed, [[...expected, `${base}/outcomes/success/sequence/0`]]);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.deepEqual(
+      expected.filter((path) => !replay.obligations.includes(path)),
+      [],
+    );
   } finally {
     a.close();
     rmSync(dir, { recursive: true });

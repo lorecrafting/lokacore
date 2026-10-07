@@ -245,6 +245,10 @@ An accepted `talk` also witnesses the selected dialogue's satisfied policy root.
 Under an `all` node, each child must hold and may be witnessed recursively; an
 `any` or `not` node does not credit its children without separate branch evidence.
 Rejected talk and merely offered dialogue actions witness no policy path.
+An accepted `perform` witnesses its exact authored recipe definition and admitted
+policy root. Each child under a required `all` policy node is also witnessed;
+`any` and `not` descendants require separate branch proof. Recipe outcomes and
+sequence steps require their own consequence witnesses.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:

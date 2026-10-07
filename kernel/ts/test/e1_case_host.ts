@@ -113,7 +113,13 @@ export function witnessedObligations(
       ...(ended ? [`${base}/steps/${dream.count}`, `${base}/steps/${dream.count + 1}`] : []),
     ];
   }
-  if (p.type !== 'perform' || p.action !== 'study_tracks') return [];
+  if (p.type !== 'perform') return [];
+  const { id, version } = before.cartridge.manifest;
+  const base = `/recipes/${id}@${version}:recipe/${p.action}`;
+  const recipe = before.cartridge.recipes?.[`${id}@${version}:recipe/${p.action}`];
+  if (!recipe) return [];
+  const witnessed = [base, ...requiredPolicyPaths(recipe.policy.root, `${base}/policy/root`)];
+  if (p.action !== 'study_tracks') return witnessed;
   const fact = {
     cartridge_id: 'ashmere_missing_child',
     cartridge_version: '0.0.42',
@@ -121,8 +127,8 @@ export function witnessedObligations(
     key: 'fen_tracks_found',
   } as DefinitionRef;
   return value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
-    ? ['/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0']
-    : [];
+    ? [...witnessed, `${base}/outcomes/success/sequence/0`]
+    : witnessed;
 }
 
 function requiredPolicyPaths(node: unknown, path: string): string[] {
