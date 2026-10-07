@@ -15,3 +15,13 @@ Validation at the exact source:
 - Explicit loaded v042 simulation, generator 17, seed 360: exit 0, 55 steps, digest `e8fe5a1d9bd7df962945ab9ab264e7971a3a6bc33f2e31b0a9e7a8a630c500ae`.
 
 Ponytail Review: Lean already. Reuses existing selection lookup and refusal path; no new abstraction or dependency. Correctness pass found only R1. The earlier 10,000-sequence attempt remains failed and immutable; this focused seed pass is not final E1 certification. No broad local gate, ExUnit, native session or owner save was used.
+
+## Scoped re-review — APPROVE
+
+Reviewed exact amended source `0893b598bf8d27b00d2e4aa78c544b2b7f21f749`. **E1-PRECHOICE-R1 closed:** Step and GameView now explicitly give the D11 pre-choice `invalid_state` gate precedence over ActionSet matching. Trusted elapsed retains its separate admitted route.
+
+The three `needsAncestry` call sites preserve their original actor arguments and truth conditions: engine uses `world.character`, composed uses its actor, and refusal uses `world.character`. Boolean normalization does not change branch behavior. The helper reuses an existing predicate and satisfies the function-size limit; no extra configuration or abstraction is needed. Runtime identity and elapsed paths remain unchanged.
+
+Exact-head validation: `npm run typecheck` in `kernel/ts` exits 0; `elixir bin/check_docs.exs` reports 776 docs, zero broken links/unreachable files; the focused character-choice suite passes 7/7. Removing only the amended shared guard with the read-only Node load hook again fails the exit-reason assertion (6 pass, 1 fail). Selected-v042 seed 360 passes 55 steps with unchanged digest `e8fe5a1d9bd7df962945ab9ab264e7971a3a6bc33f2e31b0a9e7a8a630c500ae`.
+
+No open findings. Ponytail Review: Lean already. Reviewer authored no source. The original final-head simulation failure remains retained; 10,000-sequence candidate proof remains pending.
