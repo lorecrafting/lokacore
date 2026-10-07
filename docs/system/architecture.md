@@ -231,6 +231,8 @@ definition; only an accepted choice against that pending continuation witnesses 
 specific choice path. Rejected or merely offered choices remain pending. Replay derives
 these witnesses from committed commands and states, and requires their explicit receipt
 paths rather than accepting a coverage claim by itself.
+Ending-specific conversations must be opened after that ending is committed, then
+their selected choices resolved; one ending's dialogue cannot stand in for another.
 For modal scenes, only an accepted Continue on the displayed line witnesses that
 line's authored step. The first acknowledgement also witnesses the scene definition;
 the final acknowledgement witnesses the structural `await_ack` and `end` steps only
