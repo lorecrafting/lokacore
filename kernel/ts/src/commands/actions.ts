@@ -189,12 +189,8 @@ export function refusal(
   action?: Key,
   set?: ActionSet,
 ) {
-  if (
-    needsAncestry(world, world.character) &&
-    payload.type !== 'choose_ancestry' &&
-    payload.type !== 'elapsed'
-  )
-    return 'invalid_state';
+  const choiceGated = payload.type !== 'choose_ancestry' && payload.type !== 'elapsed';
+  if (choiceGated && needsAncestry(world, world.character)) return 'invalid_state';
   if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&
