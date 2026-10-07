@@ -511,3 +511,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D8 primary P4 save proof](2026-10-06-d8-primary-review.md#scoped-p4-save-proof--closed-browser-open): source `efc7f5eb`; save portion closed after25 reopens/20 faults and typed-corruption red control. Browser held refresh/Shoo remains open; CHANGES REQUIRED.
 - [D8 final primary browser closure](2026-10-06-d8-primary-review.md#final-scoped-p4-browser-review--approve): exact candidate `e947251e`, overall APPROVE; P4 held refresh/Shoo closed, no open primary findings. Final-head hosted CI and merge publication remain PM gates.
+
+- [D9 primary source review](2026-10-06-d9-primary-source-review.md): candidate `50b3e67f`, provisional CHANGES REQUIRED; P1 public Aldric S2 dialogue shadowing, cast reconciliation and final browser/publication proof pending.
