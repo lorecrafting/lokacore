@@ -6,6 +6,8 @@ The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs 
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
 which every agent loads every session.
+The [post-D10 fixture repair evidence](evidence/2026-10-06-post-d10-fixture-repair.md) records
+a separate targeted Node authority check.
 
 - `boundary` (strict, every boundary): the dependency directions in
   [architecture.md](system/architecture.md#elixir-boundaries-compile-checked) are a compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).

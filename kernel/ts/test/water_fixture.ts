@@ -1,5 +1,11 @@
 // Controlled clocks/locations use the actual compiled chapter; release pins remain provisional.
-import { bundle as sourceBundle, fresh as sourceFresh, ref, prefix } from './transport_fixture.ts';
+import {
+  bundle as sourceBundle,
+  fresh as sourceFresh,
+  genesis as sourceGenesis,
+  ref,
+  prefix,
+} from './transport_fixture.ts';
 export { ref, prefix, room, entity } from './transport_fixture.ts';
 export function waterSource(c: any) {
   c.entry = ref('room', 'well_shaft');
@@ -24,6 +30,12 @@ export const bundle = (change: (c: any) => void = () => {}) =>
   });
 export const fresh = (change: (c: any) => void = () => {}) =>
   sourceFresh((c) => {
+    waterSource(c);
+    change(c);
+  });
+
+export const genesis = (change: (c: any) => void = () => {}) =>
+  sourceGenesis((c) => {
     waterSource(c);
     change(c);
   });
