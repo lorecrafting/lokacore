@@ -1,0 +1,41 @@
+(node:52490) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ E1 wisp-ward cold reopens and replays its literal consequences (473.1945ms)
+✔ E1 infirmary-herbs cold reopens and replays its literal consequences (5411.798583ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6293.117542
+
+✖ failing tests:
+
+test at kernel/ts/test/e1_wisp_herbs.test.ts:22:3
+✖ E1 wisp-ward cold reopens and replays its literal consequences (473.1945ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'active'
+  - 'resolved'
+  
+      at wispWard (file://[local-path]
+      at TestContext.<anonymous> (file://[local-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'active',
+    expected: 'resolved',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+exit_status=1

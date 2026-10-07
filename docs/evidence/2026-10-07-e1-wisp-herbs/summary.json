@@ -1,0 +1,36 @@
+{
+  "source": {
+    "source_sha": "2d08b5faf3925a8e0e201b8d237c9f5ad506cc84",
+    "check_hash": "68553094788b8353d647c25c1afaa85fb99b2a6538a4bc7608e8f40589e050f4",
+    "policy_hash": "02d71791e4c8f7849ae7e81677685d2ff85f77f343b13d0b31ed358525d725fd"
+  },
+  "certification": false,
+  "receipts": [
+    {
+      "case_id": "wisp-ward",
+      "status": "provisional-pass",
+      "summary": {
+        "outcome": "answer",
+        "ward": true,
+        "wrong_sitting_closed": true,
+        "terminal_room": "chapel_nave"
+      },
+      "steps": 25,
+      "semantic_replay": "pass",
+      "cold_reopens": 11
+    },
+    {
+      "case_id": "infirmary-herbs",
+      "status": "provisional-pass",
+      "summary": {
+        "exchanges": 4,
+        "contribution": 3,
+        "bandages": 12,
+        "terminal_room": "infirmary"
+      },
+      "steps": 43,
+      "semantic_replay": "pass",
+      "cold_reopens": 17
+    }
+  ]
+}

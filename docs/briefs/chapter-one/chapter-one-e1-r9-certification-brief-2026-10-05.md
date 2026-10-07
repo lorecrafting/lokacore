@@ -88,3 +88,5 @@ Optional quest route checkpoint: [controlled debt and Lantern dream receipts](..
 Optional exact recorder/replay integration: [provisional receipts and remaining-path breakdown](../../evidence/2026-10-06-e1-optional-integration/README.md); final E1 proof remains pending.
 
 Disjoint path author checkpoint: [watch rounds and the original blocked marsh Start](../../evidence/2026-10-06-e1-night-watch/README.md); registration and final certification remain pending.
+
+Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../../evidence/2026-10-07-e1-wisp-herbs/README.md); independent review/registration and E1 certification remain pending.
