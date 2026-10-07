@@ -2,5 +2,5 @@ green exit0
 {"reopens":25,"faults":20,"owner_save_access":false}
 red control exit7
 AssertionError [ERR_ASSERTION]: Expected values to be strictly equal
-Actual persisted coin custody changed before cold reopen; whole-state equality refused.
+Actual persisted coin custody changed before cold reopen; cold-open checker refused typed save_corrupt.
 Focused authority file6 tests passed (including paused, resumed and Shoo replay cases).

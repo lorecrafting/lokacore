@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. P4 save/browser closure remains pending.
+- [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. Final primary closure is indexed below.
 
 
 - [D11 character choice primary source](2026-10-06-d11-character-choice-primary-review.md): PR #257 initial `73d3d972` CHANGES REQUIRED for D11-P1 and independent D11-SP-01; scoped fix `1cb0f6fb` APPROVE closes death/cold-reopen proof and portable present-null refusal. Both replanted mutants red; restored 19 TypeScript/SQLite and 2 Elixir tests green. Independent scoped save/protocol opinion APPROVE on the same source head. No open findings.
@@ -510,3 +510,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D8 primary scoped fix round 1](2026-10-06-d8-primary-review.md#scoped-fix-round-1--p1p3-closed-p4-open): source `ec0f2dd3`, P1–P3 closed; P4 save/browser acceptance remains open. TypeScript24/24, Elixir16/16, three focused mutations red and restored.
 
 - [D8 primary P4 save proof](2026-10-06-d8-primary-review.md#scoped-p4-save-proof--closed-browser-open): source `efc7f5eb`; save portion closed after25 reopens/20 faults and typed-corruption red control. Browser held refresh/Shoo remains open; CHANGES REQUIRED.
+- [D8 final primary browser closure](2026-10-06-d8-primary-review.md#final-scoped-p4-browser-review--approve): exact candidate `e947251e`, overall APPROVE; P4 held refresh/Shoo closed, no open primary findings. Final-head hosted CI and merge publication remain PM gates.

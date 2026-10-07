@@ -389,7 +389,7 @@ the same slot's new exact member; coin custody remains conserved. Existing
 authority table also includes Shoo cold reopen/replay. No production source changed.
 
 Distinct red control rewrites the real isolated persisted coin-holder row before
-cold reopen: unchanged whole-state checker refuses (exit7, AssertionError). Compact
+cold reopen: unchanged cold-open checker refuses typed save_corrupt (exit7, AssertionError). Compact
 results and script are hashed beside earlier evidence. No owner save touched.
 These are required controlled proof scenarios using the existing fixture/fault
 harness, rather than extra kernel regression tests. Affected script/test size
@@ -457,3 +457,13 @@ Book move passed the Shoo-transfer mutant and the new crow case failed on absent
 room coin. Final candidate e947251e passed normal pre-push full gate exit0 and
 was approved by the independent primary reviewer; final record is integrated
 next. Exact final-head hosted CI/publication remains PM work.
+
+## Final independent approval integrated
+
+Primary final record approves exact D8 candidate e947251e and closes P4 with no
+open primary findings. Reviewer inspected retained browser report/trace and
+old/red/restored-green runner outcomes. Final approval is indexed alongside
+historical scoped records, with no duplicate entry. Save-red wording now names
+the actual typed save_corrupt refusal before whole-state comparison. All retained
+hashes verify. Only metadata changed after reviewed application/test candidate;
+normal push hook and exact final-head hosted CI remain required before PM merge.
