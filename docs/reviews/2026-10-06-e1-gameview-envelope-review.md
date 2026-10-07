@@ -29,4 +29,28 @@ The regression uses v025 without ancestry selection, leaving the new pre-choice 
 Current implementation passed read-only probes for all eight pre-choice/nil/foreign-world/foreign-actor combinations. Nil-permissive mutation correctly fails the new regression. No current implementation defect or unnecessary machinery found; changes requested concern required regression protection.
 ```
 
-These test gaps remain open pending a scoped fix and same-reviewer recheck. The source behavior itself was not found defective.
+The source behavior itself was not found defective; the test gaps were closed by the scoped fix and recheck below.
+
+## Scoped hosted recheck
+
+```text
+APPROVE
+
+Reviewed exact head 34d81f7c82a93abcffad357810e7532e30db1b11.
+
+S1 CLOSED — kernel/ts/test/service.test.ts:67
+Foreign-actor assertions now reject counterfeit acceptance and permission_denied. Both foreign-always-true and actor-only-always-true mutations fail this regression.
+
+S2 CLOSED — kernel/ts/test/service.test.ts:106
+The v042 pre-choice test combines nil CommandId with foreign world/actor, verifies Step’s literal invalid_state result, and rejects permission_denied and not_found counterfeits. Removing the oracle’s pre-choice guard fails this test.
+
+Checks actually verified:
+- Service suite: 8/8 pass.
+- Typecheck: exit 0.
+- Size check on service.test.ts and invariants_view.ts: exit 0.
+- Three read-only load-hook mutations: each exits 1 with its intended regression failing.
+- Oracle dispatch and direct runtime invariant registration inspected; both unchanged by the fix.
+- Working tree clean; no files edited or remote comments posted.
+
+No open findings. Review remained scoped to S1 and S2.
+```
