@@ -36,3 +36,11 @@
 
 1. **should-fix**: `docs/WORKFLOW.md:11`, `docs/WORKFLOW.md:15`, `docs/WORKFLOW.md:308` and `docs/system/owner-rules.md:238` still say "Fable for E1–E3" or "Fable reviews only the E1–E3 gate closures". Failure: the same as finding 1. A PM who reads the role table (line 11) or the gate rule spawns Fable for E1 closure, against the row on line 23. Fix: say "E2–E3" in these four places, or link them to the line 23 row.
 2. **nit**: `docs/system/owner-rules.md:241-242`. The inserted link breaks the sentence: "...certification audit (E1 closure link) gate closures and audits;". Move the link to the end of the clause.
+
+## Fix round 2: `c301aff7`
+
+**Verdict: APPROVE.** Nothing open.
+
+- Round 1 should-fix **closed**: `docs/WORKFLOW.md:11`, `:15` and `:308` and `docs/system/owner-rules.md:238` now say E2–E3. A grep for Fable in active `.md` files (not archive, reviews, decisions or evidence; `.claude/agents` included) agrees everywhere. E1 closure gets two fresh Opus reviewers (`WORKFLOW.md:23`, `owner-rules.md:242`). The Fable audit happens at release-candidate certification (`WORKFLOW.md:15`, `:23`, `owner-rules.md:241`). E2 and E3 keep Fable. `owner-rules.md:214-215` (Fable audits before E3) is consistent.
+- Round 1 nit **closed**: `owner-rules.md:241-242` reads as one sentence, with the E1 clause in parentheses and the link inside it.
+- `check_beads_export.py --complete` exit 0. No machine paths in `238bc61f..c301aff7`.
