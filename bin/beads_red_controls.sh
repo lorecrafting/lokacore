@@ -48,11 +48,13 @@ if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; th
 fi
 python3 - "$case_file" <<'PY'
 import json
+import re
 import sys
 from pathlib import Path
 
 rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
-rows.append(dict(rows[0], id='loka-duplicate-slice'))
+slice_row = next(row for row in rows if re.match(r'^[A-E]\d+ — ', row['title']))
+rows.append(dict(slice_row, id='loka-duplicate-slice'))
 Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
 PY
 if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
