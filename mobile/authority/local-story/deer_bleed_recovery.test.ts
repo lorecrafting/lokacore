@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, content } from '../../../kernel/ts/test/deer_fixture.ts';
+import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { newWorld } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
@@ -43,7 +44,8 @@ function journey(t: TestContext) {
       target_ids,
     } as never);
     assert.equal(r.kind, 'saved', JSON.stringify(r));
-    if (r.kind === 'saved') assert.equal(r.decision.kind, 'accepted', JSON.stringify(r));
+    if (r.kind === 'saved')
+      assert.equal((r.decision as unknown as DecisionResult).kind, 'accepted', JSON.stringify(r));
   };
   const tick = (until: number) => {
     const r = story.elapsed({
@@ -52,8 +54,10 @@ function journey(t: TestContext) {
       until,
     });
     assert.equal(r.kind, 'saved', JSON.stringify(r));
-    if (r.kind === 'saved') assert.equal(r.decision.kind, 'accepted', JSON.stringify(r));
-    return r;
+    if (r.kind === 'saved')
+      assert.equal((r.decision as unknown as DecisionResult).kind, 'accepted', JSON.stringify(r));
+    if (r.kind !== 'saved') throw Error('elapsed not saved');
+    return r.decision as unknown as DecisionResult;
   };
   const reopen = () => {
     sql.close();
@@ -84,10 +88,10 @@ function journey(t: TestContext) {
 // Break: deer recovery mistakes a legal round/bleed group resumed after unrelated population jobs for a sight handoff.
 test('real SQLite reopens a lawful interleaved round, population and bleed receipt', (t) => {
   const p = journey(t);
-  assert.equal(p.result.kind, 'saved');
-  if (p.result.kind !== 'saved' || p.result.decision.kind !== 'accepted') return;
+  assert.equal(p.result.kind, 'accepted');
+  if (p.result.kind !== 'accepted') return;
   const jobs = p.story.world().state.jobs!;
-  const completed = p.result.decision.delta.ops
+  const completed = p.result.delta.ops
     .filter((op) => op.op === 'job.complete')
     .map((op) => ({
       group: op.writer_group,
