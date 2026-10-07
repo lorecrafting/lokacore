@@ -105,7 +105,6 @@ and new review carries; their linked records retain the governing details.
 | First strict-quest activation root with matching acquisition | Original triage 14: recheck strict-quest activation/acquisition writer composition against an actual consuming root before claiming that case certified. The old sampler restriction is historical. |
 | First job-emitted acquisition | D8 now emits job-scoped acquisition to the crow ([contract](system/protocol.md#d8-exact-crow-transport-and-shoo-composition-selected-contract)). Unresolved: prove the quest join's before=now branch for a job acquisition whose actual holder qualifies the player quest. |
 | First selector-overflow contract or content exceeding the selector cap | Original triage 16 and c1-locks target overflow: typed graceful overflow; current selectors are bounded at 1024. |
-| First speaker with two simultaneously eligible dialogues | Original triage 30: selection ambiguity policy; sampler has one graph per NPC. |
 | First NPC dialogue that exceeds available scrolling space | Original triage 31: legacy menu-fit carry is superseded for the current scrollable presenter; recheck reachability/fit for that new content ([Book UI](system/book-ui.md)). |
 | First authored breakable key / one-way or bent passage / keyless locked door | Original triage 1/6/7: install the corresponding content and loader semantics before accepting it. |
 | Before E1 certification | Complete the current baseline reset/audit under the [forward-development policy](decisions/owner-decision-forward-development-2026-10-05.md). Retain current-behavior guards, independently re-pin changed answers and retire obsolete development-only coverage through reviewed changes. [Fixture migration follow-up](#baseline-audit-follow-up) remains explicit; no blanket fixture deletion or completed-cleanup claim. |
@@ -124,6 +123,8 @@ implicit position/scene fact dependency ([loader review](reviews/2026-10-06-e1-l
 spawn provenance ([C3 contract](system/protocol.md#c3-spawned-bundles-and-population-composition));
 due-job generation re-read ([combat round contract](system/protocol.md#encounter-and-round-supplements-m6-a));
 alias identity ([M12-A review](reviews/2026-10-05-m12-a-readable-review.md));
+labelled dialogue selection ([D9 contract](system/cartridge.md#d9-village-reaction-content-selected-contract),
+[D9 service/reopen proof and red controls](evidence/2026-10-06-d9-integration/README.md));
 NPC-to-player acquisition ([dialogue receive contract](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts));
 ancestry choice ([D11 contract](system/cartridge.md#d11-ancestry-declarations-selected-contract)).
 These source proofs do not close E1–E3.
