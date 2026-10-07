@@ -32,6 +32,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 
 ## Post-R3
 
+- [Chapter 1 polish phase and release-candidate certification order](owner-decision-chapter-one-polish-order-2026-10-07.md): E1 closes at coverage complete; E2, then an open-ended UI polish phase, then one frozen release-candidate certification, then E3 and release.
 - [Move forward](owner-decision-move-forward-2026-10-07.md): lessons first, then delete records of closed or superseded work; protocol fixtures, in-force decisions and open work stay.
 - [Claude Code only, Beads permanent, auto-merge](owner-decision-claude-only-auto-merge-2026-10-07.md): Opus reviews (Fable for E1–E3 gates), Codex retired, Beads permanent, background merge after green CI.
 - [Designer role](owner-decision-designer-role-2026-10-07.md): an Opus `designer` subagent owns the Book UI design system and spec text, shapes UI briefs, flags one-offs and gives independent design reviews.

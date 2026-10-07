@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
+
 - Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
 
 - D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
@@ -233,11 +235,11 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   queues each merge in the background behind `gh pr checks --watch` ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
-- Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E1–E3) of the
+- Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the
   riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E1–E3
-  gate closures and audits; Codex and cross-vendor review are retired; Beads Rust is the
+- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E2 and E3 gate closures and audits and the release-candidate certification audit
+  (E1 closure: two fresh Opus reviewers, [record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)); Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
 - An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout

@@ -53,6 +53,9 @@ The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](http
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
 D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-bundled-chapter)
 owns the release/API/hash/ID pins. **E1–E3 remain open.**
+Order: E1 (coverage complete), E2, a Chapter 1 UI polish phase, release-candidate
+certification on one frozen source, then E3 and release
+([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in

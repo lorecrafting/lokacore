@@ -1,5 +1,7 @@
 # E3 — Full-chapter R10 browser content gate
 
+> **Amendment, 2026-10-07:** E3 runs on the release-candidate certification's frozen source, after the polish phase; E1 supplies the recorder, not the final candidate freeze ([record](../../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
+
 > **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
 
 Provisional PM brief, 2026-10-05. **Provisional until all mechanics/content merge; not source GO, full R10 gate approval, native certification or public-release readiness.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Proof prerequisites: [E1 exact-candidate certification](chapter-one-e1-r9-certification-brief-2026-10-05.md), [E2 interaction cartridge](chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
