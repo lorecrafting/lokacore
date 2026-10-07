@@ -28,3 +28,15 @@
 2. **should-fix** `kernel/ts/test/e1_services.test.ts:71-78`: the wrong-provider control plants `provider_id = body`. The payment check rejects that first, so the provider (`:51`) and cask-holder (`:118`) clauses have no test of their own. The entitlement event (`:92-101`) and before/after fact (`:81-82`) clauses also survive because the test mutates only ops. Failure: deleting any of these clauses stays green. Add one planted violation for each clause, or delete clauses that are not needed.
 3. **nit** `kernel/ts/test/e1_obligations.ts:124`: hard-coded `previous.quantity - 1`. The kernel debits the liquid's `drink_amount` (`liquid/shared.ts:127`). This is correct for v042 ale (`drink_amount: 1`) and fails closed elsewhere.
 4. **nit** `docs/system/architecture.md:290`: "ale serving" names content. The benefit kind is `drink`.
+
+## R1 re-check: `1278bc4c`, `a2126b1b` (head `a2126b1b`)
+
+Verdict: **APPROVE**. No open findings.
+
+- Typecheck exit 0. `node --test test/e1*.test.ts` exit 0. Direct callers of `witnessedObligations` (`e1_case_host.ts`, `e1_cases.ts` replay, six e1 test files) pass. Recorder exit 2, `pending`, 157 authored paths open, 3 `/services/` paths witnessed.
+- Each mutant below makes `e1_services.test.ts` fail (exit 1): remove the whole payment check; remove only the provider credit; remove the provider, quote and actor checks; remove the cask holder; remove the liquid kind; serving back to `- 1`; drop `gain > 0`; drop `fact.assign` `expected === false`; drop the scope `character_id`; drop `resource.adjust` `from === old`.
+1. Blocker: **closed**. Added plants: payer op removed, provider op removed, wrong quote, authored price different from debit. Payer and provider ops each get a wrong-holder, wrong-resource, wrong-`from` and wrong-`to` plant (`e1_services.test.ts:80-108`).
+2. Should-fix: **closed**. Each kept clause has its own plant. Deleting the entitlement before/after and event checks is sound. The `fact.assign` CAS is enforced at commit: `invariants_delta.ts:22,31-34` checks `expected` against the prior fact. An accepted op `expected:false, value:true` therefore is the committed false-to-true transition. The service clause (`architecture.md:287-292`) requires only "the entitlement fact transition", not a fact event (unlike the dialogue `skill.acquire`/`topic.grant` clause). Payment still checks both op and state, as the clause requires.
+3. Nit: **closed**. The serving is `drink_amount` (`e1_obligations.ts:104-111`). A `drink_amount: 2` plant and the `- 1` mutant both fail.
+4. Nit: **closed**. `architecture.md:290` now says "drink serving".
+- PM decision on a capped `from == to` MV adjust: **agreed**. The kernel refuses a meal or drink at full MV (`service/shared.ts:90`, `service.full_mv`), so a zero gain is never a real benefit. The synthetic plant (`e1_services.test.ts` "capped recovery from == to") is red against the `gain > 0` removal.

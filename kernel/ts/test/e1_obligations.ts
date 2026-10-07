@@ -77,28 +77,15 @@ export function witnessedObligations(
     const benefit = service.benefit;
     let committed = false;
     if (benefit.kind === 'entitlement') {
-      committed =
-        value(before, p.actor_id, benefit.fact) === false &&
-        value(after, p.actor_id, benefit.fact) === true &&
-        ops.some(
-          (op) =>
-            op.op === 'fact.assign' &&
-            same(op.fact, benefit.fact) &&
-            op.scope.kind === 'player' &&
-            op.scope.character_id === p.actor_id &&
-            op.expected === false &&
-            op.value === true,
-        ) &&
-        decision.events.some(
-          (event) =>
-            String(event.causation_id) === String(command.id) &&
-            event.payload.type === 'fact_changed' &&
-            event.scope.kind === 'player' &&
-            event.scope.character_id === p.actor_id &&
-            same(event.payload.fact, benefit.fact) &&
-            event.payload.old === false &&
-            event.payload.new === true,
-        );
+      committed = ops.some(
+        (op) =>
+          op.op === 'fact.assign' &&
+          same(op.fact, benefit.fact) &&
+          op.scope.kind === 'player' &&
+          op.scope.character_id === p.actor_id &&
+          op.expected === false &&
+          op.value === true,
+      );
     } else {
       const old = level(before, before.body, benefit.recovery);
       const maximum = resourceSpec(before, before.body, benefit.recovery)?.maximum;
@@ -106,6 +93,7 @@ export function witnessedObligations(
         old === undefined || maximum === undefined
           ? 0
           : Math.min(old + benefit.amount, maximum) - old;
+      // A capped adjust with from == to cannot be told apart from a benefit that adds nothing.
       const recovered = gain > 0 && adjusted(before.body, benefit.recovery, gain);
       if (benefit.kind === 'meal')
         committed = recovered && adjusted(p.provider_id, benefit.stock, -benefit.debit);
@@ -113,15 +101,14 @@ export function witnessedObligations(
         const vessel = entityId(before, benefit.vessel);
         const previous = before.state.liquids?.[vessel];
         const current = after.state.liquids?.[vessel];
+        const liquid = previous?.kind && before.cartridge.liquids?.[refString(previous.kind)];
         committed =
           recovered &&
           before.state.containers[vessel] === p.provider_id &&
-          !!previous &&
-          !!current &&
-          previous.quantity > 0 &&
-          !!previous.kind &&
+          !!previous?.kind &&
           same(previous.kind, benefit.liquid) &&
-          current.quantity === previous.quantity - 1 &&
+          !!liquid &&
+          current?.quantity === previous.quantity - liquid.drink_amount &&
           ops.some(
             (op) =>
               op.op === 'liquid.set' &&
