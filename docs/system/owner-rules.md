@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
+
 - D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
 
 - D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
