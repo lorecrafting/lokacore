@@ -2,3 +2,6 @@ cli.log: OK
 report.json: OK
 dream-follow_fox.jsonl: OK
 dream-wake.jsonl: OK
+rest-focused.log: OK
+rest-old-mutant.log: OK
+rest-new-mutant.log: OK

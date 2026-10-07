@@ -15,8 +15,18 @@ typecheck and the docs check passed. The clean-head recorder then exited
 ten previously open dream-scene paths were witnessed, and **499 authored paths**
 remain open. E1 is not certified.
 
+The independent review found that the initial test did not check the Rest
+command that first displays the dream. Test commit `8373c0f3` adds an explicit
+no-credit assertion on that committed display in both branches. The focused
+suite passed 6/6 again. A premature-Rest-credit mutant left the prior five
+cases green and failed the new dream case; the corrected test does not alter
+the source-bound recorder code or its check digest. The full recorder must be
+rerun on the final combined source.
+
 The [report](report.json), [two dream traces](dream-follow_fox.jsonl) (including
-the [wake branch](dream-wake.jsonl)) and redacted [CLI log](cli.log) are hashed
+the [wake branch](dream-wake.jsonl)), redacted [CLI log](cli.log), and
+[green](rest-focused.log)/[old suite](rest-old-mutant.log)/[new case](rest-new-mutant.log)
+negative-control logs are hashed
 in [SHA256SUMS](SHA256SUMS), with [verification](SHA256SUMS.verify). The complete
 isolated output was hashed at capture in [case-SHA256SUMS](case-SHA256SUMS),
 with [verification](case-SHA256SUMS.verify). The recorder's `redact()` covers
