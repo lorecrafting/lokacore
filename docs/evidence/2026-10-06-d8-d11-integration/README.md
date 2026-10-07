@@ -445,3 +445,15 @@ provide this controlled UI proof; deferred UI blur254 remains untouched. Earlier
 real-clock nest/full-fallback screenshots remain distinct. Primary final P4
 recheck, exact final-head hosted checks and PM publication approval still pending;
 PR remains draft. No independent approval or merge is claimed by the developer.
+
+## Retained controlled browser raw evidence
+
+Sanitized raw green/red/old runner logs and final report are retained as
+`browser-controlled-{green,red,old}-raw.log` and
+`browser-controlled-report.json`, all covered by SHA256SUMS. Raw isolated trace
+archives remain in the harness's .e2e artifacts for independent review and were
+not overwritten or committed. The restored browser case passed; old focused
+Book move passed the Shoo-transfer mutant and the new crow case failed on absent
+room coin. Final candidate e947251e passed normal pre-push full gate exit0 and
+was approved by the independent primary reviewer; final record is integrated
+next. Exact final-head hosted CI/publication remains PM work.
