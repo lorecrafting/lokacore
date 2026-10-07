@@ -71,3 +71,15 @@ predicate evidence, not an asserted root cause/fix. Source owner was notified.
 Metro watch roots resolved the isolated checkout; node_modules came from npm ci
 and was not symlinked. All diagnostic changes to store/session/authority/bell-save
 were restored; this commit contains evidence only.
+
+## Original saved scene recovery with narrow fix
+
+Proof head02c35cf67c5c2418415daf6adb98dea09cd372f4 applies only source fix
+7f071e40 to this old release pin. Source/test/document conflict resolutions take
+the source developer's versions. The original formerly-corrupt origin now opens
+the same saved bell scene without Start over or any database edit. Three ordinary
+Continue taps finish it. A subsequent reload and chapter Continue restore the
+Chapel bell receipt, label its cue "Earlier: The bell carries across Ashmere."
+and show Ring/Silence as unavailable. See recovered-original-trace.json and PNG.
+Old-pin misleading Fen copy remains historical here; fresh final candidate must
+prove corrected copy and the complete browser matrix separately.
