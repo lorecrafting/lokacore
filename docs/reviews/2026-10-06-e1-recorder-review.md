@@ -16,3 +16,11 @@ Derived before reading the diff from the [active E1 proof policy](../system/arch
 - Read the source diff, five ending recipes, thirty-day observer, real SQLite full/failed/lost recipes, recorder and semantic replay. Fault recipes check durable receipts, cold reopen, duplicate replay, changed-intent conflict and unchanged memory before resolution. Replay is explicitly semantic; it does not claim to re-execute storage faults.
 - Ponytail Review: Lean already. Ship after E1-R1. No new dependency or speculative abstraction found in this bounded checkpoint.
 - Current case CLI exits 2, has no certification verdict, and leaves 648 authored obligations pending. This review does not close remaining path coverage, final candidate pin, selected 10,000 sequences, E2/E3 browser proof or the independent final gate.
+
+## Scoped E1-R1 fix recheck
+
+**APPROVE** the bounded recorder checkpoint at exact source `c06e5c27ae9f3cb556644c39cd914720b0828a5c`; **E1-R1 closed**. The five-line fix asserts that elapsed commit *n* has clock `64800 + 3600*n` before it is counted. The direct `e1_cases.ts` caller still invokes the fixed `thirtyDays` recipe, and the remaining horizon/fault logic is unchanged.
+
+Independent controlled input at the first nonhourly commit (`68401`) throws the new assertion. The developer's actual focused +1-hour mutant failed (`actual: 68400`, `expected: 72000`, exit 1); after restoration, the real SQLite 720-hour focused case passed (one pass, zero failures, exit 0). The scratch test was removed and the source worktree was clean at the reviewed SHA. Ponytail Review: the five-line assertion adds only the required literal check; no cut.
+
+This approves the recorder fix, not E1 certification. Final candidate identity, path receipts, selected 10,000 sequences, E2/E3 browser evidence and final gate review remain pending.
