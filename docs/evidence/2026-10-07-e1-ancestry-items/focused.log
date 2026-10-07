@@ -1,0 +1,37 @@
+(node:59274) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (2182.271375ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (5749.910375ms)
+✔ E1 binds the exact study_tracks recipe and required policy from committed performance (2402.304416ms)
+✔ E1 binds the two bell assignments and the epilogue event to accepted receipts (4761.759083ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (699.14ms)
+✔ E1 binds each required predicate of the selected Elspeth report dialogue (1688.831959ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (9747.874709ms)
+✔ E1 binds both selected dream branches and acknowledged scene steps (7223.44675ms)
+(node:59760) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 ancestry witness requires the exact new committed selection (3893.221292ms)
+✔ E1 item witnesses bind the exact original transfer and receipt holders (27888.704583ms)
+✔ E1 NPC witness requires the accepted target in a newly opened dialogue (1546.397792ms)
+(node:61425) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 binds Maud objective only on its committed resolved transition (12645.989625ms)
+✔ E1 binds selected dialogue fact adjustment and assignment from committed receipt (7716.918333ms)
+✔ E1 binds only visible entity definitions after committed room entry (893.135083ms)
+✔ E1 binds only the used ferry route on committed arrival (715.159375ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 92613.471291
+
+exit_status: 0

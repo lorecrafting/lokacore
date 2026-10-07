@@ -133,3 +133,5 @@ review approved; integrated capture and E1 certification remain pending.
 [Selected active journal variants](../../evidence/2026-10-07-e1-journal-variants/README.md) witnessed nine paths in two clean-source ending routes; separated-escort variant 0 and final E1 certification remain pending.
 
 [Selected skill and topic effect binding](../../evidence/2026-10-07-e1-knowledge-effects/README.md) is an author checkpoint for two committed dialogue sequence effects; integrated recorder evidence and E1 certification remain pending.
+
+[Ancestry and static entity witnesses](../../evidence/2026-10-07-e1-ancestry-items/README.md) retain six bounded clean-source SQLite traces; E1 remains pending.
