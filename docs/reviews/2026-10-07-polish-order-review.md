@@ -23,3 +23,16 @@
 
 1. **should-fix**: `docs/decisions/owner-decision-chapter-one-polish-order-2026-10-07.md:5,8`. Step 1 says E1 closes with an "independent" review, and step 4 says the Fable gate audit "moves here from E1". [WORKFLOW.md:23](../WORKFLOW.md) and `owner-rules.md:241` still require Fable for E1 closure. Failure: the PM closes E1 on an Opus review and cites the record, or runs Fable twice, because nothing says which applies. Fix: one clause naming the E1 closure reviewer, or amend the workflow line.
 2. **nit**: `.beads/issues.jsonl`, the `loka-e1-r9-certification-2rz` notes. The old sentence "Final exact-candidate selected-v042 10,000-sequence proof, independent gate review and exact-head CI remain" stays above the 2026-10-07 line that moves the proof out of E1. A reader who stops at the first line plans the v042 proof inside E1.
+
+## Fix round 1: `7332ef06` (commits `caf81209`, `7332ef06`)
+
+**Verdict: APPROVE WITH NOTES.** Finding 1 is partly fixed and still open; finding 2 is closed.
+
+- Finding 2 **closed**: the `loka-e1-r9-certification-2rz` notes are rewritten. They now say E1 closes at coverage complete with a fresh Opus review, a second opinion and exact-head CI, and that the freeze, the v042 proof and the Fable audit moved to `loka-4xk`. The stale sentence is gone.
+- Finding 1 **partly fixed**: the three edited places agree: record step 1, `docs/WORKFLOW.md:23` and `docs/system/owner-rules.md:241` (E1 gets two fresh Opus reviewers, Fable does the release-candidate audit, E2 and E3 keep Fable).
+- `check_beads_export.py --complete` exit 0. No machine paths in `ba1bd9b8..7332ef06`.
+
+### Open
+
+1. **should-fix**: `docs/WORKFLOW.md:11`, `docs/WORKFLOW.md:15`, `docs/WORKFLOW.md:308` and `docs/system/owner-rules.md:238` still say "Fable for E1–E3" or "Fable reviews only the E1–E3 gate closures". Failure: the same as finding 1. A PM who reads the role table (line 11) or the gate rule spawns Fable for E1 closure, against the row on line 23. Fix: say "E2–E3" in these four places, or link them to the line 23 row.
+2. **nit**: `docs/system/owner-rules.md:241-242`. The inserted link breaks the sentence: "...certification audit (E1 closure link) gate closures and audits;". Move the link to the end of the clause.
