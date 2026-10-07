@@ -1,0 +1,106 @@
+Resolving Hex dependencies...
+Resolution completed in 0.014s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 84 files (.ex)
+Generated loka app
+No cycles found
+Running ExUnit with seed: 114201, max_cases: 16
+
+.................................................................................................................................................................................................................................................................................................................................................................................
+
+  1) test quest reaction references, owners and restricted activation are checked (Loka.ContentFirstSearchTest)
+     test/loka/content_first_search_test.exs:18
+     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:
+
+       1. per test by setting "@tag timeout: x" (accepts :infinity)
+       2. per test module by setting "@moduletag timeout: x" (accepts :infinity)
+       3. globally via "ExUnit.start(timeout: x)" configuration
+       4. by running "mix test --timeout x" which sets timeout
+       5. or by running "mix test --trace" which sets timeout to infinity
+          (useful when using IEx.pry/0)
+
+     where "x" is the timeout given as integer in milliseconds (defaults to 60_000).
+
+     code: for {name, code, change} <- cases do
+     stacktrace:
+       (stdlib 8.0.4) gen.erl:243: :gen.do_call/4
+       (stdlib 8.0.4) gen_server.erl:1297: :gen_server.call/3
+       (kernel 11.0.3) file.erl:3026: :file.call/2
+       (elixir 1.20.4) src/elixir_utils.erl:113: :elixir_utils.read_link_type/1
+       (elixir 1.20.4) lib/file.ex:1279: File.do_cp_r/6
+       (elixir 1.20.4) lib/file.ex:1315: anonymous fn/7 in File.do_cp_r/6
+       (elixir 1.20.4) lib/enum.ex:5119: Enumerable.List.reduce/3
+       (elixir 1.20.4) lib/enum.ex:2676: Enum.reduce_while/3
+       (elixir 1.20.4) lib/file.ex:1314: File.do_cp_r/6
+       (elixir 1.20.4) lib/file.ex:1315: anonymous fn/7 in File.do_cp_r/6
+       (elixir 1.20.4) lib/enum.ex:5119: Enumerable.List.reduce/3
+       (elixir 1.20.4) lib/enum.ex:2676: Enum.reduce_while/3
+       (elixir 1.20.4) lib/file.ex:1314: File.do_cp_r/6
+       (elixir 1.20.4) lib/file.ex:1229: File.cp_r/3
+       (elixir 1.20.4) lib/file.ex:1264: File.cp_r!/3
+       test/loka/content_first_search_test.exs:6: Loka.ContentFirstSearchTest.compile/2
+       test/loka/content_first_search_test.exs:67: anonymous fn/3 in Loka.ContentFirstSearchTest."test quest reaction references, owners and restricted activation are checked"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_first_search_test.exs:66: (test)
+       (ex_unit 1.20.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2
+
+.....
+
+  2) test compiler refuses bounded route and patrol ownership violations (Loka.ContentPatrolTest)
+     test/loka/content_patrol_test.exs:33
+     ** (ExUnit.TimeoutError) test timed out after 60000ms. You can change the timeout:
+
+       1. per test by setting "@tag timeout: x" (accepts :infinity)
+       2. per test module by setting "@moduletag timeout: x" (accepts :infinity)
+       3. globally via "ExUnit.start(timeout: x)" configuration
+       4. by running "mix test --timeout x" which sets timeout
+       5. or by running "mix test --trace" which sets timeout to infinity
+          (useful when using IEx.pry/0)
+
+     where "x" is the timeout given as integer in milliseconds (defaults to 60_000).
+
+     code: for {{file, expected, change}, i} <- Enum.with_index(mutations) do
+     stacktrace:
+       (stdlib 8.0.4) gen.erl:243: :gen.do_call/4
+       (stdlib 8.0.4) gen_server.erl:1297: :gen_server.call/3
+       (kernel 11.0.3) file.erl:3026: :file.call/2
+       (elixir 1.20.4) src/elixir_utils.erl:107: :elixir_utils.read_file_type/2
+       (elixir 1.20.4) lib/file.ex:181: File.regular?/2
+       (elixir 1.20.4) lib/enum.ex:4542: Enum.filter_list/2
+       (elixir 1.20.4) lib/enum.ex:4543: Enum.filter_list/2
+       (loka 0.1.0) lib/loka/content/source.ex:52: Loka.Content.Source.load/1
+       (loka 0.1.0) lib/loka/content.ex:40: Loka.Content.compile/2
+       test/loka/content_patrol_test.exs:72: anonymous fn/3 in Loka.ContentPatrolTest."test compiler refuses bounded route and patrol ownership violations"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_patrol_test.exs:67: (test)
+       (ex_unit 1.20.4) lib/ex_unit/runner.ex:533: ExUnit.Runner.exec_test/2
+       (stdlib 8.0.4) timer.erl:599: :timer.tc/2
+       (ex_unit 1.20.4) lib/ex_unit/runner.ex:455: anonymous fn/6 in ExUnit.Runner.spawn_test_monitor/4
+
+.........................
+Finished in 74.1 seconds (74.1s async, 0.07s sync)
+
+Result: 399/401 passed
+Failed: 2 tests
