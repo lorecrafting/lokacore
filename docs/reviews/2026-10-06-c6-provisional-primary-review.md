@@ -71,3 +71,46 @@ changed-row commits and small receipt helpers, with no added dependency or raise
 size limit. Validation and recovery checks are necessary trust-boundary work.
 Self-reviewed the findings against lawful detours and the deliberately nonterminal
 failed quest: neither requests new mechanics or terminal quest failure.
+
+
+## Scoped fix round 1 — P1/P2 closed
+
+**Verdict: APPROVE for provisional source `5658f7c39c9d067afc9f1f90aff8cb83c0f1bb6d`.**
+No open primary findings. This is a scoped source approval, not final C6 release
+acceptance; the publication gates named above remain in force.
+
+Reviewed the five-file fix diff from carried review record `c0b999ea`, its direct
+Journal/Book callers and the two new actual-source regressions.
+
+- **P1 closed:** `kernel/ts/src/view/quest_journal.ts:57` now chooses the authored
+  failed-attempt prose while preserving the nonterminal quest. Actual departure,
+  cold reopen and explicit Restart retain failure/retry text and then restore
+  active text with a fresh attempt at cursor zero.
+- **P2 closed:** `kernel/ts/src/view/quest_journal.ts:87` supplies a directional
+  hint only at the bound route edge's origin. `mobile/app/book/model.ts:18` and
+  the Journal renderer show the retained named checkpoint without an inapplicable
+  direction. Returning to Reed Bank restores west/Willow Shade without crediting
+  that return move.
+
+Independent verification: the focused kernel/contract/actual-source/real-SQLite
+suite exits zero with thirteen tests passed. An additional throwaway reviewer
+control, using the actual compiled source with its ancestry choice and populated
+hound Start/Flee, exits zero: a legal cursor-one detour reopens with the truthful
+checkpoint label; return reopens with the directional label; outside-footprint
+failure reopens with `marsh.journal.failed`; explicit Restart reopens with
+`marsh.journal.active`, cursor zero and a different attempt ID. `git diff --check`
+on the fix diff exits zero. The temporary control was removed.
+
+The added tests exercise accepted moves and Restart against compiled authored
+content. Their literal expected stage/status/text values are independent of the
+projection implementation and catch distinct breaks missing from the prior tests.
+Inspected the developer's three recorded restored red controls: removing the P1
+selection fails on active versus failed prose; removing the P2 origin guard fails
+on west versus absent direction; restoring the old Book formatter fails on
+`Next: undefined to Willow Shade.` versus the checkpoint label. The original
+review independently demonstrated P1's failing literal assertion and P2's wrong
+actual detour behavior. No production source was edited during this recheck.
+
+Ponytail/correctness scoped self-review: the two projection conditions and small
+Book formatter are sufficient; no new dependency, schema or release pin, generic
+rendering layer, or unnecessary test fixture. No additional finding.

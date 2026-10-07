@@ -513,3 +513,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D8 final primary browser closure](2026-10-06-d8-primary-review.md#final-scoped-p4-browser-review--approve): exact candidate `e947251e`, overall APPROVE; P4 held refresh/Shoo closed, no open primary findings. Final-head hosted CI and merge publication remain PM gates.
 
 - [C6 provisional primary review](2026-10-06-c6-provisional-primary-review.md): exact source `8acf6825`, CHANGES REQUIRED; failed-attempt Journal guidance and honest detour edge wording. Provisional source only; final release waits D9 publication.
+
+- [C6 provisional primary scoped fix round 1](2026-10-06-c6-provisional-primary-review.md#scoped-fix-round-1--p1p2-closed): source `5658f7c3`, provisional APPROVE; P1/P2 closed after thirteen focused tests and an actual-source SQLite detour/failure/Restart reopen control. Final release remains pending D9.
