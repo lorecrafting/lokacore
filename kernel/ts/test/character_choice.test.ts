@@ -68,7 +68,8 @@ const command = (w: ReturnType<typeof fresh>, type: string, ancestry?: string) =
     payload: { type, actor_id: w.character, ...(ancestry && { ancestry }) },
   }) as never;
 
-// Breaks: a character-choice guard blocks trusted time or due jobs, or elapsed opens player play.
+// Breaks: a character-choice guard blocks trusted time or due jobs, or the exit view gives a
+// different refusal than player admission before selection.
 test('trusted elapsed drains a due job before ancestry choice without admitting player movement', () => {
   const w = fresh();
   const run = '6f6f6f6f-1111-4222-8333-444444444444';
@@ -91,6 +92,9 @@ test('trusted elapsed drains a due job before ancestry choice without admitting 
     'completed',
   );
   assert.equal(advanced.world.state.characters?.[w.character], undefined);
+  const north = gameView(advanced.world).exits.find((exit) => exit.direction === 'north');
+  assert.ok(north && !north.available);
+  assert.equal(north.reason.code, 'invalid_state');
   const movement = step(
     advanced.world,
     {

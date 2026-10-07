@@ -192,6 +192,13 @@ export function refusal(
   set?: ActionSet,
 ) {
   if (
+    world.cartridge.ancestries &&
+    !characterChoice(world, world.character) &&
+    payload.type !== 'choose_ancestry' &&
+    payload.type !== 'elapsed'
+  )
+    return 'invalid_state';
+  if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&
     !fighting(world, payload.actor_id)
