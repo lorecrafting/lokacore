@@ -546,3 +546,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D10 foundation and composition opinion](2026-10-06-d10-foundation-opinion.md): scoped APPROVE at `8a4b8b04`; null-row invariant finding F1 closed, portable differential and knowledge/bleed/deer overlap controls pass. Content pins, browser, authority and final publication gates remain separate.
 
 - [Post-D10 authority fixture repair](2026-10-06-post-d10-fixture-review.md): initial source `c34e22c2`, CHANGES REQUIRED; scoped fix `5402b305`, independent APPROVE, R1 closed. Transport-trigger deletion now fails at forged-event refusal; restored focused 25/25 pass. Genesis, Study custody and Book stale-service controls also fail as intended; production guards and frozen fixtures unchanged.
+
+- [Browser SQLite worker deadline independent review](2026-10-06-web-sqlite-sync-deadline-review.md): exact source `fb618a29`, **APPROVE**, no findings; 50 focused tests pass, SDK-loop/no-deadline controls fail behaviorally, and version/source guard refusals preserve bytes. Broad publication gate remains separate.
