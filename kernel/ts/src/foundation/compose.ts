@@ -5,7 +5,11 @@ import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
 import { transitionEscort } from './compose_escort.ts';
-import { populationTransition, initializePopulationResource } from './compose_population.ts';
+import {
+  populationTransition,
+  initializePopulationResource,
+  crowTransition,
+} from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter } from './compose_encounter.ts';
 import { composeJob } from './compose_job.ts';
@@ -131,29 +135,29 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   return applyWorld(op, row, ctx);
 }
 
-function applyWorld(
-  op: Extract<
-    DeltaOp,
-    {
-      op:
-        | 'population.control'
-        | 'population.slot'
-        | 'water.transition'
-        | 'escort.transition'
-        | 'time.advance'
-        | 'resource.adjust'
-        | 'resource.initialize'
-        | 'cooldown.start'
-        | 'barrier.transition';
-    }
-  >,
-  row: Json | undefined,
-  ctx: Ctx,
-): Outcome {
+type WorldOp = Extract<
+  DeltaOp,
+  {
+    op:
+      | 'population.control'
+      | 'population.slot'
+      | 'crow.transition'
+      | 'water.transition'
+      | 'escort.transition'
+      | 'time.advance'
+      | 'resource.adjust'
+      | 'resource.initialize'
+      | 'cooldown.start'
+      | 'barrier.transition';
+  }
+>;
+function applyWorld(op: WorldOp, row: Json | undefined, ctx: Ctx): Outcome {
   switch (op.op) {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
+    case 'crow.transition':
+      return crowTransition(op, row);
     case 'water.transition':
       return transitionWater(op, row, ctx.state, read(containment(op.value.body_id), ctx));
     case 'escort.transition':

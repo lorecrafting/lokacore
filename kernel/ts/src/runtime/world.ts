@@ -35,6 +35,7 @@ import * as dialogue from '../mechanics/dialogue/rule.ts';
 import * as light from '../mechanics/light/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
+import * as population from '../mechanics/population/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
 import * as readable from '../mechanics/readable/rule.ts';
@@ -49,6 +50,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   attributes: attributes.decide,
   movement: movement.decide,
   combat: combat.decide,
+  population: population.decide,
   description_variant: description_variant.decide,
   containment: containment.decide,
   commerce: commerce.decide,
@@ -82,7 +84,6 @@ const RULELESS = [
   'death',
   'escort',
   'patrol',
-  'population',
   'behavior',
   'calendar',
   'reaction',
@@ -94,7 +95,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.33',
+  kernel_api: '1.34',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

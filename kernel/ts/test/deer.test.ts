@@ -11,7 +11,6 @@ import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
 import { content, fresh, ref } from './deer_fixture.ts';
 import { read } from './read.ts';
-
 const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 const missSeed = [2710938419, 1329376837, 2657997399, 1914447725] as const;
 function command(w: World, type: 'move' | 'attack', argument: string, n: number) {
@@ -65,11 +64,10 @@ function advance(w: World, until: number): World {
 function slot(w: World, member: string) {
   return Object.values(w.state.population_slots ?? {}).find((s) => s.member_id === member)!;
 }
-
 // Breaks: a new plan shifts genesis allocation or mints a second member or hide.
 test('independent active genesis IDs include all three deer pairs and control jobs', () => {
   const w = fresh();
-  const expected = read('protocol/fixtures/missing_child_v038_ids.json');
+  const expected = read('protocol/fixtures/missing_child_v039_ids.json');
   for (const name of ['oak_deer', 'orchard_deer', 'willow_deer']) {
     for (const role of ['deer', 'hide']) {
       const id = Object.entries(w.state.created ?? {}).find(
@@ -489,12 +487,14 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
 });
 
 // Breaks: a hash-correct untrusted cartridge bypasses the deer role pair or sight route checks.
-test('loader refuses malformed deer roles and missing flight text', () => {
-  for (const changed of ['role', 'narration']) {
+test('loader refuses malformed deer roles, missing hide and flight text', () => {
+  for (const changed of ['role', 'narration', 'missing_item']) {
     const c = structuredClone(content) as any;
     if (changed === 'role')
       c.population_bundles[ref('population_bundle', 'willow_deer')].loot_role = 'pelt';
-    else delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
+    else if (changed === 'narration')
+      delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
+    else delete c.population_bundles[ref('population_bundle', 'willow_deer')].item;
     const canonical = encode(c);
     const hash = createHash('sha256').update(canonical).digest('hex');
     const loaded = loadCartridge(

@@ -1,0 +1,19 @@
+✔ loader refuses a crow corridor without its reciprocal return edge (75.3035ms)
+✔ one exact dropped coin travels through one crow to the open nest (74.834875ms)
+✔ Attack releases carried coin and pauses the crow return (65.238541ms)
+✔ closed original nest causes a dry room fallback before the next leg (57.084417ms)
+✔ full original nest causes a conserved room fallback (54.235792ms)
+✔ a same-time return home suppresses the ordinary wander for that member (58.689666ms)
+✔ same-time stale acquire permits the ordinary crow wander (55.043ms)
+✔ crow job phase must match the current occurrence before moving custody (60.975625ms)
+✔ Take before the due acquisition cancels the old intent (61.474042ms)
+✔ Shoo releases the exact carried coin and cancels its pending transport leg (57.104792ms)
+✔ a second Green crow may bind a later Drop while the first returns (57.261292ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1374.447542

@@ -1,12 +1,6 @@
 # size: allow 340, patrol, water, bleed and character pairing join precondition replay
 defmodule Loka.Core.Invariants do
-  @moduledoc """
-  Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is
-  `kernel/ts/src/runtime/invariants.ts`, checked by the same composition fixtures.
-  Inputs: state/delta/result (`Compose.compose/2`), resolution (`TargetResolution`),
-  and decision/commit/published (committed, failed or unknown host outcome).
-  Unknown invariant ids raise.
-  """
+  @moduledoc "Pure portable invariants: composition, resolution and host outcomes; unknown IDs raise."
   alias Loka.Core.Compose
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
   @external_resource @registry_path
@@ -139,7 +133,10 @@ defmodule Loka.Core.Invariants do
   defp replay_op(%{"op" => "water.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
-  defp replay_op(%{"op" => "resource.initialize"}, _, _, ctx), do: {:cont, ctx}
+
+  defp replay_op(%{"op" => kind}, _, _, ctx) when kind in ~w(crow.transition resource.initialize),
+    do: {:cont, ctx}
+
   defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}

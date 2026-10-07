@@ -1,0 +1,29 @@
+✔ loader refuses a crow corridor without its reciprocal return edge (81.524792ms)
+✔ one exact dropped coin travels through one crow to the open nest (88.367708ms)
+✔ Attack releases carried coin and pauses the crow return (77.539ms)
+✔ closed original nest causes a dry room fallback before the next leg (62.503083ms)
+✔ full original nest causes a conserved room fallback (59.358667ms)
+✔ a same-time return home suppresses the ordinary wander for that member (61.095ms)
+✔ same-time stale acquire permits the ordinary crow wander (59.875958ms)
+✔ crow job phase must match the current occurrence before moving custody (56.565333ms)
+✔ Take before the due acquisition cancels the old intent (57.468334ms)
+✔ Shoo releases the exact carried coin and cancels its pending transport leg (60.045416ms)
+✔ a second Green crow may bind a later Drop while the first returns (58.54125ms)
+✔ crow acquisition harmlessly completes when another transfer moved the exact coin (57.289416ms)
+✔ crow transport composition matches independent literal answers (3.374042ms)
+✔ crow invariant rejects a counterfeit success (0.105208ms)
+✔ crow-only job cancellation is valid; missing every alternative is rejected (0.205ms)
+✔ a crow-bound schedule requires its closed phase (0.148083ms)
+✔ crow acquisition survives real SQLite cold reopen and invocation replay (259.442542ms)
+✔ crow intention, corridor flight and delivered return cold-reopen at their exact custody (769.062416ms)
+✔ a crow killed beyond its wander pair cold-reopens at its actual corridor room (201.828708ms)
+✔ real failed COMMIT and lost acknowledgement settle one crow acquisition (215.817209ms)
+✔ cold reopen refuses a forged crow occurrence without rewriting owner progress (104.98775ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2413.158584

@@ -8,6 +8,31 @@ defmodule Loka.Core.ComposePopulation do
   def base(%{"kind" => "population_slot"} = target, state),
     do: Map.get(state, "population_slots", %{})[key(target)]
 
+  def base(%{"kind" => "crow"} = target, state),
+    do: Map.get(state, "crows", %{})[key(target)]
+
+  # ponytail: one bounded five-phase CAS row. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  def transition(%{"op" => "crow.transition", "expected" => expected, "value" => value}, prior, _) do
+    from = expected && expected["phase"]
+    phase = value["phase"]
+
+    allowed = %{
+      "idle" => ~w(acquire),
+      "acquire" => ~w(leg idle return paused_return),
+      "leg" => ~w(leg return idle paused_return),
+      "return" => ~w(return idle paused_return),
+      "paused_return" => ~w(return idle)
+    }
+
+    check(
+      prior == expected and if(from, do: phase in allowed[from], else: phase == "acquire") and
+        (from in [nil, "idle"] or
+           (expected["member_id"] == value["member_id"] and
+              expected["generation"] == value["generation"])) and crow_shape?(phase, value),
+      value
+    )
+  end
+
   def transition(%{"op" => "population.control"} = op, row, _) do
     value = op["value"]
 
@@ -42,6 +67,24 @@ defmodule Loka.Core.ComposePopulation do
       %{"value" => op["value"], "at" => op["at"]}
     )
   end
+
+  defp crow_shape?("idle", value),
+    do: Enum.all?(~w(item_id nest_id job_id drop_event_id encounter_id), &(value[&1] == nil))
+
+  defp crow_shape?("paused_return", value),
+    do:
+      value["item_id"] == nil and value["job_id"] == nil and
+        value["encounter_id"] != nil and value["nest_id"] != nil and value["drop_event_id"] != nil
+
+  defp crow_shape?("return", value),
+    do:
+      value["item_id"] == nil and value["job_id"] != nil and
+        value["encounter_id"] == nil and value["nest_id"] != nil and value["drop_event_id"] != nil
+
+  defp crow_shape?(_, value),
+    do:
+      value["item_id"] != nil and value["job_id"] != nil and
+        value["encounter_id"] == nil and value["nest_id"] != nil and value["drop_event_id"] != nil
 
   defp check(true, value), do: {:ok, value}
   defp check(false, _), do: {:error, "precondition_failed"}

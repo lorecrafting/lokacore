@@ -1,0 +1,1571 @@
+{
+  "schemaVersion": "report-1",
+  "run": {
+    "id": "01a113ef-1cb5-77ea-b20c-2fc2ac612129",
+    "specVersion": "0.1",
+    "runner": {
+      "name": "e2e",
+      "version": "0.17.0"
+    },
+    "status": "passed",
+    "exitCode": 0,
+    "startedAt": "2026-10-07T01:16:40.224Z",
+    "finishedAt": "2026-10-07T01:16:50.218Z",
+    "project": {
+      "id": "loka-app",
+      "configDigest": "2a4b134772a090b78e1009e781f9530701efc5bda95f4dd03239494649328e41"
+    },
+    "environment": {
+      "ci": false,
+      "trustNoticeShown": false,
+      "os": "darwin 25.6.0",
+      "arch": "arm64",
+      "runtime": "node v24.21.0"
+    },
+    "vcs": {
+      "commit": "41d2551725449a61af9622f609a18e10caaefe3e",
+      "branch": "chapter1/d8-crows",
+      "dirty": false
+    },
+    "targets": [
+      {
+        "id": "web",
+        "index": 0,
+        "platform": "web",
+        "baseOrigin": "http://127.0.0.1:19106",
+        "environment": "test",
+        "engine": {
+          "name": "web",
+          "version": "0.12.0",
+          "spiVersion": 1
+        },
+        "capabilities": [
+          "actions",
+          "artifacts",
+          "browser",
+          "keyboard",
+          "location",
+          "observation",
+          "pointer",
+          "state"
+        ],
+        "artifactCapabilities": [
+          "screenshot",
+          "trace",
+          "video"
+        ],
+        "stateCapability": true
+      }
+    ],
+    "serialGroups": [],
+    "results": [
+      {
+        "id": "923f2a6c9be150bffc6888716e9d217768f568a52320f8b4884cdba0df3900a2",
+        "testId": "tests/book.e2e.ts::Book%20keeps%20a%20confirmed%20move%20across%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "Book keeps a confirmed move across reload"
+        ],
+        "file": "tests/book.e2e.ts",
+        "source": {
+          "file": "tests/book.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "81973c56d1a8f9e7a069e08c5bac9a2c5c96b58d524f81b4e117830b9252fb57",
+        "testId": "tests/book.e2e.ts::paid%20Lantern%20Rest%20resumes%20its%20captured%20dream%20choice%20after%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "paid Lantern Rest resumes its captured dream choice after browser reload"
+        ],
+        "file": "tests/book.e2e.ts",
+        "source": {
+          "file": "tests/book.e2e.ts",
+          "line": 22,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "c82f580f468267d0e49eb30fe10f76d1631c3efc882d353fed83d28e5fb0412c",
+        "testId": "tests/book.e2e.ts::paid%20ferry%20and%20free%20Sedge%20lesson%20survive%20isle%20exploration%2C%20return%20and%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 2,
+        "titlePath": [
+          "paid ferry and free Sedge lesson survive isle exploration, return and browser reload"
+        ],
+        "file": "tests/book.e2e.ts",
+        "source": {
+          "file": "tests/book.e2e.ts",
+          "line": 68,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "770beadd507c2881ea1fcee30903f01fd2a6f8b33ea2404aa011723b31121eec",
+        "testId": "tests/c4_pack.e2e.ts::hound%20Attack%20shows%20admitted%20helpers%20on%20the%20Combat%20page",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "hound Attack shows admitted helpers on the Combat page"
+        ],
+        "file": "tests/c4_pack.e2e.ts",
+        "source": {
+          "file": "tests/c4_pack.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "2f9fb5ccf76d5f957e02fe83daa53c5688857d95cf31082950d7824ec4c2ab8d",
+        "testId": "tests/character_choice.e2e.ts::authored%20ancestries%20keep%20their%20chapter%20effects%20and%20choice%20across%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "authored ancestries keep their chapter effects and choice across browser reload"
+        ],
+        "file": "tests/character_choice.e2e.ts",
+        "source": {
+          "file": "tests/character_choice.e2e.ts",
+          "line": 6,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "a272ac6f4eeae26e117df028962f30dbeda770325a38714e548b52bc01ed512f",
+        "testId": "tests/crows.e2e.ts::a%20held%20crow%20coin%20survives%20browser%20reload%20and%20Shoo%20returns%20it%20once",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "a held crow coin survives browser reload and Shoo returns it once"
+        ],
+        "file": "tests/crows.e2e.ts",
+        "source": {
+          "file": "tests/crows.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": true,
+        "status": "passed",
+        "attempts": [
+          {
+            "id": "01a113ef-2178-705f-ba91-ae6db6c48873",
+            "index": 0,
+            "status": "passed",
+            "startedAt": "2026-10-07T01:16:41.208Z",
+            "durationMs": 8975,
+            "artifacts": [
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:0",
+                "kind": "screenshot",
+                "mediaType": "image/png",
+                "redaction": "complete",
+                "producer": {
+                  "kind": "step",
+                  "stepId": "01a113ef-2178-705f-ba91-ae6db6c48873:38"
+                },
+                "path": "web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/screenshots/001-crow-held-before-refresh.png",
+                "size": 25103,
+                "sha256": "dd5143aa4f9ab92e1a34afcc40f7312f04cc96e6f81e73d372501be0566ba650"
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:1",
+                "kind": "screenshot",
+                "mediaType": "image/png",
+                "redaction": "complete",
+                "producer": {
+                  "kind": "step",
+                  "stepId": "01a113ef-2178-705f-ba91-ae6db6c48873:42"
+                },
+                "path": "web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/screenshots/002-crow-held-after-refresh.png",
+                "size": 25103,
+                "sha256": "dd5143aa4f9ab92e1a34afcc40f7312f04cc96e6f81e73d372501be0566ba650"
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:2",
+                "kind": "screenshot",
+                "mediaType": "image/png",
+                "redaction": "complete",
+                "producer": {
+                  "kind": "step",
+                  "stepId": "01a113ef-2178-705f-ba91-ae6db6c48873:59"
+                },
+                "path": "web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/screenshots/003-shoo-exact-coin-recovered.png",
+                "size": 24917,
+                "sha256": "530d7a1fa6ee86e67c95ccdb0a477e3239bdce37051e69b6c8bee6aa929f82d2"
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:3",
+                "kind": "trace",
+                "mediaType": "application/zip",
+                "redaction": "not-required",
+                "producer": {
+                  "kind": "attempt"
+                },
+                "path": "web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/trace/trace-part1.zip",
+                "size": 55593,
+                "sha256": "08f9862eb1b01b238b7b6761dee114260cc9011a5fdef1facf9772c9fadfcbe9"
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:4",
+                "kind": "trace",
+                "mediaType": "application/zip",
+                "redaction": "not-required",
+                "producer": {
+                  "kind": "attempt"
+                },
+                "path": "web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/trace/trace.zip",
+                "size": 1377569,
+                "sha256": "a0e78d348f309a6e8cde3d11a2d7a3ce4fce2dd349ea2c61afb73885dd96a556"
+              }
+            ],
+            "secondaryErrors": [],
+            "cleanup": "complete",
+            "steps": [
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:0",
+                "index": 0,
+                "kind": "resource",
+                "api": "browser.addInitScript",
+                "label": "function",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:41.307Z",
+                "durationMs": 1,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 10,
+                  "column": 17
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:1",
+                "index": 1,
+                "kind": "app",
+                "api": "app.clearState",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:41.309Z",
+                "durationMs": 636,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 18,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:2",
+                "index": 2,
+                "kind": "resource",
+                "api": "browser.reload",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:41.945Z",
+                "durationMs": 280,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 19,
+                  "column": 17
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:3",
+                "index": 3,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Fen-born\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.226Z",
+                "durationMs": 311,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 20,
+                  "column": 48
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:4",
+                "index": 4,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Continue\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.538Z",
+                "durationMs": 47,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 21,
+                  "column": 48
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:5",
+                "index": 5,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.585Z",
+                "durationMs": 49,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:6",
+                "index": 6,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go north\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.634Z",
+                "durationMs": 69,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:7",
+                "index": 7,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.704Z",
+                "durationMs": 39,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:8",
+                "index": 8,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go west\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.743Z",
+                "durationMs": 69,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:9",
+                "index": 9,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: /Peg Harrow, open/)",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.812Z",
+                "durationMs": 48,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 28,
+                  "column": 56
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:10",
+                "index": 10,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Buy a torch — 3p\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.860Z",
+                "durationMs": 79,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 29,
+                  "column": 56
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:11",
+                "index": 11,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Leave\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.939Z",
+                "durationMs": 53,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 30,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:12",
+                "index": 12,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: /^Contents, Character/)",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:42.993Z",
+                "durationMs": 50,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 31,
+                  "column": 60
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:13",
+                "index": 13,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Equipment & Inventory\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.043Z",
+                "durationMs": 48,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 32,
+                  "column": 61
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:14",
+                "index": 14,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"a torch, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.091Z",
+                "durationMs": 51,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 33,
+                  "column": 53
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:15",
+                "index": 15,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Ignite a torch\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.142Z",
+                "durationMs": 81,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 34,
+                  "column": 54
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:16",
+                "index": 16,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Leave\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.223Z",
+                "durationMs": 36,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 35,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:17",
+                "index": 17,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.259Z",
+                "durationMs": 49,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:18",
+                "index": 18,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go east\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.308Z",
+                "durationMs": 71,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:19",
+                "index": 19,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.380Z",
+                "durationMs": 45,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:20",
+                "index": 20,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go down\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.425Z",
+                "durationMs": 73,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:21",
+                "index": 21,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.498Z",
+                "durationMs": 44,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:22",
+                "index": 22,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go down\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.542Z",
+                "durationMs": 69,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:23",
+                "index": 23,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.611Z",
+                "durationMs": 44,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 39,
+                  "column": 54
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:24",
+                "index": 24,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Take old coin\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.656Z",
+                "durationMs": 53,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 40,
+                  "column": 53
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:25",
+                "index": 25,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Surface (free)\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.709Z",
+                "durationMs": 76,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 41,
+                  "column": 54
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:26",
+                "index": 26,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.785Z",
+                "durationMs": 41,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:27",
+                "index": 27,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go up\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.826Z",
+                "durationMs": 70,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:28",
+                "index": 28,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Map\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.897Z",
+                "durationMs": 45,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 23,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:29",
+                "index": 29,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Go north\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:43.943Z",
+                "durationMs": 80,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 24,
+                  "column": 57
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:30",
+                "index": 30,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: /^Contents, Character/)",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.024Z",
+                "durationMs": 34,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 44,
+                  "column": 60
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:31",
+                "index": 31,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Equipment & Inventory\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.058Z",
+                "durationMs": 33,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 45,
+                  "column": 61
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:32",
+                "index": 32,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.091Z",
+                "durationMs": 34,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 46,
+                  "column": 54
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:33",
+                "index": 33,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Drop old coin\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.125Z",
+                "durationMs": 74,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 47,
+                  "column": 53
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:34",
+                "index": 34,
+                "kind": "resource",
+                "api": "browser.evaluate",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.199Z",
+                "durationMs": 2,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 48,
+                  "column": 17
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:35",
+                "index": 35,
+                "kind": "app",
+                "api": "app.restart",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.201Z",
+                "durationMs": 418,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 52,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:36",
+                "index": 36,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Continue\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.619Z",
+                "durationMs": 320,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 53,
+                  "column": 48
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:37",
+                "index": 37,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"button\", name: \"a crow, The crow grips an old coin in its beak., open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.939Z",
+                "durationMs": 4,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 58,
+                  "column": 25
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:38",
+                "index": 38,
+                "kind": "app",
+                "api": "app.screenshot",
+                "label": "crow-held-before-refresh",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.943Z",
+                "durationMs": 20,
+                "events": [],
+                "artifacts": [
+                  "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:0"
+                ],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 59,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:39",
+                "index": 39,
+                "kind": "app",
+                "api": "app.restart",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:44.963Z",
+                "durationMs": 412,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 60,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:40",
+                "index": 40,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Continue\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.375Z",
+                "durationMs": 293,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 61,
+                  "column": 48
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:41",
+                "index": 41,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"button\", name: \"a crow, The crow grips an old coin in its beak., open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.669Z",
+                "durationMs": 4,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 62,
+                  "column": 25
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:42",
+                "index": 42,
+                "kind": "app",
+                "api": "app.screenshot",
+                "label": "crow-held-after-refresh",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.673Z",
+                "durationMs": 35,
+                "events": [],
+                "artifacts": [
+                  "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:1"
+                ],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 63,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:43",
+                "index": 43,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"a crow, The crow grips an old coin in its beak., open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.708Z",
+                "durationMs": 50,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 64,
+                  "column": 17
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:44",
+                "index": 44,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Shoo a crow\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.758Z",
+                "durationMs": 83,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 65,
+                  "column": 51
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:45",
+                "index": 45,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByText(\"The crow drops the old coin and flies off.\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.842Z",
+                "durationMs": 3,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 66,
+                  "column": 80
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:46",
+                "index": 46,
+                "kind": "assertion",
+                "api": "expect.not.toBeVisible",
+                "label": "getByRole(\"button\", name: \"Shoo a crow\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:45.846Z",
+                "durationMs": 1083,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 67,
+                  "column": 63
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:47",
+                "index": 47,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Leave\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:46.929Z",
+                "durationMs": 49,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 68,
+                  "column": 45
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:48",
+                "index": 48,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:46.978Z",
+                "durationMs": 3,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 69,
+                  "column": 62
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:49",
+                "index": 49,
+                "kind": "assertion",
+                "api": "expect.not.toBeVisible",
+                "label": "getByRole(\"button\", name: \"a crow, The crow grips an old coin in its beak., open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:46.982Z",
+                "durationMs": 1000,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 70,
+                  "column": 29
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:50",
+                "index": 50,
+                "kind": "app",
+                "api": "app.restart",
+                "label": "",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:47.983Z",
+                "durationMs": 419,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 71,
+                  "column": 13
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:51",
+                "index": 51,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Continue\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:48.402Z",
+                "durationMs": 305,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 72,
+                  "column": 48
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:52",
+                "index": 52,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:48.707Z",
+                "durationMs": 3,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 73,
+                  "column": 62
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:53",
+                "index": 53,
+                "kind": "assertion",
+                "api": "expect.not.toBeVisible",
+                "label": "getByRole(\"button\", name: \"a crow, The crow grips an old coin in its beak., open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:48.710Z",
+                "durationMs": 1090,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 74,
+                  "column": 29
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:54",
+                "index": 54,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:49.800Z",
+                "durationMs": 55,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 75,
+                  "column": 54
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:55",
+                "index": 55,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Take old coin\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:49.855Z",
+                "durationMs": 95,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 76,
+                  "column": 53
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:56",
+                "index": 56,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: /^Contents, Character/)",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:49.950Z",
+                "durationMs": 48,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 77,
+                  "column": 60
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:57",
+                "index": 57,
+                "kind": "locator",
+                "api": "locator.tap",
+                "label": "getByRole(\"button\", name: \"Equipment & Inventory\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:49.998Z",
+                "durationMs": 50,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 78,
+                  "column": 61
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:58",
+                "index": 58,
+                "kind": "assertion",
+                "api": "expect.toBeVisible",
+                "label": "getByRole(\"button\", name: \"old coin, open\")",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:50.048Z",
+                "durationMs": 2,
+                "events": [],
+                "artifacts": [],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 79,
+                  "column": 62
+                }
+              },
+              {
+                "id": "01a113ef-2178-705f-ba91-ae6db6c48873:59",
+                "index": 59,
+                "kind": "app",
+                "api": "app.screenshot",
+                "label": "shoo-exact-coin-recovered",
+                "status": "passed",
+                "startedAt": "2026-10-07T01:16:50.051Z",
+                "durationMs": 30,
+                "events": [],
+                "artifacts": [
+                  "01a113ef-2178-705f-ba91-ae6db6c48873:artifact:2"
+                ],
+                "source": {
+                  "file": "tests/crows.e2e.ts",
+                  "line": 80,
+                  "column": 13
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "2c4479c2e12ccbeb2e4b6fc2a52b9dc27e65af138075df4b076f1951f3eff316",
+        "testId": "tests/deer.e2e.ts::a%20visible%20deer%20leaves%20Willow%20Shade%20after%20the%20sight%20deadline%20and%20stays%20gone%20on%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "a visible deer leaves Willow Shade after the sight deadline and stays gone on reload"
+        ],
+        "file": "tests/deer.e2e.ts",
+        "source": {
+          "file": "tests/deer.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "5658963b6f8a825c4b2d4476d05b65cf84e981c8432ae19b0836cb31c198847f",
+        "testId": "tests/deer.e2e.ts::a%20killed%20deer%20leaves%20its%20one%20hide%20for%20a%20confirmed%20Take%20across%20reload",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "a killed deer leaves its one hide for a confirmed Take across reload"
+        ],
+        "file": "tests/deer.e2e.ts",
+        "source": {
+          "file": "tests/deer.e2e.ts",
+          "line": 42,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "e4d28b6ca8643fa6c2034b2c62608dc21244701f3a6cf7f4c69553b9b9ca20c8",
+        "testId": "tests/practical_skills.e2e.ts::Sedge%20lesson%20leads%20to%20careful%20Harvest%20and%20survives%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "Sedge lesson leads to careful Harvest and survives browser reload"
+        ],
+        "file": "tests/practical_skills.e2e.ts",
+        "source": {
+          "file": "tests/practical_skills.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "e34a410198484d9734d2ef499c48288f84a5c6ff55a96c9d271c3dd88910d035",
+        "testId": "tests/practical_skills.e2e.ts::Peg%20lesson%20discounts%20an%20actual%20purchase%20after%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "Peg lesson discounts an actual purchase after browser reload"
+        ],
+        "file": "tests/practical_skills.e2e.ts",
+        "source": {
+          "file": "tests/practical_skills.e2e.ts",
+          "line": 43,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "a008a602d21037c1623b3fcd67e511c729aa59bee4a5741ed1816ec4b73c1506",
+        "testId": "tests/water_depths.e2e.ts::both%20water%20bottoms%20keep%20lit%20loot%20and%20a%20free%20Surface%20across%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "both water bottoms keep lit loot and a free Surface across browser reload"
+        ],
+        "file": "tests/water_depths.e2e.ts",
+        "source": {
+          "file": "tests/water_depths.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "64a26866ab14503b9a4da0860c348e0acd03212456ba4e18cf4daefbb6ac2941",
+        "testId": "tests/water_depths.e2e.ts::expired%20dive%20returns%20to%20Chapel%20and%20recovers%20original%20belongings%20once%20after%20reload",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "expired dive returns to Chapel and recovers original belongings once after reload"
+        ],
+        "file": "tests/water_depths.e2e.ts",
+        "source": {
+          "file": "tests/water_depths.e2e.ts",
+          "line": 70,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "4866e35b6c3b7cb7db3394f58639cf283c998d2ccd84caf3c5588ddf64729f6f",
+        "testId": "tests/western_ashmere.e2e.ts::Western%20Ashmere%20documents%20and%20all%20dark%20stairs%20persist%20through%20browser%20reload",
+        "kind": "test",
+        "declarationIndex": 0,
+        "titlePath": [
+          "Western Ashmere documents and all dark stairs persist through browser reload"
+        ],
+        "file": "tests/western_ashmere.e2e.ts",
+        "source": {
+          "file": "tests/western_ashmere.e2e.ts",
+          "line": 5,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      },
+      {
+        "id": "e71301165b56017435dfb0345aa91fb844789e88d7df7285a8700fcc9c0ca1e5",
+        "testId": "tests/western_ashmere.e2e.ts::Hob%20can%20be%20met%20at%20both%20scheduled%20destinations%20using%20an%20isolated%20controlled%20browser%20clock",
+        "kind": "test",
+        "declarationIndex": 1,
+        "titlePath": [
+          "Hob can be met at both scheduled destinations using an isolated controlled browser clock"
+        ],
+        "file": "tests/western_ashmere.e2e.ts",
+        "source": {
+          "file": "tests/western_ashmere.e2e.ts",
+          "line": 71,
+          "column": 1
+        },
+        "targetId": "web",
+        "platform": "web",
+        "agent": "default",
+        "repeat": 0,
+        "tags": [],
+        "selected": false,
+        "status": "skipped",
+        "skip": {
+          "cause": "filtered",
+          "reason": "file not selected by a positional argument"
+        },
+        "attempts": []
+      }
+    ],
+    "errors": [],
+    "summary": {
+      "discovered": 14,
+      "selected": 1,
+      "executed": 1,
+      "passed": 1,
+      "failed": 0,
+      "interrupted": 0,
+      "flaky": 0,
+      "skipped": 0
+    },
+    "limits": {
+      "maxAgentContextBytes": 16384,
+      "maxLedgerBytes": 8192,
+      "maxObservationBytes": 262144,
+      "maxEventsPerStep": 1000,
+      "maxModelTokensPerCall": 64000
+    },
+    "usage": {
+      "discoveredResults": 14,
+      "maxAgentContextBytes": 0,
+      "maxLedgerBytes": 0,
+      "maxObservationBytes": 0,
+      "artifactBytes": 1508285,
+      "downloads": 0,
+      "events": 0,
+      "modelTokens": 0,
+      "maxModelCallsInStep": 0,
+      "maxActionStepsInStep": 0
+    }
+  }
+}

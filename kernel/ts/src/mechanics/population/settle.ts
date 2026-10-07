@@ -199,6 +199,15 @@ function wanderable(
     row.replacement_due === null &&
     !born.has(member) &&
     row.last_flight_at !== job.due_time &&
+    !Object.values(world.state.crows ?? {}).some(
+      (crow) => crow.member_id === member && crow.phase !== 'idle',
+    ) &&
+    !Object.values(world.state.jobs ?? {}).some(
+      (due) =>
+        due.crow_member_id === member &&
+        due.due_time === job.due_time &&
+        (due.crow_phase === 'leg' || due.crow_phase === 'return'),
+    ) &&
     living(world, member) &&
     !engaged(world, member as EntityId)
   );

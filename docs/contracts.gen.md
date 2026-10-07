@@ -211,6 +211,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `continue`: Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs.
   - `elapsed`: Authority-only elapsed logical interval (M1-A); admitted only by stepElapsed, never an invocation. Durable run scopes its distinct CommandId.
   - `attack`
+  - `shoo`
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.
   - `put`: Put a directly body-held existing item into a reachable open item container, preserving identity and checking cycles/capacity.
   - `read`: Read one present inspectable detail with readable metadata (readable@1).
@@ -276,6 +277,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `patrol.transition`
   - `choice.attempt`
   - `liquid.set`
+  - `crow.transition`
   - `population.control`
   - `population.slot`
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
@@ -302,6 +304,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `fuel`
   - `patrol`
   - `liquid`
+  - `crow`
   - `population_plan`
   - `population_slot`
   - `bleed`
@@ -379,6 +382,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `entity_entered_room`: entity_id entered room_id.
   - `item_acquired`: item_id is now held by holder_id.
   - `item_dropped`: item_id was dropped into room_id.
+  - `shooed`: A living co-located actor made a carrying crow drop its exact item into this room.
   - `quest_activated`: A QuestInstance became active.
   - `quest_resolved`: A QuestInstance resolved with a named outcome.
   - `choice_opened`: A pending choice opened.
@@ -605,6 +609,7 @@ ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.
 
 Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).
 
+- **CrowTransport**: One bounded crow slot's exact scavenging occurrence. Idle rows retain the last member generation without a pending item or job.
 - **EntityIdentity**: A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.
 - **EntityOrigin**: Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).
   - `authored`: Placed by the cartridge's authored content.

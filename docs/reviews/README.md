@@ -1,5 +1,8 @@
 # Independent reviews
 
+- [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. Final primary closure is indexed below.
+
+
 - [D11 character choice primary source](2026-10-06-d11-character-choice-primary-review.md): PR #257 initial `73d3d972` CHANGES REQUIRED for D11-P1 and independent D11-SP-01; scoped fix `1cb0f6fb` APPROVE closes death/cold-reopen proof and portable present-null refusal. Both replanted mutants red; restored 19 TypeScript/SQLite and 2 Elixir tests green. Independent scoped save/protocol opinion APPROVE on the same source head. No open findings.
 
 - [D7 deer final save, protocol and foundation second opinion](2026-10-06-d7-deer-final-save-review.md): PR #253 original `776742a6` APPROVE; round-1 `6b626769` CHANGES REQUIRED for D7-S3; round-2 `c446bee0` APPROVE closes the sight-only cause in composer and cold receipt. Focused kernel 3/3 and SQLite 2/2, red controls verified. Hosted exact-head merge gate remains PM-owned.
@@ -501,3 +504,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 owner-approved scoped fix round 3](2026-10-06-c5-final-primary-review.md#owner-approved-scoped-fix-round-3--approve): source `0e7bbfe8`, APPROVE; SO7 future-cadence skip refused in both kernels and SO8 committed SQLite reopen/receipt/later-tick regression verified. TS/SQLite21/21, Elixir3/3, three mutation controls red; no open primary finding.
 
 - [C5 second opinion on owner-approved fix round 3](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-owner-approved-fix-round-3): verbatim APPROVE on corrected exact source `0e7bbfe8`; SO7/SO8 closed, no open findings. Both independent reviews approve; exact-head hosted CI remains the merge gate.
+
+- [D8 primary review](2026-10-06-d8-primary-review.md): source `41e86ee7`, CHANGES REQUIRED; combat escape, safe allowlist admission, replacement invariant and remaining save/browser proof.
+
+- [D8 primary scoped fix round 1](2026-10-06-d8-primary-review.md#scoped-fix-round-1--p1p3-closed-p4-open): source `ec0f2dd3`, P1–P3 closed; P4 save/browser acceptance remains open. TypeScript24/24, Elixir16/16, three focused mutations red and restored.
+
+- [D8 primary P4 save proof](2026-10-06-d8-primary-review.md#scoped-p4-save-proof--closed-browser-open): source `efc7f5eb`; save portion closed after25 reopens/20 faults and typed-corruption red control. Browser held refresh/Shoo remains open; CHANGES REQUIRED.
+- [D8 final primary browser closure](2026-10-06-d8-primary-review.md#final-scoped-p4-browser-review--approve): exact candidate `e947251e`, overall APPROVE; P4 held refresh/Shoo closed, no open primary findings. Final-head hosted CI and merge publication remain PM gates.

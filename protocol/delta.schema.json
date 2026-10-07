@@ -530,6 +530,16 @@
             },
             "water_body_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "crow_phase": {
+              "enum": ["acquire", "leg", "return"]
             }
           },
           "required": [
@@ -878,6 +888,13 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "crow_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "crow_generation": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
@@ -897,10 +914,14 @@
           "exactlyOneRequired": [
             "encounter_id",
             "bleed_body_id",
+            "crow_member_id",
             "sight_member_id",
             "water_generation"
           ],
           "requiredUnless": {
+            "crow_member_id": [
+              "encounter_id"
+            ],
             "sight_member_id": [
               "encounter_id"
             ],
@@ -912,6 +933,12 @@
             ]
           },
           "dependentRequired": {
+            "crow_member_id": [
+              "crow_generation"
+            ],
+            "crow_generation": [
+              "crow_member_id"
+            ],
             "bleed_body_id": [
               "bleed_generation"
             ],
@@ -1117,6 +1144,19 @@
             "from",
             "to"
           ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": { "const": "crow.transition" },
+            "writer_group": { "$ref": "#/$defs/WriterGroup" },
+            "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "slot": { "type": "integer", "minimum": 1, "maximum": 64 },
+            "expected": { "anyOf": [{ "$ref": "relation.schema.json#/$defs/CrowTransport" }, { "type": "null" }] },
+            "value": { "$ref": "relation.schema.json#/$defs/CrowTransport" }
+          },
+          "required": ["op", "writer_group", "plan", "slot", "expected", "value"],
           "additionalProperties": false
         },
         {
@@ -1752,6 +1792,16 @@
             "kind",
             "item_id"
           ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "crow" },
+            "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "slot": { "type": "integer", "minimum": 1, "maximum": 64 }
+          },
+          "required": ["kind", "plan", "slot"],
           "additionalProperties": false
         },
         {

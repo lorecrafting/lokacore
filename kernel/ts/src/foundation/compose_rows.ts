@@ -19,6 +19,7 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   if (t.kind === 'clock') return s.clock;
   if (t.kind === 'character') return get(section(s, 'characters'), t.character_id);
   if (t.kind === 'fact') return get(section(s, 'facts'), key(t));
+  if (t.kind === 'crow') return get(section(s, 'crows'), key(t));
   switch (t.kind) {
     case 'entity':
       return get(section(s, 'created'), t.entity_id);
@@ -40,15 +41,13 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'water'), t.actor_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
+    case 'resource':
+    case 'cooldown':
+    case 'barrier':
+      return get(section(s, `${t.kind}s`), key(t));
     case 'fuel':
     case 'liquid':
       return get(section(s, t.kind === 'fuel' ? 'fuel' : 'liquids'), t.item_id);
-    case 'resource':
-      return get(section(s, 'resources'), key(t));
-    case 'cooldown':
-      return get(section(s, 'cooldowns'), key(t));
-    case 'barrier':
-      return get(section(s, 'barriers'), key(t));
   }
 }
 

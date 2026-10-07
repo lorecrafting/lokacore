@@ -17,7 +17,7 @@ export function birth(
   const spec = world.populationSpecs[key(plan)];
   if (!spec) throw new KernelError('precondition_failed');
   const member_id = mint() as EntityId;
-  const loot_id = mint() as EntityId;
+
   const origin = {
     kind: 'spawned' as const,
     by: plan,
@@ -33,11 +33,13 @@ export function birth(
       spec.home,
       writer_group,
     ),
-    ...spawnPair(
-      identity(loot_id, spec[spec.loot_role]!, spec.loot_role, origin),
-      member_id,
-      writer_group,
-    ),
+    ...(spec[spec.loot_role]
+      ? spawnPair(
+          identity(mint() as EntityId, spec[spec.loot_role]!, spec.loot_role, origin),
+          member_id,
+          writer_group,
+        )
+      : []),
     hpBirth(plan, member_id, spec.hp.start, at, writer_group),
   ];
 }

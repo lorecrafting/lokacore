@@ -244,9 +244,12 @@ export function admission(
 
 function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
   const p = payload as { actor_id: CharacterId } & Partial<
-    Record<'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id', EntityId>
+    Record<
+      'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id' | 'crow_id',
+      EntityId
+    >
   >;
-  const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id];
+  const ids = [p.target_id, p.item_id, p.recipient_id, p.container_id, p.provider_id, p.crow_id];
   if (payload.type === 'fill') ids.push(payload.source_id, payload.vessel_id);
   if (payload.type === 'pour') ids.push(payload.source_id, payload.receiver_id);
   if (payload.type === 'drink') ids.push(payload.vessel_id);

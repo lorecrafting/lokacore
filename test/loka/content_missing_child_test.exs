@@ -1,7 +1,7 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v038_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v039_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward/message custody, return guards or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do
@@ -105,6 +105,36 @@ defmodule Loka.ContentMissingChildTest do
            )
   end
 
+  # Breaks: relaxing crow companion items also accepts a deer bundle without its hide.
+  test "deer bundle still requires its hide", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "population_bundles/willow_deer.json")
+    bundle = path |> File.read!() |> JSON.decode!() |> Map.delete("item")
+    File.write!(path, JSON.encode!(bundle))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             diagnostics,
+             &String.ends_with?(&1["path"], "populations/willow_deer.bundle")
+           )
+  end
+
+  # Breaks: source compiler accepts a one-way crow corridor that strands a return leg.
+  test "crow transport corridor requires its reciprocal edge", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "rooms/well_lane.json")
+    room = path |> File.read!() |> JSON.decode!()
+    File.write!(path, JSON.encode!(update_in(room, ["exits"], &Map.delete(&1, "south"))))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(diagnostics, fn d ->
+             d["code"] == "SCHEMA_VIOLATION" and
+               d["path"] == "populations/crow_green_1.scavenge"
+           end)
+  end
+
   # Breaks: the compiler admits a period that cannot revisit a newly eligible fatal slot in time.
   test "hound wander must be no slower than replacement", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ashmere_missing_child", dir)
@@ -135,5 +165,22 @@ defmodule Loka.ContentMissingChildTest do
              &(&1["code"] == "SCHEMA_VIOLATION" and
                  &1["path"] == "populations/fen_hounds.pack.flight_below_percent")
            )
+  end
+
+  # Breaks: an authored allowlist admits a container or protected/wearable item before expansion.
+  test "crow source refuses unsafe allowlisted item roles", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "items/old_coin.json")
+    original = path |> File.read!() |> JSON.decode!()
+
+    for patch <- [
+          %{"container" => true, "capacity" => 2},
+          %{"give_allowed" => false},
+          %{"slot" => "cloak"}
+        ] do
+      File.write!(path, JSON.encode!(Map.merge(original, patch)))
+      assert {:error, diagnostics} = Loka.Content.compile(dir)
+      assert Enum.any?(diagnostics, &String.ends_with?(&1["path"], ".scavenge"))
+    end
   end
 end

@@ -25,6 +25,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   move: [{ kind: 'none' }, ['direction']],
   scan: [{ kind: 'none' }, []],
   attack: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
+  shoo: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
   flee: [{ kind: 'none' }, []],
   buy: [entity('room_contents'), ['quoted_price']],
   sell: [entity('inventory'), ['quoted_price']],

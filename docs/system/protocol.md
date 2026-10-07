@@ -20,6 +20,7 @@ The standard `dependentRequired` object keyword requires the declared companion 
 whenever its key is present. C5 uses it in both directions for a bleed body/generation pair;
 an orphan generation cannot hide inside another cancellation binding. Missing companions
 report `missing_property` at their property paths in both kernels.
+
 Every contract's
 `examples` must validate and `protocol/fixtures/invalid.json` must fail with exactly the listed
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
@@ -68,7 +69,7 @@ storage half):
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
-   (`runtime/proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
+   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
    The headless GameView/admission check classifies a foreign-world envelope
    against the observed world before comparing its action offer: only `not_found`
    rejection agrees. A current-world offer refused `not_found` remains a mismatch.
@@ -96,7 +97,7 @@ A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (a
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
 `protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:365`). A rejection or fault changes nothing: not the state, RNG,
-clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/runtime/invariants.ts:246`).
+clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/runtime/invariants.ts:116`).
 
 ## Composition
 
@@ -190,7 +191,7 @@ Admission independently revalidates its pair under the decision counter.
 
 `protocol/invariants.json` registers the active invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
-Pure checks by id: `kernel/ts/src/runtime/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
+Pure checks by id: `kernel/ts/src/runtime/invariants.ts:34` (all), `lib/loka/core/invariants.ex:34`
 (the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:141`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
@@ -1230,6 +1231,6 @@ Movement's accepted transfer is the sole route-credit producer. At the hydrated 
 
 The committed player Drop remains the only intent producer: its `item_dropped` event binds the exact item EntityId, direct room holder, command cause and one eligible current crow slot/member generation. One typed occurrence per crow binds its current job and phase (`acquire`, `leg`, `return` or `paused_return`), member generation, original nest EntityId, and the exact item only during acquire/leg; return/paused_return has no reserved item. No unbounded candidate scan, claim table or new generic scheduler is selected. A job advances one acquisition/transport/return leg in its own writer group under canonical `(due_time, job_id)` order and shared budgets; scheduling its successor uses the pinned cartridge interval. A stale occurrence completes harmlessly and cannot reassign the item. Never merge unrelated job writer groups or weaken `conflicting_write`.
 
-Job acquisition uses existing checked `entity.transfer` and `item_acquired` with the crow as holder and `run_job` causation. It is not a player Take; consumers requiring body acquisition still check the actual destination. Each leg uses ordinary NPC room transfer and `entity_entered_room` with job scope/cause. Deposit uses checked `entity.transfer` into the original open nest only at Oak Branches; its direct-root limit is checked before transfer. Failed capacity/location/open-edge conditions use a conserved transfer to the crow's present dry room and change the occurrence to return. Deposit also starts return. Each return job checks the same crow/slot/generation, current corridor room, home and job binding, then transfers the crow one adjacent edge toward home and schedules only the next return leg. If already at home, release clears the occurrence without a new job; otherwise the final home arrival clears it, after at most seven legs. No item stays reserved during return, but that crow remains unavailable for a new Drop until return ends. The same checked custody and query budget cover Shoo and Attack release. Neither fallback nor Shoo emits player acquisition or a reward. A malformed or no-longer-legal return edge faults without teleport or a zero-time retry.
+Each crow-bound scheduled job carries one closed `crow_phase` (`acquire`, `leg`, or `return`) copied from the occurrence at scheduling; run admission requires it to equal the current phase. This existing job-row field distinguishes a completed return from a stale acquisition after Take at a same-time population boundary; only a due `leg` or `return` job suppresses that member's ordinary wander. Job acquisition uses existing checked `entity.transfer` and `item_acquired` with the crow as holder and `run_job` causation. It is not a player Take; consumers requiring body acquisition still check the actual destination. Each leg uses ordinary NPC room transfer and `entity_entered_room` with job scope/cause. Deposit uses checked `entity.transfer` into the original open nest only at Oak Branches; its direct-root limit is checked before transfer. Failed capacity/location/open-edge conditions use a conserved transfer to the crow's present dry room and change the occurrence to return. Deposit also starts return. Each return job checks the same crow/slot/generation, current corridor room, home and job binding, then transfers the crow one adjacent edge toward home and schedules only the next return leg. If already at home, release clears the occurrence without a new job; otherwise the final home arrival clears it, after at most seven legs. No item stays reserved during return, but that crow remains unavailable for a new Drop until return ends. The same checked custody and query budget cover Shoo and Attack release. Neither fallback nor Shoo emits player acquisition or a reward. A malformed or no-longer-legal return edge faults without teleport or a zero-time retry.
 
 Add `shoo {actor_id: CharacterId, crow_id: EntityId}` with exact `ActionInvocation {action_key: "shoo", target_ids: [crow_id], input: {}}` and accepted `shooed` binding crow, item and destination room. Shared projection/execution admission requires a living standing co-located actor, current living plan member, direct held eligible item and its pending transport occurrence. Before any transfer, recheck generation/job/custody and destination. The existing Attack command keeps its own shape; accepted Attack against a carrying or returning crow drops any held root locally, cancels the due job and records `paused_return` in the same group before encounter creation. On encounter close, the combat owner clears a dead member's occurrence or schedules one return job for the surviving member at the next authored interval; no return job runs during the encounter. Death uses existing forced corpse custody for any direct held root. Population work skips a member with a due transport/return job at the same clock, whether it ran first or second, without writing that member or sharing the job writer group. A refused/stale action leaves all rows unchanged. Extend only necessary closed command/action/outcome/job/event shapes and both validators; every new required field and bound gets a negative fixture and mutant. Preserve all frozen fixtures, exact replay and final-head budget behavior.
