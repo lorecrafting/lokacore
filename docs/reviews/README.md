@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, independent CHANGES REQUIRED; D8-S1 replacement invariant and D8-S2 unbound-job parity remain open. Own CAS mutant killed; 21 TS/SQLite and 15 Elixir checks pass; browser closure pending.
+- [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. P4 save/browser closure remains pending.
 
 
 - [D11 character choice primary source](2026-10-06-d11-character-choice-primary-review.md): PR #257 initial `73d3d972` CHANGES REQUIRED for D11-P1 and independent D11-SP-01; scoped fix `1cb0f6fb` APPROVE closes death/cold-reopen proof and portable present-null refusal. Both replanted mutants red; restored 19 TypeScript/SQLite and 2 Elixir tests green. Independent scoped save/protocol opinion APPROVE on the same source head. No open findings.

@@ -63,3 +63,36 @@ than the five focused SQLite tests above. Full-nest fallback, carrying refresh
 and Shoo browser closure remain pending at this source. No browser, E1–E3 or
 publication certification is granted. Owner save untouched; native work paused;
 UI blur remains deferred. This record is committed separately for PM integration.
+
+## Round 1 scoped recheck
+
+Exact source `ec0f2dd3ac6acda1a0f0e8a9028e8c97642df45c`.
+Same independent reviewer; **APPROVE for S1/S2 fixes**. This scoped verdict does
+not close the primary review's P4 save/browser proof or authorize publication.
+
+- **D8-S1 CLOSED:** both independent invariants now exempt only an idle prior
+  occurrence from member/generation continuity. Active occurrences retain the
+  check. Shared literal cases prove replacement acquisition succeeds and an
+  active generation cannot rebind; the latter also rejects counterfeit success.
+- **D8-S2 CLOSED:** TypeScript composition and independent replay now select crow
+  binding validation for `population_bundle` even when all crow fields are
+  absent. Elixir independent replay refuses that unbound kind as its composer
+  already did. The shared literal refusal and counterfeit-success check pass
+  through both kernels and the differential test.
+
+Independent focused run: **22 TypeScript/kernel/real-SQLite tests passed**,
+including all17 literal flight/return cold checkpoints, expanded real failed
+COMMIT/lost-acknowledgement cases and combat pause/Flee resume with receipt replay.
+**5 Elixir composition/differential tests passed**. Individually reverted the
+S1 TypeScript and Elixir exceptions, the S2 TypeScript composer and invariant
+kind checks, and the S2 Elixir invariant kind check: **all five mutants failed**
+(existing extended literal tests; TypeScript exit1, Elixir exit2). Restored each
+source; final TypeScript22 and Elixir5 runs are green. No mutant retained.
+
+Inspected direct composition/invariant callers and changed save-facing movement
+closure and SQLite tests. Movement reuses existing crow settlement on encounter
+close. No protocol schema, save format or transaction-host implementation changed
+in this round. Ponytail scoped review found no unnecessary machinery. P4's
+remaining nest/Shoo/replacement/fault/browser matrix is explicitly pending in the
+developer checkpoint and is not certified here; exact-head hosted CI remains the
+PM merge gate. Open second-opinion findings: **none**.
