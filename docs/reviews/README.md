@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D10 save/protocol independent review](2026-10-06-d10-save-protocol-review.md): source `806bfe4f`, test-only followup `b8c4e8ec`, scoped APPROVE; 8 focused tests, 9 independent SQLite corruption probes and 3 save-pin tests pass. No findings; foundation/proposal, browser and publication gates remain separate.
+
 - [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. Final primary closure is indexed below.
 
 
