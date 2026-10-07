@@ -1,5 +1,0 @@
-check: mismatch-restored
-exit_status: 0
-active v034 hash e2ad69a89f007881eba3ebec925abd63bcb563060dc60b8725d87da13c12a390
-old v033 only: pinned_release_missing, byte-preserving
-exact v034: open

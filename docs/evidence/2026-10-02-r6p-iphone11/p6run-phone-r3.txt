@@ -1,5 +1,0 @@
-P6RUN p6-1790960272442-n37920ea8b43b2aa4 ka begin build=r3 hermes={"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
-P6RUN p6-1790960272442-n37920ea8b43b2aa4 ka CHECK lantern known answer hash PASS "050cba8c964be222d47454c0a2e833dc592cfc905c8bcd09bb2def34f908b89d"
-P6RUN p6-1790960272442-n37920ea8b43b2aa4 ka CHECK lantern known answer value PASS "canonical"
-P6RUN p6-1790960272442-n37920ea8b43b2aa4 ka CHECK known answers no mismatch PASS ["[]","[]","[]","[]"]
-P6RUN p6-1790960272442-n37920ea8b43b2aa4 ka done records=4 mismatches=0 checks_failed=0

@@ -1,3 +1,0 @@
-mobile/authority/local-story/commerce-save.ts:27: info: size: allow 60, one ordered reconciliation loop joins exact money and custody evidence
-mobile/authority/local-story/commerce-save.ts:125: info: size: allow 50, bind one whole exchange to its command, item, payment and acquired event
-kernel/ts/test/sim.ts:1: info: size: allow 515, the existing headless action generator also consumes exact service offers

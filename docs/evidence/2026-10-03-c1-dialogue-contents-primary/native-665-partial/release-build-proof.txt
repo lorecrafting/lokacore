@@ -1,6 +1,0 @@
-Actual xcodebuild configuration: Release
-SDK: iphonesimulator
-Signing: CODE_SIGNING_ALLOWED=NO
-Clean source: 665b3ff6c0fbed1109a8aa13576bad710a623d11
-Actual final marker: ** BUILD SUCCEEDED **
-Raw full build output retained privately; source and simulator identifiers excluded.

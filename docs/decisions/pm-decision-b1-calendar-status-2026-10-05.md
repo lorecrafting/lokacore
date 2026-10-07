@@ -1,7 +1,7 @@
 # PM decision: B1 chapter calendar and Book status — 2026-10-05
 
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
-the PM adopts [B1](../briefs/chapter-one/b1-calendar-status-brief-2026-10-05.md) as the
+the PM adopts [B1](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b1-calendar-status-brief-2026-10-05.md) as the
 M1-C consumer for the real Missing Child chapter. These are PM selections within the owner's
 world-parameter and browser-first direction.
 

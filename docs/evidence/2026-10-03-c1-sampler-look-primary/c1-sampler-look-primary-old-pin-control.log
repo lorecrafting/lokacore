@@ -1,3 +1,0 @@
-PASS: real previous sampler save refuses missing pin with byte-identical file; explicit Start over installs literal 0.0.2 pin in place, without deletion.
-
-EXIT 0

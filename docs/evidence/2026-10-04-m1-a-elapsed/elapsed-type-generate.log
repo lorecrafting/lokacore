@@ -1,4 +1,0 @@
-** (ArgumentError) protocol/ outside the schema subset:
-command.schema.json#/$defs/CommandPayload/oneOf: every branch needs the same one required const property
-    lib/loka/core/contracts/schema.ex:57: Loka.Core.Contracts.Schema.flatten!/1
-    lib/loka/core/contracts.ex:36: (module)

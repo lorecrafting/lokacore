@@ -1,9 +1,0 @@
-$ mise exec -- node bin/check_ts_size.mjs kernel/ts/src/view/view.ts kernel/ts/src/view/action_lists.ts mobile/authority/local-story/save.ts
-kernel/ts/src/view/action_lists.ts:1: info: size: allow 312, food projection and method-aware Harvest share the composed view list
-kernel/ts/src/view/action_lists.ts:37: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
-kernel/ts/src/view/action_lists.ts:139: info: size: allow 50, exact detail harvest joins shared action admission and projection
-mobile/authority/local-story/save.ts:1: file, 348 lines, limit 300
-mobile/authority/local-story/save.ts:130: function narration, 60 lines, limit 40
-mobile/authority/local-story/save.ts:221: function receiptDetail, 48 lines, limit 40
-
-exit_status=1

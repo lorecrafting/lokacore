@@ -1,8 +1,0 @@
-c1-sampler-primary-compiler.log: OK
-c1-sampler-primary-fault-anchors.log: OK
-c1-sampler-primary-focused.log: OK
-c1-sampler-primary-mutant-point-pair.log: OK
-c1-sampler-primary-mutant-save-binding.log: OK
-c1-sampler-primary-oracle.log: OK
-c1-sampler-primary-remaps.log: OK
-c1-sampler-primary-restored.log: OK

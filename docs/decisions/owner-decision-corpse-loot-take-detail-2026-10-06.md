@@ -6,7 +6,7 @@ the confirmed pickup appears there once, and the item appears in Carrying.
 
 This resolves the conflict between the ordinary item Take rule, which returns to
 World, and the C3 corpse-loot rule. The active [Book contract](../system/book-ui.md#item-details-and-takedrop)
-owns the general exception; the [C3 brief](../briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md#book-action-and-route-readiness)
+owns the general exception; the [C3 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md#book-action-and-route-readiness)
 applies it to the hound pelt. The C3 implementation and independent review must
 prove the actual nested detail route, confirmed-only pickup history, Back navigation,
 and cold-open behavior.

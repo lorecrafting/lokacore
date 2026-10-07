@@ -1,6 +1,0 @@
-The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-Removed element IDs: 60-62, 64
-+					67 heading Description: A wool cloak, Secondary Actions: Cancel
-+					68 text Description: Heavy grey wool. Rain runs off it., Secondary Actions: Cancel
-+					69 text Description: Take: too heavy to carry., Secondary Actions: Cancel
-+					70 text Description: Nothing to do here., Secondary Actions: Cancel

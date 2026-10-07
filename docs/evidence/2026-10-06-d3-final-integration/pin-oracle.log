@@ -1,4 +1,0 @@
-command: python3 protocol/fixtures/generate_missing_child_v033.py
-Independent D3 successor 0.0.33/API1.28: 5d48ad7fb4402de91c775dfe9395949ed1c1fe73d4bf0e13f2cb29717c1c1fdf, 184 initial IDs.
-
-exit: 0

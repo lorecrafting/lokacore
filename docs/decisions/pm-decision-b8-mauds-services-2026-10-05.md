@@ -6,7 +6,7 @@ the PM adopts [B8 mechanics](../system/mechanics.md#b8-mauds-immediate-services-
 [composition](../system/protocol.md#b8-immediate-service-composition),
 [save recovery](../system/save.md#b8-service-recovery) and
 [Book flow](../system/book-ui.md#b8-maud-and-bed-details) for the
-[implementation brief](../briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md).
+[implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md).
 This is a docs-only adopted plan, not source implementation, review approval,
 release proof or authorization to merge/push.
 
@@ -38,10 +38,10 @@ S1 offer, turn-in, key and chest remain independent direct paths.
 ## Source dependency re-pin
 
 The original planning base was `4ec52632d510e45214e43a1fe5beca0ec5addbad`;
-[its independent approval](../reviews/2026-10-05-b8-maud-services-plan-review.md)
+[its independent approval](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-b8-maud-services-plan-review.md)
 remains the behavior review. B7 Well Lane waterskins and liquid actions are now
 published in [#209](https://github.com/lorecrafting/lokacore/pull/209), and the
-[brief](../briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) pins its exact
+[brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) pins its exact
 approved source/reviews and integrated chapter0.0.22/API1.20/96-ID baseline at
 GitHub main `547f809ccdd587498dee86cb14822f564efee642`. The B3/B7/Rest dependency
 gate is satisfied. B8 successor/source pins remain null.

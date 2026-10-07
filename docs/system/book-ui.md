@@ -588,7 +588,7 @@ Browser death/Restart remains an explicit gap to close in the Chapter 1 E3 brows
 walk, or sooner if practical. Actual fatal/Restart is proved separately by real-host
 SQLite; native UI verification remains deferred under the mobile pause. The
 previously failing terminal save has
-[twice-reopened browser evidence](../evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
+[twice-reopened browser evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-c2-watchmans-rounds/README.md#preserved-terminal-reopen-after-published-web-fix)
 after the published Web SQLite fix. Browser fatal/Restart remains the separate
 E3 gap; native UI verification is not claimed.
 
@@ -740,7 +740,7 @@ history identity without opening an obsolete detail or copying text to World.
 The confirmed-route requirement also applies when uncertain Read settles after Book
 mounts: restore its exact target once beneath chapter Continue with scene/combat
 precedence. The actual component regression is traced in the
-[D2-P1 review](../reviews/2026-10-05-d2-priory-books-primary-review.md).
+[D2-P1 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-d2-priory-books-primary-review.md).
 Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
 separate touch cards at the declared overlap; a departed novice's pending context
 retains its original identity and follows normal refusal/Leave rules.
@@ -840,7 +840,7 @@ Mill Cellar show authored dark text, known up/down return exits and the actor's
 actual owned corpse/accessible contents under B4; ordinary Hob and detail links
 remain hidden. No light exemption, forced-overload Take or replacement gear is
 added. Headless Book/SQLite proof is distinct from
-[browser refresh/interaction proof](../evidence/2026-10-06-d3-final-integration/README.md);
+[browser refresh/interaction proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-final-integration/README.md);
 native verification remains paused.
 
 ## D6 water exits and Chapel recovery

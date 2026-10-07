@@ -1,5 +1,0 @@
-README.md: OK
-d1-ci-no-mise-green.log: OK
-d1-ci-no-mise-red.log: OK
-d1-ci-typescript-failed.log: OK
-d1-publication-push.log: OK

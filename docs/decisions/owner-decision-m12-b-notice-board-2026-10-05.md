@@ -38,4 +38,4 @@ Normative behavior: [Book UI](../system/book-ui.md#notice-board-details),
 [protocol](../system/protocol.md#notice-board-projection), and
 [readable](../system/mechanics.md#readable1-mechanicsreadablerulets).
 
-Developer validation: [headless evidence](../evidence/m12-b-notice-board/README.md).
+Developer validation: [headless evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/m12-b-notice-board/README.md).

@@ -1,13 +1,12 @@
 # Archive
 
-History and plans, read only when a task needs them ([AGENTS.md](../../AGENTS.md#specification-source-of-truth)).
-The current system is [docs/system/](../system/README.md). The old layout is kept so the relative links between the files still resolve.
+What remains after the [move-forward trim](../decisions/owner-decision-move-forward-2026-10-07.md);
+each file stays because something current still cites it. The current system is [docs/system/](../system/README.md).
 
-- [spec/](spec/README.md): the R0 specification packet as amended until 2026-10-02. Conformance fixtures, `release-scope.*` and `IMPORT.md` stayed in `docs/spec/`.
-- [decisions/](../decisions/README.md): ADR texts and owner decision records before 2026-10-02, indexed by the live decisions index, which also lists the records still in force.
-- [reviews/](../reviews/README.md): independent review records up to 2026-10-02, indexed by the live reviews index.
-- [ROADMAP.md](ROADMAP.md): the finished stage rows, slice tables and token estimates, verbatim.
+- [spec/](spec/README.md): the R0 specification packet as amended until 2026-10-02. Protocol schemas
+  cite its sections, and `test/loka/core/registries_test.exs` reads the invariant citations from it.
+- [decisions/](../decisions/README.md): older ADR texts and owner decision records still in force or
+  named by `protocol/`, code, lint or tests, indexed by the live decisions index.
+- [ROADMAP.md](ROADMAP.md): the R0–R6 stage rows; a protocol schema names it.
 
-- [2026-10-06 publication log](ROADMAP-2026-10-06.md): dated development status, source identities and evidence links.
-- [C1 checklist](C1-GATE-2026-10-03.md): the original premerge gate packet; C1 is now passed.
-- [M1–M23 proposal](NEXT-MECHANICS-2026-10-06.md): original mechanics planning and unconsumed candidate ideas; the live roadmap owns status and unresolved carries.
+Everything else archived on 2026-10-07 is at [the last commit that held it](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive).

@@ -1,3 +1,0 @@
-$ mise exec -- npm --prefix mobile/app exec -- tsc --project mobile/app/tsconfig.json --noEmit
-
-exit_status=0

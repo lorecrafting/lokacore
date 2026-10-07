@@ -1,3 +1,0 @@
-$ mise exec -- elixir bin/contracts.exs --check
-
-exit_status=0

@@ -3,7 +3,7 @@
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts the [S9 contract](../system/mechanics.md#s9-infirmary-herbs-b5-selected-contract)
 and [chapter tuning](../system/cartridge.md#b5-herb-and-bandage-stock).
-The [re-pinned brief](../briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
+The [re-pinned brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
 assigns the later source slice; this record is planning, not implementation/proof.
 
 B1/B2 are installed at chapter0.0.16/API1.14. Local base `d41ec0d2` includes

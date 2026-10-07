@@ -481,7 +481,7 @@ leaves the save intact.
 
 The `characters[CharacterId]` row is one immutable `character.select` value holding ancestry and all six textual-ref attribute values. D11's once-only selection belongs to the character identity, not the body returned from death. The selected ancestry, six values, initial acquired skill and initial Priory/Fen value commit with one command receipt through the existing changed-row transaction. No partially selected state may be adopted or rendered. Initial no-choice is legal only before that command and admits no ordinary gameplay. Reopen and reconciliation validate the pinned declaration against the exact character and selected effects; missing/null/malformed or contradictory rows and accepted receipt evidence return typed `save_corrupt` without repair or deletion. An inherited acquired skill needs that exact creation receipt as its alternate provenance under [C1 recovery](#c1-learned-skill-and-lesson-recovery); it is not a forged teacher grant. The starting faction change likewise needs the exact creation receipt as its alternate provenance under B2's revision-ordered faction validation, not an unexplained change from zero. Later lessons and faction changes retain their existing evidence rules. The existing explicit Start over remains available. A mismatch with a release not carried still refuses by pin, never reinterprets a previous character choice.
 
-Failed COMMIT leaves no selected state. For an uncertain COMMIT, fence input until receipt reconciliation proves either the full choice or its absence. Lost acknowledgement and same-invocation retry replay the one committed result; a new invocation with a different choice refuses without changing attribute, skill or faction rows. Cold reopen is required before and after choice, after later training, after death and owned-corpse recovery, and after a refused incompatible pin. The installed row and receipt validators enforce this shape; the [D11 source review](../reviews/2026-10-06-d11-character-choice-primary-review.md) records real SQLite fault/replay/reopen proof. Adoption keeps structural sharing.
+Failed COMMIT leaves no selected state. For an uncertain COMMIT, fence input until receipt reconciliation proves either the full choice or its absence. Lost acknowledgement and same-invocation retry replay the one committed result; a new invocation with a different choice refuses without changing attribute, skill or faction rows. Cold reopen is required before and after choice, after later training, after death and owned-corpse recovery, and after a refused incompatible pin. The installed row and receipt validators enforce this shape; the [D11 source review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d11-character-choice-primary-review.md) records real SQLite fault/replay/reopen proof. Adoption keeps structural sharing.
 
 ## C1 learned-skill and lesson recovery
 
@@ -848,7 +848,7 @@ scene/chapter precedence. An unavailable book yields no invented visible route o
 World/other-book narration fallback. Current-release pin refusal remains explicit.
 Historical replay must also run when readable items are the only content requiring
 it; the isolated gate control is traced in the
-[D2-S1 review](../reviews/2026-10-05-d2-priory-books-save-second-review.md).
+[D2-S1 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-d2-priory-books-save-second-review.md).
 
 ## B9 dream recovery
 
@@ -1023,7 +1023,7 @@ and false deer closure/successor-cancel handoffs still fail exact replay and ref
 in place without rewriting the save. Deer-specific validation retains the exact
 sight job, occurrence and transfer producer checks; it must not reconstruct global
 writer ordering independently of the composing kernel.
-[Reproduction and developer evidence](../evidence/2026-10-06-deer-bleed-recovery/README.md).
+[Reproduction and developer evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-deer-bleed-recovery/README.md).
 
 ## C5 bleed and bandage recovery
 

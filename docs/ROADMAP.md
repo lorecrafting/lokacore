@@ -34,18 +34,18 @@ The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](http
 
 | Stage | Slices | Content |
 |---|---|---|
-| R3 to R5 | 8 + 3 + 1 + 11 | Done; Gates R3 and R5 passed ([R5 review](archive/reviews/2026-09-30-r5-gate-review.md)); slices and decisions in [the archive](archive/ROADMAP.md). |
-| R6 | 7 + 1 (P1) + 1 (SM) | Done; Gate R6 [review](archive/reviews/2026-09-30-r6-gate-review.md), deferred items carried (the one list is the [archived row](archive/ROADMAP.md)). |
+| R3 to R5 | 8 + 3 + 1 + 11 | Done; Gates R3 and R5 passed ([R5 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r5-gate-review.md)); slices and decisions in [the archive](archive/ROADMAP.md). |
+| R6 | 7 + 1 (P1) + 1 (SM) | Done; Gate R6 [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r6-gate-review.md), deferred items carried (the one list is the [archived row](archive/ROADMAP.md)). |
 | SM2 | 3 | Done: #77, #78, #79 (the book UI over the smoke controller); P4A-2 carried to R12 ([archived row](archive/ROADMAP.md)). |
-| Early R7/R8 | 6 + 1 (G) | Done: #82 to #96; gate [review](archive/reviews/2026-10-01-early-r7r8-gate-review.md); carries in the R6P, R7/R8 and Playtest rows ([archived row](archive/ROADMAP.md)). |
-| R6P | 11 + gate | Done ([gate review](archive/reviews/2026-10-02-r6p-gate-review.md)); deferred: touch-to-photon (R7/R8 row), unaided completion (Playtest row). [Rows](archive/ROADMAP.md) |
+| Early R7/R8 | 6 + 1 (G) | Done: #82 to #96; gate [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-01-early-r7r8-gate-review.md); carries in the R6P, R7/R8 and Playtest rows ([archived row](archive/ROADMAP.md)). |
+| R6P | 11 + gate | Done ([gate review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-02-r6p-gate-review.md)); deferred: touch-to-photon (R7/R8 row), unaided completion (Playtest row). [Rows](archive/ROADMAP.md) |
 | Docs compaction | 2 | Done: #117 (`docs/system/`), #119 (archive, AGENTS.md source of truth; [decision](decisions/owner-decision-docs-compaction-2026-10-02.md)). |
-| Presenter split | 1 | Done: #118 (`GameSession`, the words move to `mobile/app`; [review](archive/reviews/2026-10-02-presenter-split-review.md)). [Row](archive/ROADMAP.md) |
-| Quest from dialogue | 1 | Done: merged #120 ([review](reviews/2026-10-02-m1-quest-dialogue-review.md)) (M1, [record](decisions/owner-decision-quest-from-dialogue-2026-10-02.md)): Bram's quest starts from his `bram_offer` dialogue choice, not a place action; spec in [mechanics](system/mechanics.md); Lantern hash `806508c7`; device rerun on the iPhone 11 passes ([evidence](evidence/2026-10-02-m1-quest-dialogue-iphone11/README.md)). |
+| Presenter split | 1 | Done: #118 (`GameSession`, the words move to `mobile/app`; [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-02-presenter-split-review.md)). [Row](archive/ROADMAP.md) |
+| Quest from dialogue | 1 | Done: merged #120 ([review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-02-m1-quest-dialogue-review.md)) (M1, [record](decisions/owner-decision-quest-from-dialogue-2026-10-02.md)): Bram's quest starts from his `bram_offer` dialogue choice, not a place action; spec in [mechanics](system/mechanics.md); Lantern hash `806508c7`; device rerun on the iPhone 11 passes ([evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-02-m1-quest-dialogue-iphone11/README.md)). |
 | R7/R8 for chapter one | 12 + gate | Approved 2026-10-02 ([record](decisions/owner-decision-chapter-one-plan-2026-10-02.md)); all 12 [C1 slices](#c1-slices) done, Gate C1 passed via [#149](https://github.com/lorecrafting/lokacore/pull/149), with [closure checklist](C1-GATE.md). Carries and their triggers live in [C1 carry checkpoints](#c1-carry-checkpoints); content decision details remain in their linked record. |
 | M mechanics continuation | 23 original planning groups | [Adopted queue #150](https://github.com/lorecrafting/lokacore/pull/150); dated proposal in [mechanics history](NEXT-MECHANICS.md). Installed Chapter 1 outcomes and remaining proof follow [current completion](#chapter-one-completion). |
 | Later chapter mechanics lookahead | provisional; PR count unset | [C2/C3/CC quest-consumer queues](LATER-MECHANICS.md), after current Missing Child work. No installed mechanic, active M renumbering or completed-slice credit. |
-| Playtest and tune | open; owner ends stage | [Owner decision](archive/decisions/owner-decision-playtest-2026-09-25.md); historical iterations in the [publication log](archive/ROADMAP-2026-10-06.md). Unaided first-tester completion remains a prelaunch obligation. Native proof is paused; current UI deferrals remain in [carry checkpoints](#c1-carry-checkpoints). |
+| Playtest and tune | open; owner ends stage | [Owner decision](archive/decisions/owner-decision-playtest-2026-09-25.md); historical iterations in the [publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md). Unaided first-tester completion remains a prelaunch obligation. Native proof is paused; current UI deferrals remain in [carry checkpoints](#c1-carry-checkpoints). |
 
 ## Chapter one completion
 
@@ -72,7 +72,7 @@ records six findings on its dated baseline. Their reviewed
 [repair dispositions](evidence/2026-10-07-chapter-one-docs-repairs.md) are
 published; E1–E3 acceptance remains open.
 
-The [dated publication log](archive/ROADMAP-2026-10-06.md) retains the individual
+The [dated publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md) retains the individual
 PRs, reviewed source identities and historical evidence claims. It is not an
 assignment queue. Native verification remains paused under the
 [owner ruling](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
@@ -102,7 +102,7 @@ Original owner-approved order; all rows below are completed. Each slice's scope 
 - Beyond the installed modal subset and [B9 Rest dream](system/mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract): arbitrary overlays, restricted control, role bindings, checkpoints/consequence beats and additional scene-ended quest objectives need a concrete consumer and reviewed contract.
 - scene_started: add when a consumer needs a separate start event; it requires a
   proposal delivery event hook, with the corresponding review depth.
-- SCENE-01 Simulator render/terminate/relaunch is complete: [touch proof](evidence/c1-touch/README.md).
+- SCENE-01 Simulator render/terminate/relaunch is complete: [touch proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-touch/README.md).
   Headless close/reopen and receipt-retry proof is in the scene review.
 
 ## C1 carry checkpoints
@@ -130,15 +130,15 @@ and new review carries; their linked records retain the governing details.
 | First typed worn/nested-item consumer / targetless item alias | Equipment: typed targets omit worn items; locks: typed examine omits nested items. Revisit when a typed client needs them. A targetless take/drop/give alias is listed but never accepted; revisit before first such authored alias. |
 | Next necessary dialogue boundary change | c1-journal: inline continuationId when a typed replacement satisfies rule purity. Older-development Lantern migration is not required under the [preproduction policy](decisions/owner-decision-forward-development-2026-10-05.md); retain saved bytes and exact mismatch refusal. |
 
-M20-B1 — atomic Maud reward and usable storage mechanics — merged [#171](https://github.com/lorecrafting/lokacore/pull/171) under [PM adoption](decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md). M20-B2 — playable Maud quest and chest content — merged [#172](https://github.com/lorecrafting/lokacore/pull/172) with [independent review](reviews/2026-10-05-m20-b2-mauds-cellar-review.md).
+M20-B1 — atomic Maud reward and usable storage mechanics — merged [#171](https://github.com/lorecrafting/lokacore/pull/171) under [PM adoption](decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md). M20-B2 — playable Maud quest and chest content — merged [#172](https://github.com/lorecrafting/lokacore/pull/172) with [independent review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-m20-b2-mauds-cellar-review.md).
 
-Closed C1 carries: bound Continue ([A3 review](reviews/2026-10-05-a3-green-primary-review.md));
+Closed C1 carries: bound Continue ([A3 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-a3-green-primary-review.md));
 implicit position/scene fact dependency ([loader review](reviews/2026-10-06-e1-loader-integrated-review.md));
 spawn provenance ([C3 contract](system/protocol.md#c3-spawned-bundles-and-population-composition));
 due-job generation re-read ([combat round contract](system/protocol.md#encounter-and-round-supplements-m6-a));
-alias identity ([M12-A review](reviews/2026-10-05-m12-a-readable-review.md));
+alias identity ([M12-A review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-m12-a-readable-review.md));
 labelled dialogue selection ([D9 contract](system/cartridge.md#d9-village-reaction-content-selected-contract),
-[D9 service/reopen proof and red controls](evidence/2026-10-06-d9-integration/README.md));
+[D9 service/reopen proof and red controls](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d9-integration/README.md));
 NPC-to-player acquisition ([dialogue receive contract](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts));
 ancestry choice ([D11 contract](system/cartridge.md#d11-ancestry-declarations-selected-contract)).
 These source proofs do not close E1–E3.

@@ -1,7 +1,7 @@
 # Owner rules in force
 
-One line per active rule, with its record. Superseded rules are not listed; their records stay in
-`docs/decisions/` or `docs/archive/decisions/` ([index](../decisions/README.md)). The architecture decisions every agent must
+One line per active rule, with its record. Superseded rules are not listed; their records are deleted
+and linked by permalink from the [index](../decisions/README.md), or kept only where code or `protocol/` cites them ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
 and not repeated here.
@@ -127,7 +127,7 @@ and not repeated here.
 
 - C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
 
-- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](../reviews/2026-10-06-c3-publication-status-review.md).
+- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md).
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
@@ -200,9 +200,10 @@ and not repeated here.
 ## Process
 
 - During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+- Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
-- Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+- Keep review findings and dispositions as cross-referenceable history while their work is open ([closed work](../decisions/owner-decision-move-forward-2026-10-07.md)); promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - Web stays active through game completion: C2 has focused fresh Book proof, browser fatal/Restart remains due by the E3 browser walk, and the preserved terminal save has twice-reopened evidence after the separate Web fix; native verification follows the existing pause ([record](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)).
 
@@ -263,7 +264,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
   for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
 - Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
-  `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
+  `docs/system` first, then the code. `docs/archive/` holds only cited older records; new
   decision records go in `docs/decisions/` and add a line here
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
 - C5 PR #255 alone has one owner-approved third fix round for SO7/SO8, with scoped independent

@@ -14,7 +14,7 @@ these are not verbatim quotations:
   shape.
 
 This supersedes the broad separate-rules direction in the earlier
-[Realm separation leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md),
+[Realm separation leaning](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-leaning-realm-separation-2026-10-01.md),
 which was not a decision. That historical record remains unchanged.
 
 ## Application within existing architecture

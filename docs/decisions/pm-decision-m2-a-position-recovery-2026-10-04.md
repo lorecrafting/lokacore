@@ -6,7 +6,7 @@ rate/position agreement guard. The governing behavior lives in
 [mechanics](../system/mechanics.md#resource1-kerneltssrcmechanicsresourcets),
 [composition and final adoption](../system/protocol.md#composition), and
 [cartridge opt-in](../system/cartridge.md#compiler); the implementation brief is
-[M2-A](../briefs/m2-a-position-recovery.md).
+[M2-A](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m2-a-position-recovery.md).
 
 M2 follows reviewed M1-B2 merge `e1b90dca77303dbdbd5bc58284fb67282c3f21e6`.
 The initial disjoint source draft has advanced to one vertical change: portable resource

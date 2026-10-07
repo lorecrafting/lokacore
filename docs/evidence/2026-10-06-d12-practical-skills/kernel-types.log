@@ -1,5 +1,0 @@
-
-> loka-kernel@0.0.0 typecheck
-> tsc && tsc -p test && tsc -p play
-
-exit_status=0

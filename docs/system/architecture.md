@@ -190,7 +190,7 @@ The app shell imports the local authority's session controller
   The preview is for development;
   browser saves have no compatibility promise across chapter builds. The local run and
   worktree-switch procedure is in [web preview](../web-preview.md).
-  The [Web recovery evidence](../evidence/2026-10-05-web-sqlite-stream/README.md)
+  The [Web recovery evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-web-sqlite-stream/README.md)
   records cold-open verification and the remaining transport limits.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal

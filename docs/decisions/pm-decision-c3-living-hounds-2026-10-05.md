@@ -6,7 +6,7 @@ the PM adopts [C3 population and deliberate fight](../system/mechanics.md#c3-bou
 [typed creation/composition](../system/protocol.md#c3-spawned-bundles-and-population-composition),
 [save integrity](../system/save.md#c3-living-population-recovery),
 [Book](../system/book-ui.md#c3-living-hound-and-loot-details) and the
-[implementation brief](../briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md).
+[implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md).
 This is planning adoption, not source GO, independent approval or executed proof.
 
 Explicitly amend the [archived population row](../archive/spec/00a-chapter-one-content.md#populations):

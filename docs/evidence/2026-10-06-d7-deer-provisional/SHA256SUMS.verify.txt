@@ -1,4 +1,0 @@
-schema-sweep.py: OK
-schema-sweep.log: OK
-red-save.log: OK
-red-loader.log: OK

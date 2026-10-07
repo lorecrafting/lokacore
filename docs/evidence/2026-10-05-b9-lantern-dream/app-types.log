@@ -1,2 +1,0 @@
-command: mise exec -- mobile/app/node_modules/.bin/tsc -p mobile/app
-exit: 0

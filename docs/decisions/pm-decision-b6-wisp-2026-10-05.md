@@ -3,7 +3,7 @@
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts the [S4 contract](../system/mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 and [route/tuning](../system/cartridge.md#b6-marsh-route-and-tuning).
-The [brief](../briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
+The [brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 assigns later implementation; this is planning, not source or gameplay proof.
 
 Select a reciprocal three-room extension from the already passable Mire Crossing,

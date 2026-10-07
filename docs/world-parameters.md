@@ -79,12 +79,12 @@ Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtu
 |---|---|---|---|
 | P1 | mobile/app/book/model.ts:77-78 | `branch(t)` = double-hour branch from 3600 s per hour, `% 24` | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
 | P2 | removed | the wait offer (whole hours, 3600 step) was removed with Wait ([record](decisions/owner-decision-untimed-lantern-2026-10-02.md)) | calendar (hours_per_day, units_per_hour) and `world.wait` (W16) |
-| P3 | DONE | Content catalog supplies `band.<key>` phrases; projected W13 tone selects the palette in the touch presenter ([#141](https://github.com/lorecrafting/lokacore/pull/141), [review](reviews/2026-10-03-c1-touch-review.md)) | text.json and world.bands |
+| P3 | DONE | Content catalog supplies `band.<key>` phrases; projected W13 tone selects the palette in the touch presenter ([#141](https://github.com/lorecrafting/lokacore/pull/141), [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md)) | text.json and world.bands |
 | P4 | mobile/app/book/model.ts:59-64; pages.tsx:183 | `hp` is the condition pool (phrase shown on hp only) | `resources.json <pool>.condition: true` or `world.condition_pool` |
 | P5 | mobile/app/book/model.ts:51-55 | story ends when every journal quest is resolved/failed/abandoned | a cartridge ending (story point / `world.ending`); already an OWNER item in the comment |
 | P7 | kernel/ts/play/text.ts:226-233 (`loka play` CLI) | `clock()` "day N, HH:MM" from 86400/3600/24/60 | calendar (W5/W6) |
 | P8 | kernel/ts/play/text.ts:101-105; play/main.ts:99 | `wait [hours]` 1..24, converted with `* 3600` | calendar units_per_hour / hours_per_day; `world.wait.max` (W16) |
 | P9 | kernel/ts/play/text.ts:241-248 | status line lists exactly `hp`, `ma`, `mv` (other pools never shown) | iterate `world.resourceSpecs` (as view.ts does) |
-| P6 | DONE | the fixed RNG seed `[1,2,3,4]` and world context of every new game: the host draws both per lineage ([#129](https://github.com/lorecrafting/lokacore/pull/129), [Simulator evidence](evidence/2026-10-02-c1-host-simulator/README.md)) | not a cartridge value |
+| P6 | DONE | the fixed RNG seed `[1,2,3,4]` and world context of every new game: the host draws both per lineage ([#129](https://github.com/lorecrafting/lokacore/pull/129), [Simulator evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-02-c1-host-simulator/README.md)) | not a cartridge value |
 
 M1-A installs the opt-in content-owned elapsed rate contract ([decision](decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md)); it installs no rate default or clock conversion. M1-B owns driver/remainder and sampler rate; M1-C retains the calendar/period/recovery follow-ons. Existing W rows are not marked DONE by this contract-only slice.

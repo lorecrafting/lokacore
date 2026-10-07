@@ -144,6 +144,8 @@ invariant from its red-controlled check. Link unfinished work back to the findin
 from the roadmap or adopted task tracker. The review record stays the evidence;
 other records state only the reusable rule or next action, avoiding copied findings
 and speculative generalizations ([owner decision](decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+Once the work closes, fold any recurring class into its lesson; the record may then be
+deleted and linked by permalink ([move forward](decisions/owner-decision-move-forward-2026-10-07.md)).
 
 ### Beads Rust pilot
 
@@ -192,7 +194,7 @@ or green local test alone does not close a slice. Ad hoc findings that need
 follow-up become linked issues only when they are real work; the review record
 keeps the finding and disposition. Beads gate records are deferred during the
 pilot because the existing CI and review records own the gate evidence.
-The [hook comparison](evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
+The [hook comparison](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-beads-hooks-pilot.md) pilots repo-owned
 `post-merge` and `post-checkout` imports only in the main integration checkout.
 After `git config core.hooksPath .githooks`, opt in there with
 `git config --local loka.beads.integrationRoot "$(pwd -P)"`; remove that setting

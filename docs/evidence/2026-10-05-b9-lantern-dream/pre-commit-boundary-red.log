@@ -1,5 +1,0 @@
-command: git commit (normal pre-commit hook)
-exit: 1
-error[mobile-kernel-via-local-story]: Only mobile/authority/local-story imports the kernel (spec document 10 §2).
-mobile/app/book/dream.test.ts:8 imported kernel/ts/test/dream_fixture.ts directly.
-Correction: Book test imports the same shared fixture through the existing authority test helper; production boundary/guard unchanged.

@@ -36,7 +36,7 @@ touch the usual preview at 19006 or its save. Install its browser once with `mis
 npx e2e-web install chromium`. The test uses no model or API key, and telemetry is disabled.
 Its pretest also runs the controlled worker deadline check governed by
 [the save boundary](system/save.md#commit-fence-reconcile), with
-[delayed/silent-worker red controls and browser proof](evidence/2026-10-06-web-sqlite-sync-deadline/README.md).
+[delayed/silent-worker red controls and browser proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-web-sqlite-sync-deadline/README.md).
 
 The default `e2e run` is headless. To watch the configured browser live and save a video,
 run `mise exec -- npm run test:e2e -- tests/book.e2e.ts --headed --video`.
