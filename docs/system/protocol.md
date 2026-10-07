@@ -61,7 +61,9 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/runtime/world.ts:79`): the capability owning the command type
+5. **Step** (`kernel/ts/src/runtime/world.ts:79`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
+   refuses ordinary player commands as `invalid_state` before ActionSet matching. Otherwise,
+   the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:106`): the nil CommandId is `permission_denied`
    (`:115`), another world or actor `not_found`, and the ActionSet must offer an action that
@@ -315,7 +317,9 @@ adjacent-sight projection, rule, content artifact or saved state
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
 `exits` in compass order, first checking Move against the actor's composed ActionSet with
-the exit's direction: `unsupported_capability` when no matching action remains (including
+the exit's direction: before ancestry selection, each ordinary Move shows `invalid_state`
+under the [D11 gate](mechanics.md#d11-character-choice-selected-contract), matching Step;
+after selection, `unsupported_capability` when no matching action remains (including
 while a modal scene runs), or `invalid_state` when every matching action's policy fails;
 then `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
