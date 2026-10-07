@@ -1,0 +1,20 @@
+[
+  {
+    "level": "warn",
+    "message": "D9_RING_COMMAND_GUARDS Object",
+    "timestamp": "2026-10-07T02:45:13.669Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "D9_RING_COMMAND_GUARDS {\"validate\":0,\"commandMatch\":true,\"actorRow\":true,\"actorPayload\":true,\"context\":true,\"targetKey\":false,\"targetRoom\":false}",
+    "timestamp": "2026-10-07T02:45:23.008Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "D9_RING_COMMAND_GUARDS {\"validate\":0,\"commandMatch\":true,\"actorRow\":true,\"actorPayload\":true,\"context\":true,\"targetKey\":false,\"targetRoom\":false}",
+    "timestamp": "2026-10-07T02:45:41.077Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  }
+]

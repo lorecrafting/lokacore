@@ -1,5 +1,7 @@
 bell-rung.png: OK
 browser-warnings.json: OK
+corruption-diagnostic.json: OK
+receipt-guard-diagnostic.json: OK
 reload-save-corrupt.png: OK
 reproduction-errors.json: OK
 reproduction-reload.png: OK

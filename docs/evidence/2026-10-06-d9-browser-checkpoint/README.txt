@@ -53,3 +53,21 @@ SHA256SUMS.verify retains verification and is not self-listed. Existing
 .gitattributes evidence rule is -whitespace. No test or production source added.
 Ponytail review: lean evidence, no framework/dependency. Correctness pass keeps
 observations, red reproduction, good reopen control and unknowns distinct.
+
+## Temporary diagnostic, after the red reproduction
+
+Source developer and PM authorized temporary console diagnostics solely in the
+isolated proof worktree. Preserved failing origin was reopened; no save edits.
+Raw sanitized output in corruption-diagnostic.json identifies SyntaxError
+"malformed JSON: inconsistent bell return" at bellSave → dialogueSave →
+receiptRecovery → load. Compiled bundle line maps the refusal to bell-save.ts:105,
+the original prior choiceReceipt check. receipt-guard-diagnostic.json confirms
+Command validation returns zero problems; receipt command ID, row/payload actor
+and context all match. The payload target resolves neither bell detail key nor
+Belfry room, so receipt validation rejects before DecisionResult checks.
+Target ID value/presence was not captured and remains unknown. This is exact
+predicate evidence, not an asserted root cause/fix. Source owner was notified.
+
+Metro watch roots resolved the isolated checkout; node_modules came from npm ci
+and was not symlinked. All diagnostic changes to store/session/authority/bell-save
+were restored; this commit contains evidence only.
