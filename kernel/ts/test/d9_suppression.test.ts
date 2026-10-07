@@ -118,7 +118,10 @@ test('population ticks stay quiet until the exact two-day deadline', () => {
   const base = ready(0);
   const [hound] = Object.entries(base.state.created ?? {}).find(
     ([, row]) =>
-      row.origin.kind === 'spawned' && row.origin.role === 'hound' && row.origin.slot === 1,
+      row.origin.kind === 'spawned' &&
+      row.origin.by.key === 'fen_hounds' &&
+      row.origin.role === 'hound' &&
+      row.origin.slot === 1,
   )!;
   const member = hound as EntityId;
   const hp = resourceRef(base, 'hp');
@@ -176,7 +179,10 @@ test('suppression closes an open hound encounter without reward or deleting the 
   )!;
   const [hound] = Object.entries(base.state.created ?? {}).find(
     ([, row]) =>
-      row.origin.kind === 'spawned' && row.origin.role === 'hound' && row.origin.slot === 1,
+      row.origin.kind === 'spawned' &&
+      row.origin.by.key === 'fen_hounds' &&
+      row.origin.role === 'hound' &&
+      row.origin.slot === 1,
   )!;
   const transferred = apply(base, [
     {
@@ -279,14 +285,17 @@ test('stale population occurrence completes without changing the suppressed plan
     Object.values(after.state.population_slots ?? {}).filter((s) => s.member_id).length,
     before,
   );
-  assert.equal(Object.values(after.state.population_plans ?? {})[0].suppression?.ends_at, 237600);
+  assert.equal(
+    after.state.population_plans![key(ref('population', 'fen_hounds'))].suppression?.ends_at,
+    237600,
+  );
 });
 
 // Breaks: an ordinary successor silently drops the bell suppression while rotating its job ID.
 test('population successor cannot rewrite suppression', () => {
   const world = run(ready(), { type: 'perform', action: 'ring_bell' }, 1).world;
   const plan = ref('population', 'fen_hounds');
-  const control = Object.values(world.state.population_plans ?? {})[0];
+  const control = world.state.population_plans![key(ref('population', 'fen_hounds'))];
   const changed = apply(world, [
     {
       op: 'population.control',

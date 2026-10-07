@@ -1,0 +1,9 @@
+{
+  "keywords": ["corpse", "crow_corpse"],
+  "short": "item.crow_corpse.short",
+  "room_line": "item.crow_corpse.room",
+  "description": "item.crow_corpse.description",
+  "location": { "in": "template" },
+  "mass_grams": 0,
+  "container": true
+}

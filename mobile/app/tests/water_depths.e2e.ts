@@ -12,6 +12,7 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
     await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
   };
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('north', 'Well Lane');
   await go('west', 'Chandler');
@@ -85,6 +86,7 @@ test('expired dive returns to Chapel and recovers original belongings once after
   };
   await app.clearState();
   await browser.reload();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('north', 'Well Lane');
   await go('west', 'Chandler');

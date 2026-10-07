@@ -63,7 +63,7 @@ contracts remain `src/contracts.gen.ts`.
 
 Rules are registered in `runtime/world.ts` only as `<module>.decide`. The typed `Rule<C>`
 contract (`runtime/decision.ts:192`) limits each rule to its capability's commands and events;
-admission re-checks event ownership (`runtime/proposal.ts:285`). The `ts-rule-*` lint rules
+admission re-checks event ownership (`runtime/proposal_admit.ts:13`). The `ts-rule-*` lint rules
 keep rule exports in `mechanics/<capability>/rule.ts`, ban mutation and type escapes there,
 and permit only kernel helpers, never another rule. The foundation import rule enforces its
 narrow dependency boundary; actual-path plants prove these guards in [CHECKS](../CHECKS.md).

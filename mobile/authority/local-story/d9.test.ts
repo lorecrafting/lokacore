@@ -179,7 +179,7 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
     p.fault.armed = true;
     assert.equal(p.story.invoke(invocation).kind, 'pending', kind);
     assert.equal(
-      Object.values(p.story.world().state.population_plans ?? {})[0].suppression,
+      p.story.world().state.population_plans![key(ref('population', 'fen_hounds'))].suppression,
       undefined,
       kind,
     );
@@ -189,7 +189,7 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
     if (settled.kind !== 'saved') continue;
     assert.equal(settled.replay, kind === 'lost', kind);
     assert.equal((settled.decision as { kind: string }).kind, 'accepted', kind);
-    const control = Object.values(p.story.world().state.population_plans ?? {})[0];
+    const control = p.story.world().state.population_plans![key(ref('population', 'fen_hounds'))];
     assert.deepEqual(
       [control.suppression?.generation, control.suppression?.ends_at],
       [1, 237600],

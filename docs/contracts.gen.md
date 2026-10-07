@@ -155,6 +155,7 @@ The capability registry vocabulary, exact capability versions and the capability
 
 The compiled cartridge, its artifact file and the compiler and loader diagnostics (05 §8, §11, §12, §20; 08 §6; 14 §R4). R4 minimal: the frozen kinds only; rooms, NPCs, schedules, quests, dialogue, assets and localization join with their features, under a new format tag.
 
+- **AncestrySpec**: One authored character choice and its bounded initial effects.
 - **ArtifactSize**: The byte length of a cartridge artifact file, checked before decoding: at most 4 MiB (owner decision, docs/archive/decisions/owner-decisions-r4-2026-09-25.md, item 2). bin/contracts.exs emits the maximum into kernel/ts/src/contracts.gen.ts as ARTIFACT_MAX_BYTES; Elixir reads it here.
 - **AttributeSpec**: attributes@1 (00 §4.3 and 06 §21 amendments 2026-10-03): an attribute and its starting value, content and never an engine default. Every actor's value is start while nothing writes attributes (no state). In source, attributes.json's {"attributes": {key: {start}}}, the key taken from the map (an authored key is UNKNOWN_FIELD).
 - **BleedDefinition**: An authored body bleed duration, tick cadence and HP loss.
@@ -183,6 +184,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
 
 - **Command**: A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/archive/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity, ["loka-job-command-v1", job_id, occurrence] with the occurrence its due time (numeric-profile.md, job CommandId), so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 §21). Elapsed authority commands use the separate run/world/interval domain in numeric-profile.md; normal player admission refuses them.
 - **CommandPayload**: The registered Command types; an unknown type fails before game rules (04 §3). Invocation-derived types carry the actor; run_job is authority-internal (04 §1) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md).
+  - `choose_ancestry`: Select one authored ancestry for this character before ordinary play (attributes@1).
   - `move`: Move through a connection.
   - `open`: Open the closed, unlocked barrier on the exit in `direction`, or on the item `target_id` (a container's lid; exactly one of the two, else invalid_target) (barrier@1).
   - `close`: Close the open barrier on the exit in `direction`, or on the item `target_id` (exactly one of the two, else invalid_target) (barrier@1).
@@ -209,6 +211,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `continue`: Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs.
   - `elapsed`: Authority-only elapsed logical interval (M1-A); admitted only by stepElapsed, never an invocation. Durable run scopes its distinct CommandId.
   - `attack`
+  - `shoo`
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.
   - `put`: Put a directly body-held existing item into a reachable open item container, preserving identity and checking cycles/capacity.
   - `read`: Read one present inspectable detail with readable metadata (readable@1).
@@ -245,9 +248,11 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
   - `true`
   - `false`
+- **CharacterChoice**: The once-only character identity and its complete saved attribute values.
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
 - **DeltaOp**: One registered delta operation (04 §5.3 families). Each description names the op's target and precondition.
+  - `character.select`: One immutable character-owned creation row. Precondition: no row for character_id.
   - `fact.assign`: Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).
   - `entity.create`
   - `entity.transfer`: Conserved transfer. Target: containment (entity_id). Preconditions: the entity is in source_id; destination_id is not the entity or inside it; destination capacity holds (03 §23: one container per entity).
@@ -272,6 +277,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `patrol.transition`
   - `choice.attempt`
   - `liquid.set`
+  - `crow.transition`
   - `population.control`
   - `population.slot`
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
@@ -282,6 +288,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
 - **JobId**: A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.
 - **MutationTarget**: Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5).
+  - `character`: One character's immutable choice.
   - `fact`: A scoped fact.
   - `containment`: An entity's one container.
   - `quest`: A QuestInstance's lifecycle.
@@ -297,6 +304,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `fuel`
   - `patrol`
   - `liquid`
+  - `crow`
   - `population_plan`
   - `population_slot`
   - `bleed`
@@ -374,6 +382,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `entity_entered_room`: entity_id entered room_id.
   - `item_acquired`: item_id is now held by holder_id.
   - `item_dropped`: item_id was dropped into room_id.
+  - `shooed`: A living co-located actor made a carrying crow drop its exact item into this room.
   - `quest_activated`: A QuestInstance became active.
   - `quest_resolved`: A QuestInstance resolved with a named outcome.
   - `choice_opened`: A pending choice opened.
@@ -600,6 +609,7 @@ ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.
 
 Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).
 
+- **CrowTransport**: One bounded crow slot's exact scavenging occurrence. Idle rows retain the last member generation without a pending item or job.
 - **EntityIdentity**: A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.
 - **EntityOrigin**: Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).
   - `authored`: Placed by the cartridge's authored content.

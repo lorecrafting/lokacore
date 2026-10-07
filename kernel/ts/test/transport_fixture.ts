@@ -8,7 +8,14 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
-import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
+import {
+  INSTALLED,
+  loadCartridge,
+  newWorld,
+  step,
+  type Cartridge,
+  type World,
+} from '../src/index.ts';
 import type { DefinitionRef } from '../src/contracts.gen.ts';
 const scratch = mkdtempSync(join(tmpdir(), 'loka-transport-source-'));
 let source: any;
@@ -45,11 +52,26 @@ export function fresh(change: (c: any) => void = () => {}) {
       INSTALLED,
     );
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  return newWorld(
+  const world = newWorld(
     loaded.cartridge as Cartridge,
     '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
     [1, 2, 3, 4],
   );
+  const selected = step(
+    world,
+    {
+      id: '11111111-2222-4333-8444-555555555555' as never,
+      world_context_id: world.context,
+      payload: {
+        type: 'choose_ancestry',
+        actor_id: world.character,
+        ancestry: 'fey_touched' as never,
+      },
+    },
+    1,
+  );
+  assert.equal(selected.decision.kind, 'accepted');
+  return selected.world;
 }
 export const entity = (w: World, kind: string, name: string) =>
   w.entityIds[`${prefix}:${kind}/${name}`];

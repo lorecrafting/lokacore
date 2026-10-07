@@ -1,0 +1,43 @@
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run tests/crows.e2e.ts --workers 1
+
+
+ RUN  e2e v0.17.0 <checkout>/mobile/app
+      run 01a113ee-eb7a-7b23-ab98-e8966ff9e0dd · targets: web
+
+ ✓ target "web" command ready 666ms
+ ❯ |web| tests/crows.e2e.ts (1 test | 1 failed) 10.83s
+   × a held crow coin survives browser reload and Shoo returns it once 10.83s
+     → expect.toBeVisible failed
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| tests/crows.e2e.ts > a held crow coin survives browser reload and Shoo returns it once
+ASSERTION_FAILED: expect.toBeVisible failed
+locator: getByRole("button", name: "old coin, open")
+expected: visible
+observed: no node (match count 0)
+ ❯ tests/crows.e2e.ts:69:3
+     67|   await expect(screen.getByRole('button', 'Shoo a crow')).not.toBeVis…
+     68|   await screen.getByRole('button', 'Leave').tap();
+     69|   await expect(screen.getByRole('button', 'old coin, open')).toBeVisi…
+       |   ^
+     70|   await expect(carrier).not.toBeVisible();
+     71|   await app.restart();
+ ❯ at http://127.0.0.1:19106/
+ ❯ screen .e2e/artifacts/web/tests_crows.e2e.ts__a_20held_20crow_20coin_20survives_20browser_20reload_20and_20Shoo_20returns_20it_20once-0106ced5/default/attempt-0/failure/screen.txt
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 0 passed (1)
+      Tests  1 failed | 0 passed (1)
+   Start at  15:16:27
+   Duration  11.86s (startup 666ms)
+     Report  .e2e/report.json
+

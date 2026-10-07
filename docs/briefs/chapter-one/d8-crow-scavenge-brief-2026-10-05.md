@@ -1,5 +1,7 @@
 # D8 — Crows carry exact eligible items to a reachable bounded nest
 
+Implementation checkpoint: [published D11 integration and remaining proof](../../evidence/2026-10-06-d8-d11-integration/README.md).
+
 > **Planning status 2026-10-06:** The [D8 selection](../../decisions/pm-decision-d8-crow-scavenge-2026-10-06.md) passed independent plan review at `f6d012ee`; published D6 is re-pinned below. This final re-pin awaits the same reviewer's scoped check. D8 source GO, successor pins and implementation proof remain pending.
 
 Proposed branch: `chapter1/d8-crow-scavenge`.

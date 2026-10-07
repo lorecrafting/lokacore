@@ -1,4 +1,4 @@
-"""Provisional D9 v040 answer from frozen D7 v036 plus authored D9 source fields; re-pin after predecessors publish."""
+"""Independent D9 v040 answer from frozen published D8 v039 plus authored D9 fields."""
 import hashlib
 import json
 import uuid
@@ -7,8 +7,8 @@ from pathlib import Path
 here = Path(__file__).parent
 source = here.parents[1] / 'cartridges' / 'ashmere_missing_child'
 version = '0.0.40'
-v = json.loads((here / 'missing_child_v036_hash.json').read_text())['value']
-v = json.loads(json.dumps(v).replace('0.0.36', version))
+v = json.loads((here / 'missing_child_v039_hash.json').read_text())['value']
+v = json.loads(json.dumps(v).replace('0.0.39', version))
 
 def ref(kind, key):
     return {'cartridge_id': 'ashmere_missing_child', 'cartridge_version': version,
@@ -59,8 +59,8 @@ v['text'] = read('text.json')
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 digest = hashlib.sha256(canonical.encode()).hexdigest()
 (here / 'missing_child_v040_hash.json').write_text(json.dumps({
-    'description': 'D9 village reactions, bounded bell cue and suppression, and fox Study ingress over published D7 v036; provisional pending C5/D11/D8.',
-    'value': v, 'canonical': canonical, 'sha256': digest,
+    'description': 'D9 village reactions, bounded bell cue and suppression, and fox Study ingress over published D8 v039.',
+    'value': json.loads(canonical), 'canonical': canonical, 'sha256': digest,
 }, indent=2, ensure_ascii=False) + '\n')
 rooms = sorted(v['rooms'].items())
 labels = ['character', 'body'] + ['room/' + room['key'] for _, room in rooms]
@@ -71,7 +71,8 @@ labels += ['job/' + npc['key'] for _, npc in sorted(v['npcs'].items()) if npc.ge
 labels += ['slot/' + slot for slot in sorted({item['slot'] for item in v['items'].values() if 'slot' in item})]
 labels += ['consumed']
 for plan in sorted(v['populations'].values(), key=lambda p: p['key']):
-    roles = ('deer', 'hide') if 'sight' in plan else ('member', 'pelt')
+    bundle = v['population_bundles'][named('population_bundle', plan['bundle']['key'])]
+    roles = ('deer', 'hide') if 'sight' in plan else (('member', 'pelt') if 'item' in bundle else ('member',))
     for slot in range(1, plan['day_target'] + 1):
         labels += [f"population/{plan['key']}/slot{slot}/{role}" for role in roles]
     labels += [f"population/{plan['key']}/job"]
@@ -84,4 +85,4 @@ for ordinal, label in enumerate(labels):
     raw[8] = (raw[8] & 63) | 128
     answers[label] = str(uuid.UUID(bytes=bytes(raw)))
 (here / 'missing_child_v040_ids.json').write_text(json.dumps(answers, indent=2) + '\n')
-print(f'Provisional D9 successor {version}/API1.35: {digest}, {len(answers)} initial IDs.')
+print(f'D9 successor {version}/API1.35: {digest}, {len(answers)} initial IDs.')

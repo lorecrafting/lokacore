@@ -210,7 +210,7 @@ export function refStage(c: Obj): Diagnostic[] {
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
-  // checkers push to out too
+  ancestryRefs(c, check, out);
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
@@ -242,6 +242,35 @@ function spatialRefs(c: Obj, { named, typedValue, text }: Checks, out: Diagnosti
       }
     }
     out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
+  }
+}
+
+function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnostic[]) {
+  const { named, typedValue, text } = check;
+  if (c.ancestries && !Object.keys(c.ancestries).length)
+    out.push(diag('SCHEMA_VIOLATION', '.cartridge.ancestries'));
+  for (const [choice, ancestry] of Object.entries((c.ancestries ?? {}) as Obj)) {
+    const at = `.cartridge.ancestries${step(choice)}`;
+    const attribute = refString(ancestry.attribute);
+    named(ancestry.attribute, 'attribute', `${at}.attribute`);
+    if (ancestry.skill) named(ancestry.skill, 'skill', `${at}.skill`);
+    if (ancestry.faction) {
+      named(ancestry.faction.fact, 'fact', `${at}.faction.fact`);
+      typedValue(ancestry.faction.fact, ancestry.faction.value, `${at}.faction.value`);
+      const fact = c.facts[refString(ancestry.faction.fact)];
+      if (fact && (fact.scopes.length !== 1 || fact.scopes[0] !== 'player'))
+        out.push(diag('SCHEMA_VIOLATION', `${at}.faction.fact`));
+    }
+    text(ancestry, ['label', 'description'], at);
+    if (!Number.isSafeInteger((c.attributes?.[attribute]?.start ?? 0) + ancestry.modifier))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.modifier`));
+    if (
+      c.lock.capabilities.attributes !== 1 ||
+      c.lock.capabilities.fact !== 1 ||
+      (ancestry.skill && c.lock.capabilities.skills !== 1) ||
+      (ancestry.dark_sight && c.lock.capabilities.light !== 1)
+    )
+      out.push(diag('UNDECLARED_CAPABILITY', at));
   }
 }
 

@@ -30,6 +30,12 @@ export function skillsSave(world: World, db: Db, meta: Meta) {
       grants.set(ref, [...(grants.get(ref) ?? []), id]);
     }
   }
+  const selected = world.state.characters?.[world.character];
+  const inherited = selected && world.cartridge.ancestries?.[selected.ancestry]?.skill;
+  if (inherited) {
+    const ref = refString(inherited);
+    grants.set(ref, [...(grants.get(ref) ?? []), 'creation']);
+  }
   memberships(world, grants);
   reservedReceipts(world, db, scope, grants);
 }
@@ -60,10 +66,11 @@ function reservedReceipts(world: World, db: Db, scope: string, grants: Map<strin
       if (
         !d.delta.ops.some(
           (o) =>
-            o.op === 'choice.resolve' &&
-            grants
-              .get(refString({ ...op.fact, kind: 'skill', key: skill.key }))
-              ?.includes(o.continuation_id),
+            (o.op === 'choice.resolve' && ids.includes(o.continuation_id)) ||
+            (o.op === 'character.select' &&
+              ids.includes('creation') &&
+              o.character_id === world.character &&
+              o.value.ancestry === world.state.characters?.[world.character]?.ancestry),
         )
       )
         invalid();
@@ -115,10 +122,11 @@ function receiptBound(
   return (
     command.id === r.command_id &&
     command.world_context_id === world.context &&
-    payload.type === 'choose' &&
+    (payload.type === 'choose' || payload.type === 'choose_ancestry') &&
     payload.actor_id === world.character &&
     d.kind === 'accepted' &&
-    d.outcome === payload.choice_id &&
-    ids.includes(payload.continuation_id)
+    (payload.type === 'choose'
+      ? d.outcome === payload.choice_id && ids.includes(payload.continuation_id)
+      : d.outcome === payload.ancestry && ids.includes('creation'))
   );
 }

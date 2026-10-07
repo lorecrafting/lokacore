@@ -27,6 +27,7 @@ defmodule Loka.Core.ComposeTest do
   end
 
   defp state(s) when is_map(s), do: s
+
   defp state(name), do: index(Map.get_lazy(@fixture["states"], name, fn -> built(name) end))
 
   @hub "10000000-0000-4000-8000-000000000000"

@@ -1,11 +1,6 @@
 # size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
-  @moduledoc """
-  Portable StateDelta composition (04 §5.1-§5.4, 14 §R3A). Preconditions read
-  an overlay over the committed base; only changed rows are returned. Different
-  writer groups sharing a target fault atomically. Budgets precede operations,
-  and an explicit time.advance sets the visited time for jobs and resources.
-  """
+  @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
   alias Loka.Core.{ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
@@ -113,6 +108,14 @@ defmodule Loka.Core.Compose do
     now = with nil <- read(t, ctx), do: get_in(elem(ctx, 0), ["fact_defaults", key(op["fact"])])
     check(now == op["expected"], op["value"])
   end
+
+  defp apply_op(%{"op" => "character.select", "value" => value}, t, {state, _, overlay}),
+    do:
+      check(
+        Map.fetch(section(state, "characters"), t["character_id"]) == :error and
+          Map.fetch(overlay, key(t)) == :error,
+        value
+      )
 
   defp apply_op(%{"op" => "entity.create", "identity" => identity}, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == nil and Creation.valid?(identity, state), identity)
@@ -231,8 +234,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
 
-  defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
-    do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
+  defp apply_op(%{"op" => kind} = op, t, ctx)
+       when kind in ~w(population.control population.slot crow.transition),
+       do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
   defp apply_op(%{"op" => "water.transition"} = op, t, ctx),
     do: Loka.Core.ComposeWater.transition(op, read(t, ctx), ctx, &read/2)
@@ -277,6 +281,7 @@ defmodule Loka.Core.Compose do
 
   defp base(%{"kind" => "fuel", "item_id" => i}, s), do: section(s, "fuel")[i]
   defp base(%{"kind" => "fact"} = t, s), do: section(s, "facts")[key(t)]
+  defp base(%{"kind" => "character", "character_id" => id}, s), do: section(s, "characters")[id]
   defp base(%{"kind" => "entity", "entity_id" => e}, s), do: section(s, "created")[e]
   defp base(%{"kind" => "containment", "entity_id" => e}, s), do: section(s, "containers")[e]
   defp base(%{"kind" => "quest", "instance_id" => i}, s), do: section(s, "quests")[i]
@@ -286,7 +291,8 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
 
-  defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
+  defp base(%{"kind" => kind} = t, s) when kind in ~w(population_plan population_slot crow),
+    do: Loka.Core.ComposePopulation.base(t, s)
 
   defp base(%{"kind" => "water", "actor_id" => a}, s), do: section(s, "water")[a]
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]

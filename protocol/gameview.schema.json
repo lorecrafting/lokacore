@@ -433,6 +433,9 @@
     },
     "EntityView": {
       "properties": {
+        "carrying": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "contents": {
           "type": "array",
           "items": {
@@ -1133,6 +1136,33 @@
           "type": "array",
           "items": {
             "$ref": "gameview.schema.json#/$defs/AttributeView"
+          }
+        },
+        "ancestry": { "$ref": "action.schema.json#/$defs/Key" },
+        "ancestry_choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "$ref": "action.schema.json#/$defs/Key" },
+              "label": { "$ref": "text.schema.json#/$defs/TextKey" },
+              "description": { "$ref": "text.schema.json#/$defs/TextKey" },
+              "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "modifier": { "type": "integer", "minimum": 1 },
+              "skill": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "faction": {
+                "type": "object",
+                "properties": {
+                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "value": { "type": "integer" }
+                },
+                "required": ["fact", "value"],
+                "additionalProperties": false
+              },
+              "dark_sight": { "const": true }
+            },
+            "required": ["key", "label", "description", "attribute", "modifier"],
+            "additionalProperties": false
           }
         },
         "topics": {

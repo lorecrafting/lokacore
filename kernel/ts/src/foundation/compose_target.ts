@@ -4,14 +4,19 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
  * Patrol uses the exact quest instance; escort retains its actor target.
  * Writer conflicts use this identity before any precondition is checked.
  */
+// size: allow 44, one dispatch covers the closed delta target union
 export function target(op: DeltaOp): MutationTarget {
   if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
   if (op.op === 'liquid.set' || op.op === 'fuel.set')
     return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
   if (op.op === 'population.control' || op.op === 'population.slot') return populationTarget(op);
+  if (op.op === 'crow.transition') return { kind: 'crow', plan: op.plan, slot: op.slot };
   if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
   if (op.op === 'time.advance') return { kind: 'clock' };
+
   switch (op.op) {
+    case 'character.select':
+      return { kind: 'character', character_id: op.character_id };
     case 'fact.assign':
       return factTarget(op);
     case 'entity.create':

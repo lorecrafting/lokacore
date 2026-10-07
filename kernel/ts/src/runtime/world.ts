@@ -20,6 +20,8 @@ import { allocator, rejected, type Mint, type Rule, type Steps, type World } fro
 import { invariants as factInvariants } from '../mechanics/fact.ts';
 import { refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
+import * as attributes from '../mechanics/attributes/rule.ts';
+import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
 import * as bleed from '../mechanics/bleed/rule.ts';
@@ -33,6 +35,7 @@ import * as dialogue from '../mechanics/dialogue/rule.ts';
 import * as light from '../mechanics/light/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
+import * as population from '../mechanics/population/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
 import * as readable from '../mechanics/readable/rule.ts';
@@ -44,8 +47,10 @@ import { newWorld, NIL } from './fresh.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
+  attributes: attributes.decide,
   movement: movement.decide,
   combat: combat.decide,
+  population: population.decide,
   description_variant: description_variant.decide,
   containment: containment.decide,
   commerce: commerce.decide,
@@ -79,13 +84,11 @@ const RULELESS = [
   'death',
   'escort',
   'patrol',
-  'population',
   'behavior',
   'calendar',
   'reaction',
   'narration',
   'target_resolution',
-  'attributes',
   'skills',
   'topics',
 ];
@@ -114,6 +117,12 @@ export function step(
   action?: Key,
 ): Stepped {
   if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };
+  if (
+    world.cartridge.ancestries &&
+    !characterChoice(world, world.character) &&
+    command.payload.type !== 'choose_ancestry'
+  )
+    return { decision: rejected('invalid_state'), world };
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
