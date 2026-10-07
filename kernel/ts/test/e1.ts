@@ -34,6 +34,7 @@ export function source() {
     'e1_optional_quests.ts',
     'e1_watch_rounds.ts',
     'e1_wisp_herbs.ts',
+    'e1_maud.ts',
     'e1_world.ts',
     'e1_faults.ts',
     'e1_cases.ts',
