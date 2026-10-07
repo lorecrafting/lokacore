@@ -19,7 +19,8 @@ import {
   type Coverage,
 } from './e1_case_host.ts';
 import { checked } from './sim.ts';
-import { ending, ENDINGS } from './e1_paths.ts';
+import { ENDINGS } from './e1_paths.ts';
+import { epilogueTalks } from './e1_epilogue_talks.ts';
 import { chandlersDebt, lanternDream } from './e1_optional_quests.ts';
 import { watchRounds } from './e1_watch_rounds.ts';
 import { wispWard, infirmaryHerbs } from './e1_wisp_herbs.ts';
@@ -199,7 +200,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   let failure: string | null = null;
   try {
     for (const [child, allegiance, fox] of ENDINGS)
-      run(`${child}-${allegiance}`, (a) => ending(a, child, allegiance, fox));
+      run(`${child}-${allegiance}`, (a) => epilogueTalks(a, child, allegiance, fox));
     run('topology', topology);
     run('watch-rounds', watchRounds);
     run('wisp-ward', wispWard);
