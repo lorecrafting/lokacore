@@ -1,12 +1,6 @@
-# size: allow 340, patrol, water, and bleed pairing join precondition replay
+# size: allow 340, patrol, water, bleed and character pairing join precondition replay
 defmodule Loka.Core.Invariants do
-  @moduledoc """
-  Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is
-  `kernel/ts/src/runtime/invariants.ts`, checked by the same composition fixtures.
-  Inputs: state/delta/result (`Compose.compose/2`), resolution (`TargetResolution`),
-  and decision/commit/published (committed, failed or unknown host outcome).
-  Unknown invariant ids raise.
-  """
+  @moduledoc "Pure portable invariants: composition, resolution and host outcomes; unknown IDs raise."
   alias Loka.Core.Compose
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
   @external_resource @registry_path
@@ -139,7 +133,10 @@ defmodule Loka.Core.Invariants do
   defp replay_op(%{"op" => "water.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
-  defp replay_op(%{"op" => "resource.initialize"}, _, _, ctx), do: {:cont, ctx}
+
+  defp replay_op(%{"op" => kind}, _, _, ctx) when kind in ~w(crow.transition resource.initialize),
+    do: {:cont, ctx}
+
   defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}
@@ -271,6 +268,7 @@ defmodule Loka.Core.Invariants do
   # Each op reads one value of its target and leaves another: the fact value, the container,
   # the quest state, the continuation or job status, the clock.
   defp link(%{"op" => "fact.assign"} = op), do: {op["expected"], op["value"]}
+  defp link(%{"op" => "character.select"} = op), do: {nil, op["value"]}
   defp link(%{"op" => "bleed.transition"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "entity.create", "identity" => i}), do: {nil, i}
   defp link(%{"op" => "entity.transfer"} = op), do: {op["source_id"], op["destination_id"]}
@@ -291,6 +289,9 @@ defmodule Loka.Core.Invariants do
     with nil <- get_in(s, ["facts", Compose.key(Compose.target(op))]),
          do: get_in(s, ["fact_defaults", Compose.key(op["fact"])])
   end
+
+  defp initial(%{"op" => "character.select", "character_id" => id}, s),
+    do: get_in(s, ["characters", id])
 
   defp initial(%{"op" => "entity.create", "identity" => i}, s),
     do: get_in(s, ["created", i["id"]])

@@ -29,6 +29,47 @@ export function populationsHold(state: Any, ops: Any[], result: Any): boolean {
   );
 }
 
+/** Independent CAS and phase replay for the one persisted crow occurrence per slot. */
+export function crowsHold(state: Any, ops: Any[], result: Any): boolean {
+  const rows = new Map<string, Any>();
+  for (const op of ops) {
+    if (op.op !== 'crow.transition') continue;
+    const at = key({ kind: 'crow', plan: op.plan, slot: op.slot });
+    const before = rows.has(at) ? rows.get(at) : (state.crows?.[at] ?? null);
+    const after = op.value;
+    const legal: Record<string, string[]> = {
+      idle: ['acquire'],
+      acquire: ['leg', 'return', 'idle', 'paused_return'],
+      leg: ['leg', 'return', 'idle', 'paused_return'],
+      return: ['return', 'idle', 'paused_return'],
+      paused_return: ['return', 'idle'],
+    };
+    if (
+      !same(before, op.expected) ||
+      !(before === null ? after.phase === 'acquire' : legal[before.phase]?.includes(after.phase)) ||
+      (before !== null &&
+        before.phase !== 'idle' &&
+        (before.member_id !== after.member_id || before.generation !== after.generation)) ||
+      (after.phase === 'idle' &&
+        [after.item_id, after.nest_id, after.job_id, after.drop_event_id, after.encounter_id].some(
+          (v) => v !== null,
+        )) ||
+      (after.phase === 'paused_return' &&
+        (after.item_id !== null || after.job_id !== null || after.encounter_id === null)) ||
+      (!['idle', 'paused_return'].includes(after.phase) &&
+        (after.job_id === null ||
+          after.nest_id === null ||
+          after.drop_event_id === null ||
+          after.encounter_id !== null))
+    )
+      return false;
+    rows.set(at, after);
+  }
+  return [...rows].every(([at, row]) =>
+    result.changes.some((c: Any) => key(c.target) === at && same(c.value, row)),
+  );
+}
+
 function legal(kind: string, before: Any, after: Any): boolean {
   if (kind === 'population.control')
     return (

@@ -1,9 +1,8 @@
-# size: allow 410, skill and bleed refs share the checked expansion boundary
+# size: allow 410, skill, bleed and ancestry refs share the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
-
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
@@ -31,6 +30,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
+
+  def expand(%{"attribute" => _, "modifier" => _} = ancestry, m),
+    do: Loka.Content.Ancestries.expand(ancestry, m)
 
   def expand(%{"kind" => "source", "capacity" => _, "supply" => supply} = f, m),
     do: Map.put(f, "supply", ref(supply, "item", m))
@@ -60,7 +62,6 @@ defmodule Loka.Content.Checks do
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
 
-  # A reaction's trigger (ReactionRule on): its short fact or room.
   def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
     do: Map.put(on, "fact", ref(k, "fact", m))
 
@@ -74,7 +75,6 @@ defmodule Loka.Content.Checks do
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
     do: Map.update!(p, k, &ref(&1, k, m))
 
-  # A post_activation_event objective (QuestObjective): its short item.
   def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),
     do: Map.put(objective, "item_acquired", ref(k, "item", m))
 

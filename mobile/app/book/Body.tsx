@@ -16,6 +16,7 @@ import {
   RoomPage,
   ScenePage,
   SettingsPage,
+  AncestryPage,
 } from './pages.tsx';
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
@@ -50,6 +51,16 @@ export function Body(p: BodyProps) {
 function PageBody(p: BodyProps) {
   const { view, text } = p.screen;
   const { page } = p;
+  if (view.ancestry_choices)
+    return (
+      <AncestryPage
+        view={view}
+        text={text}
+        buttons={p.screen.buttons}
+        pending={p.screen.pending}
+        press={p.press}
+      />
+    );
   if (view.scene)
     return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)

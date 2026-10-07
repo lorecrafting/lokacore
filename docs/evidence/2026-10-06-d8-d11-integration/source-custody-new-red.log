@@ -1,0 +1,33 @@
+✖ crow acquisition harmlessly completes when another transfer moved the exact coin (94.662625ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 780.242625
+
+✖ failing tests:
+
+test at kernel/ts/test/crow.test.ts:433:1
+✖ crow acquisition harmlessly completes when another transfer moved the exact coin (94.662625ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"fault","code":"precondition_failed","target":{"kind":"containment","entity_id":"619363b4-697f-8e0d-ae4a-5208a285a460"}}
+  + actual - expected
+  
+  + 'fault'
+  - 'accepted'
+  
+      at advance (file://[redacted-path]/kernel/ts/test/crow.test.ts:69:12)
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:441:11)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'fault',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

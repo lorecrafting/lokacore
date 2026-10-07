@@ -5,6 +5,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "fact.assign"} = op),
     do: Map.put(Map.take(op, ~w(fact scope subject_id)), "kind", "fact")
 
+  def target(%{"op" => "character.select", "character_id" => id}),
+    do: %{"kind" => "character", "character_id" => id}
+
   def target(%{"op" => "entity.create", "identity" => %{"id" => e}}),
     do: %{"kind" => "entity", "entity_id" => e}
 
@@ -36,6 +39,9 @@ defmodule Loka.Core.ComposeTarget do
 
   def target(%{"op" => "population.slot", "plan" => p, "slot" => s}),
     do: %{"kind" => "population_slot", "plan" => p, "slot" => s}
+
+  def target(%{"op" => "crow.transition", "plan" => p, "slot" => s}),
+    do: %{"kind" => "crow", "plan" => p, "slot" => s}
 
   def target(%{"op" => "water.transition", "actor_id" => a}),
     do: %{"kind" => "water", "actor_id" => a}

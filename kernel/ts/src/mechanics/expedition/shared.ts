@@ -79,3 +79,36 @@ export function refused(
     ? undefined
     : ('invalid_state' as const);
 }
+
+export function actionRefused(
+  world: World,
+  actor: CharacterId,
+  a: { command: string; key: string },
+  target: EntityId | undefined,
+) {
+  if (a.command !== 'expedition' || target === undefined) return;
+  const spec = definition(world).spec;
+  const stage = (Object.keys(spec.actions) as ('start' | 'restart' | 'shelter')[]).find(
+    (k) => spec.actions[k] === a.key,
+  );
+  if (!stage) return 'invalid_target' as const;
+  const now = current(world, actor);
+  return refused(
+    world,
+    actor,
+    stage,
+    target,
+    now?.instance_id,
+    now?.attempt?.attempt_id,
+    now?.attempt?.cursor,
+  );
+}
+
+export function atDetail(world: World, target: string) {
+  return Object.values(world.cartridge.quests ?? {}).some(
+    (q) =>
+      q.expedition &&
+      (detailFor(world, q.expedition, 'start') === target ||
+        detailFor(world, q.expedition, 'shelter') === target),
+  );
+}

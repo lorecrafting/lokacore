@@ -1,0 +1,11 @@
+{
+  "keywords": ["nest", "crow_nest"],
+  "short": "item.crow_nest.short",
+  "room_line": "item.crow_nest.room",
+  "description": "item.crow_nest.description",
+  "mass_grams": 250,
+  "capacity": 8,
+  "location": { "in": "room", "room": "oak_branches" },
+  "barrier": "crow_nest_lid",
+  "container": true
+}

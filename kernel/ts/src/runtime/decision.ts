@@ -10,6 +10,7 @@ import {
   type BarrierState,
   type BleedRow,
   type CharacterId,
+  type CharacterChoice,
   type Command,
   type CommandPayload,
   type CompiledCartridge,
@@ -26,6 +27,7 @@ import {
   type PopulationControl,
   type PopulationSlot,
   type PopulationPlan,
+  type CrowTransport,
   type ErrorCode,
   type EventPayload,
   type FactValue,
@@ -60,9 +62,11 @@ export type State = {
   readonly expeditions?: Readonly<Record<string, ExpeditionAttempt>>; // by QuestInstanceId
   readonly population_plans?: Readonly<Record<string, PopulationControl>>; // by plan ref
   readonly population_slots?: Readonly<Record<string, PopulationSlot>>; // by target
+  readonly crows?: Readonly<Record<string, CrowTransport>>; // by plan/slot target
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
+  readonly characters?: Readonly<Record<string, CharacterChoice>>;
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;
@@ -92,23 +96,9 @@ export type ChoiceRow = {
   readonly quest_instance_id?: QuestInstanceId;
 };
 
-/** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
-export type JobRow = {
-  readonly water_generation?: number;
-  readonly water_body_id?: EntityId;
-  readonly job: DefinitionRef;
-  readonly due_time: number;
-  readonly status: 'pending' | 'completed' | 'cancelled';
-  readonly encounter_id?: EncounterId;
-  readonly quest_instance_id?: QuestInstanceId;
-  readonly actor_id?: CharacterId;
-  readonly bleed_body_id?: EntityId;
-  readonly bleed_generation?: number;
-  readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
-};
-
+import type { JobRow } from './rows.ts';
+export type { JobRow } from './rows.ts';
 export { row } from './rows.ts';
-
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
 export type QuestRow = {
   readonly quest: DefinitionRef;
@@ -145,6 +135,7 @@ export type World = {
         readonly hide?: DefinitionRef;
         readonly member_role: 'hound' | 'deer';
         readonly loot_role: 'pelt' | 'hide';
+
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;
@@ -204,7 +195,7 @@ export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
   action_recipe: ['check'],
-  schedule: ['movement', 'combat', 'death', 'quest'],
+  schedule: ['movement', 'combat', 'death', 'quest', 'containment'],
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement'],
   movement: ['quest'],

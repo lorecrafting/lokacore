@@ -66,13 +66,13 @@ function complete(state: Any, ops: Any[]): boolean {
       ['pelt', 'hide'].includes(op.identity.origin.role),
   );
   const slots = ops.filter((op) => op.op === 'population.slot');
-  if (hounds.length !== pelts.length) return false;
   for (const h of hounds) {
     const origin = h.identity.origin;
+    const spec = state.population_specs?.[key(origin.by)];
     if (
       pelts.filter(
         (p) => p.writer_group === h.writer_group && p.identity.origin.member_id === h.identity.id,
-      ).length !== 1 ||
+      ).length !== (spec?.pelt ? 1 : 0) ||
       ops.filter(
         (op) =>
           op.op === 'resource.initialize' &&

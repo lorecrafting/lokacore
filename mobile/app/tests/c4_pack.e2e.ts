@@ -9,6 +9,7 @@ test('hound Attack shows admitted helpers on the Combat page', async ({ app, scr
     await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
   };
   await app.clearState();
+  await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('south', 'Reed Path');
   await go('south', 'Reed Bank');

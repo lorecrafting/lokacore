@@ -85,6 +85,37 @@ Actual checks for this continuation:
   failure; the complete contract-example test file then passes (9 tests). The full
   gate remains unclaimed until actual predecessor integration and final pins.
 
+## Published D8/D11 integration checkpoint
+
+Merged published main `de8b1cb53e1436d2f5989481a820313f59fe08bf` into the
+preserved C6 branch with a merge commit. Conflict resolutions retain D11 ancestry
+creation, D8 crow composition/row handlers and C6 expedition composition/row
+handlers. Generated contracts and feature records come from the merged sources.
+The manifest and installed API follow the published predecessor's development
+labels; no final C6 successor version/API/hash/IDs are assigned.
+
+The merge exposed existing physical-size overruns. The corrections move C6's
+read-only notice/action queries into its existing shared module, reuse the current
+target helper, shorten the existing choice forwarding and remove redundant
+comments. Admission order, validation and target binding stay covered by the
+focused controls. No size or complexity limit was raised.
+
+Actual checks on the integrated candidate:
+
+- Focused C6 kernel/contract/actual-source/real-SQLite tests: exit 0, 11 passed.
+- Typecheck: exit 0. Headless simulator: exit 0, 19 passed.
+- Full example-transcript replay suite: exit 0, including preserved C6 source replay.
+- Focused Elixir expedition source, portable composition and crow composition:
+  exit 0, 19 passed. Credo, TypeScript/Elixir size, generator checks, formatting and
+  `git diff --check` pass.
+- Comparison with published main finds no C6 changes to `protocol/fixtures`.
+  Comparison with the preceding C6 checkpoint finds the provisional artifact and
+  expedition transcript unchanged.
+
+Independent final review, full publication gate and browser closure are still
+pending. D9 publication must establish the actual predecessor order before C6's
+independent final answer and replacement of its provisional replay input.
+
 ## Remaining publication work
 
 Full local gate and complete review of the changed schema surface; actual final predecessor integration and independent release pins;

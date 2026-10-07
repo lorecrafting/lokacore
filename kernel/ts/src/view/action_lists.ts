@@ -28,7 +28,8 @@ import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { movable as movableItem } from '../runtime/created.ts';
-import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
+import { attackRefused } from '../mechanics/combat/shared.ts';
+import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
@@ -65,7 +66,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !hidden(a))
       .filter((a) => movable(world, a, id))
-      .filter((a) => combatOffered(world, body, a, id))
+      .filter((a) => combatOffered(world, actor, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
@@ -163,8 +164,7 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
-  const target_ids =
-    a.command === 'expedition' && id ? [id as EntityId] : lightTargets(world, actor, a, id);
+  const target_ids = targetsFor(world, actor, a, id);
   const shown = {
     action_key: a.key,
     ...((light.VERBS.includes(a.command) || ['harvest', 'expedition'].includes(a.command)) && {
@@ -177,16 +177,9 @@ function advertise(
     ...(patch && { target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
-  // Step's order: the action's policy, then the talk rule's not_found and talkRefused.
   const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
-  const gathered =
-    a.command === 'harvest' && target !== undefined
-      ? harvestOffered(world, actor, a, target, steps)
-      : undefined;
-  const excursion =
-    a.command === 'expedition' && target !== undefined
-      ? expeditionAdmission(world, actor, a, target)
-      : undefined;
+  const gathered = harvestOffered(world, actor, a, target, steps);
+  const excursion = expedition.actionRefused(world, actor, a, target);
   const talk =
     a.command === 'talk' &&
     (speaks(world, target)
@@ -215,9 +208,10 @@ function harvestOffered(
   world: World,
   actor: CharacterId,
   a: Offered,
-  target: EntityId,
+  target: EntityId | undefined,
   steps: Steps,
 ) {
+  if (a.command !== 'harvest' || target === undefined) return;
   const method = a.input.includes('method') ? ('careful' as const) : undefined;
   const code = refusal(
     world,
@@ -265,13 +259,6 @@ function movable(world: World, a: Offered, id?: string): boolean {
   );
 }
 
-function combatOffered(world: World, body: EntityId | undefined, a: Offered, id?: string) {
-  if (a.command === 'move' && body && engaged(world, body)) return false;
-  if (a.command === 'flee') return !!body && !!engaged(world, body);
-  const entity = id && world.entities[id];
-  return a.command !== 'attack' || (entity && entity.kind === 'npc' && !!entity.attack);
-}
-
 // Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.
 function putPairs(
   world: World,
@@ -296,13 +283,7 @@ function putPairs(
 
 function noticeOffer(world: World, a: Offered, id: string) {
   return (
-    (a.command === 'expedition' &&
-      Object.values(world.cartridge.quests ?? {}).some(
-        (q) =>
-          q.expedition &&
-          (expedition.detailFor(world, q.expedition, 'start') === id ||
-            expedition.detailFor(world, q.expedition, 'shelter') === id),
-      )) ||
+    (a.command === 'expedition' && expedition.atDetail(world, id)) ||
     (a.command === 'harvest' &&
       !!world.details[id]?.harvest &&
       (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
@@ -312,24 +293,6 @@ function noticeOffer(world: World, a: Offered, id: string) {
         world.details[detailOf(world, a.recipe.target)]?.perception) &&
       detailOf(world, a.recipe.target) === id
     )
-  );
-}
-
-function expeditionAdmission(world: World, actor: CharacterId, a: Offered, target: EntityId) {
-  const spec = expedition.definition(world).spec;
-  const stage = (Object.keys(spec.actions) as ('start' | 'restart' | 'shelter')[]).find(
-    (k) => spec.actions[k] === a.key,
-  );
-  if (!stage) return 'invalid_target' as const;
-  const now = expedition.current(world, actor);
-  return expedition.refused(
-    world,
-    actor,
-    stage,
-    target,
-    now?.instance_id,
-    now?.attempt?.attempt_id,
-    now?.attempt?.cursor,
   );
 }
 
@@ -347,7 +310,8 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
   );
 }
 
-function lightTargets(world: World, actor: CharacterId, a: Offered, id?: string) {
+function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
+  if (a.command === 'expedition' && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
     : undefined;

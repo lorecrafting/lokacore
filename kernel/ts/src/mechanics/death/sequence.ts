@@ -13,6 +13,7 @@ import { cmp } from '../../foundation/validate.ts';
 import { key } from '../../foundation/compose.ts';
 
 import { leave } from '../water/shared.ts';
+import { died as crowDied } from '../crow/behavior.ts';
 import { clearBleed } from '../bleed/shared.ts';
 
 type DeathEvent = DomainEvent & {
@@ -62,6 +63,7 @@ export function deathSequence(
     },
   ];
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group));
+  ops.push(...crowDied(world, victim_id, writer_group));
   ops.push(...populationLoss(world, loss));
   if (player) ops.push(...returnBody(world, fatal));
   const died = deathEvent(world, command, fatal, id, corpse_id, player);

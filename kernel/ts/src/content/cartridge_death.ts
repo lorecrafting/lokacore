@@ -15,7 +15,7 @@ export function death(c: Obj, named: Checks['named']): Diagnostic[] {
     const at = `.cartridge.items${step(ref)}`;
     const ordinary = d && [d.player_corpse, d.npc_corpse].some((r) => refString(r) === ref);
     const bundleRoles = Object.values(c.population_bundles ?? {}).flatMap((b: any) =>
-      ['item', 'corpse'].filter((role) => refString(b[role]) === ref),
+      ['item', 'corpse'].filter((role) => b[role] && refString(b[role]) === ref),
     );
     if (!ordinary && bundleRoles.length === 0) bad(`${at}.location`);
     if (ordinary || bundleRoles.includes('corpse')) {

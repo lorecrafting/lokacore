@@ -1,0 +1,191 @@
+✔ loader refuses a crow corridor without its reciprocal return edge (76.925958ms)
+✖ one exact dropped coin travels through one crow to the open nest (71.005708ms)
+✖ Attack releases carried coin and pauses the crow return (67.494542ms)
+✖ closed original nest causes a dry room fallback before the next leg (57.659209ms)
+✖ full original nest causes a conserved room fallback (60.331458ms)
+✖ a same-time return home suppresses the ordinary wander for that member (71.296833ms)
+✔ same-time stale acquire permits the ordinary crow wander (56.0765ms)
+✖ crow job phase must match the current occurrence before moving custody (54.464916ms)
+✔ Take before the due acquisition cancels the old intent (56.090458ms)
+✖ Shoo releases the exact carried coin and cancels its pending transport leg (77.515416ms)
+✖ a second Green crow may bind a later Drop while the first returns (55.0035ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 3
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1399.327666
+
+✖ failing tests:
+
+test at kernel/ts/test/crow.test.ts:76:1
+✖ one exact dropped coin travels through one crow to the open nest (71.005708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3d4829ad-9e43-81ef-bc10-66b1b267e157'
+  - '66998c23-25e1-8de8-8284-f78446a85745'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:86:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+    expected: '66998c23-25e1-8de8-8284-f78446a85745',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:107:1
+✖ Attack releases carried coin and pauses the crow return (67.494542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:115:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:155:1
+✖ closed original nest causes a dry room fallback before the next leg (57.659209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3d4829ad-9e43-81ef-bc10-66b1b267e157'
+  - '6514913d-4eee-8eae-857e-c5bd36d48735'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:171:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+    expected: '6514913d-4eee-8eae-857e-c5bd36d48735',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:186:1
+✖ full original nest causes a conserved room fallback (60.331458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3d4829ad-9e43-81ef-bc10-66b1b267e157'
+  - '6514913d-4eee-8eae-857e-c5bd36d48735'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:200:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+    expected: '6514913d-4eee-8eae-857e-c5bd36d48735',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:205:1
+✖ a same-time return home suppresses the ordinary wander for that member (71.296833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '4ab97506-6638-89ed-92ba-1dd9267d590b'
+  - '6514913d-4eee-8eae-857e-c5bd36d48735'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:221:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '4ab97506-6638-89ed-92ba-1dd9267d590b',
+    expected: '6514913d-4eee-8eae-857e-c5bd36d48735',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:299:1
+✖ crow job phase must match the current occurrence before moving custody (54.464916ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3d4829ad-9e43-81ef-bc10-66b1b267e157'
+  - '66998c23-25e1-8de8-8284-f78446a85745'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:330:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+    expected: '66998c23-25e1-8de8-8284-f78446a85745',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:350:1
+✖ Shoo releases the exact carried coin and cancels its pending transport leg (77.515416ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
+  + actual - expected
+  
+  + 'rejected'
+  - 'accepted'
+  
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:367:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'rejected',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/crow.test.ts:389:1
+✖ a second Green crow may bind a later Drop while the first returns (55.0035ms)
+  TypeError: Cannot read properties of undefined (reading 'member_id')
+      at TestContext.<anonymous> (file://[redacted-path]/kernel/ts/test/crow.test.ts:396:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

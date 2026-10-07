@@ -10,6 +10,7 @@ import { definition as expeditionDefinition } from '../mechanics/expedition/shar
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
 const INPUTS: readonly string[] = [
+  'ancestry',
   'direction',
   'choice_id',
   'continuation_id',

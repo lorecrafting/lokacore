@@ -315,6 +315,8 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 // listed entity or an item inside one, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
+  if (view.ancestry_choices?.length)
+    return { type: 'choose_ancestry', ancestry: g.pick(view.ancestry_choices).key };
   const set = resolved(world, world.character);
   const here = world.state.containers[world.body]!;
   const exits = Object.keys(world.rooms[here]!.exits);

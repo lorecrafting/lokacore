@@ -16,6 +16,7 @@ import * as expedition from '../expedition/sequence.ts';
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
+import { settled as crowSettled } from '../crow/behavior.ts';
 import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
 import { fare, passage } from './shared.ts';
@@ -48,7 +49,7 @@ export function moveSequence(
     transfer,
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
-    ...closeEncounter(world, body),
+    ...closeMovementEncounter(world, body, mint),
     ...entrySight(world, here, there, command.id, mint, steps),
   ];
   const entered = event(world, command, mint, 1, {
@@ -104,4 +105,13 @@ export function movementPlan(
   const paid = fare(world, body);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };
+}
+
+/** Escape closes combat and resumes the same surviving crow's checked return. */
+function closeMovementEncounter(world: World, body: Parameters<typeof engaged>[1], mint: Mint) {
+  const fight = engaged(world, body);
+  return [
+    ...closeEncounter(world, body),
+    ...(fight ? crowSettled(world, fight.row.npc_id, mint) : []),
+  ];
 }

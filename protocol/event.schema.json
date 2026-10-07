@@ -221,6 +221,18 @@
           "additionalProperties": false
         },
         {
+          "description": "A living co-located actor made a carrying crow drop its exact item into this room.",
+          "type": "object",
+          "properties": {
+            "type": { "const": "shooed" },
+            "crow_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "item_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "room_id": { "$ref": "identity.schema.json#/$defs/EntityId" }
+          },
+          "required": ["type", "crow_id", "item_id", "room_id"],
+          "additionalProperties": false
+        },
+        {
           "description": "A QuestInstance became active.",
           "type": "object",
           "properties": {

@@ -12,6 +12,7 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 // choose and close_choice come from mechanics/dialogue/shared.ts).
 export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   expedition: [{ kind: 'entity', scopes: ['inspectable_details'] }, ['transition']],
+  choose_ancestry: [{ kind: 'none' }, ['ancestry']],
   recover_corpse: [entity('room_contents'), []],
   use_transport: [{ kind: 'entity', scopes: ['inspectable_details'] }, ['route', 'quoted_fare']],
   use_service: [{ kind: 'entity', scopes: ['room_occupants'] }, ['service', 'quoted_price']],
@@ -25,6 +26,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   move: [{ kind: 'none' }, ['direction']],
   scan: [{ kind: 'none' }, []],
   attack: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
+  shoo: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
   flee: [{ kind: 'none' }, []],
   buy: [entity('room_contents'), ['quoted_price']],
   sell: [entity('inventory'), ['quoted_price']],

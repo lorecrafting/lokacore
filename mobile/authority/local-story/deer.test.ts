@@ -4,13 +4,16 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, fresh, ref } from '../../../kernel/ts/test/deer_fixture.ts';
+import { bundle, content, ref } from '../../../kernel/ts/test/deer_fixture.ts';
+import { newWorld } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { deerSave } from './deer-save.ts';
 import { openStory } from './authority.ts';
 
-const releases = [{ fresh: fresh(), content_hash: bundle.sha256 }] as const;
+const initial = (seed: readonly number[] = [1, 2, 3, 4]) =>
+  newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, seed);
+const releases = [{ fresh: initial(), content_hash: bundle.sha256 }] as const;
 function adapter(sql: DatabaseSync) {
   return {
     execSync: (q: string) => sql.exec(q),
@@ -70,11 +73,19 @@ function setup(t: TestContext, seed?: readonly number[]) {
   };
   const p = { sql, db, host, fault };
   const selected = seed
-    ? ([{ fresh: fresh(seed), content_hash: bundle.sha256 }] as const)
+    ? ([{ fresh: initial(seed), content_hash: bundle.sha256 }] as const)
     : releases;
   const story = openStory(p.db as never, selected, p.host);
   assert.equal(story.kind, 'open');
   if (story.kind !== 'open') throw Error('open failed');
+  const choice = story.invoke({
+    invocation_id: 'bbbbbbbb-0000-4000-8000-000000000001',
+    actor_id: story.world().character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  });
+  assert.equal(choice.kind, 'saved', JSON.stringify(choice));
   return { path, p, story, selected };
 }
 function move(story: ReturnType<typeof setup>['story'], direction: string, n: number) {
