@@ -8,7 +8,7 @@ if [ -n "$base" ] && git merge-base --is-ancestor "$base" "$after" 2>/dev/null; 
   printf '%s\n' "$files" | awk -v lane="$lane" '
     /\.md$/ && !/\.gen\.md$/ { next }
     $0 == ".beads/issues.jsonl" { next }
-    lane == "code" && /^mobile\// { next }
+    lane == "code" && /^mobile\// && !/^mobile\/authority\/local-story\// { next }
     { bad = 1 }
     END { exit !bad }
   ' && { echo run; exit 0; }

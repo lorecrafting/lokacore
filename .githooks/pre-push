@@ -1,5 +1,6 @@
 #!/bin/sh
-# Metadata and Book-only changes use the short local lane; other changes run the full line.
+# Metadata and mobile app changes outside local-story authority use the short lane;
+# local-story authority/save and other code changes run the full line.
 # ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
 scope=metadata
 seen=0
