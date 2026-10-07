@@ -13,7 +13,7 @@ source review/CI gates. The PM is the single tracker writer, whether the PM is
 Codex or Claude Code. The pilot is reversible by retiring `.beads/` in a reviewed
 change; the Git evidence remains.
 
-The [delivery workflow](../WORKFLOW.md#beads-rust-pilot) owns sync, path hygiene
+The [delivery workflow](../WORKFLOW.md#beads-rust) owns sync, path hygiene
 and the evaluation point after two source merges.
 
 The owner expanded the pilot on 2026-10-06:
@@ -28,7 +28,7 @@ until they become definite; do not invent extra tracker tasks to represent them.
 The owner expanded the pilot again on 2026-10-06: allow hooks and deeper
 integration, and preserve comparable observations from before and after hooks.
 Use the repo-owned, opt-in Git import hook described in the
-[workflow](../WORKFLOW.md#beads-rust-pilot). It updates only the local Beads index
+[workflow](../WORKFLOW.md#beads-rust). It updates only the local Beads index
 after Git advances the selected integration checkout. Git reviews, source gates,
 roadmap publication and PM-owned task closures stay as before. The same hook
 runs for Claude Code and Codex because it belongs to the checkout, not an agent

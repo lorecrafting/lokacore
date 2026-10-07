@@ -34,4 +34,4 @@ and successor release pins remain null. B6 depends on those approved slices and
 installed reviewed Q2 riddle; re-pin their actual source heads before assignment.
 B6 release/API/hash/IDs/source/review/PR/proof are null. PM adoption tier is Codex
 Sol medium; source needs Sol high and independent protocol/save opinions under
-[the routing](pm-decision-codex-model-routing-2026-10-05.md).
+[the routing](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md).

@@ -33,6 +33,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 ## Post-R3
 
 - [Move forward](owner-decision-move-forward-2026-10-07.md): lessons first, then delete records of closed or superseded work; protocol fixtures, in-force decisions and open work stay.
+- [Claude Code only, Beads permanent, auto-merge](owner-decision-claude-only-auto-merge-2026-10-07.md): Opus reviews (Fable for E1–E3 gates), Codex retired, Beads permanent, background merge after green CI.
 - [D11 trusted elapsed before character choice](owner-decision-d11-prechoice-elapsed-2026-10-06.md): the owner allows clock and due-job advancement before selection while player commands stay blocked.
 - [C5 bounded third fix round](owner-decision-c5-third-fix-round-2026-10-06.md): owner-approved exception for PR #255 SO7/SO8 correction, scoped re-reviews and exact-head CI; the general two-round cap remains.
 - [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
@@ -176,7 +177,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
 
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
-- [Codex model routing during local chapter work](pm-decision-codex-model-routing-2026-10-05.md): PM execution choice after the owner's model/role audit request; explicit lower-cost implementation tiers, stronger review at trust boundaries, Astra for highest-risk audits.
+- [Codex model routing during local chapter work](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md): retired with Codex 2026-10-07.
 - [Fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md): owner prioritizes speed; complete source slices may merge into local `main` after checks and self-review while independent review runs in parallel, with remote publication still gated.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
