@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E1 recorder integration](2026-10-06-e1-recorder-integration-review.md): exact checkpoint `a1322ea0`, independent **APPROVE**, no findings; 11 focused checks and typecheck pass, retained hashes verify, E1 remains pending with 647 authored paths.
+
 - [E1 legal topology route proof](2026-10-06-e1-legal-routes-review.md): exact `104701ea`, independent **APPROVE**, no findings; 57-room real SQLite focused route passes, separate elapsed-conversion red control fails, retained evidence hashes verify. Final runner registration and E1 certification remain pending.
 - [E1 optional quest checkpoint](2026-10-06-e1-optional-quests-review.md): exact `dad439c6`, independent **APPROVE**, no findings; three repeated real SQLite cases pass, missing-delivery red control exits 1, retained hashes verify. Bounded routes only; E1 certification remains pending.
 
