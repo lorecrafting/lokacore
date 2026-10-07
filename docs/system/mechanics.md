@@ -562,7 +562,10 @@ midnight; jobs schedule strictly after the current time. The compiler and loader
 outside the authored day, unsafe day products and malformed periods. Optional ordered solar and
 lunar phase cuts classify confirmed time; absent sky data produces no sky claim. Legacy
 cartridges without the expanded calendar retain their installed fixed-hour meaning.
-Invariant `job_complete_owned_by_run`.
+Invariant `job_complete_owned_by_run`: each completion belongs to its job's own `run_job`,
+outside the root command's writer group 0, and the job is due by the advance's target.
+Equal-due combat round/bleed and population deadline pairs may share a writer group;
+the group does not identify a unique job completion.
 
 ## Engine-wide behaviours
 
