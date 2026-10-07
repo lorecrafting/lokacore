@@ -13,10 +13,10 @@ simulator's adopted-state check retains final-row validation. No story rule,
 save format, cartridge byte or owner save changed.
 
 The focused test on the unchanged checker exited 1 at the legal Start. With the
-correction, five focused simulator/C6 tests passed. A deliberate bypass of the
+correction, the [five-test simulator/C6 suite](focused-suite.log) passed. A deliberate bypass of the
 expedition check made the new false-prior assertion fail (exit 1); its
 [retained output](skip-check-mutant.log) proves the guard is sensitive. The
-[restored focused run](focused.log) exited 0. The full local
+[restored single-test run](focused.log) exited 0. The full local
 [`bin/check_all.sh` run](full-gate.log) on the clean code source exited 0;
 its retained output includes the 402 ExUnit tests and TypeScript checks.
 All retained raw outputs are redacted and [hash verified](hashes.verify).

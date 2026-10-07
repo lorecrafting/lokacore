@@ -1,3 +1,4 @@
 full-gate.log: OK
 focused.log: OK
+focused-suite.log: OK
 skip-check-mutant.log: OK
