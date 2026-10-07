@@ -1,8 +1,18 @@
 # Release scope planning
 
-Planning applicability from [release-scope.json](release-scope.json); its capability
-rows also feed the [feature map](../features.gen.md). The old Markdown regeneration
-script is no longer present; keep this planning summary consistent with that input.
+**Non-executable planning matrix; incomplete for the current chapter.**
+[release-scope.json](release-scope.json) also labels itself proposed planning, and its
+capability rows feed the [feature map](../features.gen.md). Neither document supplies
+E1's final applicability policy or certifies a release. The old Markdown regeneration
+script is no longer present.
+
+Known reconciliation carry for [E1](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md):
+the current v042 lock includes `escort@1`, `expedition@1`, `knowledge@1`, `patrol@1`
+and `water@1`, absent from the JSON capability matrix. This Markdown summary also
+omits JSON's `food@1`, `bleed@1` and `transport@1` capability rows. Derive the final
+policy from actual used contracts and the exact candidate, then reconcile both
+planning documents in E1's reviewed amendment; missing rows cannot mean not applicable.
+E1's final policy and certification remain open.
 
 Full chapter-one endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 R6P and the six-room C1 sampler are separate early proofs.

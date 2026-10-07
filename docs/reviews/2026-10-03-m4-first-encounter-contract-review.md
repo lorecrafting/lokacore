@@ -17,7 +17,7 @@ From merged `91da6b32e57d2e72ef7b96d4d158b6f3f92fa86f`: [M queue](../NEXT-MECHAN
 
 Inspected all eleven changed Markdown files against those requirements. S0–S5 match the independently retained [numeric vectors](../spec/conformance/numeric-vectors.json) exactly. Hand-checked uniform acceptance/modulo arithmetic, conditional draw counts, alternating initiative and HP outcomes for oracles A/B/C. Their answers do not come from combat code.
 
-Inspected targeted State/World, resource lookup and save-load source: actor-specific HP and durable dynamic-corpse gaps are accurately described. The four-room chapel route matches [00a §2](../archive/spec/00a-chapter-one-content.md#2-room-graph); those rooms are absent from the current sampler.
+Inspected targeted State/World, resource lookup and save-load source: actor-specific HP and durable dynamic-corpse gaps are accurately described. The four-room chapel route matches [00a §2](../archive/spec/00a-chapter-one-content.md#2-rooms); those rooms are absent from the current sampler.
 
 `git diff --check` passed. PM confirmed applicable exact-head CI green; code jobs were expected docs-only skips. No executable schemas, code or fixtures changed; no mutation tests, builds or native/storage operations were needed.
 

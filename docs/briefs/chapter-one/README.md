@@ -2,7 +2,13 @@
 
 These 33 briefs support the [Missing Child completion plan](../../MISSING-CHILD-PLAN.md). They are **provisional PM recommendations** unless their own text links an adopted decision; a brief is not implementation proof, review approval or proof of a playable chapter. Before assigning a slice, the PM must reconcile recommendations with current `docs/system/` and owner decisions, and re-pin the actual merged dependencies, source head, fixtures, release identity and checks. Unknown future pins remain null. The [delivery workflow](../../WORKFLOW.md) governs implementation and review.
 
-The public plan owns the 33-row order and dependencies. These briefs add candidate implementation detail. If they differ, the public plan and governing decisions control until the PM resolves the conflict. B9 now adopts paid actual Rest, a resumable bed-nested dream and final-only memory; B8 source/review re-pins remain required. B7 now adopts an untimed water path with B3 as its sole new-slice dependency; B8 now adopts immediate Maud services with durable bed eligibility and finite stock MV recovery; B7 source is published in #209; B8's brief now pins its approved dependency baseline and queues full source assignment behind active B6/C2 shared-source integration. C6 contains proposed recovery and reward policies requiring adoption. B6 now links its selected all-hours Seek, bounded retry and usable ward contract; B4/B5 are published, so re-pin B6 to current main before source work. B4 now links its selected light/fuel/recovery contract; its source is published. A1–A3 contain older historical lookups; use the merged status in the public roadmap and re-pin before source work. C2's brief is re-pinned to reviewed C1 and current main for source assignment. E1–E3 are proof plans, not gate verdicts.
+The public plan owns the 33-row order and dependencies. These briefs retain dated
+assignment detail; the [roadmap](../../ROADMAP.md) owns merged status and the
+[current bundled chapter](../../system/cartridge.md#current-bundled-chapter) owns
+release identity. A–D source is installed, including B6, B8 and C6; the adopted
+[C6 decision](../../decisions/pm-decision-c6-night-marsh-2026-10-06.md)
+supersedes its proposed recovery/reward alternatives. Re-pin exact source and
+contracts before any follow-up assignment. E1–E3 remain open proof plans, not gate verdicts.
 
 ## A. Main story
 

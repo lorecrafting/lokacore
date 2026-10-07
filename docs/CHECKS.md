@@ -96,5 +96,5 @@ records its focused baseline, corrected tests and six independent red controls.
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3). [Foreign-world envelope oracle evidence](evidence/2026-10-06-sim-foreign-world-envelope/README.md)
-  retains the published-v030 failure and its focused fix controls; its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
-  [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).
+  retains the published-v030 failure and its focused fix controls, all run on Node. Separately, the historical simulator sample (seeds 1-19) ran on Hermes in
+  [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074); it does not certify the later foreign-world oracle fix.
