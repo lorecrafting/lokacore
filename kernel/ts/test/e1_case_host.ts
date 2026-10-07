@@ -76,9 +76,13 @@ export function witnessedObligations(
     const route = before.cartridge.transports?.[key];
     if (!route || decision.outcome !== 'transport_used') return questPaths;
     const destination = route.destination;
+    const room =
+      after.roomIds[
+        `${destination.cartridge_id}@${destination.cartridge_version}:room/${destination.key}`
+      ];
     return withQuests(
       before.state.containers[before.body] !== after.state.containers[after.body] &&
-        gameView(after).place.title.key === `room.${destination.key}.title`
+        after.state.containers[after.body] === room
         ? [`/transports/${key}`]
         : [],
     );

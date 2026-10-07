@@ -554,8 +554,26 @@ test('E1 binds only the used ferry route on committed arrival', () => {
     a.move('north', 'west', 'east', 'south', 'west');
     const witnessed: string[][] = [];
     a.watch((before, after, command, decision) => {
-      if (command.payload.type === 'use_transport')
+      if (command.payload.type === 'use_transport') {
         witnessed.push(witnessedObligations(before, after, command, decision));
+        const other = after.roomIds['ashmere_missing_child@0.0.42:room/chapel_nave'];
+        const arrived = after.state.containers[after.body];
+        assert.notEqual(other, before.state.containers[before.body]);
+        assert.notEqual(other, arrived);
+        const falseArrival = {
+          ...after,
+          rooms: {
+            ...after.rooms,
+            [other]: { ...after.rooms[other]!, title: after.rooms[arrived]!.title },
+          },
+          state: { ...after.state, containers: { ...after.state.containers, [after.body]: other } },
+        };
+        assert.equal(gameView(falseArrival).place.title.key, gameView(after).place.title.key);
+        assert.equal(
+          witnessedObligations(before, falseArrival, command, decision).includes(outbound),
+          false,
+        );
+      }
     });
     a.invoke('board_ferry', [a.detail('boathouse', 'ferry')], {
       route: {
