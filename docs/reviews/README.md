@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Beads audit follow-ups independent review](2026-10-06-beads-audit-followups-extra-review.md): exact source `18d0c847`, **APPROVE**, no findings; complete export, shipped controls, 13 independent structural probes, distinct duplicate-slice mutation and docs checks pass. PM-owned evidence links and all 33 required slices preserved.
+
 - [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
 
 - [E1 loader carry integrated independent review](2026-10-06-e1-loader-integrated-review.md): exact source `03eb7089` against post-D10 base `87ac4cbb`, **APPROVE**, no findings; 78/78 focused tests, two independent red controls and seven negative/v042 probes pass. Loader carry only; final A–D E1 certification remains separate.
