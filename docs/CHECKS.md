@@ -72,12 +72,13 @@ a separate targeted Node authority check.
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
-  nonempty `source_repo_path` or a local machine path; the full export must contain
-  each Chapter 1 plan slice once with no missing dependency target or Beads-reserved
-  `-wisp-` ID. The pre-commit hook reads the staged export; CI lint and
-  `check_all` read the checkout.
-  `bin/beads_red_controls.sh` plants both path classes, a missing slice and a
-  reserved ID and observes refusal. The check needs no `br` binary.
+  nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
+  slices must appear exactly once with unique issue IDs, while supplemental
+  audit follow-ups are allowed. Missing dependency targets and Beads-reserved
+  `-wisp-` IDs fail. The pre-commit hook reads the staged export; CI lint and
+  `check_all` read the checkout. `bin/beads_red_controls.sh` accepts a valid
+  supplemental task and refuses both path classes, a missing or duplicate slice
+  and a reserved ID. The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
   changes confined to `mobile/` plus metadata; the browser lane runs for those. All other

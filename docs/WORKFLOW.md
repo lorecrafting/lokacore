@@ -148,7 +148,9 @@ and speculative generalizations ([owner decision](decisions/owner-decision-revie
 ### Beads Rust pilot
 
 The [owner-approved pilot](decisions/owner-decision-beads-rust-pilot-2026-10-06.md)
-tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`. The PM, whether using
+tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`; the export may also
+contain concrete, evidence-linked audit follow-ups under the [owner's extension](decisions/owner-decision-beads-audit-followups-2026-10-06.md).
+The PM, whether using
 Codex or Claude Code, owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
@@ -177,7 +179,8 @@ and verify it contains no local machine path; the installed release writes
 Avoid `-wisp-` in an issue ID: Beads Rust reserves it for ephemeral records,
 even when the task itself is durable.
 The [export check](CHECKS.md) rejects path, ID and completeness errors in the
-staged commit and CI.
+staged commit and CI. All 33 plan slices must remain present exactly once;
+additional tasks need a concrete audit finding and evidence link.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current

@@ -22,11 +22,34 @@ import sys
 from pathlib import Path
 
 rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
+rows.append({'id': 'loka-audit-followup', 'title': 'Audit follow-up: close a reviewed finding', 'dependencies': []})
+Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
+PY
+python3 bin/check_beads_export.py --complete "$case_file"
+python3 - "$case_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
 rows = [row for row in rows if not row['title'].startswith('B6 ')]
 Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
 PY
 if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
   echo 'Beads completeness control failed: a missing slice was accepted' >&2
+  exit 1
+fi
+python3 - "$case_file" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
+rows.append(dict(rows[0], id='loka-duplicate-slice'))
+Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
+PY
+if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
+  echo 'Beads completeness control failed: a duplicate slice was accepted' >&2
   exit 1
 fi
 python3 - "$case_file" <<'PY'
@@ -50,4 +73,4 @@ if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; th
   echo 'Beads ID control failed: a reserved wisp ID was accepted' >&2
   exit 1
 fi
-echo 'ok   beads: local paths, missing slices and reserved IDs refused'
+echo 'ok   beads: valid audit task accepted; local paths, missing/duplicate slices and reserved IDs refused'
