@@ -10,7 +10,7 @@ and not repeated here.
 
 - D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
 
-- D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote; source/proof remain pending ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
+- D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
 
 - D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
 
@@ -44,8 +44,8 @@ and not repeated here.
 - B1 uses the delegated [chapter calendar/status selection](../decisions/pm-decision-b1-calendar-status-2026-10-05.md): cartridge time units and sky phases drive confirmed Book/CLI status; deadline effects follow in B2.
 
 - B2 S2 uses the real public Aldric, Peg's always-reachable offer, an inclusive chapter
-  deadline and a conserved funded penny reward; its source is installed in the local
-  chapter 0.0.16 ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
+  deadline and a conserved funded penny reward; its source is installed in the
+  [current chapter](cartridge.md#current-bundled-chapter) ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
 - B5 S9 uses finite real herb/bandage stock, immediate optional explicit repeats and a separate capped Priory contribution ([PM adoption](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)).
 
 - B3 Peg's shop starts with a finite four-item authored shelf, exact conserved penny exchange,
@@ -125,7 +125,7 @@ and not repeated here.
 
 - C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
 
-- C3 living hounds have a [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; implementation and independent proof remain ahead.
+- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](../reviews/2026-10-06-c3-publication-status-review.md).
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
@@ -271,7 +271,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - PM adoption under autonomous mechanics authority: [M1–M23 queue, clock/safety and chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md); each implementation still amends active specs and follows reviewed delivery.
 
-- PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), planned contract before M5/M6; new combat equations are not silently inherited from draft PR #136.
+- PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), installed through M5/M6; new combat equations are not silently inherited from draft PR #136.
 
 - Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
 
@@ -300,4 +300,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Q2-A staged first search lead: [PM adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
 
-- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); selected-docs review is approved; publication and source proof remain pending.
+- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); installed source is in the [current chapter](cartridge.md#current-bundled-chapter).

@@ -287,7 +287,7 @@ and independently validates both targets.
 body, directly or nested), `barrier_state`, `quest_state` (false while the actor has no
 instance), `time_window` (hour of day from the validated cartridge calendar, wrapping windows allowed),
 `target_present` (the action's target is in reach, `:47`), and `stat_compare` and
-`resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
+`resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60)). An op outside this list throws:
 the loader closes the set (`content/cartridge.ts:160`).
 
 ## Target resolution
@@ -503,10 +503,12 @@ the escorts State section. Choose retains current policy and original-role reval
 Move/Flee and death include escort changes in the same root decision; no new command,
 transcript, SQLite table, save format or UI mode is added.
 
-## Selected S2 composition (pending implementation)
+<a id="selected-s2-composition-pending-implementation"></a>
+
+## Selected S2 composition
 
 S2's accepted offer and turn-in use one typed proposal under the
-[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
+[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract).
 An occurrence-bound expiry job identifies its actor and quest instance; completion
 cancels or invalidates only that job. Due jobs settle before an input at the same
 logical time. Exact payment debits and credits the two named resource targets in the
@@ -514,8 +516,8 @@ same proposal, with nonnegative, in-range preconditions; saturation is not payme
 The admitted choice and projected availability share current time, bound identity,
 presence, custody, carrying and funding checks. Extend schemas and composition twins
 only for the actual new operation/row fields, and retain the registered event,
-writer-group, budget and deterministic-ID rules. This is a selected source contract,
-not an installed operation.
+writer-group, budget and deterministic-ID rules. S2 is installed in the
+[current bundled chapter](cartridge.md#current-bundled-chapter).
 
 ## B3 shop composition
 
@@ -648,13 +650,13 @@ Do not encode engine history as untyped cartridge facts or generalize the new op
 into arbitrary item-state assignment. Because a new delta target crosses portable
 composition, both kernels require independently pinned valid/invalid/precondition
 fixtures and differential coverage; the light story rule remains TypeScript-only.
-The [current successor pin](cartridge.md#b4-well-and-fuel) is independently derived
-from the actual C1/B5 base. Existing error codes,
+The [current chapter identity](cartridge.md#current-bundled-chapter) owns the
+installed pin; B4's original C1/B5 predecessor remains dated evidence. Existing error codes,
 writer groups, checked arithmetic and query budgets apply.
 
 ## B7 liquid composition
 
-**Selected, pending implementation.** `liquid@1` owns only commands
+`liquid@1` owns only commands
 `fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
 and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
 item. ActionInvocation targets retain that exact ordered pair (or Drink's one
@@ -705,7 +707,7 @@ adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets sta
 in force; pair enumeration is bounded before work, not an unmetered all-item scan.
 ## C2 patrol composition and admission
 
-**Local source implemented; independent review pending.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+[C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
 quest instance, independently of the unchanged escort row. Register its minimal
 state/mutation target/transition and invariant under the patrol owner. Preserve
@@ -861,7 +863,7 @@ required. New schemas get invalid fixtures and required/bound mutant sweeps.
 
 ## C4 pack encounter and flight composition
 
-**Selected, pending implementation.** [C4 mechanics](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+[C4 mechanics](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
 adds only bounded active opponent IDs, primary and next-opponent ID to the owned
 encounter transition. Each write checks the complete prior encounter row, current
 job/round and exact character/body/room. Active IDs are unique, canonically ordered,
@@ -940,7 +942,7 @@ admission keep their separate writers.
 
 ## B8 immediate service composition
 
-**Implemented locally, publication pending.** A service invocation binds actor, exact
+A service invocation binds actor, exact
 provider EntityId, declared service DefinitionRef and displayed positive quoted
 price. The selected command is `use_service {actor_id, provider_id, service,
 quoted_price}`, with `service` the authored DefinitionRef and accepted outcome
@@ -999,7 +1001,7 @@ and receipt together before adopting memory or replying; no full-state copy occu
 
 ## B9 Rest occurrence and dream composition
 
-**Current consumed source; independent review pending.** Register `rested {body_id, room_id}` as a
+Register `rested {body_id, room_id}` as a
 position-owned DomainEvent for accepted `rest` only. Its full actor/player scope,
 world/time, root command cause/correlation and causal position bind the actual
 accepted body/room transition after prior-rate settlement. Root-to-event checks
@@ -1049,9 +1051,9 @@ is mandatory only for scene-owned choices and must match the saved occurrence.
 The real bed's optional `DreamView` carries current saved text, safe availability,
 selected branch and exact Continue/choice offers. These controls preserve action
 keys and captured inputs; scene-owned choices never enter ordinary dialogue
-pending selection. This consumed subset requires API1.25; current integrated release/
-hash/ID answers are recorded in the [B9 evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
-Publication remains pending the normal gates.
+pending selection. The original B9 subset required API1.25; it is installed in the
+[current bundled chapter](cartridge.md#current-bundled-chapter). Original integrated
+answers remain in the [B9 evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
 ## D4 held-food composition
 
 **D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
@@ -1090,7 +1092,7 @@ and applicable two-kernel differential cases if the foundation changes.
 
 ## D6 water movement and corpse selection
 
-**PM-selected contract; selected-docs review approved, implementation pending.** Use installed `move` and
+Use installed `move` and
 ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
 `input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
 Trust actor/invocation/freshness fields normally. A shared read-only exact-edge
@@ -1123,7 +1125,7 @@ compares the full prior row and increments the generation on entry or clear.
 An active row binds body, bottom room, entry clock, absolute deadline and job;
 a cleared row retains generation/body and has null room/entry/deadline/job.
 The job binds actor/body/generation to the exact bottom DefinitionRef and due
-clock. These are source candidates, not a successor API/release/hash/ID freeze.
+clock. The [current bundled chapter](cartridge.md#current-bundled-chapter) owns the installed release answers.
 
 Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
 `target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at
@@ -1171,15 +1173,18 @@ changed. D6's `recover_corpse` remains restricted to its two underwater rooms.
 
 ## D12 Harvest method and Buy quote composition
 
-**Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) extends only the existing Harvest command and action input with optional literal `method: "careful"`. A projected careful offer is `ActionInvocation {action_key: "gather_carefully", target_ids: [patch_detail_id], input: {method: "careful"}}`, with the ordinary actor/id context; it resolves to `{type: "harvest", actor_id, target_id: patch_detail_id, method: "careful"}`. `ActionInputParameter` registers `method`, and `ActionInput.method` plus `Command.harvest.method` accept only that literal. Ordinary Harvest has `input: {}` and omits the command method. A method requires the exact offered action's input declaration and the target's opted [careful metadata](cartridge.md#d12-practical-skill-declarations); neither an arbitrary detail nor ordinary Harvest input can invoke the benefit by name alone. Unsupported method/shape fails typed wire/admission validation before effects.
+[D12](mechanics.md#d12-practical-skill-consumers-selected-contract) extends only the existing Harvest command and action input with optional literal `method: "careful"`. A projected careful offer is `ActionInvocation {action_key: "gather_carefully", target_ids: [patch_detail_id], input: {method: "careful"}}`, with the ordinary actor/id context; it resolves to `{type: "harvest", actor_id, target_id: patch_detail_id, method: "careful"}`. `ActionInputParameter` registers `method`, and `ActionInput.method` plus `Command.harvest.method` accept only that literal. Ordinary Harvest has `input: {}` and omits the command method. A method requires the exact offered action's input declaration and the target's opted [careful metadata](cartridge.md#d12-practical-skill-declarations); neither an arbitrary detail nor ordinary Harvest input can invoke the benefit by name alone. Unsupported method/shape fails typed wire/admission validation before effects.
 
 Shared keyed target/input admission and the method-aware pure Harvest query drive projection and execution. A loaded alias whose key differs from `harvest` must independently produce the literal invocation and resolved payload above before its successful result. The careful accepted proposal contains the selected distinct custody transfers and matching acquisition events in one writer group, one accepted receipt and the authored careful narration. The budget is shared across action policy, skill policy, selection and combined carrying; fatal exhaustion faults atomically. There is no new foundation op or command capability.
 
-The existing `buy {actor_id, provider_id, item_id, quoted_price}` and ordered provider/item targets stay unchanged. Project and resolve the current effective Buy price through the shared commerce query and `ActionInput.quoted_price`, then compare that bound number again after authority elapsed preflight before any transfer. Qualification is an input to the quote, not a saved quote or acquisition condition. No stale offer may silently charge a newly computed price. The [chapter's optional shop declaration](cartridge.md#d12-practical-skill-declarations) owns the ratio/floor; Buy/Sell custody and checked payment compose exactly as B3. Protocol/schema/generated-contract changes belong to the future source slice and its independent review.
+The existing `buy {actor_id, provider_id, item_id, quoted_price}` and ordered provider/item targets stay unchanged. Project and resolve the current effective Buy price through the shared commerce query and `ActionInput.quoted_price`, then compare that bound number again after authority elapsed preflight before any transfer. Qualification is an input to the quote, not a saved quote or acquisition condition. No stale offer may silently charge a newly computed price. The [chapter's optional shop declaration](cartridge.md#d12-practical-skill-declarations) owns the ratio/floor; Buy/Sell custody and checked payment compose exactly as B3. These protocol/schema/generated-contract changes are installed; the
+[D12 save/protocol review](../reviews/2026-10-06-d12-final-save-review.md) records their independent acceptance.
 
-## D7 sight flight composition (planning contract)
+<a id="d7-sight-flight-composition-planning-contract"></a>
 
-**PM-selected proposal; independent plan review and source proof pending.** Reuse the C3 plan/slot/control, paired create/placement and C4 legal NPC movement/last-flight contracts. C4 currently initializes `last_flight_at` only for pack plans; D7 must initialize and validate it for deer sight-flight plans without enabling pack assistance. The deer and hide need distinct typed spawned-role declarations; their full plan, bundle, slot, generation, creation occurrence, member and parent provenance remain immutable. A deer is one current member of one one-slot plan, and its hide belongs to that exact birth pair. Existing hound/pelt roles and frozen fixtures retain their own meaning.
+## D7 sight flight composition
+
+Reuse the C3 plan/slot/control, paired create/placement and C4 legal NPC movement/last-flight contracts. C4 currently initializes `last_flight_at` only for pack plans; D7 must initialize and validate it for deer sight-flight plans without enabling pack assistance. The deer and hide need distinct typed spawned-role declarations; their full plan, bundle, slot, generation, creation occurrence, member and parent provenance remain immutable. A deer is one current member of one one-slot plan, and its hide belongs to that exact birth pair. Existing hound/pelt roles and frozen fixtures retain their own meaning.
 
 A sight binding is at most one pending job per current deer generation, carrying exact plan/slot/member/player, occurrence and due time; replacing it cancels the prior job atomically. Its job is internal, never a player ActionSet verb. Player entry or the checked population `entity.transfer` into the player's current room establishes co-presence; the latter schedules or resets sight in that same due-job writer group, bound to the exact transfer and population-job occurrence without requiring `entity_entered_room`. That cause and the current slot/job binding authorize dispatch. If the transfer is a new birth, include the sight binding in the birth slot transition rather than writing that slot twice. The sight group completes that job and makes one checked slot transition that clears its binding and, on actual flight, records the last-flight clock; legal deer transfer also stays in that group. Re-read the hydrated prefix; a stale generation, completed job, dead/departed deer or absent player cannot move anything. Sight first may transfer an engaged deer, close its encounter and cancel its still-pending current round entirely in the sight group. Unengaged deer use the same legal transfer without encounter changes. A stale or blocked sight completes harmlessly; when the encounter remains live, its current or successor round stays pending.
 
@@ -1187,7 +1192,7 @@ For the sole round-to-sight handoff, a current ordinary deer round in group G at
 
 ## C5 bleed and bandage composition
 
-**Selected contract; schema/source pending.** [C5](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) adds one body-keyed typed bleed row and checked `bleed.transition {body_id, expected, value}` delta. The closed C5 value retains a monotone positive generation even while inactive; its active form has producer hound EntityId, `ends_at`, cadence `next_tick_at` and exact pending JobId (whose due time may be the earlier tick or the end). Transitions compare the complete prior row, including null at first application. A new application increments the retained generation; refresh keeps the original producer, generation and pending cadence/job while extending the end after any eligible hound hit. The next cadence may pass the refreshed end; the pending job then runs at the earlier end to expire without damage. Tick advances that row; cure, expiry and death leave an inactive row with no due/job, preserving the generation needed to reject stale work. Schedule a final expiry delivery at `ends_at` when no damaging tick precedes it. One job owns only one current instance; stale generation/job work is harmless. Both generic delta validators, projection and loader reject malformed rows and impossible transitions. This installs no arbitrary effect script, stack collection or second scheduler.
+[C5](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) adds one body-keyed typed bleed row and checked `bleed.transition {body_id, expected, value}` delta. The closed C5 value retains a monotone positive generation even while inactive; its active form has producer hound EntityId, `ends_at`, cadence `next_tick_at` and exact pending JobId (whose due time may be the earlier tick or the end). Transitions compare the complete prior row, including null at first application. A new application increments the retained generation; refresh keeps the original producer, generation and pending cadence/job while extending the end after any eligible hound hit. The next cadence may pass the refreshed end; the pending job then runs at the earlier end to expire without damage. Tick advances that row; cure, expiry and death leave an inactive row with no due/job, preserving the generation needed to reject stale work. Schedule a final expiry delivery at `ends_at` when no damaging tick precedes it. One job owns only one current instance; stale generation/job work is harmless. Both generic delta validators, projection and loader reject malformed rows and impossible transitions. This installs no arbitrary effect script, stack collection or second scheduler.
 
 The hound combat owner may transition only after its resolver actually lowers player HP by a positive nonfatal amount in that writer group. It binds the actual C3 member and body rather than trusting a free event or template name. Due tick reads that status row, body HP/life and owned job at the hydrated prefix; it composes existing `resource.adjust`, fatal sequence if needed, and status/job cleanup in its one writer group. Fatal combat loss and any player death clear this C5 row before return. No `attack_result` is fabricated by a status tick; its typed cause identifies bleeding and original hound without granting hound kill credit.
 
@@ -1207,11 +1212,8 @@ frozen answers.
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.
 ## D10 knowledge and Knock composition
 
-Implementation assignment is based on published main `9d9cde51`, Chapter v041/API1.36,
-content hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`,
-209 starting IDs and 57 rooms. D10 advances the current chapter to v042/API1.37;
-its independently derived hash and allocation oracle are recorded in the
-[cartridge clause](cartridge.md#d10-map-positions-and-chapel-door-selected-pending-implementation).
+D10 is installed in the [current bundled chapter](cartridge.md#current-bundled-chapter);
+that section owns release, API, hash and allocation answers.
 
 `knowledge@1` owns `visited_rooms` rows keyed by canonical `{kind: "visit",
 actor_id, room_id}` and `observed_npcs` rows keyed by canonical `{kind: "observation",
@@ -1244,15 +1246,18 @@ to the accepted command receipt, and retry does not produce a second response.
 
 ## C6 expedition composition
 
-Implementation pin: final predecessor main `b52eaeff4caca4bcd64e4ba2c7c81cf672f1bc40` includes D9 merge `fb94a19eeef6966d86ec64f48d6f146af11feabc`, chapter `0.0.40` / API `1.35`. C6 candidate `0.0.41` / API `1.36` has independent hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a` and 209 initial identities in the frozen v041 fixtures. Independent final review and publication remain pending.
+C6 is installed in the [current bundled chapter](cartridge.md#current-bundled-chapter);
+its [final save opinion](../reviews/2026-10-06-c6-final-save-second-opinion.md) records source acceptance.
 
-**Selected planning contract; source pending.** An actor/quest-instance-keyed `ExpeditionAttempt` retains the bound living player body, original S27 quest occurrence, exact Start or Restart command ID as attempt ID, route cursor `0..5`, optional sheltered flag and status `active/failed/completed`. A checked complete-prior-row transition changes only this one attempt. The quest remains active through failed attempts; failure sets cursor0 and clears shelter; Restart replaces the attempt ID and retains cursor0 in the same row. Do not reuse C2's leader-bound patrol row or create a universal route interpreter. The fixed authored route and footprint are pinned definitions, not saved room tags or duplicated visit facts.
+An actor/quest-instance-keyed `ExpeditionAttempt` retains the bound living player body, original S27 quest occurrence, exact Start or Restart command ID as attempt ID, route cursor `0..5`, optional sheltered flag and status `active/failed/completed`. A checked complete-prior-row transition changes only this one attempt. The quest remains active through failed attempts; failure sets cursor0 and clears shelter; Restart replaces the attempt ID and retains cursor0 in the same row. Do not reuse C2's leader-bound patrol row or create a universal route interpreter. The fixed authored route and footprint are pinned definitions, not saved room tags or duplicated visit facts.
 
 Use three exact authored keys resolving to one narrow typed `expedition` command: `begin_marsh_watch` at gnawed bones with `target_ids: [gnawed_bones_detail_id]`, `input: {transition: "start"}`; `retry_marsh_watch` at the same detail with `input: {transition: "restart", quest_instance_id, attempt_id}`; and `use_marsh_shelter` at Drowned Oak's new shelter detail with `target_ids: [shelter_detail_id]`, `input: {transition: "shelter", quest_instance_id, attempt_id, cursor: 3}`. All resolve to `{type: "expedition", actor_id, detail_id, ...input}` and are registered only for this declared quest/transition; wrong key, target, transition or input cannot invoke another stage. Exact detail IDs come from the loaded definitions. Projection and direct command share one admission query over current actor/body, room/detail, quest state, attempt state, and current C3 hound slots. A stale drawing cannot start a second attempt or use shelter after progress changes. Start activates S27 and transitions the attempt before optional C4 Attack-style encounter creation in **one** writer group. The encounter uses the same current hound identity, roster, current room and budget as deliberate C4 Attack; no separate AI job or opportunistic enemy strike is added. If no hound is eligible, no encounter write occurs. A current encounter still restricts ordinary Move; legal Flee may advance the route only if its accepted edge is the next declared one.
 
 Movement's accepted transfer is the sole route-credit producer. At the hydrated proposal prefix, require the exact actor/body, active attempt ID, expected source/destination edge and next cursor; compose attempt transition with that one Move/Flee writer group. At cursor3 in Drowned Oak, Use shelter transitions the current attempt from unsheltered to sheltered once; no other stage/place/actor can record it and it never completes the quest. A wrong accepted edge inside the footprint earns no credit; an accepted exit outside marks failed. The fifth edge composes cursor5, quest resolution, one bounded faction adjustment and one reserved fact assignment in the same group. Death changes an active attempt to failed before the existing same-body return, with no quest completion or faction write. No event listener can credit an NPC entry or replay, and no independent fact/quest writer can forge terminal S27. Ordinary transaction, conflict, query and action budgets remain. Add the narrow typed state/delta/action and portable foundation fixtures only where necessary; release/API gate the new shape without changing frozen fixtures.
 
-## D8 exact crow transport and Shoo composition (selected planning contract)
+<a id="d8-exact-crow-transport-and-shoo-composition-selected-planning-contract"></a>
+
+## D8 exact crow transport and Shoo composition (selected contract)
 
 The committed player Drop remains the only intent producer: its `item_dropped` event binds the exact item EntityId, direct room holder, command cause and one eligible current crow slot/member generation. One typed occurrence per crow binds its current job and phase (`acquire`, `leg`, `return` or `paused_return`), member generation, original nest EntityId, and the exact item only during acquire/leg; return/paused_return has no reserved item. No unbounded candidate scan, claim table or new generic scheduler is selected. A job advances one acquisition/transport/return leg in its own writer group under canonical `(due_time, job_id)` order and shared budgets; scheduling its successor uses the pinned cartridge interval. A stale occurrence completes harmlessly and cannot reassign the item. Never merge unrelated job writer groups or weaken `conflicting_write`.
 

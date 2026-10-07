@@ -1,10 +1,13 @@
 # The current system
 
-What the code does now, checked claim by claim against the code and its tests at `87a1246`.
-A `path:line` cites that commit; a quoted name cites a test. Where the code and an old spec
-disagree, the text follows the code and [DIFFERENCES.md](DIFFERENCES.md) lists the
-difference for the owner. History (the specification packet, ADRs, decision records,
-reviews) is in [docs/archive/](../archive/README.md), read only when a task needs it.
+These are the active system contracts. Their initial claim-by-claim audit was at `87a1246`;
+unchanged line citations originate there. Later mechanic clauses and their governing
+records describe published changes through D10 at `87ac4cbb`, rather than claiming that
+the initial audit covered those changes. A quoted name cites a test. The
+[current bundled chapter](cartridge.md#current-bundled-chapter) owns the current release
+identity. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
+History (the specification packet, ADRs, decisions and reviews) remains in its dated
+records and [docs/archive/](../archive/README.md).
 
 | File | Covers |
 |---|---|
@@ -32,4 +35,8 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 [numeric profile](../spec/conformance/numeric-profile.md)) and
 [release scope](../spec/release-scope.md).
 
-Planned mechanics beyond C1: [M1–M23 queue](../NEXT-MECHANICS.md) and [first M1-A brief](../briefs/m1-a-clock.md), reachable through [future work](future.md). These plans do not describe installed behavior.
+Chapter 1 A–D mechanics are published; E1–E3 remain open in the
+[roadmap](../ROADMAP.md). The [M1–M23 queue](../NEXT-MECHANICS.md) records mechanic
+planning and [future work](future.md) links later work. A plan alone does not establish
+installed behavior. Native verification and the known UI blur carry remain deferred
+under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
