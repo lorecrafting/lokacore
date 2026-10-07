@@ -1,0 +1,44 @@
+✔ E1 inventory retains slash-bearing v042 definition roots (219.614959ms)
+✔ E1 world settings retain semantic gates and refuse unknown keys (39.854667ms)
+✔ E1 command refuses a different admitted candidate (1093.143375ms)
+✔ E1 command fails an unknown applicability obligation (870.680125ms)
+✔ retained repro rechecks the invariant and refuses incomplete or changed inputs (1166.110708ms)
+(node:64888) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (1456.088958ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (3242.298458ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (602.015666ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (5655.368542ms)
+(node:64889) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 optional quest debt-on_time survives SQLite reopen and deterministic repetition (3728.955375ms)
+✔ E1 optional quest dream-follow_fox survives SQLite reopen and deterministic repetition (3395.372917ms)
+✔ E1 optional quest dream-wake survives SQLite reopen and deterministic repetition (3091.791125ms)
+(node:64890) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 fresh authority route visits 57 literal rooms and reopens before each joined consumer (12470.149583ms)
+(node:64891) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 watch rounds cold reopen and replay the four literal post-start checkpoints (8358.129209ms)
+(node:64892) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 wisp-ward cold reopens and replays its literal consequences (5212.334541ms)
+✔ E1 infirmary-herbs cold reopens and replays its literal consequences (11100.333375ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17590.60025

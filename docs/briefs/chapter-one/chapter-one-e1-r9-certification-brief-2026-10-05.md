@@ -95,3 +95,5 @@ Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../.
 [Reviewed Watch, Wisp and herb route registration](../../evidence/2026-10-07-e1-route-registration/README.md) records a corrected-source 16-case replay with 609 authored obligations still pending.
 
 [Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint; recorder registration and E1 certification remain pending.
+
+[Modal scene acknowledgement binding](../../evidence/2026-10-07-e1-modal-scene-binding/README.md) is a clean-source recorder checkpoint with ten dream scene paths and other authored obligations pending.

@@ -1,0 +1,12 @@
+report.json: OK
+rescued-prior.jsonl: OK
+rescued-fox.jsonl: OK
+stays-prior.jsonl: OK
+stays-fox.jsonl: OK
+lost-prior.jsonl: OK
+cli.log: OK
+old-suite-mutant.log: OK
+new-test-mutant.log: OK
+focused.log: OK
+typecheck.log: OK
+docs.log: OK
