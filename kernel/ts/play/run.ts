@@ -107,10 +107,10 @@ function outcome(d: DecisionResult, r: Run): [unknown, unknown] {
 // target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted. Past
 // selector_cardinality candidates resolve throws; that gets a refusal and no record, whose
 // candidates count could not hold it.
-export function found(r: Run, words: string): EntityId | undefined {
+export function found(r: Run, words: string, mode?: 'where'): EntityId | undefined {
   let res: TargetResolution;
   try {
-    res = resolve(r.world, r.world.character, words);
+    res = resolve(r.world, r.world.character, words, mode);
   } catch (e) {
     if (!String(e).includes('exceed selector_cardinality')) throw e;
     return void process.stdout.write(

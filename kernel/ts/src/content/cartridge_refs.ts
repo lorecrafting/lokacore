@@ -25,6 +25,7 @@ import { typed } from '../mechanics/fact.ts';
 import { barriers } from './cartridge_barriers.ts';
 import { links, unreachable } from './cartridge_links.ts';
 import { dialogues } from './cartridge_dialogues.ts';
+import { knowledge } from './cartridge_knowledge.ts';
 import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
@@ -183,6 +184,7 @@ export function refStage(c: Obj): Diagnostic[] {
   if (c.format !== 'loka-cartridge-v2') return out;
   out.push(...exchanges(c, check), ...fuel(c, check));
   spatialRefs(c, check, out);
+  out.push(...knowledge(c, check));
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const { in: k } = i.location;

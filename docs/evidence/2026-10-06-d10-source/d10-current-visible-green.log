@@ -1,0 +1,12 @@
+✔ only committed body entry adds a visited room; refused moves and rendering add none (27.536791ms)
+✔ Look observes only visible local NPCs at its committed logical time (10.222541ms)
+✔ real fatal sequence records Chapel return in the same adopted proposal (7.51475ms)
+✔ both real recoverable boots retain exact ambiguous IDs and independent touch examination (8.976042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 233.77975

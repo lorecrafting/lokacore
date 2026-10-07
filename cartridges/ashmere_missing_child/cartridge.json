@@ -1,7 +1,7 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_missing_child",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "title": "Ashmere — The Missing Child",
   "ancestries": {
     "fen_born": {
@@ -42,7 +42,7 @@
   },
   "requires": {
     "kernel_api": {
-      "at_least": "1.36",
+      "at_least": "1.37",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -84,7 +84,8 @@
       "food": 1,
       "bleed": 1,
       "water": 1,
-      "expedition": 1
+      "expedition": 1,
+      "knowledge": 1
     },
     "client_features": []
   },

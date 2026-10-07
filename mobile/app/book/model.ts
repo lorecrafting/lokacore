@@ -291,6 +291,12 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...travel(v),
     ...doors,
     ...held,
+    ...(v.known_npcs ?? []).map((n) => ({
+      label: `Where ${text(n.name)}`,
+      action_key: 'where',
+      target_ids: [n.id],
+      input: {},
+    })),
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
     ...serviceButtons(v, text),

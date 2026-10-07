@@ -1,0 +1,61 @@
+✖ only committed body entry adds a visited room; refused moves and rendering add none (142.614291ms)
+✔ Look observes only visible local NPCs at its committed logical time (13.666291ms)
+✖ real fatal sequence records Chapel return in the same adopted proposal (27.825709ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 588.424
+
+✖ failing tests:
+
+test at kernel/ts/test/d10_knowledge.test.ts:46:1
+✖ only committed body entry adds a visited room; refused moves and rendering add none (142.614291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'room.ferry_landing.title',
+  -   'room.well_lane.title'
+    ]
+  
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/d10_knowledge.test.ts:59:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'room.ferry_landing.title' ],
+    expected: [ 'room.ferry_landing.title', 'room.well_lane.title' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/d10_knowledge.test.ts:120:1
+✖ real fatal sequence records Chapel return in the same adopted proposal (27.825709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  -   'room.chapel_nave.title',
+      'room.ferry_landing.title'
+    ]
+  
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/d10_knowledge.test.ts:137:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'room.ferry_landing.title' ],
+    expected: [ 'room.chapel_nave.title', 'room.ferry_landing.title' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

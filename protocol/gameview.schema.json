@@ -1187,30 +1187,60 @@
             "$ref": "gameview.schema.json#/$defs/AttributeView"
           }
         },
-        "ancestry": { "$ref": "action.schema.json#/$defs/Key" },
+        "ancestry": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "ancestry_choices": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "key": { "$ref": "action.schema.json#/$defs/Key" },
-              "label": { "$ref": "text.schema.json#/$defs/TextKey" },
-              "description": { "$ref": "text.schema.json#/$defs/TextKey" },
-              "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-              "modifier": { "type": "integer", "minimum": 1 },
-              "skill": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "key": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "description": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "modifier": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "skill": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
               "faction": {
                 "type": "object",
                 "properties": {
-                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "value": { "type": "integer" }
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "value": {
+                    "type": "integer"
+                  }
                 },
-                "required": ["fact", "value"],
+                "required": [
+                  "fact",
+                  "value"
+                ],
                 "additionalProperties": false
               },
-              "dark_sight": { "const": true }
+              "dark_sight": {
+                "const": true
+              }
             },
-            "required": ["key", "label", "description", "attribute", "modifier"],
+            "required": [
+              "key",
+              "label",
+              "description",
+              "attribute",
+              "modifier"
+            ],
             "additionalProperties": false
           }
         },
@@ -1243,6 +1273,15 @@
           "type": "array",
           "items": {
             "$ref": "water.schema.json#/$defs/CorpseRecoveryView"
+          }
+        },
+        "map": {
+          "$ref": "gameview.schema.json#/$defs/MapView"
+        },
+        "known_npcs": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownNpcView"
           }
         }
       },
@@ -1762,15 +1801,38 @@
         "cue": {
           "type": "object",
           "properties": {
-            "source_event_id": { "$ref": "event.schema.json#/$defs/EventId" },
-            "command_id": { "$ref": "identity.schema.json#/$defs/CommandId" },
-            "actor_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
-            "observer_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
-            "room_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
-            "logical_time": { "type": "integer", "minimum": 0 },
-            "key": { "$ref": "text.schema.json#/$defs/TextKey" }
+            "source_event_id": {
+              "$ref": "event.schema.json#/$defs/EventId"
+            },
+            "command_id": {
+              "$ref": "identity.schema.json#/$defs/CommandId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "observer_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "logical_time": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "key": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
           },
-          "required": ["source_event_id", "command_id", "actor_id", "observer_id", "room_id", "logical_time", "key"],
+          "required": [
+            "source_event_id",
+            "command_id",
+            "actor_id",
+            "observer_id",
+            "room_id",
+            "logical_time",
+            "key"
+          ],
           "additionalProperties": false
         },
         "lines": {
@@ -2467,6 +2529,138 @@
         "tick_every"
       ],
       "additionalProperties": false
+    },
+    "KnownRoomView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "y": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "z": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "x",
+        "y",
+        "z"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "room.ferry_landing.title",
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      ],
+      "description": "An actor’s visited room with its title and static drawing coordinates."
+    },
+    "KnownConnectionView": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "to": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "direction": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "direction"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "from": "aaaaaaaa-0000-4000-8000-000000000001",
+          "to": "aaaaaaaa-0000-4000-8000-000000000002",
+          "direction": "north"
+        }
+      ],
+      "description": "A known directed exit between visited rooms; carries no live traversal availability."
+    },
+    "KnownNpcView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "name": "npc.aldric.short"
+        }
+      ],
+      "description": "A currently visible NPC or one previously observed by this actor, offered for exact-ID Where."
+    },
+    "MapView": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownRoomView"
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownConnectionView"
+          }
+        }
+      },
+      "required": [
+        "rooms",
+        "links"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "rooms": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "room.ferry_landing.title",
+              "x": 0,
+              "y": 0,
+              "z": 0
+            }
+          ],
+          "links": []
+        }
+      ],
+      "description": "The actor’s visited places and connections between visited endpoints."
     }
   }
 }

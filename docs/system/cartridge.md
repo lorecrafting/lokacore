@@ -1354,6 +1354,13 @@ Add `skills/bandage.json` under the existing C1 skill shape: current qualificati
 Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
 ## D10 map positions and Chapel door (selected, pending implementation)
 
+**Implementation candidate:** Chapter v042/API1.37 has 57 rooms and 211 initial IDs.
+Its independently derived content hash is
+`5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`;
+[the frozen artifact](../../protocol/fixtures/missing_child_v042_hash.json) and
+[allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) retain the answers.
+Source review and publication are pending.
+
 The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
 These integer drawing coordinates are content, not an engine inference from compass
 directions: the room graph contains ferry links and loops. Compilation and loading

@@ -1,5 +1,6 @@
+import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
-// size: allow 315, one terminal session: its loop, each command's dispatch and the replay
+// size: allow 320, one terminal session: its loop, each command's dispatch and the replay
 // `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
 // Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
@@ -157,6 +158,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
 }
 
 type Turn = ReturnType<typeof decide>;
+// size: allow 45, terminal outcome projection retains ordinary command and located output
 function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
   const { trace, latency, decision } = result;
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
@@ -180,6 +182,8 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     activated_with_possession: 'You agree to help, and you already have what is needed.\n',
     choice_opened: choice(cartridge, r.world),
   };
+  if (decision.kind === 'accepted' && decision.location)
+    done.located = locationLine(r.world, decision.location);
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
     decision.kind !== 'accepted'
@@ -201,13 +205,13 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
 // Resolves the player's words (commands/target.ts; 04 §17), and for give the recipient's: each unique
 // id goes into a look, take, drop or give Command; none and ambiguous build no Command.
 function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
-  const id = found(r, p.lookup);
+  const id = found(r, p.lookup, p.verb === 'where' ? 'where' : undefined);
   const to = p.verb === 'give' && id ? found(r, p.to!) : undefined;
   if (!id || (p.verb === 'give' && !to)) return;
   const payload =
     p.verb === 'give'
       ? { type: 'give', item_id: id, recipient_id: to }
-      : p.verb === 'talk' || p.verb === 'read'
+      : p.verb === 'talk' || p.verb === 'read' || p.verb === 'where'
         ? { type: p.verb, target_id: id }
         : p.verb
           ? { type: p.verb, item_id: id }

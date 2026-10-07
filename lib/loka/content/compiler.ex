@@ -1,4 +1,4 @@
-# size: allow 315, ancestry source manifest wiring joins the existing compiler boundary
+# size: allow 326, ancestry and static map source wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -34,13 +34,24 @@ defmodule Loka.Content.Compiler do
   def compile(files, loaded, registry) do
     {manifest, located, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
-    {text, d3} = text(of(files, :text))
-    v2 = v2(defs, located, text, files)
+    {located, v2, d3} = world_content(files, manifest, defs, located)
 
     case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
-      {warnings, []} -> {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
-      {_, errors} -> {:error, errors}
+      {warnings, []} ->
+        {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
+
+      {_, errors} ->
+        {:error, errors}
     end
+  end
+
+  defp world_content(files, manifest, defs, located) do
+    {text, d3} = text(of(files, :text))
+    {positions, d4} = Loka.Content.MapPositions.source(of(files, :map_positions), manifest, defs)
+    located = Loka.Content.MapPositions.settings(located, positions)
+    v2 = v2(defs, located, text, files)
+
+    {located, v2, d3 ++ d4}
   end
 
   # {warnings, errors} of the lists of diagnostics

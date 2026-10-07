@@ -78,6 +78,9 @@
             },
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
+            },
+            "location": {
+              "$ref": "#/$defs/LocatedNpc"
             }
           },
           "required": [
@@ -187,6 +190,88 @@
           ]
         }
       ]
+    },
+    "LocatedNpc": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "here"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "target_id",
+            "status",
+            "room_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "last_seen"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "target_id",
+            "status",
+            "room_id",
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "target_id",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "target_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "status": "unknown"
+        },
+        {
+          "target_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "status": "here",
+          "room_id": "aaaaaaaa-0000-4000-8000-000000000001"
+        },
+        {
+          "target_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "status": "last_seen",
+          "room_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "at": 64800
+        }
+      ],
+      "description": "Where’s visibility-gated here result, saved last observation, or unknown result without location evidence."
     }
   }
 }

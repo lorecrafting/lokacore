@@ -24,7 +24,8 @@
       "open",
       "close",
       "lock",
-      "unlock"
+      "unlock",
+      "knock"
     ],
     "definitions": [
       "barrier"
@@ -141,7 +142,9 @@
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability",
-    "commands": ["choose_ancestry"],
+    "commands": [
+      "choose_ancestry"
+    ],
     "definitions": [
       "attribute"
     ],
@@ -526,6 +529,17 @@
     "residency": "portable_capability",
     "commands": [
       "expedition"
+    ],
+    "definitions": [],
+    "events": []
+  },
+  {
+    "key": "knowledge",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "where"
     ],
     "definitions": [],
     "events": []

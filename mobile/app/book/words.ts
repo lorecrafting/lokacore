@@ -70,6 +70,17 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
     return SENTENCE[code] ?? `You can't do that: ${reason(code)}.`;
   }
   if (d.kind === 'fault') return '';
+  if (d.outcome === 'located' && d.location) {
+    const location = d.location;
+    const name =
+      view.known_npcs?.find((n) => n.id === location.target_id)?.name ??
+      view.entities.find((n) => n.id === location.target_id)?.name;
+    const who = name ? text(name) : 'They';
+    if (location.status === 'here') return `${who}: here.`;
+    if (location.status === 'unknown') return 'Their whereabouts are unknown.';
+    const room = view.map?.rooms.find((r) => r.id === location.room_id);
+    return `${who}: last seen at ${room ? text(room.title) : 'a previously observed place'} at ${location.at}s.`;
+  }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
   return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');

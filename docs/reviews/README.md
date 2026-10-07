@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D10 save/protocol independent review](2026-10-06-d10-save-protocol-review.md): source `806bfe4f`, test-only followup `b8c4e8ec`, scoped APPROVE; 8 focused tests, 9 independent SQLite corruption probes and 3 save-pin tests pass. No findings; foundation/proposal, browser and publication gates remain separate.
+
 - [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. Final primary closure is indexed below.
 
 
@@ -533,3 +535,6 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C6 scoped historical D12 fixture review](2026-10-06-c6-provisional-primary-review.md#scoped-full-gate-d12-fixture-correction): exact `249a9976`, APPROVE; original four behavior/contract tests pass, all frozen text retained, twelve bounded additions and old wholesale-graft loader red control confirmed.
 
 - [Simulator input purity](2026-10-06-sim-input-purity-review.md): exact source `62b2bc7d`, independent APPROVE, no findings; focused test and step-side mutation caught, guard-removal control red. JSON snapshot coverage limit recorded; normal publication checks and hosted CI remain delivery gates.
+
+- [D10 primary source review](2026-10-06-d10-primary-source-review.md): source through `8a4b8b04`, independent APPROVE WITH NOTES; no additional source findings, independent v042 hash/211 IDs, real SQLite and reviewer-planted visibility/entry controls verified. Browser/full gate/opinions/CI remain publication gates.
+- [D10 foundation and composition opinion](2026-10-06-d10-foundation-opinion.md): scoped APPROVE at `8a4b8b04`; null-row invariant finding F1 closed, portable differential and knowledge/bleed/deer overlap controls pass. Content pins, browser, authority and final publication gates remain separate.

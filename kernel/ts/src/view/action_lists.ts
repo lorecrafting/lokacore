@@ -1,4 +1,4 @@
-// size: allow 325, food, water, and practical skill offers share the composed view list
+// size: allow 330, food, water, practical skills and local Knock share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { bandageActions } from './bleed.ts';
@@ -37,6 +37,7 @@ import { reach } from '../mechanics/lookups.ts';
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
 const HIDDEN = [
+  'where',
   'recover_corpse',
   'eat',
   'bandage',
@@ -142,7 +143,9 @@ function entityOffered(
       lightOffered(world, actor, a, id as EntityId, steps)
     );
   return door(a)
-    ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
+    ? a.command !== 'knock' &&
+        lidded(world, id) &&
+        usable(world, actor, a, { target_id: id as EntityId })
     : nested
       ? !!a.engine && a.command === 'take'
       : a.target.kind === 'entity' &&
@@ -222,7 +225,7 @@ function harvestOffered(
   return code ?? harvest(world, actor, target, steps, method);
 }
 
-const door = (a: Offered) => Object.hasOwn(barrier.MOVES, a.command);
+const door = (a: Offered) => a.command === 'knock' || Object.hasOwn(barrier.MOVES, a.command);
 // Only an item with a barrier can take a door verb; skips usable's admission for every other entity.
 const lidded = (world: World, id: string) => {
   const e = world.entities[id];
@@ -247,7 +250,9 @@ function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site
   const payload = { type: a.command, ...site, actor_id: actor } as CommandPayload;
   return (
     !refusal(world, payload, steps, a.key) &&
-    typeof barrier.transition(world, actor, a.command, site, steps) !== 'string'
+    typeof (a.command === 'knock'
+      ? barrier.knock(world, actor, site.direction!)
+      : barrier.transition(world, actor, a.command, site, steps)) !== 'string'
   );
 }
 

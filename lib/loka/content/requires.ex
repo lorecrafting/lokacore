@@ -52,6 +52,9 @@ defmodule Loka.Content.Requires do
   # ponytail: finite wire floors stay ordered here; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp minimum_feature_api(m, all) do
     cond do
+      is_map_key(m["requires"]["capabilities"], "knowledge") ->
+        [1, 37]
+
       is_map_key(m["requires"]["capabilities"], "patrol") ->
         [1, 22]
 

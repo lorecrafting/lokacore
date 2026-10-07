@@ -1,3 +1,4 @@
+import { knowledgeSave } from './knowledge-save.ts';
 import { patrolSave } from './patrol-save.ts';
 import { expeditionSave } from './expedition-save.ts';
 import { riddleSave, selectorSave } from './riddle-save.ts';
@@ -15,6 +16,7 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
 export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+  knowledgeSave(world);
   patrolSave(world);
   expeditionSave(world, db, meta, revision);
   selectorSave(world, db, meta);

@@ -1207,6 +1207,25 @@ frozen answers.
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.
 ## D10 knowledge and Knock composition
 
+Implementation assignment is based on published main `9d9cde51`, Chapter v041/API1.36,
+content hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`,
+209 starting IDs and 57 rooms. D10 advances the current chapter to v042/API1.37;
+its independently derived hash and allocation oracle are recorded in the
+[cartridge clause](cartridge.md#d10-map-positions-and-chapel-door-selected-pending-implementation).
+
+`knowledge@1` owns `visited_rooms` rows keyed by canonical `{kind: "visit",
+actor_id, room_id}` and `observed_npcs` rows keyed by canonical `{kind: "observation",
+actor_id, npc_id}`. A `VisitedRoom` row contains `actor_id, room_id`; an
+`ObservedNpc` row contains `actor_id, npc_id, room_id, at` (logical seconds).
+`visit.record` writes the former only from absence; `observation.record` carries
+`from` (null or the prior row) and `value`, and requires monotone observation time.
+Both carry actor and target identity. Entry observations are captured at their causal
+sequence; all knowledge writes form one final writer group, preserving their order and
+prior rows. No mechanic reads knowledge during the same command. Look records observations
+in its own accepted rule. Existing
+changed-row storage and receipt history carry them; no separate database is added.
+
+
 Typed character-owned visited-room and observed-NPC rows are the only new gameplay
 knowledge. Their delta operations are written by the accepted entry/Look decision and
 committed with the receipt; GameView, Map, Where and Knock never write them while

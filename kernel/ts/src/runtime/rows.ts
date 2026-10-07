@@ -13,6 +13,8 @@ import { key } from '../foundation/compose.ts';
 const SECTIONS: Readonly<
   Record<
     string,
+    | 'visited_rooms'
+    | 'observed_npcs'
     | 'water'
     | 'liquids'
     | 'fuel'
@@ -36,6 +38,8 @@ const SECTIONS: Readonly<
     | 'bleeds'
   >
 > = {
+  visit: 'visited_rooms',
+  observation: 'observed_npcs',
   water: 'water',
   liquid: 'liquids',
   fuel: 'fuel',

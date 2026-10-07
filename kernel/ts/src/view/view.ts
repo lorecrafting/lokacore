@@ -1,3 +1,4 @@
+import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
 import { waterViews } from './water.ts';
@@ -66,7 +67,6 @@ export function gameView(world: World): GameView {
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
   const equipment = equipmentViews(world, actions, steps);
-  const place = placeView(world, here, steps);
   const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
@@ -76,12 +76,13 @@ export function gameView(world: World): GameView {
   const bleed = currentBleed(world, world.body);
   const view: GameView = {
     actor_id: world.character,
+    ...knowledgeView(world, steps),
     ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
-    place,
+    place: placeView(world, here, steps),
     exits: exits(world, actions.door, steps),
     actions: actions.place,
     ...noticeViews(world, here, actions.notice, steps),

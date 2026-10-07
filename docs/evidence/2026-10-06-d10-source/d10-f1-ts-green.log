@@ -1,0 +1,10 @@
+✔ knowledge composition matches independent row and refusal fixtures (4.004083ms)
+✔ knowledge invariant refuses forged success over null visit and observation rows (0.324ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.981875

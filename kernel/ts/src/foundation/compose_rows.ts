@@ -11,6 +11,7 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
 export const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 export const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
+// size: allow 44, closed row-target dispatch includes actor-owned knowledge rows
 export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
@@ -21,6 +22,10 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   if (t.kind === 'fact') return get(section(s, 'facts'), key(t));
   if (t.kind === 'crow') return get(section(s, 'crows'), key(t));
   switch (t.kind) {
+    case 'visit':
+      return get(section(s, 'visited_rooms'), key(t));
+    case 'observation':
+      return get(section(s, 'observed_npcs'), key(t));
     case 'entity':
       return get(section(s, 'created'), t.entity_id);
     case 'containment':

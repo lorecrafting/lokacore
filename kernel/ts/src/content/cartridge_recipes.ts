@@ -1,6 +1,7 @@
 // The loader's recipe checks (action_recipe@1; action.schema.json ActionRecipe), twin of
 // lib/loka/content/recipes.ex, and each room's action contribution.
 import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
@@ -16,7 +17,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const taken = new Set([
-    ...Object.keys(CAPABILITY_OWNERS.command),
+    ...reservedCommands(c),
     ...Object.values(c.actions as Obj).map((a) => a.key),
   ]);
   const checks = Object.values((c.recipes ?? {}) as Obj).map((r) => r.check?.key);
@@ -83,4 +84,12 @@ function attributes(c: Obj, { named }: Checks) {
     if (r.check?.attribute)
       named(r.check.attribute, 'attribute', `.cartridge.recipes${step(ref)}.check.attribute`);
   return [];
+}
+
+function reservedCommands(c: Obj): string[] {
+  return Object.keys(CAPABILITY_OWNERS.command).filter(
+    (key) =>
+      !['where', 'knock'].includes(key) ||
+      apiCmp(c.manifest.requires.kernel_api.at_least, '1.37') >= 0,
+  );
 }

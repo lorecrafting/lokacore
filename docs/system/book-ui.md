@@ -123,12 +123,11 @@ memory fallback. The accessible Map activation opens the section; Go-direction a
 same offered exits. Gesture/drawing details remain in
 [joystick](../../mobile/app/book/joystick.ts) and [footer](../../mobile/app/book/Footer.tsx).
 
-Map is a scrolling current-room projection, distinct from the enlarged joystick. It shows
-exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
-currently offered door/place actions. It invents no discovered multiroom coordinate map.
+Map is a scrolling projection, distinct from the enlarged joystick. Releases without
+discovery metadata retain the current-room exit/door projection.
 
 The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
-replaces this current-room-only Map after D10 source is installed. Then Map draws only
+is implemented in the D10 candidate: Map draws only
 visited rooms at their authored level/position and links whose two endpoints were visited.
 Remote visited links are drawn as known static connections without a current traversal
 claim; only exits from the actor's current room show live availability/refusal from

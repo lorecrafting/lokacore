@@ -18,6 +18,7 @@ import {
 } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { body, head, paper, prose, note } from './paper.ts';
+import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -353,15 +354,37 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
 }
 
 // Map reuses the room's exit controls and lists the place's targetless actions.
-export function MapPage(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
+export function MapPage(p: {
+  view: GameView;
+  text: Say;
+  g: Grouped;
+  press: (b: Button) => void;
+  log?: readonly string[];
+}) {
   return (
     <Sheet title="Map">
-      <Text style={prose}>{p.text(p.view.place.title.key)}</Text>
+      {p.log?.map((line, i) => (
+        <Text key={i} style={prose}>
+          {line}
+        </Text>
+      ))}
+      {p.view.map && <DiscoveredMap view={p.view} text={p.text} />}
+      <Text style={prose}>Current place: {p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
-      <Ways {...p} />
+      <Ways
+        {...p}
+        view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
+      />
       {p.g.place.map((b) => (
         <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
+      {p.view.known_npcs?.length ? <Text style={titleStyle}>Where</Text> : null}
+      {(p.view.known_npcs ?? []).map((n) =>
+        p.g
+          .on(n.id)
+          .filter((b) => b.action_key === 'where')
+          .map((b) => <Act key={n.id} b={b} press={p.press} />),
+      )}
     </Sheet>
   );
 }

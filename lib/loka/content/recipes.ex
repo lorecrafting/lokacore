@@ -49,8 +49,17 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
+  defp reserved?(key, m) do
+    api =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    key in commands() and (key not in ~w(where knock) or api >= [1, 37])
+  end
+
   defp recipe({rel, r}, ctx) do
-    taken = r["key"] in ctx.actions or r["key"] in commands()
+    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
     duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
     Enum.concat([

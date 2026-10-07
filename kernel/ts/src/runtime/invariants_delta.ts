@@ -1,3 +1,4 @@
+import { knowledgeHolds } from './invariants_knowledge.ts';
 import { foodTransferValid } from './invariants_food.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { resourceAfter } from './invariants_resource.ts';
@@ -126,7 +127,7 @@ function extra(
 
 export function deltaPreconditions(state: Any, ops: DeltaOp[], result: Any) {
   if ('fault' in result) return true;
-  if (!gate(state, ops, result)) return false;
+  if (!gate(state, ops, result) || !knowledgeHolds(state, ops, result)) return false;
   const seen = new Map<string, Json | undefined>();
   const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
   const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
@@ -166,6 +167,8 @@ export function deltaPreconditions(state: Any, ops: DeltaOp[], result: Any) {
 function separatelyChecked(op: DeltaOp) {
   return (
     [
+      'visit.record',
+      'observation.record',
       'escort.transition',
       'patrol.transition',
       'crow.transition',

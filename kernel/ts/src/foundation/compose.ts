@@ -1,3 +1,4 @@
+import { recordKnowledge } from './compose_knowledge.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
@@ -112,6 +113,9 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'bleed.transition')
     return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
   switch (op.op) {
+    case 'visit.record':
+    case 'observation.record':
+      return recordKnowledge(op, row, ctx.horizon);
     case 'character.select':
       return check(row === undefined, op.value);
     case 'fact.assign':

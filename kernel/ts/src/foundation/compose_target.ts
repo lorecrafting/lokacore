@@ -4,7 +4,7 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
  * Patrol uses the exact quest instance; escort retains its actor target.
  * Writer conflicts use this identity before any precondition is checked.
  */
-// size: allow 44, one dispatch covers the closed delta target union
+// size: allow 48, one dispatch covers the closed delta target union including knowledge
 export function target(op: DeltaOp): MutationTarget {
   if ('instance_id' in op) return { kind: 'quest', instance_id: op.instance_id };
   if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
@@ -15,6 +15,10 @@ export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
   if (op.op === 'time.advance') return { kind: 'clock' };
   switch (op.op) {
+    case 'visit.record':
+      return { kind: 'visit', actor_id: op.actor_id, room_id: op.room_id };
+    case 'observation.record':
+      return { kind: 'observation', actor_id: op.actor_id, npc_id: op.npc_id };
     case 'character.select':
       return { kind: 'character', character_id: op.character_id };
     case 'fact.assign':

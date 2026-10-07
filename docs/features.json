@@ -255,7 +255,8 @@
       "Policy",
       "ItemDefinition",
       "EntityView",
-      "ContentView"
+      "ContentView",
+      "KnockResponse"
     ],
     "modules": [
       "kernel/ts/src/mechanics/movement/rule.ts",
@@ -269,7 +270,8 @@
     "fixtures": [
       "protocol/fixtures/composition.json",
       "protocol/fixtures/cartridge_gate_hash.json",
-      "protocol/fixtures/cartridge_locks_hash.json"
+      "protocol/fixtures/cartridge_locks_hash.json",
+      "protocol/fixtures/missing_child_v042_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -962,5 +964,39 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C6 candidate v041/API1.36 over published D9 v040: ordered marsh route, optional shelter, immediate retry, fatal recovery and one bounded reward; publication pending final review"
+  },
+  "knowledge": {
+    "spec": "docs/system/mechanics.md D10 discovered places, observations and Knock; docs/system/protocol.md D10 knowledge and Knock composition; docs/system/save.md D10 recovery",
+    "contracts": [
+      "VisitedRoom",
+      "ObservedNpc",
+      "MapView",
+      "KnownRoomView",
+      "KnownConnectionView",
+      "KnownNpcView",
+      "LocatedNpc",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "lib/loka/content/map_positions.ex",
+      "kernel/ts/src/content/cartridge_refs.ts",
+      "kernel/ts/src/mechanics/knowledge/shared.ts",
+      "kernel/ts/src/foundation/compose_knowledge.ts",
+      "lib/loka/core/compose_knowledge.ex",
+      "mobile/authority/local-story/knowledge-save.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/missing_child_v042_hash.json",
+      "protocol/fixtures/missing_child_v042_ids.json",
+      "protocol/fixtures/knowledge_composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "D10 candidate v042/API1.37: committed actor-owned visits and visible NPC observations, truthful Map/Where; independent source review pending"
   }
 }

@@ -1566,6 +1566,9 @@ Amend the focused combat ActionSet for this exact bandage command after shared o
 
 ## D10 discovered places, observations and Knock (selected, pending implementation)
 
+**Implementation candidate:** v042/API1.37 implements this selected contract; independent
+source review, browser proof and final publication remain gates.
+
 Map knowledge belongs to the character. A new character knows only the entry room. An
 accepted body entry adds the destination room once, in the same proposal as its real
 transfer; this includes a paid ferry, a water surface move and a death respawn. Looking,

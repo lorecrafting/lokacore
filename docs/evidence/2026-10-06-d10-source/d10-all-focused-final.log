@@ -1,0 +1,21 @@
+✔ only committed body entry adds a visited room; refused moves and rendering add none (34.166667ms)
+✔ Look observes only visible local NPCs at its committed logical time (11.0395ms)
+✔ real fatal sequence records Chapel return in the same adopted proposal (9.005583ms)
+✔ both real recoverable boots retain exact ambiguous IDs and independent touch examination (10.240417ms)
+✔ Where uses saved observation in darkness and remembers names only for Where (1.315541ms)
+✔ Map joins actor-owned visited rooms and only links with two visited endpoints (1.313833ms)
+✔ Knock selects actual local responder and produces no writes (0.328958ms)
+✔ terminal parses Where and Knock through existing exact target and door paths (0.255167ms)
+✔ knowledge composition matches independent row and refusal fixtures (3.86575ms)
+✔ D10 real SQLite keeps each entry/Look and shared door commit across cold reopen and retry (941.820834ms)
+✔ D10 malformed and forged knowledge rows refuse in place without deleting saved progress (699.086541ms)
+✔ D10 failed and lost COMMIT keep whole knowledge and replay one accepted entry (171.698792ms)
+✔ D10 ferry, water entry/surface and due drowning return discover once and reopen at each intermediate (1217.18575ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3351.689458

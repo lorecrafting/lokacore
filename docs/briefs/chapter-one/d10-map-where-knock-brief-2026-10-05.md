@@ -1,6 +1,6 @@
 # D10 — Discovered map, truthful Where and a real Knock response
 
-> **Publication note:** The [D10 PM selection](../../decisions/pm-decision-d10-finding-way-2026-10-06.md) is a planning draft pending independent review. Source is unbuilt. Re-pin actual merged dependencies before assignment.
+> **Source assignment:** Planning findings P1/P2 are closed by the [approved review](../../reviews/2026-10-06-d10-wayfinding-plan-review.md). Published main `9d9cde51` contains D8, D9 and C6; Chapter v041/API1.36 has 57 rooms and 209 starting IDs. The implementation pin is recorded in the [active protocol clause](../../system/protocol.md#d10-knowledge-and-knock-composition). Source and verification remain pending.
 
 Proposed branch: `chapter1/d10-map-where-knock`.
 

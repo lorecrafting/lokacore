@@ -1,3 +1,4 @@
+import { key } from '../foundation/compose.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
@@ -36,14 +37,29 @@ export function normalize(text: string): string[] {
  * with over 1024 same-named items, NPCs and details in reach; the contract has no overflow
  * outcome to report it gracefully (DEFERRED, docs/ROADMAP.md "R7/R8 for chapter one" row).
  */
-export function resolve(world: World, actor: CharacterId, text: string): TargetResolution {
+export function resolve(
+  world: World,
+  actor: CharacterId,
+  text: string,
+  mode?: 'where',
+): TargetResolution {
   const phrase = normalize(text).join('_');
   const near = (id: string, words: readonly string[]) =>
-    words.includes(phrase) && present(world, actor, id);
+    words.includes(phrase) &&
+    (present(world, actor, id) ||
+      (mode === 'where' &&
+        world.entities[id]?.kind === 'npc' &&
+        !!world.state.observed_npcs?.[
+          key({ kind: 'observation', actor_id: actor, npc_id: id as EntityId })
+        ]));
   // ponytail: scans every detail and entity of the world per lookup; index by room when it shows.
   const ids = [
-    ...Object.entries(world.details).filter(([id, d]) => near(id, d.aliases)),
-    ...Object.entries(world.entities).filter(([id, e]) => near(id, e.keywords)),
+    ...(mode === 'where'
+      ? []
+      : Object.entries(world.details).filter(([id, d]) => near(id, d.aliases))),
+    ...Object.entries(world.entities).filter(
+      ([id, e]) => (mode !== 'where' || e.kind === 'npc') && near(id, e.keywords),
+    ),
   ]
     .map(([id]) => id as EntityId)
     .sort(cmp);

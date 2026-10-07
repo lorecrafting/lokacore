@@ -1,0 +1,20 @@
+Compiling 84 files (.ex)
+Generated loka app
+Running ExUnit with seed: 737499, max_cases: 16
+
+
+
+  1) test independent invariant refuses forged success over null knowledge (Loka.Core.KnowledgeCompositionTest)
+     test/loka/core/knowledge_composition_test.exs:22
+     null-visit-is-not-absence
+     code: for {bad, success} <- [
+     stacktrace:
+       test/loka/core/knowledge_composition_test.exs:29: anonymous fn/2 in Loka.Core.KnowledgeCompositionTest."test independent invariant refuses forged success over null knowledge"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/knowledge_composition_test.exs:23: (test)
+
+.
+Finished in 0.03 seconds (0.03s async, 0.00s sync)
+
+Result: 1/2 passed
+Failed: 1 test
