@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [Resource authored interval](2026-10-06-resource-authored-interval-review.md): exact source `7a51883b`, independent **APPROVE**, no findings; 22 TypeScript and 14 Elixir focused tests pass, both old-constant mutants fail, absent-field boundary probes pass. Frozen fixtures and save handling unchanged.
 - [Simulator complete world inputs and quest retirement](2026-10-06-simulator-world-inputs-review.md): exact source `c299195c` against published `747c252d`, independent **APPROVE**, no in-scope findings; 2 new/20 existing focused checks pass, both actual adapter mutants fail the new cases while the old suite misses them. Separate lawful bleed-job replay omission retained as SIM-CARRY-01; no invariant skipped.
 - [Paired job completion invariant second opinion](2026-10-06-job-complete-owned-run-second-opinion.md): PR #269 exact `d12bf1e1` versus current main `9669f6e4`, independent Sol **APPROVE**, no findings; 22 kernel/composition, 6 D9 and 4 real SQLite checks pass, three distinct observer mutants red.
 
@@ -555,4 +556,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Browser SQLite worker deadline independent review](2026-10-06-web-sqlite-sync-deadline-review.md): exact source `fb618a29`, **APPROVE**, no findings; 50 focused tests pass, SDK-loop/no-deadline controls fail behaviorally, and version/source guard refusals preserve bytes. Broad publication gate remains separate.
 - [Current baseline Round 2](2026-10-06-current-baseline-round2-review.md): local `docs/astra-round2-history` at `ab10c69f`, CHANGES REQUIRED; scoped fix `132b4752`, APPROVE, BASE-R2-01 closed by linking installed D9 labelled selection and service/reopen proof. Archives, relative/heading navigation, release-scope caveat and save/native boundaries verified.
 
+- [Resource authored interval second opinion](2026-10-06-resource-authored-interval-second-opinion.md): source `7a51883b`, integrated head `5f7ab50a`, independent APPROVE; no findings. Literal fallback/override/due-time probes, focused twins/differential and both hour-only replay mutations verified.
 - [Browser SQLite worker deadline second opinion](2026-10-06-web-sqlite-sync-deadline-second-review.md): exact `482f6837`, independent APPROVE; 50 focused tests pass, CPU-cap and missing-deadline controls fail in both modes, install drift refuses with bytes intact; no open findings.
