@@ -60,3 +60,22 @@ to the existing identity and dated proof. Retain the historical records unchange
   No new tests or mutation checks are warranted for this documentation-only change.
 
 No native session, browser session or owner-save access was performed.
+
+## Scoped BASE-R1 recheck — APPROVE
+
+Reviewed only `c6efb420..388c430eb9b14f285d44c6c2285c3c94890946d8`
+and the three changed documents' linked contract/proof destinations. **BASE-R1
+closed; no open findings.** D12 now links the current chapter identity and final
+primary/save acceptance; C3 links its published source/save approval; C4, D7, D8
+and D9 are correctly identified as installed consumers. The dated records remain
+unchanged and the current release answer still has one owning section.
+
+Independently read the three cited review records and checked v042's two D12 skills,
+careful two-item declaration, Peg discount, eight population plans and C4 pack
+opt-in. All five current-contract fragments introduced by the correction resolve.
+`mise exec -- elixir bin/check_docs.exs` passes with the review record present:
+**756 docs, 0 broken links, 0 unreachable**. Scoped `git diff --check` passes.
+Ponytail Review: **Lean already. Ship.** The fix replaces stale status prose with
+existing contracts/proof links and adds no parallel implementation or pin source.
+This approval covers documentation truth at `388c430e`; remaining chapter and
+native gates retain their existing scope.
