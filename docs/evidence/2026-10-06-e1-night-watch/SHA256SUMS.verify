@@ -1,0 +1,11 @@
+README.md: OK
+green.log: OK
+last-join-old-suite.log: OK
+last-join-red.log: OK
+night-start-summary.json: OK
+night-start.jsonl: OK
+rejoin-old-suite.log: OK
+rejoin-red.log: OK
+retained-replay.log: OK
+watch-rounds.jsonl: OK
+watch-summary.json: OK

@@ -86,3 +86,5 @@ retain the topology recipe's distinct red control. The [provisional integration 
 Optional quest route checkpoint: [controlled debt and Lantern dream receipts](../../evidence/2026-10-06-e1-optional-quests/README.md), with remaining outcomes pending.
 
 Optional exact recorder/replay integration: [provisional receipts and remaining-path breakdown](../../evidence/2026-10-06-e1-optional-integration/README.md); final E1 proof remains pending.
+
+Disjoint path author checkpoint: [watch rounds and the original blocked marsh Start](../../evidence/2026-10-06-e1-night-watch/README.md); registration and final certification remain pending.
