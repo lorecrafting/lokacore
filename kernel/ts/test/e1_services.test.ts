@@ -10,6 +10,7 @@ import { replayCase } from './e1_cases.ts';
 import { lanternServices } from './e1_services.ts';
 import { hash } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { key as stateKey } from '../src/foundation/compose.ts';
 import type { World } from '../src/index.ts';
 import type { Command, DeltaOp as Op } from '../src/contracts.gen.ts';
 
@@ -78,7 +79,7 @@ test('E1 witnesses each Maud service only with its own payment and committed ben
       const patch = (match: (op: Op) => boolean, change: (op: any) => object) =>
         edit(match, (op) => ({ ...op, ...change(op) }) as Op);
       const provider = command.payload.provider_id;
-      const plants: [string, World, Command, typeof decision][] = [
+      const plants: [string, World, Command, typeof decision, World?][] = [
         ['other actor', before, payload({ actor_id: 'someone-else' }), decision],
         [
           'other authored provider',
@@ -150,13 +151,40 @@ test('E1 witnesses each Maud service only with its own payment and committed ben
           ],
         );
       else plants.push(['recovery op removed', before, command, edit(recoveryOp, () => undefined)]);
-      if (key === 'lantern_meal')
+      if (key === 'lantern_meal') {
         plants.push([
           'stock debit differs',
           authoring({ benefit: { ...authored.benefit, debit: 2 } }),
           command,
           decision,
         ]);
+        // The kernel refuses a full-MV meal; plant the capped receipt it would need: MV already
+        // at its maximum before and after, and an mv adjust with from == to.
+        const old = (ops.find(recoveryOp) as any).from as number;
+        const mv = (ops.find(recoveryOp) as any).resource;
+        const spec = stateKey(mv);
+        const row = stateKey({ kind: 'resource', resource: mv, entity_id: before.body });
+        const capped = {
+          ...before.resourceSpecs,
+          [spec]: { ...before.resourceSpecs[spec]!, maximum: old },
+        };
+        const atMax = { ...before, resourceSpecs: capped } as World;
+        const stillMax = {
+          ...after,
+          resourceSpecs: capped,
+          state: {
+            ...after.state,
+            resources: { ...after.state.resources, [row]: before.state.resources![row]! },
+          },
+        } as World;
+        plants.push([
+          'capped recovery from == to',
+          atMax,
+          command,
+          patch(recoveryOp, () => ({ to: old })),
+          stillMax,
+        ]);
+      }
       if (key === 'lantern_ale') {
         const vessel = a.entity('item', 'lantern_ale_cask');
         const ale = 'ashmere_missing_child@0.0.42:liquid/ale';
@@ -213,9 +241,9 @@ test('E1 witnesses each Maud service only with its own payment and committed ben
           ],
         );
       }
-      for (const [label, w, c, d] of plants)
+      for (const [label, w, c, d, aw = after] of plants)
         assert.equal(
-          witnessedObligations(w, after, c, d).includes(selected),
+          witnessedObligations(w, aw, c, d).includes(selected),
           false,
           `${key}: ${label}`,
         );

@@ -89,10 +89,12 @@ export function witnessedObligations(
     } else {
       const old = level(before, before.body, benefit.recovery);
       const maximum = resourceSpec(before, before.body, benefit.recovery)?.maximum;
-      const recovered =
-        old !== undefined &&
-        maximum !== undefined &&
-        adjusted(before.body, benefit.recovery, Math.min(old + benefit.amount, maximum) - old);
+      const gain =
+        old === undefined || maximum === undefined
+          ? 0
+          : Math.min(old + benefit.amount, maximum) - old;
+      // A capped adjust with from == to cannot be told apart from a benefit that adds nothing.
+      const recovered = gain > 0 && adjusted(before.body, benefit.recovery, gain);
       if (benefit.kind === 'meal')
         committed = recovered && adjusted(p.provider_id, benefit.stock, -benefit.debit);
       else {
