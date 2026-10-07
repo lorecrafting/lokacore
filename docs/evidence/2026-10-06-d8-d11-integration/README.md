@@ -226,3 +226,18 @@ nest-cap8 and coin/property conservation proof with red controls; isolated Book
 browser Drop/carry/follow/nest recovery/full-nest/Shoo/refresh proof; fresh
 independent primary review and save/protocol/proposal second opinion; final pushed
 head CI and PM merge/publication. No source review or publication approval claimed.
+
+## D8 schema and controlled conservation checkpoint
+
+- In-memory direct guard sweep: exit0,57 mutants killed,0 survivors (`schema-sweep.ts`).
+- Source schema subset sweep: exit0,11 closed-object/required-discriminator mutants rejected (`schema-subset.exs`). Source schemas/generation were never rewritten.
+- Controlled30-day replay: exit0,736 due steps; max4 live crows, max1 nest root (within8), exactly one independently pinned coin ending in the original nest. A fifth live crow with real HP makes the unchanged checker fail: exit1,5 versus4.
+- Actual capacity9, wrong-holder and stale-Shoo source mutations: each exit1 on existing crow behavior tests; all source restored.
+- Missing acquisition source-custody precondition survived all11 old focused kernel tests. One new controlled regression models another committed transfer moving the exact coin before acquisition; the mutant faults elapsed instead of completing harmlessly (exit1). Original guard restored; final kernel/composition/real-SQLite suite exit0,21 passed.
+
+Compact redacted outputs are retained beside these scripts and hashed in
+`SHA256SUMS`. The30-day replay certifies ordinary capped wandering/return and one
+exact coin; full-nest8/fallback behavior is separately covered by focused tests
+and the planted capacity9 mutation. Browser proof remains pending. One new test
+changed after the prior green gate, so a final full gate on this checkpoint is
+required before source PR/review. No owner save access or native work occurred.

@@ -428,3 +428,24 @@ test('a second Green crow may bind a later Drop while the first returns', () => 
   assert.notEqual(second.member_id, first.member_id);
   assert.equal(second.item_id, coin);
 });
+
+// Breaks: another scheduled custody change leaves the Drop intent stale and blocks elapsed forever.
+test('crow acquisition harmlessly completes when another transfer moved the exact coin', () => {
+  let world = initial();
+  const coin = entity(world, 'item', 'old_coin');
+  world = act(world, 'take', coin, 201);
+  world = act(world, 'drop', coin, 202);
+  const job = Object.values(world.state.crows!).find((row) => row.phase === 'acquire')!.job_id!;
+  const moved = world.roomIds[`${prefix}:room/well_lane`];
+  world = {
+    ...world,
+    state: { ...world.state, containers: { ...world.state.containers, [coin]: moved } },
+  };
+  world = advance(world, START + 150);
+  assert.equal(world.state.containers[coin], moved);
+  assert.equal(world.state.jobs![job].status, 'completed');
+  assert.equal(
+    Object.values(world.state.crows!).find((row) => row.job_id === job),
+    undefined,
+  );
+});
