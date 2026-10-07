@@ -35,3 +35,7 @@ file covers: [the protocol map](../../protocol/README.md).
   verb to exactly its own spec: overriding `look` with a no-target spec also disables examine.
   A rule that emits events after a `fact.assign` leaves that assign's causal position free; the
   host puts its `fact_changed` there (`factChanged` in `kernel/ts/src/mechanics/fact.ts`).
+- A guard implemented in both kernels needs a red control in each kernel's own suite.
+  Differential runs compare accepted inputs, so an Elixir fuel-guard bypass survived all
+  159 core tests (B4-S1) and Elixir alone accepted an orphan water body in a bleed schedule (C5-SO6)
+  ([B4 save review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-b4-light-save-second-review.md)).

@@ -54,6 +54,7 @@ Keep lessons in area files; link here only when relevant to all work.
 - Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 - Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
+- For CI, hooks, skip rules or randomized tests, read [check lessons](docs/lessons/checks.md).
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
