@@ -5,6 +5,7 @@ import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 import { identityWitnesses } from './e1_identity.ts';
+import { creatureWitnesses } from './e1_creatures.ts';
 import { level, resourceSpec } from '../src/mechanics/resource.ts';
 import { same } from '../src/foundation/compose.ts';
 
@@ -39,6 +40,7 @@ export function witnessedObligations(
   questPaths.push(
     ...journalVariantPaths(after),
     ...identityWitnesses(before, after, command, decision),
+    ...creatureWitnesses(before, after, decision),
   );
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
   if (p.type === 'use_service') {
