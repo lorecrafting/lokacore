@@ -22,6 +22,9 @@ lists only what a file adds to that.
 | `fact.schema.json` | FactSpec, scoped facts | 03 §7, §13; 21 §3.9, §4 | |
 | `resource.schema.json` | ResourceSpec: bounded integer resources, the default HP/MA/MV pools, legacy hourly and opted position recovery | 21 §4; 00 §4 | `composition.json`, `cartridge_road_hash.json`, `resource_recovery.json` |
 | `service.schema.json` | Immediate paid room entitlement, finite meal and provider-owned liquid serving; projected exact keyed quote | [B8 composition](../docs/system/protocol.md#b8-immediate-service-composition) | `service_contracts.json`, `missing_child_v025_hash.json` |
+| [`liquid.schema.json`](liquid.schema.json) | finite liquid contents and authored mass/serving metadata | [B7 composition](../docs/system/protocol.md#b7-liquid-composition) | `liquid_contracts.json`, `liquid_template.json` |
+| [`transport.schema.json`](transport.schema.json) | paired ferry boarding endpoints, conserved fare and actor-owned corpse recovery | [D1 mechanics](../docs/system/protocol.md#d1-ferry-transport-composition) | `transport_contracts.json` |
+| [`water.schema.json`](water.schema.json) | bounded underwater occupancy contracts | [D6 mechanics](../docs/system/protocol.md#d6-water-movement-and-corpse-selection) | `water_contracts.json`, `water_composition.json` |
 | `delta.schema.json` | StateDelta ops, targets, preconditions | 04 §1, §5.1, §5.3; 14 §R3A | `composition.json`, `resource_recovery.json` |
 | `decision.schema.json` | DecisionResult | 04 §5, §5.0, §5.2 | `composition.json` |
 | `event.schema.json` | DomainEvent, proposed versus committed | 04 §1, §5.1, §8, §11; 14 §R3A | `composition.json` |
