@@ -58,7 +58,17 @@ const POLICY: Readonly<Record<string, readonly string[]>> = {
   expedition: ['QUEST', 'WORLD'],
   knowledge: ['RULES'],
 };
-export const POLICY_HASH = sha256(encode(POLICY as never));
+const WORLD_OWNERS: Readonly<Record<string, string>> = {
+  bands: 'resource',
+  bell_cue: 'fact',
+  carry: 'containment',
+  combat: 'combat',
+  death: 'death',
+  death_credit: 'combat',
+  movement: 'movement',
+  water: 'water',
+};
+export const POLICY_HASH = sha256(encode({ capabilities: POLICY, world: WORLD_OWNERS } as never));
 type Use = { feature: string; path: string; gates: readonly string[] };
 
 /** The real loader validates dependencies first; the literal answer then selects this release. */
@@ -164,7 +174,13 @@ function inventory(c: Cartridge, uses: Use[]) {
     resources: 'resource',
     ancestries: 'attributes',
     bleeds: 'bleed',
-    world: 'schedule',
   }))
     walk(c[section as keyof Cartridge], `/${section}`, owner);
+  for (const [key, value] of Object.entries(c.world ?? {})) {
+    if (!Object.hasOwn(WORLD_OWNERS, key)) throw new Error(`unknown applicability: world.${key}`);
+    const owner = WORLD_OWNERS[key]!;
+    if (c.lock.capabilities[owner] !== 1)
+      throw new Error(`unknown applicability: world.${key} requires ${owner}@1`);
+    walk({ [key]: value }, '/world', owner);
+  }
 }

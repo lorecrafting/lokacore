@@ -5,9 +5,10 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
-import { caseHost } from './e1_case_host.ts';
+import { caseHost, coverage } from './e1_case_host.ts';
 import { storageFault, faultSchedule } from './e1_faults.ts';
-import { replayCase } from './e1_cases.ts';
+import { replayCase, gaps } from './e1_cases.ts';
+import { search } from './e1_paths.ts';
 import { hash } from '../src/foundation/canonical.ts';
 
 const pin = read('protocol/fixtures/missing_child_v042_hash.json');
@@ -65,6 +66,53 @@ test('E1 SQLite case requires complete fault schedule and committed commands', (
       () => replayCase(bytes, text.trim().split('\n').slice(0, -1).join('\n'), source),
       /incomplete case finish/,
     );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: an executed consequence remains gapped, or a missing/unrelated witness claims it.
+test('E1 binds only the witnessed study_tracks consequence after semantic replay', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-binding-'));
+  const loaded = admitCandidate(bytes);
+  const a = caseHost(loaded, join(dir, 'save.db'), join(dir, 'case.jsonl'), undefined, {
+    case_id: 'rescued-prior',
+    source,
+    fault_schedule: [],
+  });
+  const path =
+    '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0';
+  try {
+    search(a);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const text = readFileSync(join(dir, 'case.jsonl'), 'utf8');
+    const replay = replayCase(bytes, text, source);
+    assert.deepEqual(replay.obligations, [path]);
+    const pending = gaps(loaded, coverage(), new Set(replay.obligations)).authored_obligations;
+    assert.equal(pending.includes(path), false);
+    assert.equal(
+      pending.includes('/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks'),
+      true,
+    );
+    for (const replacement of [undefined, [], ['/world/carry']]) {
+      const rows = text
+        .trim()
+        .split('\n')
+        .map((line) => JSON.parse(line));
+      for (const row of rows) if (row.kind === 'step') row.obligations = replacement;
+      const missing = replayCase(bytes, rows.map((r) => JSON.stringify(r)).join('\n'), source);
+      assert.deepEqual(missing.obligations, []);
+      assert.equal(
+        gaps(loaded, coverage(), new Set(missing.obligations)).authored_obligations.includes(path),
+        true,
+      );
+    }
   } finally {
     a.close();
     rmSync(dir, { recursive: true });

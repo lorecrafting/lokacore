@@ -44,6 +44,28 @@ test('E1 inventory retains slash-bearing v042 definition roots', () => {
     );
 });
 
+// Breaks: carry settings inherit scheduling gates and unknown world settings are waived.
+test('E1 world settings retain semantic gates and refuse unknown keys', () => {
+  const c = structuredClone(pin.value);
+  const uses = applicability(c).uses;
+  for (const [key, feature, gates] of [
+    ['bands', 'resource', ['TRANSACTION']],
+    ['bell_cue', 'fact', ['RULES']],
+    ['carry', 'containment', ['TRANSACTION']],
+    ['combat', 'combat', ['RULES', 'WORLD']],
+    ['death', 'death', ['RULES', 'AUTHORITY']],
+    ['death_credit', 'combat', ['RULES', 'WORLD']],
+    ['movement', 'movement', ['TOPOLOGY']],
+    ['water', 'water', ['RULES', 'WORLD']],
+  ] as const) {
+    const use = uses.find((u) => u.path === `/world/${key}`);
+    assert.equal(use?.feature, `authored.${feature}`);
+    assert.deepEqual(use?.gates, gates);
+  }
+  c.world.unowned = {};
+  assert.throws(() => applicability(c), /unknown applicability: world.unowned/);
+});
+
 // Build changed controlled inputs with Node hashing and separately sorted JSON; the expected
 // refusal below is literal and never supplied by the classifier or canonical encoder.
 function artifact(c: unknown): string {

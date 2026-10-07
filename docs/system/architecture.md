@@ -176,6 +176,10 @@ these obligations: quest outcomes/escort/survival/deadline, scene beats/modal/dr
 immediate service/commerce/transport, durable scheduling/population/patrol, resource recovery,
 food/bleed/water, equipment/custody and ancestry/knowledge. Record each authored definition,
 choice, consequence and command path that still lacks candidate-specific controlled evidence.
+World settings retain their semantic owner: `bands` → resource, `bell_cue` → fact,
+`carry` → containment, `combat` and `death_credit` → combat, `death` → death,
+`movement` → movement and `water` → water. Unknown world keys block applicability.
+
 Neither [release-scope planning file](../spec/release-scope.md) nor `protocol/feature_registry.json`
 is executable certification authority; their omissions never waive a gate.
 
@@ -213,7 +217,13 @@ labeled when needed for a controlled admission or fault boundary.
 Coverage names actual committed room visits, quest transitions/outcomes, resolved dialogue
 choices, scene beats/consequences and command paths. An offer or a definition count is not
 execution. Check literal terminal facts, all 57 declared room routes and every authored
-quest/choice/scene against the recorded uses, leaving unexecuted paths pending. At the
+quest/choice/scene against the recorded uses, leaving unexecuted paths pending.
+An exact authored consequence may be discharged only by a retained step witness whose
+command, accepted decision and literal before/after assertion are checked again in replay.
+The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
+`perform` names that recipe and `fen_tracks_found` changes from false to true. Missing,
+invalid or unrelated witnesses leave the exact path pending; this never certifies sibling
+policies, the whole recipe or a capability family. At the
 thirty-day horizon, observe scheduled destinations and population/provenance/pending-job
 bounds at each committed boundary, with deterministic clock/RNG/fuel replay. Existing
 independent fixture and authority faults supply unchanged contract proof; export new

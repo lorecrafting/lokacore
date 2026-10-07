@@ -41,6 +41,27 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
+// ponytail: one reviewed consequence; other authored paths wait for their own literal witness.
+export function witnessedObligations(
+  before: World,
+  after: World,
+  command: Command,
+  decision: DecisionResult,
+): string[] {
+  const p = command.payload;
+  if (decision.kind !== 'accepted' || p.type !== 'perform' || p.action !== 'study_tracks')
+    return [];
+  const fact = {
+    cartridge_id: 'ashmere_missing_child',
+    cartridge_version: '0.0.42',
+    kind: 'fact',
+    key: 'fen_tracks_found',
+  } as DefinitionRef;
+  return value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
+    ? ['/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0']
+    : [];
+}
+
 export function caseHost(
   loaded: LoadedCandidate,
   path: string,
@@ -120,6 +141,7 @@ export function caseHost(
       digest.update(observation.bytes);
       record({
         kind: 'step',
+        obligations: witnessedObligations(previous, after, command, decision),
         command,
         revision: r.revision,
         decision,

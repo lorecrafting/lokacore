@@ -14,6 +14,7 @@ import {
   CASE_GENERATOR,
   caseHost,
   coverage,
+  witnessedObligations,
   type LoadedCandidate,
   type Coverage,
 } from './e1_case_host.ts';
@@ -68,12 +69,15 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   assert.equal(world.body, start.identity.body);
   const digest = createHash('sha256');
   let steps = 0;
+  const obligations = new Set<string>();
   for (const e of events) {
     if (e.kind !== 'step') continue;
     const observed = checked(AUTHORITY_KERNEL, world, e.command as Command, e.revision);
     assert.equal(observed.failure, undefined, JSON.stringify(observed.failure));
     assert.equal(e.invariant_failure, null, 'case recorded an invariant failure');
     assert.equal(observed.bytes, `${encode(e.decision)}\n${e.state_hash}\n`);
+    for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
+      if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
     assert.equal(world.state.clock, e.clock);
     assert.deepEqual(world.state.rng, e.rng);
@@ -86,12 +90,13 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   return {
     case_id: start.case_id,
     steps,
+    obligations: [...obligations].sort(),
     state_hash: finish.state_hash,
     fault_schedule: start.fault_schedule,
   };
 }
 
-function gaps(loaded: LoadedCandidate, seen: Coverage) {
+export function gaps(loaded: LoadedCandidate, seen: Coverage, witnessed: Set<string>) {
   const c = loaded.cartridge;
   const missing = (expected: string[], actual: Set<string>) =>
     expected.filter((key) => !actual.has(key)).sort();
@@ -118,9 +123,8 @@ function gaps(loaded: LoadedCandidate, seen: Coverage) {
       Object.values(c.scenes ?? {}).map((x) => x.key),
       new Set([...seen.scenes].map((x) => x.split('/')[0]!)),
     ),
-    // Per-definition command/consequence/beat binding still requires reviewed case mapping.
     authored_obligations: applicability(c)
-      .uses.filter((u) => u.feature.startsWith('authored.'))
+      .uses.filter((u) => u.feature.startsWith('authored.') && !witnessed.has(u.path))
       .map((u) => u.path),
   };
 }
@@ -129,7 +133,8 @@ function recordCases(bytes: Uint8Array, out: string) {
   const loaded = admitCandidate(bytes),
     identity = source(),
     machine = host(),
-    seen = coverage();
+    seen = coverage(),
+    witnessed = new Set<string>();
   assert.equal(existsSync(out), false, 'output directory must be new');
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
@@ -157,6 +162,7 @@ function recordCases(bytes: Uint8Array, out: string) {
         summary,
       });
       const replay = replayCase(bytes, readFileSync(log, 'utf8'), identity);
+      for (const path of replay.obligations) witnessed.add(path);
       for (const key of Object.keys(seen) as (keyof Coverage)[])
         for (const item of a.seen[key]) seen[key].add(item);
       receipts.push({
@@ -202,7 +208,8 @@ function recordCases(bytes: Uint8Array, out: string) {
     coverage: Object.fromEntries(
       Object.entries(seen).map(([key, values]) => [key, [...values].sort()]),
     ),
-    gaps: gaps(loaded, seen),
+    witnessed_obligations: [...witnessed].sort(),
+    gaps: gaps(loaded, seen, witnessed),
     pending: [
       'selected 10000-sequence proof on final source/check identity',
       'all applicable path/consequence/beat receipts',
