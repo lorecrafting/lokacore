@@ -8,6 +8,8 @@ their rules and red controls remain available for resumption. Moved out of [AGEN
 which every agent loads every session.
 The [post-D10 fixture repair evidence](evidence/2026-10-06-post-d10-fixture-repair.md) records
 a separate targeted Node authority check.
+The [E1 bleed job oracle evidence](evidence/2026-10-06-encounter-bleed-oracle/README.md)
+records its focused baseline, corrected tests and six independent red controls.
 
 - `boundary` (strict, every boundary): the dependency directions in
   [architecture.md](system/architecture.md#elixir-boundaries-compile-checked) are a compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).

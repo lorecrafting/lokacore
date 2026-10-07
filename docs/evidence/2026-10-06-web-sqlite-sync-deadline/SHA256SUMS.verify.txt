@@ -1,0 +1,4 @@
+authority.log: OK
+browser.log: OK
+controls.log: OK
+full-gate.log: OK

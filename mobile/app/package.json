@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "node patch-sqlite-web.cjs",
     "web:preview": "node preview-server.cjs",
-    "pretest:e2e": "node patch-sqlite-web.cjs",
+    "pretest:e2e": "node patch-sqlite-web.cjs && node --test sqlite-web-worker.test.ts",
     "test:e2e": "E2E_TELEMETRY_DISABLED=1 e2e run",
     "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"../authority/**/*.test.ts\" \"book/*.test.ts\" \"*.test.ts\""
   },

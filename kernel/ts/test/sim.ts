@@ -24,6 +24,7 @@ import { next, type RngState } from '../src/foundation/rng.ts';
 import { utf8 } from '../src/foundation/sha256.ts';
 import { resolve } from '../src/commands/target.ts';
 import { gameView, holds, row, step } from '../src/runtime/world.ts';
+import { base } from '../src/runtime/apply.ts';
 import { append, kernelVersion, line, ROOT } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
@@ -187,7 +188,12 @@ type Checked = { world: World; bytes: string; code: string; failure?: Omit<Failu
 
 // One step through `kernel`, as the commit at `revision`: a throw or a broken invariant is a
 // failure, never a crash.
-function checked(kernel: Kernel, before: World, command: Command, revision: number): Checked {
+export function checked(
+  kernel: Kernel,
+  before: World,
+  command: Command,
+  revision: number,
+): Checked {
   try {
     const input = JSON.stringify(before);
     const view = kernel.gameView(before);
@@ -209,17 +215,7 @@ function checked(kernel: Kernel, before: World, command: Command, revision: numb
 const kindCode = (d: Exclude<DecisionResult, { kind: 'accepted' }>) =>
   d.kind === 'rejected' ? d.error.code : `fault ${d.code}`;
 
-/** The state composition reads, as runtime/proposal.ts adopt builds it. */
-export const base = (w: World) => ({
-  ...w.state,
-  fact_defaults: w.factDefaults,
-  capacities: w.capacities,
-  liquid_specs: w.liquidSpecs,
-  fuel_specs: w.fuelSpecs,
-  resource_specs: w.resourceSpecs,
-  entity_resource_specs: w.entityResourceSpecs,
-  barrier_initial: w.barrierInitial,
-});
+export { base };
 
 // The first registered invariant the step breaks.
 function violated(
@@ -274,7 +270,12 @@ function adopted(before: World, decision: Accepted, after: World, revision: numb
   for (const { target, value } of result.changes) {
     if (target.kind === 'clock') want.clock = value;
     const at = row(target);
-    if (at) want[at[0]] = { ...(want[at[0]] as object), [at[1]]: value };
+    if (at) {
+      const rows = { ...(want[at[0]] as Record<string, unknown>) };
+      if (target.kind === 'quest' && value === null) delete rows[at[1]];
+      else rows[at[1]] = value;
+      want[at[0]] = rows;
+    }
   }
   // A continuation opened here carries the revision its commit takes (runtime/proposal.ts adopt).
   for (const o of decision.delta.ops)

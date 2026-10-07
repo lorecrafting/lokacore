@@ -97,19 +97,14 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   // STEP: `before` and `after` are the State around step(command) = decision; `view` is the
   // actor's GameView of the world before it.
   // Only a run_job completes a job, its own (delta.schema.json job.complete): the host's drain
-  // gives each run_job its own writer group, never the command's own (0), so a job.complete is
-  // the only one of its group, outside group 0, and its job was due by the advance's target.
+  // may share a writer group for equal-due paired jobs, never the command's own (0).
+  // Each completed job was due by the advance's target.
   job_complete_owned_by_run: ({ decision, before }) => {
     if (decision.kind !== 'accepted') return true;
     const ops: Any[] = decision.delta.ops;
     const to = ops.find((o) => o.op === 'time.advance')?.to;
     const done = ops.filter((o) => o.op === 'job.complete');
-    return done.every(
-      (o) =>
-        o.writer_group > 0 &&
-        done.filter((d) => d.writer_group === o.writer_group).length === 1 &&
-        before.jobs?.[o.job_id]?.due_time <= to,
-    );
+    return done.every((o) => o.writer_group > 0 && before.jobs?.[o.job_id]?.due_time <= to);
   },
   // A rejection or fault leaves the State (clock, containers, RNG, facts, resources, cooldowns,
   // barriers) byte for byte as it was (04 §5.0; §5.2 for a fault).

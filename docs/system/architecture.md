@@ -153,6 +153,9 @@ catalogue (`cartridge_*hash.json`) preserves its curated generator16 regression 
 The active [chapter release](cartridge.md#source-layout) has a separate controlled
 corpus run through the same generator and per-step invariant checks; its versioned
 release pin does not silently retarget the historical demo regression corpus.
+Simulator composition consumes the runtime's complete immutable world input projection.
+Its independent adoption check applies composed row changes, including removal of a
+retired quest's [null change](protocol.md#b5-harvest-and-exchange-composition).
 
 ## E1 exact candidate proof policy
 

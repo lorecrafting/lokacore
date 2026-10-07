@@ -1,4 +1,4 @@
-# size: allow 520, patrol and liquid cases share the existing randomized differential pool
+# size: allow 524, patrol, liquid and authored gain share the existing randomized differential pool
 defmodule Loka.Core.ComposeTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}
@@ -283,7 +283,7 @@ defmodule Loka.Core.ComposeTest do
     assert Compose.compose(at.("toString"), %{"ops" => [op.("toString")]}) == fault
   end
 
-  # Seeded small-pool deltas exercise conflicts and preconditions across both kernels.
+  # Seeded small-pool deltas exercise conflicts, authored gain and preconditions across both kernels.
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
     for c <- JSON.decode!(File.read!("protocol/fixtures/corpse_creation.json"))["cases"],
@@ -337,7 +337,11 @@ defmodule Loka.Core.ComposeTest do
     ours
   end
 
-  @base @fixture["states"]["base"]
+  @base Map.update!(@fixture["states"]["base"], "resource_specs", fn specs ->
+          Map.new(specs, fn {ref, spec} ->
+            {ref, Map.put(spec, "gain_every", 100)}
+          end)
+        end)
   defp pick(list), do: Enum.random(list)
 
   defp random_case(pool) do
