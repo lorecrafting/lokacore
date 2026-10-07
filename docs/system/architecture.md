@@ -154,6 +154,51 @@ The active [chapter release](cartridge.md#source-layout) has a separate controll
 corpus run through the same generator and per-step invariant checks; its versioned
 release pin does not silently retarget the historical demo regression corpus.
 
+## E1 exact candidate proof policy
+
+E1 implements the bounded minimum from [the E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md),
+archived [09 §1a and §20](../archive/spec/09-cartridge-lab-certification.md) and
+[14 R9](../archive/spec/14-implementation-plan.md#r9--cartridge-lab-v1).
+The private runner accepts only the [current bundled candidate](cartridge.md#current-bundled-chapter).
+It freezes normalized artifact bytes before execution, checks the independent known answer,
+and admits those bytes through the real loader. In particular the loader owns the implicit
+position/scene → fact dependency; certification does not replace that check.
+
+The executable policy is bounded to this candidate's admitted forms. Derive used definitions,
+policy operations, authored commands and engine commands from the admitted artifact and the
+engine ownership tables; retain each use and its location. Every admitted locked capability
+also supplies conservative dependency obligations, including capabilities that own no command.
+An unknown capability/version, command or policy disposition blocks. Feature gates add to
+these obligations: quest outcomes/escort/survival/deadline, scene beats/modal/dream/finale,
+immediate service/commerce/transport, durable scheduling/population/patrol, resource recovery,
+food/bleed/water, equipment/custody and ancestry/knowledge. Record each authored definition,
+choice, consequence and command path that still lacks candidate-specific controlled evidence.
+Neither [release-scope planning file](../spec/release-scope.md) nor `protocol/feature_registry.json`
+is executable certification authority; their omissions never waive a gate.
+
+The runner wraps existing frozen foundation/compiler/loader tests, controlled chapter tests,
+real Node SQLite authority tests and `simulate(seed, KERNEL, [loadedCandidate])` explicitly.
+Keep the historical demo corpus separate. Every failed command exits nonzero and its raw
+redacted output has a byte hash. Receipts bind artifact byte/content hashes, source commit,
+protocol/schema/lock and policy/check digests, pinned toolchain, host platform/architecture
+and command/exit status. A dirty source tree cannot issue a source receipt. Bundled private
+content has no deployment identity; record the reason. Test-suite success is evidence of the
+named suite, not proof that every inventoried content path ran.
+
+An invariant failure retains the exact initial state and its hash, fresh/adjusted construction,
+clock, RNG algorithm/state/seed, world and deterministic IdSource identity, ordered commands,
+explicit fault schedule and the asserted failure. Replay rechecks the simulator's invariants
+from that state against the same bytes and source identity; an absent field or changed hash
+refuses. `loka play --replay` alone is playback, not reproduction.
+
+Reports use pass, fail, pending/deferred or not applicable with a reason. Required missing
+evidence and unknown applicability exit nonzero; a complete headless subset is not an
+unqualified `offline_private` certificate. E1 stays open until one final published A–D plus
+review-fix candidate has applicable controlled tests, 10,000 candidate sequences, real SQLite
+receipts and independent review. Browser interaction/content receipts belong to E2/E3.
+Native ARM/Hermes, app lifecycle and blur remain deferred under the mobile pause; preserve
+owner save bytes and explicit pin refusal. No general Lab service or new protocol schema.
+
 ## Mobile import rules
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared

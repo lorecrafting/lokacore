@@ -31,6 +31,11 @@ errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` gene
 `residency.json`) are checked in `test/loka/core/registries_test.exs`: every command, event
 and policy op has exactly one owning capability (`:159`).
 
+E1's bounded [exact candidate proof policy](architecture.md#e1-exact-candidate-proof-policy)
+uses these contracts and the existing loader; its private JSON receipts are evidence, not a
+new protocol contract. Authoring feature kinds and planning scope are not executable gate
+applicability. A required unknown form or dependency cannot become a green skipped row.
+
 ## Numeric profile (frozen `loka-numeric-v1`)
 
 [numeric-profile.md](../spec/conformance/numeric-profile.md) is the rule text; both kernels
