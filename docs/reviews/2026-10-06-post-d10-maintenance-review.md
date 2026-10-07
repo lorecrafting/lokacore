@@ -17,3 +17,16 @@ The [architecture-audit decision](../decisions/owner-decision-chapter-one-archit
 Ponytail Review: lean already. The summary and roadmap pointer preserve actionable evidence without duplicating an active implementation spec or creating new machinery. Correctness review found no stale attribution or unsupported current-defect claim.
 
 Validation: `git diff --check` passed; all 15 linked repair-evidence hashes matched. Documentation link/reachability validation ran in the commit hook. No source edits, broad gates, mutation tests, new Astra audit, native/browser sessions, owner-save access or push occurred.
+
+## Hosted exact-head Codex review
+
+```text
+APPROVE
+No findings.
+
+Reviewed d78f4adc84dc3c0831cf054616009c174fbcb951 against published main 1424b6cda48cd89f2ed84325d57f69334bccb6a9.
+
+#265 recovery repair and #269 invariant repair are correctly distinguished. All four post-E3 risks have concrete source evidence, future triggers and bounded red controls; none is falsely presented as a current blocker.
+
+Owner-save protections, native pause, headless simulation and open E1–E3 gates remain preserved. All 15 repair-evidence hashes match; cited local links resolve.
+```
