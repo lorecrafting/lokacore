@@ -1,3 +1,4 @@
+- [E1 accepted recipe policy witness](2026-10-07-e1-recipe-policy-binding-review.md): source `92a1d9ab`, independent **APPROVE**, no substantive findings; accepted recipe/root/all paths and separate `study_tracks` transition checked, focused tests 6/6 and old-suite/new-test red control pass. Clean-source report is pending with 18/18 cases, 438 authored paths still open; final combined capture and E1 certification remain pending.
 # Independent reviews
 
 - [E1 integrated routes and witness rules](2026-10-07-e1-integrated-routes-review.md): source `83942fe0`, evidence/docs through `8488c847`, independent **APPROVE**, no open findings; seven focused cases and three retained replays pass, digest/hashes and deduplicated 139 witnesses/509 authored gaps verified. E1 remains pending.
