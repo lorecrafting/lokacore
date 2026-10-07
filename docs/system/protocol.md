@@ -26,7 +26,7 @@ Every contract's
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
 `kernel/ts/src/contracts.gen.ts`, [contracts.gen.md](../contracts.gen.md) and
 [residency.gen.json](../residency.gen.json) and `--check` compares them. Registries
-(`capability_registry.json`, 38 capabilities, all `portable_capability`; `event_registry.json`;
+([`capability_registry.json`](../../protocol/capability_registry.json), all `portable_capability`; `event_registry.json`;
 `error_registry.json`; `effect_registry.json`; `feature_registry.json`; `invariants.json`;
 `residency.json`) are checked in `test/loka/core/registries_test.exs`: every command, event
 and policy op has exactly one owning capability (`:159`).
