@@ -75,6 +75,11 @@ export function thirtyDays(a: CaseHost) {
     if (command.payload.type !== 'elapsed') return;
     boundedPopulations(after);
     const clock = after.state.clock;
+    assert.equal(
+      clock,
+      64800 + 3600 * (observedClocks.length + 1),
+      'elapsed commits must land on every hourly boundary',
+    );
     assert.ok(clock > (observedClocks.at(-1) ?? 64800));
     observedClocks.push(clock);
     if (clock % 3600 === 0) {
