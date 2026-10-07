@@ -25,3 +25,12 @@
 - No tracker (`br`) duties given to the designer; reviewer independence intact.
 - PR #297: its polish lane defers designer review to "its own decision, in another PR"; consistent with this PR, no contradiction on lines 11, 15, 23 or 308.
 - Over-engineering: none; 90 added lines across the required files.
+
+## Fix round 1 (head `07edea35e7085b4ba1cec8ef387a68d38e3b3dfa`)
+
+Scope: merge `5542e38d` (main with #297) and `07edea35`. **Verdict: APPROVE.**
+
+- Finding 1, fixed: `docs/WORKFLOW.md:27` now sends every Book UI review to `designer` plus a fresh `reviewer` (a quick correctness pass that also checks the designer's spec and token text for a pure polish batch; the normal review when mechanics, save, protocol or kernel are in the diff). The designer's text always gets a fresh reviewer.
+- Finding 2, fixed: `.claude/agents/designer.md:37` allows the review record.
+- Finding 3, fixed: `designer.md:37-38` says the token file path is named when polish work creates it.
+- Merge: `git diff origin/main 07edea35` (main `91154c64`) touches only this PR's files. The #297 Fable rules (`WORKFLOW.md:12,17,26`; `owner-rules.md:241-243`) match main; no stale "E1–E3" left. Each designer row appears once, and none is duplicated. `bin/check_docs.exs`: 280 docs, 0 broken links.
