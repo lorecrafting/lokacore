@@ -189,8 +189,8 @@ for the cartridge's existing hp pool. Bounds/start are ResourceInt; gain is a no
 ResourceInt. Compiler and loader require `minimum <= start <= maximum`
 (`RESOURCE_SPEC_INVALID`). No bands, regen, key or arbitrary pool map is accepted.
 Missing hp preserves legacy behavior. Presence requires resource@1 and an authored
-`requires.kernel_api.at_least >= 1.4` (`KERNEL_API_RANGE_INVALID` otherwise); installed
-API 1.4 loads this addition and older APIs reject its requirement. Runtime definition and
+`requires.kernel_api.at_least >= 1.4` (`KERNEL_API_RANGE_INVALID` otherwise); this field was introduced in API 1.4. Generic manifest range validation remains, but
+older-development compatibility is not required under the [owner policy](../decisions/owner-decision-forward-development-2026-10-05.md). Runtime definition and
 row semantics live in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
 
 
@@ -313,9 +313,9 @@ Dialogue `receive` role references must name an item and NPC and exclude accept/
 API1.10 also permits receive without a resolving quest; earlier APIs require that quest.
 Optional item `give_allowed: false` also requires API1.10; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
 a reserved engine fact. Both validators enforce references, types and ownership; source short
-fact references expand for this new spelling. Current reward/storage content declares API1.7;
+fact references expand for this new spelling. The original M20-B reward/storage release declared API1.7; current bundled content follows the [chapter pin](#current-bundled-chapter).
 there is no per-feature minimum-version detector for legacy quest-resolving receive, fact.adjust or Put under the
-[pre-production policy](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
+[pre-production policy](../decisions/owner-decision-forward-development-2026-10-05.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
 single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
 
@@ -348,15 +348,12 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.5, `content_schema` 1, `rule_ir`
-1, no client features, and these capabilities at version 1: with a rule module `movement`,
-`barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
-`inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution`, `attributes`, `death` (`:52`). The [feature map](../features.gen.md) is the authority for what
-each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The registered capabilities it marks `not yet` may be named by a
-cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
+`INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
+content schema, rule IR and installed capabilities. The [current bundled chapter](#current-bundled-chapter)
+records the release/API pin; the generated [feature map](../features.gen.md) records each
+capability's implemented subset and locations. `bin/features.exs --check` fails when a rule
+module exists without its row. A cartridge locking an uninstalled capability fails
+`CAPABILITY_NOT_INSTALLED`.
 
 ## Text
 
@@ -380,9 +377,9 @@ has its own identity and frozen known answer; all preexisting cartridges remain 
 `cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
 the Lantern's current possession changes its active text, while the oar's post-activation
 acquisition keeps its earned text after drop; terminal states select an outcome text or their
-stage's fallback. `lantern_proof` stays byte-identical to preserve phone saves pinned to its
-release. Adding journal keys there requires retaining the old pinned Lantern release, a save
-migration outside this slice; c1-sampler supplies journal keys for the phone first.
+stage's fallback. These are historical development proofs, not a retained-release or save
+migration requirement. Current bundled content and forward-development policy are in the
+[current chapter](#current-bundled-chapter) and [owner decision](../decisions/owner-decision-forward-development-2026-10-05.md); preserve saved bytes and exact mismatch refusal.
 
 `cartridges/ashmere_{hello,rooms,details,facts,items,bell,dusk,road,gate,errand,ferry,green}`
 each exercise one slice; most carry replayable transcripts
@@ -392,12 +389,12 @@ Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_st
 objective and no offer, two dialogues of Bram's: `bram_offer` while the player has no instance of
 the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
-(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). The phone bundles its known answer
-(`mobile/app/App.tsx`).
+(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundles the
+[current Missing Child chapter](#current-bundled-chapter).
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.9; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 
@@ -860,7 +857,7 @@ public path on existing firm footing; preserve the already always-passable mire
 and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
 east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
 its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
-The future Hound Run connection waits for C3; no dangling exit is emitted.
+C3 now installs the Hound Run connection; see the [current chapter](#current-bundled-chapter) and [C3 population declarations](#c3-hound-population-and-loot).
 Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
 → Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
 His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
@@ -1349,8 +1346,8 @@ Compiler and loader reject unknown fields, unresolved skill/action/narration ref
 D12 is installed in the [current bundled chapter](#current-bundled-chapter). Its
 [final primary review](../reviews/2026-10-06-d12-final-primary-review.md) and
 [save/protocol opinion](../reviews/2026-10-06-d12-final-save-review.md) record the
-independent source, pin and recovery proof. Existing frozen conformance fixtures
-remain unchanged; explicit incompatible-pin refusal preserves saves without an
+independent source, pin and recovery proof. Current-behavior conformance guards remain required; obsolete development fixtures follow the
+[forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md). Explicit incompatible-pin refusal preserves saves without an
 adapter, migration or deletion.
 
 <a id="d7-deer-planning-declarations"></a>

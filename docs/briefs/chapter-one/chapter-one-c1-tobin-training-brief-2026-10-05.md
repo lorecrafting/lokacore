@@ -21,7 +21,7 @@ shield behavior in the real cellar fight. Follow the [PM adoption](../../decisio
 [save/reopen](../../system/save.md#c1-learned-skill-and-lesson-recovery) and
 [Book](../../system/book-ui.md#c1-teaching-and-defense-details). Installed
 [equipment](../../system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets),
-[attributes](../../system/mechanics.md#attributes1),
+[attributes](../../system/mechanics.md#attributes1-kerneltssrcmechanicspolicyts60),
 [dialogue receive](../../system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts),
 [combat](../../system/mechanics.md#combat1--first-live-encounter-m6-a) and
 [ActionSet](../../system/protocol.md#actionset-and-admission) still govern their
