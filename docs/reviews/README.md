@@ -515,3 +515,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C6 provisional primary review](2026-10-06-c6-provisional-primary-review.md): exact source `8acf6825`, CHANGES REQUIRED; failed-attempt Journal guidance and honest detour edge wording. Provisional source only; final release waits D9 publication.
 
 - [C6 provisional primary scoped fix round 1](2026-10-06-c6-provisional-primary-review.md#scoped-fix-round-1--p1p2-closed): source `5658f7c3`, provisional APPROVE; P1/P2 closed after thirteen focused tests and an actual-source SQLite detour/failure/Restart reopen control. Final release remains pending D9.
+- [C6 provisional save/protocol second opinion](2026-10-06-c6-provisional-save-second-opinion.md): exact source `5658f7c3`, scoped APPROVE with no new findings; real SQLite failure/replay, fatal/compiler red controls and active cold-open causation guard verified. Final publication remains pending.
