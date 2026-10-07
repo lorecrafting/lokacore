@@ -1,0 +1,122 @@
+[
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_links.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_dialogues.ts -> ../../kernel/ts/src/content/cartridge_patrol.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_dialogues.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_quests.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_reactions.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_recipes.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_position.ts -> ../../kernel/ts/src/content/cartridge_scenes.ts -> ../../kernel/ts/src/content/cartridge_dreams.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_position.ts -> ../../kernel/ts/src/content/cartridge_scenes.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.459Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/content/cartridge_refs.ts -> ../../kernel/ts/src/content/cartridge_position.ts -> ../../kernel/ts/src/content/cartridge_refs.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/scene/shared.ts -> ../../kernel/ts/src/mechanics/scene/rest.ts -> ../../kernel/ts/src/mechanics/scene/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/dialogue/shared.ts -> ../../kernel/ts/src/mechanics/patrol/shared.ts -> ../../kernel/ts/src/mechanics/movement/shared.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/scene/shared.ts -> ../../kernel/ts/src/mechanics/dialogue/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/population/shared.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/population/shared.ts -> ../../kernel/ts/src/mechanics/population/settle.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/movement/shared.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/population/shared.ts -> ../../kernel/ts/src/mechanics/population/settle.ts -> ../../kernel/ts/src/mechanics/movement/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/population/shared.ts -> ../../kernel/ts/src/mechanics/population/settle.ts -> ../../kernel/ts/src/mechanics/population/behavior.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.460Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/mechanics/movement/shared.ts -> ../../kernel/ts/src/mechanics/combat/shared.ts -> ../../kernel/ts/src/mechanics/population/shared.ts -> ../../kernel/ts/src/mechanics/population/settle.ts -> ../../kernel/ts/src/mechanics/population/behavior.ts -> ../../kernel/ts/src/mechanics/movement/shared.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.461Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/commands/actions.ts -> ../../kernel/ts/src/mechanics/dialogue/shared.ts -> ../../kernel/ts/src/commands/actions.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.461Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: ../../kernel/ts/src/runtime/proposal.ts -> ../../kernel/ts/src/runtime/proposal_adopt.ts -> ../../kernel/ts/src/runtime/proposal.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.461Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Require cycle: book/model.ts -> book/offers.ts -> book/model.ts\n\nRequire cycles are allowed, but can result in uninitialized values. Consider refactoring to remove the need for a cycle.",
+    "timestamp": "2026-10-07T02:40:05.461Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  },
+  {
+    "level": "warn",
+    "message": "Using synchronous SQLite operations can cause significant performance impact. Consider using async operations instead.",
+    "timestamp": "2026-10-07T02:40:05.563Z",
+    "url": "http://127.0.0.1:19346/index.ts.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+  }
+]
