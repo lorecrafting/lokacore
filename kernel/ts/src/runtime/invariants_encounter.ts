@@ -162,6 +162,10 @@ function job(op: Any, row: Any, horizon: number): Any {
       next.crow_phase = op.crow_phase;
     }
     if (op.sight !== undefined) next.sight = op.sight;
+    if (op.bleed_body_id !== undefined) {
+      next.bleed_body_id = op.bleed_body_id;
+      next.bleed_generation = op.bleed_generation;
+    }
 
     return next;
   }
@@ -172,6 +176,12 @@ function job(op: Any, row: Any, horizon: number): Any {
 }
 
 function bindingValid(op: Any) {
+  if (
+    op.bleed_body_id !== undefined ||
+    op.bleed_generation !== undefined ||
+    op.job.kind === 'bleed'
+  )
+    return bleedBindingValid(op);
   if (
     op.crow_member_id !== undefined ||
     op.crow_generation !== undefined ||
@@ -206,6 +216,25 @@ function bindingValid(op: Any) {
   return true;
 }
 
+function bleedBindingValid(op: Any) {
+  return (
+    op.bleed_body_id !== undefined &&
+    op.bleed_generation !== undefined &&
+    op.job.kind === 'bleed' &&
+    [
+      op.encounter_id,
+      op.quest_instance_id,
+      op.actor_id,
+      op.water_generation,
+      op.water_body_id,
+      op.sight,
+      op.crow_member_id,
+      op.crow_generation,
+      op.crow_phase,
+    ].every((v) => v === undefined)
+  );
+}
+
 function crowBindingValid(op: Any) {
   return (
     op.crow_member_id !== undefined &&
@@ -223,6 +252,16 @@ function crowBindingValid(op: Any) {
 }
 
 function cancelValid(op: Any, row: Any) {
+  if (op.bleed_body_id !== undefined || op.bleed_generation !== undefined)
+    return (
+      op.bleed_body_id !== undefined &&
+      op.bleed_generation !== undefined &&
+      row.bleed_body_id === op.bleed_body_id &&
+      row.bleed_generation === op.bleed_generation &&
+      [op.encounter_id, op.sight_member_id, op.water_generation, op.crow_member_id].every(
+        (v) => v === undefined,
+      )
+    );
   return op.crow_member_id !== undefined
     ? row.crow_member_id === op.crow_member_id &&
         row.crow_generation === op.crow_generation &&
