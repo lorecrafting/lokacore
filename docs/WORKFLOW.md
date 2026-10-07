@@ -115,8 +115,10 @@ Report at the end of the slice, not at every step.
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
-   nobody waits on hosted CI: `gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge
-   --match-head-commit <sha>`. It merges only after every started job on `<sha>` passes; a
+   nobody waits on hosted CI: `until [ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = <sha> ];
+   do sleep 5; done; gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge
+   --match-head-commit <sha>` (the wait keeps the watch from reading the previous head's checks;
+   a head with no checks yet makes `gh pr checks` fail, not merge). It merges only after every started job on `<sha>` passes; a
    later push makes the merge fail instead of landing unchecked, so any PM commit after the
    verdict re-queues on the new head. (`main` has no required checks and the `browser` job
    does not run on every PR, so GitHub's `--auto` would not wait.) The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
