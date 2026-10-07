@@ -121,3 +121,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Selected dialogue choice effect binding](../../evidence/2026-10-07-e1-dialogue-choice-effects/README.md) passed 18 clean-source cases and replays; 243 authored paths remain pending on its isolated source.
 
 [Exact ferry room identity repair](../../evidence/2026-10-07-e1-ferry-room-identity/README.md) replaces the display-title witness, passes 18 clean-source cases and replays, and retains 271 authored paths pending.
+
+[Integrated provisional checkpoint](../../evidence/2026-10-07-e1-integrated-checkpoint/README.md) passed 18 clean-source cases and replays with 241 authored paths still pending. E1 is not certified.
