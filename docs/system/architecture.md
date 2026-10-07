@@ -255,6 +255,11 @@ Rejected talk and merely offered dialogue actions witness no policy path.
 An accepted selected dialogue choice witnesses an authored fact assignment or
 adjustment sequence step only when that exact fact changes from its prior value
 to the authored result and the committed receipt records the same transition.
+A selected dialogue `skill.acquire` or `topic.grant` step also requires its
+exact membership fact to change from false to true, the pending continuation
+to resolve, and a matching committed fact event with the same actor, scope,
+world and command cause/correlation. The witness credits only that sequence
+step; it does not certify the skill/topic definition or any unselected choice.
 Other sequence operations and unselected choices require separate evidence.
 An accepted `perform` witnesses its exact authored recipe definition and admitted
 policy root. Each child under a required `all` policy node is also witnessed;

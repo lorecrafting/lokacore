@@ -3,6 +3,7 @@ import type { Command, DecisionResult } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 
 // ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
@@ -101,7 +102,10 @@ export function witnessedObligations(
       const selected = before.cartridge.dialogues?.[key]?.choices[p.choice_id];
       const steps =
         selected?.sequence?.flatMap((step, index) => {
-          if (step.op !== 'fact.assign' && step.op !== 'fact.adjust') return [];
+          if (step.op !== 'fact.assign' && step.op !== 'fact.adjust')
+            return knowledgeChoiceStep(before, after, command, decision, step)
+              ? [`${base}/sequence/${index}`]
+              : [];
           const old = value(before, p.actor_id, step.fact);
           const next =
             step.op === 'fact.assign'
