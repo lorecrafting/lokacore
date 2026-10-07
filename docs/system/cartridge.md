@@ -939,10 +939,13 @@ compile/load; inspect actual slot bounds before traversal or allocation.
 
 No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
 in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
-S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
-must amend their actual additional contracts. The published C3 release answer is
-recorded in the [roadmap](../ROADMAP.md); C3/C4 are installed in the
-[current bundled chapter](#current-bundled-chapter).
+S1 credits retain their declared consumer. Additional installed consumers are
+[C4 pack response/flight](#c4-pack-response-and-wounded-flight),
+[D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
+and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
+The [current bundled chapter](#current-bundled-chapter) owns release answers;
+[C3's publication review](../reviews/2026-10-06-c3-publication-status-review.md)
+retains its original independent source/save proof.
 
 ## C4 pack response and wounded flight
 
@@ -1343,7 +1346,12 @@ The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerat
 
 Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
 
-D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
+D12 is installed in the [current bundled chapter](#current-bundled-chapter). Its
+[final primary review](../reviews/2026-10-06-d12-final-primary-review.md) and
+[save/protocol opinion](../reviews/2026-10-06-d12-final-save-review.md) record the
+independent source, pin and recovery proof. Existing frozen conformance fixtures
+remain unchanged; explicit incompatible-pin refusal preserves saves without an
+adapter, migration or deletion.
 
 <a id="d7-deer-planning-declarations"></a>
 
