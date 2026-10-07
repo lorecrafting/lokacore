@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E3 authority CI scope correction](2026-10-06-e3-authority-ci-scope-review.md): exact `cb77af0f`, independent **APPROVE**, no findings; focused controls pass, original unsafe-skip classifier fails the new control, controlled pre-push selects app/authority lanes correctly. No E3 certification claim.
+
 - [Beads audit follow-ups independent review](2026-10-06-beads-audit-followups-extra-review.md): exact source `18d0c847`, **APPROVE**, no findings; complete export, shipped controls, 13 independent structural probes, distinct duplicate-slice mutation and docs checks pass. PM-owned evidence links and all 33 required slices preserved.
 - [Resource authored interval](2026-10-06-resource-authored-interval-review.md): exact source `7a51883b`, independent **APPROVE**, no findings; 22 TypeScript and 14 Elixir focused tests pass, both old-constant mutants fail, absent-field boundary probes pass. Frozen fixtures and save handling unchanged.
 - [Simulator complete world inputs and quest retirement](2026-10-06-simulator-world-inputs-review.md): exact source `c299195c` against published `747c252d`, independent **APPROVE**, no in-scope findings; 2 new/20 existing focused checks pass, both actual adapter mutants fail the new cases while the old suite misses them. Separate lawful bleed-job replay omission retained as SIM-CARRY-01; no invariant skipped.
