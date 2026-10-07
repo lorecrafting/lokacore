@@ -72,3 +72,34 @@ although the working tree differs (demonstrated below). The hook had the same bl
   ignored DB files appear); "gh unavailable" fallback prints. `.claude/settings.json` parses as JSON.
 - `mise exec -- bin/check_all.sh` exit 0 (2m21s) and wrote a marker matching `HEAD^{tree}`;
   `elixir bin/check_docs.exs`: 269 docs, 0 broken, 0 unreachable.
+
+## Fix re-check — `b46805ef`
+
+**Verdict: APPROVE WITH NOTES.** All dispositions verified; one should-fix (R1) is open and
+must be disposed before merge, per WORKFLOW step 7 ("nothing open").
+
+- **S1 + Q1 fixed.** `--auto` is gone from WORKFLOW (`:117-122`), the decision record (`:21-24`),
+  owner-rules (`:231-233`) and the decisions index (`:36`); no `--auto` merge instruction remains.
+  `gh pr checks` without `--required` watches every check run on the PR head, `--fail-fast` stops
+  on the first failure, and a `skipping` `if:` job does not fail it. The PM's commits after the verdict now re-queue.
+- **S2 fixed.** `owner-rules.md:242-243` restores "Opus drafts briefs" and one persistent PM worktree,
+  linking the source. Renaming `../lokacore-pm` to "the integration checkout" (also `WORKFLOW.md:99`) matches
+  the live checkouts (`git worktree list` has no `lokacore-pm`) and keeps the rule's substance.
+- **N1 fixed.** `ROADMAP.md:24`.
+- **N2 fixed** for the config case. Stub repo with `status.showUntrackedFiles=no` and a hidden untracked
+  file: the fixed hook reran the checks. Red control: the same hook without `--untracked-files=all`, run from an
+  outside `core.hooksPath`, skipped. With the file removed, it skipped again. assume-unchanged remains a stated limit.
+- `elixir bin/check_docs.exs`: 270 docs, 0 broken, 0 unreachable.
+
+**R1 should-fix** `docs/WORKFLOW.md:118-120`: `gh pr checks <N>` reads the checks of whatever head the
+PR shows at that moment, not `<sha>`. Failure: the PM pushes an index-line commit and queues
+`gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge --match-head-commit <new>` at once.
+GitHub has not yet moved the PR to `<new>`, so the watch sees the old head's green checks and exits 0.
+By the time `gh pr merge` runs, the head is `<new>`, the match passes, and an unchecked head merges. Fix: wait first
+until `gh pr view <N> --json headRefOid -q .headRefOid` equals `<sha>`. Not reproduced: that needs a live throwaway PR.
+
+**Note (no action):** jobs that depend on another job are created only when it finishes. Evidence: ci.yml run
+37674520584 created `elixir`/`sim`/`typescript` at 19:26:50, the same second `changes` completed; book-e2e
+created `browser` at 19:13:55, also the second `changes` completed. During that gap `lint` (independent) or the other workflow's
+jobs are normally still pending, so the watch does not exit early. A sub-second window remains only if every
+other check is already done. On the PR's own head, `gh pr checks 292` listed `browser` as pending, so the watch covers it when it runs.
