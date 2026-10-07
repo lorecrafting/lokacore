@@ -107,3 +107,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Integrated Maud/Night routes and reviewed witness rules](../../evidence/2026-10-07-e1-integrated-routes/README.md) passed 18 clean-source SQLite cases and replays; 509 authored paths remain pending.
 
 [Accepted recipe and required-policy binding](../../evidence/2026-10-07-e1-recipe-policy-binding/README.md) passed 18 clean-source cases and replays; 29 recipe paths and 438 authored paths remain pending on its isolated source.
+
+[Combined dream and recipe witnesses](../../evidence/2026-10-07-e1-dream-recipe-combined/README.md) passed 18 clean-source cases and replays; dream scene paths are closed, and 428 authored paths remain pending.
