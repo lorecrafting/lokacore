@@ -261,6 +261,8 @@ resolved witnesses that quest definition and objective. For a current-state
 objective, its satisfied root and required `all` children may also be credited;
 other branches still require separate evidence. A failed or merely active quest
 does not discharge its resolved objective.
+An accepted `use_transport` reaching the exact authored destination witnesses
+the selected transport definition.
 For authored item and NPC definitions, an accepted room entry may witness only
 entities actually present in the resulting Book's visible room, inventory or
 equipment projection. Hidden, absent and unvisited entities remain pending;

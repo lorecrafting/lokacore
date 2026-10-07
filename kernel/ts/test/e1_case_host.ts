@@ -70,6 +70,19 @@ export function witnessedObligations(
     ];
   });
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
+  if (p.type === 'use_transport') {
+    const ref = p.route;
+    const key = `${ref.cartridge_id}@${ref.cartridge_version}:transport/${ref.key}`;
+    const route = before.cartridge.transports?.[key];
+    if (!route || decision.outcome !== 'transport_used') return questPaths;
+    const destination = route.destination;
+    return withQuests(
+      before.state.containers[before.body] !== after.state.containers[after.body] &&
+        gameView(after).place.title.key === `room.${destination.key}.title`
+        ? [`/transports/${key}`]
+        : [],
+    );
+  }
   if (p.type === 'move') {
     if (before.state.containers[before.body] === after.state.containers[after.body])
       return questPaths;

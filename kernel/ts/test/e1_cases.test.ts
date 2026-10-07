@@ -532,3 +532,53 @@ test('E1 binds only visible entity definitions after committed room entry', () =
     rmSync(dir, { recursive: true });
   }
 });
+
+// Breaks: a used ferry reaches its authored destination but its selected transport stays gapped.
+test('E1 binds only the used ferry route on committed arrival', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-ferry-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    {
+      case_id: 'topology',
+      source,
+      fault_schedule: [],
+    },
+  );
+  const outbound = '/transports/ashmere_missing_child@0.0.42:transport/fen_outbound';
+  const returning = '/transports/ashmere_missing_child@0.0.42:transport/fen_return';
+  try {
+    a.invoke('choose_ancestry', [], { ancestry: 'hill_folk' });
+    a.move('north', 'west', 'east', 'south', 'west');
+    const witnessed: string[][] = [];
+    a.watch((before, after, command, decision) => {
+      if (command.payload.type === 'use_transport')
+        witnessed.push(witnessedObligations(before, after, command, decision));
+    });
+    a.invoke('board_ferry', [a.detail('boathouse', 'ferry')], {
+      route: {
+        cartridge_id: 'ashmere_missing_child',
+        cartridge_version: '0.0.42',
+        kind: 'transport',
+        key: 'fen_outbound',
+      },
+      quoted_fare: 2,
+    });
+    assert.deepEqual(witnessed, [[outbound]]);
+    assert.equal(a.view().place.title.key, 'room.fen_isle_landing.title');
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.equal(replay.obligations.includes(outbound), true);
+    assert.equal(replay.obligations.includes(returning), false);
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
