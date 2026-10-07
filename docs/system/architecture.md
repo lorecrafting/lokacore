@@ -301,6 +301,26 @@ NPC holders participating in that transfer may also be witnessed. Opening a
 pending dialogue witnesses its exact static NPC target only when that NPC is
 bound in the new continuation. Merely inspecting merchant stock grants no item
 witness; dynamically created entities require separate provenance evidence.
+An accepted step creating a death-origin corpse witnesses that corpse item only when its
+`entity_died` event names the same victim and corpse, the committed created row equals the
+receipt identity, the corpse lies in the room the victim occupied, and its definition is the
+victim's population bundle corpse, else the world player or NPC corpse. For a spawned member,
+that death also witnesses its population plan and NPC definition when the member is the
+bundle NPC bound to its slot generation and the receipt's `population.slot` row schedules
+replacement at death time plus the plan's `replacement_delay`; with those, it witnesses the
+bundle loot item only when the receipt moves that member's own spawned loot from the member into its corpse.
+A bleed definition is witnessed only when the receipt opens a new active row equal to the
+committed row, sourced by a created NPC whose attack names that bleed, after its positive-loss
+hit at time t, ending at t + `duration` with its first tick at t + `tick_every`. A reaction
+on a committed `fact_changed` event witnesses its definition, `when` root and each
+`population.suppress` step only when it has at least one apply step, every apply step is
+`population.suppress`, the policy holds after the accepted step, and each named plan,
+unsuppressed before the accepted step, newly gains suppression caused by that event, ending
+at its time plus the authored duration, matching the receipt's `population.control` row.
+Descendants of that `when` root stay pending: the [branch evidence rule](#e1-policy-branch-evidence)
+is not yet bound for reactions.
+Sightings, wander ticks, bleed refreshes and reactions with any other apply step witness none
+of these paths.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
