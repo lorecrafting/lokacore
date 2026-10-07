@@ -1,6 +1,7 @@
 # Independent reviews
 
 - [E1 legal topology route proof](2026-10-06-e1-legal-routes-review.md): exact `104701ea`, independent **APPROVE**, no findings; 57-room real SQLite focused route passes, separate elapsed-conversion red control fails, retained evidence hashes verify. Final runner registration and E1 certification remain pending.
+- [E1 optional quest checkpoint](2026-10-06-e1-optional-quests-review.md): exact `dad439c6`, independent **APPROVE**, no findings; three repeated real SQLite cases pass, missing-delivery red control exits 1, retained hashes verify. Bounded routes only; E1 certification remains pending.
 
 - [E1 bounded recorder checkpoint](2026-10-06-e1-recorder-review.md): exact `8d2841d9` CHANGES REQUIRED; scoped fix `c06e5c27` independent APPROVE, E1-R1 closed. Certification remains pending.
 - [E1 runner primary source review](2026-10-06-e1-runner-primary-review.md): initial `cf97a4c3` CHANGES REQUIRED; scoped fix `32448076` **APPROVE**, E1-P1 closed. All 92 affected roots restored; 82 focused tests pass and both inventory red controls fail. Runner packaging only; final E1 certification remains pending.
