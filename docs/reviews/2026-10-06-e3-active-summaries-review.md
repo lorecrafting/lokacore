@@ -14,3 +14,7 @@ The architecture rows match the existing `mobile/packages/game-view/session.ts` 
 `mise exec -- elixir bin/check_docs.exs` passed on the reviewed commit: 784 docs, 0 broken links, 0 unreachable. `git diff --check 37a2af0c 594d5a7e` passed. No behavior tests apply to this documentation-only correction.
 
 Ponytail review: Lean already. Ship.
+
+## Fix round 1 — `f47591f61e3d71fc1c88df45246c6dd5592645ca`
+
+Verdict: **APPROVE**. E3-SUM-1 is closed: the Production Story app summary now names the remaining clock source, background driver and recurring catch-up, and links to the installed M1-A contract. The link resolves and the summary accurately distinguishes the installed elapsed policy from its remaining production integration. `mise exec -- elixir bin/check_docs.exs` passed on the fix commit: 785 docs, 0 broken links, 0 unreachable. `git diff --check 594d5a7e f47591f6` passed. No open findings.
