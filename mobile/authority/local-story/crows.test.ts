@@ -102,9 +102,22 @@ test('crow acquisition survives real SQLite cold reopen and invocation replay', 
 test('crow intention, corridor flight and delivered return cold-reopen at their exact custody', (t) => {
   for (const [until, phase, room, holder] of [
     [43200, 'acquire', 'village_green', 'village_green'],
+    [43350, 'leg', 'village_green', 'crow'],
     [43500, 'leg', 'well_lane', 'crow'],
+    [43650, 'leg', 'ferry_landing', 'crow'],
+    [43800, 'leg', 'reed_path', 'crow'],
+    [43950, 'leg', 'reed_bank', 'crow'],
+    [44100, 'leg', 'willow_shade', 'crow'],
+    [44250, 'leg', 'drowned_oak', 'crow'],
+    [44400, 'leg', 'oak_branches', 'crow'],
     [44550, 'return', 'oak_branches', 'nest'],
     [44700, 'return', 'drowned_oak', 'nest'],
+    [44850, 'return', 'willow_shade', 'nest'],
+    [45000, 'return', 'reed_bank', 'nest'],
+    [45150, 'return', 'reed_path', 'nest'],
+    [45300, 'return', 'ferry_landing', 'nest'],
+    [45450, 'return', 'well_lane', 'nest'],
+    [45600, 'idle', 'village_green', 'nest'],
   ] as const) {
     const dir = mkdtempSync(join(tmpdir(), 'loka-crow-flight-'));
     t.after(() => rmSync(dir, { recursive: true }));
@@ -112,10 +125,14 @@ test('crow intention, corridor flight and delivered return cold-reopen at their 
     const a = setup(path);
     a.invoke('take', [a.coin]);
     a.invoke('drop', [a.coin]);
+    const member = Object.values(a.s.world().state.crows ?? {}).find(
+      (r) => r.phase === 'acquire',
+    )!.member_id;
     a.elapsed(until);
     const before = a.s.world().state;
-    const crow = Object.values(before.crows ?? {}).find((r) => r.phase === phase)!;
+    const crow = Object.values(before.crows ?? {}).find((r) => r.member_id === member)!;
     assert.ok(crow, `${until}: ${phase}`);
+    assert.equal(crow.phase, phase);
     assert.equal(
       before.containers[crow.member_id],
       a.s.world().roomIds[`${prefix}:room/${room}`],
@@ -178,43 +195,56 @@ test('a crow killed beyond its wander pair cold-reopens at its actual corridor r
 });
 
 // Breaks: an uncertain acquisition COMMIT adopts half a transfer or retries the same job twice.
-test('real failed COMMIT and lost acknowledgement settle one crow acquisition', () => {
-  for (const kind of ['failed', 'lost'] as const) {
-    const a = setup();
-    try {
-      a.invoke('take', [a.coin]);
-      a.invoke('drop', [a.coin]);
-      const before = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-      if (kind === 'failed')
-        a.p.sql.exec(
-          'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+test('real failed COMMIT and lost acknowledgement settle crow acquisition, legs and deposit', () => {
+  for (const until of [43350, 43500, 44550, 44700, 45600]) {
+    for (const kind of ['failed', 'lost'] as const) {
+      const a = setup();
+      try {
+        a.invoke('take', [a.coin]);
+        a.invoke('drop', [a.coin]);
+        const member = Object.values(a.s.world().state.crows ?? {}).find(
+          (r) => r.phase === 'acquire',
+        )!.member_id;
+        a.elapsed(until - 150);
+        const holderBefore = a.s.world().state.containers[a.coin];
+        const before = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+        if (kind === 'failed')
+          a.p.sql.exec(
+            'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+          );
+        const evidence = { expected_run_id: a.s.runId(), from: until - 150, until };
+        a.p.fault.kind = kind;
+        a.p.fault.armed = true;
+        assert.equal(a.s.elapsed(evidence).kind, 'pending');
+        assert.equal(a.s.world().state.containers[a.coin], holderBefore);
+        a.p.fault.reads = false;
+        if (kind === 'failed')
+          assert.deepEqual(
+            a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
+            before,
+          );
+        const settled = a.s.elapsed(evidence);
+        assert.equal(settled.kind, 'saved');
+        if (settled.kind === 'saved') assert.equal(settled.replay, kind === 'lost');
+        const carrier = Object.values(a.s.world().state.crows ?? {}).find(
+          (r) => r.member_id === member,
+        )!;
+        assert.equal(carrier.phase, until < 44550 ? 'leg' : until < 45600 ? 'return' : 'idle');
+        assert.equal(
+          a.s.world().state.containers[a.coin],
+          until < 44550 ? member : entity(a.s.world(), 'item', 'crow_nest'),
         );
-      const evidence = { expected_run_id: a.s.runId(), from: 43200, until: 43350 };
-      a.p.fault.kind = kind;
-      a.p.fault.armed = true;
-      assert.equal(a.s.elapsed(evidence).kind, 'pending');
-      assert.equal(
-        a.s.world().state.containers[a.coin],
-        a.s.world().roomIds[`${prefix}:room/village_green`],
-      );
-      a.p.fault.reads = false;
-      if (kind === 'failed')
+        const rows = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+        const replay = a.s.elapsed(evidence);
+        assert.equal(replay.kind, 'saved');
+        if (replay.kind === 'saved') assert.equal(replay.replay, true);
         assert.deepEqual(
           a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
-          before,
+          rows,
         );
-      const settled = a.s.elapsed(evidence);
-      assert.equal(settled.kind, 'saved');
-      if (settled.kind === 'saved') assert.equal(settled.replay, kind === 'lost');
-      const carrier = Object.values(a.s.world().state.crows ?? {}).find((r) => r.phase === 'leg')!;
-      assert.equal(a.s.world().state.containers[a.coin], carrier.member_id);
-      const rows = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-      const replay = a.s.elapsed(evidence);
-      assert.equal(replay.kind, 'saved');
-      if (replay.kind === 'saved') assert.equal(replay.replay, true);
-      assert.deepEqual(a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), rows);
-    } finally {
-      a.p.sql.close();
+      } finally {
+        a.p.sql.close();
+      }
     }
   }
 });

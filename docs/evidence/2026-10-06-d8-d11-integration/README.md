@@ -346,3 +346,23 @@ movement closure helper keeps the required function size gate intact. No new
 world number, source identity, schema or owner-save behavior. P4 wider intermediate
 and uncertain-COMMIT matrix and timed browser rows remain pending; final gate and
 independent follow-up review still required.
+
+## Round 1 expanded SQLite matrix checkpoint
+
+Existing real-SQLite cold-reopen proof now covers all17 literal checkpoints:
+intention; acquisition; each of seven outbound movements; deposit; each of six
+intermediate return movements; and arrival idle at the original home. Every row
+asserts the original bound member, literal phase/room/custody, then compares the
+entire lawful persisted state after cold reopen. No authored identity is derived
+from the composer. Existing failed-COMMIT/lost-acknowledgement proof now exercises
+acquisition, first carrying leg, deposit, first return leg and final arrival:
+10 fault cases, pending memory remains unadopted, retry settles once, replay
+changes no rows. SQLite focused file: exit0,6 tests passed. These are required
+proof-table extensions using the existing operation-based real-storage fault
+harness, not overlapping new regression tests.
+
+P4 still open: real-SQLite original-nest moved/closed/full and Shoo checkpoints,
+death→replacement→new Drop cold reopen, and failed/uncertain commits at those
+additional boundaries including combat pause/Flee resume. Browser carrying,
+held refresh and Shoo still unproved. Final full gate on the changed source/test
+head remains required. Branch remains draft/unapproved/unmerged.
