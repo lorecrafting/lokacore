@@ -36,11 +36,12 @@ export const gameview_agrees_with_admission = ({
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
-  if (command.world_context_id !== world_context_id) return code === 'not_found';
   const type = command.payload.type;
+  if (type === 'use_service')
+    return serviceAgrees(view, command, decision, world_context_id, action_key);
+  if (command.world_context_id !== world_context_id) return code === 'not_found';
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
-  if (type === 'use_service') return serviceAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
     return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
@@ -183,7 +184,19 @@ function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): bool
   );
 }
 
-function serviceAgrees(view: GameView, payload: Any, decision: Any, action_key?: string) {
+function serviceAgrees(
+  view: GameView,
+  command: Any,
+  decision: Any,
+  world_context_id: string,
+  action_key?: string,
+) {
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  if (view.ancestry_choices?.length) return code === 'invalid_state';
+  if (command.id === '00000000-0000-0000-0000-000000000000') return code === 'permission_denied';
+  const payload = command.payload;
+  if (command.world_context_id !== world_context_id || payload.actor_id !== view.actor_id)
+    return code === 'not_found';
   const offer = view.entities
     .find((e: EntityView) => e.id === payload.provider_id)
     ?.services?.find(
