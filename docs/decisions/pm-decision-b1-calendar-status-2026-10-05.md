@@ -25,5 +25,5 @@ world-parameter and browser-first direction.
   [browser-first pause](owner-decision-web-first-mobile-pause-2026-10-05.md) rules out native
   Simulator/build proof in this slice. B2 owns deadline effects and expiry.
 
-The active clauses are [mechanics](../system/mechanics.md#schedule1-behavior1-calendar1-mechanicsschedulerulets-kernelts-srcmechanicsschedulebehaviorts),
+The active clauses are [mechanics](../system/mechanics.md#schedule1-behavior1-calendar1-mechanicsschedulerulets-kerneltssrcmechanicsschedulebehaviorts),
 [protocol](../system/protocol.md#gameview), and [Book status](../system/book-ui.md#world-and-status-entry).
