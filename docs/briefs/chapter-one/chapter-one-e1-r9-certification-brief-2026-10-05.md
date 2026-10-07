@@ -84,3 +84,5 @@ The [legal 57-room route author checks](../../evidence/2026-10-06-e1-legal-route
 retain the topology recipe's distinct red control. The [provisional integration checkpoint](../../evidence/2026-10-06-e1-topology-integration/README.md) records source-bound registration and 57 room visits; final certification remains pending.
 
 Optional quest route checkpoint: [controlled debt and Lantern dream receipts](../../evidence/2026-10-06-e1-optional-quests/README.md), with remaining outcomes pending.
+
+Optional exact recorder/replay integration: [provisional receipts and remaining-path breakdown](../../evidence/2026-10-06-e1-optional-integration/README.md); final E1 proof remains pending.

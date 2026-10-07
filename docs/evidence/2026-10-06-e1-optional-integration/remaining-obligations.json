@@ -1,0 +1,4541 @@
+[
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/a_night_in_the_marsh",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/a_night_in_the_marsh/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/a_room_at_the_lantern",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/a_room_at_the_lantern/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/a_room_at_the_lantern/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere/objective/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere/objective/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/chandlers_debt",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/chandlers_debt/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/chandlers_debt/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/first_lead",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/first_lead/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/first_lead/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/infirmary_herbs",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/infirmary_herbs/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/infirmary_herbs/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar/objective/policy/root/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/0/when/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/0/when/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/0/when/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/1/when/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/1/when/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/1/when/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/2/when/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/2/when/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/3/when/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/3/when/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/4/when/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/journal/active_variants/4/when/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/missing_child/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/watch_rounds",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/watch_rounds/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/wisp_ward",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/wisp_ward/objective",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.quest",
+    "path": "/quests/ashmere_missing_child@0.0.42:quest/wisp_ward/objective/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_lost_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_lost_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_lost_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_lost_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_lost_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_fox/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_rescued_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_fox/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_elspeth_stays_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_lost_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_lost_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_lost_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_lost_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_lost_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_fox/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_rescued_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_fox/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_maud_stays_prior/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_sedge_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_fox",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_fox/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_fox/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_fox/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_prior",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_prior/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_prior/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_vesper_prior/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/late",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/late/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/late/sequence/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/on_time",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/on_time/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/choices/on_time/sequence/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_debt/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/choices/accept",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/0/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/0/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/1/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/1/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/1/items/1/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/0/items/1/items/1/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_lost",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_lost/choices/acknowledge",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_lost/choices/directions",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_lost/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report/choices/report",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/choices/rescued",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/choices/rescued/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_rescue/policy/root/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/choices/stays",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/choices/stays/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_return/policy/root/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/choices/accept_late",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/choices/accept_late/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/choices/accept_on_time",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/choices/accept_on_time/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/choices/elapsed",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/choices/meet_wren",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/choices/meet_wren/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_vesper_meeting/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/choices/accept",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root/item",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root/item/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root/item/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/choices/accept",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/choices/rescue",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/choices/rescue/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wren_escort/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ada",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ada/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ada/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ash",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ash/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/ash/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_aldric",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_aldric/choices/bell",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_aldric/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_aldric/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued/choices/acknowledge",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued/choices/directions",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued/choices/inn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_rescued/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays/choices/acknowledge",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays/choices/directions",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays/choices/inn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_elspeth_stays/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/choices/answer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/choices/answer/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_vesper_riddle/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wick_turn_in",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wick_turn_in/choices/exchange",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wick_turn_in/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wick_turn_in/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wick_turn_in/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/choices/answer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/choices/answer/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/choices/answer/sequence/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wisp_riddle/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/choices/rejoin",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/b_wren_rejoin/policy/root/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_aldric_ward",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_aldric_ward/choices/ward",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_aldric_ward/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_aldric_ward/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/choices/carry_message",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/choices/carry_message/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/policy/root/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/c_vesper_answered/policy/root/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth/choices/accept",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth/choices/directions",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth/choices/inn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth/choices/wren",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/gareth",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/gareth/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/gareth/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hale",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hale/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hale/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hob",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hob/choices/leave",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/hob/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/choices/accept",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/2",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/3",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/4",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in/choices/done",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in/choices/done/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in/choices/done/sequence/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/peg_haggle",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/peg_haggle/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/peg_haggle/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/peg_haggle/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_herbalism",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_herbalism/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_herbalism/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_herbalism/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_marsh",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_marsh/choices/acknowledge",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_marsh/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_swim",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_swim/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_swim/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/sedge_swim/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge/policy/root/items/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_dodge/policy/root/items/1",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_swords",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_swords/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_swords/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_swords/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch/choices/continue",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch/choices/rejoin",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch/choices/restart",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch/choices/start",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/tobin_watch/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/vesper",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/vesper/choices/greet",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/vesper/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wick_bandage",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wick_bandage/choices/learn",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wick_bandage/choices/learn/sequence/0",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wick_bandage/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wren",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wren/choices/greet",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.dialogue",
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/wren/policy/root",
+    "gates": [
+      "QUEST"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_rung/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_silenced",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_silenced/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_silenced/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_silenced/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/bell_silenced/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/3/choices/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/3/choices/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/5",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen/steps/6",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_lost_prior/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_fox/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_rescued_prior/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_fox/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior/steps/0",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior/steps/1",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior/steps/2",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior/steps/3",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.scene",
+    "path": "/scenes/ashmere_missing_child@0.0.42:scene/epilogue_stays_prior/steps/4",
+    "gates": [
+      "SCENE"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/5",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/6",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior/policy/root/items/7",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/5",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/6",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_fox/policy/root/items/7",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/5",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/6",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_rescued_prior/policy/root/items/7",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/5",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/6",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_fox/policy/root/items/7",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/5",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/6",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_stays_prior/policy/root/items/7",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/outcomes/success/sequence/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/0/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/0/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/1/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/1/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/1/items/1/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/ring_bell/policy/root/items/3/items/1/items/1/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/outcomes/failure",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/seek_wisp/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/outcomes/success/sequence/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/2",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/2/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/2/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/3",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/silence_bell/policy/root/items/4",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/0",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.action_recipe",
+    "path": "/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/1",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/a_resolve_bell",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/a_resolve_bell/apply/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/a_resolve_bell/when/root",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/a_resolve_bell/when/root/items/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/a_resolve_bell/when/root/items/1",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/apply/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/apply/1",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root/items/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root/items/1",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root/items/2",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root/items/3",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/b_lost_before_meeting/when/root/items/4",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/c_resolve_silence",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/c_resolve_silence/apply/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/c_resolve_silence/when/root",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/c_resolve_silence/when/root/items/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/c_resolve_silence/when/root/items/1",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/d9_suppress_hounds",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/d9_suppress_hounds/apply/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/d9_suppress_hounds/when/root",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/start_search",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.reaction",
+    "path": "/reactions/ashmere_missing_child@0.0.42:reaction/start_search/apply/0",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.transport",
+    "path": "/transports/ashmere_missing_child@0.0.42:transport/fen_outbound",
+    "gates": [
+      "TRANSACTION",
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.transport",
+    "path": "/transports/ashmere_missing_child@0.0.42:transport/fen_return",
+    "gates": [
+      "TRANSACTION",
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.service",
+    "path": "/services/ashmere_missing_child@0.0.42:service/lantern_ale",
+    "gates": [
+      "TRANSACTION",
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.service",
+    "path": "/services/ashmere_missing_child@0.0.42:service/lantern_meal",
+    "gates": [
+      "TRANSACTION",
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.service",
+    "path": "/services/ashmere_missing_child@0.0.42:service/lantern_room",
+    "gates": [
+      "TRANSACTION",
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/crow_branches",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/crow_green_1",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/crow_green_2",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/crow_oak",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/fen_hounds",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/oak_deer",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/orchard_deer",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.population",
+    "path": "/populations/ashmere_missing_child@0.0.42:population/willow_deer",
+    "gates": [
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/apple_01",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/apple_02",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/apple_03",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_01",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_02",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_03",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_04",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_05",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_06",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_07",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_08",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_09",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_10",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_11",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bandage_12",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/bell_rites",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/boot",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/brass_key",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/cellar_key",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/crow_corpse",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/crow_nest",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/deer_corpse",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/deer_hide",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_01",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_02",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_03",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_04",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_05",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_06",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_07",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_08",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_09",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_10",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_11",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fenwort_12",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/fox_drawing",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/hound_corpse",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/hound_pelt",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/iron_sword",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/lamp_oil",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/lantern_ale_cask",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/leather_boots",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/old_coin",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/player_corpse",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/rat_corpse",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/rusty_sword",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/satchel",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/silver_ring",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/spare_waterskin",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/storage_chest",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/sunken_chest",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/tin_whistle",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/tithe_ledger",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/torch",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/trunk",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/vesper_message",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/ward_of_the_fen",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/waterskin",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/wooden_shield",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/items/ashmere_missing_child@0.0.42:item/wool_cloak",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/ada",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/aldric",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/ash",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/cellar_rat_1",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/cellar_rat_2",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/cellar_rat_3",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/cellar_rat_4",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/cellar_rat_5",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/crow_branches",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/crow_green",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/crow_oak",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/elspeth",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/fen_hound",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/gareth",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/hale",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/hob",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/maud",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/oak_deer",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/orchard_deer",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/peg",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/sedge",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/tobin",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/vesper",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/wick",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/willow_deer",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/wisp",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/npcs/ashmere_missing_child@0.0.42:npc/wren",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/resources/ashmere_missing_child@0.0.42:resource/hp",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/resources/ashmere_missing_child@0.0.42:resource/lantern_meals",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/resources/ashmere_missing_child@0.0.42:resource/ma",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/resources/ashmere_missing_child@0.0.42:resource/mv",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/resources/ashmere_missing_child@0.0.42:resource/pennies",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.attributes",
+    "path": "/ancestries/fen_born",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.attributes",
+    "path": "/ancestries/fey_touched",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.attributes",
+    "path": "/ancestries/hill_folk",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.attributes",
+    "path": "/ancestries/road_born",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.bleed",
+    "path": "/bleeds/ashmere_missing_child@0.0.42:bleed/bleeding",
+    "gates": [
+      "RULES",
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.resource",
+    "path": "/world/bands",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.fact",
+    "path": "/world/bell_cue",
+    "gates": [
+      "RULES"
+    ]
+  },
+  {
+    "feature": "authored.containment",
+    "path": "/world/carry",
+    "gates": [
+      "TRANSACTION"
+    ]
+  },
+  {
+    "feature": "authored.combat",
+    "path": "/world/combat",
+    "gates": [
+      "RULES",
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.death",
+    "path": "/world/death",
+    "gates": [
+      "RULES",
+      "AUTHORITY"
+    ]
+  },
+  {
+    "feature": "authored.combat",
+    "path": "/world/death_credit",
+    "gates": [
+      "RULES",
+      "WORLD"
+    ]
+  },
+  {
+    "feature": "authored.movement",
+    "path": "/world/movement",
+    "gates": [
+      "TOPOLOGY"
+    ]
+  },
+  {
+    "feature": "authored.water",
+    "path": "/world/water",
+    "gates": [
+      "RULES",
+      "WORLD"
+    ]
+  }
+]

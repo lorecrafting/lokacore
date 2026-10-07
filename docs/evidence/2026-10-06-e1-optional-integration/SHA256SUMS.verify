@@ -1,0 +1,13 @@
+README.md: OK
+cli-record.log: OK
+cli-report-summary.json: OK
+debt-on_time-replay.log: OK
+debt-on_time.jsonl: OK
+dream-follow_fox-replay.log: OK
+dream-follow_fox.jsonl: OK
+dream-wake-replay.log: OK
+dream-wake.jsonl: OK
+focused-green.log: OK
+old-suite.log: OK
+registration-red.log: OK
+remaining-obligations.json: OK

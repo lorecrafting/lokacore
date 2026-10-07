@@ -1,0 +1,7 @@
+{"case_id":"dream-wake","steps":12,"obligations":[],"state_hash":"bf80ec8090d2b88126ec7b38741309abada5f6d9135bfda534151668c3ed9a3c","fault_schedule":[]}
+(node:16973) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+exit_status=0
