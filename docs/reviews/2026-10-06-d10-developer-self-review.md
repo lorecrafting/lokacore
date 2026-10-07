@@ -71,3 +71,13 @@ successful rows against the frozen null-row inputs. Both existing focused suites
 passed before these tests; both new tests failed on the defect, then passed after
 the fix. The BEAM randomized differential plus fixtures passes 14 tests. These
 checks and the old/red/green logs are retained in the source evidence directory.
+
+## Browser prose correction
+
+The isolated browser showed the original answered Knock line claiming the chapel
+was open beside a closed-door state. The authored reply now reports only Aldric's
+presence, without claiming door availability. The current v042 hash is re-pinned
+in the cartridge contract; all 211 IDs remain unchanged. The knowledge transcript
+was recaptured from actual authority execution against this successor bundle.
+Three current-source Elixir fixture files also now use v042 references; their
+synthetic extra dream room declares its required map position.

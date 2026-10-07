@@ -1356,7 +1356,7 @@ Compiler and loader validate the closed positive safe-integer duration, interval
 
 **Implementation candidate:** Chapter v042/API1.37 has 57 rooms and 211 initial IDs.
 Its independently derived content hash is
-`43d90ba39b07188e62e0bf96d41963554b691134f6763cf9bf975f631ba26afc`;
+`5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`;
 [the frozen artifact](../../protocol/fixtures/missing_child_v042_hash.json) and
 [allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) retain the answers.
 Source review and publication are pending.
