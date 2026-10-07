@@ -145,7 +145,7 @@ Checks: [current gates](docs/CHECKS.md), focused [provisional lane](docs/decisio
 ## Working rules
 
 - Follow [the delivery workflow](docs/WORKFLOW.md) for slice reviews and the
-  [Beads Rust pilot](docs/WORKFLOW.md#beads-rust-pilot) for PM task status.
+  [Beads Rust](docs/WORKFLOW.md#beads-rust) for PM task status.
 - Update [Book UI](docs/system/book-ui.md) per mechanic; fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.

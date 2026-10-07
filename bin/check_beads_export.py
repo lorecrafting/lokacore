@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 
-LOCAL_PATH = re.compile(r"/Users/|/home/|/private/|/tmp/|/var/folders/|~/|[A-Za-z]:[\\/]")
+LOCAL_PATH = re.compile(r"/Users/|/home/|/private/|/tmp/|/var/folders/|~/|(?<![A-Za-z])[A-Za-z]:[\\/]")
 
 
 def strings(value):

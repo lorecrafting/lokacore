@@ -15,6 +15,13 @@ if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
   echo 'Beads path control failed: machine path was accepted' >&2
   exit 1
 fi
+printf '%s\n' '{"id":"loka-example","source_repo_path":null,"external_ref":"https://github.com/lorecrafting/lokacore/pull/1"}' > "$case_file"
+python3 bin/check_beads_export.py "$case_file"
+printf '%s\n' '{"id":"loka-example","source_repo_path":null,"description":"C:\\Users\\example"}' > "$case_file"
+if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
+  echo 'Beads path control failed: drive path was accepted' >&2
+  exit 1
+fi
 python3 bin/check_beads_export.py
 python3 - "$case_file" <<'PY'
 import json

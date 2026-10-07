@@ -29,7 +29,7 @@ its own immediate recovery contract if bandage consumption becomes required;
 D12 may extend herbalism only at its real consumer. No renewable mechanism is
 silently promised by this decision.
 
-PM adoption tier: Codex Sol medium under the [routing](pm-decision-codex-model-routing-2026-10-05.md).
+PM adoption tier: Codex Sol medium under the [routing](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md).
 Future B5 source/release/hash/IDs/PR/proof pins remain null until implementation.
 Independent exact-head plan review follows; source work still needs the normal
 protocol/save reviews, checks and local draft-PR workflow.
