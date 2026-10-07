@@ -1,4 +1,4 @@
-// Fixed v042 service circuit; literal prices, stock and recovery come from cartridge.md.
+// Fixed v042 service circuit; prices, stock and start values come from cartridges/ashmere_missing_child/{services,npcs/maud,resources,items/lantern_ale_cask}.json.
 import assert from 'node:assert/strict';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
