@@ -531,3 +531,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C6 final save/protocol second opinion](2026-10-06-c6-final-save-second-opinion.md): corrected final source `206ffb39`, scoped APPROVE; final v041 oracle/209 IDs, real SQLite route/fatal/fault/replay, actual-shell pin and byte-preserving v040 refusal verified. Browser/full gate/CI remain pending.
 
 - [C6 scoped historical D12 fixture review](2026-10-06-c6-provisional-primary-review.md#scoped-full-gate-d12-fixture-correction): exact `249a9976`, APPROVE; original four behavior/contract tests pass, all frozen text retained, twelve bounded additions and old wholesale-graft loader red control confirmed.
+
+- [Simulator input purity](2026-10-06-sim-input-purity-review.md): exact source `62b2bc7d`, independent APPROVE, no findings; focused test and step-side mutation caught, guard-removal control red. JSON snapshot coverage limit recorded; normal publication checks and hosted CI remain delivery gates.
