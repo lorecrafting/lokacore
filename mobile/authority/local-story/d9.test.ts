@@ -13,7 +13,7 @@ import { deathSequence } from '../../../kernel/ts/src/mechanics/death/sequence.t
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import { gameView, loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
 import type { Command, FactValue } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/index.ts';
+import type { World, Cartridge } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import { replace, type Meta } from './store.ts';
@@ -376,7 +376,7 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
   }
 });
 
-// Breaks: a lawful stays/prior bell intermediate cannot cold-open before the first Continue.
+// Breaks: the Book’s targetless recipe invocation commits Ring but its receipt cannot cold-open before Continue.
 test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-stays-bell-'));
   t.after(() => rmSync(dir, { recursive: true }));
@@ -394,7 +394,7 @@ test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
   assert.ok(loaded.ok);
   if (!loaded.ok) return;
   const unchosen = newWorld(
-    loaded.cartridge,
+    loaded.cartridge as Cartridge,
     '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
     [1, 2, 3, 4],
   );
@@ -410,12 +410,11 @@ test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
   if (ancestry.kind === 'saved')
     assert.equal((ancestry.decision as { kind: string }).kind, 'accepted');
   staysToBelfry(p, 50);
-  const bell = Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0];
   const reply = p.story.invoke({
     invocation_id: 'aaaaaaaa-0000-4000-8000-000000000999',
     actor_id: p.story.world().character,
     action_key: 'ring_bell',
-    target_ids: [bell],
+    target_ids: [],
     input: {},
   });
   assert.equal(reply.kind, 'saved');

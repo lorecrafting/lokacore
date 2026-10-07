@@ -954,7 +954,10 @@ browser refresh is separate proof.
 ## D9 village consequence recovery
 
 **Selected D9 contract.** The accepted bell receipt and causal
-event bind exact actor, room, time and one cue occurrence. Cold reopen can
+event bind exact actor, room, time and one cue occurrence. A normal recipe
+invocation omits `target_id`: recover its exact detail from the pinned recipe,
+as ordinary action-recipe admission does. If an explicit target is present,
+it must be that same detail; malformed or foreign explicit targets remain corrupt. Cold reopen can
 reproduce its retained past narration without emitting a new cue or reapplying
 consequences. Persist the hound suppression generation/deadline, resume job,
 actual encounter cancellation and population state with the ordinary changed
