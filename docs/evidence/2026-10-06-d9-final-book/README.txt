@@ -1,57 +1,95 @@
-# Final D9 Book critical rows and continuing matrix
+# Final D9 Book browser evidence
 
-Exact source5bee68110fc197e182e8166548a934b828d2d898, review-record
-head8dbf22c8. Actual production v040/API1.35,
-hashf67b09edee64dc0449e35cd129663a12d7ea74b180859c06b55ba10c1150f89f,
-208 IDs, Old Bram absent. Genuine installed dependencies and ordinary Chrome UI
-at fresh isolated origins19360(prior) and19362(fox). No owner save, clock override,
-state seeding, database inspection/edits, Start over, native session or blur work.
+Source5bee68110fc197e182e8166548a934b828d2d898; review-record baseline8dbf22c8.
+Actual v040/API1.35, canonical hash
+f67b09edee64dc0449e35cd129663a12d7ea74b180859c06b55ba10c1150f89f,
+208 starting IDs, Old Bram absent. Five fresh isolated Chrome loopback saves on
+ports19360/62/64/66/68, with genuine npm-ci dependencies and patched expo-sqlite
+57.0.3 WASM/OPFS under COOP/COEP. No clock override, state seed, database edits/
+inspection, Start over, owner-save access, native session or UI blur change.
 
-trace.json records chronological DOM after actual controls, each pair labeled.
-Both current complete pairs are stays/prior and stays/fox. Other three final-pin
-terminal routes are continuing, not claimed here. Interim five-pair evidence is
-separate and does not certify this revised release. Core final cast/Green rows
-currently cover Elspeth,Maud,Aldric for both stays pairs; prior Green remains to
-finish. Vesper/Sedge final matrix also continuing. No Bram acceptance needed.
+## Five actual terminal paths and observed matrix
 
-## Proven critical rows
+All five reached through ordinary controls, including physical drawing/clue,
+tracks, literal LANTERN when appropriate, original Wren escort or Vesper message
+handoff, and actual Belfry Ring/Silence. Lost rings before meeting Wren. Every
+final scene was refreshed before Continue and resumed its saved exact line.
 
-Bell: actual Belfry Ring before Continue cold-reopens the same saved scene;
-confirmed receipt displays Earlier cue once. Read identifies actual Ashmere/
-public Priory area and scene excludes Fen. Fox Silence likewise cold-reopens.
+Pair             Elspeth   Maud rumor   Green   public Aldric   Vesper   Sedge
+stays/prior      observed  observed     observed observed       observed observed
+stays/fox        observed  observed     observed observed       observed observed
+lost/prior       observed  observed     observed observed       not repeated not repeated
+rescued/prior    observed  observed     observed observed       not repeated not repeated
+rescued/fox      observed  observed     observed observed       not repeated not repeated
 
-Study: ordinary west ingress/east egress before allegiance occurs on both final
-paths. After fox choice, Nave Map reports West:closed with no Go west, including
-after refresh. No Study corpse exception or underwater recovery claim is made.
+Elspeth/Maud/Green preserve returned child versus living child choosing to stay
+versus lost child, and rung versus silent bell. Aldric is welcoming/cool while
+public. Vesper bound/allied and Sedge hostile/warm flavor are observed on the two
+representative stays pairs; their other three browser cells are not claimed.
+Corrected Sedge status says learned Swim is required for underwater descent,
+with learned/currently-qualified state, independent reachable free ferry return.
+No Bram acceptance row remains. trace.json labels every pair/action/state.
 
-Public S2: on BOTH allegiances accepted Peg's exact ledger, reached public Aldric,
-used explicit Deliver the tithe ledger control and actual on-time Give. Confirmed
-payout changes20→30p; handoff control disappears. Fox closure stays intact.
+## Critical behavior
 
-Hounds: after prior Ring, actual HoundRun has four conserved living hounds.
-Cold reopen retains four and HP10; exact hound detail is inspectable with
-Nothing to do here and no Attack/encounter. This proves the observed passive
-state across refresh. Exact172800 suppression expiry would require57m36s actual
-waiting at real_elapsed rate50; that row belongs to realSQLite deadline/fault
-proof, not this browser run. No exact deadline browser coverage claimed.
+Public S2 succeeds on BOTH allegiances: accept Peg's exact ledger, reach living
+public Aldric, choose explicit Deliver the tithe ledger, give it on time and
+observe20→30p. Bound delivery offer disappears. Fox cold reopen preserves30p,
+actual ledger absence from Carrying and resolved on-time10p Journal.
 
-## Web adapter limitation and recovery
+Study ordinary west ingress and east egress work before allegiance on both
+stays paths. After fox choice Nave Map reports West:closed with no Go west;
+refresh preserves that restriction. Public S2 still succeeds outside Study.
+Controlled Study corpse exemption is host/SQLite proof, not ordinary browser
+play. This evidence makes no remote/underwater recovery claim for Study.
 
-Fox S2 confirmed receipt/payout additionally showed Saved result; narration
-recovery unavailable: Array buffer allocation failed. No Start over pressed.
-Reopen succeeds and preserves30p, removes tithe ledger from actual Carrying and
-shows resolved Chandler's Debt/on-time10p Journal. This proves saved gameplay,
-not restoration of the missing detail narration. Separate open E3 web-adapter
-finding; no causal diagnosis or claimed narration recovery. A prior unconfirmed
-fox movement was reconciled by reopen: it remained ReedPath, then a new accepted
-move reached FerryLanding. Browser CDP acknowledgement timeouts are recorded
-and followed by authoritative state inspection before continuing.
+Actual Ring cold-open resumes saved scene and confirmed Chapel bell receipt
+labels its retained cue Earlier once. Read names Ashmere/public Priory area;
+scene says Fen beyond bell reach. Dry ReedPath/Mire traversal remains legal
+after descriptive flood; reaching original Vesper is recorded on day2.
 
-## Evidence handling
+After prior Ring, HoundRun has four conserved living hounds. Cold reopen retains
+four/HP10, exact detail remains inspectable with Nothing to do here and no
+Attack/encounter. A later day2 08:57 reopen still has four passive hounds. This
+proves observed suppression/passivity across refresh, not spawn causation or the
+exact expiry boundary. Fox HoundRun was empty at one inspected frame; no direct
+same-generation unsuppressed comparison is claimed. Exact172800 expiry at
+real_elapsed rate50 needs57m36s actual waiting; realSQLite deadline/fault proof
+owns that row. No browser deadline claim.
 
-Viewport PNGs and chronological raw DOM trace retained; hashes in SHA256SUMS,
-verification in SHA256SUMS.verify, neither self-listed. Capture redacts private
-paths; no profile/storage/device identifiers retained. Existing -whitespace
-rule protects evidence bytes. Source remains unmodified. Ponytail/correctness
-self-review: evidence only, no framework/dependency/tests; explicit coverage,
-unknowns and open findings. Final source approval is separate from this proof.
+The preserved older49e S2 origin19358 was opened on revised pin and explicitly
+refused pinned_release_missing. No Start over or replacement was performed.
+Narrow same-save S2 fix recheck was inapplicable because the authored source
+label required a revised pin; fresh final-pin S2 paths above prove the fix.
+
+## Separate E3 web adapter and browser-control limits
+
+Fox S2 confirmed payout also showed Saved result; narration recovery unavailable:
+Array buffer allocation failed. Reopen succeeds, preserves30p, ledger transfer
+and resolved Journal. Restoration of missing detail narration is NOT claimed.
+Rescued/prior later showed Array buffer allocation failed after local Leave;
+reopen preserved actual Wren/Elspeth at Landing. Screenshots/trace retain faults.
+
+Minimal temporary session-only narration/status exception logging was authorized,
+used for potential stack capture, then fully restored. No stack was emitted by
+those boundaries; allocation-diagnostic.json is an honest empty diagnostic,
+not evidence of no failure. No package/source/save fix or causal diagnosis is
+claimed. This remains an E3 adapter/narration-recovery finding.
+
+Several browser CDP acknowledgement timeouts or ineffective locator clicks were
+followed by actual state inspection; committed choices/moves were not replayed.
+A visible-DOM Map click resolved one locator no-effect episode. Unconfirmed
+moves were reconciled through normal reopen, then a new legal move where old
+room remained. A retained remote conversation was closed through offered
+Continue conversation → Conversation Leave before other NPC Talk resumed.
+These recovery observations do not establish the allocation cause.
+
+## Evidence and self-review
+
+Chronological DOM, viewport PNGs and diagnostic JSON are retained raw; hashes in
+SHA256SUMS, verification in SHA256SUMS.verify, neither self-listed. Capture
+redacts private paths; no browser profiles/storage/device identifiers retained.
+Existing evidence -whitespace rule protects bytes. Source is restored unchanged;
+all commits from this proof branch are evidence only. Ponytail/correctness pass:
+no framework/dependency/tests, actual observations separated from untested cells,
+deadline scope and E3 findings. Independent source/CI approval is separate.
