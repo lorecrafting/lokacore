@@ -1,0 +1,21 @@
+(node:60818) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (650.442292ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (1840.842834ms)
+(node:60819) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 watch rounds cold reopen and replay the four literal post-start checkpoints (4301.492292ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4752.303292
+
+exit_status=0
