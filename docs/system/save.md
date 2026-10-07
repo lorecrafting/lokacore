@@ -994,6 +994,16 @@ Cold reopen covers each legal Talk/Choose, learned-but-unqualified, careful two-
 
 A forged/duplicate sight binding, wrong role/parent, stale member, illegal transfer, fabricated death/loot, unmatched round-to-sight group/encounter/predecessor/successor/equal-due evidence or missing job/receipt evidence is typed `save_corrupt` without rewriting bytes. Only the matching closure and exact successor cancellation may retain the preceding round writer group; receipt replay cannot widen that exception. Genuine failed COMMIT, unknown committed and absent COMMIT, lost acknowledgement and same-invocation replay resolve the complete prior or next state with no duplicate animal, hide, transfer or job. Preserve explicit release-pin refusal and in-place Start over; do not migrate or delete an owner save silently. Browser refresh is separate evidence from real SQLite fault proof.
 
+Cross-mechanic writer-group authorization is proved by exact accepted-receipt
+replay before deer-specific sight-cause validation. A decreasing group number is
+not itself a deer handoff: the C5 same-body/equal-due round-and-bleed pair may resume
+its group after unrelated population work, which keeps its own group. Reopen that
+legal committed prefix. Forged group assignments, unrelated lower-group writes
+and false deer closure/successor-cancel handoffs still fail exact replay and refuse
+in place without rewriting the save. Deer-specific validation retains the exact
+sight job, occurrence and transfer producer checks; it must not reconstruct global
+writer ordering independently of the composing kernel.
+
 ## C5 bleed and bandage recovery
 
 **Selected planning contract; source pending.** Persist the typed C5 status row, HP, current job, exact item custody, skill fact and receipt with the normal changed-row transaction before memory adoption/reply. Reconstruct the current release's inactive generation tombstone or active instance from revision-ordered accepted producers, refreshes, ticks, cure, expiry and deaths. Require actual positive nonfatal C3 hound loss for an application, monotone generation, preserved next due on refresh, one matching live job, ordered tick/expiry and same-body death cleanup. An old hound may have died or fled after applying a valid bleed. Null/malformed fields, impossible time/job/producer/body, unexplained HP loss or active postdeath bleed are typed `save_corrupt`; no silent repair.
