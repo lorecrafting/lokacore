@@ -65,6 +65,7 @@
 - [C2 Watchman's Rounds save/protocol second opinion](2026-10-05-c2-watchmans-rounds-save-second-review.md): exact local source `747113496572892a01224c47cddc0bf4f63d0fdc`, independent scoped APPROVE; no findings. Real SQLite cold/COMMIT/retry, 21 unchanged-file forgeries, actual Wren combat/Flee/death, both-kernel literals/differential and v024/API1.22/all 109 pins pass; causal/identity red controls fail. Terminal browser-host cold-open remains unverified.
 
 - [B9 Lantern Rest and dream plan](2026-10-05-b9-lantern-dream-plan-review.md): exact planning head `83ec4c3a08de11eda83f6e495f98f6e7126af0b0`, independent APPROVE; no findings, source dependency re-pins and later primary/save reviews remain required.
+- [Post-Chapter-1 tiered checks](2026-10-06-tiered-ci-after-chapter-one-review.md): pending decision diff independent APPROVE; initial missing owner-rules entry fixed and rechecked. Current gates remain until separate reviewed implementation after E3.
 
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
 One line per record: PR, commit reviewed, verdict, and the final round's commit and verdict
