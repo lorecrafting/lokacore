@@ -1,0 +1,3 @@
+authority.log: OK
+browser.log: OK
+controls.log: OK

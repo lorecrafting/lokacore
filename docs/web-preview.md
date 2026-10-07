@@ -24,7 +24,7 @@ play survives reload and a closed/reopened tab. Browser saves have no cross-buil
 migration promise.
 
 `expo-sqlite` 57.0.3's browser worker needs an asynchronous first open before synchronous
-session calls, plus the narrow install-time length and error-message fixes in
+session calls, plus the narrow install-time length, error-message and elapsed-time fixes in
 `mobile/app/patch-sqlite-web.cjs`.
 Its web support is alpha. On an SDK update, review that guard and repeat real browser
 open, action, reload, tab reopen and Fast Refresh checks before using the preview.
@@ -34,6 +34,9 @@ test:e2e`. The tester.army e2e runner starts and stops its own preview on ports 
 19107, uses a fresh browser profile, and checks a saved move after reload. It does not
 touch the usual preview at 19006 or its save. Install its browser once with `mise exec --
 npx e2e-web install chromium`. The test uses no model or API key, and telemetry is disabled.
+Its pretest also runs the controlled worker deadline check governed by
+[the save boundary](system/save.md#commit-fence-reconcile), with
+[delayed/silent-worker red controls and browser proof](evidence/2026-10-06-web-sqlite-sync-deadline/README.md).
 
 The default `e2e run` is headless. To watch the configured browser live and save a video,
 run `mise exec -- npm run test:e2e -- tests/book.e2e.ts --headed --video`.
