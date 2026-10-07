@@ -54,7 +54,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | **C3 Living hounds:** encounter bounded, persistent Fen hounds and collect actual fight loot ([adopted contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)). | B1, C1, installed combat | 0.9–1.1 |
 | **C4 Hound behavior:** hounds respond to deliberate aggression, assist a pack and flee when hurt ([selected contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)). | C1, C3 | 0.8–1.0 |
 | **C5 Bleeding and bandage:** a hound hit can bleed; a learned bandage skill can stop it. | B5, C1, C4 | 0.7–0.9 |
-| **C6 S27 Night in the Marsh:** begin a bounded survival expedition now and finish its real route alive; any swim-training reward is free and idempotent after Sedge's earlier lesson. | C2, C5, D1, D6 if swim reward retained | 0.7–0.9 |
+| **C6 S27 Night in the Marsh:** begin a bounded survival expedition now and finish its real route alive; Sedge's existing swim lesson stays available without a duplicate grant ([adoption](decisions/pm-decision-c6-night-marsh-2026-10-06.md)). | C2, C5, D1, D6 | 0.7–0.9 |
 
 ## D. Connected world and remaining chapter consumers
 
@@ -68,7 +68,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | **D6 Water depths:** use Sedge's earlier swim lesson to reach two bottom rooms through an explicit, recoverable water rule; S27 is not the first way to learn swim ([selected PM contract](decisions/pm-decision-d6-water-depths-2026-10-06.md)). | B4, C1, D1, D5 | 0.8–1.0 |
 | **D7 Deer:** observe bounded deer fleeing and conserved loot from deliberate fights. | C3, C4, D4 | 0.4–0.6 |
 | **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5, D6 (real old coin) | 0.6–0.8 |
-| **D9 Reactive village:** hear the bell where it carries and see distinct cast responses to child and allegiance outcomes; full scope includes hound suppression and safe optional-study closure. | A3, B2, C3, C4, D1, D2, D4, D6; D9 must select its own study-corpse recovery rule | 0.7–0.9 |
+| **D9 Reactive village:** hear the bell where it carries and see distinct cast responses to child and allegiance outcomes; full scope includes hound suppression and safe optional-study closure. | A3, B2, C3, C4, D1, D2, D4, D6; the [adopted D9 recovery rule](decisions/pm-decision-d9-village-reactions-2026-10-06.md) governs optional study | 0.7–0.9 |
 | **D10 Finding the way:** discover the full map, ask where and knock on a real accessible door. | all 57 rooms | 0.6–0.8 |
 | **D11 Character choice:** choose the reconciled ancestry/attributes once and use inherited skills in real swim/shop consumers. | B2, B4, B6, C1, D6, D12 | 0.6–0.8 |
 | **D12 Practical skills:** train herbalism and haggle, then use them on herbs and a shop price. | B3, B5, C1, D1 | 0.6–0.8 |
@@ -97,8 +97,7 @@ player-blocking seam findings before E3 closes, and track nonblocking debt. It i
 also a closure obligation, not a 34th story slice.
 
 The shared TypeScript engine simulation, real SQLite transaction/fault checks and
-contract checks remain part of development proof. Browser play uses the same Book
-client once its web host works, but browser storage evidence does not certify native
+contract checks remain part of development proof. Browser play uses the [shared Book client and web host](web-preview.md), but browser storage evidence does not certify native
 SQLite, backgrounding, touch or Hermes. Native build/device evidence is deferred
 under the [owner's current development pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md); public release
 readiness requires that separate prelaunch work after the pause is lifted.
