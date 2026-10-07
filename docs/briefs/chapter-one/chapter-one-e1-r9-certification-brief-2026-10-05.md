@@ -86,20 +86,20 @@ retain the topology recipe's distinct red control. The [provisional integration 
 Optional quest route checkpoint: [controlled debt and Lantern dream receipts](../../evidence/2026-10-06-e1-optional-quests/README.md), with remaining outcomes pending.
 
 Optional exact recorder/replay integration: [provisional receipts and remaining-path breakdown](../../evidence/2026-10-06-e1-optional-integration/README.md); final E1 proof remains pending.
-Disjoint path author checkpoint: [watch rounds and the original blocked marsh Start](../../evidence/2026-10-06-e1-night-watch/README.md); registration and final certification remain pending.
+Disjoint path author checkpoint: [watch rounds and the original blocked marsh Start](../../evidence/2026-10-06-e1-night-watch/README.md); Watch was later registered and Night resolved against the published checker fix. E1 certification remains pending.
 
-Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../../evidence/2026-10-07-e1-wisp-herbs/README.md); registration and E1 certification remain pending.
+Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../../evidence/2026-10-07-e1-wisp-herbs/README.md); both were later registered. E1 certification remains pending.
 
 [Dialogue and selected choice binding](../../evidence/2026-10-07-e1-dialogue-binding/README.md) is a bounded checkpoint; other authored paths and final certification remain pending.
 
 [Reviewed Watch, Wisp and herb route registration](../../evidence/2026-10-07-e1-route-registration/README.md) records a corrected-source 16-case replay with 609 authored obligations still pending.
 
-[Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint; recorder registration and E1 certification remain pending.
+[Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint, later registered in the integrated recorder. E1 certification remains pending.
 
 [Modal scene acknowledgement binding](../../evidence/2026-10-07-e1-modal-scene-binding/README.md) is a clean-source recorder checkpoint with ten dream scene paths and other authored obligations pending.
 
 [Selected dialogue policy binding](../../evidence/2026-10-07-e1-dialogue-policy-binding/README.md) is a bounded checkpoint for an accepted `all` branch; other authored policy paths remain pending.
 
-Disjoint path author checkpoint: [legal Night route after the published checker fix](../../evidence/2026-10-07-e1-night-published/README.md), preserving the original failure receipt; independent review/registration and E1 certification remain pending.
+Disjoint path author checkpoint: [legal Night route after the published checker fix](../../evidence/2026-10-07-e1-night-published/README.md), preserving the original failure receipt; its independent review and registration are complete. E1 certification remains pending.
 
 [Integrated Maud/Night routes and reviewed witness rules](../../evidence/2026-10-07-e1-integrated-routes/README.md) passed 18 clean-source SQLite cases and replays; 509 authored paths remain pending.
