@@ -47,5 +47,5 @@ export function itemRound(a: CaseHost) {
     sold = ['iron_sword', 'satchel', 'wooden_shield', 'waterskin'];
   for (const key of held) assert.equal(world.state.containers[item(key)], world.body, key);
   for (const key of sold) assert.equal(world.state.containers[item(key)], peg, key);
-  return { held, sold, pennies: 0 };
+  return { held, sold, pennies: pennies() };
 }
