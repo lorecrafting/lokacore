@@ -1,0 +1,112 @@
+CONTROL old-existing-check: exit 0 (expected 0)
+✔ Web reads preserve bound ordered rows beyond the bulk response capacity (9.900792ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.416208
+
+CONTROL old-loop-red: exit 1 (expected 1)
+✖ patched worker uses elapsed time with Atomics.pause enabled (74.211292ms)
+✖ patched worker uses elapsed time with Atomics.pause absent (8468.201959ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9050.932917
+
+✖ failing tests:
+
+test at sqlite-web-worker.test.ts:84:3
+✖ patched worker uses elapsed time with Atomics.pause enabled (74.211292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'Sync operation timeout'
+  - undefined
+  
+      at TestContext.<anonymous> (file://<redacted-path>)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Sync operation timeout',
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at sqlite-web-worker.test.ts:84:3
+✖ patched worker uses elapsed time with Atomics.pause absent (8468.201959ms)
+  Error: SQLite bridge did not stop within eight seconds
+      at Timeout._onTimeout (file://<redacted-path>)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+CONTROL missing-deadline-red: exit 1 (expected 1)
+✖ patched worker uses elapsed time with Atomics.pause enabled (8531.708333ms)
+✖ patched worker uses elapsed time with Atomics.pause absent (8465.826333ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17610.694084
+
+✖ failing tests:
+
+test at sqlite-web-worker.test.ts:84:3
+✖ patched worker uses elapsed time with Atomics.pause enabled (8531.708333ms)
+  Error: SQLite bridge did not stop within eight seconds
+      at Timeout._onTimeout (file://<redacted-path>)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+test at sqlite-web-worker.test.ts:84:3
+✖ patched worker uses elapsed time with Atomics.pause absent (8465.826333ms)
+  Error: SQLite bridge did not stop within eight seconds
+      at Timeout._onTimeout (file://<redacted-path>)
+      at listOnTimeout (node:internal/timers:685:17)
+      at process.processTimers (node:internal/timers:618:7)
+
+CONTROL version-guard-red: exit 1 (expected 1)
+<redacted-path>
+if (version !== '57.0.3') throw new Error(`Review the SQLite web patch for version ${version}`);
+                          ^
+
+Error: Review the SQLite web patch for version 57.0.4
+    at Object.<anonymous> (<redacted-path>)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.21.0
+
+CONTROL duplicate-loop-guard-red: exit 1 (expected 1)
+<redacted-path>
+  if (oldCount + newCount !== 1) throw new Error('Review the SQLite web worker upstream');
+                                 ^
+
+Error: Review the SQLite web worker upstream
+    at Object.<anonymous> (<redacted-path>)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.21.0
