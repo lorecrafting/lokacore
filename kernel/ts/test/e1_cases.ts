@@ -32,6 +32,7 @@ import { nightMarsh } from './e1_night_marsh.ts';
 import { dialogueCircuit } from './e1_dialogue_circuit.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
+import { itemRound } from './e1_items.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 
 export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType<typeof source>) {
@@ -67,6 +68,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'dialogue-circuit',
         'lantern-services',
         'creatures',
+        'item-round',
       ].includes(start.case_id) ||
       ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
         start.case_id,
@@ -224,6 +226,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('mauds-cellar', maudsCellar);
     run('lantern-services', lanternServices);
     run('creatures', creatures);
+    run('item-round', itemRound);
     run('night-marsh', nightMarsh);
     run('debt-on_time', chandlersDebt);
     run('debt-late', debtLate);
