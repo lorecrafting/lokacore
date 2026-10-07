@@ -528,3 +528,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [C6 final actual-publication primary source review](2026-10-06-c6-provisional-primary-review.md#final-actual-publication-source-review): exact source `206ffb39`, APPROVE; v041/API1.36 independent hash/209 IDs, final transcript, hostile Sedge, real D1→D6→C6 and fatal/retry SQLite controls, corrected actual App bundle. Full gate/browser/CI/publication remain delivery gates.
 - [C6 final save/protocol second opinion](2026-10-06-c6-final-save-second-opinion.md): corrected final source `206ffb39`, scoped APPROVE; final v041 oracle/209 IDs, real SQLite route/fatal/fault/replay, actual-shell pin and byte-preserving v040 refusal verified. Browser/full gate/CI remain pending.
+
+- [C6 scoped historical D12 fixture review](2026-10-06-c6-provisional-primary-review.md#scoped-full-gate-d12-fixture-correction): exact `249a9976`, APPROVE; original four behavior/contract tests pass, all frozen text retained, twelve bounded additions and old wholesale-graft loader red control confirmed.

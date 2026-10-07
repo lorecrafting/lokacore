@@ -195,3 +195,37 @@ Ponytail/correctness final self-review: bounded helpers remain in their current
 owners, no new dependency or raised size allowance, no alternate lesson or extra
 state framework. Necessary admission and corruption/refusal checks remain. No
 additional finding. Owner-save bytes were never read or written.
+
+
+## Scoped full-gate D12 fixture correction
+
+**Verdict: APPROVE for scoped correction `249a9976d72196e481b795715034ad2160fe6423`.**
+No open primary finding. The production source remains the approved C6 candidate;
+full gate, narration/browser disposition, exact-head CI and publication are still
+separate delivery gates.
+
+Reviewed the three-file diff from `7c39c57e`: one historical test helper, the
+retained failed-gate log and its evidence description. The helper clones frozen
+v030 content and previously replaced every text value with current source text;
+that made the current Drowned Oak description reference `marsh_shelter`, absent
+from frozen v030 geometry. The correction supplies only twelve literal D12 text
+keys with nullish assignment, preserving all frozen shared text and identities.
+No production module, frozen answer or release pin changes.
+
+Independent check: `mise exec -- node --test kernel/ts/test/practical_skills.test.ts
+kernel/ts/test/practical_skills_contracts.test.ts` exits zero, four tests passed.
+Their harvest alias, atomic refusal, finite two-item transfer, haggle quote/floors,
+resource conservation and schema/loader negatives remain unchanged.
+
+An independent controlled bundle check compares every original frozen text value
+with the corrected helper output and confirms exactly twelve added declarations.
+Restoring the old wholesale graft on that in-memory controlled bundle, then
+independently rehashing it, makes the real loader refuse with
+`UNRESOLVED_REFERENCE` at the frozen Drowned Oak description, target
+`marsh_shelter`. This reproduces the shared fixture admission failure without
+editing source or frozen fixtures. The retained developer red run records all
+four original failures. `git diff --check` exits zero.
+
+Ponytail/correctness scoped self-review: the explicit small key list bounds the
+historical fixture supplement and retains required validation; no general merger,
+new test or dependency was added. No additional finding.
