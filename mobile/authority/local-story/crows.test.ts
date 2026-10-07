@@ -14,7 +14,11 @@ import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
-function setup(path = ':memory:') {
+export function setup(
+  path = ':memory:',
+  changeMore: (c: any) => void = () => {},
+  ancestry = 'fey_touched',
+) {
   const change = (c: any) => {
     c.entry = ref('room', 'village_green');
     c.calendar.start = 43200;
@@ -22,6 +26,7 @@ function setup(path = ':memory:') {
       in: 'room',
       room: ref('room', 'village_green'),
     };
+    changeMore(c);
   };
   const b = bundle(change);
   const loaded = loadCartridge(
@@ -54,7 +59,7 @@ function setup(path = ':memory:') {
       assert.equal((result.decision as any).kind, 'accepted', JSON.stringify(result.decision));
     return input;
   };
-  invoke('choose_ancestry', [], { ancestry: 'fey_touched' });
+  invoke('choose_ancestry', [], { ancestry });
   const elapsed = (until: number) => {
     while (s.world().state.clock < until) {
       const from = s.world().state.clock;
@@ -270,7 +275,7 @@ test('cold reopen refuses a forged crow occurrence without rewriting owner progr
 
 // Breaks: cold reopen rejects a lawful combat-paused carrier or loses its Flee-resumed binding.
 test('paused and Flee-resumed crow saves cold-reopen with exact released custody', (t) => {
-  for (const resume of [false, true]) {
+  for (const mode of ['attack', 'flee', 'shoo']) {
     const dir = mkdtempSync(join(tmpdir(), 'loka-crow-flee-'));
     t.after(() => rmSync(dir, { recursive: true }));
     const path = join(dir, 'save.db');
@@ -280,11 +285,14 @@ test('paused and Flee-resumed crow saves cold-reopen with exact released custody
     a.elapsed(43500);
     const carrier = Object.values(a.s.world().state.crows ?? {}).find((r) => r.phase === 'leg')!;
     a.invoke('move', [], { direction: 'south' });
-    a.invoke('attack', [carrier.member_id]);
-    const last = resume ? a.invoke('flee') : undefined;
+    const last =
+      mode === 'shoo'
+        ? a.invoke('shoo', [carrier.member_id])
+        : a.invoke('attack', [carrier.member_id]);
+    const replayInput = mode === 'flee' ? a.invoke('flee') : last;
     const before = a.s.world().state;
     const row = Object.values(before.crows ?? {}).find((r) => r.member_id === carrier.member_id)!;
-    assert.equal(row.phase, resume ? 'return' : 'paused_return');
+    assert.equal(row.phase, mode === 'attack' ? 'paused_return' : 'return');
     assert.equal(before.containers[a.coin], a.s.world().roomIds[`${prefix}:room/well_lane`]);
     assert.equal(row.generation, carrier.generation);
     a.p.sql.close();
@@ -294,9 +302,9 @@ test('paused and Flee-resumed crow saves cold-reopen with exact released custody
     assert.equal(opened.kind, 'open');
     if (opened.kind !== 'open') continue;
     assert.equal(encode(opened.world().state as never), encode(before as never));
-    if (last) {
+    if (replayInput) {
       const rows = q.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-      const replay = opened.invoke(last);
+      const replay = opened.invoke(replayInput);
       assert.equal(replay.kind, 'saved');
       if (replay.kind === 'saved') assert.equal(replay.replay, true);
       assert.deepEqual(q.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), rows);

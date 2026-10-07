@@ -375,3 +375,25 @@ cases to crow_loader.test.ts using the existing bundle fixture, preserving all
 assertions and size limits. Focused crow/loader/composition/SQLite: exit0,24 passed;
 both affected test files pass size checks. Normal pre-push full gate will certify
 the final pushed head; P4/browser/follow-up review remain open.
+
+## P4 real-SQLite completion checkpoint
+
+`mise exec -- node docs/evidence/2026-10-06-d8-d11-integration/crow-p4-save.ts`
+passed exit0:25 additional cold reopens,20 actual failed-COMMIT/lost-acknowledgement
+cases. Real ordinary invocations move, close and fill the original eight-root nest;
+configured states and lawful crow fallback reopen unchanged. Combat Attack/Flee,
+Shoo, nest Take/Close/Put, fatal combat round, replacement and new-generation Drop
+faults leave pending memory unadopted; retry settles once and repeated receipt
+replay leaves rows unchanged. Actual death→generation2 replacement→new Drop binds
+the same slot's new exact member; coin custody remains conserved. Existing
+authority table also includes Shoo cold reopen/replay. No production source changed.
+
+Distinct red control rewrites the real isolated persisted coin-holder row before
+cold reopen: unchanged whole-state checker refuses (exit7, AssertionError). Compact
+results and script are hashed beside earlier evidence. No owner save touched.
+These are required controlled proof scenarios using the existing fixture/fault
+harness, rather than extra kernel regression tests. Affected script/test size
+checks pass; final normal pre-push required after fixture changes.
+
+P4 local browser carrying/held refresh/Shoo remains open. Primary final recheck,
+final hosted checks and approval remain pending; source PR remains draft.
