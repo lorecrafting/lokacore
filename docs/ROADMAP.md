@@ -18,7 +18,7 @@ The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
 [#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
 maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
 lift and proof. Completed rows are recorded below. The
-[33 provisional slice briefs](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/README.md), merged in
+[33 provisional slice briefs](briefs/chapter-one/README.md), merged in
 [#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
 was fixed and independently rechecked, provide candidate assignment detail.
 The [Beads Rust pilot](WORKFLOW.md#beads-rust-pilot) mirrors all 33 Chapter 1 slices;
@@ -53,7 +53,7 @@ The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](http
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
 D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-bundled-chapter)
 owns the release/API/hash/ID pins. **E1–E3 remain open.**
-The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/README.md#e-proof-and-closure)
+The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
 [#265](https://github.com/lorecrafting/lokacore/pull/265). Neither closes E1 certification.
@@ -149,7 +149,7 @@ Before E1 certification, inventory remaining sampler and older-release fixtures/
 against current behavior. For each obsolete development pin, identify the current
 regression it still guards, then migrate that proof to the current chapter or record
 why deletion is safe; independently derive changed literal answers. The
-[Round 1 audit](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-current-baseline-round1-review.md) retains the
+[Round 1 audit](reviews/2026-10-06-current-baseline-round1-review.md) retains the
 findings and exact audited source. This documentation correction does not migrate
 or delete runtime fixtures and does not close this follow-up. E1 also resolves the
 [known planning-matrix omissions](spec/release-scope.md) before final applicability certification. Preserve owner-save

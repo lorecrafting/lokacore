@@ -19,8 +19,8 @@ permalink pinned to the last commit that held it; git history keeps every byte.
 Kept, and why:
 
 - `protocol/` and every conformance fixture: the cross-kernel source of truth (PM ruling).
-- `docs/system/`, `docs/lessons/`, ROADMAP, WORKFLOW, CHECKS and the files they need: the
-  current system and its rules.
+- `docs/system/`, `docs/lessons/`, ROADMAP, WORKFLOW and CHECKS: the current system and its
+  rules. Records they cite only as proof of closed work become permalinks.
 - Decision records in force: those linked from [owner rules](../system/owner-rules.md),
   AGENTS.md, WORKFLOW, CHECKS or `docs/system`, plus owner records of current process.
 - `docs/archive/spec/`: protocol schemas cite its sections (`04 §7`), and
@@ -28,7 +28,8 @@ Kept, and why:
 - Archive decision records in force or named by `protocol/`, code, lint or tests, and
   `docs/archive/ROADMAP.md`, which a protocol schema names. They stay at their paths so
   those references hold.
-- Open work: E1–E3 briefs, evidence and reviews; the Chapter 1 documentation and
+- Open work: E1–E3 briefs and their index, evidence and reviews; the baseline audit ROADMAP
+  requires before E1 certification; the CI scope audit CHECKS uses as the current gate's cost record; the Chapter 1 documentation and
   architecture audits that E3 closure needs; records an open Beads task cites.
 - Any file read by code, tests, checks, CI or hooks.
 

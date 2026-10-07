@@ -17,8 +17,7 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   Compare a receipt's branch effects to the current rows in both directions: a historical
   lost transition cannot justify a later active quest merely because its fact rows changed.
   Generic row validators skip a mechanic's own fields: an active bleed row missing every
-  active field passed them (C5-S1), and all 497 mobile tests stayed green with D2's history
-  guard removed. Each new persisted field gets its own forged-row red control
+  active field passed them (C5-S1). Each new persisted field gets its own forged-row red control
   ([C5 save review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c5-bleeding-bandage-save-second-review.md)).
 
 **Recovery and retry**

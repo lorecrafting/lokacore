@@ -2,7 +2,7 @@
 
 The active checks run in CI; pre-push runs the relevant local lane selected by
 [`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md).
-The [scope audit](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
+The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
 which every agent loads every session.

@@ -1,6 +1,6 @@
 # Mechanics slice briefs
 
-Current Chapter 1 work is indexed in the [Chapter 1 briefs](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/README.md).
+Current Chapter 1 work is indexed in the [Chapter 1 briefs](chapter-one/README.md).
 
 - [M1-A elapsed authority](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m1-a-clock.md).
 - [M1-B1 durable clock driver](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m1-b1-clock-driver.md).
