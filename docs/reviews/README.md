@@ -2,6 +2,8 @@
 - [E1 resolved quest objective witness](2026-10-07-e1-quest-objective-binding-review.md): source `f8a89719`, independent **APPROVE**, no findings; accepted unresolved-to-resolved objective binding, five Maud predicates, replay and witness interactions checked. Focused tests 8/8; report remains pending with 395 authored paths (14 quest paths) open; final combined capture and E1 certification remain pending.
 # Independent reviews
 
+- [E1 ending-specific conversations](2026-10-07-e1-epilogue-conversations-review.md): source `717c298c`, integrated unchanged at `2340ac2c`/`ac503823`, combined evidence `07c0120e`, independent **APPROVE**, no findings; five ending routes and omitted-Sedge red control verified, selected retained replay/hashes pass, all 16 D9 dialogue/leave variants bound. E1 remains pending with 273 authored paths open.
+
 - [E1 presentation-only dream witness](2026-10-07-e1-dream-binding-review.md): initial `3d334130` CHANGES REQUIRED for missing Rest/display no-credit oracle; test fix `8373c0f3` closes it. Combined source `178d0290`, **APPROVE**; both selected branches, final close steps and premature-display red control verified. E1 remains pending with 428 authored obligations.
 - [E1 integrated routes and witness rules](2026-10-07-e1-integrated-routes-review.md): source `83942fe0`, evidence/docs through `8488c847`, independent **APPROVE**, no open findings; seven focused cases and three retained replays pass, digest/hashes and deduplicated 139 witnesses/509 authored gaps verified. E1 remains pending.
 
