@@ -215,6 +215,9 @@ through trusted elapsed input. Reuse existing clock segmentation and invariant c
 player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
 implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
 labeled when needed for a controlled admission or fault boundary.
+Independently checked chapter routes enter the recorder as named fresh cases only with
+their literal result assertions intact; their committed steps must pass the same semantic
+replay, SQLite observation and candidate/source checks as the ending cases.
 
 Coverage names actual committed room visits, quest transitions/outcomes, resolved dialogue
 choices, scene beats/consequences and command paths. An offer or a definition count is not

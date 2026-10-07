@@ -21,6 +21,8 @@ import {
 import { checked } from './sim.ts';
 import { ending, ENDINGS } from './e1_paths.ts';
 import { chandlersDebt, lanternDream } from './e1_optional_quests.ts';
+import { watchRounds } from './e1_watch_rounds.ts';
+import { wispWard, infirmaryHerbs } from './e1_wisp_herbs.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
@@ -48,6 +50,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     fault ||
       start.case_id === 'thirty-days' ||
       start.case_id === 'topology' ||
+      ['watch-rounds', 'wisp-ward', 'infirmary-herbs'].includes(start.case_id) ||
       ['debt-on_time', 'dream-follow_fox', 'dream-wake'].includes(start.case_id) ||
       ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
     'unknown E1 case',
@@ -194,6 +197,9 @@ function recordCases(bytes: Uint8Array, out: string) {
     for (const [child, allegiance, fox] of ENDINGS)
       run(`${child}-${allegiance}`, (a) => ending(a, child, allegiance, fox));
     run('topology', topology);
+    run('watch-rounds', watchRounds);
+    run('wisp-ward', wispWard);
+    run('infirmary-herbs', infirmaryHerbs);
     run('debt-on_time', chandlersDebt);
     for (const branch of ['follow_fox', 'wake'] as const)
       run(`dream-${branch}`, (a) => lanternDream(a, branch));
