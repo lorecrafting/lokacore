@@ -268,3 +268,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C6 Night in the Marsh](pm-decision-c6-night-marsh-2026-10-06.md): immediate five-entry survival attempt, optional shelter, bounded hound danger and one completion reward; source waits for C5.
 
 - [D9 real cast clarification](pm-decision-d9-real-cast-2026-10-06.md): retain October 5 no-Bram ruling after owner delegation.
+
+- [Orphan provisional fixture cleanup](pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
