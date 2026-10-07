@@ -2623,7 +2623,7 @@
           "name": "npc.aldric.short"
         }
       ],
-      "description": "An exact NPC previously observed by this actor, available for Where targeting."
+      "description": "A currently visible NPC or one previously observed by this actor, offered for exact-ID Where."
     },
     "MapView": {
       "type": "object",
