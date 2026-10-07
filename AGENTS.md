@@ -138,9 +138,8 @@ A test exists to catch a specific break. Adapted from
 
 ## Checks
 
-CI and full local checks: [CHECKS](docs/CHECKS.md), `bin/check_all.sh`.
-The [provisional lane](docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md)
-uses focused checks first.
+Checks: [current gates](docs/CHECKS.md), focused [provisional lane](docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md).
+[Post-E3 tiering](docs/decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md) awaits reviewed implementation.
 
 ## Working rules
 
