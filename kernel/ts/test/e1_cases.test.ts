@@ -298,8 +298,18 @@ test('E1 binds both selected dream branches and acknowledged scene steps', () =>
     );
     try {
       const observed: string[][] = [];
+      let restDisplays = 0;
       a.watch((before, after, command, decision) => {
         const p = command.payload;
+        if (p.type === 'rest') {
+          restDisplays++;
+          assert.deepEqual(
+            witnessedObligations(before, after, command, decision).filter((path) =>
+              path.startsWith(base),
+            ),
+            [],
+          );
+        }
         if (
           (p.type === 'continue' && p.scene?.key === 'dream_of_the_fen') ||
           (p.type === 'choose' && p.dream)
@@ -307,6 +317,7 @@ test('E1 binds both selected dream branches and acknowledged scene steps', () =>
           observed.push(witnessedObligations(before, after, command, decision));
       });
       lanternDream(a, branch);
+      assert.equal(restDisplays, 1);
       assert.deepEqual(observed, [
         [base, `${base}/steps/0`],
         [`${base}/steps/1`],
