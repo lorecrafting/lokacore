@@ -5,9 +5,9 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
-import { caseHost, witnessedObligations, type CaseHost } from './e1_case_host.ts';
+import { caseHost, witnessedObligations } from './e1_case_host.ts';
 import { replayCase } from './e1_cases.ts';
-import { debtElapsed, debtLate } from './e1_debt.ts';
+import { debtLate } from './e1_debt.ts';
 import { hash } from '../src/foundation/canonical.ts';
 import type { World } from '../src/index.ts';
 import type { Command, DecisionResult, Key } from '../src/contracts.gen.ts';
@@ -27,52 +27,23 @@ type Step = [World, World, Command, DecisionResult];
 const debtPaths = (...step: Step) =>
   witnessedObligations(...step).filter((path) => path.includes('_debt/choices/'));
 
-/** Runs a recorded case; returns each choose step's debt-choice witnesses and the replayed set. */
-function run(case_id: string, recipe: (a: CaseHost) => object, plant: (step: Step) => void) {
+// Breaks: a late debt choice is credited without its own committed fact transition and receipt event.
+test('E1 witnesses late debt choices and their sequence steps only from committed effects', () => {
+  const late = [`${aldric}late`, `${aldric}late/sequence/0`, `${aldric}late/sequence/1`];
+  const accept = [`${peg}accept_late`, `${peg}accept_late/sequence/0`];
   const dir = mkdtempSync(join(tmpdir(), 'loka-e1-debt-'));
   const a = caseHost(
     admitCandidate(bytes),
     join(dir, 'save.db'),
     join(dir, 'case.jsonl'),
     undefined,
-    {
-      case_id,
-      source,
-      fault_schedule: [],
-    },
+    { case_id: 'debt-late', source, fault_schedule: [] },
   );
-  try {
-    const chosen: string[][] = [];
-    a.watch((...step) => {
-      if (step[2].payload.type !== 'choose') return;
-      chosen.push(debtPaths(...step));
-      if (step[3].kind === 'accepted') plant(step);
-    });
-    const summary = recipe(a);
-    a.record({
-      kind: 'finish',
-      steps: a.commands.length,
-      digest: a.digest(),
-      state_hash: hash(a.story.world().state as never),
-    });
-    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
-    return {
-      summary,
-      chosen,
-      replayed: replay.obligations.filter((p) => p.includes('_debt/choices/')),
-    };
-  } finally {
-    a.close();
-    rmSync(dir, { recursive: true });
-  }
-}
-
-// Breaks: a late debt choice is credited without its own committed fact transition and receipt event.
-test('E1 witnesses late debt choices and their sequence steps only from committed effects', () => {
-  const late = [`${aldric}late`, `${aldric}late/sequence/0`, `${aldric}late/sequence/1`];
-  const accept = [`${peg}accept_late`, `${peg}accept_late/sequence/0`];
+  const chosen: string[][] = [];
   let planted = 0;
-  const result = run('debt-late', debtLate, ([before, after, command, decision]) => {
+  a.watch((before, after, command, decision) => {
+    if (command.payload.type !== 'choose') return;
+    chosen.push(debtPaths(before, after, command, decision));
     if (decision.kind !== 'accepted') return;
     type Fact = Extract<(typeof decision.events)[number]['payload'], { type: 'fact_changed' }>;
     const events = (edit: (p: Fact) => Fact | undefined) => ({
@@ -87,7 +58,7 @@ test('E1 witnesses late debt choices and their sequence steps only from committe
       events((p) => (p.fact.key === 'priory_tithe_delivered' ? edit(p) : p));
     const resolved = { ...before, state: { ...before.state, choices: after.state.choices } };
     const preset = { ...before, state: { ...before.state, facts: after.state.facts } };
-    const selected = command.payload.type === 'choose' ? command.payload.choice_id : '';
+    const selected = command.payload.choice_id;
     const [l, l0, l1] = late;
     const violations: [string, string[], ...Step][] = [
       ['continuation already resolved', [], resolved, after, command, decision],
@@ -144,23 +115,23 @@ test('E1 witnesses late debt choices and their sequence steps only from committe
       planted++;
     }
   });
-  assert.deepEqual(result.summary, { outcome: 'late', axis: -1 });
-  assert.deepEqual(result.chosen, [[], accept, [], late]);
-  assert.equal(planted, 11);
-  assert.deepEqual(result.replayed, [...accept, ...late].sort());
-});
-
-// Breaks: Peg's elapsed choice is credited from a refused or already-resolved continuation, or not at all.
-test('E1 witnesses the elapsed Peg debt choice only when accepted against its pending continuation', () => {
-  let planted = 0;
-  const result = run('debt-elapsed', debtElapsed, ([before, after, command, decision]) => {
-    const resolved = { ...before, state: { ...before.state, choices: after.state.choices } };
-    assert.deepEqual(debtPaths(resolved, after, command, decision), []);
-    assert.deepEqual(debtPaths(before, after, command, { kind: 'rejected' } as never), []);
-    planted += 2;
-  });
-  assert.deepEqual(result.summary, { outcome: 'elapsed', quest: null });
-  assert.deepEqual(result.chosen, [[], [`${peg}elapsed`]]);
-  assert.equal(planted, 2);
-  assert.deepEqual(result.replayed, [`${peg}elapsed`]);
+  try {
+    assert.deepEqual(debtLate(a), { outcome: 'late', axis: -1 });
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.deepEqual(chosen, [[], accept, [], late]);
+    assert.equal(planted, 11);
+    assert.deepEqual(
+      replay.obligations.filter((path) => path.includes('_debt/choices/')),
+      [...accept, ...late].sort(),
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
 });

@@ -1,5 +1,6 @@
 // Late and elapsed v042 debt routes; windows and values from cartridges/ashmere_missing_child/dialogues/a_{peg,aldric}_debt.json.
 import assert from 'node:assert/strict';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { CaseHost } from './e1_case_host.ts';
 
 // cartridge.json: calendar start 64800, real_elapsed rate 50 (1 host second = 50 logical units).
@@ -11,6 +12,10 @@ const refuse = (a: CaseHost, choice_id: string) =>
     { continuation_id: a.view().choice!.continuation_id, choice_id },
     'invalid_state',
   );
+const pennies = (a: CaseHost) => {
+  const w = a.story.world();
+  return level(w, w.body, resourceRef(w, 'pennies'));
+};
 const debt = (a: CaseHost) =>
   Object.values(a.story.world().state.quests ?? {}).find((q) => q.quest.key === 'chandlers_debt');
 
@@ -41,6 +46,7 @@ export function debtLate(a: CaseHost) {
   assert.equal(a.flag('priory_tithe_delivered'), 'late');
   assert.equal(a.flag('priory_fen_axis'), -1);
   assert.equal(a.story.world().state.containers[ledger], aldric);
+  assert.equal(pennies(a), 20); // resources.json start; late has no payment, unlike on_time
   return { outcome: 'late', axis: -1 };
 }
 
@@ -53,6 +59,7 @@ export function debtElapsed(a: CaseHost) {
   const peg = a.entity('npc', 'peg'),
     ledger = a.entity('item', 'tithe_ledger');
   a.invoke('a_peg_debt', [peg]);
+  refuse(a, 'accept_on_time');
   refuse(a, 'accept_late');
   a.choose('elapsed');
   a.reopen();
