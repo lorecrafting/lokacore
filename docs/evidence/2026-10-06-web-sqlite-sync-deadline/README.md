@@ -28,9 +28,12 @@ there is no SQL retry or save reset.
   (exit 1), with input worker bytes preserved. Applying the actual patch twice
   succeeds in the behavior test.
 - Changed-file Prettier, TypeScript size check and `git diff --check`: exit 0.
+- Serialized `bin/check_all.sh` on
+  `b61764c5cc873bdeddb15bdbf95f4bbc177d18ad`: exit 0. This head includes the
+  [independent approval](../../reviews/2026-10-06-web-sqlite-sync-deadline-review.md)
+  and published documentation merge; the reviewed source is unchanged.
 
-The full local gate is pending its serialized run. Correctness self-review found
-no unresolved issue; Ponytail Review: Lean already. Ship.
+Correctness self-review found no unresolved issue; Ponytail Review: Lean already. Ship.
 
 ## Limits and retained output
 
@@ -41,5 +44,5 @@ foreground thread until its deadline; clock checks are periodic. No native
 verification ran and no owner save was accessed.
 
 Sanitized raw output: [browser](browser.log), [authority](authority.log),
-[red controls](controls.log). [SHA256SUMS](SHA256SUMS) covers these retained
+[red controls](controls.log), [full gate](full-gate.log). [SHA256SUMS](SHA256SUMS) covers these retained
 bytes; [verification](SHA256SUMS.verify.txt) is kept alongside it.
