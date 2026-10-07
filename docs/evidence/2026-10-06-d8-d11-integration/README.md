@@ -284,3 +284,28 @@ the full nest remains at Oak Branches. Current browser page is the nest menu.
 A draft PR may preserve this source checkpoint with remaining UI rows explicitly
 pending. Independent source approval, exact pushed-head hosted CI, publication and
 D9 integration remain pending; no completion or merge is claimed.
+
+## Draft PR and remaining timed browser rows
+
+Draft source [PR258](https://github.com/lorecrafting/lokacore/pull/258) is pinned to
+`41e86ee7bd0ca71368fcfeaa92e8a5b1f0b61972`. Normal `git push` pre-push full gate
+completed exit0 on that exact head. PM subsequently verified every hosted job
+green there, including browser/simulation. Source remains unapproved; fresh
+independent review is in progress against that pin.
+
+Actual full-nest crow fallback now passed: at Drowned Oak, Dropped the recovered
+original coin with the eight-root nest still full. Visible log showed acquisition
+then “The crow drops the old coin here”. The coin appeared as an ordinary room
+item, offered Take, and was recovered. [Fallback screenshot](browser-full-fallback.png).
+
+Timed carrier/held-refresh attempt failed at the browser selector deadline while
+waiting for acquisition text; diagnostics showed the expected text visible, but
+the carrying window then expired normally into fallback. One further bounded
+batch stopped at its initial crow click: both previously visible crows had wandered
+out, so there were no matching targets. No carrying, held refresh or Shoo success
+is claimed. Timing attempts stopped on PM instruction; these proof rows remain
+pending. The coin is held by the player; original nest remains full at Oak Branches.
+The isolated Chrome tab/preview is retained for handoff, with owner saves untouched.
+
+This evidence-only checkpoint is held locally while reviewers finish pinned-source
+findings; do not push or change source until PM coordinates reviewer records/heads.

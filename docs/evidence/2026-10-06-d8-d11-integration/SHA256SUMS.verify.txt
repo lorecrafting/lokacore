@@ -11,3 +11,4 @@ crow-proof-final.log: OK
 browser-acquisition.png: OK
 browser-recovered.png: OK
 browser-full-nest.png: OK
+browser-full-fallback.png: OK
