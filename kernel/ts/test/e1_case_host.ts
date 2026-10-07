@@ -226,8 +226,11 @@ export function caseHost(
     },
     view: () => gameView(story.world()),
     flag: (name: string) => value(story.world(), initial.character, ref('fact', name)),
-    entity: (kind: string, key: string) =>
-      initial.entityIds[`ashmere_missing_child@0.0.42:${kind}/${key}`]!,
+    entity: (kind: string, key: string) => {
+      const id = initial.entityIds[`ashmere_missing_child@0.0.42:${kind}/${key}`];
+      assert.ok(id, `E1 case names unplaced ${kind} ${key}`);
+      return id;
+    },
     detail: (room: string, key: string) =>
       Object.entries(initial.details).find(
         ([, d]) => initial.rooms[d.room]?.key === room && d.key === key,

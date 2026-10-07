@@ -1,12 +1,14 @@
 import { gameView, type World } from '../src/index.ts';
-import type { Command, DecisionResult } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 import { identityWitnesses } from './e1_identity.ts';
+import { level, resourceSpec } from '../src/mechanics/resource.ts';
+import { same } from '../src/foundation/compose.ts';
 
-// ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest and visible-entity witnesses;
+// ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest, service and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -39,6 +41,98 @@ export function witnessedObligations(
     ...identityWitnesses(before, after, command, decision),
   );
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
+  if (p.type === 'use_service') {
+    const key = refString(p.service);
+    if (decision.outcome !== 'service_used') return questPaths;
+    const service = before.cartridge.services?.[key];
+    if (!service) throw new Error(`accepted use_service names unknown service ${key}`);
+    if (
+      p.actor_id !== before.character ||
+      p.provider_id !== entityId(before, service.provider) ||
+      p.quoted_price !== service.price
+    )
+      return questPaths;
+    const ops = decision.delta.ops;
+    const adjusted = (holder: EntityId, resource: DefinitionRef, amount: number) => {
+      const old = level(before, holder, resource);
+      const next = level(after, holder, resource);
+      return (
+        old !== undefined &&
+        next === old + amount &&
+        ops.some(
+          (op) =>
+            op.op === 'resource.adjust' &&
+            op.entity_id === holder &&
+            same(op.resource, resource) &&
+            op.from === old &&
+            op.to === next,
+        )
+      );
+    };
+    if (
+      !adjusted(before.body, service.currency, -service.price) ||
+      !adjusted(p.provider_id, service.currency, service.price)
+    )
+      return questPaths;
+    const benefit = service.benefit;
+    let committed = false;
+    if (benefit.kind === 'entitlement') {
+      committed =
+        value(before, p.actor_id, benefit.fact) === false &&
+        value(after, p.actor_id, benefit.fact) === true &&
+        ops.some(
+          (op) =>
+            op.op === 'fact.assign' &&
+            same(op.fact, benefit.fact) &&
+            op.scope.kind === 'player' &&
+            op.scope.character_id === p.actor_id &&
+            op.expected === false &&
+            op.value === true,
+        ) &&
+        decision.events.some(
+          (event) =>
+            String(event.causation_id) === String(command.id) &&
+            event.payload.type === 'fact_changed' &&
+            event.scope.kind === 'player' &&
+            event.scope.character_id === p.actor_id &&
+            same(event.payload.fact, benefit.fact) &&
+            event.payload.old === false &&
+            event.payload.new === true,
+        );
+    } else {
+      const old = level(before, before.body, benefit.recovery);
+      const maximum = resourceSpec(before, before.body, benefit.recovery)?.maximum;
+      const gain =
+        old === undefined || maximum === undefined
+          ? 0
+          : Math.min(old + benefit.amount, maximum) - old;
+      const recovered = gain > 0 && adjusted(before.body, benefit.recovery, gain);
+      if (benefit.kind === 'meal')
+        committed = recovered && adjusted(p.provider_id, benefit.stock, -benefit.debit);
+      else {
+        const vessel = entityId(before, benefit.vessel);
+        const previous = before.state.liquids?.[vessel];
+        const current = after.state.liquids?.[vessel];
+        committed =
+          recovered &&
+          before.state.containers[vessel] === p.provider_id &&
+          !!previous &&
+          !!current &&
+          previous.quantity > 0 &&
+          !!previous.kind &&
+          same(previous.kind, benefit.liquid) &&
+          current.quantity === previous.quantity - 1 &&
+          ops.some(
+            (op) =>
+              op.op === 'liquid.set' &&
+              op.item_id === vessel &&
+              JSON.stringify(op.from) === JSON.stringify(previous) &&
+              JSON.stringify(op.to) === JSON.stringify(current),
+          );
+      }
+    }
+    return withQuests(committed ? [`/services/${key}`] : []);
+  }
   if (p.type === 'use_transport') {
     const ref = p.route;
     const key = `${ref.cartridge_id}@${ref.cartridge_version}:transport/${ref.key}`;
@@ -251,4 +345,10 @@ function journalVariantPaths(world: World): string[] {
       `/quests/${key}/journal/active_variants/${index}/when/root`,
     );
   });
+}
+
+function entityId(world: World, ref: DefinitionRef): EntityId {
+  const id = world.entityIds[refString(ref)];
+  if (id === undefined) throw new Error(`E1 service names unplaced entity ${refString(ref)}`);
+  return id;
 }
