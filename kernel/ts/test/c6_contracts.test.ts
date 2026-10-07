@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { encode } from '../src/foundation/canonical.ts';
 import { test } from 'node:test';
 import { DEFS } from '../src/contracts.gen.ts';
 import { validate, type Defs } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
+import { INSTALLED, loadCartridge, newWorld, type Cartridge } from '../src/index.ts';
 
 const id = 'aaaaaaaa-0000-4000-8000-000000000001';
 const row = {
@@ -16,7 +19,7 @@ const row = {
   status: 'active',
 };
 const quest = Object.values(
-  read('kernel/ts/test/fixtures/c6-provisional-artifact.json').cartridge.quests,
+  read('protocol/fixtures/missing_child_v041_hash.json').value.quests,
 ).find((q: any) => q.key === 'a_night_in_the_marsh') as any;
 
 // Breaks: a malformed persisted attempt loses its actor/body/generation or admits an unbounded cursor.
@@ -186,7 +189,7 @@ test('expedition command, transition and journal contracts fail closed with indi
   const view = {
     quest: {
       cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.38',
+      cartridge_version: '0.0.41',
       kind: 'quest',
       key: 'a_night_in_the_marsh',
     },
@@ -260,4 +263,67 @@ test('expedition command, transition and journal contracts fail closed with indi
     delete schema(mutant, contract).properties[field].enum;
     assert.deepEqual(validate(contract, invalid, mutant), [], `${field}.enum red control`);
   }
+});
+
+// Breaks: changing cast or cue content shifts fresh identities without updating the release pin.
+test('final C6 allocation pins the shelter detail and all starting identities', () => {
+  const pin = read('protocol/fixtures/missing_child_v041_hash.json');
+  const loaded = loadCartridge(
+    new TextEncoder().encode(
+      JSON.stringify({
+        cartridge: pin.value,
+        content_hash: pin.sha256,
+      }),
+    ),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  const world = newWorld(
+    (loaded as { cartridge: Cartridge }).cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const actual: Record<string, string> = {
+    character: world.character,
+    body: world.body,
+    consumed: world.consumed!,
+  };
+  for (const [id, room] of Object.entries(world.rooms)) actual[`room/${room.key}`] = id;
+  for (const [id, detail] of Object.entries(world.details))
+    actual[`detail/${world.rooms[detail.room].key}/${detail.key}`] = id;
+  for (const [id, entity] of Object.entries(world.entities)) {
+    const origin = world.state.created?.[id]?.origin;
+    if (origin?.kind === 'spawned')
+      actual[
+        `population/${origin.by.key}/slot${origin.slot}/${origin.role === 'hound' ? 'member' : origin.role}`
+      ] = id;
+    else actual[`${entity.kind}/${entity.key}`] = id;
+  }
+  for (const [id, job] of Object.entries(world.state.jobs ?? {}))
+    actual[job.job.kind === 'population' ? `population/${job.job.key}/job` : `job/${job.job.key}`] =
+      id;
+  for (const [slot, id] of Object.entries(world.slots)) actual[`slot/${slot}`] = id;
+  assert.deepEqual(actual, read('protocol/fixtures/missing_child_v041_ids.json'));
+});
+
+// Breaks: a structurally valid route claims a transfer that its source room's exit cannot make.
+test('C6 loader refuses an independently rehashed impossible physical route', () => {
+  const cartridge = structuredClone(read('protocol/fixtures/missing_child_v041_hash.json').value);
+  const quest = Object.values(cartridge.quests).find(
+    (q: any) => q.key === 'a_night_in_the_marsh',
+  ) as any;
+  quest.expedition.route[0].direction = 'north';
+  const loaded = loadCartridge(
+    new TextEncoder().encode(
+      JSON.stringify({
+        cartridge,
+        content_hash: createHash('sha256').update(encode(cartridge)).digest('hex'),
+      }),
+    ),
+    INSTALLED,
+  );
+  assert.equal(loaded.ok, false);
+  if (loaded.ok) throw Error('impossible physical route loaded');
+  assert.equal(loaded.diagnostic.code, 'OUTCOME_MISMATCH');
+  assert.ok(loaded.diagnostic.path.endsWith('.expedition.route[0]'));
 });

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, step } from '../src/index.ts';
+import type { FactValue } from '../src/contracts.gen.ts';
+import { spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { key } from '../src/foundation/compose.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
@@ -8,7 +10,7 @@ import { fresh, ref } from './transport_fixture.ts';
 import { fatal } from './death_fixture.ts';
 import { buttonsOf, expeditionLine } from '../../../mobile/app/book/model.ts';
 
-function source(cleared = false) {
+function source(cleared = false, allegiance?: 'prior') {
   let world = fresh((c) => {
     c.entry = ref('room', 'hound_run');
     c.calendar.start = 43200;
@@ -39,6 +41,21 @@ function source(cleared = false) {
       },
     };
   }
+  if (allegiance)
+    world = {
+      ...world,
+      state: {
+        ...world.state,
+        facts: {
+          ...world.state.facts,
+          [key({
+            kind: 'fact',
+            fact: ref('fact', 'chapel_allegiance'),
+            scope: { kind: 'player', character_id: world.character },
+          })]: allegiance as FactValue,
+        },
+      },
+    };
   let ordinal = 0;
   const command = (payload: object, action?: string) => {
     const before = world;
@@ -215,4 +232,62 @@ test('a legal detour retains the next checkpoint and hides an inapplicable direc
     expeditionLine(journal(), (key) => (key === 'room.willow_shade.title' ? 'Willow Shade' : key)),
     'Next: west to Willow Shade.',
   );
+});
+
+// Breaks: D9's hostile default dialogue swallows an explicitly offered C6 acknowledgement or D1 lesson.
+test('actual source hostile Sedge retains explicit marsh acknowledgement and free swim', () => {
+  const a = source(true, 'prior');
+  const accepted = (payload: object) => assert.equal(a.command(payload).kind, 'accepted');
+  accepted({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' });
+  for (const direction of ['west', 'west', 'south', 'north', 'east'])
+    accepted({ type: 'move', direction });
+  assert.equal(a.attempt()!.status, 'completed');
+  const invoke = (action_key: string, target_ids: string[], input: object = {}) => {
+    const w = a.world();
+    const identified = identify('c6-hostile', w.character, {
+      invocation_id: 'cccccccc-0000-4000-8000-000000000001',
+      actor_id: w.character,
+      action_key,
+      target_ids,
+      input,
+    } as never);
+    assert.equal(identified.kind, 'identified');
+    const resolved = resolve(w, identified as never);
+    assert.ok('payload' in resolved);
+    if (!('payload' in resolved)) throw Error('unresolved action');
+    const { actor_id: _, ...payload } = resolved.payload as any;
+    assert.equal(a.command(payload, action_key).kind, 'accepted');
+  };
+  for (const direction of ['north', 'north', 'west']) accepted({ type: 'move', direction });
+  const offer = gameView(a.world()).notices!.find((n) => n.transport)!.transport!;
+  invoke(offer.action.action_key, [...offer.action.target_ids!], {
+    route: offer.route,
+    quoted_fare: offer.fare,
+  });
+  accepted({ type: 'move', direction: 'east' });
+  const sedge = Object.entries(a.world().entities).find(([, e]) => e.key === 'sedge')![0];
+  assert.equal(
+    spokenBy(a.world(), a.world().character, sedge as never)?.prompt,
+    'dialogue.d9_sedge_prior.prompt',
+  );
+  invoke('sedge_marsh', [sedge]);
+  accepted({
+    type: 'choose',
+    continuation_id: gameView(a.world()).choice!.continuation_id,
+    choice_id: 'acknowledge',
+  });
+  assert.equal(gameView(a.world()).skills!.find((s) => s.skill.key === 'swim')!.acquired, false);
+  const pennies = gameView(a.world()).resources!.find((r) => r.resource.key === 'pennies')!.current;
+  invoke('sedge_swim', [sedge]);
+  accepted({
+    type: 'choose',
+    continuation_id: gameView(a.world()).choice!.continuation_id,
+    choice_id: 'learn',
+  });
+  assert.equal(gameView(a.world()).skills!.find((s) => s.skill.key === 'swim')!.acquired, true);
+  assert.equal(
+    gameView(a.world()).resources!.find((r) => r.resource.key === 'pennies')!.current,
+    pennies,
+  );
+  assert.equal(gameView(a.world()).time, 43200);
 });

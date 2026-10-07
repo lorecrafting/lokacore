@@ -21,9 +21,7 @@ import { load } from './store.ts';
 import { expeditionSave } from './expedition-save.ts';
 
 function fixture(danger = false) {
-  const content = structuredClone(
-    read('kernel/ts/test/fixtures/c6-provisional-artifact.json').cartridge,
-  );
+  const content = structuredClone(read('protocol/fixtures/missing_child_v041_hash.json').value);
   content.entry.key = 'hound_run';
   if (danger) {
     content.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
@@ -48,12 +46,24 @@ function fixture(danger = false) {
   return { bundle: { canonical, sha256 }, initial };
 }
 
+function started(...args: Parameters<typeof elapsedHost>) {
+  const a = elapsedHost(...args);
+  const reply = a.game.invoke({
+    action_key: 'choose_ancestry' as never,
+    target_ids: [],
+    input: { ancestry: 'road_born' as never },
+  });
+  assert.equal(reply.kind, 'saved');
+  if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
+  return a;
+}
+
 // Breaks: a route cursor is credited from room presence or a prior visit, rather than each new accepted edge.
 test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim survive cold reopen', (t) => {
   const { bundle } = fixture();
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = elapsedHost(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle);
+  const a = started(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle);
   t.after(() => a.sql.close());
   let game = a.game;
   const view = () => game.view().view;
@@ -176,7 +186,7 @@ test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim surviv
 // or a shelter command that silently replaces the current attempt identity.
 test('cold reopen refuses forged expedition transitions without changing saved rows', (t) => {
   const { bundle, initial } = fixture();
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
+  const a = started(':memory:', { wall: 10000, mono: 0 }, bundle);
   t.after(() => a.sql.close());
   const invoke = (action_key: string, input: object = {}) => {
     const notice = a.game
@@ -276,7 +286,7 @@ test('a real hound bleed fails stage three before shrine return and immediate re
   const { bundle } = fixture(true);
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-fatal-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = elapsedHost(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle);
+  const a = started(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle);
   t.after(() => a.sql.close());
   let game = a.game;
   const view = () => game.view().view;
@@ -346,7 +356,7 @@ test('final route completion reconciles real failed and lost COMMIT outcomes and
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-commit-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   for (const kind of ['failed', 'lost'] as const) {
-    const a = elapsedHost(join(dir, kind + '.db'), { wall: 10000, mono: 0 }, bundle);
+    const a = started(join(dir, kind + '.db'), { wall: 10000, mono: 0 }, bundle);
     let opened = openStory(a.db, releases, a.host);
     assert.equal(opened.kind, 'open');
     if (opened.kind !== 'open') throw new Error('open required');

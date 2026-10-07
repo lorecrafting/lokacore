@@ -20,13 +20,6 @@ const kats = [
   ...globSync('protocol/fixtures/containers_*hash.json', { cwd: ROOT }),
   ...globSync('protocol/fixtures/missing_child_*hash.json', { cwd: ROOT }),
 ].map(read);
-// C6 source proof uses its preserved development input until the actual successor is independently frozen.
-const c6 = read('kernel/ts/test/fixtures/c6-provisional-artifact.json');
-kats.push({
-  value: c6.cartridge,
-  canonical: JSON.stringify(c6.cartridge),
-  sha256: c6.content_hash,
-});
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
 test('every example transcript replays and exercises its capability', () => {

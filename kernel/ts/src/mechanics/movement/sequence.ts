@@ -57,6 +57,24 @@ export function moveSequence(
     entity_id: body,
     room_id: there,
   });
+  const progress = routeProgress(world, command, plan, ops, mint, steps);
+  return accepted(
+    world,
+    outcome,
+    [...ops, ...progress.ops],
+    [entered, ...progress.events],
+    progress.narration,
+  );
+}
+
+function routeProgress(
+  world: World,
+  command: MoveCommand,
+  { here, there }: Exclude<ReturnType<typeof movementPlan>, string>,
+  ops: Parameters<typeof patrol.travel>[4],
+  mint: Mint,
+  steps: { n: number },
+) {
   const joined = patrol.travel(world, command, here, there, ops, mint, steps);
   const ventured = expedition.travel(
     world,
@@ -67,15 +85,12 @@ export function moveSequence(
     mint,
     steps,
   );
-  return accepted(
-    world,
-    outcome,
-    [...ops, ...joined.ops, ...ventured.ops],
-    [entered, ...joined.events, ...ventured.events],
-    [...joined.narration, ...ventured.narration].length
-      ? [...joined.narration, ...ventured.narration]
-      : undefined,
-  );
+  const narration = [...joined.narration, ...ventured.narration];
+  return {
+    ops: [...joined.ops, ...ventured.ops],
+    events: [...joined.events, ...ventured.events],
+    narration: narration.length ? narration : undefined,
+  };
 }
 
 /** Read-only ordinary movement checks, reused before random escape selection. */

@@ -11,6 +11,28 @@ export function expedition(c: Obj, q: Obj, at: string, checks: Checks): Diagnost
       : [];
   const out: Diagnostic[] = [];
   const bad = (field: string) => out.push(diag('OUTCOME_MISMATCH', `${at}.expedition.${field}`));
+  references(e, at, checks);
+  route(c, e, at, checks, bad);
+  declarations(c, q, bad);
+  for (const capability of [
+    'expedition',
+    'movement',
+    'quest',
+    'fact',
+    'combat',
+    'death',
+    'population',
+  ])
+    if (c.lock.capabilities[capability] !== 1)
+      out.push(
+        diag('UNDECLARED_CAPABILITY', `${at}.expedition`, { capability }, [`${capability}@1`]),
+      );
+  for (const name of Object.keys(e.narration))
+    checks.text(e.narration, [name], `${at}.expedition.narration`);
+  return out;
+}
+
+function references(e: Obj, at: string, checks: Checks) {
   for (const [field, kind] of [
     ['start_room', 'room'],
     ['shelter_room', 'room'],
@@ -22,6 +44,9 @@ export function expedition(c: Obj, q: Obj, at: string, checks: Checks): Diagnost
   e.footprint.forEach((r: Obj, i: number) =>
     checks.named(r, 'room', `${at}.expedition.footprint[${i}]`),
   );
+}
+
+function route(c: Obj, e: Obj, at: string, checks: Checks, bad: (field: string) => void) {
   e.route.forEach((edge: Obj, i: number) => {
     checks.named(edge.from, 'room', `${at}.expedition.route[${i}].from`);
     checks.named(edge.to, 'room', `${at}.expedition.route[${i}].to`);
@@ -48,6 +73,10 @@ export function expedition(c: Obj, q: Obj, at: string, checks: Checks): Diagnost
     !e.footprint.some((r: any) => refString(r) === refString(e.start_room))
   )
     bad('route');
+}
+
+function declarations(c: Obj, q: Obj, bad: (field: string) => void) {
+  const e = q.expedition;
   for (const [detail, room] of [
     [e.start_detail, e.start_room],
     [e.shelter_detail, e.shelter_room],
@@ -79,20 +108,4 @@ export function expedition(c: Obj, q: Obj, at: string, checks: Checks): Diagnost
     q.patrol
   )
     bad('quest');
-  for (const capability of [
-    'expedition',
-    'movement',
-    'quest',
-    'fact',
-    'combat',
-    'death',
-    'population',
-  ])
-    if (c.lock.capabilities[capability] !== 1)
-      out.push(
-        diag('UNDECLARED_CAPABILITY', `${at}.expedition`, { capability }, [`${capability}@1`]),
-      );
-  for (const name of Object.keys(e.narration))
-    checks.text(e.narration, [name], `${at}.expedition.narration`);
-  return out;
 }

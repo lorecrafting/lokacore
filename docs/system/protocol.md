@@ -1225,7 +1225,7 @@ to the accepted command receipt, and retry does not produce a second response.
 
 ## C6 expedition composition
 
-Implementation pin: C5 is published at merge `4387903d` on `f34f3785` with chapter `0.0.37`, API `1.32`, and frozen hash `d995ec92f0e7dcfd45d495504cd008176c04a3fa6c822e4a194b0b127be7fc65`. C6's successor pin is assigned only after integration with the final published predecessor.
+Implementation pin: final predecessor main `b52eaeff4caca4bcd64e4ba2c7c81cf672f1bc40` includes D9 merge `fb94a19eeef6966d86ec64f48d6f146af11feabc`, chapter `0.0.40` / API `1.35`. C6 candidate `0.0.41` / API `1.36` has independent hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a` and 209 initial identities in the frozen v041 fixtures. Independent final review and publication remain pending.
 
 **Selected planning contract; source pending.** An actor/quest-instance-keyed `ExpeditionAttempt` retains the bound living player body, original S27 quest occurrence, exact Start or Restart command ID as attempt ID, route cursor `0..5`, optional sheltered flag and status `active/failed/completed`. A checked complete-prior-row transition changes only this one attempt. The quest remains active through failed attempts; failure sets cursor0 and clears shelter; Restart replaces the attempt ID and retains cursor0 in the same row. Do not reuse C2's leader-bound patrol row or create a universal route interpreter. The fixed authored route and footprint are pinned definitions, not saved room tags or duplicated visit facts.
 

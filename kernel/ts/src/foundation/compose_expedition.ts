@@ -21,6 +21,15 @@ export function transitionExpedition(
     )
   )
     return { code: 'precondition_failed' as const };
+  return lifecycle(before, after)
+    ? { value: after as unknown as Json }
+    : { code: 'precondition_failed' as const };
+}
+
+function lifecycle(
+  before: Extract<DeltaOp, { op: 'expedition.transition' }>['value'],
+  after: typeof before,
+) {
   const restart =
     before.status === 'failed' &&
     after.status === 'active' &&
@@ -35,13 +44,7 @@ export function transitionExpedition(
     !after.sheltered;
   const progress =
     before.status === 'active' &&
-    after.status === 'active' &&
-    before.attempt_id === after.attempt_id &&
-    after.cursor === before.cursor + 1 &&
-    before.sheltered === after.sheltered;
-  const complete =
-    before.status === 'active' &&
-    after.status === 'completed' &&
+    (after.status === 'active' || after.status === 'completed') &&
     before.attempt_id === after.attempt_id &&
     after.cursor === before.cursor + 1 &&
     before.sheltered === after.sheltered;
@@ -52,7 +55,5 @@ export function transitionExpedition(
     before.cursor === after.cursor &&
     !before.sheltered &&
     after.sheltered;
-  return restart || fail || progress || complete || shelter
-    ? { value: after as unknown as Json }
-    : { code: 'precondition_failed' as const };
+  return restart || fail || progress || shelter;
 }

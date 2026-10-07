@@ -954,13 +954,13 @@
       "mobile/authority/local-story/expedition-receipt.ts"
     ],
     "fixtures": [
-      "kernel/ts/test/fixtures/c6-provisional-artifact.json"
+      "protocol/fixtures/missing_child_v041_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "fault_discards_whole_proposal",
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C6 provisional source: five ordered live transfers, optional shelter, immediate retry, fatal recovery and one bounded reward; final release pin and publication pending D8/D9 order"
+    "implemented_in": "C6 candidate v041/API1.36 over published D9 v040: ordered marsh route, optional shelter, immediate retry, fatal recovery and one bounded reward; publication pending final review"
   }
 }

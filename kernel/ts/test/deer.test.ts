@@ -65,9 +65,9 @@ function slot(w: World, member: string) {
   return Object.values(w.state.population_slots ?? {}).find((s) => s.member_id === member)!;
 }
 // Breaks: a new plan shifts genesis allocation or mints a second member or hide.
-test('provisional v040 genesis IDs include all three deer pairs and control jobs', () => {
+test('v041 genesis IDs include all three deer pairs and control jobs', () => {
   const w = fresh();
-  const expected = read('protocol/fixtures/missing_child_v040_ids.json');
+  const expected = read('protocol/fixtures/missing_child_v041_ids.json');
   for (const name of ['oak_deer', 'orchard_deer', 'willow_deer']) {
     for (const role of ['deer', 'hide']) {
       const id = Object.entries(w.state.created ?? {}).find(

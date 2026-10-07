@@ -141,11 +141,72 @@ Correctness/Ponytail self-review keeps the two projection guards and one small
 Book text helper; no dependencies or generic rendering machinery were added.
 The same reviewer must recheck P1/P2 on this candidate before approval.
 
+## Final integration over published D9
+
+Merge checkpoint `cbfce8d86f4063544827d13cbe98cf0f26d8d511` incorporates
+published main `b52eaeff4caca4bcd64e4ba2c7c81cf672f1bc40`, including D9 PR259
+merge `fb94a19eeef6966d86ec64f48d6f146af11feabc`. The actual publication order
+assigns C6 chapter `0.0.41`, API `1.36`. Its independent standard-library Python
+successor generator starts from frozen published v040, expands the authored C6
+declarations, pins five literal edges and the −1 consequence, and derives:
+
+- Content hash: `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`.
+- Initial identities: 209, including the new Drowned Oak shelter detail.
+- Actual Elixir compilation equals the complete independent canonical answer;
+  TypeScript loading and enumeration equal every independently allocated identity.
+
+The final transcript contains the actual ancestry selection and accepted expedition
+route. Normal transcript discovery replays it; the provisional replay override and
+the duplicate 250 KB provisional artifact were removed. All active C6 proofs consume
+the final frozen answer or independently compiled source. Frozen D9 v040 hash/ID
+answers remain unchanged and their allocation proof still passes.
+
+Final checks after the cohesive size corrections:
+
+- Focused C6/schema/actual-source/real-SQLite, preserved D9 contracts and portable
+  composition: 33 passed; typecheck passes.
+- Actual-source Elixir chapter oracle, expedition physical-edge admission and
+  deer/dream/patrol consumers: 20 passed.
+- Headless simulator: 19 passed, 503 sequences / 16,305 steps on the captured run.
+  Active chapter's 32 controlled seeds and preserved D8 allocation proof pass.
+- Complete example-transcript replay passes, including final C6.
+- Contract/feature generation, active Elixir/TypeScript size, docs links and diff
+  whitespace checks pass. Full publication gate remains a separate pending gate.
+
+The real SQLite route cold-reopens the ordered entries and optional shelter,
+completes once, visits Sedge, acknowledges once, learns swim freely and idempotently,
+then reaches D6 Pool Bottom with 120 seconds remaining. The same authority proof
+covers actual hound-produced fatal bleed at stage three and immediate retry after
+shrine return, forged save refusal without changed rows, and final-stage failed
+deferred-FK COMMIT / lost-ack COMMIT recovery and exact invocation replay. Owner
+save bytes were never read or written.
+
+A controlled actual-source prior-allegiance profile now completes the route and
+reaches Sedge through the ferry. Her D9 hostile default prompt remains visible;
+explicit C6 acknowledgement and D1 swim learning remain available. Ignoring selected
+dialogue binding passes the four earlier source tests and fails this new regression
+(rejected instead of accepted). An independently rehashed route claiming a nonexistent
+north transfer is refused by the loader with the exact route diagnostic. Removing
+that physical-exit guard passes the four earlier contract/pin tests and fails only
+the new loader negative. Both planted mutations were restored. Existing schema tests
+continue to exercise their 62 individual guard red controls; P1/P2 controls remain
+recorded above.
+
+The broad size check's five failures were retained in the local check log before
+correction: loader93, lifecycle53, read41, target46/44 and movement51. Cohesive local
+helpers now retain the same ordered validation and movement effects, merge identical
+active/completed progression predicates, and reuse closed-union target/row handling.
+No source size allowance was added or raised. Correctness self-review checked
+reference diagnostics, exact prior/binding checks, same attempt IDs, cursor increments,
+failed/restart/shelter transitions and movement event/operation order. Ponytail Review
+keeps these bounded extractions in their existing modules; no new dependency or
+general framework.
+
 ## Remaining publication work
 
-Full local gate and complete review of the changed schema surface; actual final predecessor integration and independent release pins;
-replacement of provisional feature transcript/input by final known answers; fresh independent reviews and CI on
-the exact published head; browser/Book closure. The current full gate is blocked,
-and C6 is not complete. Native work remains paused; UI blur remains deferred.
-
-Ponytail/correctness self-review: route, reference and lifecycle checks retain their original ownership; existing modules own the Elixir size corrections. No dependencies or raised size/complexity limits were added. Independent review remains required.
+Final exact-head primary and save/protocol rechecks of the v041 integration and size
+corrections, full local publication gate, browser/Book closure, PR, hosted CI and merge
+remain pending. Earlier provisional source approvals remain historical and are not
+claimed as approval of this final candidate. C6 is not complete or published.
+Native work remains paused; UI blur remains deferred; owner save and mismatch refusal
+are preserved.

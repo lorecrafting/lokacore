@@ -12,14 +12,30 @@ import {
 import { value } from '../src/mechanics/fact.ts';
 import { read } from './read.ts';
 
-const artifact = read('kernel/ts/test/fixtures/c6-provisional-artifact.json');
-const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
+const artifact = read('protocol/fixtures/missing_child_v041_hash.json');
+const loaded = loadCartridge(
+  new TextEncoder().encode(
+    JSON.stringify({ cartridge: artifact.value, content_hash: artifact.sha256 }),
+  ),
+  INSTALLED,
+);
 if (!loaded.ok) throw Error(JSON.stringify(loaded));
 const cartridge = loaded.cartridge as Cartridge;
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
 function setup(hour = 18) {
-  const fresh = newWorld(cartridge, context, [1, 2, 3, 4]);
+  const initial = newWorld(cartridge, context, [1, 2, 3, 4]);
+  const selected = step(
+    initial,
+    {
+      id: id(999),
+      world_context_id: context,
+      payload: { type: 'choose_ancestry', actor_id: initial.character, ancestry: 'road_born' },
+    } as never,
+    1,
+  );
+  assert.equal(selected.decision.kind, 'accepted');
+  const fresh = selected.world;
   const room = Object.entries(fresh.rooms).find(([, r]) => r.key === 'hound_run')![0];
   let world: World = {
     ...fresh,
