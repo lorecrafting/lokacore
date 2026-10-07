@@ -23,6 +23,7 @@ export const AUTHORITY_KERNEL = {
 };
 
 export type LoadedCandidate = ReturnType<typeof admitCandidate>;
+export const CASE_GENERATOR = 'e1-v042-authority-cases-v1';
 export type Coverage = {
   rooms: Set<string>;
   quests: Set<string>;
@@ -77,6 +78,7 @@ export function caseHost(
   };
   record({
     kind: 'start',
+    generator: CASE_GENERATOR,
     content_hash: loaded.hash,
     artifact_sha256: sha256(loaded.artifact),
     construction: 'fresh',
@@ -90,6 +92,7 @@ export function caseHost(
     },
     rng: { algorithm: 'xoshiro128**', state: initial.state.rng },
     logical_clock: initial.state.clock,
+    host_clock: { ...clock },
     ...proof,
     run_id: story.runId(),
     kernel_version: kernelVersion,
@@ -255,8 +258,10 @@ export function caseHost(
     },
     reopen: () => {
       const before = hash(story.world().state as never);
+      const newId = p.host.newId;
       p.sql.close();
       p = sqliteHost(path, clock, kernelVersion);
+      p.host.newId = newId;
       story = open();
       story.onAdvance(observe);
       assert.equal(

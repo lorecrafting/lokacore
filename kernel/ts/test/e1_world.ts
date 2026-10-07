@@ -98,6 +98,7 @@ export function thirtyDays(a: CaseHost) {
     'thirty adopted calendar days did not execute',
   );
   assert.equal(destinations.size, 12, 'not every authored schedule destination was observed');
+  assert.equal(observedClocks.length, 720, 'thirty days must observe every hourly boundary');
   a.reopen();
   assert.equal(a.story.world().state.clock, 2_656_800);
   return {

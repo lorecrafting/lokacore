@@ -11,6 +11,7 @@ import { source, host, redact } from './e1.ts';
 import { admitCandidate, applicability, sha256 } from './e1_policy.ts';
 import {
   AUTHORITY_KERNEL,
+  CASE_GENERATOR,
   caseHost,
   coverage,
   type LoadedCandidate,
@@ -30,11 +31,13 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   const start = events.shift(),
     finish = events.pop();
   assert.equal(start?.kind, 'start', 'incomplete case start');
+  assert.equal(start.generator, CASE_GENERATOR);
   assert.equal(finish?.kind, 'finish', 'incomplete case finish');
   assert.deepEqual(start.source, identity, 'case belongs to another source/check/policy');
   assert.equal(start.content_hash, loaded.hash);
   assert.equal(start.artifact_sha256, sha256(bytes));
   assert.equal(start.construction, 'fresh');
+  assert.deepEqual(start.host_clock, { wall: 10000, mono: 0 });
   assert.equal(start.rng.algorithm, 'xoshiro128**');
   assert.equal(start.identity.algorithm, 'loka-id-v1');
   const fault = FAULTS.find((f) => start.case_id === `sqlite-${f}`);
