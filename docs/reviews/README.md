@@ -549,3 +549,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Browser SQLite worker deadline independent review](2026-10-06-web-sqlite-sync-deadline-review.md): exact source `fb618a29`, **APPROVE**, no findings; 50 focused tests pass, SDK-loop/no-deadline controls fail behaviorally, and version/source guard refusals preserve bytes. Broad publication gate remains separate.
 - [Current baseline Round 2](2026-10-06-current-baseline-round2-review.md): local `docs/astra-round2-history` at `ab10c69f`, CHANGES REQUIRED; scoped fix `132b4752`, APPROVE, BASE-R2-01 closed by linking installed D9 labelled selection and service/reopen proof. Archives, relative/heading navigation, release-scope caveat and save/native boundaries verified.
+
+- [Browser SQLite worker deadline second opinion](2026-10-06-web-sqlite-sync-deadline-second-review.md): exact `482f6837`, independent APPROVE; 50 focused tests pass, CPU-cap and missing-deadline controls fail in both modes, install drift refuses with bytes intact; no open findings.
