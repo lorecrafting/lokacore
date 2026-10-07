@@ -119,3 +119,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Ferry route destination binding](../../evidence/2026-10-07-e1-ferry-routes/README.md) passed 18 clean-source cases and replays; 271 authored paths remain pending on its isolated source.
 
 [Selected dialogue choice effect binding](../../evidence/2026-10-07-e1-dialogue-choice-effects/README.md) passed 18 clean-source cases and replays; 243 authored paths remain pending on its isolated source.
+
+[Exact ferry room identity repair](../../evidence/2026-10-07-e1-ferry-room-identity/README.md) replaces the display-title witness, passes 18 clean-source cases and replays, and retains 271 authored paths pending.

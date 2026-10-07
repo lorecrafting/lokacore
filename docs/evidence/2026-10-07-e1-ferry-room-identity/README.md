@@ -1,0 +1,9 @@
+# E1 ferry room identity repair checkpoint
+
+Clean source `385f0b202ae5870eaf0cf0c6a1ab46d12a10da99` repairs the earlier display-title witness: accepted `use_transport` now credits the selected route only when the body's committed container equals the room ID resolved from the full authored destination ref. Candidate and check digest `e28439121b330b7f406e179cd4e9b35e0b70dc035e902a3a9127b4ac6535577d` are in the [report](report.json).
+
+The recorder exited **2, pending**. All 18 isolated real SQLite cases and semantic replays passed, including the topology route using both ferries, five endings, thirty-day hourly replay and three storage faults. The two transport paths are witnessed; **271 authored paths** remain open on this isolated source. This is provisional evidence, not E1 certification.
+
+The focused E1 suite passed 10/10, TypeScript typecheck passed, and docs found 835 documents with zero broken or unreachable links. The test constructs a wrong arrival in a different room with the same display title and requires no ferry witness. Replacing the room-ID guard with the former title comparison leaves the prior nine tests [green](old-suite-green.log) and makes the new test [fail](red-control.log); restored results are [green](focused-tests.log). The repair reuses the existing `roomIds` map with no new dependency or configuration; Ponytail Review found no extra abstraction.
+
+The [report](report.json), selected [topology](topology.jsonl) and [ending](rescued-prior.jsonl) traces, and [redacted CLI log](cli.log) are hashed in [SHA256SUMS](SHA256SUMS), with [verification](SHA256SUMS.verify). The full isolated output, including 18 databases and traces, was hashed at capture in [case-SHA256SUMS](case-SHA256SUMS); all 38 checks are retained in [verification](case-SHA256SUMS.verify). Final path coverage, candidate pin, independent review and 10,000-sequence simulation remain pending.

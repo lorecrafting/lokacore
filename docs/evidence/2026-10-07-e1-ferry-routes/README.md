@@ -3,9 +3,10 @@
 Independent review found that this source compared a destination display key,
 which could falsely credit another room with the same title. The captured run
 and hashes below are preserved as provisional history; the corrected room-ID
-guard and a same-title wrong-room red control are in the follow-up checkpoint.
+guard and a same-title wrong-room red control are in the
+[follow-up checkpoint](../2026-10-07-e1-ferry-room-identity/README.md).
 
-Clean source `9e5ea35334f1ad78a3126f39e280387bcece9a24` binds an accepted `use_transport` to the selected authored route only when the Book reaches its exact destination. Candidate and check digest `402b2398ab683a589760735e8d9440745b2c5a2a5bf243c56b8deb696257a48e` are in the [report](report.json).
+Clean source `9e5ea35334f1ad78a3126f39e280387bcece9a24` used the selected authored route and destination display key. Candidate and check digest `402b2398ab683a589760735e8d9440745b2c5a2a5bf243c56b8deb696257a48e` are in the [report](report.json).
 
 The recorder exited **2, pending**. All 18 isolated real SQLite cases and semantic replays passed, including the topology route using both ferries, five endings, thirty-day hourly replay and three storage faults. The two transport paths are now witnessed; **271 authored paths** remain open on this isolated source. This is provisional evidence, not E1 certification.
 

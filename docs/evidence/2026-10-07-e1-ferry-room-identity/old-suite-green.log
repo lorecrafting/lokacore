@@ -1,0 +1,21 @@
+(node:31870) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (634.979ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (1846.47275ms)
+✔ E1 binds the exact study_tracks recipe and required policy from committed performance (804.238125ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (320.903208ms)
+✔ E1 binds each required predicate of the selected Elspeth report dialogue (817.097833ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (3613.815375ms)
+✔ E1 binds both selected dream branches and acknowledged scene steps (1751.051167ms)
+✔ E1 binds Maud objective only on its committed resolved transition (3379.9295ms)
+✔ E1 binds only visible entity definitions after committed room entry (505.864084ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14114.368042
