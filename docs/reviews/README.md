@@ -567,3 +567,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Post-D10 architecture maintenance record](2026-10-06-post-d10-maintenance-review.md): independent docs-only APPROVE at `eeef28b6`; #265/#269 attribution, evidence and bounded post-E3 risks verified; no new audit or implementation claimed.
 - [Post-D10 Beads follow-ups](2026-10-06-post-d10-beads-followups-review.md): exact source `9ac3fa89`, independent **APPROVE**, no findings; four evidence-linked, triggered tasks depend on E3, all 33 Chapter 1 rows remain unchanged, and the focused export check passes.
+
+- [Chapter 1 one-time documentation audit](2026-10-06-chapter-one-docs-audit-review.md): `efcc0df`, fresh independent docs-only APPROVE; six open findings/evidence and exclusions verified; repairs and E1–E3 remain open.
