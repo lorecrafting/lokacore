@@ -68,8 +68,9 @@ The architecture record was published in [#278](https://github.com/lorecrafting/
 its supplemental Beads follow-ups were published in [#280](https://github.com/lorecrafting/lokacore/pull/280).
 
 The [one-time documentation audit](evidence/2026-10-06-chapter-one-docs-audit.md)
-records six current findings with owners and closure triggers. Focused repairs are
-in progress; their reviewed publication is required before E3 closes.
+records six findings on its dated baseline. Their reviewed
+[repair dispositions](evidence/2026-10-07-chapter-one-docs-repairs.md) are
+published; E1–E3 acceptance remains open.
 
 The [dated publication log](archive/ROADMAP-2026-10-06.md) retains the individual
 PRs, reviewed source identities and historical evidence claims. It is not an
