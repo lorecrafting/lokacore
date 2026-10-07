@@ -1003,6 +1003,7 @@ and false deer closure/successor-cancel handoffs still fail exact replay and ref
 in place without rewriting the save. Deer-specific validation retains the exact
 sight job, occurrence and transfer producer checks; it must not reconstruct global
 writer ordering independently of the composing kernel.
+[Reproduction and developer evidence](../evidence/2026-10-06-deer-bleed-recovery/README.md).
 
 ## C5 bleed and bandage recovery
 
