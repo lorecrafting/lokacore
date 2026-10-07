@@ -287,7 +287,7 @@ the selected transport definition.
 An accepted `use_service` witnesses its exact authored service only when the
 selected provider and quote match, the receipt and before/after state agree on
 the payer debit and provider credit, and the selected benefit is committed:
-the entitlement fact transition, meal stock debit and recovery, or ale serving
+the entitlement fact transition, meal stock debit and recovery, or drink serving
 debit and recovery. A service offer, rejected purchase, or payment without its
 benefit witnesses no service path.
 For authored item and NPC definitions, an accepted room entry may witness only
