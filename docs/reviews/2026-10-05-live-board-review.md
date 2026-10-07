@@ -4,7 +4,7 @@
 - Base: `0caf15c7`.
 - Initial verdict: **CHANGES REQUIRED**.
 - Final verdict: **APPROVE** at `67a81244770b16664c0600a89cefd1d1c9850c7e`.
-- Governing requirements: [live board](../live-board.md), [local workflow](../WORKFLOW.md#local-draft-pr-cadence), [privacy rules](../../AGENTS.md#hard-won-lessons).
+- Governing requirements: [live board](https://github.com/lorecrafting/lokacore/blob/aa138a73a20de5e14aab5a35ce848e1e700e5733/docs/live-board.md), [local workflow](../WORKFLOW.md#local-draft-pr-cadence), [privacy rules](../../AGENTS.md#hard-won-lessons).
 
 Before inspecting the diff, the required behavior was: display the real completion
 plan and roadmap; distinguish reported phases from process liveness and approval;

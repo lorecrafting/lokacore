@@ -155,6 +155,7 @@ Codex or Claude Code, owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
+It replaces the retired `bin/board` and `$board` dashboards; `bv` is the board view.
 
 Install `br` (pilot version 0.7.4) with
 `brew tap dicklesworthstone/tap && brew install dicklesworthstone/tap/br`,
@@ -272,9 +273,6 @@ At each chapter closure, follow the [owner's browser E2E loop](decisions/owner-d
 The prior [Debug/Release Simulator procedure](decisions/owner-decision-local-edit-loop-2026-10-04.md)
 remains historical guidance for when the owner resumes native work. Do not silently reset or
 re-pin a save when that happens.
-
-The [live Chapter 1 board](live-board.md) displays local Git facts and explicit
-last-reported phases, activities and check durations; it does not replace these gates.
 
 ## Token hygiene
 
