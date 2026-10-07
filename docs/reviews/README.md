@@ -508,3 +508,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D8 primary review](2026-10-06-d8-primary-review.md): source `41e86ee7`, CHANGES REQUIRED; combat escape, safe allowlist admission, replacement invariant and remaining save/browser proof.
 
 - [D8 primary scoped fix round 1](2026-10-06-d8-primary-review.md#scoped-fix-round-1--p1p3-closed-p4-open): source `ec0f2dd3`, P1–P3 closed; P4 save/browser acceptance remains open. TypeScript24/24, Elixir16/16, three focused mutations red and restored.
+
+- [D8 primary P4 save proof](2026-10-06-d8-primary-review.md#scoped-p4-save-proof--closed-browser-open): source `efc7f5eb`; save portion closed after25 reopens/20 faults and typed-corruption red control. Browser held refresh/Shoo remains open; CHANGES REQUIRED.

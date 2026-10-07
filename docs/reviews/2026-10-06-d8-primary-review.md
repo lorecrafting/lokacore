@@ -58,3 +58,37 @@ issue; existing settlement and validator patterns suffice.
 Overall verdict remains **CHANGES REQUIRED**, solely for open primary finding
 D8-P4. Final-head CI and required independent second-opinion closure remain PM
 merge gates.
+
+
+## Scoped P4 save proof — closed; browser open
+
+Exact source reviewed: `efc7f5ebb112748e281f7b681162ccc4737d586c`.
+Scope: the added P4 evidence script, its changed authority fixture/cases, and the
+existing operation-based fault harness they use. P1–P3 were not reopened.
+
+**P4 SAVE PORTION CLOSED.** Independently ran
+`mise exec -- node docs/evidence/2026-10-06-d8-d11-integration/crow-p4-save.ts`:
+exit0,25 additional cold reopens and20 actual failed-COMMIT/lost-acknowledgement
+cases; the imported authority suite also passed6/6. Checked ordinary nest
+Take/Close/eight-root Put and fallback states; Shoo, Attack/Flee, fatal combat,
+replacement and generation2 Drop; pending memory stays unchanged, absent COMMIT
+preserves prior rows where asserted, settled invocation/job replay changes no rows,
+and cold-open state matches the committed state. The prior17 flight/home
+checkpoints and10 fault cases remain present. No production code changed.
+
+Independently ran the supplied `--red-control`: exit7, expected `open` versus
+actual typed `save_corrupt` after changing the persisted exact coin-holder row.
+The same cold-open checker therefore detects a real isolated storage mutation;
+no source mutant or altered save was retained. All16 evidence hashes verify.
+Ponytail/test-integrity check: bounded proof scenarios reuse actual invocations,
+real SQLite and the existing operation fault mechanism; no additional finding.
+
+**P4 BROWSER PORTION OPEN; overall CHANGES REQUIRED.** Full-nest fallback is
+recorded as proved. PM reports a transient carrying label observation, which this
+save-only recheck does not independently certify. Remaining browser obligation:
+refresh during actual crow-held custody and confirm the same carried coin/crow
+continues lawfully; demonstrate Shoo success releasing that exact coin once to
+ordinary room Take, and truthful refusal/unavailability afterward. Retain the
+observations on the isolated browser run, then obtain scoped primary closure and
+checks green on the exact final merge head. Native work stays paused; owner save
+and deferred blur remain untouched.
