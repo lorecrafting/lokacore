@@ -29,6 +29,7 @@ export function source() {
     'e1_repro.ts',
     'sim.ts',
     'e1_case_host.ts',
+    'e1_obligations.ts',
     'e1_paths.ts',
     'e1_routes.ts',
     'e1_optional_quests.ts',
