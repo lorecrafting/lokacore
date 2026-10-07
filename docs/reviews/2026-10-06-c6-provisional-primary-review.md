@@ -114,3 +114,84 @@ actual detour behavior. No production source was edited during this recheck.
 Ponytail/correctness scoped self-review: the two projection conditions and small
 Book formatter are sufficient; no new dependency, schema or release pin, generic
 rendering layer, or unnecessary test fixture. No additional finding.
+
+
+## Final actual-publication source review
+
+**Verdict: APPROVE for source `206ffb39de549d9781fa36bb61e9fada2852ad4f`.**
+No open primary source findings. This approves the final source and release pin;
+full local publication checks, independent save/protocol disposition, browser
+closure, exact-head hosted CI, PR and merge remain delivery gates. It does not
+claim C6 published or owner/native proof.
+
+Reviewed final integration over published D9 main `b52eaeff`, candidate source
+`c32d1c21`, and the three-file bundled-Book correction to `206ffb39`. Earlier
+provisional P1/P2 remain closed. Checked the changed source/pin/tests and direct
+movement/composition callers, retained hound/death/receipt ownership, current
+Sedge dialogue selection, final transcript discovery and independent oracle.
+
+### Final pin and integration
+
+Chapter `0.0.41`, API `1.36`, content hash
+`cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`,
+209 initial identities. Ran the standard-library Python successor generator with
+writes captured in memory: both final hash/canonical and ID output reproduce the
+retained fixture bytes exactly. The generator starts from unchanged frozen D9
+v040, independently expands C6 references, and pins the five literal route edges
+and minus-one consequence; it calls no compiler/kernel helper. Elixir source
+compilation equals that complete answer; TypeScript allocation compares every
+initial identity to the independent answer.
+
+Size corrections retain validation order, complete prior-row checks, immutable
+bindings, attempt identity, cursor increments and legal lifecycle transitions.
+Movement still passes its transfer prefix into patrol then expedition, and
+preserves resulting operations/events/narration order. The closed-union target
+and row dispatch changes preserve quest/patrol behavior. No existing frozen
+fixture was changed. The provisional duplicate artifact and special transcript
+replay override are removed; normal discovery replays the final trace including
+ancestry selection.
+
+Browser preparation independently found that `c32d1c21` still bundled v040. The
+minimal reviewed correction selects v041 in the actual App and updates the
+existing shell test's independent literal hash. That packaging issue is closed
+at the approved source above.
+
+### Independent checks
+
+- Final C6 kernel/schema/actual-source/real-SQLite and full transcript replay:
+  exit zero, seventeen tests passed.
+- Focused Elixir chapter oracle, expedition physical-edge compiler admission,
+  deer/dream/patrol consumers and portable composition: exit zero, thirty-two
+  tests passed.
+- Actual corrected App shell: exit zero, five tests passed, including unsupported
+  old-save refusal/preservation and unchanged save ownership.
+- A throwaway actual-source real-SQLite control: exit zero. Sedge teaches free D1
+  swim before any S27 instance; cold reopen retains it; actual D6 Pool Bottom has
+  the literal 120-second water budget; ordinary return then real populated hound
+  Start/Flee and the five ordered entries complete C6, still retaining swim.
+- A throwaway extension to the real fatal-bleed SQLite test: exit zero. Stage-three
+  fatal return cold-reopens with `marsh.journal.failed`; ordinary corridor return
+  and immediate fresh Restart cold-reopen with `marsh.journal.active` and cursor
+  zero. Both reviewer controls were removed.
+- `git diff --check` on final changes: exit zero.
+
+The retained real-SQLite suite also proves each ordered stage/shelter reopen,
+C6-first Sedge acknowledgement and subsequent independent lesson/D6 use, forged
+save refusal without changed rows, deferred-FK failed COMMIT, successful COMMIT
+with lost acknowledgement, and exact-invocation replay without duplicate reward.
+The actual-source hostile-prior Sedge regression confirms the hostile default
+prompt remains while explicit C6 acknowledgement and free D1 teaching work.
+
+The compiler and loader each reject a controlled nonexistent north route edge;
+the loader input is independently rehashed so it reaches semantic admission.
+Schema tests execute their individual guard removals through the explicit schema
+argument. Inspected the recorded restored physical-exit and selected-dialogue
+mutants: their focused new regressions fail while earlier focused cases pass.
+New cases name distinct plausible breaks, use literal/independent answers and
+accepted behavior on controlled source; no source-text assertion or coverage-only
+case was added. Production source was not edited during this review.
+
+Ponytail/correctness final self-review: bounded helpers remain in their current
+owners, no new dependency or raised size allowance, no alternate lesson or extra
+state framework. Necessary admission and corruption/refusal checks remain. No
+additional finding. Owner-save bytes were never read or written.
