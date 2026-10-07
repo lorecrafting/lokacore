@@ -20,6 +20,7 @@ import {
 } from './e1_case_host.ts';
 import { checked } from './sim.ts';
 import { ending, ENDINGS } from './e1_paths.ts';
+import { chandlersDebt, lanternDream } from './e1_optional_quests.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
@@ -47,6 +48,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     fault ||
       start.case_id === 'thirty-days' ||
       start.case_id === 'topology' ||
+      ['debt-on_time', 'dream-follow_fox', 'dream-wake'].includes(start.case_id) ||
       ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
     'unknown E1 case',
   );
@@ -143,7 +145,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   const receipts: object[] = [];
   const run = (
     name: string,
-    recipe: (a: ReturnType<typeof caseHost>, path: string) => object,
+    recipe: (a: ReturnType<typeof caseHost>, path: string) => object | void,
     fault_schedule: object[] = [],
   ) => {
     const path = join(out, `${name}.db`),
@@ -155,7 +157,7 @@ function recordCases(bytes: Uint8Array, out: string) {
       fault_schedule,
     });
     try {
-      const summary = recipe(a, path);
+      const summary = recipe(a, path) ?? null;
       a.record({
         kind: 'finish',
         steps: a.commands.length,
@@ -192,6 +194,9 @@ function recordCases(bytes: Uint8Array, out: string) {
     for (const [child, allegiance, fox] of ENDINGS)
       run(`${child}-${allegiance}`, (a) => ending(a, child, allegiance, fox));
     run('topology', topology);
+    run('debt-on_time', chandlersDebt);
+    for (const branch of ['follow_fox', 'wake'] as const)
+      run(`dream-${branch}`, (a) => lanternDream(a, branch));
     run('thirty-days', thirtyDays);
     for (const fault of FAULTS)
       run(`sqlite-${fault}`, (a, path) => storageFault(a, path, fault), faultSchedule(fault));
