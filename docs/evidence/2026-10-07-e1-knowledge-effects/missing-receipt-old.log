@@ -1,0 +1,30 @@
+(node:53855) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (1571.226291ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (3648.672625ms)
+✔ E1 binds the exact study_tracks recipe and required policy from committed performance (1422.273291ms)
+✔ E1 binds the two bell assignments and the epilogue event to accepted receipts (2853.154041ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (397.713125ms)
+✔ E1 binds each required predicate of the selected Elspeth report dialogue (973.477042ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (4164.704958ms)
+✔ E1 binds both selected dream branches and acknowledged scene steps (2127.820208ms)
+(node:53861) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 binds Maud objective only on its committed resolved transition (7723.598917ms)
+✔ E1 binds selected dialogue fact adjustment and assignment from committed receipt (4739.708875ms)
+✔ E1 binds only visible entity definitions after committed room entry (667.254167ms)
+✔ E1 binds only the used ferry route on committed arrival (544.508458ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18245.663833
+
+exit_status=0

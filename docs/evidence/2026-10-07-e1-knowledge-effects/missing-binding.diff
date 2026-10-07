@@ -1,0 +1,11 @@
+--- a/kernel/ts/test/e1_obligations.ts
++++ b/kernel/ts/test/e1_obligations.ts
+@@ -100,7 +100,7 @@
+       const steps =
+         selected?.sequence?.flatMap((step, index) => {
+           if (step.op !== 'fact.assign' && step.op !== 'fact.adjust')
+-            return knowledgeChoiceStep(before, after, command, decision, step)
++            return false
+               ? [`${base}/sequence/${index}`]
+               : [];
+           const old = value(before, p.actor_id, step.fact);

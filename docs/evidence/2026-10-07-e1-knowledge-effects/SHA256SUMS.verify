@@ -1,0 +1,13 @@
+README.md: OK
+docs.log: OK
+missing-binding-new.log: OK
+missing-binding-old.log: OK
+missing-binding.diff: OK
+missing-receipt-new.log: OK
+missing-receipt-old.log: OK
+missing-receipt.diff: OK
+restored.log: OK
+size.log: OK
+typecheck.log: OK
+
+exit_status=0
