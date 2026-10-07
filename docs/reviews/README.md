@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [E1 runner primary source review](2026-10-06-e1-runner-primary-review.md): exact `cf97a4c3`, **CHANGES REQUIRED**, E1-P1 blocks incomplete v042 definition inventory. Admission/replay red controls verified; 81 focused and 58 real SQLite tests pass. Runner packaging only; final E1 certification remains pending.
+- [E1 runner primary source review](2026-10-06-e1-runner-primary-review.md): initial `cf97a4c3` CHANGES REQUIRED; scoped fix `32448076` **APPROVE**, E1-P1 closed. All 92 affected roots restored; 82 focused tests pass and both inventory red controls fail. Runner packaging only; final E1 certification remains pending.
 
 
 - [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, initially CHANGES REQUIRED; scoped fix `388c430e` APPROVE closes BASE-R1 remaining C3/D12 published-status contradictions. Docs check and all 25 historical heading aliases pass.

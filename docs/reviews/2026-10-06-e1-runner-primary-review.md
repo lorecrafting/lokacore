@@ -77,3 +77,21 @@ runner receipts, 10,000 sequences, 30-day proof, path-to-receipt coverage,
 host-fault export/replay and final independent gate review remain pending.
 Browser smoke belongs to E2/E3; native proof remains deferred. These acceptance
 carries are separate from the concrete runner defect above.
+
+## Scoped E1-P1 fix recheck
+
+**APPROVE** runner packaging at exact fix source
+`32448076e9897d7b71e374b163794d1239cf0228`; **E1-P1 closed**.
+This disposition supersedes the initial source verdict above, not the pending
+certification carries. Review scope: structural-depth fix, its literal v042
+coverage test, direct inventory consumers and retained fix evidence.
+
+- `kernel/ts/test/e1_policy.ts:140–151` now records actual section children at depth 1, independent of slashes in a definition key. The existing nested predicates and recursive walk remain intact.
+- Independently checked every root in the eight affected families against literal expected counts: all **92** are retained exactly once. All **1,235** pre-fix uses, including their feature/path/gate values and nested obligations, remain present; the required gate set is unchanged.
+- `e1.test.ts` + `cartridge.test.ts`: **82/82 pass**, exit 0. The new test uses literal candidate paths and expected feature owners, independent of the walker.
+- In a detached throwaway worktree, restoring the old path predicate and deleting the inventory call each makes the new focused test fail (exit 1, missing the literal marsh-quest root). Restored E1 suite: **4/4 pass**, exit 0. Mutations restored and worktree removed.
+- Retained evidence hashes verify, exit 0. Author logs retain the old-suite gap, pre-fix failure, both red controls, restored pass and full-check pass. The independent full check was not repeated for this narrow recheck.
+- Ponytail/correctness: one depth counter fixes the existing walker; no additional abstraction or dependency. No open finding in the scoped fix.
+
+No final candidate run, milestone closure, browser/native proof or owner-save
+operation was performed by this recheck.
