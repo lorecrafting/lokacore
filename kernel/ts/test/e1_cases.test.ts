@@ -479,6 +479,51 @@ test('E1 binds Maud objective only on its committed resolved transition', () => 
   }
 });
 
+// Breaks: Maud's accepted turn-in changes trust and cellar status but its choice effects stay gapped.
+test('E1 binds selected dialogue fact adjustment and assignment from committed receipt', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-choice-effects-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    {
+      case_id: 'mauds-cellar',
+      source,
+      fault_schedule: [],
+    },
+  );
+  const base = '/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_turn_in/choices/done';
+  const expected = [`${base}/sequence/0`, `${base}/sequence/1`];
+  try {
+    const seen: string[][] = [];
+    a.watch((before, after, command, decision) => {
+      if (command.payload.type === 'choose') {
+        const paths = witnessedObligations(before, after, command, decision).filter((path) =>
+          path.startsWith(base),
+        );
+        if (paths.length) seen.push(paths);
+      }
+    });
+    maudsCellar(a);
+    assert.deepEqual(seen, [[base, ...expected]]);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.deepEqual(
+      expected.filter((path) => !replay.obligations.includes(path)),
+      [],
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
 // Breaks: entering a room displays its authored item or NPC but leaves that exact definition gapped.
 test('E1 binds only visible entity definitions after committed room entry', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-e1-visible-'));

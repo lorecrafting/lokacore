@@ -247,6 +247,10 @@ An accepted `talk` also witnesses the selected dialogue's satisfied policy root.
 Under an `all` node, each child must hold and may be witnessed recursively; an
 `any` or `not` node does not credit its children without separate branch evidence.
 Rejected talk and merely offered dialogue actions witness no policy path.
+An accepted selected dialogue choice witnesses an authored fact assignment or
+adjustment sequence step only when that exact fact changes from its prior value
+to the authored result and the committed receipt records the same transition.
+Other sequence operations and unselected choices require separate evidence.
 An accepted `perform` witnesses its exact authored recipe definition and admitted
 policy root. Each child under a required `all` policy node is also witnessed;
 `any` and `not` descendants require separate branch proof. Recipe outcomes and

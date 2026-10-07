@@ -131,10 +131,34 @@ export function witnessedObligations(
   if (p.type === 'choose') {
     const choice = before.state.choices?.[p.continuation_id];
     if (choice?.status !== 'pending') return questPaths;
-    if (choice.source.kind === 'dialogue')
-      return withQuests([
-        `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
-      ]);
+    if (choice.source.kind === 'dialogue') {
+      const key = `${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}`;
+      const base = `/dialogues/${key}/choices/${p.choice_id}`;
+      const selected = before.cartridge.dialogues?.[key]?.choices[p.choice_id];
+      const steps =
+        selected?.sequence?.flatMap((step, index) => {
+          if (step.op !== 'fact.assign' && step.op !== 'fact.adjust') return [];
+          const old = value(before, p.actor_id, step.fact);
+          const next =
+            step.op === 'fact.assign'
+              ? step.value
+              : typeof old === 'number'
+                ? old + step.amount
+                : undefined;
+          if (next === undefined || old === next || value(after, p.actor_id, step.fact) !== next)
+            return [];
+          return decision.events.some(
+            (event) =>
+              event.payload.type === 'fact_changed' &&
+              JSON.stringify(event.payload.fact) === JSON.stringify(step.fact) &&
+              event.payload.old === old &&
+              event.payload.new === next,
+          )
+            ? [`${base}/sequence/${index}`]
+            : [];
+        }) ?? [];
+      return withQuests([base, ...steps]);
+    }
     const dream = gameView(before).notices?.find((notice) => notice.bed)?.dream;
     if (
       choice.source.kind !== 'scene' ||
