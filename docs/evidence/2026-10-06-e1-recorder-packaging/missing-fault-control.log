@@ -1,0 +1,44 @@
+old mutation exit=0
+✔ E1 inventory retains slash-bearing v042 definition roots (66.429625ms)
+✔ E1 command refuses a different admitted candidate (442.125209ms)
+✔ E1 command fails an unknown applicability obligation (351.382ms)
+✔ retained repro rechecks the invariant and refuses incomplete or changed inputs (449.791792ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1557.632208
+
+new mutation exit=1
+✖ E1 SQLite case requires complete fault schedule and committed commands (357.330083ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 626.003375
+
+✖ failing tests:
+
+test at kernel/ts/test/e1_cases.test.ts:24:1
+✖ E1 SQLite case requires complete fault schedule and committed commands (357.330083ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://<redacted-path>
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /incomplete fault schedule/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+

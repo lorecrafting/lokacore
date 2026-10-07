@@ -1,5 +1,8 @@
 # E1 runner packaging — author evidence
 
+The [bounded ending, 30-day and real SQLite recorder checkpoint](../2026-10-06-e1-recorder-packaging/README.md)
+extends this packaging; certification remains pending.
+
 Implementation begins from published `71c3323dee2d9265e59587957eea3e3c90f544ac`.
 The active [proof policy](../../system/architecture.md#e1-exact-candidate-proof-policy)
 was amended before code in `cc7854eb`. Candidate version, content hash, API,

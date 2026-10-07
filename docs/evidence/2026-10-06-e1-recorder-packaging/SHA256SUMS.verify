@@ -1,0 +1,9 @@
+README.md: OK
+elapsed-helper.log: OK
+focused.log: OK
+full-gate.log: OK
+missing-fault-control.log: OK
+provisional-case-cli.log: OK
+provisional-case-hashes.verify: OK
+provisional-case.SHA256SUMS: OK
+provisional-report.json: OK
