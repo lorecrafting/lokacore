@@ -97,3 +97,5 @@ Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../.
 [Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint; recorder registration and E1 certification remain pending.
 
 [Modal scene acknowledgement binding](../../evidence/2026-10-07-e1-modal-scene-binding/README.md) is a clean-source recorder checkpoint with ten dream scene paths and other authored obligations pending.
+
+[Selected dialogue policy binding](../../evidence/2026-10-07-e1-dialogue-policy-binding/README.md) is a bounded checkpoint for an accepted `all` branch; other authored policy paths remain pending.
