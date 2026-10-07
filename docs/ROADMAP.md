@@ -57,6 +57,8 @@ The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-o
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
 [#265](https://github.com/lorecrafting/lokacore/pull/265). Neither closes E1 certification.
+The [C6 headless checker evidence](evidence/2026-10-06-e1-expedition-invariant/README.md)
+records a legal expedition Start correction; it grants no E1 path credit.
 
 The [post-D10 architecture record](evidence/2026-10-06-post-d10-architecture-audit.md)
 links that resolved recovery defect and four concrete post-E3 maintenance risks,
