@@ -516,3 +516,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D9 primary scoped source fix review](2026-10-06-d9-primary-source-review.md#scoped-fix-review--source-approve-final-browser-acceptance-pending): source `5bee6811`, source APPROVE; P1 closed for prior/fox, no-Bram cast reconciled, 208-ID pin regenerated, eight red controls fail and restore green. Final browser/independent-opinion/publication gates pending.
 - [D9 provisional foundation second opinion](2026-10-06-d9-foundation-opinion.md): source `50b3e67f`, CHANGES REQUIRED; regular-first suppression deadline cold reopen rejects a lawful receipt, and new portable suppression semantics lack independent oracle/differential coverage.
+
+- [D9 independent save and protocol recheck](2026-10-06-d9-save-opinion.md): source `5bee6811`, scoped APPROVE; both suppression deadline orders survive real SQLite faults/reopen/replay, malformed receipts refuse, and old-release refusal preserves bytes. Supersedes the provisional save approval; portable foundation and browser/publication gates remain separate.
