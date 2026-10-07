@@ -1,4 +1,4 @@
-// size: allow 545, original ferry custody, death recovery and SQLite faults share one transport fixture
+// size: allow 563, original ferry custody, death recovery and SQLite faults share one transport fixture
 // D1 uses the real rollback-journal SQLite host, not browser refresh as a fault oracle.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -482,9 +482,16 @@ test('actual Chapel death return reaches the dark-loft corpse without gear and r
   assert.deepEqual(pennies(a.story.world()), [0, 2]);
 });
 
-// Breaks: transport-only saves skip accepted-history validation because no liquid, service, patrol, exchange or fuel producer activates it.
+// Breaks: transport saves skip accepted-history validation when every other history producer is absent.
 test('a transport-only cartridge validates crossing receipts without another producer', (t) => {
   const a = setup(':memory:', (c) => {
+    delete c.world.water;
+    delete c.bleeds;
+    delete c.map_positions;
+    for (const capability of ['knowledge', 'food']) {
+      delete c.manifest.requires.capabilities[capability];
+      delete c.lock.capabilities[capability];
+    }
     delete c.services;
     delete c.liquids;
     delete c.populations;
@@ -500,13 +507,24 @@ test('a transport-only cartridge validates crossing receipts without another pro
     );
     for (const [key, npc] of Object.entries(c.npcs) as [string, any][])
       if (npc.spawn_template) delete c.npcs[key];
-    for (const npc of Object.values(c.npcs) as any[]) delete npc.services;
+    for (const npc of Object.values(c.npcs) as any[]) {
+      delete npc.services;
+      if (npc.shop) delete npc.shop.buy_discount;
+    }
     for (const item of Object.values(c.items) as any[]) {
       delete item.vessel;
       delete item.fuel;
+      delete item.readable;
+      delete item.edible;
+      delete item.bandage;
     }
-    for (const room of Object.values(c.rooms) as any[])
-      for (const detail of Object.values(room.details ?? {}) as any[]) delete detail.liquid_source;
+    for (const room of Object.values(c.rooms) as any[]) {
+      for (const exit of Object.values(room.exits) as any[]) delete exit.knock;
+      for (const detail of Object.values(room.details ?? {}) as any[]) {
+        delete detail.liquid_source;
+        if (detail.harvest) delete detail.harvest.careful;
+      }
+    }
     for (const quest of Object.values(c.quests) as any[]) {
       if (quest.patrol || quest.expedition)
         quest.objective = {

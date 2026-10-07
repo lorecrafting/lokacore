@@ -45,7 +45,7 @@ acknowledgement, same-invocation replay, transport receipt forgery and malformed
 water/history rejection with unchanged saved rows. The authority glob also passed
 the existing ancestry, recovery, general faults, saves and Start over controls.
 
-The full active `bin/check_all.sh` exited **0**: 401 ExUnit tests passed; kernel
+The full active `bin/check_all.sh` on the original repair exited **0**: 401 ExUnit tests passed; kernel
 TypeScript typechecking and the full kernel Node suite (including the headless
 simulator) passed; contract/content, boundary, lint, docs/tracker, formatting,
 size and planted red controls passed. A final documentation check after adding
@@ -70,7 +70,7 @@ validation bypass. Correctness self-review checked unmodified release genesis,
 once-only ancestry, distinct invocation IDs, deterministic real death, replay,
 fixture reference integrity and unchanged behavioral assertions. Two type errors
 in the first D9 assertion revision were caught by the active check and fixed before
-handoff. Test size allowances retain the shared SQLite fixtures (transport 545
+handoff. Test size allowances retain the shared SQLite fixtures (transport 563
 lines, water 507); independent review should confirm that splitting is less clear.
 
 Native/mobile verification remains paused; these are explicitly requested Node
@@ -78,3 +78,29 @@ fixture checks. The full headless engine simulator remains in the active check.
 No browser, phone, native build, owner save, push or PR was used. Independent review
 and integration with later `main` remain PM steps. This record summarizes observed
 results; raw transient console logs are not committed.
+
+## Independent review correction R1
+
+The reviewer found that the transport-only test still passed when only the
+transport trigger was removed from `liquidSave`: other retained declarations
+also invoked accepted-history validation. This was a test-isolation blocker.
+
+The controlled fixture now also removes knowledge and map/Knock declarations,
+water, food and its dependent edible/bandage/bleed declarations, readable item
+metadata, careful Harvest and shop discounts. The loader accepts the resulting
+cartridge; accepted crossing, cold reopen, literal `[1, 2]` balances, forged-event
+refusal and unchanged-database assertions remain.
+
+The exact review mutant deletes only
+`!Object.keys(fresh.cartridge.transports ?? {}).length &&` from `liquid-save.ts`.
+Running the existing transport-only test exited **1**, at its forged-event
+refusal: actual `open`, expected `save_corrupt`. The production file was restored
+immediately. With the guard restored, the focused 25-test command above exited
+**0** (25 passed, zero failures/skips), including real SQLite corruption and fault
+controls. `mise exec -- npm run typecheck` in `kernel/ts` also exited **0**.
+Documentation and formatting checks passed. The full gate was not repeated for
+this fixture-only correction; the original full-gate result remains above.
+
+Ponytail Review and correctness self-review found no further issue: the change
+extends the existing fixture reduction, adds no test or helper, and changes no
+production guard. Independent reviewer recheck remains required.
