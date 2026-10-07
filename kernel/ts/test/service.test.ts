@@ -74,6 +74,14 @@ test('service view compares only a current-actor, nonnil invocation with its off
     error: { code: 'permission_denied' },
   });
   assert.equal(agrees(nil).agrees, true);
+  assert.equal(
+    gameview_agrees_with_admission({ view, command: nil, decision: agrees(command).decision }),
+    false,
+  );
+  assert.equal(
+    gameview_agrees_with_admission({ view, command: nil, decision: agrees(foreign).decision }),
+    false,
+  );
 });
 
 // Breaks: rental performs Rest/recovery, repeats charge, or immediate meal/drink lose conserved payment/stock.
