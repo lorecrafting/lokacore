@@ -1,6 +1,7 @@
+// size: allow 315, terminal parsing and authored text projection, including Where labels
 // Terminal words and room text (00 §4.10, 06 §20); action aliases live here until authored.
 import { gameView, type Cartridge, type World } from '../src/index.ts';
-import type { EntityId } from '../src/contracts.gen.ts';
+import type { EntityId, LocatedNpc } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { COMPASS, refString } from '../src/runtime/decision.ts';
 import { exitOf } from '../src/mechanics/lookups.ts';
@@ -298,4 +299,13 @@ export function reason(
     ),
   };
   return words[`${type} ${code}`] ?? words[code!] ?? `(${d.kind}: ${code})`;
+}
+
+/** Report saved observation time, never a guessed live remote position. */
+export function locationLine(world: World, location: LocatedNpc): string {
+  if (location.status === 'unknown') return 'Their whereabouts are unknown.\n';
+  const name = say(world.cartridge, world.entities[location.target_id].short);
+  return location.status === 'here'
+    ? `${name}: here.\n`
+    : `${name}: last seen at ${say(world.cartridge, world.rooms[location.room_id].title)} at ${location.at}s.\n`;
 }

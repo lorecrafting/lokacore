@@ -1,5 +1,6 @@
+import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
-// size: allow 315, one terminal session: its loop, each command's dispatch and the replay
+// size: allow 320, one terminal session: its loop, each command's dispatch and the replay
 // `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
 // Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
@@ -157,6 +158,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
 }
 
 type Turn = ReturnType<typeof decide>;
+// size: allow 45, terminal outcome projection retains ordinary command and located output
 function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
   const { trace, latency, decision } = result;
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
@@ -180,14 +182,8 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     activated_with_possession: 'You agree to help, and you already have what is needed.\n',
     choice_opened: choice(cartridge, r.world),
   };
-  const location = decision.kind === 'accepted' && decision.location;
-  if (location)
-    done.located =
-      location.status === 'here'
-        ? `${name(location.target_id)}: here.\n`
-        : location.status === 'last_seen'
-          ? `${name(location.target_id)}: last seen at ${say(cartridge, r.world.rooms[location.room_id].title)} at ${location.at}s.\n`
-          : 'Their whereabouts are unknown.\n';
+  if (decision.kind === 'accepted' && decision.location)
+    done.located = locationLine(r.world, decision.location);
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
     decision.kind !== 'accepted'

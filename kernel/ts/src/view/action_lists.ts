@@ -1,4 +1,4 @@
-// size: allow 325, food, water, and practical skill offers share the composed view list
+// size: allow 330, food, water, practical skills and local Knock share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { bandageActions } from './bleed.ts';

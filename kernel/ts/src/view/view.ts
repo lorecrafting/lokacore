@@ -67,7 +67,6 @@ export function gameView(world: World): GameView {
   const steps = { n: 0 };
   const actions = lists(world, world.character, steps);
   const equipment = equipmentViews(world, actions, steps);
-  const place = placeView(world, here, steps);
   const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
@@ -83,7 +82,7 @@ export function gameView(world: World): GameView {
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
-    place,
+    place: placeView(world, here, steps),
     exits: exits(world, actions.door, steps),
     actions: actions.place,
     ...noticeViews(world, here, actions.notice, steps),
