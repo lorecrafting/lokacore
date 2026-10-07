@@ -17,7 +17,9 @@ local authority; the online Realm authority (BEAM, Phoenix transport) is not bui
 | `kernel/ts/test/` | kernel tests, the deterministic simulator (`sim.ts`), differential peers the Elixir tests call | built |
 | `mobile/authority/local-story/` | the local Story authority: admission, receipts, the SQLite save, recovery, the trace, story point delivery, the session controller | built |
 | `mobile/app/` | the Expo shell (`App.tsx`) and the book-style touch UI (`book/`) | built |
-| `mobile/authority/remote-realm/`, `mobile/features/*`, `mobile/packages/*` | Realm transport, Story and Realm UX, shared packages: `export {}` stubs that pin the import rules | empty |
+| `mobile/authority/remote-realm/`, `mobile/features/*` | Realm transport and Story/Realm UX | empty |
+| `mobile/packages/game-view/session.ts` | host-neutral renderer/session boundary used by the local authority | built |
+| `mobile/packages/ui/` | shared UI package | empty |
 | `protocol/` | the current contracts, registries and fixtures both kernels validate against ([map](../../protocol/README.md)) | active |
 | `cartridges/` | development cartridge sources and their replayable transcripts | content |
 | `bin/` | checks and generators; `bin/check_all.sh` runs them all; `bin/loka` the CLI | tooling |
