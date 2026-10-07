@@ -214,7 +214,7 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 56, exact same-plan deadline pairing keeps ordered jobs in one boundary
+// size: allow 65, population deadline and bleed round pairing share ordered job delivery
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})

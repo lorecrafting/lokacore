@@ -1,4 +1,3 @@
-// size: allow 370, population genesis, suppression and one bounded resume share plan ownership
 import type {
   CharacterId,
   Command,

@@ -1294,16 +1294,16 @@ conditional fox policy. No new room, NPC, token relationship fact or synthetic
 ferryman instance is needed.
 
 The audible area is the existing **25 Ashmere rooms and ten public Priory
-rooms**, excluding Fen and isle rooms. Author the area as explicit chapter
+rooms**, excluding Fen and isle rooms. Bell Read, immediate narration and cast
+responses must not claim audible sound in those excluded rooms. Author the area as explicit chapter
 room references with loader validation; a room's ordinary descriptive tags do
 not become sound authority. Flood variants affect Reed Path and Mire text only.
 The bell's hound suppression duration is **172800 logical seconds**, owned by
 the cartridge. Author its population-plan reference and resume bound against
 the existing hound plan; no new population cap, catch-up count or creature is
-declared. The published D6 predecessor is chapter v035/API1.30,
-[hash/190 IDs](../../protocol/fixtures/missing_child_v035_hash.json).
-D9 source successor release/API/hash/IDs remain null until its actual source
-is independently pinned.
+declared. The integrated D9 release follows published D8 v039/API1.34. Its independent
+v040/API1.35 hash and209 allocation answers are retained with
+[the integration proof](../evidence/2026-10-06-d9-integration/README.md).
 
 ## D12 practical skill declarations
 

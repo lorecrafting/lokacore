@@ -953,7 +953,7 @@ browser refresh is separate proof.
 
 ## D9 village consequence recovery
 
-**Selected, pending implementation.** The accepted bell receipt and causal
+**Selected D9 contract.** The accepted bell receipt and causal
 event bind exact actor, room, time and one cue occurrence. Cold reopen can
 reproduce its retained past narration without emitting a new cue or reapplying
 consequences. Persist the hound suppression generation/deadline, resume job,

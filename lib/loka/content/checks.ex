@@ -1,4 +1,4 @@
-# size: allow 440, careful skill refs and Study ingress join shared source checking
+# size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]

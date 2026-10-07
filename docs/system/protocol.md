@@ -1134,7 +1134,7 @@ rewearing and no general remote Take. Malformed custody never creates an offer.
 
 ## D9 reaction, cue and Study admission composition
 
-**Selected, pending implementation.** The existing child and bell choice
+**Selected D9 contract.** The existing child and bell choice
 producers emit their committed fact/quest events; D9 consumes them in the
 bounded reaction queue. Terminal fact writers are unchanged. Cast and Green
 profiles may be derived from current facts without a persisted mirror. A

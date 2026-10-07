@@ -11,7 +11,7 @@ import { admit, adopt } from '../../../kernel/ts/src/runtime/proposal.ts';
 import { adjust, level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { deathSequence } from '../../../kernel/ts/src/mechanics/death/sequence.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
-import { gameView } from '../../../kernel/ts/src/index.ts';
+import { gameView, loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
 import type { Command, FactValue } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -123,6 +123,64 @@ function setup(
   return { ...p, story, release, host };
 }
 
+function staysToBelfry(p: ReturnType<typeof setup>, elapsed = 0) {
+  let n = 1;
+  const ok = (action_key: string, target_ids: string[] = [], input: object = {}) => {
+    if (elapsed) {
+      const from = p.story.world().state.clock;
+      const tick = p.story.elapsed({
+        expected_run_id: p.story.runId(),
+        from,
+        until: from + elapsed,
+      });
+      assert.equal(tick.kind, 'saved');
+    }
+    const result = p.story.invoke({
+      invocation_id: `bbbbbbbb-0000-4000-8000-${String(n++).padStart(12, '0')}`,
+      actor_id: p.story.world().character,
+      action_key,
+      target_ids,
+      input,
+    });
+    assert.equal(result.kind, 'saved');
+    if (result.kind === 'saved')
+      assert.equal((result.decision as { kind: string }).kind, 'accepted');
+  };
+  const move = (...directions: string[]) =>
+    directions.forEach((direction) => ok('move', [], { direction }));
+  const choose = (choice_id: string, extra: object = {}) =>
+    ok('choose', [], {
+      continuation_id: gameView(p.story.world()).choice!.continuation_id,
+      choice_id,
+      ...extra,
+    });
+  const talk = (action: string, npc: string) => ok(action, [entity(p.story.world(), 'npc', npc)]);
+  move('south', 'south', 'south', 'south', 'south');
+  talk('elspeth', 'elspeth');
+  choose('accept');
+  move('north', 'north');
+  ok('take', [entity(p.story.world(), 'item', 'fox_drawing')]);
+  move('south', 'south');
+  talk('a_elspeth_report', 'elspeth');
+  choose('report');
+  move('south', 'south');
+  ok('study_tracks');
+  move('south', 'south');
+  talk('a_vesper_meeting', 'vesper');
+  choose('meet_wren');
+  talk('b_vesper_riddle', 'vesper');
+  choose('answer', { answer: 'LANTERN' });
+  talk('c_vesper_answered', 'vesper');
+  choose('carry_message');
+  move('north', 'north', 'north', 'north');
+  talk('a_elspeth_return', 'elspeth');
+  choose('stays');
+  move('north', 'north', 'north', 'north', 'north');
+  talk('a_aldric_offer', 'aldric');
+  choose('accept');
+  move('up', 'up');
+}
+
 // Breaks: a confirmed bell cue is lost on cold reopen or replay emits another cue.
 test('real SQLite cold reopen retains one cause-bound bell cue', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-'));
@@ -224,127 +282,152 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
 test('real SQLite fox Study corpse permits pickup then closes ingress after cold reopen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-study-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  const p = setup(join(dir, 'save.db'), studySource());
-  assert.equal(
-    p.story.world().state.containers[p.story.world().body],
-    room(p.story.world(), 'chapel_nave'),
-  );
-  const item = entity(p.story.world(), 'item', 'brass_key');
-  const request = (n: number, action_key: string, target_ids: string[], input: object) => ({
-    invocation_id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
-    actor_id: p.story.world().character,
-    action_key,
-    target_ids,
-    input,
-  });
-  const invoke = (n: number, action_key: string, target_ids: string[], input: object) => {
-    const result = p.story.invoke(request(n, action_key, target_ids, input));
-    assert.equal(result.kind, 'saved');
-    if (result.kind === 'saved')
-      assert.equal((result.decision as { kind: string }).kind, 'accepted');
-  };
-  const reopen = () => {
-    const opened = openStory(
-      p.db,
-      [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
-      p.host,
+  for (const faultKind of ['failed', 'lost'] as const) {
+    const p = setup(join(dir, `${faultKind}.db`), studySource());
+    assert.equal(
+      p.story.world().state.containers[p.story.world().body],
+      room(p.story.world(), 'chapel_nave'),
     );
-    assert.equal(opened.kind, 'open');
-    if (opened.kind !== 'open') throw new Error('saved Study world did not reopen');
-    p.story = opened;
-  };
-  let n = 1;
-  const ok = (action: string, target_ids: string[] = [], input: object = {}) =>
-    invoke(n++, action, target_ids, input);
-  const move = (...directions: string[]) =>
-    directions.forEach((direction) => ok('move', [], { direction }));
-  const choose = (choice_id: string, extra: object = {}) =>
-    ok('choose', [], {
-      continuation_id: gameView(p.story.world()).choice!.continuation_id,
-      choice_id,
-      ...extra,
+    const item = entity(p.story.world(), 'item', 'brass_key');
+    const request = (n: number, action_key: string, target_ids: string[], input: object) => ({
+      invocation_id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
+      actor_id: p.story.world().character,
+      action_key,
+      target_ids,
+      input,
     });
-  const talk = (action: string, npc: string) => ok(action, [entity(p.story.world(), 'npc', npc)]);
-  move('south', 'south', 'south', 'south', 'south');
-  talk('elspeth', 'elspeth');
-  choose('accept');
-  move('north', 'north');
-  ok('take', [entity(p.story.world(), 'item', 'fox_drawing')]);
-  move('south', 'south');
-  talk('a_elspeth_report', 'elspeth');
-  choose('report');
-  move('south', 'south');
-  ok('study_tracks');
-  move('south', 'south');
-  talk('a_vesper_meeting', 'vesper');
-  choose('meet_wren');
-  talk('b_vesper_riddle', 'vesper');
-  choose('answer', { answer: 'LANTERN' });
-  talk('c_vesper_answered', 'vesper');
-  choose('carry_message');
-  move('north', 'north', 'north', 'north');
-  talk('a_elspeth_return', 'elspeth');
-  choose('stays');
-  move('north', 'north', 'north', 'north', 'north');
-  talk('a_aldric_offer', 'aldric');
-  choose('accept');
-  move('up', 'up');
-  ok('silence_bell', [
-    Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0],
-  ]);
-  for (let line = 0; line < 2; line++) {
-    const scene = gameView(p.story.world()).scene!;
-    ok('continue', [], { scene: scene.scene, line: scene.index });
+    const invoke = (n: number, action_key: string, target_ids: string[], input: object) => {
+      const result = p.story.invoke(request(n, action_key, target_ids, input));
+      assert.equal(result.kind, 'saved');
+      if (result.kind === 'saved')
+        assert.equal((result.decision as { kind: string }).kind, 'accepted');
+    };
+    const reopen = () => {
+      const opened = openStory(
+        p.db,
+        [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
+        p.host,
+      );
+      assert.equal(opened.kind, 'open');
+      if (opened.kind !== 'open') throw new Error('saved Study world did not reopen');
+      p.story = opened;
+    };
+    let n = 1;
+    const ok = (action: string, target_ids: string[] = [], input: object = {}) =>
+      invoke(n++, action, target_ids, input);
+    const move = (...directions: string[]) =>
+      directions.forEach((direction) => ok('move', [], { direction }));
+    staysToBelfry(p);
+    ok('silence_bell', [
+      Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0],
+    ]);
+    for (let line = 0; line < 2; line++) {
+      const scene = gameView(p.story.world()).scene!;
+      ok('continue', [], { scene: scene.scene, line: scene.index });
+    }
+    move('down', 'down');
+    reopen();
+    p.sql.exec(
+      'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+    );
+    const faulted = (invocation: ReturnType<typeof request>, unchanged: () => void) => {
+      p.fault.inserted = false;
+      p.fault.kind = faultKind;
+      p.fault.armed = true;
+      assert.equal(p.story.invoke(invocation).kind, 'pending');
+      unchanged();
+      p.fault.reads = false;
+      const settled = p.story.invoke(invocation);
+      assert.equal(settled.kind, 'saved');
+      if (settled.kind === 'saved') {
+        assert.equal(settled.replay, faultKind === 'lost');
+        assert.equal((settled.decision as { kind: string }).kind, 'accepted');
+      }
+      const replayed = p.story.invoke(invocation);
+      assert.equal(replayed.kind, 'saved');
+      if (replayed.kind === 'saved') assert.equal(replayed.replay, true);
+      reopen();
+    };
+    const chapel = room(p.story.world(), 'chapel_nave');
+    const study = room(p.story.world(), 'prior_study');
+    faulted(request(301, 'move', [], { direction: 'west' }), () =>
+      assert.equal(p.story.world().state.containers[p.story.world().body], chapel),
+    );
+    assert.equal(p.story.world().state.containers[p.story.world().body], study);
+    const corpse = p.story.world().state.containers[item];
+    faulted(request(302, 'take', [item], {}), () =>
+      assert.equal(p.story.world().state.containers[item], corpse),
+    );
+    assert.equal(p.story.world().state.containers[item], p.story.world().body);
+    faulted(request(303, 'move', [], { direction: 'east' }), () =>
+      assert.equal(p.story.world().state.containers[p.story.world().body], study),
+    );
+    assert.equal(p.story.world().state.containers[item], p.story.world().body);
+    const refused = p.story.invoke({
+      invocation_id: 'aaaaaaaa-0000-4000-8000-000000000304',
+      actor_id: p.story.world().character,
+      action_key: 'move',
+      target_ids: [],
+      input: { direction: 'west' },
+    });
+    assert.equal(refused.kind, 'saved');
+    if (refused.kind === 'saved')
+      assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'exit_closed' } });
   }
-  move('down', 'down');
-  reopen();
-  p.sql.exec(
-    'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+});
+
+// Breaks: a lawful stays/prior bell intermediate cannot cold-open before the first Continue.
+test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-d9-stays-bell-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const change = (c: any) => {
+    c.entry = ref('room', 'chapel_nave');
+    c.calendar.start = 64800;
+  };
+  const artifact = bundle(change);
+  const loaded = loadCartridge(
+    new TextEncoder().encode(
+      `{"cartridge":${artifact.canonical},"content_hash":"${artifact.sha256}"}`,
+    ),
+    INSTALLED,
   );
-  const west = request(301, 'move', [], { direction: 'west' });
-  const chapel = room(p.story.world(), 'chapel_nave');
-  p.fault.kind = 'failed';
-  p.fault.armed = true;
-  assert.equal(p.story.invoke(west).kind, 'pending');
-  assert.equal(p.story.world().state.containers[p.story.world().body], chapel);
-  p.fault.reads = false;
-  const retriedWest = p.story.invoke(west);
-  assert.equal(retriedWest.kind, 'saved');
-  if (retriedWest.kind === 'saved') assert.equal(retriedWest.replay, false);
-  const replayedWest = p.story.invoke(west);
-  assert.equal(replayedWest.kind, 'saved');
-  if (replayedWest.kind === 'saved') assert.equal(replayedWest.replay, true);
-  reopen();
-  assert.equal(
-    p.story.world().state.containers[p.story.world().body],
-    room(p.story.world(), 'prior_study'),
+  assert.ok(loaded.ok);
+  if (!loaded.ok) return;
+  const unchosen = newWorld(
+    loaded.cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
   );
-  const corpse = p.story.world().state.containers[item];
-  const take = request(302, 'take', [item], {});
-  p.fault.kind = 'lost';
-  p.fault.armed = true;
-  assert.equal(p.story.invoke(take).kind, 'pending');
-  assert.equal(p.story.world().state.containers[item], corpse);
-  p.fault.reads = false;
-  const retriedTake = p.story.invoke(take);
-  assert.equal(retriedTake.kind, 'saved');
-  if (retriedTake.kind === 'saved') assert.equal(retriedTake.replay, true);
-  const replayedTake = p.story.invoke(take);
-  assert.equal(replayedTake.kind, 'saved');
-  if (replayedTake.kind === 'saved') assert.equal(replayedTake.replay, true);
-  reopen();
-  assert.equal(p.story.world().state.containers[item], p.story.world().body);
-  invoke(303, 'move', [], { direction: 'east' });
-  reopen();
-  assert.equal(p.story.world().state.containers[item], p.story.world().body);
-  const refused = p.story.invoke({
-    invocation_id: 'aaaaaaaa-0000-4000-8000-000000000304',
+  const p = setup(join(dir, 'save.db'), { bundle: artifact, fresh: unchosen });
+  const ancestry = p.story.invoke({
+    invocation_id: 'cccccccc-0000-4000-8000-000000000001',
     actor_id: p.story.world().character,
-    action_key: 'move',
+    action_key: 'choose_ancestry',
     target_ids: [],
-    input: { direction: 'west' },
+    input: { ancestry: 'fen_born' },
   });
-  assert.equal(refused.kind, 'saved');
-  if (refused.kind === 'saved')
-    assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'exit_closed' } });
+  assert.equal(ancestry.kind, 'saved');
+  if (ancestry.kind === 'saved')
+    assert.equal((ancestry.decision as { kind: string }).kind, 'accepted');
+  staysToBelfry(p, 50);
+  const bell = Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0];
+  const reply = p.story.invoke({
+    invocation_id: 'aaaaaaaa-0000-4000-8000-000000000999',
+    actor_id: p.story.world().character,
+    action_key: 'ring_bell',
+    target_ids: [bell],
+    input: {},
+  });
+  assert.equal(reply.kind, 'saved');
+  if (reply.kind === 'saved') assert.equal((reply.decision as { kind: string }).kind, 'accepted');
+  const reopened = openStory(
+    p.db,
+    [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
+    p.host,
+  );
+  assert.equal(reopened.kind, 'open');
+  if (reopened.kind === 'open') {
+    gameView(reopened.world());
+    assert.ok(reopened.narration()?.cue);
+  }
 });

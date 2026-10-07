@@ -66,7 +66,6 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
       Checks.rooms(manifest, defs, v2, registry),
-      Loka.Content.BellCue.check(manifest, defs, located, v2),
       Recipes.check(manifest, defs, v2, registry),
       Quests.check(manifest, defs, v2, registry),
       Reactions.check(manifest, defs, v2, registry),
@@ -78,7 +77,8 @@ defmodule Loka.Content.Compiler do
 
   defp final_checks(manifest, defs, v2, located, registry),
     do:
-      Position.check(manifest, defs) ++
+      Loka.Content.BellCue.check(manifest, defs, located, v2) ++
+        Position.check(manifest, defs) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{}))
 

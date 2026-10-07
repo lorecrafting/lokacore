@@ -1,3 +1,4 @@
+// size: allow 330, ancestry, bell area and Study edge join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
