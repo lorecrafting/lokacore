@@ -123,3 +123,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Exact ferry room identity repair](../../evidence/2026-10-07-e1-ferry-room-identity/README.md) replaces the display-title witness, passes 18 clean-source cases and replays, and retains 271 authored paths pending.
 
 [Integrated provisional checkpoint](../../evidence/2026-10-07-e1-integrated-checkpoint/README.md) passed 18 clean-source cases and replays with 241 authored paths still pending. E1 is not certified.
+
+[Post-split clean-source checkpoint](../../evidence/2026-10-07-e1-post-split/README.md) retained the same 241 pending paths while bringing the recorder's test files under the size gate.

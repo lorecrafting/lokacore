@@ -1,0 +1,9 @@
+# E1 post-split clean-source checkpoint
+
+Clean source `24e752bec256ce45300aeefaa0aa7f27cd4eee58` moves the unchanged authored witness binder and four focused tests into separate files to meet the repository's test-file size gate. The new binder module is included in the explicit source digest. Candidate and check digest `e9cafb1a1ba7de78e055187bd8777df09f688ae087de03021270c8a9bb5041f1` are in the [report](report.json).
+
+The recorder exited **2, pending**. All 18 isolated real SQLite cases and semantic replays passed, including five endings, the thirty-day 720-hourly-commit run, Night, Maud, both ferries and three real storage faults. The gap inventory is unchanged by the split: **241 authored paths**, 18 dialogue families and 31 choice families remain open. This does not certify E1.
+
+The focused selection passed 14/14, TypeScript typecheck passed, the scoped size check passed, and docs found 843 documents with zero broken or unreachable links. The preceding full gate found the two original test files over the 500-line limit; the split uses no size exception. An independent reviewer approved the structural move. The actual diff adds no dependency or runtime behavior; Ponytail Review found the split limited to existing witness/tests and a source digest entry.
+
+The [report](report.json), selected [ending](rescued-prior.jsonl), [topology](topology.jsonl) and [Maud](mauds-cellar.jsonl) traces, [redacted CLI log](cli.log), and [focused test log](focused-tests.log) are hashed in [SHA256SUMS](SHA256SUMS), with [verification](SHA256SUMS.verify). The full isolated output, including 18 databases and traces, was hashed at capture in [case-SHA256SUMS](case-SHA256SUMS); all 38 checks are retained in [verification](case-SHA256SUMS.verify). Full repository gate, final candidate pin, certified 10,000-sequence simulation and exact-head CI remain pending.
