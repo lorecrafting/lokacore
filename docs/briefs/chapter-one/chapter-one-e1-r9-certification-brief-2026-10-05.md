@@ -82,3 +82,5 @@ Planning self-review: Ponytail retained one thin runner over existing tools and 
 
 The [legal 57-room route author checks](../../evidence/2026-10-06-e1-legal-routes/README.md)
 retain the topology recipe's distinct red control. The [provisional integration checkpoint](../../evidence/2026-10-06-e1-topology-integration/README.md) records source-bound registration and 57 room visits; final certification remains pending.
+
+Optional quest route checkpoint: [controlled debt and Lantern dream receipts](../../evidence/2026-10-06-e1-optional-quests/README.md), with remaining outcomes pending.
