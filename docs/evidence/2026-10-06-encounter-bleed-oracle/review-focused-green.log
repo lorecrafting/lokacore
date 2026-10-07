@@ -1,0 +1,35 @@
+✔ literal bleed and terminal composition cases (4.905291ms)
+✔ active bleed rows and containing deltas require the complete occurrence (0.775ms)
+✔ bleed cancellation is the fourth exclusive job binding (0.280792ms)
+✔ only a surviving positive hound strike applies one owned bleed (130.354083ms)
+✔ a second hound hit refreshes the original source and pending cadence (7.171334ms)
+✔ off-cadence re-engagement reaches the earlier expiry without an extra hit (31.631208ms)
+✔ one held qualified bandage cures after one tick and keeps exact HP (11.878042ms)
+✔ Flee and re-engagement pair the exact same-due round and bleed tick (42.268541ms)
+✔ fatal tick closes bleed before same-body Chapel return (7.482917ms)
+✔ bleed expires at 65250 after exactly two HP ticks (6.306167ms)
+✔ held qualified bandage treats during combat without spending its round (7.352125ms)
+✔ an authored recipe remains excluded while the hound fight offers Bandage (5.3335ms)
+✔ stale generation refuses with the exact held item and world intact (5.261583ms)
+✔ unlearned bandage cannot consume the held item (5.243709ms)
+✔ nested bandage cannot cure the current generation (5.6135ms)
+✔ authored short water expiry clears active bleed before Chapel return (459.46175ms)
+✔ same-time round revives an early expiry without advancing its future cadence (45.520416ms)
+✔ independent job replay preserves the frozen bleed schedule binding (1.298625ms)
+✔ independent job replay rejects invalid bleed schedules even with matching rows (0.368416ms)
+✔ independent job replay cancels only the exact pending bleed occurrence (0.231667ms)
+✔ encounter and bound job composition matches portable literal rows (5.216834ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.317ms)
+✔ independent replay verifies every written lifecycle row (0.558334ms)
+✔ cancelling a future job frees one slot in a full queue (22.0925ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (2.649292ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1293.618917
+
+Recorded exit status: 0 (restored source; scoped regression/C5 suite)

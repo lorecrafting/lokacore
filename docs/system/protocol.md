@@ -1215,6 +1215,9 @@ that completed expiry hands off to a new job at the unchanged future cadence wit
 damage. Completion of a due tick advances cadence. Both portable composers enforce these
 transitions and refusals; existing encounter, sight and water cancellation forms keep their
 frozen answers.
+The independent encounter/job replay must retain both bleed provenance fields in
+scheduled, completed and cancelled rows, verify the exact body/generation on
+cancellation, and reject partial or mixed bindings and counterfeit result rows.
 
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Fixture changes require reviewed contract amendments and independent literal answers under the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md); retain current-behavior guards.
 ## D10 knowledge and Knock composition
