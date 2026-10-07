@@ -1,0 +1,30 @@
+# E1 integrated recipes and witness rules independent review
+
+**APPROVE** the bounded integration at exact source `83942fe017321235af76e0975417a7fbffde1a1c`, evidence `8c904c36776324ee669aa20a41d283f8cd15ee6a` and documentation reconciliation `8488c847294381137a0388245c2daf99e005a7dc`, on `slice/chapter-one-e1-r9-certification`. No open findings. The reviewer authored none of the integrated source. This is not final certification; **E1 remains pending**.
+
+Scope: reviewed modal and dialogue-policy witness cherry-picks, Maud/Night registration and source digest, conflict resolutions, linked briefs/reviews and the retained integrated report. Requirements derive from the [E1 exact-candidate policy](../system/architecture.md#e1-exact-candidate-proof-policy), [E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md), existing bounded [modal](2026-10-07-e1-modal-scene-binding-review.md), [dialogue policy](2026-10-07-e1-dialogue-policy-binding-review.md), [Maud](2026-10-07-e1-maud-path-review.md) and [Night](2026-10-07-e1-night-route-review.md) reviews, AGENTS.md and evidence/storage lessons.
+
+## Independent checks
+
+- Separate exact-source checkout; the running author recorder and its files were untouched. `mise exec -- node --test kernel/ts/test/e1_cases.test.ts kernel/ts/test/e1_night_marsh.test.ts kernel/ts/test/e1_maud.test.ts`: exit 0, seven focused cases. This checks real SQLite dialogue/root/all-child, modal acknowledgement, fault/replay validation and both route recipes after integration.
+- Independently ran registered source-bound Maud and Night recipes through `caseHost` and `replayCase`: Maud 55 steps/six exact dialogue-choice-root witnesses; Night 15 steps/zero exact authored witnesses. Both replay successfully, with literal final rewards/outcomes and no duplicate paths. Night/Maud recipe bytes and Night test bytes match the previously independently reviewed originals.
+- The actual source identity reports check hash `be8ce806013cb8548473b03f5073ff071b563c5fbc21cea26486e15560e205e8` and policy hash `02d71791e4c8f7849ae7e81677685d2ff85f77f343b13d0b31ed358525d725fd`, matching the retained report. Both new recipe files are included in the explicit check digest, imported, registered exactly once and accepted in the replay case allowlist.
+- All five retained `SHA256SUMS` entries verify. The three selected trace hashes also match their entries in the full-output capture manifest. Independently replayed retained Night, Maud and dream-follow-fox traces with the exact recorded source identity; each replay object equals its corresponding report receipt. Trace counts are 15/55/12. Dream and Night do not acquire unproved exact authored witnesses.
+- The report has 18 unique passing case IDs, `status: pending`, null failure and null certification verdict. Its 139 unique witnessed paths equal the deduplicated union of the receipt witnesses. Independently recomputing applicability gaps from that union returns exactly the retained 509 authored paths. Room/quest/scene family gaps are empty; 34 dialogue and 47 choice families remain missing. Family coverage does not remove the pending exact authored obligations.
+- `mise exec -- elixir bin/check_docs.exs`: 824 docs, zero broken links, zero unreachable files after reconciliation. `git diff --check`: exit 0. No production source changed between the reviewed source and evidence/docs heads.
+
+## Correctness and conflict resolutions
+
+The integrated binder retains both reviewed branches. Accepted talk opens new pending dialogue occurrences and credits the root; only logically required `all` children are recursively credited, leaving `any`/`not` children pending. Modal paths bind to accepted Continue of the currently displayed prior-world line, with final structural acknowledgement paths only after the running scene disappears. Presentation-only dream paths remain uncredited by that rule. Accepted-choice and study-transition witnesses remain present; focused independent tests verify these coexist.
+
+The recorder rederives witnesses through semantic replay, intersects them with each recorded step's claims and aggregates sets. Duplicate case/family/obligation credit is not introduced. Night and Maud execution gives controlled route evidence without silently claiming all of their authored paths. Failed or incomplete routes cannot enter the pass-receipt union. The current report remains explicitly pending and does not issue a certificate.
+
+Initial review notes identified a duplicate Watch index entry with an unqualified historical Night status and stale registration/review wording in the brief. Documentation fix `8488c847` removes the duplicate, restores index ordering and labels earlier Maud/Watch/Night/Wisp checkpoints as history while stating the current registrations. These notes are closed. Original bounded review SHAs remain historical reviewed identities; linked integrated evidence supplies the new source pin.
+
+The retained full-output verification is author evidence for all 18 isolated databases/logs. Only three command traces plus the report/CLI are committed in this checkpoint; the full-output manifest and verify record do not make the absent databases independently available. The independent reviewer reran seven focused cases and the three retained replays, not the full eighteen-case recorder. Evidence contains no private home/scratch/worktree paths or device/signing identifiers, and makes no new final-certificate claim.
+
+Ponytail Review: Lean already. Ship this bounded integration. Registrations reuse the recorder, replay allowlist and existing recipes; witness changes reuse the existing command/state proof. No dependency or new abstraction was introduced. Correctness review found no remaining in-scope failure.
+
+## Limits
+
+Final exact authored coverage, source-bound 10,000-sequence proof, final candidate/check/policy pin and independent certification gate remain pending. Native/browser lifecycle and E2/E3 human receipts remain separate. This review performs no publication and certifies neither full E1 nor the missing paths.

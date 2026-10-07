@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E1 integrated routes and witness rules](2026-10-07-e1-integrated-routes-review.md): source `83942fe0`, evidence/docs through `8488c847`, independent **APPROVE**, no open findings; seven focused cases and three retained replays pass, digest/hashes and deduplicated 139 witnesses/509 authored gaps verified. E1 remains pending.
+
 - [E1 selected dialogue policy witness](2026-10-07-e1-dialogue-policy-binding-review.md): source `783faeeb`, independent **APPROVE**, no findings; exact Elspeth root/all-child paths verified by SQLite trace and semantic replay, focused tests 4/4, old-suite/new-test red control and hashes/privacy verified. Other branches and E1 certification remain pending.
 - [E1 Maud cellar bounded route proof](2026-10-07-e1-maud-path-review.md): source `7e647c9c`, independent **APPROVE**, no findings; focused Maud test 1/1 and owning Maud/reward SQLite tests 4/4 pass, omitted-fifth-kill mutant escapes old suite but fails the new test, retained hashes and privacy checked. Route was unregistered at that checkpoint; later integration is retained separately. E1 certification remains pending.
 - [E1 modal scene acknowledgement binding](2026-10-07-e1-modal-scene-binding-review.md): source `5304ca16` merged at `77733cfe`, independent **APPROVE**, no findings; displayed-line Continue mapping, final structural steps and presentation-only exclusion verified; 16 focused E1 checks pass. E1 remains pending with 568 authored obligations.
