@@ -57,6 +57,8 @@ Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 (`:31`). The GameView carries `sight` (`:88`) per exit: nothing through a barrier that bars the
 way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:100`).
 
+<a id="barrier1-kerneltssrcrulesbarrierts"></a>
+
 ## barrier@1 (`kernel/ts/src/mechanics/barrier/rule.ts`)
 
 `open`, `close`, `lock`, `unlock` name exactly one of `direction` (the barrier on that exit of the
@@ -76,6 +78,8 @@ container verbs share (`transition`, `:64`). Accepted: one `barrier.transition` 
 `barrier_changed`. Both faces of a door name one state; a barrier an item names is named by no
 exit and no other item (the loader's `BARRIER_MISMATCH`). Policy leaf `barrier_state`. Keys that
 break on a failed force are LATER (owner descope, [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md)).
+
+<a id="containment1-kerneltssrcrulescontainmentts"></a>
 
 ## containment@1 (`kernel/ts/src/mechanics/containment/rule.ts`)
 
@@ -143,6 +147,8 @@ Accepted `put` is one conserved transfer and `item_acquired` with the destinatio
 Put has no positive acquisition ceiling: overloaded deposits and body-to-own-bag rearrangements work.
 Projection and admission share this pair legality query.
 
+<a id="equipment1-kerneltssrcrulesequipmentts"></a>
+
 ## equipment@1 (`kernel/ts/src/mechanics/equipment/rule.ts`)
 
 An item may declare one `slot` (`SlotKey`: `head`, `neck`, `body`, `cloak`, `arms`, `hands`,
@@ -159,6 +165,8 @@ rule and the GameView share. Composition re-checks custody, cycles and the holde
 `has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
 and dual wield, granted modifiers and affects, curses and no-remove items are LATER
 ([ROADMAP](../ROADMAP.md)).
+
+<a id="position1-kerneltssrcrulespositionts"></a>
 
 ## position@1 (`kernel/ts/src/mechanics/position/rule.ts`)
 
@@ -266,6 +274,8 @@ events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler));
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
 
+<a id="attributes1"></a>
+
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
 
 An attribute starts from the definition `AttributeSpec {key, start}` in the cartridge's
@@ -326,6 +336,8 @@ which is an explicit advance that runs due jobs. A failure commits its costs, dr
 and time exactly like success. The outcome is `success`, `failure` or `performed` (no check).
 The narration is the outcome's `narration.actor` key with its participants pinned to EntityIds
 (`:90`). Recipes are offered by the cartridge and by room contributions (ActionSet).
+
+<a id="quest1-rulesquestts-kerneltssrcquestts"></a>
 
 ## quest@1 (`mechanics/quest/rule.ts`, `kernel/ts/src/mechanics/quest/lifecycle.ts`)
 
@@ -407,6 +419,8 @@ one query counter before event allocation. Transfer the saved item identity to t
 emitting `item_acquired` with that body as holder; lower receive, bounded adjustments,
 assignments, quest resolution and choice resolution together in writer group 0. The ordinary
 proposal joins acquisition quests and reactions. Close remains usable when reward admission fails.
+
+<a id="chapters-kerneltssrcviewts"></a>
 
 ## Chapters (`kernel/ts/src/view/view.ts`)
 
@@ -527,6 +541,8 @@ reaction's quest composition, caused by the source event and correlated with the
 The resulting events trigger further rules, FIFO, to quiescence, within the deliveries,
 `reaction_depth` and `query_steps` budgets. Matching [scene starts](#scene1-mechanicsscenerulets)
 follow authored rules in scene-key order, using the same delivery machinery.
+
+<a id="schedule1-behavior1-calendar1-mechanicsschedulerulets-kernelts-srcmechanicsschedulebehaviorts"></a>
 
 ## schedule@1, behavior@1, calendar@1 (`mechanics/schedule/rule.ts`, `kernel/ts/src/mechanics/schedule/behavior.ts`)
 
