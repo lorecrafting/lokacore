@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [E1 bounded recorder checkpoint](2026-10-06-e1-recorder-review.md): exact `8d2841d9`, independent CHANGES REQUIRED; E1-R1 hourly-boundary proof gap open. Certification remains pending.
 - [E1 runner primary source review](2026-10-06-e1-runner-primary-review.md): initial `cf97a4c3` CHANGES REQUIRED; scoped fix `32448076` **APPROVE**, E1-P1 closed. All 92 affected roots restored; 82 focused tests pass and both inventory red controls fail. Runner packaging only; final E1 certification remains pending.
 - [Resource authored interval](2026-10-06-resource-authored-interval-review.md): exact source `7a51883b`, independent **APPROVE**, no findings; 22 TypeScript and 14 Elixir focused tests pass, both old-constant mutants fail, absent-field boundary probes pass. Frozen fixtures and save handling unchanged.
 - [Simulator complete world inputs and quest retirement](2026-10-06-simulator-world-inputs-review.md): exact source `c299195c` against published `747c252d`, independent **APPROVE**, no in-scope findings; 2 new/20 existing focused checks pass, both actual adapter mutants fail the new cases while the old suite misses them. Separate lawful bleed-job replay omission retained as SIM-CARRY-01; no invariant skipped.
