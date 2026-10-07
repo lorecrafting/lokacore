@@ -20,12 +20,13 @@ const git = (...args: string[]) => {
   return r.stdout.trim();
 };
 
-// Every module e1_cases.ts runs; e1.test.ts checks the import graph against it.
+// Every local module e1_cases.ts runs; e1.test.ts checks the import graph against it.
 export const CHECK_FILES = [
   'e1.ts',
   'e1_policy.ts',
   'e1_repro.ts',
   'sim.ts',
+  'read.ts',
   'e1_case_host.ts',
   'e1_obligations.ts',
   'e1_knowledge_effects.ts',

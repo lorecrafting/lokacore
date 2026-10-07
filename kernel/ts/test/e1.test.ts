@@ -156,15 +156,15 @@ test('retained repro rechecks the invariant and refuses incomplete or changed in
   assert.throws(() => reproduce(record, bytes, source), /did not reproduce/);
 });
 
-// Breaks: an e1 module the recorder runs is left out of check_hash, so editing it keeps the receipt.
-test('check_hash covers every e1 module e1_cases.ts imports', () => {
+// Breaks: a local module the recorder runs is left out of check_hash, so editing it keeps the receipt.
+test('check_hash covers every local module e1_cases.ts imports', () => {
   const seen = new Set<string>(),
     todo = ['e1_cases.ts'];
   for (let f; (f = todo.pop());)
     if (!seen.has(f)) {
       seen.add(f);
       const text = readFileSync(fileURLToPath(new URL(f, import.meta.url)), 'utf8');
-      for (const [, dep] of text.matchAll(/from '\.\/(e1(?:_\w+)?\.ts)'/g)) todo.push(dep!);
+      for (const [, dep] of text.matchAll(/from '\.\/([\w.]+\.ts)'/g)) todo.push(dep!);
     }
   assert.deepEqual(
     [...seen].filter((f) => !CHECK_FILES.includes(f)),
