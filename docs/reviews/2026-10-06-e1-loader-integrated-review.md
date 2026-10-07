@@ -17,3 +17,21 @@ Derived from [cartridge implicit dependencies](../system/cartridge.md#compiler),
 - Ponytail/Ponytail Review: lean already; no unnecessary machinery or dependencies. The new test catches a distinct admission bug and uses literal expected diagnostics.
 
 This approves only the preserved loader carry on the post-D10 integration base. Final A–D E1 certification, hosted checks and publication remain separate PM gates.
+
+## Hosted exact-head second opinion
+
+```text
+Verdict: APPROVE — loader integration only; not final E1 certification.
+Head: fec404d338b647ef2e59217f5521105ddd47da39
+Base: 87ac4cbbad74c3ddeef61ccc24089878e57a104c
+
+Findings: none.
+
+Verified: effective fact@1 dependency, diagnostic precedence,
+hash-correct malformed artifact refusal, frozen v042 loading,
+and unchanged save/pin refusal. No needless complexity.
+
+Evidence: 78/78 focused tests; old-loader and scene-only red
+controls each fail only the new test; 11 refusal/precedence probes
+pass; exact-head hosted workflows green. Read-only; no mutations.
+```
