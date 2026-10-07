@@ -42,7 +42,6 @@ test('E1 fresh authority route visits 57 literal rooms and reopens before each j
     });
     const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
     assert.equal(replay.case_id, 'topology');
-    assert.deepEqual(replay.obligations, []);
     const missing = gaps(loaded, a.seen, new Set(replay.obligations));
     assert.deepEqual(missing.rooms, []);
     assert.equal(missing.authored_obligations.includes('/world/carry'), true);

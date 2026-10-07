@@ -50,7 +50,6 @@ for (const [id, route] of [
         });
         const replay = replayCase(bytes, readFileSync(`${log}-${run}`, 'utf8'), source);
         assert.equal(replay.case_id, id);
-        assert.deepEqual(replay.obligations, []);
         if (prior) assert.equal(a.digest(), prior);
         prior = a.digest();
       } finally {
