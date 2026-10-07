@@ -1,0 +1,44 @@
+✔ literal bleed and terminal composition cases (4.093208ms)
+✔ active bleed rows and containing deltas require the complete occurrence (6.616625ms)
+✔ bleed cancellation is the fourth exclusive job binding (0.312291ms)
+✔ independent job replay preserves the frozen bleed schedule binding (1.071625ms)
+✖ independent job replay rejects invalid bleed schedules even with matching rows (0.766708ms)
+✔ independent job replay cancels only the exact pending bleed occurrence (0.222291ms)
+✔ encounter and bound job composition matches portable literal rows (3.859625ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.209708ms)
+✔ independent replay verifies every written lifecycle row (0.386708ms)
+✔ cancelling a future job frees one slot in a full queue (3.837875ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (1.381959ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 176.113792
+
+✖ failing tests:
+
+test at kernel/ts/test/encounter_bleed_jobs.test.ts:35:1
+✖ independent job replay rejects invalid bleed schedules even with matching rows (0.766708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/encounter_bleed_jobs.test.ts:61:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+Recorded exit status: 1 (water_body_id guard removed; corrected canonical counterfeit)

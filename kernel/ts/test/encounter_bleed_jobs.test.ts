@@ -40,8 +40,6 @@ test('independent job replay rejects invalid bleed schedules even with matching 
     { job: { ...schedule.job, kind: 'npc' } },
     { encounter_id: schedule.job_id },
     { quest_instance_id: schedule.job_id, actor_id: schedule.bleed_body_id },
-    { actor_id: schedule.bleed_body_id },
-    { water_body_id: schedule.bleed_body_id },
     { water_generation: 1, water_body_id: schedule.bleed_body_id },
     { sight: { member_id: schedule.bleed_body_id } },
     { crow_member_id: schedule.bleed_body_id, crow_generation: 1, crow_phase: 'leg' },
@@ -58,6 +56,18 @@ test('independent job replay rejects invalid bleed schedules even with matching 
       JSON.stringify(mutation),
     );
   }
+  // These forbidden fields are not replayed into the row; keep the counterfeit canonical.
+  for (const mutation of [
+    { actor_id: schedule.bleed_body_id },
+    { water_body_id: schedule.bleed_body_id },
+    { crow_generation: 1 },
+    { crow_phase: 'leg' },
+  ])
+    assert.equal(
+      encountersHold(bound.state, [{ ...schedule, ...mutation }], bound.expected),
+      false,
+      JSON.stringify(mutation),
+    );
 });
 
 // Break: lawful bleed cancellation is refused, or cancellation accepts a different body/generation.

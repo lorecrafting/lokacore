@@ -41,3 +41,23 @@ Self-review found no correctness issue in the actual diff. The existing job repl
 remains independent of `composeJob`; both bleed fields are kept together, and all
 other schedule/cancel branches retain their existing behavior. Ponytail Review:
 lean already; no new dependency or runtime abstraction. Independent review is pending.
+
+## E1-R1 scoped test correction
+
+Independent review at `8f85bbd4b9d287972fb809f52da86d76277dbc69` found that the
+lone water-body negative copied the forbidden field into its counterfeit result,
+so unrelated row inequality concealed a missing schedule guard. Removing only that
+guard left the original focused suite 11/11 green
+([review-lone-water-old-green.log](review-lone-water-old-green.log)). With the
+frozen canonical result instead, the same mutant fails the corrected test
+([review-lone-water-red.log](review-lone-water-red.log)).
+
+The same masking risk applies to standalone actor and orphan crow generation/phase
+fields, which the bleed job replay also omits. Their counterfeit rows now remain
+canonical in the existing test. Each of those four individual guard deletions fails
+that test ([review-omitted-field-mutants.log](review-omitted-field-mutants.log)).
+All mutations were restored; production source is unchanged. The scoped six-file
+encounter/bleed/C5 suite passes 25/25
+([review-focused-green.log](review-focused-green.log)); TypeScript typecheck,
+changed-test size and diff checks pass. Full-gate execution and scoped re-review
+remain pending. Ponytail Review found no extra abstraction or overlapping test.
