@@ -397,3 +397,26 @@ checks pass; final normal pre-push required after fixture changes.
 
 P4 local browser carrying/held refresh/Shoo remains open. Primary final recheck,
 final hosted checks and approval remain pending; source PR remains draft.
+
+## P4 browser timing and remote handoff
+
+Normal pre-push full gate passed exit0 on efc7f5ebb112748e281f7b681162ccc4737d586c;
+P4 save evidence and both scoped review records are pushed. Primary P1–P3 closed;
+second opinion S1/S2 approved; primary P4 remains open. Hosted browser deer failure
+is under PM-controlled one rerun; no current-head all-green claim.
+
+Old isolated tab showed Sync operation timeout; a fresh tab at the same19288 origin
+reopened the existing save. Actual ordinary route returned to Village Green. First
+Drop acquisition/fallback sample missed the three-second carrier interval. Second
+Drop carrier locator timed out3000ms, but actual diagnostic match was visibly
+“A crow is here.The crow grips an old coin in its beak.”, matching the accessible
+carrying label, visibletrue/disabledfalse. Thus carrier text was observed in
+browser diagnostics; no carrier screenshot is claimed. Refresh/Continue timed out
+and completed after the carrying interval; subsequent Continue succeeded with
+ordinary room coin and fallback narration. Held-refresh preservation and Shoo
+success remain unproved; no fresh successful Shoo/refusal interaction is claimed.
+
+Bounded timing attempts stopped. Isolated browser remains at Village Green; coin
+is an ordinary room item; original nest remains full8 at Oak Branches. Preview
+uses19288 with Metro19289. Final primary P4 recheck, held-refresh/Shoo UI rows,
+exact final-head hosted checks and approval remain pending. Source PR stays draft.
