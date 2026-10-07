@@ -32,9 +32,10 @@ def drift(issues, states):
 
 def main(args):
     """`ISSUES STATES` prints drift lines; `--in-progress-prs ISSUES` prints PR numbers to look up."""
-    with open(args[-1] if args[0] == "--in-progress-prs" else args[0]) as f:
+    lookup = args[0] == "--in-progress-prs"
+    with open(args[-1] if lookup else args[0]) as f:
         issues = json.load(f)["issues"]
-    if args[0] == "--in-progress-prs":
+    if lookup:
         print(" ".join(sorted({n for i in issues if i["status"] == "in_progress" and (n := pr_number(i))})))
         return 0
     with open(args[1]) as f:
