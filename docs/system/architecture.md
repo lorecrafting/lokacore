@@ -251,6 +251,11 @@ An accepted `perform` witnesses its exact authored recipe definition and admitte
 policy root. Each child under a required `all` policy node is also witnessed;
 `any` and `not` descendants require separate branch proof. Recipe outcomes and
 sequence steps require their own consequence witnesses.
+An accepted recipe result witnesses its selected outcome only when every
+authored sequence step has an exact committed effect witness. A fact assignment
+requires the matching before/after fact transition and event; an emitted event
+requires its exact receipt. A check-failed empty sequence requires its failed
+check event. Unexecuted sibling outcomes stay pending.
 An accepted command that changes an exact quest instance from unresolved to
 resolved witnesses that quest definition and objective. For a current-state
 objective, its satisfied root and required `all` children may also be credited;

@@ -164,7 +164,9 @@ test('E1 binds the exact study_tracks recipe and required policy from committed 
         observed.push(witnessedObligations(before, after, command, decision));
     });
     search(a);
-    assert.deepEqual(observed, [[...expected, `${base}/outcomes/success/sequence/0`]]);
+    assert.deepEqual(observed, [
+      [...expected, `${base}/outcomes/success`, `${base}/outcomes/success/sequence/0`],
+    ]);
     a.record({
       kind: 'finish',
       steps: a.commands.length,
@@ -175,6 +177,43 @@ test('E1 binds the exact study_tracks recipe and required policy from committed 
     assert.deepEqual(
       expected.filter((path) => !replay.obligations.includes(path)),
       [],
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: a bell or epilogue result claims authored consequences without its exact committed effects.
+test('E1 binds the two bell assignments and the epilogue event to accepted receipts', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-outcomes-'));
+  const a = caseHost(admitCandidate(bytes), join(dir, 'save.db'));
+  const seen = new Map<string, string[]>();
+  try {
+    a.watch((before, after, command, decision) => {
+      if (command.payload.type === 'perform')
+        seen.set(command.payload.action, witnessedObligations(before, after, command, decision));
+    });
+    ending(a, 'rescued', 'prior', 'stilled');
+    const recipe = '/recipes/ashmere_missing_child@0.0.42:recipe/';
+    assert.deepEqual(
+      [0, 1].map((i) =>
+        seen.get('ring_bell')?.includes(`${recipe}ring_bell/outcomes/success/sequence/${i}`),
+      ),
+      [true, true],
+    );
+    assert.equal(seen.get('ring_bell')?.includes(`${recipe}ring_bell/outcomes/success`), true);
+    assert.equal(
+      seen
+        .get('begin_epilogue_rescued_prior')
+        ?.includes(`${recipe}begin_epilogue_rescued_prior/outcomes/success/sequence/0`),
+      true,
+    );
+    assert.equal(
+      seen
+        .get('begin_epilogue_rescued_prior')
+        ?.includes(`${recipe}begin_epilogue_rescued_prior/outcomes/success`),
+      true,
     );
   } finally {
     a.close();

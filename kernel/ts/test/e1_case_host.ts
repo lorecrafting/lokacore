@@ -164,18 +164,53 @@ export function witnessedObligations(
   const recipe = before.cartridge.recipes?.[`${id}@${version}:recipe/${p.action}`];
   if (!recipe) return questPaths;
   const witnessed = [base, ...requiredPolicyPaths(recipe.policy.root, `${base}/policy/root`)];
-  if (p.action !== 'study_tracks') return withQuests(witnessed);
-  const fact = {
-    cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.42',
-    kind: 'fact',
-    key: 'fen_tracks_found',
-  } as DefinitionRef;
-  return withQuests(
-    value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
-      ? [...witnessed, `${base}/outcomes/success/sequence/0`]
-      : witnessed,
-  );
+  const branch =
+    decision.outcome === 'performed' || decision.outcome === 'success'
+      ? 'success'
+      : decision.outcome === 'failure'
+        ? 'failure'
+        : undefined;
+  if (!branch) return withQuests(witnessed);
+  const outcome = recipe.outcomes[branch];
+  if (!outcome) return withQuests(witnessed);
+  const steps = outcome.sequence.map((step, index) => {
+    if (step.op === 'fact.assign') {
+      const old = value(before, p.actor_id, step.fact);
+      return old !== step.value &&
+        value(after, p.actor_id, step.fact) === step.value &&
+        decision.events.some(
+          (event) =>
+            event.payload.type === 'fact_changed' &&
+            JSON.stringify(event.payload.fact) === JSON.stringify(step.fact) &&
+            event.payload.old === old &&
+            event.payload.new === step.value,
+        )
+        ? `${base}/outcomes/${branch}/sequence/${index}`
+        : undefined;
+    }
+    if (step.op === 'event.emit')
+      return decision.events.some(
+        (event) =>
+          event.payload.type === 'custom_event' &&
+          event.payload.event.cartridge_id === id &&
+          event.payload.event.cartridge_version === version &&
+          event.payload.event.kind === 'event' &&
+          event.payload.event.key === step.event,
+      )
+        ? `${base}/outcomes/${branch}/sequence/${index}`
+        : undefined;
+    return undefined;
+  });
+  const complete =
+    steps.every((path) => path !== undefined) &&
+    (steps.length > 0 ||
+      (branch === 'failure' &&
+        decision.events.some((event) => event.payload.type === 'check_failed')));
+  return withQuests([
+    ...witnessed,
+    ...(complete ? [`${base}/outcomes/${branch}`] : []),
+    ...steps.filter((path): path is string => path !== undefined),
+  ]);
 }
 
 function requiredPolicyPaths(node: unknown, path: string): string[] {
