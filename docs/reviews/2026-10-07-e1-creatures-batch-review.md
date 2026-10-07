@@ -81,3 +81,14 @@ Open:
   `sim.ts` (`checked`) and `read.ts`. Removing `sim.ts` from `CHECK_FILES` stays green (mutant run), and
   `read.ts` is not hashed. Failure: an edit to `sim.ts` `checked` after it is dropped from the list keeps
   the old `check_hash`. Fix: match every `./*.ts` import and add `read.ts`.
+
+## R2 re-check: `9d18ec0c`
+
+Scoped to E1-C4, head `9d18ec0c` (detached worktree). Verdict: **APPROVE**, no open findings.
+
+- E1-C4 closed: `e1.test.ts:167` now follows every `from './*.ts'` import from `e1_cases.ts`, recursively;
+  `read.ts` joined `CHECK_FILES` (`e1.ts:29`). The graph has no dynamic, side-effect or double-quoted
+  local imports, so the walk sees every real import.
+- Red controls (throwaway worktree, removed): removing `sim.ts` fails with `['sim.ts']`; removing `read.ts`
+  fails with `['read.ts']`.
+- Reruns: `node --test test/e1*.test.ts` 39/39; recorder exit 2, 24/24 pass, 125 authored paths, same set.
