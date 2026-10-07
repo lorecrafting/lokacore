@@ -57,3 +57,27 @@
   suppress step whose plan is already suppressed). Not reachable in v042.
 - **Question** `kernel/ts/test/e1_creatures.ts:190`: the suppression row names the cause event, not the
   reaction; two reactions on one event suppressing one plan could both be credited. Not reachable in v042.
+
+## R1 re-check: `86586510`, `420397f6`
+
+Scoped to the fix commits, head `420397f6` (detached worktree). Verdict: **APPROVE WITH NOTES**.
+
+- E1-C1 closed: `architecture.md:316-323` now needs at least one apply step, all `population.suppress`,
+  each named plan unsuppressed before the step. This matches `e1_creatures.ts:185,196` (`undefined` for
+  other ops, `length && every`, `!prior.suppression`). The v042 non-suppress reactions get no credit.
+- E1-C2 closed: plant `one plan already suppressed` (`e1_creatures.test.ts:264-270`). Mutant
+  `applied.some(Boolean)` fails on it ("one plan already suppressed still credits .../d9_suppress_hounds").
+- E1-C3 (question) recorded as a `ponytail:` ceiling at `e1_creatures.ts:190-192`. Accepted.
+- Item 4: `CHECK_FILES` (`e1.ts:24`) now includes `e1_debt.ts`. The test `e1.test.ts:160` walks real
+  `from './…'` imports from `e1_cases.ts`, recursively, with no unrelated text. Removing `e1_debt.ts` fails
+  it (`['e1_debt.ts']`).
+- Callers: `witnessedObligations` and `source()` are unchanged. `check_hash` changes because `e1_debt.ts`
+  is now hashed, which is intended.
+- Reruns: `node --test test/e1*.test.ts` 39/39; typecheck exit 0; recorder exit 2, 24/24 pass,
+  125 authored paths, same set as the first review.
+
+Open:
+- **E1-C4 nit** `kernel/ts/test/e1.test.ts:167`: the regex accepts only `e1*.ts`, but `e1_cases.ts` imports
+  `sim.ts` (`checked`) and `read.ts`. Removing `sim.ts` from `CHECK_FILES` stays green (mutant run), and
+  `read.ts` is not hashed. Failure: an edit to `sim.ts` `checked` after it is dropped from the list keeps
+  the old `check_hash`. Fix: match every `./*.ts` import and add `read.ts`.
