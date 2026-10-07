@@ -75,8 +75,8 @@ although the working tree differs (demonstrated below). The hook had the same bl
 
 ## Fix re-check — `b46805ef`
 
-**Verdict: APPROVE WITH NOTES.** All dispositions verified; one should-fix (R1) is open and
-must be disposed before merge, per WORKFLOW step 7 ("nothing open").
+**Verdict: CHANGES REQUIRED** (only R1, a one-line guard in the merge command). All earlier
+dispositions are verified; WORKFLOW step 7 needs nothing open.
 
 - **S1 + Q1 fixed.** `--auto` is gone from WORKFLOW (`:117-122`), the decision record (`:21-24`),
   owner-rules (`:231-233`) and the decisions index (`:36`); no `--auto` merge instruction remains.
