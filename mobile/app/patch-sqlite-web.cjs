@@ -1,4 +1,4 @@
-// expo-sqlite 57.0.3's web worker truncates sync lengths and loses Error messages.
+// expo-sqlite 57.0.3 truncates sync lengths, loses Error messages and times out by CPU speed.
 // Keep these exact guards until the installed SDK fixes them upstream.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -16,6 +16,43 @@ for (const [before, after] of [
   ],
   ['serialize({ error })', 'serialize({ error: error.message })'],
   ['self.postMessage({ id, error });', 'self.postMessage({ id, error: error?.message });'],
+  [
+    `  let i = 0;
+  // @ts-expect-error: Remove this when TypeScript supports Atomics.pause
+  const useAtomicsPause = typeof Atomics.pause === 'function';
+  while (Atomics.load(lock, 0) === PENDING) {
+    ++i;
+
+    if (useAtomicsPause) {
+      if (i > 1_000_000) {
+        throw new Error('Sync operation timeout');
+      }
+      // @ts-expect-error: Remove this when TypeScript supports Atomics.pause
+      Atomics.pause();
+    } else {
+      // NOTE(kudo): Unfortunate for the busy loop,
+      // because we don't have a way for main thread to yield its execution to other callbacks.
+      if (i > 1000_000_000) {
+        throw new Error('Sync operation timeout');
+      }
+    }
+  }`,
+    `  const deadline = performance.now() + 5_000;
+  let i = 0;
+  // @ts-expect-error: Remove this when TypeScript supports Atomics.pause
+  const useAtomicsPause = typeof Atomics.pause === 'function';
+  // Without Atomics.pause, the main thread still needs the SDK's busy-loop fallback.
+  while (Atomics.load(lock, 0) === PENDING) {
+    // Read the monotonic clock every 4096 spins, rather than on every poll.
+    if ((++i & 0xfff) === 0 && performance.now() >= deadline) {
+      throw new Error('Sync operation timeout');
+    }
+    if (useAtomicsPause) {
+      // @ts-expect-error: Remove this when TypeScript supports Atomics.pause
+      Atomics.pause();
+    }
+  }`,
+  ],
 ]) {
   const oldCount = patched.split(before).length - 1;
   const newCount = patched.split(after).length - 1;

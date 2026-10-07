@@ -1,0 +1,18 @@
+✔ literal bleed and terminal composition cases (5.743ms)
+✔ active bleed rows and containing deltas require the complete occurrence (0.976584ms)
+✔ bleed cancellation is the fourth exclusive job binding (0.318916ms)
+✔ encounter and bound job composition matches portable literal rows (5.678083ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.336666ms)
+✔ independent replay verifies every written lifecycle row (0.57525ms)
+✔ cancelling a future job frees one slot in a full queue (5.318125ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (3.779541ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 213.288208
+
+Recorded exit status: 0 (published baseline oracle)

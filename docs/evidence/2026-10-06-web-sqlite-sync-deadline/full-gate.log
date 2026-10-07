@@ -1,0 +1,199 @@
+Resolving Hex dependencies...
+Resolution completed in 0.012s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+
+20:45:18.895 [info] Compiling file system watcher for Mac...
+
+20:45:19.323 [info] Done.
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 84 files (.ex)
+Generated loka app
+No cycles found
+Running ExUnit with seed: 496136, max_cases: 16
+
+.................................................................................................................................................................................................................................................................................................................................................................................................................
+Finished in 20.1 seconds (20.1s async, 0.04s sync)
+
+Result: 401 passed
+Checking 174 source files (this might take a while) ...
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.09 seconds (0.05s to load, 0.04s running 4 checks on 174 files)
+1779 mods/funs, found no issues.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+lib/loka/content/checks.ex:1: info: size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
+lib/loka/content/compiler.ex:1: info: size: allow 326, ancestry and static map source wiring join the existing compiler boundary
+lib/loka/content/dialogues.ex:1: info: size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+lib/loka/content/scenes.ex:1: info: size: allow 320, action-started scenes validate source and end exports beside modal rules
+lib/loka/core/compose.ex:1: info: size: allow 345, typed knowledge, patrol and final birth admission share portable composition
+lib/loka/core/creation.ex:78: info: size: allow 55, one final birth-group guard; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+lib/loka/core/invariants.ex:1: info: size: allow 340, patrol, water, bleed and character pairing join precondition replay
+lib/loka/core/invariants_creation.ex:62: info: size: allow 55, independent birth oracle; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+test/loka/core/compose_test.exs:1: info: size: allow 520, patrol and liquid cases share the existing randomized differential pool
+ok   boundary: web reaches store (only platform may)
+ok   boundary: core calls an undeclared external app
+ok   types: a PartyId where a CharacterId is matched (03 §6)
+ok   xref: dependency cycle
+ok   xref: compile-connected edge
+ok   credo: cyclomatic complexity 10
+ok   credo: nesting 3
+ok   credo: ABC size 31
+ok   credo: arity 7
+ok   contracts: schema changed without regenerating the TypeScript
+ok   contracts: schema changed without regenerating the docs
+ok   contracts: unsupported keyword fails compilation
+ok   contracts: unsupported keyword fails generation
+ok   contracts: a map with declared properties fails compilation
+ok   contracts: anyOf with overlapping types fails compilation
+ok   features: a capability implemented without its feature map cells
+ok   features: a ruleless capability implemented without its feature map cells
+ok   features: a transcript added without regenerating the feature map
+ok   docs: AGENTS.md over its word budget
+ok   contracts: elixir host adapter without a differential (ADR-074)
+ok   size: limits and allow markers
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+Running 7 tests
+
+----------- Case Details -----------
+PASS ts-foundation-imports  .........
+PASS ts-rule-registration  .......
+PASS ts-rule-module-pure  ..........................
+PASS ts-rule-module-imports  .........................
+PASS ts-kernel-pure  ............
+PASS elixir-kernel-pure  .....................................
+PASS ts-rule-module-location  .........
+
+test result: ok. 7 passed; 0 failed;
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+ok   elixir-kernel-pure
+ok   ts-foundation-imports
+ok   ts-kernel-pure
+ok   ts-rule-module-imports
+ok   ts-rule-module-location
+ok   ts-rule-module-pure
+ok   ts-rule-registration
+ok   ci_scope: metadata and Book lanes, conservative fallback
+767 docs, 0 broken link(s), 0 unreachable
+ok   docs: stale code pointers
+ok   beads: local paths, missing slices and reserved IDs refused
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+
+
+> loka-kernel@0.0.0 test
+> node --test --test-reporter=${TEST_REPORTER:-spec} "test/**/*.test.ts"
+
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+......
+ok   kernel tsc rejects host and Node APIs
+ok   typecheck covers the tests
+ok   typecheck covers play/
+ok   step cannot skip admit()
+kernel/ts/play/main.ts:3: info: size: allow 320, one terminal session: its loop, each command's dispatch and the replay
+kernel/ts/play/main.ts:161: info: size: allow 45, terminal outcome projection retains ordinary command and located output
+kernel/ts/play/text.ts:1: info: size: allow 315, terminal parsing and authored text projection, including Where labels
+kernel/ts/src/content/cartridge_dialogues.ts:192: info: size: allow 52, one authored option validates its mutually constrained effects together
+kernel/ts/src/content/cartridge_reactions.ts:39: info: size: allow 52, finite reaction API and typed suppression references stay in one ordered check
+kernel/ts/src/content/cartridge_refs.ts:1: info: size: allow 330, ancestry, bell area and Study edge join shared reference admission
+kernel/ts/src/content/cartridge_refs.ts:166: info: size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
+kernel/ts/src/foundation/compose_patrol.ts:6: info: size: allow 60, full-prior row and closed attempt lifecycle share one portable precondition
+kernel/ts/src/foundation/compose_rows.ts:14: info: size: allow 44, closed row-target dispatch includes actor-owned knowledge rows
+kernel/ts/src/foundation/compose_target.ts:7: info: size: allow 48, one dispatch covers the closed delta target union including knowledge
+kernel/ts/src/foundation/creation.ts:85: info: size: allow 60, one final guard checks pair, HP and slot membership together
+kernel/ts/src/foundation/validate.ts:86: info: size: allow 55, closed-keyword dispatch includes scene trigger alternatives
+kernel/ts/src/mechanics/combat/round.ts:52: info: size: allow 46, one due round checks suppression before existing attack and crow settlement delivery
+kernel/ts/src/mechanics/containment/rule.ts:30: info: size: allow 52, finite Harvest joins the existing conserved-transfer decision
+kernel/ts/src/mechanics/containment/shared.ts:167: info: size: allow 50, one bounded pair query keeps source, reach, lid, ancestry and capacity admission together
+kernel/ts/src/mechanics/dialogue/exchange.ts:31: info: size: allow 50, shared funded readiness rechecks exact bound stock and final load
+kernel/ts/src/mechanics/dialogue/rule.ts:158: info: size: allow 60, one choice lowers its bound quest, custody, payment and events atomically
+kernel/ts/src/mechanics/dialogue/shared.ts:85: info: size: allow 55, dialogue availability and bound custody share one admission check
+kernel/ts/src/mechanics/dialogue/shared.ts:202: info: size: allow 55, exact drawn choice input shares keyed admission and mechanic eligibility
+kernel/ts/src/mechanics/population/shared.ts:34: info: size: allow 46, one cause binds suppression, resume occurrence and hound encounter closure
+kernel/ts/src/mechanics/quest/lifecycle.ts:43: info: size: allow 45, exact retirement joins bound activation and optional deadline scheduling
+kernel/ts/src/mechanics/reaction.ts:63: info: size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
+kernel/ts/src/mechanics/schedule/rule.ts:94: info: size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together
+kernel/ts/src/mechanics/transport/shared.ts:42: info: size: allow 50, exact transport admission joins conserved fare with body and bound follower custody
+kernel/ts/src/runtime/fresh.ts:1: info: size: allow 310, initial visible knowledge joins existing genesis before the first receipt
+kernel/ts/src/runtime/invariants_creation.ts:8: info: size: allow 45, one independent pass covers paired placement, origin and result rows
+kernel/ts/src/runtime/invariants_creation.ts:54: info: size: allow 60, independent pair, HP and slot proof mirrors the contract
+kernel/ts/src/runtime/invariants_patrol.ts:28: info: size: allow 50, independent lifecycle proof covers every retained attempt transition
+kernel/ts/src/runtime/invariants_population.ts:73: info: size: allow 43, independent full-prior control and slot replay includes bounded suppression
+kernel/ts/src/runtime/proposal.ts:2: info: size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
+kernel/ts/src/runtime/proposal.ts:176: info: size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
+kernel/ts/src/runtime/proposal.ts:248: info: size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
+kernel/ts/src/view/action_lists.ts:1: info: size: allow 330, food, water, practical skills and local Knock share the composed view list
+kernel/ts/src/view/action_lists.ts:53: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
+kernel/ts/src/view/action_lists.ts:158: info: size: allow 50, exact detail harvest joins shared action admission and projection
+kernel/ts/test/containment.test.ts:1: info: size: allow 555, containment and carrying behavior share the same minimal custody fixture
+kernel/ts/test/deer.test.ts:1: info: size: allow 525, deer same-clock behavior and counterfeit cause share the controlled journey
+kernel/ts/test/dialogue.test.ts:1: info: size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+kernel/ts/test/sim.ts:1: info: size: allow 515, the existing headless action generator also consumes exact service offers
+ok   ts size: limits and allow markers
+Checking formatting...
+All matched files use Prettier code style!

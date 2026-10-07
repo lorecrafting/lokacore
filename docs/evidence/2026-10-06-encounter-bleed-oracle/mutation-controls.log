@@ -1,0 +1,6 @@
+omit-scheduled-provenance: old focused suite exit0; new regression exit1; ✖ independent job replay preserves the frozen bleed schedule binding (1.51725ms)
+accept-nonbleed-kind: old focused suite exit0; new regression exit1; ✖ independent job replay rejects invalid bleed schedules even with matching rows (0.776958ms)
+accept-mixed-schedule: old focused suite exit0; new regression exit1; ✖ independent job replay rejects invalid bleed schedules even with matching rows (0.816042ms)
+ignore-cancel-body: old focused suite exit0; new regression exit1; ✖ independent job replay cancels only the exact pending bleed occurrence (0.777625ms)
+ignore-cancel-generation: old focused suite exit0; new regression exit1; ✖ independent job replay cancels only the exact pending bleed occurrence (0.772792ms)
+accept-mixed-cancel: old focused suite exit0; new regression exit1; ✖ independent job replay cancels only the exact pending bleed occurrence (0.751791ms)

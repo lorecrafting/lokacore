@@ -1,0 +1,21 @@
+✔ literal bleed and terminal composition cases (6.981458ms)
+✔ active bleed rows and containing deltas require the complete occurrence (0.868625ms)
+✔ bleed cancellation is the fourth exclusive job binding (0.617625ms)
+✔ independent job replay preserves the frozen bleed schedule binding (4.575541ms)
+✔ independent job replay rejects invalid bleed schedules even with matching rows (0.380084ms)
+✔ independent job replay cancels only the exact pending bleed occurrence (0.217833ms)
+✔ encounter and bound job composition matches portable literal rows (5.003667ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.254166ms)
+✔ independent replay verifies every written lifecycle row (0.443ms)
+✔ cancelling a future job frees one slot in a full queue (4.999541ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (2.225291ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 302.831958
+
+Recorded exit status: 0
