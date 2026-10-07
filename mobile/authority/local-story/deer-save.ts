@@ -9,7 +9,9 @@ const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent deer sight receipt');
 };
 
-/** The durable job is justified by its exact checked entry or population transfer receipt. */
+/** The durable job is justified by its exact checked entry or population transfer receipt.
+ * receiptRecovery first replays all population receipts; that kernel owns cross-mechanic groups.
+ */
 export function deerSave(world: World, db: Db, meta: Meta) {
   const jobs = world.state.jobs ?? {};
   const found = new Set<string>();
@@ -90,105 +92,6 @@ export function deerSave(world: World, db: Db, meta: Meta) {
         );
         if (!cause) invalid();
       }
-    }
-    // D9 lends a group only to the exact same-plan regular/resume deadline pair.
-    // receiptHistory has already replayed every op; do not misclassify that pair as a sight handoff.
-    const populationPairs = new Set(
-      ops
-        .filter((x) => {
-          if (x.op !== 'population.control') return false;
-          const before = x.expected?.suppression;
-          const after = x.value?.suppression;
-          const regular = ops.find(
-            (control) =>
-              control.op === 'population.control' &&
-              control.writer_group === x.writer_group &&
-              same(control.plan, x.plan) &&
-              control.expected?.job_id !== control.value?.job_id &&
-              jobs[control.expected?.job_id]?.due_time === before?.ends_at,
-          )?.expected?.job_id;
-          const resume = before?.job_id;
-          return (
-            before?.ends_at != null &&
-            after?.ends_at === null &&
-            after.job_id === null &&
-            after.generation === before.generation &&
-            after.cause_event_id === before.cause_event_id &&
-            regular !== resume &&
-            [regular, resume].every(
-              (id) =>
-                jobs[id]?.due_time === before.ends_at &&
-                same(jobs[id].job, x.plan) &&
-                ops.some(
-                  (done) =>
-                    done.op === 'job.complete' &&
-                    done.job_id === id &&
-                    done.writer_group === x.writer_group,
-                ),
-            )
-          );
-        })
-        .map((x) => x.writer_group),
-    );
-    // A receipt may lend its round group only to the matching sight closure and successor cancel.
-    let high = -1;
-    const reused = ops.filter((x) => {
-      const lower = x.writer_group < high && !populationPairs.has(x.writer_group);
-      high = Math.max(high, x.writer_group);
-      return lower;
-    });
-    if (reused.length) {
-      const [close, cancel] = reused;
-      if (
-        reused.length !== 2 ||
-        close.op !== 'encounter.close' ||
-        cancel.op !== 'job.cancel' ||
-        close.writer_group !== cancel.writer_group ||
-        close.encounter_id !== cancel.encounter_id ||
-        close.job_id !== cancel.job_id
-      )
-        invalid();
-      const advance = ops.find(
-        (x) =>
-          x.op === 'encounter.advance' &&
-          x.writer_group === close.writer_group &&
-          x.encounter_id === close.encounter_id &&
-          x.next_job_id === close.job_id,
-      );
-      const sightDone = ops.find(
-        (x) =>
-          x.op === 'job.complete' &&
-          x.writer_group > close.writer_group &&
-          jobs[x.job_id]?.sight?.member_id === world.state.encounters?.[close.encounter_id]?.npc_id,
-      );
-      const sight = sightDone && jobs[sightDone.job_id]?.sight;
-      if (
-        !advance ||
-        !sight ||
-        !jobs[advance.job_id] ||
-        jobs[advance.job_id].due_time !== jobs[sightDone.job_id].due_time ||
-        !ops.some(
-          (x) =>
-            x.op === 'job.schedule' &&
-            x.writer_group === close.writer_group &&
-            x.job_id === close.job_id &&
-            x.encounter_id === close.encounter_id,
-        ) ||
-        !ops.some(
-          (x) =>
-            x.op === 'entity.transfer' &&
-            x.writer_group === sightDone.writer_group &&
-            x.entity_id === sight.member_id,
-        ) ||
-        !ops.some(
-          (x) =>
-            x.op === 'population.slot' &&
-            x.writer_group === sightDone.writer_group &&
-            x.value?.member_id === sight.member_id &&
-            x.value?.last_flight_at === jobs[sightDone.job_id].due_time,
-        )
-      )
-        invalid();
     }
   }
   for (const [id, job] of Object.entries(jobs)) if (job.sight && !found.has(id)) invalid();
