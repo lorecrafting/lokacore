@@ -23,6 +23,16 @@
         },
         "barrier": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "corpse_ingress": {
+          "description": "Close this directed exit while the named global fact has the specified value, except for the living owner of a nonempty player corpse in its destination. The exception is rechecked at movement admission.",
+          "type": "object",
+          "properties": {
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "equals": { "$ref": "delta.schema.json#/$defs/FactValue" }
+          },
+          "required": ["fact", "equals"],
+          "additionalProperties": false
         }
       },
       "required": [

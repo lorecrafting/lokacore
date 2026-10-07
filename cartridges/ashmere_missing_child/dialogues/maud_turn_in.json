@@ -41,5 +41,6 @@
         }
       ]
     }
-  }
+  },
+  "label": "actions.maud_turn_in"
 }

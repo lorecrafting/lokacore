@@ -953,8 +953,11 @@ browser refresh is separate proof.
 
 ## D9 village consequence recovery
 
-**Selected, pending implementation.** The accepted bell receipt and causal
-event bind exact actor, room, time and one cue occurrence. Cold reopen can
+**Selected D9 contract.** The accepted bell receipt and causal
+event bind exact actor, room, time and one cue occurrence. A normal recipe
+invocation omits `target_id`: recover its exact detail from the pinned recipe,
+as ordinary action-recipe admission does. If an explicit target is present,
+it must be that same detail; malformed or foreign explicit targets remain corrupt. Cold reopen can
 reproduce its retained past narration without emitting a new cue or reapplying
 consequences. Persist the hound suppression generation/deadline, resume job,
 actual encounter cancellation and population state with the ordinary changed
@@ -972,7 +975,10 @@ Receipt replay cannot create a second root transfer or reopen the gate from
 historical custody. D6 underwater recovery remains location-specific. Prove
 real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
 acknowledgement and same-invocation replay at bell suppression/resume and
-Study recovery boundaries; input/elapsed stays fenced until reconciliation.
+Study recovery boundaries; input/elapsed stays fenced until reconciliation. The current regular population
+job and its suppression resume job may share one writer group at their exact
+common deadline; cold-load must distinguish this bound pair from deer sight
+handoff reuse and continue validating all operations through receipt replay.
 
 ## D12 lesson, careful Harvest and discount recovery
 

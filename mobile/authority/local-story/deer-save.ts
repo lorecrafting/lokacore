@@ -91,10 +91,49 @@ export function deerSave(world: World, db: Db, meta: Meta) {
         if (!cause) invalid();
       }
     }
+    // D9 lends a group only to the exact same-plan regular/resume deadline pair.
+    // receiptHistory has already replayed every op; do not misclassify that pair as a sight handoff.
+    const populationPairs = new Set(
+      ops
+        .filter((x) => {
+          if (x.op !== 'population.control') return false;
+          const before = x.expected?.suppression;
+          const after = x.value?.suppression;
+          const regular = ops.find(
+            (control) =>
+              control.op === 'population.control' &&
+              control.writer_group === x.writer_group &&
+              same(control.plan, x.plan) &&
+              control.expected?.job_id !== control.value?.job_id &&
+              jobs[control.expected?.job_id]?.due_time === before?.ends_at,
+          )?.expected?.job_id;
+          const resume = before?.job_id;
+          return (
+            before?.ends_at != null &&
+            after?.ends_at === null &&
+            after.job_id === null &&
+            after.generation === before.generation &&
+            after.cause_event_id === before.cause_event_id &&
+            regular !== resume &&
+            [regular, resume].every(
+              (id) =>
+                jobs[id]?.due_time === before.ends_at &&
+                same(jobs[id].job, x.plan) &&
+                ops.some(
+                  (done) =>
+                    done.op === 'job.complete' &&
+                    done.job_id === id &&
+                    done.writer_group === x.writer_group,
+                ),
+            )
+          );
+        })
+        .map((x) => x.writer_group),
+    );
     // A receipt may lend its round group only to the matching sight closure and successor cancel.
     let high = -1;
     const reused = ops.filter((x) => {
-      const lower = x.writer_group < high;
+      const lower = x.writer_group < high && !populationPairs.has(x.writer_group);
       high = Math.max(high, x.writer_group);
       return lower;
     });

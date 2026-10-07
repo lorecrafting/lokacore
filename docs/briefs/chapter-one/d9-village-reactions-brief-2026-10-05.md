@@ -22,13 +22,13 @@ Give the existing cast distinct, truthful child/allegiance responses; project co
 
 Literal terminal matrix for dialogue/profile/room response; precise authored strings are written with this batch, not tests of wording:
 
-| Q2 × Q3 | Elspeth / Bram / Green | Maud rumor | Aldric | Vesper | Sedge / hounds |
+| Q2 × Q3 | Elspeth / Green | Maud rumor | Aldric | Vesper | Sedge / hounds |
 |---|---|---|---|---|---|
-| rescued × prior | returned child / thankful passage / relief | returned; bell rang | welcoming | bound | hostile flavor; suppressed |
-| rescued × fox | returned child / thankful passage / relief | returned; bell silent | cold | allied | warm flavor; normal |
-| stays × prior | living child remains with fox / respectful passage / uneasy acceptance | living choice; bell rang | welcoming | bound | hostile flavor; suppressed |
-| stays × fox | living child remains with fox / respectful passage / uneasy acceptance | living choice; bell silent | cold | allied | warm flavor; normal |
-| lost × prior | grief / hushed passage / absence | lost; bell rang | welcoming | bound | hostile flavor; suppressed |
+| rescued × prior | returned child / relief | returned; bell rang | welcoming | bound | hostile flavor; suppressed |
+| rescued × fox | returned child / relief | returned; bell silent | cold | allied | warm flavor; normal |
+| stays × prior | living child remains with fox / uneasy acceptance | living choice; bell rang | welcoming | bound | hostile flavor; suppressed |
+| stays × fox | living child remains with fox / uneasy acceptance | living choice; bell silent | cold | allied | warm flavor; normal |
+| lost × prior | grief / absence | lost; bell rang | welcoming | bound | hostile flavor; suppressed |
 
 Missing/unknown uses search/base prose. Lost×fox is an impossible contract case, not a sixth normal profile. Reactions never alter completed Q2, chosen Q3, exact Wren/message identities, terminal exports or previously paid rewards.
 
@@ -40,11 +40,11 @@ Fox restricts only **Nave-west ingress to the optional Prior Study**. Its curren
 
 ## Composition and files
 
-Quest/choice owners remain sole writers of terminal child/allegiance/bell facts. Read-only description/dialogue profiles derive from them where no history is needed. Reaction owner writes only necessary suppression/job consequences, using one writer per target and bounded FIFO causal delivery. Sense-cue is a structured read-only projection of committed narration evidence. Scope: Elspeth/Bram/Maud/Green/Aldric/Vesper/Sedge response, bell area source, exact-edge Study ingress, hound suppression job, necessary reaction/behavior/narration/protocol/save/Book projection seams, current pin/oracle. Out: new actor moves, reopening exported endings, global event/audio bus, far Scan, generic Effect DSL or generalized social AI.
+Quest/choice owners remain sole writers of terminal child/allegiance/bell facts. Read-only description/dialogue profiles derive from them where no history is needed. Reaction owner writes only necessary suppression/job consequences, using one writer per target and bounded FIFO causal delivery. Sense-cue is a structured read-only projection of committed narration evidence. Scope: Elspeth/Maud/Green/Aldric/Vesper/Sedge response, bell area source, exact-edge Study ingress, hound suppression job, necessary reaction/behavior/narration/protocol/save/Book projection seams, current pin/oracle. Out: new actor moves, reopening exported endings, global event/audio bus, far Scan, generic Effect DSL or generalized social AI.
 
 ## Acceptance, mutants and player/save proof
 
-Run fresh controlled states for all five terminal pairs and base missing/unknown; assert **stays differs from rescued** for Elspeth/Bram/Maud/Green, exact public Aldric service and unchanged quest/reward/export facts. Test the actual Belfry cue from a reachable bell command; test other eligible Ashmere/Priory frames and excluded Fen/isle frames by projecting the same accepted event over controlled observer frames. Repeated view/read/reopen yields zero new writes. Causal event and observer binding survives receipts and cold-open narration; malformed new evidence is typed corrupt.
+Run fresh controlled states for all five terminal pairs and base missing/unknown; assert **stays differs from rescued** for Elspeth/Maud/Green, exact public Aldric service and unchanged quest/reward/export facts. Test the actual Belfry cue from a reachable bell command; test other eligible Ashmere/Priory frames and excluded Fen/isle frames by projecting the same accepted event over controlled observer frames. Repeated view/read/reopen yields zero new writes. Causal event and observer binding survives receipts and cold-open narration; malformed new evidence is typed corrupt.
 
 At bell commit, suppression removes aggression/spawn availability without deleting hounds/custody; at+172799 remains suppressed, at+172800 resumes once within cap. Check existing hounds, pending population jobs and an open encounter. S2 ledger delivery still works after fox Study closure. In a controlled valid world or isolated seeded save, create an actual owned nonempty Study corpse before closure; prove blocked ordinary ingress and admitted owner ingress, physically Take the same roots, leave, then prove ingress re-closes. At each legal Study custody intermediate, prove cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost acknowledgement and replay through real SQLite. Execute island/Fen recovery, unique-item custody and Wren return/rejoin through descriptive flood. Plant stays→rescued mapping, cue area leak, render-triggered write, wrong observer binding, stale suppression resume or an empty/foreign Study-corpse bypass. Browser: reachable five-pair cast/Green/rumor checks, actor's Belfry cue, public delivery, fox ingress refusal and ordinary Study egress before closure; refresh at suppression/closure. The controlled Study corpse and remote cue-frame cases are host/projection proof, not ordinary-play browser scenarios. Stop for duplicate target writers, mandatory route lock, insufficient receipt observer evidence or unimplemented relationship capability being falsely declared complete.
 

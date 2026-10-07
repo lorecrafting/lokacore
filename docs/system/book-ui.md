@@ -874,7 +874,7 @@ is authorized by this planning adoption; real SQLite faults remain separate proo
 
 ## D9 village reactions and bell cue
 
-**Selected, pending implementation.** Show current fact-derived cast dialogue,
+**Selected D9 contract.** Show current fact-derived cast dialogue,
 rumors and Green description for each of the five valid child/bell pairs,
 keeping `stays` distinct from `rescued`. The bell cue appears once in the
 eligible observer's confirmed chronological history; redisplay and refresh

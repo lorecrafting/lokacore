@@ -27,11 +27,30 @@ export function populationTransition(
       same(row ?? null, op.expected) &&
         (before === undefined ||
           (op.value.next_wander_due >= before.next_wander_due &&
-            op.value.job_id !== before.job_id)),
+            ((op.value.job_id !== before.job_id &&
+              same(op.value.suppression, before.suppression)) ||
+              (op.value.next_wander_due === before.next_wander_due &&
+                suppressionChange(before.suppression, op.value.suppression))))),
       op.value as Json,
     );
   }
   return check(same(row ?? null, op.expected) && slotValid(row, op.value), op.value as Json);
+}
+
+function suppressionChange(before: any, after: any) {
+  if (!after) return false;
+  if (!before || before.ends_at === null)
+    return (
+      after.generation === (before?.generation ?? 0) + 1 &&
+      after.ends_at !== null &&
+      after.job_id !== null
+    );
+  return (
+    after.generation === before.generation &&
+    after.cause_event_id === before.cause_event_id &&
+    after.ends_at === null &&
+    after.job_id === null
+  );
 }
 
 export function initializePopulationResource(

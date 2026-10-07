@@ -1134,7 +1134,7 @@ rewearing and no general remote Take. Malformed custody never creates an offer.
 
 ## D9 reaction, cue and Study admission composition
 
-**Selected, pending implementation.** The existing child and bell choice
+**Selected D9 contract.** The existing child and bell choice
 producers emit their committed fact/quest events; D9 consumes them in the
 bounded reaction queue. Terminal fact writers are unchanged. Cast and Green
 profiles may be derived from current facts without a persisted mirror. A
@@ -1143,6 +1143,10 @@ the time-limited effect. Bell consequence delivery closes any current hound
 encounter and cancels its round in the same causal writer group; population
 jobs read the suppression and remain bounded. At deadline equality the resume
 job checks its generation and actual living count; stale jobs do nothing.
+When the current population job and its resume are both pending for the same
+plan at that exact deadline, their ordered deliveries share one writer group
+for that plan's control and slots. Each delivery re-reads the hydrated prefix;
+unrelated jobs retain separate groups and ordinary conflict refusal.
 If this composes into two conflicting writers on one encounter, stop for PM
 before changing the proposal conflict rule.
 

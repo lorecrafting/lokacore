@@ -1,0 +1,47 @@
+RED: extracted population deadline pairing disabled; focused suppression test fails exit1 (AssertionError)
+$ mise exec -- node --test kernel/ts/test/d9_suppression.test.ts kernel/ts/test/population_composition.test.ts mobile/authority/local-story/d9.test.ts mobile/authority/local-story/deer.test.ts
+✔ accepted bell preserves hounds and schedules one cause-bound suppression deadline (118.69675ms)
+✔ population ticks stay quiet until the exact two-day deadline (213.717458ms)
+✔ suppression closes an open hound encounter without reward or deleting the member (74.528333ms)
+✔ one accepted bell event projects only within the declared Ashmere and public Priory area (71.258416ms)
+✔ stale population occurrence completes without changing the suppressed plan (69.020458ms)
+✔ population successor cannot rewrite suppression (67.007834ms)
+✔ population control and slot composition match independent literal rows (4.678667ms)
+✔ population invariant rejects counterfeit success (0.147958ms)
+✔ real SQLite cold reopen retains one cause-bound bell cue (221.683625ms)
+✔ real SQLite uncertain bell COMMIT reconciles one suppression and one resume job (2500.222708ms)
+✔ real SQLite fox Study corpse permits pickup then closes ingress after cold reopen (769.596834ms)
+✔ real SQLite stays/prior bell scene reopens before Continue (282.309416ms)
+✔ terminal profiles preserve bound ledger and cellar offers through SQLite reopen (869.506875ms)
+✔ pending sight and confirmed flight cold-reopen with conserved deer custody (34.086ms)
+✔ missed round and +300 flight cold-reopen with closed combat (46.447125ms)
+✔ sight-only receipt cannot justify a later deer binding (27.174875ms)
+✔ forged current sight binding refuses without changing saved bytes (14.387458ms)
+✔ fatal deer and its owned hide cold-reopen without replacement (34.229083ms)
+✔ real COMMIT faults preserve all-prior or all-next deer rows and one replayable receipt (181.858333ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5547.937958
+
+exit: 0
+$ mise exec -- npm --prefix kernel/ts run typecheck
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+
+
+exit: 0
+$ mise exec -- node bin/check_ts_size.mjs kernel/ts/src/runtime/proposal.ts kernel/ts/src/content/cartridge_reactions.ts kernel/ts/src/mechanics/combat/round.ts kernel/ts/src/runtime/invariants_population.ts
+kernel/ts/src/runtime/proposal.ts:1: info: size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
+kernel/ts/src/runtime/proposal.ts:169: info: size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
+kernel/ts/src/runtime/proposal.ts:241: info: size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
+kernel/ts/src/content/cartridge_reactions.ts:39: info: size: allow 52, finite reaction API and typed suppression references stay in one ordered check
+kernel/ts/src/mechanics/combat/round.ts:52: info: size: allow 46, one due round checks suppression before existing attack and crow settlement delivery
+kernel/ts/src/runtime/invariants_population.ts:73: info: size: allow 43, independent full-prior control and slot replay includes bounded suppression
+
+exit: 0

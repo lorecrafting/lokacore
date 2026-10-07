@@ -1,4 +1,4 @@
-# size: allow 410, skill, bleed and ancestry refs share the checked expansion boundary
+# size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -27,6 +27,9 @@ defmodule Loka.Content.Checks do
   @spec expand(term(), map()) :: term()
   def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
     do: Loka.Content.Population.expand(value, m)
+
+  def expand(%{"op" => "population.suppress", "plan" => plan} = step, m),
+    do: Map.put(step, "plan", ref(plan, "population", m))
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
@@ -57,11 +60,19 @@ defmodule Loka.Content.Checks do
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
-    field = fn {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)} end
+    field = fn
+      {"corpse_ingress", v} -> {"corpse_ingress", expand(v, m)}
+      {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)}
+    end
+
     exit = fn {d, e} -> {d, Map.new(e, field)} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
 
+  def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
+    do: Map.put(gate, "fact", ref(f, "fact", m))
+
+  # A reaction's trigger (ReactionRule on): its short fact or room.
   def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
     do: Map.put(on, "fact", ref(k, "fact", m))
 
@@ -221,6 +232,17 @@ defmodule Loka.Content.Checks do
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
 
+  def expand(%{"bell_cue" => cue} = world, m),
+    do:
+      world
+      |> Map.delete("bell_cue")
+      |> expand(m)
+      |> Map.put("bell_cue", %{
+        "fact" => ref(cue["fact"], "fact", m),
+        "rooms" => Enum.map(cue["rooms"], &ref(&1, "room", m)),
+        "text" => cue["text"]
+      })
+
   def expand(%{"death_credit" => credits} = world, m) when is_list(credits),
     do:
       world
@@ -349,15 +371,28 @@ defmodule Loka.Content.Checks do
   defp entry(m, ref, defs),
     do: reference("cartridge.json", [], {"entry", "room"}, %{"entry" => ref}, m, defs)
 
+  # ponytail: the one exit check keeps corpse ingress beside barrier and destination refs. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp room({rel, r}, m, defs, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
     Enum.flat_map(RoomParts.parts(r), fn {steps, kind} ->
       owned(at(rel, steps), kind, required)
     end) ++
-      for {dir, exit} <- r["exits"],
-          d <- reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs),
-          do: d
+      Enum.flat_map(r["exits"], fn {dir, exit} ->
+        reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs) ++
+          if(exit["corpse_ingress"],
+            do:
+              reference(
+                rel,
+                ["exits", dir, "corpse_ingress"],
+                {"fact", "fact"},
+                exit["corpse_ingress"],
+                m,
+                defs
+              ),
+            else: []
+          )
+      end)
   end
 
   defp text_keys(_, _, :unknown), do: []

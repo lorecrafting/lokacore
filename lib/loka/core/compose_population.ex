@@ -40,7 +40,10 @@ defmodule Loka.Core.ComposePopulation do
       row == op["expected"] and
         (row == nil or
            (value["next_wander_due"] >= row["next_wander_due"] and
-              value["job_id"] != row["job_id"])),
+              ((value["job_id"] != row["job_id"] and
+                  value["suppression"] == row["suppression"]) or
+                 (value["next_wander_due"] == row["next_wander_due"] and
+                    suppression_change?(row["suppression"], value["suppression"]))))),
       value
     )
   end
@@ -134,4 +137,22 @@ defmodule Loka.Core.ComposePopulation do
            next["last_flight_at"] == nil
 
   defp slot?(_, _), do: false
+
+  defp suppression_change?(_, nil), do: false
+
+  defp suppression_change?(nil, after_row),
+    do:
+      after_row["generation"] == 1 and after_row["ends_at"] != nil and
+        after_row["job_id"] != nil
+
+  defp suppression_change?(%{"ends_at" => nil} = before, after_row),
+    do:
+      after_row["generation"] == before["generation"] + 1 and
+        after_row["ends_at"] != nil and after_row["job_id"] != nil
+
+  defp suppression_change?(before, after_row),
+    do:
+      after_row["generation"] == before["generation"] and
+        after_row["cause_event_id"] == before["cause_event_id"] and
+        after_row["ends_at"] == nil and after_row["job_id"] == nil
 end

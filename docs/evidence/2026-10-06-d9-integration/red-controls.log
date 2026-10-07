@@ -1,0 +1,9 @@
+RED: suppression ignored exit 1
+RED: audible area leaks exit 1
+RED: foreign corpse admits owner exit 1
+GREEN: restored core checks exit 0
+RED: cue fact type exit 2
+RED: suppression fact type exit 2
+RED: suppression API floor exit 2
+RED: suppression plan kind exit 2
+GREEN: restored compiler checks exit 0

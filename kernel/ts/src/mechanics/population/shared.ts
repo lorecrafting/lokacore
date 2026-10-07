@@ -1,18 +1,81 @@
 import type {
+  CharacterId,
   Command,
   CommandId,
   DefinitionRef,
   DeltaOp,
+  DomainEvent,
   EntityId,
   JobId,
 } from '../../contracts.gen.ts';
 import { apply } from '../../runtime/apply.ts';
-import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import {
+  accepted,
+  bodyOf,
+  refString,
+  type JobRow,
+  type Mint,
+  type World,
+} from '../../runtime/decision.ts';
 import { key } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
+import { closeEncounter, engaged } from '../combat/shared.ts';
+import { add } from '../../foundation/int.ts';
 import { birth } from './birth.ts';
 import { planRef } from './refs.ts';
 import { births, wanders, type Plan, type Slots } from './settle.ts';
+
+export function suppressed(world: World, plan: DefinitionRef, at = world.state.clock) {
+  const until = world.state.population_plans?.[key(plan)]?.suppression?.ends_at;
+  return until !== undefined && until !== null && at < until;
+}
+
+/** One accepted bell cause owns one bounded suppression and its resume occurrence. */
+// size: allow 46, one cause binds suppression, resume occurrence and hound encounter closure
+export function suppress(
+  world: World,
+  actor: CharacterId,
+  plan: DefinitionRef,
+  duration: number,
+  cause: DomainEvent,
+  group: number,
+  mint: Mint,
+): DeltaOp[] {
+  const control = world.state.population_plans?.[key(plan)];
+  if (
+    !world.populationSpecs[key(plan)]?.plan.pack ||
+    !control ||
+    cause.payload.type !== 'fact_changed' ||
+    cause.payload.new !== true ||
+    cause.actor_id !== actor ||
+    suppressed(world, plan, cause.logical_time)
+  )
+    throw new KernelError('precondition_failed');
+  const job_id = mint() as JobId;
+  const ends_at = add(cause.logical_time, duration);
+  const suppression = {
+    generation: (control.suppression?.generation ?? 0) + 1,
+    ends_at,
+    job_id,
+    cause_event_id: cause.id,
+  };
+  const body = bodyOf(world, actor);
+  const fight = body && engaged(world, body);
+  const origin = fight && world.state.created?.[fight.row.npc_id]?.origin;
+  const close =
+    origin?.kind === 'spawned' && key(origin.by) === key(plan) ? closeEncounter(world, body!) : [];
+  return [
+    {
+      op: 'population.control',
+      writer_group: group,
+      plan,
+      expected: control,
+      value: { ...control, suppression },
+    },
+    { op: 'job.schedule', writer_group: group, job_id, job: plan, due_time: ends_at },
+    ...close.map((op) => ({ ...op, writer_group: group })),
+  ];
+}
 
 export function initialPopulation(world: World, mint: Mint, occurrence_id: CommandId): World {
   let current = world;
@@ -114,17 +177,63 @@ export function runPopulation(
 ) {
   const plan = world.cartridge.populations?.[refString(job.job)];
   const control = world.state.population_plans?.[key(job.job)];
-  if (!plan || !control || control.job_id !== job_id) throw new KernelError('precondition_failed');
+  if (!plan || !control) throw new KernelError('precondition_failed');
+  if (control.suppression?.job_id === job_id)
+    return resumePopulation(world, command, job_id, job, control, plan, mint);
+  if (control.job_id !== job_id)
+    return accepted<never>(world, 'job_ran', [{ op: 'job.complete', writer_group: 0, job_id }], []);
   const target = targetAt(world, plan, job.due_time);
   const slots = slotRows(world, job.job, plan.cap);
-  const born = births(world, command.id, job, target, slots, mint);
+  const quiet = suppressed(world, job.job, job.due_time);
+  const born = quiet
+    ? { ops: [] as DeltaOp[], ids: new Set<string>() }
+    : births(world, command.id, job, target, slots, mint);
   const ops: DeltaOp[] = [
     { op: 'job.complete', writer_group: 0, job_id },
     ...born.ops,
-    ...wanders(world, command.id, job.job, plan, job, control, slots, born.ids, mint),
+    ...(quiet
+      ? []
+      : wanders(world, command.id, job.job, plan, job, control, slots, born.ids, mint)),
     ...successor(world, plan, job, control, target, slots, mint),
   ];
   return accepted<never>(world, 'job_ran', ops, []);
+}
+
+function resumePopulation(
+  world: World,
+  command: Pick<Command, 'id'>,
+  job_id: JobId,
+  job: JobRow,
+  control: NonNullable<World['state']['population_plans']>[string],
+  plan: World['populationSpecs'][string]['plan'],
+  mint: Mint,
+) {
+  const suppression = control.suppression!;
+  if (suppression.ends_at !== job.due_time) throw new KernelError('precondition_failed');
+  const born = births(
+    world,
+    command.id,
+    job,
+    targetAt(world, plan, job.due_time),
+    slotRows(world, job.job, plan.cap),
+    mint,
+  );
+  return accepted<never>(
+    world,
+    'job_ran',
+    [
+      { op: 'job.complete', writer_group: 0, job_id },
+      ...born.ops,
+      {
+        op: 'population.control',
+        writer_group: 0,
+        plan: job.job,
+        expected: control,
+        value: { ...control, suppression: { ...suppression, ends_at: null, job_id: null } },
+      },
+    ],
+    [],
+  );
 }
 
 function targetAt(world: World, plan: Plan, at: number) {
@@ -167,7 +276,7 @@ function successor(
       writer_group: 0,
       plan: job.job,
       expected: control,
-      value: { job_id, next_wander_due: wander },
+      value: { ...control, job_id, next_wander_due: wander },
     },
   ];
 }

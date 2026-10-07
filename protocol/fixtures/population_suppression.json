@@ -1,0 +1,641 @@
+{
+  "description": "Independent literal D9 CAS transitions: first/start-next, resume, regular rotation and four invalid transitions. Hand-selected rows; no kernel-derived answers.",
+  "cases": [
+    {
+      "id": "first-suppression",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": 172800,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resume-retains-cause-generation",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": null,
+              "job_id": null
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": null,
+                "job_id": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "next-suppression-generation",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": null,
+              "job_id": null
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": null,
+              "job_id": null
+            }
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 2,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 345600,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 2,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": 345600,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "regular-job-preserves-live-suppression",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          },
+          "value": {
+            "job_id": "44444444-4444-4444-8444-444444444444",
+            "next_wander_due": 220,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "44444444-4444-4444-8444-444444444444",
+              "next_wander_due": 220,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": 172800,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reject-active-extension",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 345600,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "population_plan",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            }
+          }
+        }
+      },
+      "counterfeit_success": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": 345600,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reject-resume-cause-swap",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "55555555-5555-4555-8555-555555555555",
+              "ends_at": null,
+              "job_id": null
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "population_plan",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            }
+          }
+        }
+      },
+      "counterfeit_success": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "55555555-5555-4555-8555-555555555555",
+                "ends_at": null,
+                "job_id": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reject-initial-generation-gap",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 2,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "population_plan",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            }
+          }
+        }
+      },
+      "counterfeit_success": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 2,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": 172800,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reject-resume-retained-job",
+      "state": {
+        "clock": 205,
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.control",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": 172800,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          },
+          "value": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210,
+            "suppression": {
+              "generation": 1,
+              "cause_event_id": "11111111-1111-4111-8111-111111111111",
+              "ends_at": null,
+              "job_id": "22222222-2222-4222-8222-222222222222"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "population_plan",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            }
+          }
+        }
+      },
+      "counterfeit_success": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "33333333-3333-4333-8333-333333333333",
+              "next_wander_due": 210,
+              "suppression": {
+                "generation": 1,
+                "cause_event_id": "11111111-1111-4111-8111-111111111111",
+                "ends_at": null,
+                "job_id": "22222222-2222-4222-8222-222222222222"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

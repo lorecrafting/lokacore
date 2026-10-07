@@ -1,3 +1,4 @@
+// size: allow 380, confirmed narration, receipt routing and save adoption share one local boundary
 import { eatReceipt } from './food-receipt.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { defenseEvidence } from './combat-receipt.ts';
@@ -5,10 +6,11 @@ import { defenseEvidence } from './combat-receipt.ts';
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
+import { bellCue } from '../../../kernel/ts/src/mechanics/bell/cue.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
-import { bodyOf } from '../../../kernel/ts/src/runtime/decision.ts';
+import { bodyOf, refString } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
@@ -128,16 +130,14 @@ export function adopt(s: Story) {
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
+type NarrationRow = { revision: number; command_id: string; command: string; response: string };
+
+// size: allow 60, one receipt query retains exact cue, combat and detail routing
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
   let before: number | null = null;
   while (true) {
-    const r: {
-      revision: number;
-      command_id: string;
-      command: string;
-      response: string;
-    } | null = s.db.getFirstSync(
+    const r: NarrationRow | null = s.db.getFirstSync(
       `SELECT revision, command_id, command, response FROM receipt WHERE scope = ?
        AND (json_array_length(response, '$.narration') > 0
          OR json_extract(response, '$.outcome') = 'taken')
@@ -188,14 +188,39 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
       continue;
     }
     const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
+    const cue = receiptBellCue(s, r, d);
     return {
       command_id: r.command_id,
       lines,
+      ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines }),
       ...(detail_id && { detail_id }),
       ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
     } as NarrationRecord;
   }
+}
+
+function receiptBellCue(
+  s: Story,
+  r: { command_id: string; command: string },
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
+  if (!s.world.cartridge.world?.bell_cue) return;
+  const c = JSON.parse(r.command) as Command;
+  if (c?.payload?.type !== 'perform' || c.payload.action !== 'ring_bell') return;
+  const { action, actor_id } = c.payload;
+  if (validate('Command', c).length || c.id !== r.command_id || actor_id !== s.world.character)
+    throw new Error('malformed JSON: invalid committed bell cue');
+  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((a) => a.key === action);
+  if (!recipe) throw new Error('malformed JSON: missing bell cue source');
+  const room_id = s.world.roomIds[refString(recipe.target.room)];
+  if (!room_id) throw new Error('malformed JSON: missing bell cue room');
+  const cues = d.events.flatMap((e) => {
+    const projected = bellCue(s.world, e, c.id, actor_id, room_id);
+    return projected ? [projected] : [];
+  });
+  if (cues.length !== 1) throw new Error('malformed JSON: inconsistent committed bell cue');
+  return cues[0];
 }
 
 function corpsePickup(
@@ -228,6 +253,7 @@ function corpsePickup(
 }
 
 // Routing belongs to this receipt's committed command/evidence, never text or current room.
+// size: allow 50, one saved command maps its exact retained detail target
 function receiptDetail(
   s: Story,
   r: { command_id: string; command: string },

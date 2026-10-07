@@ -77,7 +77,8 @@ defmodule Loka.Content.Compiler do
 
   defp final_checks(manifest, defs, v2, located, registry),
     do:
-      Position.check(manifest, defs) ++
+      Loka.Content.BellCue.check(manifest, defs, located, v2) ++
+        Position.check(manifest, defs) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{}))
 

@@ -1,0 +1,29 @@
+{
+  "npc": "sedge",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "fox"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.d9_sedge_fox.prompt",
+  "roles": {
+    "sedge": {
+      "role": "npc",
+      "npc": "sedge"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.d9.leave",
+      "narration": "narration.d9.leave"
+    }
+  }
+}

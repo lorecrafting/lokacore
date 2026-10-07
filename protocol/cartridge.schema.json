@@ -1216,6 +1216,16 @@
         },
         "water": {
           "$ref": "water.schema.json#/$defs/WaterSettings"
+        },
+        "bell_cue": {
+          "type": "object",
+          "properties": {
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "rooms": { "type": "array", "minItems": 1, "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" } },
+            "text": { "$ref": "text.schema.json#/$defs/TextKey" }
+          },
+          "required": ["fact", "rooms", "text"],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,

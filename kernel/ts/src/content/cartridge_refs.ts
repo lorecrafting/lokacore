@@ -1,3 +1,4 @@
+// size: allow 330, ancestry, bell area and Study edge join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -181,13 +182,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
   out.push(...exchanges(c, check), ...fuel(c, check));
-  named(c.entry, 'room', '.cartridge.entry');
-  for (const [ref, r] of Object.entries(c.rooms as Obj)) {
-    const at = `.cartridge.rooms${step(ref)}`;
-    for (const [dir, exit] of Object.entries(r.exits as Obj))
-      named(exit.to, 'room', `${at}.exits.${dir}.to`);
-    out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
-  }
+  spatialRefs(c, check, out);
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const { in: k } = i.location;
@@ -221,6 +216,34 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
   return out;
+}
+
+// Bell area and exit gates name exact local room/fact references.
+function spatialRefs(c: Obj, { named, typedValue, text }: Checks, out: Diagnostic[]) {
+  named(c.entry, 'room', '.cartridge.entry');
+  if (c.world?.bell_cue) {
+    named(c.world.bell_cue.fact, 'fact', '.cartridge.world.bell_cue.fact');
+    typedValue(c.world.bell_cue.fact, true, '.cartridge.world.bell_cue.fact');
+    c.world.bell_cue.rooms.forEach((room: Obj, i: number) =>
+      named(room, 'room', `.cartridge.world.bell_cue.rooms[${i}]`),
+    );
+    text(c.world.bell_cue, ['text'], '.cartridge.world.bell_cue');
+  }
+  for (const [ref, r] of Object.entries(c.rooms as Obj)) {
+    const at = `.cartridge.rooms${step(ref)}`;
+    for (const [dir, exit] of Object.entries(r.exits as Obj)) {
+      named(exit.to, 'room', `${at}.exits.${dir}.to`);
+      if (exit.corpse_ingress) {
+        named(exit.corpse_ingress.fact, 'fact', `${at}.exits.${dir}.corpse_ingress.fact`);
+        typedValue(
+          exit.corpse_ingress.fact,
+          exit.corpse_ingress.equals,
+          `${at}.exits.${dir}.corpse_ingress.equals`,
+        );
+      }
+    }
+    out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
+  }
 }
 
 function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnostic[]) {

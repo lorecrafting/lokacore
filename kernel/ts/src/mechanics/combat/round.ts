@@ -26,6 +26,7 @@ import { npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
 import { packRound, successor, narrate } from './round_flow.ts';
+import { suppressed } from '../population/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 
 export type CombatEvent = DomainEvent & {
@@ -48,6 +49,7 @@ export function currentRound(world: World, job_id: JobId, job: JobRow) {
   return row && row.status === 'open' && row.job_id === job_id ? row : undefined;
 }
 
+// size: allow 46, one due round checks suppression before existing attack and crow settlement delivery
 export function roundSequence(
   world: World,
   command: Pick<Command, 'id'>,
@@ -78,6 +80,13 @@ export function roundSequence(
     job_id,
     ...(row.active_ids && { expected: row }),
   };
+  const origin = world.state.created?.[row.npc_id]?.origin;
+  if (
+    origin?.kind === 'spawned' &&
+    origin.role === 'hound' &&
+    suppressed(world, origin.by, job.due_time)
+  )
+    return accepted<never>(world, 'job_ran', [...r.ops, close], []);
   if (row.active_ids) return packRound(world, command, job, row, encounter_id, r, close, mint);
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
   if (r.ops.some((op) => op.op === 'encounter.close'))

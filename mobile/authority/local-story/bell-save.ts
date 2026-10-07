@@ -4,6 +4,7 @@ import type {
   DecisionResult,
   DefinitionRef,
 } from '../../../kernel/ts/src/contracts.gen.ts';
+import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
@@ -131,6 +132,9 @@ function choiceReceipt(
   const instance = { kind: 'instance', world_context_id: world.context };
   return rows.some(({ command_id, actor_id, command, response }) => {
     const c: Command = JSON.parse(command);
+    const action = c.payload?.type === 'perform' ? c.payload.action : undefined;
+    const recipe = Object.values(world.cartridge.recipes ?? {}).find((r) => r.key === action);
+    const target = recipe && detailOf(world, recipe.target);
     if (
       validate('Command', c).length ||
       c.id !== command_id ||
@@ -139,9 +143,10 @@ function choiceReceipt(
       c.payload.action !== (choice === 'prior' ? 'ring_bell' : 'silence_bell') ||
       c.payload.actor_id !== world.character ||
       c.world_context_id !== world.context ||
-      world.details[c.payload.target_id!]?.key !== 'bell' ||
-      world.details[c.payload.target_id!]?.room !==
-        world.roomIds[refString(ref(world, 'room', 'belfry'))]
+      !target ||
+      (c.payload.target_id !== undefined && c.payload.target_id !== target) ||
+      world.details[target]?.key !== 'bell' ||
+      world.details[target]?.room !== world.roomIds[refString(ref(world, 'room', 'belfry'))]
     )
       return false;
     const d: DecisionResult = JSON.parse(response);
