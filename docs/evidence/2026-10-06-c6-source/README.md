@@ -210,3 +210,13 @@ remain pending. Earlier provisional source approvals remain historical and are n
 claimed as approval of this final candidate. C6 is not complete or published.
 Native work remains paused; UI blur remains deferred; owner save and mismatch refusal
 are preserved.
+
+## Bundled Book pin correction
+
+Browser preparation on source `c32d1c2180e1ce12932a2eeee8e35935a9dc875c`
+found the application import still selected frozen v040. The minimal correction
+selects the final v041 answer and independently updates the existing actual-shell
+save-pin assertion. The existing app chapter tests pass (5 tests), including
+old-development save refusal and preservation. No owner save is opened or reset.
+This correction requires the final source reviewers to inspect the resulting head;
+the preceding source head is not the browser release candidate.
