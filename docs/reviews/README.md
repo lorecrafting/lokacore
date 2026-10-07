@@ -1,3 +1,4 @@
+- [E1 Maud cellar bounded route proof](2026-10-07-e1-maud-path-review.md): source `7e647c9c`, independent **APPROVE**, no findings; focused Maud test 1/1 and owning Maud/reward SQLite tests 4/4 pass, omitted-fifth-kill mutant escapes old suite but fails the new test, retained hashes and privacy checked. Route remains unregistered; E1 certification remains pending.
 # Independent reviews
 
 - [E1 reviewed-route registration](2026-10-07-e1-route-registration-review.md): exact source `e5a9d695` and evidence checkpoint `fa151bb5`, independent **APPROVE**, no findings; 16/16 named SQLite cases and semantic replays pass, the recipe files are bound into `check_hash`, and docs/focused/typecheck checks pass. E1 remains pending with 609 authored obligations.
