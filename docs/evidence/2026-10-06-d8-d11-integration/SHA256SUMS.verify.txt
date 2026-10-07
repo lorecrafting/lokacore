@@ -8,3 +8,6 @@ stale-shoo-red.log: OK
 source-custody-old-red.log: OK
 source-custody-new-red.log: OK
 crow-proof-final.log: OK
+browser-acquisition.png: OK
+browser-recovered.png: OK
+browser-full-nest.png: OK

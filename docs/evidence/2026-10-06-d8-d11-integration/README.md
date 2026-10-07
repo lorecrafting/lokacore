@@ -264,3 +264,23 @@ Shoo refusal/success, full nest and fallback. The proof uses the real published
 world/clock and real SQLite web authority; no seeded app state or clock override.
 The isolated preview remains running for continuation; no PR was opened. Final
 full gate/pre-push still required on the newly added custody regression head.
+
+## Actual browser corridor, Take and eight-root nest
+
+Continued the same real-v039 isolated run through Well Lane, Ferry Landing,
+Reed Path, Reed Bank, Willow Shade, Drowned Oak and ordinary Up to Oak Branches.
+Opened the real nest: Inside showed old coin. Opened that exact item and used
+ordinary Take; [inventory screenshot](browser-recovered.png) shows the recovered
+coin. No teleport, fixture state or clock override was used.
+
+Collected eight ordinary, separately visible fenwort roots from Willow Shade by
+Take, carried them to Oak Branches and used eight ordinary Put actions on the
+original open nest. [Full nest screenshot](browser-full-nest.png) shows eight
+Inside entries; ninth-root Put offers (coin/torch) disappeared. This proves actual
+UI capacity admission. Crow delivery fallback with that full nest, transient
+carrying/refresh and Shoo remain pending. The original coin is held by the player;
+the full nest remains at Oak Branches. Current browser page is the nest menu.
+
+A draft PR may preserve this source checkpoint with remaining UI rows explicitly
+pending. Independent source approval, exact pushed-head hosted CI, publication and
+D9 integration remain pending; no completion or merge is claimed.
