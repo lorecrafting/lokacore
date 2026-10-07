@@ -1,6 +1,9 @@
 # Independent reviews
 
 - [Beads audit follow-ups independent review](2026-10-06-beads-audit-followups-extra-review.md): exact source `18d0c847`, **APPROVE**, no findings; complete export, shipped controls, 13 independent structural probes, distinct duplicate-slice mutation and docs checks pass. PM-owned evidence links and all 33 required slices preserved.
+- [Paired job completion invariant second opinion](2026-10-06-job-complete-owned-run-second-opinion.md): PR #269 exact `d12bf1e1` versus current main `9669f6e4`, independent Sol **APPROVE**, no findings; 22 kernel/composition, 6 D9 and 4 real SQLite checks pass, three distinct observer mutants red.
+
+- [Paired job completion invariant](2026-10-06-job-complete-owned-run-review.md): source `c9a19d5519d3ff6024ccfc144198509f22e7a150`, independent **APPROVE**, no findings; 3/3 focused checks and three independent red controls. Broader fresh-checkout attempts stopped on missing Mix dependencies; supplied full-gate/SQLite results remain separately attributed.
 
 
 - [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, initially CHANGES REQUIRED; scoped fix `388c430e` APPROVE closes BASE-R1 remaining C3/D12 published-status contradictions. Docs check and all 25 historical heading aliases pass.
