@@ -1,5 +1,7 @@
 # Independent reviews
 
+
+- [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, CHANGES REQUIRED for BASE-R1 remaining C3/D12 published-status contradictions; docs check and all 25 historical heading aliases pass.
 - [D10 save/protocol independent review](2026-10-06-d10-save-protocol-review.md): source `806bfe4f`, test-only followup `b8c4e8ec`, scoped APPROVE; 8 focused tests, 9 independent SQLite corruption probes and 3 save-pin tests pass. No findings; foundation/proposal, browser and publication gates remain separate.
 
 - [D8 save/protocol/foundation second opinion](2026-10-06-d8-save-foundation-second-review.md): PR #258 exact source `41e86ee7`, initial CHANGES REQUIRED; scoped fix `ec0f2dd3` APPROVE closes D8-S1/S2. Five fix mutants killed; 22 TS/SQLite and 5 Elixir checks pass. Final primary closure is indexed below.
