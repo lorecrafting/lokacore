@@ -2104,7 +2104,20 @@
         "y",
         "z"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "room": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.42",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      ]
     }
   }
 }

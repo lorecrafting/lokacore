@@ -614,7 +614,25 @@
         "answered",
         "unanswered"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "npc": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.42",
+            "kind": "npc",
+            "key": "aldric"
+          },
+          "room": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.42",
+            "kind": "room",
+            "key": "chapel_nave"
+          },
+          "answered": "knock.chapel.answered",
+          "unanswered": "knock.chapel.unanswered"
+        }
+      ]
     }
   }
 }

@@ -2363,7 +2363,13 @@
         "actor_id",
         "room_id"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "room_id": "aaaaaaaa-0000-4000-8000-000000000001"
+        }
+      ]
     },
     "ObservedNpc": {
       "type": "object",
@@ -2387,7 +2393,15 @@
         "room_id",
         "at"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "npc_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "room_id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "at": 64800
+        }
+      ]
     }
   }
 }
