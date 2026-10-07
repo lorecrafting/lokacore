@@ -1301,7 +1301,9 @@ not become sound authority. Flood variants affect Reed Path and Mire text only.
 The bell's hound suppression duration is **172800 logical seconds**, owned by
 the cartridge. Author its population-plan reference and resume bound against
 the existing hound plan; no new population cap, catch-up count or creature is
-declared. The integrated D9 release follows published D8 v039/API1.34. Its independent
+declared. The cue source is a Boolean fact. A suppression declaration requires
+API1.35 and a population plan with the installed pack behavior; compiler and
+loader reject an unresolved or non-pack plan rather than admitting a runtime fault. The integrated D9 release follows published D8 v039/API1.34. Its independent
 v040/API1.35 hash and209 allocation answers are retained with
 [the integration proof](../evidence/2026-10-06-d9-integration/README.md).
 

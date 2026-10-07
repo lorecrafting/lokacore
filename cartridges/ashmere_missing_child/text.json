@@ -530,7 +530,7 @@
   "npc.sedge.room": "[Mother Sedge] sorts dried leaves beside the hearth.",
   "npc.sedge.description": "Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.",
   "skill.swim.label": "Swim",
-  "skill.swim.requirement": "No attribute requirement for learning; water access is not yet available.",
+  "skill.swim.requirement": "No attribute requirement for learning. Learned swim is required for underwater descent.",
   "sedge.swim.prompt": "Mother Sedge offers to teach you to swim.",
   "sedge.swim.choice": "Learn swim \u2014 free",
   "sedge.swim.learned": "Mother Sedge teaches you to keep afloat and swim. You have learned swim.",

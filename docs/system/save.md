@@ -975,7 +975,10 @@ Receipt replay cannot create a second root transfer or reopen the gate from
 historical custody. D6 underwater recovery remains location-specific. Prove
 real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
 acknowledgement and same-invocation replay at bell suppression/resume and
-Study recovery boundaries; input/elapsed stays fenced until reconciliation.
+Study recovery boundaries; input/elapsed stays fenced until reconciliation. The current regular population
+job and its suppression resume job may share one writer group at their exact
+common deadline; cold-load must distinguish this bound pair from deer sight
+handoff reuse and continue validating all operations through receipt replay.
 
 ## D12 lesson, careful Harvest and discount recovery
 

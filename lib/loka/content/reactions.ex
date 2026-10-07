@@ -56,7 +56,7 @@ defmodule Loka.Content.Reactions do
       |> Enum.map(&String.to_integer/1)
 
     if (needed and version < [1, 8]) or (terminal and version < [1, 12]) or
-         (suppression and version < [1, 31]),
+         (suppression and version < [1, 35]),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
        else: []
   end
@@ -83,7 +83,14 @@ defmodule Loka.Content.Reactions do
   defp consequence(rel, {%{"op" => "population.suppress"} = s, i}, on, ctx) do
     path = at(rel, ["apply", i, "op"])
     restricted = if on["event"] == "fact_changed", do: [], else: [diag("OUTCOME_MISMATCH", path)]
-    restricted ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
+
+    pack =
+      case ctx.defs["population"][s["plan"]["key"]] do
+        {_, _, %{"pack" => _}} -> []
+        _ -> [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]))]
+      end
+
+    restricted ++ pack ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
   end
 
   defp consequence(rel, {s, i}, _, ctx),

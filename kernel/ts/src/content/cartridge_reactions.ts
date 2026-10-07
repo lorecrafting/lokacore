@@ -4,6 +4,7 @@
 // consequence's event; its trigger and consequences name local fact, room or quest definitions,
 // with typed fact values and restricted quest activation. Its `when` is walked
 // with every other policy (content/cartridge_refs.ts nodes).
+import { refString } from '../runtime/decision.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
@@ -56,7 +57,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       );
     if (
       r.apply.some((s: Obj) => s.op === 'population.suppress') &&
-      (major < 1 || (major === 1 && minor < 31))
+      (major < 1 || (major === 1 && minor < 35))
     )
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
@@ -75,6 +76,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'population.suppress') {
         named(s.plan, 'population', `${at}.apply[${i}].plan`);
+        if (!c.populations?.[refString(s.plan)]?.pack)
+          out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else {

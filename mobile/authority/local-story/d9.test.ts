@@ -186,12 +186,11 @@ test('real SQLite cold reopen retains one cause-bound bell cue', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const p = setup(join(dir, 'save.db'));
-  const bell = Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0];
   const invocation = {
     invocation_id: 'aaaaaaaa-0000-4000-8000-000000000101',
     actor_id: p.story.world().character,
     action_key: 'ring_bell',
-    target_ids: [bell],
+    target_ids: [],
     input: {},
   };
   const reply = p.story.invoke(invocation);
@@ -221,12 +220,11 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
   t.after(() => rmSync(dir, { recursive: true }));
   for (const kind of ['failed', 'lost'] as const) {
     const p = setup(join(dir, `${kind}.db`));
-    const bell = Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0];
     const invocation = {
       invocation_id: 'aaaaaaaa-0000-4000-8000-000000000201',
       actor_id: p.story.world().character,
       action_key: 'ring_bell',
-      target_ids: [bell],
+      target_ids: [],
       input: {},
     };
     if (kind === 'failed')
@@ -274,6 +272,46 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
         .kind,
       'open',
       kind,
+    );
+    while (p.story.world().state.clock < 237599) {
+      const from = p.story.world().state.clock;
+      const until = Math.min(
+        237599,
+        ...Object.values(p.story.world().state.jobs ?? {})
+          .filter((j) => j.status === 'pending')
+          .map((j) => j.due_time),
+      );
+      const tick = p.story.elapsed({ expected_run_id: p.story.runId(), from, until });
+      assert.equal(tick.kind, 'saved');
+      if (tick.kind === 'saved') assert.equal((tick.decision as { kind: string }).kind, 'accepted');
+    }
+    assert.equal(
+      openStory(p.db, [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }], p.host)
+        .kind,
+      'open',
+    );
+    p.fault.inserted = false;
+    p.fault.kind = kind;
+    p.fault.armed = true;
+    const resume = { expected_run_id: p.story.runId(), from: 237599, until: 237600 };
+    assert.equal(p.story.elapsed(resume).kind, 'pending');
+    assert.equal(p.story.world().state.clock, 237599);
+    p.fault.reads = false;
+    const settledResume = p.story.elapsed(resume);
+    assert.equal(settledResume.kind, 'saved');
+    if (settledResume.kind === 'saved') assert.equal(settledResume.replay, kind === 'lost');
+    const replayedResume = p.story.elapsed(resume);
+    assert.equal(replayedResume.kind, 'saved');
+    if (replayedResume.kind === 'saved') assert.equal(replayedResume.replay, true);
+    assert.equal(
+      p.story.world().state.population_plans![key(ref('population', 'fen_hounds'))].suppression
+        ?.ends_at,
+      null,
+    );
+    assert.equal(
+      openStory(p.db, [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }], p.host)
+        .kind,
+      'open',
     );
   }
 });

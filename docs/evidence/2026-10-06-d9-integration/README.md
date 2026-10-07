@@ -47,12 +47,33 @@ one-shot deferred-constraint insertion before each failed transaction.
 and foreign-corpse ownership. Each produced an assertion failure (exit1); restored
 source passed (exit0).
 
-**Browser blocker remains open:** the disjoint browser proof at `54ecc36d` reports
-repeatable typed `save_corrupt` after ordinary Fen-born stays/prior Ring, before
-Continue. A Node real SQLite reproduction with Fen-born, the actual stays route,
-50 logical elapsed units before each action, and64800 start currently passes
-cold-open, GameView and cue narration. This is a reproduction gap, not a fix.
-Full pre-push gate, headless simulator and independent review remain pending.
+**Bell receipt fix:** browser diagnostics narrowed the rejected original receipt to
+its omitted target ID. The normal Book recipe sends `target_ids: []`; ordinary
+`perform` admission resolves the pinned recipe detail, while `bellSave` had
+incorrectly required an explicit detail ID. A real SQLite targetless invocation
+reproduced `save_corrupt` before the fix. `7f071e40` resolves the pinned recipe
+detail and still refuses any conflicting explicit target. D9 and existing bell
+checks:17 passed. The separate browser agent confirmed same-origin recovery of
+the original corrupt isolated save without Start over; fresh candidate proof
+also passed Bell refresh and the stays/prior cast.
+
+**Exact suppression resume fix:** the expanded SQLite fault case exposed
+`inconsistent deer sight receipt` at the exact237600 resume. D9's regular/resume
+pair legitimately shares one writer group across intervening same-time jobs.
+Cold-load now recognizes only its exact same-plan pair, matching both completed
+jobs, their common deadline, unchanged cause/generation and cleared resume
+binding. Ordinary receipt replay still validates every operation; deer handoff
+guards remain intact. D9 plus existing deer checks:10 passed after the fix.
+
+Compiler/loader checks now refuse a non-Boolean cue fact, non-pack suppression
+plan and suppression below API1.35. Actual guard removals fail the source test;
+restored compiler checks pass. Kernel typecheck and Credo pass.
+
+**Publication hold:** preserved D9 adds a Bram NPC, but the newer owner real-cast
+ruling excludes Old Bram while the D9 plan requires his reactions. PM has raised
+the governing conflict with the owner. This provisional209-ID pin is not final.
+Full pre-push gate, headless simulator, final browser matrix and independent
+review remain pending.
 No native device, owner save or deferred UI blur work is part of this proof.
 
 ## Authored sound correction
@@ -61,3 +82,8 @@ Browser proof found the inherited Bell Read claiming audibility in the Fen.
 The governing cartridge clause now explicitly binds authored text to the declared
 area. Bell Read, Ring narration, scene and Vesper/Sedge responses no longer claim
 Fen/isle sound. This updates the independent v040 pin without changing allocation.
+
+Ponytail self-review: reuse pinned recipe resolution and existing receipt replay;
+no adapter, new scheduler or generic sound/relationship framework. Correctness
+self-review caught the targetless Bell receipt mismatch, deadline/deer guard
+interaction, declaration admission gaps and the unresolved cast conflict.

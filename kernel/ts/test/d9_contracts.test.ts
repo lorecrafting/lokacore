@@ -35,6 +35,14 @@ test('D9 cue references and typed suppression declaration fail closed', () => {
         Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
       ].apply[0].plan = ref('population', 'absent');
     },
+    (c: any) => {
+      c.manifest.requires.kernel_api.at_least = '1.34';
+    },
+    (c: any) => {
+      c.reactions[
+        Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
+      ].apply[0].plan = ref('population', 'willow_deer');
+    },
   ]) {
     const c = structuredClone(source);
     change(c);
