@@ -1,7 +1,7 @@
 # D9 integration proof — 2026-10-06
 
 D9 integrates preserved `7207ae63` with published D8/D11 main `de8b1cb5` in
-merge checkpoint `54ecc36d`. Source review and final publication remain pending.
+merge checkpoint `54ecc36d`. Independent source review is approved; final publication remains pending.
 
 ## Release
 
@@ -117,3 +117,21 @@ kernel typecheck pass (exit0); see `review-focused.log`, `review-compiler.log` a
 green runs. Ponytail/correctness self-review: no new engine abstraction, binding
 uses existing labelled actions, and the receipt exception still requires exact
 same-plan completed jobs; ordinary deer counterfeit guards remain tested.
+
+## Final integrated browser and independent review
+
+Source `5bee6811` is independently approved by the
+[primary reviewer](../../reviews/2026-10-06-d9-primary-source-review.md),
+[save/protocol reviewer](../../reviews/2026-10-06-d9-save-opinion.md) and
+[foundation reviewer](../../reviews/2026-10-06-d9-foundation-opinion.md).
+[Final browser evidence](../2026-10-06-d9-final-book/README.txt) certifies all five
+terminal pairs on the final pin, both public ledger deliveries, scene/reload
+recovery, fox Study closure, passive existing hounds and explicit old-pin refusal.
+Earlier failed and interim traces remain separately labelled. Exact suppression
+expiry and controlled Study corpse faults are SQLite proof, not browser claims.
+
+Intermittent web-adapter allocation failure remains an E3 finding: one confirmed
+S2 result retained payment/custody after reopen but could not recover its detail
+narration. No cause or resolution is claimed here. Owner save bytes, native mobile
+pause and deferred UI blur remain preserved. Full local/hosted publication gates
+are recorded separately on their actual checked heads.
