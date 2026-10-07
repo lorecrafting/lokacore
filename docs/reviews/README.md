@@ -547,4 +547,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Post-D10 authority fixture repair](2026-10-06-post-d10-fixture-review.md): initial source `c34e22c2`, CHANGES REQUIRED; scoped fix `5402b305`, independent APPROVE, R1 closed. Transport-trigger deletion now fails at forged-event refusal; restored focused 25/25 pass. Genesis, Study custody and Book stale-service controls also fail as intended; production guards and frozen fixtures unchanged.
 
-- [Current baseline Round 2](2026-10-06-current-baseline-round2-review.md): local `docs/astra-round2-history` at `ab10c69f`, CHANGES REQUIRED; BASE-R2-01 stale multi-dialogue carry. Archives, relative/heading navigation, release-scope caveat and save/native boundaries verified.
+- [Current baseline Round 2](2026-10-06-current-baseline-round2-review.md): local `docs/astra-round2-history` at `ab10c69f`, CHANGES REQUIRED; scoped fix `132b4752`, APPROVE, BASE-R2-01 closed by linking installed D9 labelled selection and service/reopen proof. Archives, relative/heading navigation, release-scope caveat and save/native boundaries verified.

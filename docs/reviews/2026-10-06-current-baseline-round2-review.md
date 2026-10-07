@@ -78,3 +78,21 @@ No new runtime/checker code or tests are introduced; mutation checks are not
 applicable to this documentation-only diff. No browser/native session or owner
 save was accessed. Fixture migration and E1–E3 acceptance remain outside this
 review's completion claim.
+
+## Scoped BASE-R2-01 recheck — APPROVE
+
+Reviewed only fix `132b47525150c68ddef1a0f7fdca62c4b0af1109` and the changed
+roadmap's directly linked D9 contract/evidence. **BASE-R2-01 closed; no open
+findings.** The obsolete future trigger is removed; the closed-carry list now names
+the installed labelled-selection subset and links the existing service/reopen
+proof and red controls. It does not claim an unimplemented generic ambiguity
+mechanism or close E1–E3. The unresolved neighboring carries are unchanged.
+
+The linked D9 heading resolves, and its contract, evidence and selection source
+are unchanged from the independently inspected baseline. The evidence explicitly
+covers public ledger and Maud service selection beside terminal flavor, actual
+routes, SQLite cold reopen and restored defect controls. With the corrected
+roadmap and this review record present, `mise exec -- elixir bin/check_docs.exs`
+passes: **765 docs, 0 broken links, 0 unreachable**.
+`git diff --check 132b4752^ 132b4752` passes. No runtime or fixture changes need
+mutation testing. Ponytail Review: **Lean already. Ship.**
