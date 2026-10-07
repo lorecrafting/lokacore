@@ -54,8 +54,10 @@ def main():
         expected = re.findall(r"^\| \*\*([A-E]\d+) ", plan, re.MULTILINE)
         actual = [re.match(r"^([A-E]\d+) — ", issue.get("title", "")) for issue in issues]
         codes = [match.group(1) for match in actual if match]
-        ids = {issue.get("id") for issue in issues}
-        if len(codes) != len(issues) or sorted(codes) != sorted(expected) or len(ids) != len(issues):
+        ids = [issue.get("id") for issue in issues]
+        if sorted(codes) != sorted(expected) or len(codes) != len(expected) or any(
+            not isinstance(issue_id, str) or not issue_id for issue_id in ids
+        ) or len(set(ids)) != len(ids):
             print("Beads export does not contain each Chapter 1 slice exactly once", file=sys.stderr)
             return 1
         if any("-wisp-" in issue_id for issue_id in ids if isinstance(issue_id, str)):
