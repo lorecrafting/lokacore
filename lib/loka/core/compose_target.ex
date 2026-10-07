@@ -2,6 +2,12 @@ defmodule Loka.Core.ComposeTarget do
   @moduledoc "Mutation targets for portable delta operations."
   @doc "The MutationTarget an op writes (04 §5.1)."
   @spec target(map()) :: map()
+  def target(%{"op" => "visit.record"} = op),
+    do: Map.put(Map.take(op, ~w(actor_id room_id)), "kind", "visit")
+
+  def target(%{"op" => "observation.record"} = op),
+    do: Map.put(Map.take(op, ~w(actor_id npc_id)), "kind", "observation")
+
   def target(%{"op" => "fact.assign"} = op),
     do: Map.put(Map.take(op, ~w(fact scope subject_id)), "kind", "fact")
 

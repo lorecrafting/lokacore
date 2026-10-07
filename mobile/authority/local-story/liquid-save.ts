@@ -18,6 +18,7 @@ export function liquidSave(fresh: World, world: World, db: Db, meta: Meta, revis
   )
     throw new SyntaxError('malformed JSON: inconsistent vessel rows');
   if (
+    !fresh.cartridge.lock.capabilities.knowledge &&
     !fresh.cartridge.world?.water &&
     !expected.length &&
     !Object.keys(fresh.cartridge.services ?? {}).length &&

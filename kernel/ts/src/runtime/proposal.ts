@@ -1,3 +1,4 @@
+import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 // size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
@@ -85,7 +86,7 @@ export function propose(
   return {
     decision: {
       ...root,
-      delta: { ops: p.ops },
+      delta: { ops: knowledgeLast(p.ops) },
       events: p.events,
       rng: p.rng,
       ...(p.narration.length && { narration: p.narration }),
@@ -125,6 +126,12 @@ function join(
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
   p.ops.push(...own);
+  const actors = enteredActors(p.world, own);
+  if (actors.size) {
+    const at = now(p);
+    if (!('cartridge' in at)) return at;
+    for (const actor of actors) p.ops.push(...record(at, actor, true, p.steps));
+  }
   const after = earns ? now(p) : p.world;
   if (!('cartridge' in after)) return after;
   const quests = earns ? Object.entries(before.state.quests ?? {}) : [];

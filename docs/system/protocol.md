@@ -1210,7 +1210,8 @@ Extend the existing consumed-holder entry guard narrowly: a declared edible ente
 Implementation assignment is based on published main `9d9cde51`, Chapter v041/API1.36,
 content hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`,
 209 starting IDs and 57 rooms. D10 advances the current chapter to v042/API1.37;
-its derived hash and allocation oracle remain pending implementation.
+its independently derived hash and allocation oracle are recorded in the
+[cartridge clause](cartridge.md#d10-map-positions-and-chapel-door-selected-pending-implementation).
 
 `knowledge@1` owns `visited_rooms` rows keyed by canonical `{kind: "visit",
 actor_id, room_id}` and `observed_npcs` rows keyed by canonical `{kind: "observation",
@@ -1218,7 +1219,10 @@ actor_id, npc_id}`. A `VisitedRoom` row contains `actor_id, room_id`; an
 `ObservedNpc` row contains `actor_id, npc_id, room_id, at` (logical seconds).
 `visit.record` writes the former only from absence; `observation.record` carries
 `from` (null or the prior row) and `value`, and requires monotone observation time.
-Both carry actor and target identity and the ordinary writer group. Existing
+Both carry actor and target identity. Entry observations are captured at their causal
+sequence; all knowledge writes form one final writer group, preserving their order and
+prior rows. No mechanic reads knowledge during the same command. Look records observations
+in its own accepted rule. Existing
 changed-row storage and receipt history carry them; no separate database is added.
 
 

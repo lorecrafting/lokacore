@@ -1,8 +1,9 @@
+import { record } from '../knowledge/shared.ts';
 import { dark } from '../light/shared.ts';
 import { living } from '../death/shared.ts';
 // description_variant@1 (capability_registry.json): look at the current place, or examine one
 // of its inspectable details, an item or NPC in it, or an item the actor holds (21 §6, §8; 04
-// §14, §18). Accepted with nothing to change; the host shows the GameView or the thing, each
+// §14, §18). Accepted Look records visible NPC observations under knowledge@1; the host shows the GameView or the thing, each
 // described by describe(). A target_id is re-validated here, whatever resolved it: no detail or
 // entity by that id is not_found, one elsewhere not_present.
 import type { CharacterId, DescriptionVariant, TextKey } from '../../contracts.gen.ts';
@@ -17,9 +18,10 @@ import {
 } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 
-export const decide: Rule<'description_variant'> = (world, command) => {
+export const decide: Rule<'description_variant'> = (world, command, _mint, steps = { n: 0 }) => {
   const { actor_id, target_id } = command.payload;
-  if (target_id === undefined) return accepted(world, 'looked', [], []);
+  if (target_id === undefined)
+    return accepted(world, 'looked', record(world, actor_id, false, steps), []);
   const body = bodyOf(world, actor_id);
   const detail = has(world.details, target_id);
   if (!living(world, target_id)) return rejected('not_found');
@@ -27,7 +29,7 @@ export const decide: Rule<'description_variant'> = (world, command) => {
   const here = world.state.containers[body];
   const at = detail ? world.details[target_id].room : world.state.containers[target_id];
   if (at !== here && at !== body) return rejected('not_present');
-  return accepted(world, 'examined', [], []);
+  return accepted(world, 'examined', record(world, actor_id, false, steps, target_id), []);
 };
 
 /**

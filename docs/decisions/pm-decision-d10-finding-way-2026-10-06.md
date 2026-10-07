@@ -40,3 +40,9 @@ Ponytail self-review: one saved visited relation and one observed-NPC relation
 serve Map/Where; existing room graph and door admission serve layout and Knock.
 Correctness self-review: no render-time knowledge writes, hidden-location leak,
 door bypass, route lock or invented custody. This is design, not source proof.
+
+## Implementation re-pin — 2026-10-06
+
+Planning findings P1/P2 were closed in the [independent planning review](../reviews/2026-10-06-d10-wayfinding-plan-review.md). Source was assigned from published main `9d9cde51` after D8/D9/C6, as recorded in the active [protocol clause](../system/protocol.md#d10-knowledge-and-knock-composition). Inspection found that v041 had no boot item; the selected outcome therefore adds both the Reed Bank Wren boot and ordinary Chandler boots. The [candidate cartridge pin](../system/cartridge.md#d10-map-positions-and-chapel-door-selected-pending-implementation) records the successor. This corrects the planning assumption without changing the selected outcome. Source review, browser evidence and publication remain pending.
+
+Developer checkpoint: [source self-review](../reviews/2026-10-06-d10-developer-self-review.md); independent approval remains pending.

@@ -1,0 +1,12 @@
+✔ D10 real SQLite keeps each entry/Look and shared door commit across cold reopen and retry (856.470958ms)
+✔ D10 malformed and forged knowledge rows refuse in place without deleting saved progress (661.297333ms)
+✔ D10 failed and lost COMMIT keep whole knowledge and replay one accepted entry (162.107959ms)
+✔ D10 ferry, water entry/surface and due drowning return discover once and reopen at each intermediate (1129.00975ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3016.942625

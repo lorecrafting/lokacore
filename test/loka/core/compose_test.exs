@@ -289,12 +289,17 @@ defmodule Loka.Core.ComposeTest do
     for c <- JSON.decode!(File.read!("protocol/fixtures/corpse_creation.json"))["cases"],
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
+    knowledge = JSON.decode!(File.read!("protocol/fixtures/knowledge_composition.json"))["cases"]
+
+    for c <- knowledge,
+        do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
+
     :rand.seed(:exsss, {5, 5, 5})
     patrol = JSON.decode!(File.read!("protocol/fixtures/patrol.json"))["cases"]
 
     pool =
       for(c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op) ++
-        for c <- patrol, op <- c["ops"], do: op
+        for c <- patrol ++ knowledge, op <- c["ops"], do: op
 
     ours = differential(for _ <- 1..1000, do: random_case(pool))
     faults = Enum.frequencies_by(ours, &get_in(&1, ["result", "fault", "code"]))

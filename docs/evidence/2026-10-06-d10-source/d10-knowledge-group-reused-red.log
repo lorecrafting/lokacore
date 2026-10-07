@@ -1,0 +1,29 @@
+✔ D10 real SQLite keeps each entry/Look and shared door commit across cold reopen and retry (1031.294125ms)
+✔ D10 malformed and forged knowledge rows refuse in place without deleting saved progress (599.4145ms)
+✔ D10 failed and lost COMMIT keep whole knowledge and replay one accepted entry (193.320333ms)
+✖ D10 ferry, water entry/surface and due drowning return discover once and reopen at each intermediate (1367.2355ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3430.309875
+
+✖ failing tests:
+
+test at mobile/authority/local-story/d10_knowledge.test.ts:223:1
+✖ D10 ferry, water entry/surface and due drowning return discover once and reopen at each intermediate (1367.2355ms)
+  Error: save_corrupt
+      at openGame (file://[worktree]/mobile/authority/local-story/session.ts:94:50)
+      at reopen (file://[worktree]/mobile/authority/local-story/d10_knowledge.test.ts:232:12)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/d10_knowledge.test.ts:270:3)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    cause: "{ kind: 'save_corrupt', newGame: [Function: newGame] }"
+  }

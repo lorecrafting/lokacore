@@ -1,4 +1,4 @@
-import { observation } from '../mechanics/knowledge/query.ts';
+import { key } from '../foundation/compose.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
@@ -49,7 +49,9 @@ export function resolve(
     (present(world, actor, id) ||
       (mode === 'where' &&
         world.entities[id]?.kind === 'npc' &&
-        !!observation(world, actor, id as EntityId)));
+        !!world.state.observed_npcs?.[
+          key({ kind: 'observation', actor_id: actor, npc_id: id as EntityId })
+        ]));
   // ponytail: scans every detail and entity of the world per lookup; index by room when it shows.
   const ids = [
     ...(mode === 'where'

@@ -1,4 +1,4 @@
-# size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
+# size: allow 345, typed knowledge, patrol and final birth admission share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
   alias Loka.Core.{ComposeChoice, ComposePack, Creation}
@@ -102,6 +102,10 @@ defmodule Loka.Core.Compose do
     do: {:cont, Map.put(overlay, k, {group, target, value})}
 
   defp write({:error, code}, _, _, _, target), do: {:halt, fault(code, target)}
+
+  defp apply_op(%{"op" => kind} = op, t, ctx)
+       when kind in ~w(visit.record observation.record),
+       do: Loka.Core.ComposeKnowledge.record(op, t, ctx)
 
   defp apply_op(%{"op" => "fact.assign"} = op, t, ctx) do
     now = with nil <- read(t, ctx), do: get_in(elem(ctx, 0), ["fact_defaults", key(op["fact"])])

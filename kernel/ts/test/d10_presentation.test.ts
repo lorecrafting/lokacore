@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { key } from '../src/foundation/compose.ts';
-import { locate } from '../src/mechanics/knowledge/query.ts';
+import { locate } from '../src/mechanics/knowledge/shared.ts';
 import { knock, decide } from '../src/mechanics/barrier/rule.ts';
 import { knowledgeView } from '../src/view/knowledge.ts';
 import { resolve } from '../src/commands/target.ts';

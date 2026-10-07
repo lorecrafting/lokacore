@@ -20,6 +20,7 @@ import { allocator, rejected, type Mint, type Rule, type Steps, type World } fro
 import { invariants as factInvariants } from '../mechanics/fact.ts';
 import { refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
+import * as knowledge from '../mechanics/knowledge/rule.ts';
 import * as attributes from '../mechanics/attributes/rule.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -48,6 +49,7 @@ import { newWorld, NIL } from './fresh.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
+  knowledge: knowledge.decide,
   attributes: attributes.decide,
   movement: movement.decide,
   combat: combat.decide,
@@ -97,7 +99,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.36',
+  kernel_api: '1.37',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

@@ -31,6 +31,7 @@ export function adopt(
   // Every limit of the whole proposal in one call, so a tie names the first in 04 §5.4 order.
   const spent = over({
     ...counts(base(world), out.delta.ops),
+    query_steps: steps.n,
     events: out.events.length,
     output_bytes: utf8(encode(out as never)).length,
   });

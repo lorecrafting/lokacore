@@ -1,4 +1,5 @@
-import type { GameView, Key } from '../contracts.gen.ts';
+import { present } from '../commands/target.ts';
+import type { EntityId, GameView, Key } from '../contracts.gen.ts';
 import { COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
 import { exitOf } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -27,18 +28,35 @@ export function knowledgeView(
       return to && visited.has(to) ? [{ from: id, to, direction }] : [];
     }),
   );
-  const known_npcs = Object.values(world.state.observed_npcs ?? {})
+  return {
+    map: { rooms, links },
+    ...(resolved(world, world.character).where && { known_npcs: knownNpcs(world, steps) }),
+  };
+}
+
+function knownNpcs(world: World, steps: Steps) {
+  const ids = new Set(
+    Object.values(world.state.observed_npcs ?? {})
+      .filter((r) => r.actor_id === world.character)
+      .map((r) => r.npc_id),
+  );
+  for (const [id, entity] of Object.entries(world.entities))
+    if (
+      entity.kind === 'npc' &&
+      world.state.containers[id] === world.state.containers[world.body] &&
+      present(world, world.character, id, steps)
+    )
+      ids.add(id as EntityId);
+  return [...ids]
     .filter(
-      (r) =>
-        r.actor_id === world.character &&
+      (target_id) =>
         !refusal(
           world,
-          { type: 'where', actor_id: world.character, target_id: r.npc_id },
+          { type: 'where', actor_id: world.character, target_id },
           steps,
           'where' as Key,
         ),
     )
-    .sort((a, b) => cmp(a.npc_id, b.npc_id))
-    .map((r) => ({ id: r.npc_id, name: world.entities[r.npc_id].short }));
-  return { map: { rooms, links }, ...(resolved(world, world.character).where && { known_npcs }) };
+    .sort(cmp)
+    .map((id) => ({ id, name: world.entities[id].short }));
 }
