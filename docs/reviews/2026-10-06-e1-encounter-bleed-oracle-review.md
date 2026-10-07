@@ -26,3 +26,11 @@ Disposition required: adapt the existing negative case to assert refusal with th
 - Diff changes no runtime composer, save loader, schema or frozen fixture. Wrong result body/generation, partial bindings, nonbleed kind and mixed discriminator cases refuse in the new tests. Existing foreign-writer composition controls pass.
 - Ponytail Review: lean already; no new dependency or runtime abstraction. The three new tests address distinct replay gaps absent from the original eight; E1-R1 concerns how one negative input proves its guard.
 - Full local gate deliberately not run: another branch owns the serialized slot. This record claims focused verification only.
+
+## Scoped fix review — E1-R1 closed
+
+- Fix source: `e6b213617ed63b3547c921189146388017af6c53`, parent `5640ff83e919151e88d0a78a61d99c1922395b66`.
+- Verdict: **APPROVE**. E1-R1 closed; no open findings.
+- The existing negative test now supplies the frozen canonical bleed result for lone water-body, standalone actor and orphan crow generation/phase bindings. These fields are omitted by replay, so rejection must come from binding validation. No production source changes; the added inputs cover the same masking risk without adding an overlapping test or helper.
+- Independently removed each of the four individual fields from `bleedBindingValid` in a disposable detached fix worktree. Every mutant failed the corrected invalid-schedule regression with `true !== false`, exit 1. Restored new tests passed 3/3; restored encounter/bleed composition plus replay tests passed 11/11, exit 0. The disposable worktree was restored and removed.
+- All eight retained evidence hashes verified. Scope was the fix diff, E1-R1 disposition and affected test/guard controls; no broad gate rerun. Ponytail Review: lean already.

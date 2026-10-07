@@ -547,4 +547,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Post-D10 authority fixture repair](2026-10-06-post-d10-fixture-review.md): initial source `c34e22c2`, CHANGES REQUIRED; scoped fix `5402b305`, independent APPROVE, R1 closed. Transport-trigger deletion now fails at forged-event refusal; restored focused 25/25 pass. Genesis, Study custody and Book stale-service controls also fail as intended; production guards and frozen fixtures unchanged.
 
-- [E1 encounter/bleed oracle](2026-10-06-e1-encounter-bleed-oracle-review.md): local source `5640ff83`, **CHANGES REQUIRED**; E1-R1 identifies a surviving lone-water-body guard mutation masked by counterfeit-row mismatch. Runtime replay and 25 focused tests pass.
+- [E1 encounter/bleed oracle](2026-10-06-e1-encounter-bleed-oracle-review.md): initial source `5640ff83`, CHANGES REQUIRED; scoped fix `e6b21361`, **APPROVE**, E1-R1 closed. Canonical counterfeit rows expose all four omitted-field guard mutants; restored focused tests pass.
