@@ -113,3 +113,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Resolved quest objective binding](../../evidence/2026-10-07-e1-quest-objective-binding/README.md) passed 18 clean-source cases and replays; 14 quest paths and 395 authored paths remain pending on its isolated source.
 
 [Combined quest, visible entity and epilogue witnesses](../../evidence/2026-10-07-e1-quest-visible-epilogue/README.md) passed 18 clean-source cases and replays; 273 authored paths remain pending.
+
+[Recipe outcome effect binding](../../evidence/2026-10-07-e1-recipe-outcomes/README.md) passed 18 clean-source cases and replays; 255 authored paths remain pending on its isolated source.
