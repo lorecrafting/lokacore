@@ -39,3 +39,16 @@ base `origin/main`. Independent reviewer; authored none of it.
 - **nit** `bin/session_status.sh:22-25`: after `drift check incomplete: PR #N state unavailable`,
   an empty result prints `none`, which reads as "no drift" though that issue was not checked.
   The note sits directly above, so acceptable; `none found` or skipping `none` when incomplete would be exact.
+
+## Scoped re-check: fix `0aef9be5`
+
+**Verdict: APPROVE.** Nothing open.
+
+- S1 (a) fixed: drift fixture adds in_progress `e` with `10 CLOSED` and literal line
+  `drift: e is in_progress but PR #10 is CLOSED`; mutant `("MERGED",)` now red.
+- S1 (b) fixed: clean fixture adds open `d` with `11 OPEN`; mutant `!= "in_progress"` now red.
+  Unmutated `bin/beads_red_controls.sh` passes.
+- Nit fixed: `bin/session_status.sh:19-25`. Stubbed br/gh: view fails -> only the incomplete
+  note, no `none`; view OPEN -> `none`; view MERGED -> drift line. Exit 0 in all three.
+- Direct callers unchanged and compatible: `.claude/settings.json` (SessionStart hook),
+  `bin/check_all.sh` and `.github/workflows/ci.yml` (red controls).
