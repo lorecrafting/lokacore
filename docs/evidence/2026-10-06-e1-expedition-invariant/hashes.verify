@@ -1,0 +1,3 @@
+full-gate.log: OK
+focused.log: OK
+skip-check-mutant.log: OK
