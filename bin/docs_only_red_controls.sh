@@ -9,8 +9,8 @@ trap 'rm -rf "$d"' EXIT
 cd "$d"
 git init -q
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
-mkdir docs mobile .beads
-touch a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/view.tsx
+mkdir -p docs mobile/authority/local-story .beads
+touch a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/view.tsx mobile/authority/local-story/store.ts
 seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
@@ -18,6 +18,7 @@ base=$(git rev-parse HEAD)
 echo 1 >> a.md && echo 1 >> docs/x.md; md=$(c md)
 echo 1 >> .beads/issues.jsonl; beads=$(c beads)
 echo 1 >> mobile/view.tsx; book=$(c book)
+echo 1 >> mobile/authority/local-story/store.ts; authority=$(c authority)
 echo 1 >> a.md && echo 1 >> docs/features.json; json=$(c json)
 echo 1 >> docs/features.gen.md; git add -A; gen=$(c gen)
 git mv code.ts code.md; ren=$(c rename)
@@ -31,7 +32,10 @@ t skip "$md" "$beads" code "Beads export changed"
 t skip "$beads" "$book" code "Book-only change skips kernel jobs"
 t run "$beads" "$book" browser "Book-only change runs browser"
 t skip "$base" "$beads" browser "metadata skips browser"
-t run "$book" "$json" code "a .json under docs/ changed"
+# Break: treating local-story save changes as app-only skips broad code checks.
+t run "$book" "$authority" code "local-story save change runs code"
+t run "$book" "$authority" browser "local-story save change runs browser"
+t run "$authority" "$json" code "a .json under docs/ changed"
 t run "$base" "$json" code "mixed source and metadata in range"
 t run "$json" "$gen" code "a .gen.md changed"
 t run "$gen" "$ren" code "a code file renamed to .md"
