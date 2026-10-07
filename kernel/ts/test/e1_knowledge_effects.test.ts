@@ -67,8 +67,16 @@ for (const [dialogue, choice, index, fact, route] of [
         const p = command.payload;
         assert.equal(p.choice_id, choice);
         assert.equal(before.state.choices![p.continuation_id]!.source.key, dialogue);
-        assert.equal(has(after), false, 'already known');
-        assert.equal(has(before, before), false, 'no change');
+        assert.equal(
+          has({ ...before, state: { ...before.state, facts: after.state.facts } }),
+          false,
+          'already known, with the same pending continuation',
+        );
+        assert.equal(
+          has(before, { ...after, state: { ...after.state, facts: before.state.facts } }),
+          false,
+          'no membership change, with the same resolved continuation',
+        );
         const unresolved = {
           ...after,
           state: {
