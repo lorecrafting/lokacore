@@ -81,3 +81,14 @@ in the cartridge contract; all 211 IDs remain unchanged. The knowledge transcrip
 was recaptured from actual authority execution against this successor bundle.
 Three current-source Elixir fixture files also now use v042 references; their
 synthetic extra dream room declares its required map position.
+
+## Final checkpoint
+
+All three independent review scopes approve; foundation F1 is closed and primary
+rechecked the corrected Knock content/hash. The description-only KnownNpcView
+follow-up now states current visibility or prior observation. Exact source
+`3e2a5b724500c66e6dbb78a3dec568878e582125` passed the complete local
+`bin/check_all.sh` gate (exit 0), mobile typecheck and 10 focused SQLite/Book/chapter
+tests. [Final browser evidence](../evidence/2026-10-06-d10-book/README.txt) records the
+actual isolated path, reload behavior, boot identities and explicit test limits.
+Independent record integration, hosted CI and publication remain PM-owned.
