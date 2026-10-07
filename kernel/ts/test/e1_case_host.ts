@@ -41,7 +41,7 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: bind only reviewed dialogue/choice/policy, scene and study_tracks witnesses;
+// ponytail: bind only reviewed dialogue/choice/policy, scene, recipe and quest witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -51,29 +51,50 @@ export function witnessedObligations(
 ): string[] {
   const p = command.payload;
   if (decision.kind !== 'accepted') return [];
+  const questPaths = Object.entries(after.state.quests ?? {}).flatMap(([instance, quest]) => {
+    if (quest.state !== 'resolved' || before.state.quests?.[instance]?.state === 'resolved')
+      return [];
+    const ref = quest.quest;
+    const base = `/quests/${ref.cartridge_id}@${ref.cartridge_version}:quest/${ref.key}`;
+    const definition =
+      after.cartridge.quests?.[`${ref.cartridge_id}@${ref.cartridge_version}:quest/${ref.key}`];
+    if (!definition) return [];
+    const root =
+      definition.objective.evidence === 'current_state'
+        ? definition.objective.policy.root
+        : undefined;
+    return [
+      base,
+      `${base}/objective`,
+      ...(root ? requiredPolicyPaths(root, `${base}/objective/policy/root`) : []),
+    ];
+  });
+  const withQuests = (paths: string[]) => [...paths, ...questPaths];
   if (p.type === 'talk') {
-    return Object.entries(after.state.choices ?? {})
-      .filter(
-        ([id, choice]) =>
-          choice.status === 'pending' &&
-          choice.source.kind === 'dialogue' &&
-          !before.state.choices?.[id],
-      )
-      .flatMap(([, choice]) => {
-        const ref = choice.source;
-        const key = `${ref.cartridge_id}@${ref.cartridge_version}:dialogue/${ref.key}`;
-        const base = `/dialogues/${key}`;
-        const root = after.cartridge.dialogues?.[key]?.policy.root;
-        return [base, ...(root ? requiredPolicyPaths(root, `${base}/policy/root`) : [])];
-      });
+    return withQuests(
+      Object.entries(after.state.choices ?? {})
+        .filter(
+          ([id, choice]) =>
+            choice.status === 'pending' &&
+            choice.source.kind === 'dialogue' &&
+            !before.state.choices?.[id],
+        )
+        .flatMap(([, choice]) => {
+          const ref = choice.source;
+          const key = `${ref.cartridge_id}@${ref.cartridge_version}:dialogue/${ref.key}`;
+          const base = `/dialogues/${key}`;
+          const root = after.cartridge.dialogues?.[key]?.policy.root;
+          return [base, ...(root ? requiredPolicyPaths(root, `${base}/policy/root`) : [])];
+        }),
+    );
   }
   if (p.type === 'choose') {
     const choice = before.state.choices?.[p.continuation_id];
-    if (choice?.status !== 'pending') return [];
+    if (choice?.status !== 'pending') return questPaths;
     if (choice.source.kind === 'dialogue')
-      return [
+      return withQuests([
         `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
-      ];
+      ]);
     const dream = gameView(before).notices?.find((notice) => notice.bed)?.dream;
     if (
       choice.source.kind !== 'scene' ||
@@ -83,52 +104,55 @@ export function witnessedObligations(
       !p.dream ||
       gameView(after).notices?.find((notice) => notice.bed)?.dream?.branch !== p.choice_id
     )
-      return [];
+      return questPaths;
     const index = dream.choice.choices.findIndex((option) => option.choice_id === p.choice_id);
-    if (index < 0) return [];
+    if (index < 0) return questPaths;
     const base = `/scenes/${choice.source.cartridge_id}@${choice.source.cartridge_version}:scene/${choice.source.key}`;
-    return [`${base}/steps/3`, `${base}/steps/3/choices/${index}`];
+    return withQuests([`${base}/steps/3`, `${base}/steps/3/choices/${index}`]);
   }
   if (p.type === 'continue') {
     const shown = gameView(before).scene;
     if (shown && p.scene && p.line === shown.index && p.scene.key === shown.scene.key) {
       const base = `/scenes/${shown.scene.cartridge_id}@${shown.scene.cartridge_version}:scene/${shown.scene.key}`;
-      return [
+      return withQuests([
         ...(shown.index === 1 ? [base] : []),
         `${base}/steps/${shown.index - 1}`,
         ...(shown.index === shown.count && !gameView(after).scene
           ? [`${base}/steps/${shown.count}`, `${base}/steps/${shown.count + 1}`]
           : []),
-      ];
+      ]);
     }
     const dream = gameView(before).notices?.find((notice) => notice.bed)?.dream;
-    if (!dream || !p.scene || p.line !== dream.index || p.scene.key !== dream.scene.key) return [];
+    if (!dream || !p.scene || p.line !== dream.index || p.scene.key !== dream.scene.key)
+      return questPaths;
     const base = `/scenes/${dream.scene.cartridge_id}@${dream.scene.cartridge_version}:scene/${dream.scene.key}`;
     const ended =
       dream.index === dream.count &&
       gameView(after).notices?.find((notice) => notice.bed)?.dream?.index === -1;
-    return [
+    return withQuests([
       ...(dream.index === 1 ? [base] : []),
       `${base}/steps/${dream.index - 1}`,
       ...(ended ? [`${base}/steps/${dream.count}`, `${base}/steps/${dream.count + 1}`] : []),
-    ];
+    ]);
   }
-  if (p.type !== 'perform') return [];
+  if (p.type !== 'perform') return questPaths;
   const { id, version } = before.cartridge.manifest;
   const base = `/recipes/${id}@${version}:recipe/${p.action}`;
   const recipe = before.cartridge.recipes?.[`${id}@${version}:recipe/${p.action}`];
-  if (!recipe) return [];
+  if (!recipe) return questPaths;
   const witnessed = [base, ...requiredPolicyPaths(recipe.policy.root, `${base}/policy/root`)];
-  if (p.action !== 'study_tracks') return witnessed;
+  if (p.action !== 'study_tracks') return withQuests(witnessed);
   const fact = {
     cartridge_id: 'ashmere_missing_child',
     cartridge_version: '0.0.42',
     kind: 'fact',
     key: 'fen_tracks_found',
   } as DefinitionRef;
-  return value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
-    ? [...witnessed, `${base}/outcomes/success/sequence/0`]
-    : witnessed;
+  return withQuests(
+    value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
+      ? [...witnessed, `${base}/outcomes/success/sequence/0`]
+      : witnessed,
+  );
 }
 
 function requiredPolicyPaths(node: unknown, path: string): string[] {

@@ -10,6 +10,7 @@ import { storageFault, faultSchedule } from './e1_faults.ts';
 import { replayCase, gaps } from './e1_cases.ts';
 import { ending, search } from './e1_paths.ts';
 import { lanternDream } from './e1_optional_quests.ts';
+import { maudsCellar } from './e1_maud.ts';
 import { hash } from '../src/foundation/canonical.ts';
 import { gameView } from '../src/index.ts';
 
@@ -357,7 +358,11 @@ test('E1 binds both selected dream branches and acknowledged scene steps', () =>
           (p.type === 'continue' && p.scene?.key === 'dream_of_the_fen') ||
           (p.type === 'choose' && p.dream)
         )
-          observed.push(witnessedObligations(before, after, command, decision));
+          observed.push(
+            witnessedObligations(before, after, command, decision).filter((path) =>
+              path.startsWith(base),
+            ),
+          );
       });
       lanternDream(a, branch);
       assert.equal(restDisplays, 1);
@@ -388,5 +393,49 @@ test('E1 binds both selected dream branches and acknowledged scene steps', () =>
       a.close();
       rmSync(dir, { recursive: true });
     }
+  }
+});
+
+// Breaks: Maud resolves after five rats but the exact quest objective or last required predicate stays gapped.
+test('E1 binds Maud objective only on its committed resolved transition', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-quest-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    { case_id: 'mauds-cellar', source, fault_schedule: [] },
+  );
+  const base = '/quests/ashmere_missing_child@0.0.42:quest/mauds_cellar';
+  const expected = [
+    base,
+    `${base}/objective`,
+    `${base}/objective/policy/root`,
+    ...Array.from({ length: 5 }, (_, n) => `${base}/objective/policy/root/items/${n}`),
+  ];
+  try {
+    const observed: string[][] = [];
+    a.watch((before, after, command, decision) => {
+      const paths = witnessedObligations(before, after, command, decision).filter((path) =>
+        path.startsWith(base),
+      );
+      if (paths.length) observed.push(paths);
+    });
+    maudsCellar(a);
+    assert.deepEqual(observed, [expected]);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.deepEqual(
+      expected.filter((path) => !replay.obligations.includes(path)),
+      [],
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
   }
 });

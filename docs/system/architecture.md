@@ -249,6 +249,11 @@ An accepted `perform` witnesses its exact authored recipe definition and admitte
 policy root. Each child under a required `all` policy node is also witnessed;
 `any` and `not` descendants require separate branch proof. Recipe outcomes and
 sequence steps require their own consequence witnesses.
+An accepted command that changes an exact quest instance from unresolved to
+resolved witnesses that quest definition and objective. For a current-state
+objective, its satisfied root and required `all` children may also be credited;
+other branches still require separate evidence. A failed or merely active quest
+does not discharge its resolved objective.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
