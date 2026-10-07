@@ -24,11 +24,11 @@ Literal terminal matrix for dialogue/profile/room response; precise authored str
 
 | Q2 × Q3 | Elspeth / Green | Maud rumor | Aldric | Vesper | Sedge / hounds |
 |---|---|---|---|---|---|
-| rescued × prior | returned child / thankful passage / relief | returned; bell rang | welcoming | bound | hostile flavor; suppressed |
-| rescued × fox | returned child / thankful passage / relief | returned; bell silent | cold | allied | warm flavor; normal |
-| stays × prior | living child remains with fox / respectful passage / uneasy acceptance | living choice; bell rang | welcoming | bound | hostile flavor; suppressed |
-| stays × fox | living child remains with fox / respectful passage / uneasy acceptance | living choice; bell silent | cold | allied | warm flavor; normal |
-| lost × prior | grief / hushed passage / absence | lost; bell rang | welcoming | bound | hostile flavor; suppressed |
+| rescued × prior | returned child / relief | returned; bell rang | welcoming | bound | hostile flavor; suppressed |
+| rescued × fox | returned child / relief | returned; bell silent | cold | allied | warm flavor; normal |
+| stays × prior | living child remains with fox / uneasy acceptance | living choice; bell rang | welcoming | bound | hostile flavor; suppressed |
+| stays × fox | living child remains with fox / uneasy acceptance | living choice; bell silent | cold | allied | warm flavor; normal |
+| lost × prior | grief / absence | lost; bell rang | welcoming | bound | hostile flavor; suppressed |
 
 Missing/unknown uses search/base prose. Lost×fox is an impossible contract case, not a sixth normal profile. Reactions never alter completed Q2, chosen Q3, exact Wren/message identities, terminal exports or previously paid rewards.
 
