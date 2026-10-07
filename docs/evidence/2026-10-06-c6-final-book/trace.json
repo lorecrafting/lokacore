@@ -1,0 +1,386 @@
+[
+  {
+    "label": "road-born-fresh",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:10, dusk, new moon\": day 1, 18:10 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "opening-line",
+    "dom": "- button \"Look, Ferry Landing\":\n  - generic: Ferry Landing\n- generic: Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.\n- button \"Elspeth, open\":\n  - generic: Elspeth is here.\n- button \"Landing notice\":\n  - generic: Landing notice\n- generic: Hold the map and drag toward a path to walk; tap it to open the map.\n- button \"Got it\":\n  - generic: got it\n- button \"Map\"\n- generic \"day 1, 18:14, dusk, new moon\": day 1, 18:14 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "landing-map",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Ferry Landing\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Well Lane.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Path.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Boathouse.\"\n- button \"Read the notice\":\n  - generic: Read the notice\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:18, dusk, new moon\": day 1, 18:18 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "boathouse",
+    "dom": "- button \"Look, Boathouse\":\n  - generic: Boathouse\n- generic: Weathered timbers shelter an unattended rope ferry. A taut cable crosses the fen to the isle.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 18:20, dusk, new moon\": day 1, 18:20 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 20/1000"
+  },
+  {
+    "label": "ferry-offer",
+    "dom": "- heading \"Rope ferry\" [level=1]\n- generic: The rope ferry runs along its cable. Leave two pennies for Mother Sedge before crossing to the isle; passage to recover your belongings is free.\n- generic: \"Fare: 2p.\"\n- button \"Board — 2p\":\n  - generic: Board — 2p\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:22, dusk, new moon\": day 1, 18:22 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 20/1000"
+  },
+  {
+    "label": "isle",
+    "dom": "- button \"Look, Fen Isle Landing\":\n  - generic: Fen Isle Landing\n- generic: Reeds brush the rope ferry. A narrow path leads east to a hut; south, a shrine stands among the sedge.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 18:25, dusk, new moon\": day 1, 18:25 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "isle-map",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Fen Isle Landing\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Isle Hut — Mother Sedge.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Isle Shrine.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:27, dusk, new moon\": day 1, 18:27 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "sedge-hut",
+    "dom": "- button \"Look, Isle Hut\":\n  - generic: Isle Hut\n- generic: Bundles of drying herbs hang from the rafters. An open door leads to the garden, and a ladder rises into the loft.\n- button \"Mother Sedge, open\":\n  - generic: Mother Sedge is here.\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 18:30, dusk, new moon\": day 1, 18:30 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "sedge-actions",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: \"Swim: not learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Learn swim — free Mother Sedge\":\n  - generic: Learn swim — free Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:30, dusk, new moon\": day 1, 18:30 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "sedge-swim-dialogue",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: Mother Sedge offers to teach you to swim.\n- generic: \"Swim: not learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn swim — free\":\n  - generic: Learn swim — free\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:32, dusk, new moon\": day 1, 18:32 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "swim-learned",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: Mother Sedge offers to teach you to swim.\n- generic: Mother Sedge teaches you to keep afloat and swim. You have learned swim.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:35, dusk, new moon\": day 1, 18:35 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "swim-cold-reopen",
+    "dom": ""
+  },
+  {
+    "label": "swim-cold-open-ready",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:39, dusk, new moon\": day 1, 18:39 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "sedge-after-reopen-world",
+    "dom": "- button \"Look, Isle Hut\":\n  - generic: Isle Hut\n- generic: Bundles of drying herbs hang from the rafters. An open door leads to the garden, and a ladder rises into the loft.\n- button \"Mother Sedge, open\":\n  - generic: Mother Sedge is here.\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 18:44, dusk, new moon\": day 1, 18:44 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "swim-durable-status",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: Mother Sedge teaches you to keep afloat and swim. You have learned swim.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:44, dusk, new moon\": day 1, 18:44 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Isle Hut\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Herb Garden.\"\n- button \"Go up\":\n  - generic: Go up\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Fen Isle Landing.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:44, dusk, new moon\": day 1, 18:44 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 18/1000\n- button \"Start over\":\n  - generic: Sync operation timeout\n  - generic: start over"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Fen Isle Landing\":\n  - generic: Fen Isle Landing\n- generic: Reeds brush the rope ferry. A narrow path leads east to a hut; south, a shrine stands among the sedge.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 18:52, dusk, new moon\": day 1, 18:52 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "free-return-offer",
+    "dom": "- heading \"Rope ferry\" [level=1]\n- generic: The rope ferry returns to the Boathouse without a fare.\n- generic: \"Fare: free.\"\n- button \"Return — free\":\n  - generic: Return — free\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 18:53, dusk, new moon\": day 1, 18:53 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "returned-boathouse",
+    "dom": "- button \"Look, Boathouse\":\n  - generic: Boathouse\n- generic: Weathered timbers shelter an unattended rope ferry. A taut cable crosses the fen to the isle.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 18:55, dusk, new moon\": day 1, 18:55 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Boathouse\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Ferry Landing — Elspeth.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Old Mill.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:55, dusk, new moon\": day 1, 18:55 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Ferry Landing\":\n  - generic: Ferry Landing\n- generic: Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.\n- button \"Elspeth, open\":\n  - generic: Elspeth is here.\n- button \"Landing notice\":\n  - generic: Landing notice\n- button \"Map\"\n- generic \"day 1, 18:56, dusk, new moon\": day 1, 18:56 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Ferry Landing\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Well Lane.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Path.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Boathouse.\"\n- button \"Read the notice\":\n  - generic: Read the notice\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:56, dusk, new moon\": day 1, 18:56 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 99/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Reed Path\":\n  - generic: Reed Path\n- generic: A narrow path presses south between tall reeds. Mud darkens the edges, where fox prints cross the path and vanish among the stems. The landing lies north.\n- button \"Fox prints\":\n  - generic: Fox prints\n- button \"Map\"\n- generic \"day 1, 18:56, dusk, new moon\": day 1, 18:56 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 98 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 98/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Path\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Ferry Landing — Elspeth.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Bank.\"\n- button \"Inspect fox prints\":\n  - generic: Inspect fox prints\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 18:57, dusk, new moon\": day 1, 18:57 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 98 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 98/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 18:57, dusk, new moon\": day 1, 18:57 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 97 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 97/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:01, dusk, new moon\": day 1, 19:01 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 98 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 98/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Willow Shade\":\n  - generic: Willow Shade\n- generic: Long willow branches hang over a strip of firm ground. The reed bank is east; south, the path passes beneath a great old oak. A fenwort patch grows beneath the roots.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"Fenwort Patch\":\n  - generic: Fenwort Patch (12)\n- button \"Map\"\n- generic \"day 1, 19:01, dusk, new moon\": day 1, 19:01 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 97 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 97/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Willow Shade\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Reed Bank.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Drowned Oak — a crow, a deer.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:02, dusk, new moon\": day 1, 19:02 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 97 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 97/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Drowned Oak\":\n  - generic: Drowned Oak\n- generic: A broad oak stands in dark water, its lower trunk silvered by old flood marks. The ground is still firm beneath its roots, and the willow path leads north. A firm bank leads east to the mire crossing. Broad branches offer a way up; a dry bank follows the water south to the black pool. A shelter opens under the roots.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- generic: \"The roots arch into a dry hollow above the black water. You may use it during this watch.: invalid target\"\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 19:02, dusk, new moon\": day 1, 19:02 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 96 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 96/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Drowned Oak\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Mire Crossing.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Black Pool.\"\n- button \"Go up\":\n  - generic: Go up\n- generic: \"Beyond up: Oak Branches — a crow's nest.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:02, dusk, new moon\": day 1, 19:02 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 96 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 96/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Black Pool\":\n  - generic: Black Pool\n- generic: Still black water lies beside a broad, dry bank. Firm footing runs north to the oak, east toward Fox Hollow and south to a shallow reed edge. The water has no safe way down.\n- generic: You must know how to swim and carry at most 6000g. Diving costs 10 MV. Surface within 120 real seconds or drown.\n- button \"Map\":\n  - generic: down\n- generic \"day 1, 19:03, dusk, new moon\": day 1, 19:03 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 96 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 96/100 pennies 18/1000"
+  },
+  {
+    "label": "stag-pool-map",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Black Pool\n- button \"Go down\":\n  - generic: Go down\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Fox Hollow — Vesper, Wren.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Drowned Oak — a crow, a deer.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Fishing Shallows.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:03, dusk, new moon\": day 1, 19:03 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 96 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 96/100 pennies 18/1000"
+  },
+  {
+    "label": "pool-bottom-swim",
+    "dom": "- generic: 120 seconds to surface\n- button \"Surface (free)\":\n  - generic: Surface (free)\n- button \"Look, Pool Bottom\":\n  - generic: Pool Bottom\n- generic: Dark water presses around you. You know the bank lies above.\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 19:05, dusk, new moon\": day 1, 19:05 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 86 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 86/100 pennies 18/1000"
+  },
+  {
+    "label": "pool-cold-open",
+    "dom": "- generic: 116 seconds to surface\n- button \"Surface (free)\":\n  - generic: Surface (free)\n- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:09, dusk, new moon\": day 1, 19:09 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 87 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 87/100 pennies 18/1000"
+  },
+  {
+    "label": "surfaced",
+    "dom": "- button \"Look, Black Pool\":\n  - generic: Black Pool\n- generic: Still black water lies beside a broad, dry bank. Firm footing runs north to the oak, east toward Fox Hollow and south to a shallow reed edge. The water has no safe way down.\n- generic: You must know how to swim and carry at most 6000g. Diving costs 10 MV. Surface within 120 real seconds or drown.\n- button \"Map\":\n  - generic: down\n- generic \"day 1, 19:12, dusk, new moon\": day 1, 19:12 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 88 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 88/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Black Pool\n- button \"Go down\":\n  - generic: Go down\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Fox Hollow — Vesper, Wren.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Drowned Oak — a crow, a deer.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Fishing Shallows.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:14, dusk, new moon\": day 1, 19:14 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 89 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 89/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Drowned Oak\":\n  - generic: Drowned Oak\n- generic: A broad oak stands in dark water, its lower trunk silvered by old flood marks. The ground is still firm beneath its roots, and the willow path leads north. A firm bank leads east to the mire crossing. Broad branches offer a way up; a dry bank follows the water south to the black pool. A shelter opens under the roots.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- generic: \"The roots arch into a dry hollow above the black water. You may use it during this watch.: invalid target\"\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 19:15, dusk, new moon\": day 1, 19:15 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 88 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 88/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Drowned Oak\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Mire Crossing.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Black Pool.\"\n- button \"Go up\":\n  - generic: Go up\n- generic: \"Beyond up: Oak Branches — a crow's nest.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:15, dusk, new moon\": day 1, 19:15 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 88 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 88/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Willow Shade\":\n  - generic: Willow Shade\n- generic: Long willow branches hang over a strip of firm ground. The reed bank is east; south, the path passes beneath a great old oak. A fenwort patch grows beneath the roots.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"Fenwort Patch\":\n  - generic: Fenwort Patch (12)\n- button \"Map\"\n- generic \"day 1, 19:15, dusk, new moon\": day 1, 19:15 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 87 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 87/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Willow Shade\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Reed Bank.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Drowned Oak — a crow, a deer.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:15, dusk, new moon\": day 1, 19:15 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 87 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 87/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 19:16, dusk, new moon\": day 1, 19:16 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 86 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 86/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:16, dusk, new moon\": day 1, 19:16 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 87 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 87/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Hound Run\":\n  - generic: Hound Run\n- generic: A trampled path crosses the sedge. Gnawed bones lie beside the reeds.\n- button \"Old bones are cracked and stripped clean.\":\n  - generic: Old bones are cracked and stripped clean.\n- button \"Map\"\n- generic \"day 1, 19:16, dusk, new moon\": day 1, 19:16 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 86 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 86/100 pennies 18/1000"
+  },
+  {
+    "label": "expedition-offer",
+    "dom": "- heading \"Old bones are cracked and stripped clean.\" [level=1]\n- generic: Old bones are cracked and stripped clean.\n- generic: You begin a marsh watch from Hound Run. Follow the reed bank, willow shade, drowned oak, and the return path.\n- generic: \"Begin marsh watch: not now\"\n- generic: \"Begin another marsh watch: not now\"\n- generic: \"Use shelter: invalid target\"\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 19:20, dusk, new moon\": day 1, 19:20 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 87 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 87/100 pennies 18/1000"
+  },
+  {
+    "label": "contents-expedition",
+    "dom": "- heading \"Contents\" [level=1]\n- button \"Character\":\n  - generic: Character\n- button \"Equipment & Inventory\":\n  - generic: Equipment & Inventory\n- button \"Map\":\n  - generic: Map\n- button \"Journal\":\n  - generic: Journal\n- button \"Settings\":\n  - generic: Settings\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:25, dusk, new moon\": day 1, 19:25 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 88 of 100, pennies 18 of 1000\" [active]:\n  - generic: hp 10/10 ma 100/100 mv 88/100 pennies 18/1000"
+  },
+  {
+    "label": "expedition-start-journal",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: active\n- generic: \"0 of 5 entries. Next: west to Reed Bank.\"\n- generic: Follow the marked marsh circuit after accepting the watch.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:28, dusk, new moon\": day 1, 19:28 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 89 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 89/100 pennies 18/1000"
+  },
+  {
+    "label": "watch-active-cold-open",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:36, dusk, new moon\": day 1, 19:36 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "hound-exits",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Hound Run\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Adder Nest — a fen hound, a fen hound, a fen hound, a fen hound.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Reed Bank.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:37, dusk, new moon\": day 1, 19:37 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "watch-entry-one",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 19:41, dusk, new moon\": day 1, 19:41 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:41, dusk, new moon\": day 1, 19:41 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Reed Path\":\n  - generic: Reed Path\n- generic: A narrow path presses south between tall reeds. Mud darkens the edges, where fox prints cross the path and vanish among the stems. The landing lies north.\n- button \"Fox prints\":\n  - generic: Fox prints\n- generic: You left the watch route or fell. Return to Hound Run to begin another attempt.\n- button \"Map\"\n- generic \"day 1, 19:41, dusk, new moon\": day 1, 19:41 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "watch-departure-failed",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: active\n- generic: 0 of 5 entries.\n- generic: This attempt ended. Return to Hound Run to begin another watch now.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:42, dusk, new moon\": day 1, 19:42 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "failed-cold-open",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:46, dusk, new moon\": day 1, 19:46 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "failed-journal-durable",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: active\n- generic: 0 of 5 entries.\n- generic: This attempt ended. Return to Hound Run to begin another watch now.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:47, dusk, new moon\": day 1, 19:47 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Path\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Ferry Landing — Elspeth.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Bank.\"\n- button \"Inspect fox prints\":\n  - generic: Inspect fox prints\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:48, dusk, new moon\": day 1, 19:48 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 19:48, dusk, new moon\": day 1, 19:48 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:48, dusk, new moon\": day 1, 19:48 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Hound Run\":\n  - generic: Hound Run\n- generic: A trampled path crosses the sedge. Gnawed bones lie beside the reeds.\n- button \"Old bones are cracked and stripped clean.\":\n  - generic: Old bones are cracked and stripped clean.\n- button \"Map\"\n- generic \"day 1, 19:49, dusk, new moon\": day 1, 19:49 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "watch-restarted",
+    "dom": "- heading \"Old bones are cracked and stripped clean.\" [level=1]\n- generic: Old bones are cracked and stripped clean.\n- generic: You begin a fresh marsh watch. The earlier route no longer counts.\n- generic: \"Begin marsh watch: not now\"\n- generic: \"Begin another marsh watch: not now\"\n- generic: \"Use shelter: invalid target\"\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 19:49, dusk, new moon\": day 1, 19:49 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Hound Run\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Adder Nest — a fen hound, a fen hound, a fen hound, a fen hound.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Reed Bank.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:55, dusk, new moon\": day 1, 19:55 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 19:56, dusk, new moon\": day 1, 19:56 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:56, dusk, new moon\": day 1, 19:56 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Hound Run\":\n  - generic: Hound Run\n- generic: A trampled path crosses the sedge. Gnawed bones lie beside the reeds.\n- generic: \"Old bones are cracked and stripped clean.: not now\"\n- button \"Map\"\n- generic \"day 1, 19:57, dusk, new moon\": day 1, 19:57 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "legal-detour-checkpoint-hint",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: active\n- generic: \"1 of 5 entries. Next checkpoint: Willow Shade.\"\n- generic: Follow the marked marsh circuit after accepting the watch.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:57, dusk, new moon\": day 1, 19:57 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Hound Run\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Adder Nest — a fen hound, a fen hound, a fen hound, a fen hound.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Reed Bank.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:57, dusk, new moon\": day 1, 19:57 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- button \"Map\"\n- generic \"day 1, 19:58, dusk, new moon\": day 1, 19:58 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a crow, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:58, dusk, new moon\": day 1, 19:58 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Willow Shade\":\n  - generic: Willow Shade\n- generic: Long willow branches hang over a strip of firm ground. The reed bank is east; south, the path passes beneath a great old oak. A fenwort patch grows beneath the roots.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"Fenwort Patch\":\n  - generic: Fenwort Patch (12)\n- button \"Map\"\n- generic \"day 1, 19:59, dusk, new moon\": day 1, 19:59 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 90 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 90/100 pennies 18/1000"
+  },
+  {
+    "label": "map-south",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Willow Shade\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Reed Bank.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Drowned Oak — a crow, a deer.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 19:59, dusk, new moon\": day 1, 19:59 · dusk · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 90 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 90/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-south",
+    "dom": "- button \"Look, Drowned Oak\":\n  - generic: Drowned Oak\n- generic: A broad oak stands in dark water, its lower trunk silvered by old flood marks. The ground is still firm beneath its roots, and the willow path leads north. A firm bank leads east to the mire crossing. Broad branches offer a way up; a dry bank follows the water south to the black pool. A shelter opens under the roots.\n- button \"a crow, open\":\n  - generic: A crow is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"The roots arch into a dry hollow above the black water. You may use it during this watch.\":\n  - generic: The roots arch into a dry hollow above the black water. You may use it during this watch.\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 19:59, dusk, new moon\": day 1, 19:59 · dusk · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 89 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 89/100 pennies 18/1000"
+  },
+  {
+    "label": "shelter-used",
+    "dom": "- heading \"The roots arch into a dry hollow above the black water. You may use it during this watch.\" [level=1]\n- generic: The roots arch into a dry hollow above the black water. You may use it during this watch.\n- generic: You pause beneath the drowned oak’s roots. The shelter is dry; your wounds and the hour remain as they were.\n- generic: \"Begin marsh watch: invalid target\"\n- generic: \"Begin another marsh watch: invalid target\"\n- generic: \"Use shelter: not now\"\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:02, night, new moon\": day 1, 20:02 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 90 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 90/100 pennies 18/1000"
+  },
+  {
+    "label": "shelter-cold-open",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:08, night, new moon\": day 1, 20:08 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "shelter-durable-journal",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: active\n- generic: \"3 of 5 entries. Next: north to Willow Shade. Shelter used.\"\n- generic: Follow the marked marsh circuit after accepting the watch.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:09, night, new moon\": day 1, 20:09 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Drowned Oak\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Mire Crossing.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a deer, a deer.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Black Pool.\"\n- button \"Go up\":\n  - generic: Go up\n- generic: \"Beyond up: Oak Branches — a crow's nest, a crow.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:09, night, new moon\": day 1, 20:09 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Willow Shade\":\n  - generic: Willow Shade\n- generic: Long willow branches hang over a strip of firm ground. The reed bank is east; south, the path passes beneath a great old oak. A fenwort patch grows beneath the roots.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"fenwort, open\":\n  - generic: Fenwort is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"a deer, open\":\n  - generic: A deer is here.\n- button \"Fenwort Patch\":\n  - generic: Fenwort Patch (12)\n- button \"Map\"\n- generic \"day 1, 20:10, night, new moon\": day 1, 20:10 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Willow Shade\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Reed Bank.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Drowned Oak — a crow.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:10, night, new moon\": day 1, 20:10 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Reed Bank\":\n  - generic: Reed Bank\n- generic: The path reaches a low bank above brown fen water. Tracks mark the damp earth near the reeds. Firmer ground bends west under the willows. A firm path leads south to the mire crossing.\n- button \"Tracks\":\n  - generic: Tracks\n- generic: You return to Reed Bank alive after the full marsh circuit. Sedge will hear of this watch.\n- button \"Map\"\n- generic \"day 1, 20:10, night, new moon\": day 1, 20:10 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "watch-complete-journal",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: resolved\n- generic: 5 of 5 entries. Shelter used.\n- generic: You completed the five-entry marsh circuit alive.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:11, night, new moon\": day 1, 20:11 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "completion-cold-open",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:18, night, new moon\": day 1, 20:18 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "completion-durable-journal",
+    "dom": "- heading \"Journal\" [level=1]\n- generic: Night in the Marsh\n- generic: resolved\n- generic: 5 of 5 entries. Shelter used.\n- generic: You completed the five-entry marsh circuit alive.\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:19, night, new moon\": day 1, 20:19 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Bank\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Hound Run — a fen hound, a fen hound, a fen hound, a fen hound, a fen hound, a fen hound.\"\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Reed Path.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Mire Crossing.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Willow Shade — fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, fenwort, a deer, a deer.\"\n- button \"Inspect tracks\":\n  - generic: Inspect tracks\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:19, night, new moon\": day 1, 20:19 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 94 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 94/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Reed Path\":\n  - generic: Reed Path\n- generic: A narrow path presses south between tall reeds. Mud darkens the edges, where fox prints cross the path and vanish among the stems. The landing lies north.\n- button \"Fox prints\":\n  - generic: Fox prints\n- button \"Map\"\n- generic \"day 1, 20:20, night, new moon\": day 1, 20:20 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "map-north",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Reed Path\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Ferry Landing — Elspeth.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Bank.\"\n- button \"Inspect fox prints\":\n  - generic: Inspect fox prints\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:20, night, new moon\": day 1, 20:20 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-north",
+    "dom": "- button \"Look, Ferry Landing\":\n  - generic: Ferry Landing\n- generic: Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.\n- button \"Elspeth, open\":\n  - generic: Elspeth is here.\n- button \"Landing notice\":\n  - generic: Landing notice\n- button \"Map\"\n- generic \"day 1, 20:20, night, new moon\": day 1, 20:20 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "map-west",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Ferry Landing\n- button \"Go north\":\n  - generic: Go north\n- generic: \"Beyond north: Well Lane.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Reed Path.\"\n- button \"Go west\":\n  - generic: Go west\n- generic: \"Beyond west: Boathouse.\"\n- button \"Read the notice\":\n  - generic: Read the notice\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:20, night, new moon\": day 1, 20:20 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 18/1000"
+  },
+  {
+    "label": "walk-west",
+    "dom": "- button \"Look, Boathouse\":\n  - generic: Boathouse\n- generic: Weathered timbers shelter an unattended rope ferry. A taut cable crosses the fen to the isle.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 20:21, night, new moon\": day 1, 20:21 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "completion-ferry",
+    "dom": "- heading \"Rope ferry\" [level=1]\n- generic: The rope ferry runs along its cable. Leave two pennies for Mother Sedge before crossing to the isle; passage to recover your belongings is free.\n- generic: \"Fare: 2p.\"\n- button \"Board — 2p\":\n  - generic: Board — 2p\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:21, night, new moon\": day 1, 20:21 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 18 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 18/1000"
+  },
+  {
+    "label": "final-isle",
+    "dom": "- button \"Look, Fen Isle Landing\":\n  - generic: Fen Isle Landing\n- generic: Reeds brush the rope ferry. A narrow path leads east to a hut; south, a shrine stands among the sedge.\n- button \"Rope ferry\":\n  - generic: Rope ferry\n- button \"Map\"\n- generic \"day 1, 20:24, night, new moon\": day 1, 20:24 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 16/1000"
+  },
+  {
+    "label": "map-east",
+    "dom": "- heading \"Map\" [level=1]\n- generic: Fen Isle Landing\n- button \"Go east\":\n  - generic: Go east\n- generic: \"Beyond east: Isle Hut — Mother Sedge.\"\n- button \"Go south\":\n  - generic: Go south\n- generic: \"Beyond south: Isle Shrine.\"\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:24, night, new moon\": day 1, 20:24 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 16/1000"
+  },
+  {
+    "label": "walk-east",
+    "dom": "- button \"Look, Isle Hut\":\n  - generic: Isle Hut\n- generic: Bundles of drying herbs hang from the rafters. An open door leads to the garden, and a ladder rises into the loft.\n- button \"Mother Sedge, open\":\n  - generic: Mother Sedge is here.\n- button \"Map\":\n  - generic: up\n- generic \"day 1, 20:24, night, new moon\": day 1, 20:24 · night · new moon\n- button \"Position, standing\":\n  - generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 16/1000"
+  },
+  {
+    "label": "sedge-completion-offer",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Tell Sedge of the marsh watch Mother Sedge\":\n  - generic: Tell Sedge of the marsh watch Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:25, night, new moon\": day 1, 20:25 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 91 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 91/100 pennies 16/1000"
+  },
+  {
+    "label": "sedge-marsh-prompt",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: Sedge sees the marsh upon you and listens to your account of the circuit.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Tell Sedge how it went\":\n  - generic: Tell Sedge how it went\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:27, night, new moon\": day 1, 20:27 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 92 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 92/100 pennies 16/1000"
+  },
+  {
+    "label": "sedge-acknowledgement",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: Sedge sees the marsh upon you and listens to your account of the circuit.\n- generic: Sedge thanks you for making the marsh circuit and returning alive.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Tell Sedge of the marsh watch Mother Sedge\":\n  - generic: Tell Sedge of the marsh watch Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:31, night, new moon\": day 1, 20:31 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 93 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 93/100 pennies 16/1000"
+  },
+  {
+    "label": "acknowledgement-cold-open",
+    "dom": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:35, night, new moon\": day 1, 20:35 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 94 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 94/100 pennies 16/1000"
+  },
+  {
+    "label": "acknowledgement-durable",
+    "dom": "- heading \"Mother Sedge\" [level=1]\n- generic: Mother Sedge has lived beside the fen longer than anyone remembers. She teaches swimming freely to those who ask.\n- generic: \"Swim: learned; currently qualified. No attribute requirement for learning. Learned swim is required for underwater descent.\"\n- button \"Learn herbalism (2p) Mother Sedge\":\n  - generic: Learn herbalism (2p) Mother Sedge\n- button \"Tell Sedge of the marsh watch Mother Sedge\":\n  - generic: Tell Sedge of the marsh watch Mother Sedge\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 1, 20:35, night, new moon\": day 1, 20:35 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 94 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 94/100 pennies 16/1000"
+  },
+  {
+    "label": "post-watch-character",
+    "dom": "- heading \"Character\" [level=1]\n- generic: Standing\n- generic: Road-born\n- generic: CON 10\n- generic: DEX 11\n- generic: INT 10\n- generic: PER 5\n- generic: SPI 10\n- generic: STR 10\n- generic: Haggle — qualified; DEX 10 and MV 5 required to use.\n- generic: Swim — qualified; No attribute requirement for learning. Learned swim is required for underwater descent.\n- generic: hp 10 / 10, is in perfect health\n- generic: ma 100 / 100\n- generic: mv 98 / 100\n- generic: pennies 16 / 1000\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 1, 20:47, night, new moon\": day 1, 20:47 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 98 of 100, pennies 16 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 98/100 pennies 16/1000"
+  }
+]

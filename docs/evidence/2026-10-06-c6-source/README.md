@@ -220,3 +220,19 @@ save-pin assertion. The existing app chapter tests pass (5 tests), including
 old-development save refusal and preservation. No owner save is opened or reset.
 This correction requires the final source reviewers to inspect the resulting head;
 the preceding source head is not the browser release candidate.
+
+## Final browser and review disposition
+
+[Isolated final Book proof](../2026-10-06-c6-final-book/README.txt) records the
+ordinary Sedge free-swim → water descent → expedition departure failure/retry,
+truthful detour, sheltered completion and Sedge acknowledgement route at exact
+source `206ffb39de549d9781fa36bb61e9fada2852ad4f`. Swim, failed/reset attempt,
+sheltered stage3 and completed5/5 Journal survive browser reload. Browser fatal/
+co-present-hound and hostile-allegiance cells are not claimed; focused source/
+real SQLite tests cover those separately. Last acknowledgement prose did not
+repeat on the final NPC sheet after reload; E3 narration recovery remains a
+separate closure gate, with persisted receipt proof owned by SQLite.
+
+Both final independent source reviews approve exact206ffb39 with no open findings;
+their reviewer-authored records are carried intact. Full local gate and hosted
+exact-head CI/publication remain pending.
