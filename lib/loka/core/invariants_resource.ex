@@ -98,7 +98,8 @@ defmodule Loka.Core.InvariantsResource do
     before = row || %{"value" => spec["start"], "at" => 0}
 
     if valid and is_integer(before["value"]) and is_integer(before["at"]) do
-      ticks = Integer.floor_div(now, 3600) - Integer.floor_div(before["at"], 3600)
+      every = Map.get(spec, "gain_every", 3600)
+      ticks = Integer.floor_div(now, every) - Integer.floor_div(before["at"], every)
       value = min(spec["maximum"], before["value"] + spec["gain"] * ticks)
       if value == op["from"], do: %{"value" => op["to"], "at" => now}
     end

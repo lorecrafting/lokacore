@@ -122,6 +122,8 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets));
 unset means `start` at time 0 for legacy pools without an explicit entity override (`:87`). Opted recovery requires the row
 and metadata validation in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
+Independent precondition replay uses the effective spec's authored `gain_every` boundaries
+for legacy pools, retaining the hour boundary only when that field is absent.
 Optional `resource.adjust.at` is an authoritative due-job settlement time, never a
 cartridge recipe/player input. Require committed base clock <= at <= the explicit
 advance horizon, with equality at the base clock legal. When present, use that exact
