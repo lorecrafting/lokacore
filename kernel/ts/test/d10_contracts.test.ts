@@ -102,6 +102,18 @@ test('D10 contracts require each binding and bound with executable schema red co
   }
 });
 
+// Breaks: an empty map-position declaration bypasses the wire's nonempty requirement.
+test('compiled map-position arrays reject empty declarations with a minItems red control', () => {
+  const cartridge: any = (DEFS as any).CompiledCartridge.oneOf.find(
+    (b: any) => b.properties.format.const === 'loka-cartridge-v2',
+  );
+  const defs = { ...DEFS, D10Probe: cartridge.properties.map_positions } as Defs;
+  assert.notDeepEqual(validate('D10Probe', [], defs), []);
+  const mutant = structuredClone(defs);
+  delete (mutant.D10Probe as any).minItems;
+  assert.deepEqual(validate('D10Probe', [], mutant), []);
+});
+
 const pin = read('protocol/fixtures/missing_child_v042_hash.json');
 const load = (cartridge: any) =>
   loadCartridge(
@@ -133,6 +145,12 @@ test('D10 loader refuses invalid authored map and Knock declarations', () => {
     (c: any) => (c.map_positions[0].room = ref('room', 'absent')),
     (c: any) => (c.map_positions[0].x = '0'),
     (c: any) => (c.manifest.requires.kernel_api.at_least = '1.36'),
+    (c: any) => {
+      delete c.map_positions;
+      delete c.lock.capabilities.knowledge;
+      delete c.manifest.requires.capabilities.knowledge;
+      c.manifest.requires.kernel_api.at_least = '1.36';
+    },
     (c: any) => {
       delete c.lock.capabilities.knowledge;
       delete c.manifest.requires.capabilities.knowledge;

@@ -48,6 +48,16 @@ defmodule Loka.Content.Barriers do
       reference(rel, path ++ ["knock"], "npc", response, m, defs) ++
         reference(rel, path ++ ["knock"], "room", response, m, defs)
 
+    api =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    refs =
+      if api >= [1, 37],
+        do: refs,
+        else: [diag("KERNEL_API_RANGE_INVALID", at(rel, path ++ ["knock"])) | refs]
+
     if e["barrier"] && response["room"] == e["to"],
       do: refs,
       else: [diag("BARRIER_MISMATCH", at(rel, path ++ ["knock"])) | refs]

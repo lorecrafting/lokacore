@@ -28,5 +28,15 @@ defmodule Loka.ContentD10Test do
       assert {:error, _} = Loka.Content.compile(dir)
       File.write!(path, JSON.encode!(original))
     end
+
+    # Knock itself requires the new API even without optional map metadata.
+    File.rm!(map_path)
+    manifest_path = Path.join(dir, "cartridge.json")
+    manifest = manifest_path |> File.read!() |> JSON.decode!()
+    manifest = manifest |> put_in(["requires", "kernel_api", "at_least"], "1.36")
+    manifest = update_in(manifest, ["requires", "capabilities"], &Map.delete(&1, "knowledge"))
+    File.write!(manifest_path, JSON.encode!(manifest))
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+    assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
   end
 end

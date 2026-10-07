@@ -60,13 +60,7 @@ defmodule Loka.Content.Checks do
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
-    field = fn
-      {"knock", v} -> {"knock", expand(v, m)}
-      {"corpse_ingress", v} -> {"corpse_ingress", expand(v, m)}
-      {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)}
-    end
-
-    exit = fn {d, e} -> {d, Map.new(e, field)} end
+    exit = fn {d, e} -> {d, Map.new(e, &exit_field(&1, m))} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
 
@@ -446,4 +440,7 @@ defmodule Loka.Content.Checks do
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
+
+  defp exit_field({k, v}, m) when k in ~w(corpse_ingress knock), do: {k, expand(v, m)}
+  defp exit_field({k, v}, m), do: {k, ref(v, if(k == "to", do: "room", else: k), m)}
 end

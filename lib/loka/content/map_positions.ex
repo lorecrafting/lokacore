@@ -32,35 +32,24 @@ defmodule Loka.Content.MapPositions do
     rows = Enum.map(rows, &Map.update!(&1, "room", fn r -> ref(r, "room", m) end))
     keys = Enum.map(rows, & &1["room"]["key"])
 
-    refs =
-      for {row, i} <- Enum.with_index(rows),
-          row["room"] != ref(row["room"]["key"], "room", m) or
-            not Map.has_key?(defs["room"], row["room"]["key"]),
-          do: diag("UNRESOLVED_REFERENCE", at(rel, [i, "room"]))
-
     complete = Enum.sort(keys) == Enum.sort(Map.keys(defs["room"]))
     coords = Enum.map(rows, &Map.take(&1, ~w(x y z)))
-    unique = length(Enum.uniq(coords)) == length(coords)
-    declared = m["requires"]["capabilities"]["knowledge"] == 1
-
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
+    unique = Enum.uniq(coords) == coords
     checks = if complete and unique, do: [], else: [diag("SCHEMA_VIOLATION", at(rel, []))]
-    cap = if declared, do: [], else: [diag("UNDECLARED_CAPABILITY", at(rel, []))]
 
-    gate =
-      if api >= [1, 37],
-        do: [],
-        else: [
-          diag(
-            "KERNEL_API_RANGE_INVALID",
-            at("cartridge.json", ["requires", "kernel_api", "at_least"])
-          )
-        ]
+    {rows, references(rel, rows, m, defs) ++ checks ++ requirements(rel, m)}
+  end
 
-    {rows, refs ++ checks ++ cap ++ gate}
+  defp references(rel, rows, m, defs) do
+    for {row, i} <- Enum.with_index(rows),
+        row["room"] != ref(row["room"]["key"], "room", m) or
+          not Map.has_key?(defs["room"], row["room"]["key"]),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, [i, "room"]))
+  end
+
+  defp requirements(rel, m) do
+    if m["requires"]["capabilities"]["knowledge"] == 1,
+      do: [],
+      else: [diag("UNDECLARED_CAPABILITY", at(rel, []))]
   end
 end
