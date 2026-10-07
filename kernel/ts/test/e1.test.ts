@@ -21,6 +21,29 @@ const source = {
   policy_hash: '3'.repeat(64),
 };
 
+// Breaks: a slash inside a DefinitionRef map key is mistaken for another object level,
+// dropping each definition's root obligation while retaining some of its nested choices.
+test('E1 inventory retains slash-bearing v042 definition roots', () => {
+  const uses = admitCandidate(bytes).policy.uses;
+  for (const [path, feature] of [
+    ['/quests/ashmere_missing_child@0.0.42:quest/a_night_in_the_marsh', 'authored.quest'],
+    ['/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox', 'authored.dialogue'],
+    ['/resources/ashmere_missing_child@0.0.42:resource/hp', 'authored.resource'],
+    ['/services/ashmere_missing_child@0.0.42:service/lantern_ale', 'authored.service'],
+    ['/transports/ashmere_missing_child@0.0.42:transport/fen_outbound', 'authored.transport'],
+    [
+      '/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior',
+      'authored.action_recipe',
+    ],
+    ['/populations/ashmere_missing_child@0.0.42:population/crow_branches', 'authored.population'],
+    ['/bleeds/ashmere_missing_child@0.0.42:bleed/bleeding', 'authored.bleed'],
+  ])
+    assert.ok(
+      uses.some((use) => use.path === path && use.feature === feature),
+      path,
+    );
+});
+
 // Build changed controlled inputs with Node hashing and separately sorted JSON; the expected
 // refusal below is literal and never supplied by the classifier or canonical encoder.
 function artifact(c: unknown): string {

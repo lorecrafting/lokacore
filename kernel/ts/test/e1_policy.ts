@@ -137,16 +137,17 @@ export function applicability(c: Cartridge) {
 // Every authored branch/beat/consequence is retained: these paths cannot disappear
 // behind a capability label. These rows stay pending until a controlled receipt names them.
 function inventory(c: Cartridge, uses: Use[]) {
-  const walk = (value: unknown, path: string, owner: string) => {
+  const walk = (value: unknown, path: string, owner: string, depth = 0) => {
     if (value !== null && typeof value === 'object') {
       const row = value as Record<string, unknown>;
       if (
         ['op', 'type', 'evidence', 'control'].some((key) => Object.hasOwn(row, key)) ||
         /\/(?:choices|outcomes|steps|apply|sequence)\/[^/]+$/.test(path) ||
-        /^\/[a-z_]+\/[^/]+$/.test(path)
+        depth === 1
       )
         uses.push({ feature: `authored.${owner}`, path, gates: POLICY[owner]! });
-      for (const [name, child] of Object.entries(value)) walk(child, `${path}/${name}`, owner);
+      for (const [name, child] of Object.entries(value))
+        walk(child, `${path}/${name}`, owner, depth + 1);
     }
   };
   for (const [section, owner] of Object.entries({

@@ -57,6 +57,24 @@ the literal observed failure `threw / Error: planted failure / at 0`.
 Raw outputs are covered by [SHA256SUMS](SHA256SUMS), with the independent
 [verification output](SHA256SUMS.verify) retained beside it.
 
+## Primary review correction — E1-P1
+
+The primary review found that the top-level path predicate treated the slash inside
+a raw DefinitionRef map key as a JSON nesting boundary. This omitted root obligations
+for definitions that the loader's `parts()` walk does not inventory. The fix identifies
+section children by actual object depth; nested branch/beat/consequence checks are unchanged.
+
+The new test uses literal v042 root paths for quest, dialogue, resource, service,
+transport, recipe, population and bleed definitions. The [old focused suite](inventory-old-suite.log)
+passed with the bug, while the [new test failed before the fix](inventory-before-fix.log).
+Restoring the [old predicate](inventory-mutant.log) or [deleting the inventory call](inventory-omitted-call.log)
+each makes that test fail, exit 1. After restoration, [all four E1 tests pass](inventory-green.log),
+exit 0. The [full fix gate](inventory-full-check.log), `mise exec -- bin/check_all.sh`,
+passed with exit 0. Independent scoped recheck remains pending.
+Author correctness review confirms that actual section children get one root row even
+when the map key contains a slash. Ponytail Review: use one depth counter in the existing
+walk; no second walker, path parser or new dependency.
+
 ## Acceptance still pending
 
 The corrected [full local gate](full-check.log), `mise exec -- bin/check_all.sh`,
