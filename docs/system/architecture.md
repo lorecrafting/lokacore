@@ -248,9 +248,8 @@ that line's authored narration or branch. The first acknowledgement witnesses th
 definition; the last witnesses its closing steps only after the dream ends. An accepted
 choice against the pending dream continuation witnesses the choice beat and its exact
 selected option. A displayed or offered dream alone witnesses none of these paths.
-An accepted `talk` also witnesses the selected dialogue's satisfied policy root.
-Under an `all` node, each child must hold and may be witnessed recursively; an
-`any` or `not` node does not credit its children without separate branch evidence.
+An accepted `talk` also witnesses the selected dialogue's satisfied policy root
+and the descendants the [branch evidence rule](#e1-policy-branch-evidence) credits.
 Rejected talk and merely offered dialogue actions witness no policy path.
 An accepted selected dialogue choice witnesses an authored fact assignment or
 adjustment sequence step only when that exact fact changes from its prior value
@@ -261,9 +260,8 @@ to resolve, and a matching committed fact event with the same actor, scope,
 world and command cause/correlation. The witness credits only that sequence
 step; it does not certify the skill/topic definition or any unselected choice.
 Other sequence operations and unselected choices require separate evidence.
-An accepted `perform` witnesses its exact authored recipe definition and admitted
-policy root. Each child under a required `all` policy node is also witnessed;
-`any` and `not` descendants require separate branch proof. Recipe outcomes and
+An accepted `perform` witnesses its exact authored recipe definition, admitted
+policy root and the descendants the [branch evidence rule](#e1-policy-branch-evidence) credits. Recipe outcomes and
 sequence steps require their own consequence witnesses.
 An accepted recipe result witnesses its selected outcome only when every
 authored sequence step has an exact committed effect witness. A fact assignment
@@ -272,13 +270,13 @@ requires its exact receipt. A check-failed empty sequence requires its failed
 check event. Unexecuted sibling outcomes stay pending.
 An accepted command that changes an exact quest instance from unresolved to
 resolved witnesses that quest definition and objective. For a current-state
-objective, its satisfied root and required `all` children may also be credited;
-other branches still require separate evidence. A failed or merely active quest
+objective, its satisfied root and the descendants the [branch evidence rule](#e1-policy-branch-evidence)
+credits are also witnessed. A failed or merely active quest
 does not discharge its resolved objective.
 After an accepted command, an active player quest may witness only the first
 satisfied authored journal variant whose exact text appears in the resulting
-GameView journal. Its satisfied policy root and required `all` children are
-credited; other matching variants and `any`/`not` descendants remain pending.
+GameView journal. Its satisfied policy root and the descendants the
+[branch evidence rule](#e1-policy-branch-evidence) credits are witnessed; other matching variants remain pending.
 Resolved or failed journals and a final outcome alone cannot prove an earlier
 active variant. Replay derives the same selection at each committed boundary
 and requires those exact paths in the retained step receipt.
@@ -315,6 +313,41 @@ independent fixture and authority faults supply unchanged contract proof; export
 candidate fault schedules and reopen the resulting intermediate saves before their next
 consumer. Scenario receipts bind the same artifact/source/check/policy identities as the
 runner and retain commands, exact starts, state/receipt digests and asserted failures.
+
+### E1 policy branch evidence
+
+This rule ([owner decision](../decisions/owner-decision-e1-branch-evidence-2026-10-07.md))
+decides which descendants of a witnessed satisfied policy root are also witnessed. A node's
+polarity is positive under an even number of `not` ancestors within that root and negative
+under an odd number. Walk down from the root, which must hold in the evaluated state (otherwise
+nothing is credited):
+
+- A positive-polarity node is credited when it evaluates true and every ancestor evaluated to
+  its own polarity (true when positive, false when negative). Children of a credited `all`
+  hold by definition. Each child of a credited `any` is evaluated and only a true child is
+  credited, recursively. A credited `not` flips its child's polarity, so under `not(not(X))`
+  the inner `not` stays pending and `X` is credited when true.
+- A negative-polarity node is never credited, including for evaluating false: a negated
+  guard that did not fire has not been shown to fire. Under `not(all(…))` and `not(any(…))`
+  no descendant is credited unless a further `not` restores positive polarity.
+- A refusal is not evidence: the runtime records no refusing policy node, so a refused
+  command credits no path.
+
+Evaluation uses the state and target the runtime judged: the state before the accepted
+`talk` or `perform` with that action's admission target; for a resolved quest objective, the
+state before the command when the root held there, else the committed resulting state, for
+its instance's player and without a target; and the committed resulting state for the
+selected journal variant. Replay
+recomputes these credits from the replayed before/after states and accepts only paths also
+recorded in the retained step receipt, as for journal variants.
+
+A negative-polarity path, or any other authored path no execution can witness, closes only
+by a reviewed disposition: a row `{path, reason, evidence, review}` in the checked-in table
+`kernel/ts/test/e1_dispositions.json`, naming an authored path, a reason (for example an
+unreachable or always-false guard), a pointer to the evidence and the independent review
+record. The recorder reports dispositioned paths separately from witnessed and pending ones;
+a disposition never adds to the witnessed set, and a row for an unknown or witnessed path
+fails the run.
 
 ## Mobile import rules
 
