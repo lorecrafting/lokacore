@@ -88,3 +88,14 @@ cross-mechanic inference; no new production helper, storage or dependency is add
 Correctness self-review found no remaining issue. Hosted gates and any browser
 evidence remain the developer/PM publication gate; independent executions are
 limited to the source and SQLite checks above.
+
+## Hosted second opinion — PR #265, head `44547da3`
+
+After all hosted checks passed on this head, a read-only Sol review focused on
+receipt replay, forged groups, non-population applicability and save bytes returned
+the following answer verbatim:
+
+```text
+APPROVE
+Findings: none
+```
