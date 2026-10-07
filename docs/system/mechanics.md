@@ -13,22 +13,35 @@ Planned selections do not change these installed clauses; each consumer amends t
 
 ## A fresh world
 
-`newWorld(cartridge, context, seed)` (`kernel/ts/src/runtime/fresh.ts:26`) mints ids under the nil
+`newWorld(cartridge, context, seed)` (`kernel/ts/src/runtime/fresh.ts`) mints ids under the nil
 CommandId in a fixed order: the player's CharacterId, its body, each room (DefinitionRefString
-order), each room's details, one instance from each NPC [blueprint](glossary.md), one from each
-item blueprint, then one job per NPC with a daily schedule,
+order), each room's details, one instance from each ordinary NPC [blueprint](glossary.md),
+one from each ordinarily placed item blueprint, then one job per NPC with a daily schedule,
 then one slot holder per distinct `slot` some item declares, in slot-key order (UTF-8 bytes;
-[equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). A holder is an entity inside the
-body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
-The body starts in `entry`, each NPC in its room, each item at its location; the clock is
-`calendar.start` or 0 (`:40`); each scheduled NPC's first job is due at its schedule's first
+[equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). NPCs marked `spawn_template`
+and items at `location.in: template` are definitions only at this stage; they receive no
+ordinary instance or placement. A slot holder is an entity inside the body with capacity1;
+it is not in `entities`, so no command targets it and no view lists it. A food-enabled world
+then mints its single roomless terminal [consumed holder](#d4-homes-finite-apples-and-eat-selected-contract).
+Bounded population initialization follows using the same mint sequence: each authored plan
+creates its admitted initial slots/members and optional held loot, then its control job.
+Population state, origins, HP and custody are composed before play; template definitions
+never appear as extra ordinary NPCs or items. The [current allocation oracle](cartridge.md#current-bundled-chapter)
+pins this complete order.
+The body starts in `entry`, each ordinary NPC in its room, each ordinary item at its location; the clock is
+`calendar.start` or 0; each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults, with no record until the first change
 (so the [position](#position1-kerneltssrcmechanicspositionrulets) fact adds nothing to a fresh state); a world starting after time 0 stores
 the body's legacy resources at their start values. Every opted recovery pool has a required
 player-body row at the birth clock, including zero, with its authored start, standing rate
 and zero remainder ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). One body per world;
 rules read the actor from the
-command and its body from `bodyOf` (`runtime/decision.ts:159`).
+command and its body from `bodyOf` (`runtime/decision.ts`). When `knowledge@1` is opted in,
+fresh creation records the entry room for that character and observations of exactly the
+visible co-present NPCs at the birth clock, after population initialization. This grants
+no remote map knowledge. A chapter declaring ancestries starts without a selected character
+row; [D11 selection](#d11-character-choice-selected-contract) precedes ordinary player commands,
+while trusted elapsed updates retain their separately authorized admission.
 
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
 
@@ -214,7 +227,7 @@ integer amount. Read the current value (including earlier sequence steps), check
 bounds, use checked safe addition, then clamp to the authored bounds. Lower to the existing
 `fact.assign` in writer group 0; unchanged values emit no event. Corrupt values, unsafe sums
 and reserved engine-fact writes fault, never repair. This adds no foundation delta operation.
-The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1)'s.
+The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60)'s.
 
 ## resource@1 (`kernel/ts/src/mechanics/resource.ts`)
 
@@ -255,26 +268,25 @@ cartridge's `world.bands`, else the engine default table ([protocol.md](protocol
 
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
 
-Ruleless. An attribute is a definition `AttributeSpec {key, start}` in the
-cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
-the engine declares none, so the six 00 §4.3 stats are content. The installed
-pre-D11 implementation reads each actor's definition `start` and has no attribute
-state. The [selected D11 writer](#d11-character-choice-selected-contract) adds
-saved values owned by the chosen character, never its replaceable body. After that
-writer is installed, the selected player's checks read those values; NPCs and
-cartridges without character choice continue to read their definition starts.
-The exact changed row and operation syntax belong to D11's source protocol amendment.
+An attribute starts from the definition `AttributeSpec {key, start}` in the cartridge's
+`attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
+the engine declares no world stats. The installed [D11 writer](#d11-character-choice-selected-contract)
+commits `character.select` with the chosen ancestry and complete attribute values in
+`state.characters[CharacterId]`. These values belong to the character, never its replaceable
+body. `attributeValue` reads that character row when present, otherwise the definition start;
+policy, recipe thresholds and skill qualification share this lookup. Actors and cartridges
+without a selected row retain definition starts. No training/equipment attribute writer is installed.
 `attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
 `not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
 least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
-on the actor's body, as [resource@1](#resource1) derives it and before the action's costs, is.
+on the actor's body, as [resource@1](#resource1-kerneltssrcmechanicsresourcets) derives it and before the action's costs, is.
 Both fail closed: an actor without a body reads no pool, and the compiler and loader reject an
 unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
 `resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
 ## D11 character choice (selected contract)
 
-**PM-selected planning contract; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
+The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
 
 Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
 
@@ -282,7 +294,11 @@ Under the [owner's elapsed ruling](../decisions/owner-decision-d11-prechoice-ela
 
 `stat_compare` and `attribute_threshold` read the selected character value after choice on each check; neither caches qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate, both in their current room and when ordinary Scan projects a legal adjacent dark destination. It does not create a lit source or change `illuminated`; B6 `light_off` therefore retains its physical-light answer, including Seek and Talk for a hill-folk character. Barred passages still stop Scan, and hidden-exit, closed-door, custody and other perception checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
 
-Source must select a minimal typed declaration/command/changed-row shape, amend the protocol clause before code, and reject unknown choices, partial or contradictory effects, malformed values and attempts to change identity. The new shape requires compiler/loader negatives, a planted failed guard, real SQLite fault/replay/reopen proof and exact-head independent reviews. Frozen old fixtures stay frozen; preproduction pin mismatch refuses explicitly without deleting a save.
+Compiler, loader, command admission and composition reject unknown choices, partial or
+contradictory effects, malformed values and attempts to change identity. The [D11 source review](../reviews/2026-10-06-d11-character-choice-primary-review.md)
+records the independent checks and fixed findings. Preproduction pin mismatch refuses
+explicitly without deleting or retargeting a save. Obsolete development compatibility follows
+[forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).
 
 The source shape is `choose_ancestry {actor_id, ancestry}` under `attributes@1`. An authored, closed `ancestries` map gives each key its label, one attribute modifier, optional acquired skill, optional faction starting value and optional dark sight. The accepted decision writes one `character.select` row keyed by CharacterId containing the ancestry key and complete attribute values, with any acquired-skill and faction facts in the same decision and receipt. Composition admits this row only when absent. No ordinary player command is admitted before selection. The saved row is immutable and survives body replacement; the selected attribute lookup reads it for the player and falls back to definition starts for actors without a selected character row.
 
@@ -407,17 +423,16 @@ different keys: the projection maps through the trigger. Without an `outcome`, a
 outcome of P reaching its trigger counts. An active or `objectives_complete` quest does
 not reach a chapter, even when its objective holds; another player's quest does not count.
 
-This derives only from existing quest state, with no persisted marker, op or event
+Dialogue-triggered points derive from existing quest state
 ([chapter-one plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md),
-§3 slice 9 and §6; the owner's chapter-marker addition). It holds while story points
-come only from quest-resolving dialogue choices. Revisit with a persisted story-point
-record when another source appears. To keep this derivation unambiguous, a counted
+§3 slice 9 and §6; the owner's chapter-marker addition). Scene-end points use the
+persisted marker described below. To keep this derivation unambiguous, a counted
 trigger is rejected if another dialogue resolves the same quest with the same choice id;
 [the compiler and loader check](cartridge.md#compiler) fails closed with the existing
 `OUTCOME_MISMATCH` code. This narrow check is the PM's continuing-workflow choice,
 not an explicit owner response to the chapter brief's Q4.
 
-**A3 planned extension:** a story point reached by acknowledgement of an exact
+**A3 completion:** a story point reached by acknowledgement of an exact
 `scene_ended` outcome uses its engine-owned player fact marker, including the selected
 outcome, for chapter projection. It does not infer completion from a pending or delivered
 report. Dialogue-triggered points keep the quest derivation above. Only the matching
@@ -435,15 +450,17 @@ Shared fact/reference, running-line, modal action and start-delivery queries liv
 following position@1's existing helper pattern. The rule retains typed ownership and
 never casts schema values or imports I/O.
 
-Dated implementation amendment, 2026-10-03: the installed subset of archived 06
-§33–§37 and 21 §3.6 is a modal text sequence in `current_world`, as needed by 00a §9
-and the approved [C1 plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md).
-A SceneDefinition has `on {story_point, outcome}`, `control: modal`, and n ≥ 1
-`narrate {text}` steps followed by `await_ack`, then `end`. It is not skippable and
-never replays. Other control modes, overlays/dreams, dialogue/choice, role bindings,
-checkpoints and consequence beats, and a quest objective on `scene_ended` remain later.
+The installed subset of archived 06 §33–§37 and 21 §3.6 has two closed control modes.
+A `modal` SceneDefinition starts from a declared story-point, quest outcome or bound
+accepted action, and has n≥1 `narrate {text}` steps followed by `await_ack`, then `end`.
+It is not skippable or restartable. Its optional validated `on_end` atomically assigns
+declared player facts and reaches one story point; [A3](cartridge.md#a3-green-finale)
+consumes this completion. B9 adds the anchored, resumable `presentation_only` Rest dream,
+with its bounded choice/branch and final quest acknowledgement; its exact step and
+availability rules live in [S10](#s10-lantern-rest-and-dream-b9-selected-contract).
+Arbitrary overlays, scripts, role bindings, checkpoints and consequence beats remain later.
 
-For scene key k, the compiler adds `<id>@<ver>:fact/scene_<k>` exactly as follows
+For modal scene key k, the compiler adds `<id>@<ver>:fact/scene_<k>` exactly as follows
 (only `<k>` and `<n>` substitute; `1..n` is literal, n counts narrates):
 
 ```json
@@ -459,16 +476,19 @@ scene starts require scene@1 alone, never reaction@1. There is no `scene_started
 The guarded start is part of the triggering command's atomic proposal, after its
 choice closes. Duplicate delivery or receipt retry never restarts an ended scene.
 
-While the actor's scene fact is in 1..n, the resolved ActionSet is replaced by only
-`continue` (target none, empty input, `action.continue`). Normal admission refuses
+While the actor's modal scene fact is in 1..n, the resolved ActionSet is replaced by only
+`continue` (target none, exact input `{scene, line}`, `action.continue`). Normal admission refuses
 all other commands with `unsupported_capability`, through invocation or direct
 Command alike, before effects or clock changes. Every exit advertises the same
 refusal. The GameView includes `scene {scene, line, index, count}` exactly while
 running; line is the current narrate TextKey, index is one-based and count is n.
 
 `continue` at i < n returns `continued`, one fact.assign `expected: i, value: i+1`,
-no rule event. At n it returns `ended`, one assign `expected: n, value: -1`, and
-`scene_ended {scene}` at position 2, leaving position 1 for the host's fact_changed.
+no rule event. At n it returns `ended` with the cursor assign `expected: n, value: -1`,
+any declared `on_end` fact/story-point assignments, then `scene_ended {scene}` and,
+when declared, `story_point_reached`. Event positions follow all changed facts, leaving
+their causal positions for the host's `fact_changed`; without final consequences,
+`scene_ended` is at position2.
 The final continue acknowledges the last line and runs end: await_ack adds no wait.
 All continuation uses the command's actor. No running scene is the rule's defensive
 `invalid_state`; ordinary admission refuses continue as `unsupported_capability`.
@@ -476,11 +496,7 @@ SCENE-01 has headless line-2 reopen and actual Release Simulator terminate/relau
 proof in the [touch review](../reviews/2026-10-03-c1-touch-review.md) and its
 [native evidence](../evidence/c1-touch/README.md). SCENE-03 and QUESTSCENE-01's
 start-once half are covered by the [scene review](../reviews/2026-10-03-c1-scenes-modal-review.md).
-A stale fresh-id Continue can still advance an unseen line at the command boundary;
-the [ROADMAP carry](../ROADMAP.md#c1-carry-checkpoints) distinguishes presenter input
-review from the future line-bearing contract.
-
-**A3 planned extension:** Continue binds the scene identity and the line actually shown
+Every Continue binds the scene identity and the line actually shown
 when the control was drawn. Admission and the scene rule require both to equal the current
 durable scene and line, including for a fresh invocation id or direct Command. An exact
 accepted id replays its original receipt before current-state admission. A scene may start
@@ -660,7 +676,9 @@ neither. Fatal player death writes following→separated in death's existing wri
 beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
 
-## S2 Chandler's Debt selected contract (pending implementation)
+<a id="s2-chandlers-debt-selected-contract-pending-implementation"></a>
+
+## S2 Chandler's Debt selected contract
 
 This is the B2 source contract for the real Missing Child chapter, adopted in the
 [PM decision](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md). It is not an
@@ -748,7 +766,7 @@ participating balances must reopen as valid current-build truth.
 
 ## C1 training and armed defense (selected contract)
 
-**API1.18 contract; local source, independent review pending.** [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+[PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 adds the first skills and armed/defense consumer to the installed combat above.
 The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
 profile and chance. Qualification is current policy truth, never stored mastery.
@@ -932,7 +950,7 @@ shrine teleport or forced-overload recovery operation is added.
 
 ## B7 well and waterskin selected contract
 
-**Selected, pending implementation.** B7 supplies the first `liquid@1` consumer:
+B7 supplies the first `liquid@1` consumer:
 Fill at Well Lane's authored well detail, Pour between two real obtainable
 waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
 units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
@@ -983,7 +1001,7 @@ reduces load. Take, Buy and incoming transfer must include current liquid mass;
 Drop and recovery move the same contents without refilling them.
 ## S3 finite watch patrol (C2 selected contract)
 
-**Local source implemented; independent review pending.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
+[PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
 selects an all-hours, player-started patrol led by the original noncombatant Tobin.
 The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
 walk and checkpoints. This is player-follow-leader behavior; it does not change
@@ -1152,7 +1170,7 @@ No required chapter path or Book proof waits for a replacement or night.
 
 ## C4 hound response, pack assistance and flight (selected contract)
 
-**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
+[PM adoption](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
 extends C3's deliberate fight with bounded pack help and wounded flight. Entry,
 reading, elapsed time and night never initiate hostility. This selects response
 to player aggression and defers the provisional night-auto-aggression proposal
@@ -1247,7 +1265,7 @@ schedule or island enemy is part of D1.
 
 ## B8 Maud's immediate services (selected contract)
 
-**Implemented locally, publication pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
 selects three all-hours services from the original living, co-located Maud at the
 Drowned Lantern. Each accepted service immediately exchanges the exact quoted
 pennies for its declared benefit in one proposal. A meal is eaten and a serving
@@ -1294,7 +1312,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 
 ## D2 held books and public Priory (selected contract)
 
-Planned under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
+Installed under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
 D2 completes the ten public Priory rooms through the reciprocal
 [authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
 its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
@@ -1331,7 +1349,7 @@ books given away need no replacement or mint and cannot strand a required path.
 
 ## S10 Lantern Rest and dream (B9 selected contract)
 
-**Current consumed source; independent review pending.** The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 extends position/scene/quest at this first consumer. The first accepted actor-owned
 `rest` transition at actual `inn_rooms`, with B8 `lantern_bed_paid=true` and
 `slept_at_lantern=false`, sets that declared player fact true and activates the
@@ -1399,8 +1417,8 @@ or required waiting. Elspeth remains at Ferry Landing. Cottage and Green variant
 read the exact committed child enum; they do not move or create Wren, complete
 an escort, write a child outcome or claim that Wren is in the cottage.
 
-D4 is the first held-food consumer: B8 supplies resource recovery semantics,
-not an installed Eat verb. Add the narrow `food@1` capability with `eat
+D4 is the first held-food consumer. B8 supplies resource recovery semantics;
+`food@1` owns the installed `eat
 {actor_id, item_id}` and accepted `eaten {item_id}`. Admission requires the exact
 opted edible item directly in the living actor's body and positive headroom in
 its declared recovery pool. An unknown item is `not_found`, a nonfood target is
@@ -1457,9 +1475,11 @@ topic, Q2 credit, branch choice, relationship or item. The original protected
 and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
 prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.
 
-## D6 water depths and owned-corpse recovery (selected, pending implementation)
+<a id="d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation"></a>
 
-**PM-selected contract; selected-docs review approved, implementation pending.** The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
+## D6 water depths and owned-corpse recovery (selected contract)
+
+The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
 selects optional `well_bottom` and `pool_bottom` below Well Shaft and the dry
 Black Pool bank. Rescue/bell stays dry and open all hours. Sedge's free D1 lesson
 provides acquired swim before S27. Descending requires currently usable learned
@@ -1471,7 +1491,7 @@ Living actors below surface for 0 MV regardless of current skill/load/MV/posture
 light. Both directions use existing `move` and normal room-entry evidence.
 
 One water occupancy generation binds one absolute submersion deadline and one
-due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation).
+due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract).
 There is no periodic drain: MV 0 alone never drowns, and ordinary fractional
 resource recovery remains unchanged. Surface and every death invalidate water
 occupancy; stale/canceled/re-entry jobs cannot affect a later occupancy.
@@ -1494,7 +1514,9 @@ deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings a
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
 
-## D9 village consequences and Prior Study access (selected, pending implementation)
+<a id="d9-village-consequences-and-prior-study-access-selected-pending-implementation"></a>
+
+## D9 village consequences and Prior Study access (selected contract)
 
 **Selected D9 contract.** The five valid terminal pairs are
 `rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
@@ -1536,7 +1558,7 @@ Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm
 
 ## D12 practical skill consumers (selected contract)
 
-**PM-adopted policy, pending implementation.** The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
+The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
 
 Original living, co-located Sedge and Peg teach their respective skills through bound Talk/Choose, typed `skill.acquire` and conserved `lesson_payment` in one proposal. Acquisition is independent of current qualification. Already acquired refuses before any new fee or grant; exact invocation replay returns the existing accepted receipt. Lessons are optional and all-hours; neither learning nor either benefit gates ferry, recovery, ordinary Harvest, S9 or chapter completion. Sedge's existing free swim choice remains separate and available.
 
@@ -1544,17 +1566,19 @@ The existing Willow Shade patch opts into careful Harvest. Read current acquired
 
 Peg's opted Buy quote uses current usable haggle after normal elapsed settlement. The effective quote is `max(minimum, floor(base_buy × numerator / denominator))` when usable, otherwise the authored base; Sell stays authored. The existing shared shelf/admission query supplies the effective price for display, exact invocation and execution. `quoted_price` must equal that current effective price before conserved currency/item transfer; stale cheap or dear quotes refuse without silently changing the charge. Recheck all B3 provider, item, custody, balance/overflow and carrying admission. No RNG, daily counter, reserved price, token, extra ledger or stock replacement is added. Qualification is derived at use and never stored; failed qualification never erases acquired membership.
 
-## D7 bounded deer and delayed sight flight (planning contract)
+<a id="d7-bounded-deer-and-delayed-sight-flight-planning-contract"></a>
 
-**PM-selected proposal; independent plan review and source proof pending.** [D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-planning-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+## D7 bounded deer and delayed sight flight
 
-The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition-planning-contract). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
+[D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+
+The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
 
 The plan's ordinary wander still skips engaged members and the member transferred by sight flight at that same clock, using C4's last-flight guard. At equal sight/combat/population deadlines preserve normal `(due_time, job_id)` order and distinct writer groups: a fatal round cancels its bound sight job; sight first moves the deer and makes a later round harmless; a surviving round first can hand off its exact successor for sight flight; an intervening population job sees engagement and may skip. Only the checked matching encounter closure and successor cancellation use the preceding round group in that handoff. Other same-target conflicts still fault atomically. No priority override, global sight scan or per-hound job is added.
 
 ## C5 hound bleeding and bandage (selected contract)
 
-**PM-selected planning contract; source pending.** [C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#c5-bleeding-and-bandage-details) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. No generic status interpreter is selected.
+[C5 decision](../decisions/pm-decision-c5-bleeding-bandage-2026-10-06.md), [chapter values](cartridge.md#c5-bleed-and-bandage-declarations), [composition](protocol.md#c5-bleed-and-bandage-composition), [recovery](save.md#c5-bleed-and-bandage-recovery) and [Book](book-ui.md#c5-bleeding-and-bandage-details) govern this one real effect. C3/C4's existing hound damage, C1's acquired/current qualification, B5's real finite bandages and D4's terminal consumed holder are the producers and primitives. No generic status interpreter is selected.
 
 Only an actual C3 hound's positive HP loss to the surviving player body during its combat opportunity applies bleeding. Miss, successful defense, clamped zero loss, fatal hit, other opponents and forged event/name matches do not. The existing combat writer group adds one typed body/effect instance with source hound identity, generation, `ends_at`, `next_tick_at` and current owned job. A second qualifying hit while active refreshes `ends_at = now + authored duration` but retains the generation and pending next tick; it neither stacks nor postpones that tick. A new application after cure/expiry uses a fresh generation. The hound's later death or flight does not cancel its already inflicted effect.
 
@@ -1564,10 +1588,11 @@ Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is p
 
 Amend the focused combat ActionSet for this exact bandage command after shared ordinary action composition. It may be offered and admitted during an open encounter together with Flee, Stand, Look and Scan. Other item actions, recipes, movement and equipment remain excluded; a raw command or alias cannot widen the exception. Treatment leaves the encounter and pending initiative intact. Flee remains immediate under its existing prerequisites. No required story path, death recovery or owner save depends on teaching, stock, waiting or UI polish.
 
-## D10 discovered places, observations and Knock (selected, pending implementation)
+<a id="d10-discovered-places-observations-and-knock-selected-pending-implementation"></a>
 
-**Implementation candidate:** v042/API1.37 implements this selected contract; independent
-source review, browser proof and final publication remain gates.
+## D10 discovered places, observations and Knock (selected contract)
+
+D10 is installed in the [current bundled chapter](cartridge.md#current-bundled-chapter).
 
 Map knowledge belongs to the character. A new character knows only the entry room. An
 accepted body entry adds the destination room once, in the same proposal as its real
@@ -1610,9 +1635,11 @@ Knock is declared on the Steps north face only. Its response comes from the Nave
 only while the actual Aldric is present there.
 An absent Aldric yields the authored no-answer response, without asserting his location.
 
-## C6 S27 Night in the Marsh (selected planning contract)
+<a id="c6-s27-night-in-the-marsh-selected-planning-contract"></a>
 
-**Selected contract; C5/D8/D9/D11 are published, and final C6 independent review remains a gate.** The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
+## C6 S27 Night in the Marsh (selected contract)
+
+The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
 
 At any hour a standing living player at Hound Run deliberately starts S27 once. Starting binds an actor-owned quest occurrence and a five-entry ordered route attempt with cursor zero. Each later **accepted actual player Move or Flee** along the next authored edge advances that cursor exactly once. Starting co-location, NPC movement, replayed/refused movement, revisiting a room without the next edge, transport and pre-start visits earn nothing. The fifth accepted entry resolves the same quest and awards its selected consequences atomically. There is no idle survival timer, night boundary, arbitrary room-tag counter or new global objective interpreter.
 
@@ -1620,7 +1647,9 @@ The opt-in Start also provokes the lowest-ID currently living co-present unengag
 
 An accepted departure from the declared expedition footprint before completion fails only this attempt, retaining the quest active. A fatal event for the bound player body invalidates the attempt before Chapel return; death does not erase other quest progress. Either failure allows an immediate explicit Restart at Hound Run with a new attempt identity, cursor zero and the same quest occurrence. Old attempts cannot grant credit or rewards. No hound kill, item, swim qualification, clock, bell or faction state is a start/route gate. Completion is once only; Start/Restart disappear after resolution. At Drowned Oak after the third entry, one optional Use shelter action records a bound sheltered flag and narration; it is neither a completion gate nor Rest, healing or a time skip. The fifth entry returns to safe Reed Bank.
 
-## D8 crow scavenging (selected planning contract)
+<a id="d8-crow-scavenging-selected-planning-contract"></a>
+
+## D8 crow scavenging (selected contract)
 
 [D8's PM decision](../decisions/pm-decision-d8-crow-scavenge-2026-10-06.md) selects one bounded consumer of C3 population, D5's real canopy, ordinary containment and scheduled jobs. Only a directly room-held `old_coin` dropped by the player in Village Green or Drowned Oak is eligible. It must be the exact D6 item, not a keyword match; no quest item, corpse, descendant, worn or nested item, container, or NPC-held item is eligible. A committed `item_dropped` can bind one living, co-located, idle crow (lowest EntityId) and that item to one acquisition job. The player can Take the coin before the job; the job then completes harmlessly. An idle crow carries at most one acquired root. There is no reservation or new ownership ledger.
 

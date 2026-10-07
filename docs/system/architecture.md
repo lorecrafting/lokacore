@@ -168,7 +168,7 @@ The app shell imports the local authority's session controller
   scripted commands, prints the GameView, writes a transcript and the game trace; `--replay`
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
 - **The phone app** (`mobile/app/App.tsx`): opens the bundled story and its expo-sqlite
-  save under the current [chapter binding](cartridge.md#source-layout), plays through
+  save under the current [chapter binding](cartridge.md#current-bundled-chapter), plays through
   `localSession`, supplies separate wall (`Date.now`) and monotonic (`performance.now`) clocks, and draws
   the book UI or the save-error screen. Elapsed accounting follows
   [durable elapsed sessions](save.md#durable-elapsed-sessions); latency remains separate.

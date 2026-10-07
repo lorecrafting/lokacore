@@ -1,8 +1,8 @@
 # Where the code and the spec disagree
 
-For the owner. The system docs follow the code; each row is one disagreement found while
-checking them at `87a1246`. Deferred requirements that an owner decision already carries are in
-[future.md](future.md), not here.
+For the owner. The initial audit at `87a1246` found these disagreements; installed
+changes are reconciled where noted. Deferred requirements that an owner decision already
+carries are in [future.md](future.md), not here.
 
 | # | Spec | Code | Difference |
 |---|---|---|---|
@@ -11,4 +11,4 @@ checking them at `87a1246`. Deferred requirements that an owner decision already
 | 5 | [23 §11](../archive/spec/23-accounts-progress-admission.md) "Completion-at-least-once persists despite local rollback/reset" | `mobile/authority/local-story/session.ts:154` | A file SQLite cannot repair (not a database, a corrupt page, a damaged report table or index) is deleted by Start over, its pending reports and trace with it ([save.md](save.md#new-game); index-only damage carried to R12, ROADMAP SM2 row, P4A-2). |
 | 8 | [03 §14](../archive/spec/03-domain-state-persistence.md): a pre-command terminal rejection gets a receipt with its revision unchanged | `mobile/authority/local-story/authority.ts:30`, `:167` | `stale_view` is a reply with no receipt, so a retry of that invocation id re-resolves against the current world (PM ruling, ROADMAP P4b). `conflict` likewise writes nothing. |
 | 9 | [pre-release-proof](../archive/spec/pre-release-proof.md) "a deliberately blocked west exit … without another room" | `cartridges/lantern_proof/barriers/old_gate.json`, `rooms/landing.json:8` | The landing's west exit leads through `old_gate`, keyed by the lantern, into the existing shelter, so after `carry` it can be unlocked and the map loops (PM ruling 1, flagged; the compiler refuses an unreachable key and a barrier face without its reciprocal). |
-| 10 | [00 §4.1](../archive/spec/00-first-cartridge-design.md) far scan from `view` rooms (chapter two, 00 §11), perception policies and darkness | `kernel/ts/src/mechanics/movement/rule.ts` | `sight` (in every GameView exit since c1-doors) sees exactly where a move would pass, adjacent rooms only; no far scan, perception or darkness. |
+| 10 | [00 §4.1](../archive/spec/00-first-cartridge-design.md) far scan from `view` rooms (chapter two, 00 §11), perception policies and darkness | `kernel/ts/src/mechanics/movement/rule.ts` | `sight` (in every GameView exit since c1-doors) sees adjacent rooms through legal passages under current visibility, including [B4 darkness and D11 dark sight](mechanics.md#b4-light-and-darkness-selected-contract). Far scan remains deferred; the original no-darkness discrepancy is superseded. |
