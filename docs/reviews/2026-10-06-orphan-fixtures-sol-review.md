@@ -28,3 +28,25 @@ exited 0: 26 tests, including all active transcript replays, current v042 alloca
 32 controlled simulation seeds and 23 portable ABI controls. No broad gate, ExUnit run or
 owner-save access was performed in this review. No new executable behavior or tests require
 a mutation control. Ponytail Review: lean already; no extra machinery or coverage-only tests.
+
+## Hosted exact-head Codex review
+
+```text
+APPROVE
+
+No findings.
+
+Reviewed exact head b0821ee8c817affcf77dd062a4c66226e2a7a55f against published main 1424b6cda48cd89f2ed84325d57f69334bccb6a9.
+
+Active contract pins, canonical/conformance fixtures, current v042 and C3_B8/v029 answers remain unchanged. All 29 active transcript headers resolve to retained fixtures; none selects either removed hash.
+
+Save mismatch refusal and unchanged-byte checks remain intact. No runtime or save handling changes.
+
+All six documented Git recoveries reproduce the removed bytes exactly. Historical evidence is preserved; D4’s 81 checksums verify. Its retained capture’s removed-fixture dependency is covered by reproduction at the documented historical source commit.
+
+Focused current-chapter and portable ABI tests pass: 25 tests. Ponytail Review found no unnecessary machinery.
+
+GitHub API access was unavailable; hosted CI status was not verified.
+```
+
+PM independently verified every started hosted check on `b0821ee8` green before this review-only addition.
