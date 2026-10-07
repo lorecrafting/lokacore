@@ -63,6 +63,7 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   pour: ['source_id', 'receiver_id'],
   drink: ['vessel_id'],
   look: ['target_id'],
+  where: ['target_id'],
   read: ['target_id'],
   harvest: ['target_id'],
   attack: ['target_id'],

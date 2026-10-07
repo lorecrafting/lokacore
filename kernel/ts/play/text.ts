@@ -20,7 +20,7 @@ export type Parsed =
   | { type: 'scan' }
   | { type: 'stand' | 'sit' | 'rest' | 'sleep' } // position@1
   | { type: 'move'; direction: string }
-  | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk' | 'read'; to?: string }
+  | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'; to?: string }
   | { choose: string }
   | 'bye'
   | { door: (typeof DOORS)[number]; direction?: string; words?: string }
@@ -51,9 +51,10 @@ for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d }
 for (const v of ['stand', 'sit', 'rest', 'sleep'] as const) WORDS[v] = { type: v };
 
 const LOOK = ['look', 'l', 'examine', 'x'];
-const DOORS = ['open', 'close', 'lock', 'unlock'] as const;
-const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk' | 'read'> = {
+const DOORS = ['open', 'close', 'lock', 'unlock', 'knock'] as const;
+const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'> = {
   talk: 'talk',
+  where: 'where',
   read: 'read',
   get: 'take',
   take: 'take',

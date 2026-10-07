@@ -105,7 +105,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
   take: ['not_present', 'too_heavy'], // reach and voluntary carrying admission
 };
 
-const DOOR_VERBS = Object.keys(MOVES);
+const DOOR_VERBS = [...Object.keys(MOVES), 'knock'];
 const VERB_CODES = [
   'unsupported_capability',
   'invalid_target',

@@ -1,3 +1,4 @@
+import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
 import { waterViews } from './water.ts';
@@ -76,6 +77,7 @@ export function gameView(world: World): GameView {
   const bleed = currentBleed(world, world.body);
   const view: GameView = {
     actor_id: world.character,
+    ...knowledgeView(world, steps),
     ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),

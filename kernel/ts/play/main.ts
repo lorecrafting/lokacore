@@ -180,6 +180,14 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     activated_with_possession: 'You agree to help, and you already have what is needed.\n',
     choice_opened: choice(cartridge, r.world),
   };
+  const location = decision.kind === 'accepted' && decision.location;
+  if (location)
+    done.located =
+      location.status === 'here'
+        ? `${name(location.target_id)}: here.\n`
+        : location.status === 'last_seen'
+          ? `${name(location.target_id)}: last seen at ${say(cartridge, r.world.rooms[location.room_id].title)} at ${location.at}s.\n`
+          : 'Their whereabouts are unknown.\n';
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
     decision.kind !== 'accepted'
@@ -201,13 +209,13 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
 // Resolves the player's words (commands/target.ts; 04 §17), and for give the recipient's: each unique
 // id goes into a look, take, drop or give Command; none and ambiguous build no Command.
 function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
-  const id = found(r, p.lookup);
+  const id = found(r, p.lookup, p.verb === 'where' ? 'where' : undefined);
   const to = p.verb === 'give' && id ? found(r, p.to!) : undefined;
   if (!id || (p.verb === 'give' && !to)) return;
   const payload =
     p.verb === 'give'
       ? { type: 'give', item_id: id, recipient_id: to }
-      : p.verb === 'talk' || p.verb === 'read'
+      : p.verb === 'talk' || p.verb === 'read' || p.verb === 'where'
         ? { type: p.verb, target_id: id }
         : p.verb
           ? { type: p.verb, item_id: id }

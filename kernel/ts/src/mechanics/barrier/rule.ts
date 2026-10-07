@@ -45,6 +45,12 @@ export const MOVES: Readonly<Record<string, [BarrierState, BarrierState, string]
 
 export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) => {
   const { type, actor_id } = command.payload;
+  if (type === 'knock') {
+    const reply = knock(world, actor_id, command.payload.direction);
+    return typeof reply === 'string'
+      ? rejected(reply)
+      : accepted(world, 'knocked', [], [], [{ key: reply.text }]);
+  }
   const t = transition(world, actor_id, type, command.payload, steps);
   if (typeof t === 'string')
     return t === 'containment_cycle' || t === 'budget_exceeded'
@@ -111,4 +117,18 @@ function itemBarrier(
   const reached = reach(world, body, id, steps);
   if (typeof reached === 'string') return reached;
   return reached ? (e.barrier ?? 'invalid_target') : 'not_present';
+}
+
+/** The authored local response; shared with the offered door action. */
+export function knock(world: World, actor: CharacterId, direction: Key) {
+  if (!COMPASS.includes(direction)) return 'invalid_target' as const;
+  const body = bodyOf(world, actor);
+  if (!body) return 'not_found' as const;
+  const exit = exitOf(world.rooms[world.state.containers[body]], direction);
+  if (!exit) return 'not_found' as const;
+  if (!exit.barrier || !exit.knock) return 'invalid_target' as const;
+  const response = exit.knock;
+  const npc = world.entityIds[refString(response.npc)];
+  const room = world.roomIds[refString(response.room)];
+  return { text: world.state.containers[npc] === room ? response.answered : response.unanswered };
 }

@@ -246,6 +246,7 @@ export function admission(
 }
 
 function hiddenTarget(world: World, payload: CommandPayload, steps: Steps) {
+  if (payload.type === 'where') return false;
   const p = payload as { actor_id: CharacterId } & Partial<
     Record<
       'target_id' | 'item_id' | 'recipient_id' | 'container_id' | 'provider_id' | 'crow_id',
