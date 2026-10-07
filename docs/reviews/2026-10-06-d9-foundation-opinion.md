@@ -71,3 +71,55 @@ coverage, and demonstrate the relevant mutations failing. Keep frozen fixtures i
 
 Only disposable isolated review files were mutated. The developer branch and owner
 save were not changed. Temporary probe/test files were removed before handoff.
+
+
+## Scoped fix round 1 — APPROVE
+
+Reviewed source `5bee68110fc197e182e8166548a934b828d2d898`, with review-record-only
+head `8dbf22c8`. Scope: F1/F2 fixes, direct save-guard callers and the new portable
+fixture/tests. No open foundation finding. Browser proof and the complete final
+check/CI gate remain pending; this is not overall publication approval.
+
+**F1 closed.** `mobile/authority/local-story/deer-save.ts:102` now locates the
+regular occurrence through the same-plan, same-group control rotation at the exact
+suppression deadline. It retains distinct IDs, common deadline/plan, completed-job
+operations in the same group, and unchanged suppression cause/generation checks.
+The existing SQLite test now runs invocation suffixes 201 and 203 through failed
+COMMIT and lost-acknowledgement reconciliation, exact replay and reopen.
+
+Independent controlled execution confirmed the actual revised-release orders:
+201 runs resume before regular; 203 runs regular before resume, with unrelated
+same-time jobs between them. Both save and reopen at 237600. For each order,
+changing only the regular job-completion operation's stored writer group to 999
+causes `openStory` to return `save_corrupt` without rewriting that receipt; restoring
+the receipt restores successful open. This control used disposable real SQLite.
+Restoring the old F1 implementation makes the committed uncertain-bell regression
+fail with `save_corrupt`, exit 1; restoring the fix makes that test pass, exit 0.
+
+**F2 closed.** The new separate `population_suppression.json` pins four valid
+literal transitions and four invalid transitions: active extension, changed resume
+cause, initial generation gap, and retained resume job. Each invalid case also pins
+a counterfeit success that both independent invariant implementations reject.
+Both kernels compare against those literals before their differential comparison;
+the added deterministic randomized test exercises 120 varied suppression rows with
+both accepted and refused outcomes. The prior population fixture remains unchanged.
+
+Independently reverted each portable production module to published `de8b1cb5`,
+one at a time: Elixir composition and invariants each fail the focused tests with
+exit 2; TypeScript composition and invariants each fail with exit 1. Restored portable
+tests pass, including all literal/oracle checks and 120 differential rows. These
+controls now detect the regression that survived the original review.
+
+Verification run with the pinned toolchain:
+
+- `node --test` over population composition, D9 suppression, SQLite D9 and SQLite
+  deer tests: 19 passed, exit 0.
+- `mix test --force test/loka/core/population_composition_test.exs`: 3 passed,
+  exit 0; repeated after mutation restoration.
+- Five live production revert controls: all fail as intended; restored portable
+  checks and the uncertain-bell SQLite check pass.
+- Ponytail Review: focused reuse of the existing receipt/control data; no new
+  abstraction or actionable complexity finding.
+
+All mutations and receipt probes used a disposable isolated checkout/database.
+No developer source or owner save was changed; temporary probes were removed.
