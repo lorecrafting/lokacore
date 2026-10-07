@@ -727,6 +727,7 @@
     ],
     "fixtures": [
       "protocol/fixtures/population_composition.json",
+      "protocol/fixtures/population_suppression.json",
       "protocol/fixtures/missing_child_c3_b8_hash.json",
       "protocol/fixtures/missing_child_c3_b8_ids.json",
       "protocol/fixtures/missing_child_c3_provisional_hash.json",

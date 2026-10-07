@@ -1,0 +1,55 @@
+$ mise exec -- node --test kernel/ts/test/d9_content.test.ts kernel/ts/test/d9_contracts.test.ts kernel/ts/test/d9_suppression.test.ts kernel/ts/test/study_ingress.test.ts kernel/ts/test/missing_child.test.ts kernel/ts/test/population_composition.test.ts mobile/authority/local-story/d9.test.ts mobile/authority/local-story/deer.test.ts mobile/authority/local-story/bell.test.ts mobile/app/book/d9.test.ts
+✔ all five terminal pairs project distinct cast prompts and Green descriptions (253.146916ms)
+✔ D9 cue references and typed suppression declaration fail closed (1019.244166ms)
+✔ D9 typed control and cue reject missing evidence and malformed deadlines (1.158917ms)
+✔ provisional v040 allocation pins starting identities (165.83175ms)
+✔ accepted bell preserves hounds and schedules one cause-bound suppression deadline (189.101375ms)
+✔ population ticks stay quiet until the exact two-day deadline (624.492208ms)
+✔ suppression closes an open hound encounter without reward or deleting the member (150.183375ms)
+✔ one accepted bell event projects only within the declared Ashmere and public Priory area (113.893084ms)
+✔ stale population occurrence completes without changing the suppressed plan (113.672625ms)
+✔ population successor cannot rewrite suppression (126.909375ms)
+✔ the active Missing Child release keeps the simulator invariants on controlled seeds (12755.51275ms)
+✔ the D8 successor keeps its independently pinned fresh IDs (53.339792ms)
+✔ population control and slot composition match independent literal rows (25.522375ms)
+✔ population invariant rejects counterfeit success (0.179ms)
+✔ fox Study ingress rechecks actual owned nonempty corpse and never closes egress (240.9565ms)
+(node:74664) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/d9.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book keeps the bell scene and labels restored cue as past (0.84425ms)
+✔ bell-first loss survives real rollback-journal SQLite reopen after every scene line (227.278292ms)
+✔ forged lost quest without Ring receipt gives typed save corruption (48.630041ms)
+✔ late Ring keeps both Q2 returns playable through cold reopen (392.525625ms)
+✔ both completed returns keep Silence and its two scene lines through cold reopen (377.229584ms)
+✔ fox terminal requires its own committed Silence receipt (100.686625ms)
+✔ Silence receipt rejects foreign actors on linked fact events (204.864125ms)
+✔ Silence receipt binds its action, actor and scene cause (876.102916ms)
+✔ fox terminal rejects contradictory saved rows without repairing them (424.006792ms)
+✔ Silence COMMIT uncertainty settles once and its exact receipt replays unchanged (283.798667ms)
+✔ late Ring rejects a receipt with an extra Q2 loss transition (85.4195ms)
+✔ bell save contradictions offer typed recovery without changing saved rows (1276.833542ms)
+✔ linked Ring receipt fields reject controlled forgeries without repairing rows (1798.56775ms)
+✔ Ring COMMIT uncertainty settles to one complete outcome and one replayable receipt (235.084458ms)
+✔ real SQLite cold reopen retains one cause-bound bell cue (432.958583ms)
+✔ real SQLite uncertain bell COMMIT reconciles one suppression and one resume job (4128.608125ms)
+✔ real SQLite fox Study corpse permits pickup then closes ingress after cold reopen (1086.459792ms)
+✔ real SQLite stays/prior bell scene reopens before Continue (407.879458ms)
+✔ terminal profiles preserve bound ledger and cellar offers through SQLite reopen (1233.196041ms)
+✔ pending sight and confirmed flight cold-reopen with conserved deer custody (57.108667ms)
+✔ missed round and +300 flight cold-reopen with closed combat (82.695417ms)
+✔ sight-only receipt cannot justify a later deer binding (31.559375ms)
+✔ forged current sight binding refuses without changing saved bytes (21.106959ms)
+✔ fatal deer and its owned hide cold-reopen without replacement (51.240125ms)
+✔ real COMMIT faults preserve all-prior or all-next deer rows and one replayable receipt (233.400208ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13479.483542
+
+exit: 0

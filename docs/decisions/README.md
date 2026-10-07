@@ -264,3 +264,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C5 real bleeding and bandage](pm-decision-c5-bleeding-bandage-2026-10-06.md): one hound-produced timed bleed, Wick's skill lesson and exact held-bandage treatment during combat.
 - [D10 Finding the Way](pm-decision-d10-finding-way-2026-10-06.md): character-owned visited map, truthful last-observed Where and a local Chapel-door Knock; planning draft pending independent review.
 - [C6 Night in the Marsh](pm-decision-c6-night-marsh-2026-10-06.md): immediate five-entry survival attempt, optional shelter, bounded hound danger and one completion reward; source waits for C5.
+
+- [D9 real cast clarification](pm-decision-d9-real-cast-2026-10-06.md): retain October 5 no-Bram ruling after owner delegation.

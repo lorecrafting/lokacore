@@ -218,10 +218,15 @@ test('real SQLite cold reopen retains one cause-bound bell cue', (t) => {
 test('real SQLite uncertain bell COMMIT reconciles one suppression and one resume job', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-fault-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  for (const kind of ['failed', 'lost'] as const) {
-    const p = setup(join(dir, `${kind}.db`));
+  for (const [kind, suffix] of [
+    ['failed', '201'],
+    ['lost', '201'],
+    ['failed', '203'],
+    ['lost', '203'],
+  ] as const) {
+    const p = setup(join(dir, `${kind}-${suffix}.db`));
     const invocation = {
-      invocation_id: 'aaaaaaaa-0000-4000-8000-000000000201',
+      invocation_id: `aaaaaaaa-0000-4000-8000-000000000${suffix}`,
       actor_id: p.story.world().character,
       action_key: 'ring_bell',
       target_ids: [],
@@ -466,5 +471,82 @@ test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
   if (reopened.kind === 'open') {
     gameView(reopened.world());
     assert.ok(reopened.narration()?.cue);
+  }
+});
+
+// Breaks: earlier terminal flavor dialogue shadows the keyed public ledger or cellar service.
+test('terminal profiles preserve bound ledger and cellar offers through SQLite reopen', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-d9-services-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  for (const allegiance of ['prior', 'fox']) {
+    const change = (c: any) => {
+      c.entry = ref('room', 'chapel_nave');
+      c.calendar.start = 64800;
+    };
+    const p = setup(join(dir, `${allegiance}.db`), {
+      bundle: bundle(change),
+      fresh: fresh(change),
+    });
+    let n = 1;
+    const invoke = (action_key: string, target_ids: string[] = [], input: object = {}) => {
+      const reply = p.story.invoke({
+        invocation_id: `eeeeeeee-0000-4000-8000-${String(n++).padStart(12, '0')}`,
+        actor_id: p.story.world().character,
+        action_key,
+        target_ids,
+        input,
+      });
+      assert.equal(reply.kind, 'saved');
+      if (reply.kind === 'saved')
+        assert.equal((reply.decision as { kind: string }).kind, 'accepted');
+    };
+    const move = (...directions: string[]) =>
+      directions.forEach((direction) => invoke('move', [], { direction }));
+    const choose = (choice_id: string) =>
+      invoke('choose', [], {
+        continuation_id: gameView(p.story.world()).choice!.continuation_id,
+        choice_id,
+      });
+    const talk = (action: string, npc: string) =>
+      invoke(action, [entity(p.story.world(), 'npc', npc)]);
+    const reopen = () => {
+      const opened = openStory(
+        p.db,
+        [{ fresh: p.release.fresh, content_hash: p.release.bundle.sha256 }],
+        p.host,
+      );
+      assert.equal(opened.kind, 'open');
+      if (opened.kind !== 'open') throw new Error('service save did not open');
+      p.story = opened;
+    };
+    staysToBelfry(p);
+    invoke(allegiance === 'prior' ? 'ring_bell' : 'silence_bell');
+    while (gameView(p.story.world()).scene) {
+      const scene = gameView(p.story.world()).scene!;
+      invoke('continue', [], { scene: scene.scene, line: scene.index });
+    }
+    move('down', 'down', 'south', 'south', 'south', 'south', 'west');
+    talk('a_peg_debt', 'peg');
+    choose('accept_on_time');
+    reopen();
+    const ledger = entity(p.story.world(), 'item', 'tithe_ledger');
+    assert.equal(p.story.world().state.containers[ledger], p.story.world().body);
+    move('east', 'north', 'north', 'north', 'north');
+    talk('a_aldric_debt', 'aldric');
+    assert.equal(gameView(p.story.world()).choice!.prompt.key, 'dialogue.aldric_debt.prompt');
+    reopen();
+    choose('on_time');
+    reopen();
+    assert.equal(
+      p.story.world().state.containers[ledger],
+      entity(p.story.world(), 'npc', 'aldric'),
+    );
+    move('south', 'south', 'south', 'south', 'east');
+    talk('maud_offer', 'maud');
+    assert.equal(gameView(p.story.world()).choice!.prompt.key, 'dialogue.maud_offer.prompt');
+    choose('accept');
+    reopen();
+    talk('maud_turn_in', 'maud');
+    assert.equal(gameView(p.story.world()).choice!.prompt.key, 'dialogue.maud_turn_in.prompt');
   }
 });

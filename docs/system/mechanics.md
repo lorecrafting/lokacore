@@ -1499,7 +1499,7 @@ isle return. No general remote Take or replacement-gear system.
 **Selected D9 contract.** The five valid terminal pairs are
 `rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
 `lost/fox` remains invalid. Child and bell quest owners alone write their
-terminal facts. Elspeth, Bram, Maud, the Green, Aldric, Vesper and Sedge read
+terminal facts. Elspeth, Maud, the Green, Aldric, Vesper and Sedge read
 those committed facts for distinct authored responses; reading or rendering
 never changes them, reopens an ending or pays a reward. A missing child or
 unknown allegiance retains truthful search/base text.

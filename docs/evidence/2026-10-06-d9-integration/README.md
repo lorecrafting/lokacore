@@ -9,7 +9,7 @@ Current successor is chapter v040/API1.35. The independent
 [v040 generator](../../../protocol/fixtures/generate_missing_child_v040.py)
 applies the D9 authored delta to frozen published D8 v039. Its canonical answer is
 [the v040 fixture](../../../protocol/fixtures/missing_child_v040_hash.json),
-with [209 initial IDs](../../../protocol/fixtures/missing_child_v040_ids.json).
+with [208 initial IDs](../../../protocol/fixtures/missing_child_v040_ids.json).
 Frozen predecessor fixtures are unchanged. Explicit incompatible-save refusal remains.
 
 ## Checks completed
@@ -69,9 +69,26 @@ Compiler/loader checks now refuse a non-Boolean cue fact, non-pack suppression
 plan and suppression below API1.35. Seven actual guard removals fail their focused tests;
 restored compiler checks pass. Kernel typecheck and Credo pass.
 
-**Publication hold:** preserved D9 adds a Bram NPC, but the newer owner real-cast
-ruling excludes Old Bram while the D9 plan requires his reactions. PM has raised
-the governing conflict with the owner. This provisional209-ID pin is not final.
+**Cast resolution:** the owner delegated the conflict to PM, who retained the newer
+October 5 no-Bram ruling. [Clarification](../../decisions/pm-decision-d9-real-cast-2026-10-06.md)
+removes the provisional NPC/dialogues and retains the unattended ferry. The revised
+v040/API1.35 independent pin is `f67b09edee64dc0449e35cd129663a12d7ea74b180859c06b55ba10c1150f89f`,
+with208 IDs. Frozen earlier fixtures remain unchanged.
+
+**Independent review corrections:** regular-first job ordering now derives the
+regular job from its own control transition, instead of the resume clearing op's
+already-rotated successor. SQLite suffix203 exercises regular-first; suffix201
+retains resume-first. Both failed/lost COMMIT paths reopen at237600. Public S2 and
+Maud's cellar controls now use existing explicit labelled dialogue binding so
+terminal flavor cannot shadow services. Actual route + SQLite cold reopen passes
+for prior and fox, with retained ledger custody. [Review red controls](review-red-controls.py)
+restore each defect and observe failure; restored D9/deer checks pass.
+
+Portable suppression has eight independent literal transition answers, including
+four invalid successful-write counterfeits, in a new fixture; old fixtures remain
+unchanged. Both kernels validate these answers before120 randomized suppression
+cases compare composition and independent invariant replay.
+
 Headless simulator:19 tests passed (regression seeds and500 fresh sequences).
 Full pre-push gate, final browser matrix and independent review remain pending.
 No native device, owner save or deferred UI blur work is part of this proof.
@@ -86,9 +103,17 @@ Fen/isle sound. This updates the independent v040 pin without changing allocatio
 Ponytail self-review: reuse pinned recipe resolution and existing receipt replay;
 no adapter, new scheduler or generic sound/relationship framework. Correctness
 self-review caught the targetless Bell receipt mismatch, deadline/deer guard
-interaction, declaration admission gaps and the unresolved cast conflict.
+interaction, declaration admission gaps and the resolved cast conflict.
 
 Final nondependent checkpoint checks are retained in [focused.log](focused.log),
 [compiler.log](compiler.log), [typecheck.log](typecheck.log) and
 [headless-sim.log](headless-sim.log), with explicit exit status for the final focused,
 compiler and typecheck commands. All retained logs have SHA-256 verification.
+
+Review-fix checkpoint:40 focused Node checks,15 Elixir source/portable checks and
+kernel typecheck pass (exit0); see `review-focused.log`, `review-compiler.log` and
+`review-typecheck.log`. `review-red-controls.log` records eight planted defects
+(four host/service plus four independent portable module removals) and restored
+green runs. Ponytail/correctness self-review: no new engine abstraction, binding
+uses existing labelled actions, and the receipt exception still requires exact
+same-plan completed jobs; ordinary deer counterfeit guards remain tested.

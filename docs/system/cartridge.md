@@ -1285,9 +1285,9 @@ Select the smallest closed source declaration that maps the four keys to these v
 
 The five valid child/allegiance pairs and the Study rule are defined in
 [mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
-Author distinct child responses for Elspeth and Bram, five truthful Maud rumor
+Author distinct child responses for Elspeth, five truthful Maud rumor
 variants and Green descriptions, prior/fox Aldric and Vesper responses, and
-bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave.
+bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave. Explicit labelled dialogue bindings keep the ledger handoff and Maud's cellar offer/turn-in independently selectable alongside terminal reaction profiles. Old Bram remains outside the real cast under the [D9 clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md).
 The Study remains the existing reciprocal Nave-west/Study-east edge; no new
 door/barrier definition or key is authored. Only its west ingress gets the
 conditional fox policy. No new room, NPC, token relationship fact or synthetic

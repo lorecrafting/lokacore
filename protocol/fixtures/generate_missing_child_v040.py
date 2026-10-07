@@ -30,16 +30,15 @@ def policy(node):
     return node
 
 v['manifest']['requires']['kernel_api']['at_least'] = '1.35'
-for path in sorted((source / 'dialogues').glob('a0_d9_*.json')) + [source / 'dialogues' / 'bram.json']:
+for path in sorted((source / 'dialogues').glob('a0_d9_*.json')):
     d = policy(json.loads(path.read_text()))
     d['key'] = path.stem
     d['npc'] = ref('npc', d['npc'])
     for role in d['roles'].values():
         role['npc'] = ref('npc', role['npc'])
     v['dialogues'][named('dialogue', path.stem)] = d
-bram = read('npcs/bram.json')
-bram.update(key='bram', room=ref('room', bram['room']))
-v['npcs'][named('npc', 'bram')] = bram
+for name in ('a_aldric_debt', 'maud_offer', 'maud_turn_in'):
+    v['dialogues'][named('dialogue', name)]['label'] = read(f'dialogues/{name}.json')['label']
 reaction = policy(read('reactions/d9_suppress_hounds.json'))
 reaction['key'] = 'd9_suppress_hounds'
 reaction['on']['fact'] = ref('fact', reaction['on']['fact'])

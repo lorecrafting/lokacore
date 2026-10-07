@@ -97,7 +97,7 @@ test('D9 typed control and cue reject missing evidence and malformed deadlines',
   }
 });
 
-// Breaks: adding Bram or cue content shifts fresh identities without updating the release pin.
+// Breaks: changing cast or cue content shifts fresh identities without updating the release pin.
 test('provisional v040 allocation pins starting identities', () => {
   const pin = read('protocol/fixtures/missing_child_v040_hash.json');
   const loaded = loadCartridge(

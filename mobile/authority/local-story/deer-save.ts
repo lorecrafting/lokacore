@@ -99,7 +99,14 @@ export function deerSave(world: World, db: Db, meta: Meta) {
           if (x.op !== 'population.control') return false;
           const before = x.expected?.suppression;
           const after = x.value?.suppression;
-          const regular = x.expected?.job_id;
+          const regular = ops.find(
+            (control) =>
+              control.op === 'population.control' &&
+              control.writer_group === x.writer_group &&
+              same(control.plan, x.plan) &&
+              control.expected?.job_id !== control.value?.job_id &&
+              jobs[control.expected?.job_id]?.due_time === before?.ends_at,
+          )?.expected?.job_id;
           const resume = before?.job_id;
           return (
             before?.ends_at != null &&

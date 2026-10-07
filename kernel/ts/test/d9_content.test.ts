@@ -41,7 +41,7 @@ test('all five terminal pairs project distinct cast prompts and Green descriptio
       },
     };
     const suffix = `${child}_${allegiance}`;
-    for (const npc of ['elspeth', 'bram', 'maud'])
+    for (const npc of ['elspeth', 'maud'])
       assert.equal(
         spokenBy(world, world.character, entity(world, 'npc', npc))?.prompt,
         `dialogue.d9_${npc}_${suffix}.prompt`,

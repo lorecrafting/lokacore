@@ -6,12 +6,20 @@ import { check } from '../src/runtime/invariants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import type { StateDelta } from '../src/contracts.gen.ts';
 
-const cases = JSON.parse(
+const priorCases = JSON.parse(
   readFileSync(
     new URL('../../../protocol/fixtures/population_composition.json', import.meta.url),
     'utf8',
   ),
 ).cases;
+
+const suppressionCases = JSON.parse(
+  readFileSync(
+    new URL('../../../protocol/fixtures/population_suppression.json', import.meta.url),
+    'utf8',
+  ),
+).cases;
+const cases = [...priorCases, ...suppressionCases];
 
 // Breaks: a slot is rewritten without its full prior row, or combat and population share one slot.
 test('population control and slot composition match independent literal rows', () => {
@@ -20,6 +28,16 @@ test('population control and slot composition match independent literal rows', (
     assert.deepEqual(validate('StateDelta', delta), [], c.id);
     const result = compose(c.state, delta);
     assert.deepEqual(result, c.expected, c.id);
+    if (c.counterfeit_success)
+      assert.equal(
+        check('delta_preconditions_hold', {
+          state: c.state,
+          delta,
+          result: c.counterfeit_success,
+        }),
+        false,
+        c.id,
+      );
     if (c.prefix_expected)
       assert.deepEqual(compose(c.state, delta, false), c.prefix_expected, c.id);
     assert.equal(check('delta_preconditions_hold', { state: c.state, delta, result }), true, c.id);
