@@ -159,7 +159,10 @@ test('E1 witnesses an opened dialogue and only its accepted choice', () => {
       .trim()
       .split('\n')
       .map((line) => JSON.parse(line));
-    assert.deepEqual(rows.filter((r) => r.kind === 'step').at(-1).obligations, [base]);
+    assert.deepEqual(rows.filter((r) => r.kind === 'step').at(-1).obligations, [
+      base,
+      `${base}/policy/root`,
+    ]);
     a.choose('accept');
     a.record({
       kind: 'finish',
@@ -169,7 +172,53 @@ test('E1 witnesses an opened dialogue and only its accepted choice', () => {
     });
     assert.deepEqual(
       replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations,
-      [base, `${base}/choices/accept`],
+      [base, `${base}/choices/accept`, `${base}/policy/root`],
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: an accepted all-policy dialogue is recorded without its required child predicates.
+test('E1 binds each required predicate of the selected Elspeth report dialogue', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-policy-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    {
+      case_id: 'rescued-prior',
+      source,
+      fault_schedule: [],
+    },
+  );
+  const base = '/dialogues/ashmere_missing_child@0.0.42:dialogue/a_elspeth_report';
+  const expected = [
+    base,
+    `${base}/policy/root`,
+    `${base}/policy/root/items/0`,
+    `${base}/policy/root/items/1`,
+  ];
+  try {
+    const observed: string[][] = [];
+    a.watch((before, after, command, decision) => {
+      const paths = witnessedObligations(before, after, command, decision);
+      if (paths.includes(base)) observed.push(paths);
+    });
+    search(a);
+    assert.deepEqual(observed, [expected]);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.deepEqual(
+      expected.filter((path) => !replay.obligations.includes(path)),
+      [],
     );
   } finally {
     a.close();

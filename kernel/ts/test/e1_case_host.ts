@@ -41,7 +41,7 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: bind only the reviewed dialogue/choice, modal scene and study_tracks witnesses;
+// ponytail: bind only reviewed dialogue/choice/policy, modal scene and study_tracks witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -59,10 +59,13 @@ export function witnessedObligations(
           choice.source.kind === 'dialogue' &&
           !before.state.choices?.[id],
       )
-      .map(
-        ([, choice]) =>
-          `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}`,
-      );
+      .flatMap(([, choice]) => {
+        const ref = choice.source;
+        const key = `${ref.cartridge_id}@${ref.cartridge_version}:dialogue/${ref.key}`;
+        const base = `/dialogues/${key}`;
+        const root = after.cartridge.dialogues?.[key]?.policy.root;
+        return [base, ...(root ? requiredPolicyPaths(root, `${base}/policy/root`) : [])];
+      });
   }
   if (p.type === 'choose') {
     const choice = before.state.choices?.[p.continuation_id];
@@ -94,6 +97,18 @@ export function witnessedObligations(
   return value(before, p.actor_id, fact) === false && value(after, p.actor_id, fact) === true
     ? ['/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0']
     : [];
+}
+
+function requiredPolicyPaths(node: unknown, path: string): string[] {
+  const policy = node as { op: string; items?: readonly unknown[] };
+  return [
+    path,
+    ...(policy.op === 'all'
+      ? (policy.items ?? []).flatMap((child, index) =>
+          requiredPolicyPaths(child, `${path}/items/${index}`),
+        )
+      : []),
+  ];
 }
 
 export function caseHost(

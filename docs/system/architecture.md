@@ -236,6 +236,10 @@ line's authored step. The first acknowledgement also witnesses the scene definit
 the final acknowledgement witnesses the structural `await_ack` and `end` steps only
 when the scene actually closes. Presentation-only dream scenes require separate
 choice/beat evidence and are not credited by this modal rule.
+An accepted `talk` also witnesses the selected dialogue's satisfied policy root.
+Under an `all` node, each child must hold and may be witnessed recursively; an
+`any` or `not` node does not credit its children without separate branch evidence.
+Rejected talk and merely offered dialogue actions witness no policy path.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
