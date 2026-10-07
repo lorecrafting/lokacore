@@ -41,7 +41,8 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: one reviewed consequence; other authored paths wait for their own literal witness.
+// ponytail: bind only the reviewed dialogue/choice and study_tracks witnesses here;
+// other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
   after: World,
@@ -49,8 +50,29 @@ export function witnessedObligations(
   decision: DecisionResult,
 ): string[] {
   const p = command.payload;
-  if (decision.kind !== 'accepted' || p.type !== 'perform' || p.action !== 'study_tracks')
-    return [];
+  if (decision.kind !== 'accepted') return [];
+  if (p.type === 'talk') {
+    return Object.entries(after.state.choices ?? {})
+      .filter(
+        ([id, choice]) =>
+          choice.status === 'pending' &&
+          choice.source.kind === 'dialogue' &&
+          !before.state.choices?.[id],
+      )
+      .map(
+        ([, choice]) =>
+          `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}`,
+      );
+  }
+  if (p.type === 'choose') {
+    const choice = before.state.choices?.[p.continuation_id];
+    return choice?.status === 'pending' && choice.source.kind === 'dialogue'
+      ? [
+          `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
+        ]
+      : [];
+  }
+  if (p.type !== 'perform' || p.action !== 'study_tracks') return [];
   const fact = {
     cartridge_id: 'ashmere_missing_child',
     cartridge_version: '0.0.42',

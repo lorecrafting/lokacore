@@ -220,6 +220,11 @@ Coverage names actual committed room visits, quest transitions/outcomes, resolve
 choices, scene beats/consequences and command paths. An offer or a definition count is not
 execution. Check literal terminal facts, all 57 declared room routes and every authored
 quest/choice/scene against the recorded uses, leaving unexecuted paths pending.
+For dialogue proof, a newly opened pending dialogue witnesses that dialogue's authored
+definition; only an accepted choice against that pending continuation witnesses its
+specific choice path. Rejected or merely offered choices remain pending. Replay derives
+these witnesses from committed commands and states, and requires their explicit receipt
+paths rather than accepting a coverage claim by itself.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:

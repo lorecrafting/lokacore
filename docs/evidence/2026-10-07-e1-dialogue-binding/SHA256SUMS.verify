@@ -1,0 +1,5 @@
+docs.log: OK
+focused-tests.log: OK
+new-test-mutant.log: OK
+old-suite-mutant.log: OK
+typecheck.log: OK

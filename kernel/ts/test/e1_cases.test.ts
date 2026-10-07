@@ -110,7 +110,7 @@ test('E1 binds only the witnessed study_tracks consequence after semantic replay
       [],
     );
     const replay = replayCase(bytes, text, source);
-    assert.deepEqual(replay.obligations, [path]);
+    assert.equal(replay.obligations.includes(path), true);
     const pending = gaps(loaded, coverage(), new Set(replay.obligations)).authored_obligations;
     assert.equal(pending.includes(path), false);
     assert.equal(
@@ -130,6 +130,46 @@ test('E1 binds only the witnessed study_tracks consequence after semantic replay
         true,
       );
     }
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: offering dialogue choices is mistaken for selecting them, or the accepted choice is lost.
+test('E1 witnesses an opened dialogue and only its accepted choice', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-dialogue-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    {
+      case_id: 'rescued-prior',
+      source,
+      fault_schedule: [],
+    },
+  );
+  const base = '/dialogues/ashmere_missing_child@0.0.42:dialogue/elspeth';
+  try {
+    a.invoke('choose_ancestry', [], { ancestry: 'fen_born' });
+    a.invoke('elspeth', [a.entity('npc', 'elspeth')]);
+    const rows = readFileSync(join(dir, 'case.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    assert.deepEqual(rows.filter((r) => r.kind === 'step').at(-1).obligations, [base]);
+    a.choose('accept');
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    assert.deepEqual(
+      replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations,
+      [base, `${base}/choices/accept`],
+    );
   } finally {
     a.close();
     rmSync(dir, { recursive: true });
