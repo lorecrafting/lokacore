@@ -184,7 +184,8 @@ Keep one PM writer across worktrees/clones and update statuses at reviewed merge
 `br` run from any worktree reads and writes the integration checkout's database and
 JSONL (`br where` shows it), so commit tracker changes from that checkout, not a slice
 branch. A Claude Code session starts with `bin/session_status.sh` (in-progress, ready
-and blocked issues plus open PRs), so Beads, not a memory file, holds current status.
+and blocked issues, open PRs, and report-only drift from each issue's `external_ref` PR URL:
+in-progress with the PR merged or closed, open PR with no issue, closed with the PR open), so Beads, not a memory file, holds current status.
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to
