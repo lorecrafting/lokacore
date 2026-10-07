@@ -80,7 +80,8 @@ records its focused baseline, corrected tests and six independent red controls.
   `-wisp-` IDs fail. The pre-commit hook reads the staged export; CI lint and
   `check_all` read the checkout. `bin/beads_red_controls.sh` accepts a valid
   supplemental task and refuses both path classes, a missing or duplicate slice
-  and a reserved ID. The check needs no `br` binary.
+  and a reserved ID, and checks the session-start PR drift report
+  (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
   changes confined to `mobile/` outside `mobile/authority/local-story/`, plus metadata;
