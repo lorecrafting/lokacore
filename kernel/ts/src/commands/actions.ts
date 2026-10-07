@@ -52,6 +52,9 @@ export type Offered = {
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
 
+const needsAncestry = (world: World, actor: CharacterId) =>
+  !!world.cartridge.ancestries && !characterChoice(world, actor);
+
 /** `set` with contribution `c` applied by one of ADR-016's operations. */
 export function apply(set: ActionSet, op: ActionContribution['op'], c: ActionSet): ActionSet {
   const keep = (inC: boolean) =>
@@ -82,11 +85,7 @@ function engine(world: World): ActionSet {
           verb !== 'expedition' &&
           !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
-      .filter(
-        ([verb]) =>
-          verb !== 'choose_ancestry' ||
-          (!!world.cartridge.ancestries && !characterChoice(world, world.character)),
-      )
+      .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
@@ -129,8 +128,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
  * removes them; combat filters the result afterward), which lists never renders directly.
  */
 export function composed(world: World, actor: CharacterId): ActionSet {
-  if (world.cartridge.ancestries && !characterChoice(world, actor))
-    return { choose_ancestry: engine(world).choose_ancestry };
+  if (needsAncestry(world, actor)) return { choose_ancestry: engine(world).choose_ancestry };
   if (scene.running(world, actor)) return scene.modal();
   const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
@@ -191,6 +189,8 @@ export function refusal(
   action?: Key,
   set?: ActionSet,
 ) {
+  const choiceGated = payload.type !== 'choose_ancestry' && payload.type !== 'elapsed';
+  if (choiceGated && needsAncestry(world, world.character)) return 'invalid_state';
   if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&
