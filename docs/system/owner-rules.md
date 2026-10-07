@@ -200,9 +200,10 @@ and not repeated here.
 ## Process
 
 - During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+- Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
-- Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+- Keep review findings and dispositions as cross-referenceable history while their work is open ([closed work](../decisions/owner-decision-move-forward-2026-10-07.md)); promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - Web stays active through game completion: C2 has focused fresh Book proof, browser fatal/Restart remains due by the E3 browser walk, and the preserved terminal save has twice-reopened evidence after the separate Web fix; native verification follows the existing pause ([record](../decisions/owner-decision-c2-staged-browser-proof-2026-10-05.md)).
 

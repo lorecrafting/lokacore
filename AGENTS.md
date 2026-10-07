@@ -14,8 +14,8 @@ commit `997a7a8` (`docs/rewrite-v3/`, `r1-spike/`).
   If they disagree, stop and ask ([known differences](docs/system/DIFFERENCES.md)).
 - [Owner rules in force](docs/system/owner-rules.md): a new decision adds its record to
   [docs/decisions/](docs/decisions/README.md) and a line there.
-- [docs/archive/](docs/archive/README.md): old specs, decisions, reviews and roadmap rows.
-  History, read only when a task needs it.
+- [docs/archive/](docs/archive/README.md): cited spec packet, in-force older decisions.
+  Closed work keeps only lessons and permalinks ([move forward](docs/decisions/owner-decision-move-forward-2026-10-07.md)).
 
 ## Architecture decisions already made (do not reopen silently)
 
