@@ -1,0 +1,6 @@
+report.json: OK
+mauds-cellar.jsonl: OK
+rescued-prior.jsonl: OK
+cli.log: OK
+old-suite-green.log: OK
+red-control.log: OK
