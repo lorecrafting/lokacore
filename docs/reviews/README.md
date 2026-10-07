@@ -570,4 +570,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [E1 service GameView envelope](2026-10-06-e1-gameview-envelope-review.md): initial `ccb30248`, CHANGES REQUIRED; final `520a747d`, **APPROVE**, E1-ENVELOPE-R1/R2 closed. Service7/7, typecheck/size and existing envelope check pass; actor/nil removal and permissive-nil mutants fail; selected-v042 seed2079 passes 61 steps. Full E1 proof remains pending.
 
 - [Post-D10 architecture maintenance record](2026-10-06-post-d10-maintenance-review.md): independent docs-only APPROVE at `eeef28b6`; #265/#269 attribution, evidence and bounded post-E3 risks verified; no new audit or implementation claimed.
+- [E3 evidence path redaction](2026-10-06-e3-evidence-path-redaction-review.md): source `034849b0cc104c2c75b11247f51d1dbb826eccff`, independent APPROVE; two nested assertion values sanitized, historical mismatch attribution retained, all 55 top-level hashes verified and controlled nested-path check exits 1.
 - [Post-D10 Beads follow-ups](2026-10-06-post-d10-beads-followups-review.md): exact source `9ac3fa89`, independent **APPROVE**, no findings; four evidence-linked, triggered tasks depend on E3, all 33 Chapter 1 rows remain unchanged, and the focused export check passes.
+
+- [Chapter 1 one-time documentation audit](2026-10-06-chapter-one-docs-audit-review.md): `efcc0df`, fresh independent docs-only APPROVE; six open findings/evidence and exclusions verified; repairs and E1–E3 remain open.
+- [Active system summaries](2026-10-06-e3-active-summaries-review.md): source `594d5a7e`, CHANGES REQUIRED; scoped fix `f47591f6`, independent **APPROVE**, E3-SUM-1 closed; installed `real_elapsed` policy is distinguished from future app clock/resume integration.

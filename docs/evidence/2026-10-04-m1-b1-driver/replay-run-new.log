@@ -19,7 +19,7 @@ test at mobile/authority/local-story/observe.test.ts:231:1
 ✖ a real committed elapsed then ordinary local trace replays identically with header run preflight (314.182583ms)
   AssertionError [ERR_ASSERTION]: The input did not match the regular expression /run differs from trace header/. Input:
   
-  'replay differs from /var/folders/hm/hr2h38yj3yvd3mxh5_dmhv940000gn/T/loka-elapsed-replay-hlEgaJ/trace.jsonl\n'
+  'replay differs from [local path]\n'
   
       at TestContext.<anonymous> (file://[private-path]:273:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -30,7 +30,7 @@ test at mobile/authority/local-story/observe.test.ts:231:1
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: true,
     code: 'ERR_ASSERTION',
-    actual: 'replay differs from /var/folders/hm/hr2h38yj3yvd3mxh5_dmhv940000gn/T/loka-elapsed-replay-hlEgaJ/trace.jsonl\n',
+    actual: 'replay differs from [local path]\n',
     expected: /run differs from trace header/,
     operator: 'match',
     diff: 'simple'

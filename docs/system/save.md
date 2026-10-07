@@ -820,7 +820,7 @@ committed command identity, never inferred from an unrelated latest receipt.
 
 ## D2 book knowledge and Read recovery
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
+Installed [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
 ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
 cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
 historical Read command/receipt: actor/body, original item and pinned readable/topic

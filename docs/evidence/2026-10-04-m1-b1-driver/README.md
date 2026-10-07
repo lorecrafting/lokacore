@@ -34,6 +34,8 @@ B2 still owns actual lifecycle/UI/sampler consumption. No native compatibility/d
 
 Retained outputs are redacted before hashing. `SHA256SUMS` and its verification are beside the artifacts; neither hashes itself. Existing `docs/evidence/** -whitespace` protects their bytes.
 
+The retained `replay-run-new.log` is a sanitized correction to the original capture, not a byte-for-byte copy of it: two nested assertion values had local temporary paths replaced with `[local path]`. Its assertions still record the same replay mismatch. The checksums below cover this repaired retained evidence.
+
 ## Final publication check correction
 
 The first normal pre-push passed the nonmobile checks and failed the existing smoke test that still used v2 as an unsupported future save. Its input now uses v3, preserving the literal unsupported/no-reset assertions; the targeted case passes (`future-format-restored.log`). Remaining v2 test mentions are actual supported-format expectations. `prepush-first-failure.log` retains the real failure; a normal final pre-push rerun is required. No hook bypass or runtime relaxation was used.
