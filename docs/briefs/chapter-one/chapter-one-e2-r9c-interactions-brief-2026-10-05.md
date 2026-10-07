@@ -1,16 +1,16 @@
 # E2 — Compact R9C interaction cartridge
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+> **Publication note:** Re-pinned read-only on 2026-10-06 against published main `005df47c` after A–D merged. E1 runner/policy acceptance remains open. Check the [current roadmap](../../ROADMAP.md) and re-pin E1 before assignment; this brief does not authorize implementation or certify proof.
 
-Provisional PM brief, 2026-10-05. **Provisional until full mechanics merge; not source GO, an implemented cartridge, a gate pass or native proof.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Runner/policy dependency: [E1 repeatable certification](chapter-one-e1-r9-certification-brief-2026-10-05.md).
+Provisional PM brief, 2026-10-05; source re-pin 2026-10-06. **A–D source is installed; E1 remains a dependency. Not source GO, an implemented cartridge, a gate pass or native proof.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Runner/policy dependency: [E1 repeatable certification](chapter-one-e1-r9-certification-brief-2026-10-05.md).
 
 ## Outcome, branch and dependency pin
 
 Suggested branch: `proof/e2-r9c-interaction-cartridge`; developer uses an isolated worktree. Build a small permanent, synthetic cartridge whose legal scenarios prove that the chapter's implemented mechanisms compose. It is intentionally unpolished and has separate identity/save/transcripts from the real chapter. Reuse the same compiler, loader, kernel, local authority, Book presenter and E1 runner; never build a second game model to make proof easier.
 
-Final read-only inspected baseline: clean PM `f467f75b1e5a68462e61987f078508dafcf97a42`, production chapter v012/API1.11; ROADMAP records PR190 rescue merged. Final R9C cartridge ID/version/hash/allocated IDs, engine revision, schema/policy revisions, E1 merge and E2 source/PR remain **null**. Suggested source directory `cartridges/r9c_interactions/` is a proposal, not an existing cartridge. Re-pin actual installed feature forms after A–D and E1 merge; collect minimal cross-feature regression inputs during those consumers rather than postponing their tests.
+Read-only inspected baseline: clean published main `005df47c` ([#269](https://github.com/lorecrafting/lokacore/pull/269)), with all A1–D12 source installed. The [current bundled chapter](../../system/cartridge.md#current-bundled-chapter) owns the v042/API1.37 content hash and allocation pins; its actual `cartridge.json` requires content schema1/rule IR1. Supporting loader dependency closure [#264](https://github.com/lorecrafting/lokacore/pull/264), save recovery [#265](https://github.com/lorecrafting/lokacore/pull/265), and paired job-completion invariant [#269](https://github.com/lorecrafting/lokacore/pull/269) are included in this inspected engine baseline. These source fixes do not close E1. Final R9C cartridge ID/version/hash/allocated IDs, frozen execution engine/schema/lock/check identities, E1 runner path/API/policy/report revision and merge, E2 source/PR, receipts and source GO remain **null** until inspected at the E1 handoff and E2 execution. Suggested source directory `cartridges/r9c_interactions/` remains a proposal. Re-pin the then-current engine and E1 merge before assignment; the synthetic artifact has its own independent identity.
 
-E1 provides exact-candidate selection and conservative applicability; A3 supplies acknowledged scene/story-point consequences; B/C/D supply real commerce/liquid/light/status/training/population/behavior/overlay/transport forms. Only merged features with named interactions enter this cartridge. E2's independent artifact does not inherit the production chapter hash or its content acceptance. E3 later re-pins E2's exact engine/check revision and reruns applicable evidence against its frozen chapter candidate.
+E1 provides exact-candidate selection and conservative applicability; A3 supplies acknowledged scene/story-point consequences; B/C/D supply real commerce/liquid/light/bleed/training/population/behavior/dream/transport forms. Only installed forms with named interactions enter this cartridge; a locked capability alone does not establish exercised coverage. E2's independent artifact does not inherit the production chapter hash or its content acceptance. E3 later re-pins E2's exact engine/check revision and reruns applicable evidence against its frozen chapter candidate.
 
 ## Governing clauses
 
@@ -33,24 +33,68 @@ Read/reuse `lib/loka/content/`, kernel loader/step/gameView/target-resolution/in
 
 Out of scope: production Ashmere copy/quests/parameters, native builds or save/preview operations, engine features created just for coverage, LokaScript, spatial InstancePlan, ServiceJob escrow/queue, party/Realm/cross-authority work, store/accounts, synthetic mobile UI, a generic behavior tree or search generator. No new multi-actor command admission merely to satisfy a synthetic actor example. Preserve the existing supported actor model and exercise unauthorized/foreign actor refusal at its real boundary.
 
-## Minimal interaction matrix
+## Installed forms and minimal scenario proposal
 
-Every row uses a few controlled entities/rooms/commands, literal expected results and the later consumer that reveals the break. Synthetic labels are sufficient. Not every capability needs a standalone new test; each scenario must cross a meaningful boundary.
+The re-pin inspected the actual v042 manifest and source declarations, the loader's
+`lockDiagnostics`, simulator corpus argument and authority entrypoint alongside the
+active system clauses. The [current bundled chapter](../../system/cartridge.md#current-bundled-chapter)
+and linked owning clauses retain exact chapter values; synthetic values must be authored
+and independently checked when its artifact is built.
 
-| Interaction | Observable result and plausible regression |
+- Actor/scope: one trusted player admits commands; bound NPCs participate in consequences.
+  Exercise foreign actor refusal and exact participant/target binding, without adding a second command actor.
+- [B9](../../system/mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract): an anchored `presentation_only` checkpoint with one saved choice and final acknowledgement,
+  not a spatial overlay. No overlay-owned objects or copied inventory exist. Ordinary elapsed work continues.
+- [C5](../../system/mechanics.md#c5-hound-bleeding-and-bandage-selected-contract): actual hound-produced bleeding, generation-bound tick/expiry jobs and exact directly held Bandage.
+  Generic `status@1` is not locked by the chapter and is not selected as a new interpreter.
+- [C3/C4/D7/D8](../../system/mechanics.md#c3-bounded-living-hounds-selected-contract): fixed population slots/generations, two-room ordinary wander, bounded pack response,
+  exact deer sight jobs and allowlisted dropped-coin crow transport. D8 preserves the original nest
+  and item identities, legal corridor legs, fallback/Shoo/corpse custody and bounded return;
+  it does not supply general scavenging. C2 patrol and C6 expedition retain different typed attempt rows.
+- [B8](../../system/mechanics.md#b8-mauds-immediate-services-selected-contract)/[D1](../../system/mechanics.md#d1-paid-ferry-and-sedge-lesson-selected-contract)/[D12](../../system/mechanics.md#d12-practical-skill-consumers-selected-contract): immediate meal/drink/entitlement services, paired ferry routes with owned-corpse recovery,
+  and learned skills whose qualification is derived at use. No service queue/escrow or persistent qualification grant.
+
+Propose **one cartridge and seven ordered scenario families**, sharing entities and legal
+snapshots where useful. These are planning inputs, not executable scenarios or coverage receipts.
+Each variant must name its break and use literal expected state/result/RNG; do not create
+seven separate worlds or a generic matrix interpreter.
+
+| Family | Observable interaction and later consumer |
 |---|---|
-| Actor/scope + typed consequence | Two bound roles with explicit scopes; allowed player command touches only its scoped row/target. Foreign command actor is refused without mutation. A reaction uses its committed actor/target bindings; literal non-target row stays unchanged. Detect using the world's player/nearby role instead of the bound participant. |
-| Text ambiguity + touch identity + stale invocation | Two matching nouns return canonical ordered candidates; distinct cards choose the exact different targets. A touch/text command for the same selected identity has equal domain result. A still-offered action survives elapsed redraw via the shared client contract; departed/changed-target/scene-line identity refuses. Detect picking the first string match or accepting a consumed continuation. |
-| Exact custody + load/container admission + reciprocal barrier | Move one item through player, authored receptacle and another legal holder, then unlock/open/traverse both faces. Unique ownership, mass and barrier state stay coherent across refusal and retry. Detect a missed source debit, brass-key-like non-container admission or one-sided barrier update. |
-| Quest fork + causal reaction + scene-end report | Fork from one valid common snapshot into mutually exclusive literal terminal outcomes. Distinct scoped reactions/scene consequences follow each; duplicate events/commands cannot duplicate reward or report. Final acknowledgement owns export/story point; no early export. Detect wrong ordering, another branch switch, false credit or render-triggered consequence. |
-| Scoped dream overlay + elapsed/custody | Enter the actual overlay subset, choose its bounded branch, close/reopen before acknowledgement and exit legally. World elapsed jobs continue; no overlay entity/location/item leaks. Detect resolving Rest from menu opening or exporting an overlay-owned object to normal space. No spatial instance is invented. |
-| Due jobs + behavior conflict + follower death | Use merged arbitration on a tiny legal schedule/follow/hostility case with exact roles and pending generation. Due jobs re-read prior committed changes; departed/dead actors cannot attack or grant route credit. Player death separates a follower and the legal recovery/rejoin path remains usable. Detect stale job reads, wrong follower identity or duplicate assist turns. |
-| Spawn provenance + population cap + loot/scavenging | Spawn/kill/reopen/respawn one bounded supported population; scavenger acquires an eligible dropped item and yields reachable retrieval. Count/provenance/loot remain literal and bounded; protected quest/corpse items retain eligibility rules. Detect respawning a second live origin or creating loot on replay. |
-| Immediate money/service + item/liquid/light conservation | Buy/use/refill a controlled real item, pour between supported holders and make one paid transport/service. Payment, stock/custody/liquid/fuel state commit together; carrying refusal leaves all unchanged. Retry does not charge/drink/refill twice; return/corpse access is available. Detect source quantity/coin debit omitted or service relocation before commit. |
-| Skill qualification + harm/status + RNG/clock | Literal unlearned, learned-unqualified and qualified inputs exercise the actual skill-dependent effect, a real status producer and its cure. Record exact conditional draws and due boundary. Rejection changes no RNG; accepted failed roll advances once. Detect extra draw, missing qualification or stale expiry after cure. |
-| Receipt fault + later cross-mechanic consumer | Fault one transaction that changes at least two domains, then reopen through the real loader and execute its dependent action. Observe all-prior or all-next, one receipt/reward/report, no false fresh narration. Detect partial cross-domain durability/adoption or receipt replay after freshness. |
+| Identity, custody and trade | Two matching nouns produce canonical candidates; touch chooses each exact identity. Bound NPC reward, Put/carry refusal, reciprocal barrier and learned/qualified Haggle quote compose. Later Take/traverse/Read/Where/Knock consumes custody, knowledge and barrier state; changed target/quote refuses without mutation. Include a still-offered action surviving elapsed redraw under the shared client contract. |
+| Terminal fork and final acknowledgement | Fork one common snapshot into two mutually exclusive terminal outcomes, with scoped reactions and bound modal Continue. Only final acknowledgement writes memory/story point/report. Reopen/replay cannot switch outcome, duplicate credit or accept a consumed line. |
+| Paid Rest, dream, liquid and light | Pay entitlement, accept Stand→Rest, close the checkpoint, settle elapsed jobs, return/resume, choose and acknowledge. Supported Fill/Pour/Drink/Refuel preserve literal quantities; neither payment/menu nor dream presentation pauses time or grants early dream credit. |
+| Hound combat, bleed, escort and expedition | Exact current hound/pack jobs re-read committed prefixes. Unlearned/unqualified/qualified Bandage and stale effect generations exercise actual C5. Player death separates escort and fails expedition; legal recovery/rejoin/restart stays usable and grants no stale route credit. Include a real conditional draw with literal state: rejected input draws none, accepted failed roll consumes its prescribed draw. |
+| Patrol and deer job ordering | Leader-bound patrol checkpoint credit and departure suppression compose with schedule work. Exact deer sight/combat/population equal-time continuations retain ordinary writer conflicts and the merged paired-job completion invariant. Later movement/combat proves no stale actor attack or duplicate credit. |
+| Crow provenance and retrieval | Drop the allowlisted original item; Take may cancel acquisition. Exercise legal deposit or closed/moved/full-nest fallback, Shoo/Attack release, return, death/replacement and retrieval. Living slots stay bounded; no replay mints loot, credits player acquisition from crow custody or loses the original identity. |
+| Skill, water and terminal consumption | Swim acquisition versus current qualification/load, underwater deadline/death, paired paid/free transport and exact owned-corpse recovery compose. Finite careful Harvest/exchange/Eat retain IDs. Later movement/inventory proves no new loot, consumed-item reuse or inaccessible recovery route. |
 
-At re-pin, each row either names its exact installed source form and literal scenario or has a documented nonapplicability reason based on the frozen artifact. Unknowns block. Select the smallest combined cases that cover these interactions; do not create ten near-identical fixture worlds or a generic matrix interpreter. Parameters come from the synthetic cartridge, not new kernel literals.
+Unauthorized and stale invocation checks use existing boundary helpers. Representative
+cross-domain commits from these families receive the real transaction-fault schedule; every
+lawful committed intermediate reopens through the actual loader before its next consumer.
+Where the focused suite already kills a mutant, link that receipt and retain only the
+standing cartridge integration scenario. Unused capability locks do not count as coverage.
+
+## E1 handoff dependency and remaining unknowns
+
+Before E2 assignment, E1 must provide its merged runner path/API, policy/check revision and
+report format, explicit frozen-artifact selection, used-form/transitive-dependency applicability,
+and resolvable invariant/fault receipts. The actual loader requires effective `fact@1` for
+position/scene; v2 compilation also supplies resource/schedule. The existing simulator accepts
+an explicit `cartridges` argument; its default historical fixture glob does not select this
+synthetic candidate. Playback alone does not re-check a failed invariant.
+
+Candidate bytes/hash/allocation, engine SHA, schema/locks, policy/check revision and
+host/toolchain/evidence digests must remain distinct. Browser receipts name the actual adapter;
+real SQLite fault receipts remain separate. E1 must disposition the [baseline audit follow-up](../../ROADMAP.md#baseline-audit-follow-up)
+and planning applicability omissions. Missing obligations cannot become skipped green rows.
+
+Synthetic identity, authored parameters/literal answers, shared topology, E1 interfaces,
+browser storage adapter and the reachable interaction mutant not already caught by focused
+checks remain **null**. Unknown applicability blocks that row. Native/Hermes obligations remain
+named pending under the mobile pause. Estimated lift is **3–5 developer days plus 1–2 review/fix
+days**, assuming E1 exposes these existing-tool hooks and no mechanic defect is discovered;
+this is a PM estimate, not an execution receipt or source GO.
 
 ## Acceptance and red controls
 
@@ -72,4 +116,4 @@ Stop if a row requires an unimplemented future feature, admits a second command 
 
 Handoff includes exact synthetic artifact and source/check identities, scenario/coverage table, red-control repro/restore receipts, actual local/CI results, self-review disposition and deferred Hermes/native rows. Its completion claim is **applicable R9C headless/browser interaction evidence**, not full host certification or R10 content completion.
 
-Planning self-review: Ponytail retained one compact cartridge and concrete scenarios over installed mechanics; no coverage-driven future features, second actor implementation or new interpreter. Correctness pass checked independent oracles, legal intermediate reopen, real fault branches, production/synthetic identity and native limits. This author check is not independent implementation review.
+Planning self-review (2026-10-06 re-pin): Ponytail retained one compact cartridge and seven concrete scenario families over installed mechanics; no coverage-driven future features, second actor implementation or new interpreter. Correctness pass checked independent oracles, legal intermediate reopen, real fault branches, production/synthetic identity and native limits. This author check is not independent implementation review.
