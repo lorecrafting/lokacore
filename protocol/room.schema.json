@@ -632,7 +632,8 @@
           "answered": "knock.chapel.answered",
           "unanswered": "knock.chapel.unanswered"
         }
-      ]
+      ],
+      "description": "A local barrier face’s authored answer when the named NPC is in the destination room, and its no-answer text."
     }
   }
 }

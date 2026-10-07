@@ -2571,7 +2571,8 @@
           "y": 0,
           "z": 0
         }
-      ]
+      ],
+      "description": "An actor’s visited room with its title and static drawing coordinates."
     },
     "KnownConnectionView": {
       "type": "object",
@@ -2598,7 +2599,8 @@
           "to": "aaaaaaaa-0000-4000-8000-000000000002",
           "direction": "north"
         }
-      ]
+      ],
+      "description": "A known directed exit between visited rooms; carries no live traversal availability."
     },
     "KnownNpcView": {
       "type": "object",
@@ -2620,7 +2622,8 @@
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
           "name": "npc.aldric.short"
         }
-      ]
+      ],
+      "description": "An exact NPC previously observed by this actor, available for Where targeting."
     },
     "MapView": {
       "type": "object",
@@ -2656,7 +2659,8 @@
           ],
           "links": []
         }
-      ]
+      ],
+      "description": "The actor’s visited places and connections between visited endpoints."
     }
   }
 }

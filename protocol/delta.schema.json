@@ -2369,7 +2369,8 @@
           "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
           "room_id": "aaaaaaaa-0000-4000-8000-000000000001"
         }
-      ]
+      ],
+      "description": "One actor’s committed room visit; keyed by actor and room."
     },
     "ObservedNpc": {
       "type": "object",
@@ -2401,7 +2402,8 @@
           "room_id": "aaaaaaaa-0000-4000-8000-000000000001",
           "at": 64800
         }
-      ]
+      ],
+      "description": "One actor’s latest committed visible observation of an exact NPC, room and logical time."
     }
   }
 }

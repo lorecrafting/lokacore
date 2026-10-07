@@ -270,7 +270,8 @@
           "room_id": "aaaaaaaa-0000-4000-8000-000000000001",
           "at": 64800
         }
-      ]
+      ],
+      "description": "Where’s visibility-gated here result, saved last observation, or unknown result without location evidence."
     }
   }
 }
