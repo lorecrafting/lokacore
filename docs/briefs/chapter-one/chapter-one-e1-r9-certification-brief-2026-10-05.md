@@ -105,3 +105,5 @@ Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../.
 Disjoint path author checkpoint: [legal Night route after the published checker fix](../../evidence/2026-10-07-e1-night-published/README.md), preserving the original failure receipt; its independent review and registration are complete. E1 certification remains pending.
 
 [Integrated Maud/Night routes and reviewed witness rules](../../evidence/2026-10-07-e1-integrated-routes/README.md) passed 18 clean-source SQLite cases and replays; 509 authored paths remain pending.
+
+[Accepted recipe and required-policy binding](../../evidence/2026-10-07-e1-recipe-policy-binding/README.md) passed 18 clean-source cases and replays; 29 recipe paths and 438 authored paths remain pending on its isolated source.

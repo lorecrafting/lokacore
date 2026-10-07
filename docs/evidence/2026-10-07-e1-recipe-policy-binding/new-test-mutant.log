@@ -1,0 +1,44 @@
+(node:72975) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ E1 binds the exact study_tracks recipe and required policy from committed performance (531.954959ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 921.508709
+
+✖ failing tests:
+
+test at kernel/ts/test/e1_cases.test.ts:142:1
+✖ E1 binds the exact study_tracks recipe and required policy from committed performance (531.954959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+  -     '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks',
+  -     '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root',
+  -     '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/0',
+  -     '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/1',
+        '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0'
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://[local-path]:165:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0' ] ],
+    expected: [ [ '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks', '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root', '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/0', '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/policy/root/items/1', '/recipes/ashmere_missing_child@0.0.42:recipe/study_tracks/outcomes/success/sequence/0' ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
