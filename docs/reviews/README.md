@@ -4,6 +4,8 @@
 - [E1 resolved quest objective witness](2026-10-07-e1-quest-objective-binding-review.md): source `f8a89719`, independent **APPROVE**, no findings; accepted unresolved-to-resolved objective binding, five Maud predicates, replay and witness interactions checked. Focused tests 8/8; report remains pending with 395 authored paths (14 quest paths) open; final combined capture and E1 certification remain pending.
 # Independent reviews
 
+- [E1 integrated provisional checkpoint risk review](2026-10-07-e1-integrated-checkpoint-risk-review.md): evidence head `3c5d61db`, recorded source `a10a455e`, independent bounded **APPROVE**, no findings; fourteen focused checks, three retained replays, hashes/privacy and exact 407-witness/241-gap inventory verify. Full gate, final 10k review and E1 certification remain separate.
+
 - [E1 dialogue choice fact effects](2026-10-07-e1-dialogue-choice-effects-review.md): source `d344aaaa`, evidence `ca651a4d`, independent **APPROVE**, no findings; eleven focused cases, distinct adjustment red control, selected replay/negative probes and hashes pass. E1 remains pending with 243 authored paths open.
 
 - [E1 ending-specific conversations](2026-10-07-e1-epilogue-conversations-review.md): source `717c298c`, integrated unchanged at `2340ac2c`/`ac503823`, combined evidence `07c0120e`, independent **APPROVE**, no findings; five ending routes and omitted-Sedge red control verified, selected retained replay/hashes pass, all 16 D9 dialogue/leave variants bound. E1 remains pending with 273 authored paths open.
