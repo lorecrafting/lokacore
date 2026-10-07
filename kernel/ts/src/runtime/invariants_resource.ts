@@ -94,9 +94,10 @@ export function resourceAfter(op: Any, s: Any, row: Any, horizon: number): Json 
     op.to > spec.maximum
   )
     return undefined;
+  const every = spec.gain_every ?? 3600;
   const value = Math.min(
     spec.maximum,
-    before.value + spec.gain * (Math.floor(now / 3600) - Math.floor(before.at / 3600)),
+    before.value + spec.gain * (Math.floor(now / every) - Math.floor(before.at / every)),
   );
   return value === op.from ? { value: op.to, at: now } : undefined;
 }
