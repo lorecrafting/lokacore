@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [E3 authority CI scope correction](2026-10-06-e3-authority-ci-scope-review.md): exact `cb77af0f`, independent **APPROVE**, no findings; focused controls pass, original unsafe-skip classifier fails the new control, controlled pre-push selects app/authority lanes correctly. No E3 certification claim.
 - [E3 authoring navigation](2026-10-06-e3-authoring-navigation-review.md): exact source `6f374d06`, independent **APPROVE**, no findings; source map, spawn-template placement wording, Chapter 1 and schema links checked against current code; docs check passes.
 
 - [Beads audit follow-ups independent review](2026-10-06-beads-audit-followups-extra-review.md): exact source `18d0c847`, **APPROVE**, no findings; complete export, shipped controls, 13 independent structural probes, distinct duplicate-slice mutation and docs checks pass. PM-owned evidence links and all 33 required slices preserved.
