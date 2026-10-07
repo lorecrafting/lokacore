@@ -8,11 +8,11 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable for E1–E3 gate closures. | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
-reviewer on the highest Opus; Fable reviews only the E1–E3 gate closures. Codex and
+reviewer on the highest Opus; Fable reviews only the E2–E3 gate closures and the release-candidate audit. Codex and
 other cross-vendor reviews are retired. Every `Agent` spawn names its `model`:
 
 | Work | Claude Code default | Escalate when |
@@ -305,7 +305,7 @@ silently closes unfinished work.
 ## Milestone gate
 
 A gate is slim ([owner decision](decisions/owner-decision-slim-gates-2026-10-02.md)): the owner's
-play or test when the stage has something touchable; one fresh Opus audit (Fable for E1–E3) of the stage's riskiest
+play or test when the stage has something touchable; one fresh Opus audit (Fable for E2–E3) of the stage's riskiest
 code; and a short checklist, checked by one reviewer without narrative (no second review of a docs-only gate PR). The checklist: every spec proof linked, every carry in a stage row,
 and the docs tidy pass over the docs changed during the milestone (not `docs/archive/`, nor review
 or decision records, which are history): a fact stated
