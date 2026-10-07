@@ -4,8 +4,9 @@
 # ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
 scope=metadata
 seen=0
+deleted=0
 while read -r _ local _ remote; do
-  case $local in *[!0]*) ;; *) continue ;; esac          # branch deletion
+  case $local in *[!0]*) ;; *) deleted=1; continue ;; esac # branch deletion
   seen=1
   case $remote in
     *[!0]*) ;;
@@ -16,6 +17,7 @@ while read -r _ local _ remote; do
   esac
   [ "$(bin/ci_scope.sh "$remote" "$local" code)" = skip ] || scope=full
 done
+[ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
 [ "$seen" = 1 ] || scope=full
 [ "$scope" = metadata ] && exec bin/check_all.sh --metadata
 exec bin/check_all.sh

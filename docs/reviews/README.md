@@ -580,3 +580,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Chapter 1 documentation repair dispositions](2026-10-07-chapter-one-docs-repairs-review.md): `15ead59e`, fresh independent docs-only APPROVE; six merged/local repairs verified, archive digests match supplied originals, 30/33 and E1–E3 remain open.
 
 - [Retire board dashboards for Beads Rust](2026-10-07-retire-board-review.md): PR #289 at `902ebb57`, independent docs/config-only **APPROVE**; no remaining references, JSONL changes only E1 notes/`updated_at`, notes match draft #288.
+
+- [Skip pre-push checks for deletion-only pushes](2026-10-07-pre-push-deletion-only-review.md): PR #290 at `12fe9ab6`, independent config-only **APPROVE**, no findings; stub matrix (deletion-only, empty, update, mixed both orders) under dash and sh, two guard mutants red.
