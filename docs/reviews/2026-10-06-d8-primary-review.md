@@ -92,3 +92,40 @@ ordinary room Take, and truthful refusal/unavailability afterward. Retain the
 observations on the isolated browser run, then obtain scoped primary closure and
 checks green on the exact final merge head. Native work stays paused; owner save
 and deferred blur remain untouched.
+
+
+## Final scoped P4 browser review — APPROVE
+
+Exact candidate reviewed: `e947251ec514344a02a46e242c663503e1695299`.
+Scope: `mobile/app/tests/crows.e2e.ts`, its retained browser report/trace and
+old-suite/red/restored-green results. Earlier P1–P3 and P4 save dispositions stand.
+
+**D8-P4 CLOSED; overall APPROVE.** The test uses ordinary Book actions to obtain
+the sole authored coin and Drop it at Green. The inspected report and trace show
+the literal carrier visible before and after a real page restart, then actual
+Shoo, committed release narration, disappearance of that crow's Shoo offer,
+ordinary room coin with no carrying offer, the same state after another restart,
+and ordinary Take followed by inventory visibility. This satisfies the remaining
+held-refresh and successful/refused-projection obligations. Earlier real-clock
+nest recovery/full-fallback evidence remains separate.
+
+Inspected retained runner report: selected crow case passed,8975ms. Inspected
+trace events corroborate the restart and locator interactions/assertions rather
+than merely accepting the summary log. Report provenance names `41d25517`; the
+candidate differs from that commit in application/kernel scope only by this new
+crow test. Retained trace SHA-256:
+`a0e78d348f309a6e8cde3d11a2d7a3ce4fce2dd349ea2c61afb73885dd96a556`.
+Inspected raw mutation logs: removing the Shoo transfer leaves the old focused
+Book move case green, fails the new case at line69 because the ordinary room coin
+is absent, and restored source passes. Committed evidence hashes verify.
+
+The test-owned stable clock controls the brief custody window without changing
+production clocks or injecting world state. Frozen animation time makes the
+screenshots unsuitable for visual-layout proof; readable screenshots are not
+needed to establish these DOM/interaction behaviors. This is no closure of the
+deferred UI blur or future E3 human gate. Ponytail/test-integrity review found no
+additional issue. No source mutations or owner saves were touched by this recheck.
+
+No open primary findings. Final merged head still requires the workflow's exact
+head CI and merge-commit procedure; PM reports hosted checks green on this
+candidate. This approval is D8 only.
