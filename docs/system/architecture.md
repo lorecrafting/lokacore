@@ -202,6 +202,25 @@ receipts and independent review. Browser interaction/content receipts belong to 
 Native ARM/Hermes, app lifecycle and blur remain deferred under the mobile pause; preserve
 owner save bytes and explicit pin refusal. No general Lab service or new protocol schema.
 
+The E1 scenario recorder is a fixed program for the admitted bundled chapter over the
+existing local authority and real Node SQLite. It records legal player routes, five fresh
+child/allegiance endings, completionist and negative paths, and thirty adopted calendar days
+through trusted elapsed input. Reuse existing clock segmentation and invariant checks; no
+player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
+implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
+labeled when needed for a controlled admission or fault boundary.
+
+Coverage names actual committed room visits, quest transitions/outcomes, resolved dialogue
+choices, scene beats/consequences and command paths. An offer or a definition count is not
+execution. Check literal terminal facts, all 57 declared room routes and every authored
+quest/choice/scene against the recorded uses, leaving unexecuted paths pending. At the
+thirty-day horizon, observe scheduled destinations and population/provenance/pending-job
+bounds at each committed boundary, with deterministic clock/RNG/fuel replay. Existing
+independent fixture and authority faults supply unchanged contract proof; export new
+candidate fault schedules and reopen the resulting intermediate saves before their next
+consumer. Scenario receipts bind the same artifact/source/check/policy identities as the
+runner and retain commands, exact starts, state/receipt digests and asserted failures.
+
 ## Mobile import rules
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
