@@ -241,3 +241,26 @@ exact coin; full-nest8/fallback behavior is separately covered by focused tests
 and the planted capacity9 mutation. Browser proof remains pending. One new test
 changed after the prior green gate, so a final full gate on this checkpoint is
 required before source PR/review. No owner save access or native work occurred.
+
+## Isolated Book browser checkpoint
+
+Browser skill selected Chrome, with a new tab at `http://localhost:19288/` and
+separate Metro19289. No owner origin/save, storage inspection or native session.
+Startup initially showed “The game cannot go on yet” with truncated JSON; the
+existing `patch-sqlite-web.cjs` repaired the installed SDK dependency and reload
+opened the ancestry screen. No repository implementation changed for that repair.
+
+Actual Book interactions: Fen-born selected; Continue; Ferry Landing→Well Lane→
+Chandler; bought torch3p; lit it; Well Lane→Well Shaft→Well Bottom; inspected and
+Took the sole authored old coin; Surface free→Well Shaft→Well Lane→Village Green.
+Waited for a present crow; opened inventory and Dropped old coin. The visible log
+then showed “The crow picks up the old coin” and the crow departed. Screenshot:
+[browser acquisition](browser-acquisition.png).
+
+This certifies actual Drop and acquisition narration, not the complete crow UI
+closure. Remaining browser cases: observe original crow's carried-item projection,
+refresh while held, follow reachable corridor/nest, recover via ordinary Take,
+Shoo refusal/success, full nest and fallback. The proof uses the real published
+world/clock and real SQLite web authority; no seeded app state or clock override.
+The isolated preview remains running for continuation; no PR was opened. Final
+full gate/pre-push still required on the newly added custody regression head.

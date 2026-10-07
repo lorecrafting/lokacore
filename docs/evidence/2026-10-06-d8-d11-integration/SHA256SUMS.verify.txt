@@ -1,0 +1,10 @@
+schema-sweep.log: OK
+schema-subset.log: OK
+conservation.log: OK
+conservation-red.log: OK
+capacity9-red.log: OK
+wrong-holder-red.log: OK
+stale-shoo-red.log: OK
+source-custody-old-red.log: OK
+source-custody-new-red.log: OK
+crow-proof-final.log: OK
