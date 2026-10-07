@@ -19,3 +19,4 @@ Agents: start with [AGENTS.md](AGENTS.md).
 - `mobile/`: the Expo app (`app/`), authorities, features and shared packages.
 - `bin/`: checks and generators; `bin/check_all.sh` runs them all.
 - [docs/design/room-view/](docs/design/room-view/README.md): the chosen touch UI direction (informative).
+- [docs/design/ui-exploration/](docs/design/ui-exploration/README.md): the mock playable chapter one and other UI explorations (informative).
