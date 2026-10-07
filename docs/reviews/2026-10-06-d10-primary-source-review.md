@@ -67,3 +67,29 @@ PM subsequently reported a browser contradiction: the answered Knock text says t
 chapel is open even after Close. A presence-only text correction and independently
 regenerated v042 hash are pending. This verdict covers the source above; the final
 Knock text/hash require a scoped recheck before publication.
+
+## Scoped final content and contract recheck — APPROVE
+
+Reviewed `8a4b8b04..3a4ec6d2d645c6e7f566157e1e339859d2c68f9e` only.
+The answered Chapel Knock now says “I’m here,” making no assertion about open/closed
+barrier state. An actual-source probe of both states returned the same presence-only
+answer and zero delta operations. No gameplay rule changed.
+
+Independent Python applied that one source text edit to the previously reviewed
+artifact and reproduced the complete final canonical value/hash:
+`5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`.
+The 211-ID oracle is byte-identical. Compiler/current-source tests: **11 passed**;
+focused contract/presentation/allocation/App save tests: **14 passed**; every chapter
+transcript replayed successfully, including the recaptured current knowledge trace.
+
+Nine schema descriptions are the only generated DEFS changes; validation constraints
+are unchanged. Full candidate `git diff --check` is clean. The four stale source-test
+expectations were already checked in the first review's `b8c4e8ec` followup; this range
+contains no further source-test changes. Ponytail Review found nothing to cut.
+
+One nonblocking documentation correction remains: `KnownNpcView` should include
+currently visible NPCs as well as previously observed NPCs. Its current description
+omits the supported visible-without-a-saved-observation case; runtime and the focused
+unit regression already handle it. PM has assigned the description correction.
+Browser completion, full gate, independent opinions and exact-head CI remain
+publication gates.
