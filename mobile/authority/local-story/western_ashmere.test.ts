@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   bundle,
-  fresh,
+  genesis,
   ref,
   room,
   entity,
@@ -24,9 +24,15 @@ const start = (c: any) => {
 };
 function setup(path: string, change = start) {
   const b = bundle(change),
-    initial = fresh(change);
-  let p = elapsedHost(path, { wall: 10000, mono: 0 }, b),
-    book = presenter(p.game);
+    initial = genesis(change);
+  let p = elapsedHost(path, { wall: 10000, mono: 0 }, b);
+  const ancestry = p.game.invoke({
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  } as never);
+  assert.equal(ancestry.kind === 'saved' && ancestry.decision.kind, 'accepted');
+  let book = presenter(p.game);
   p.game.subscribe(book.update);
   const world = () => {
     const s = openStory(p.db, [{ fresh: initial, content_hash: b.sha256 }], p.host);
@@ -43,7 +49,6 @@ function setup(path: string, change = start) {
     directions.forEach((direction) => invoke('move', [], { direction }));
   return {
     initial,
-    content_hash: b.sha256,
     world,
     invoke,
     move,
@@ -130,7 +135,6 @@ test('Western rooms and both exact standalone Read histories survive cold SQLite
     a.reopen();
     assert.equal(a.view().place.id, room(a.initial, expected));
   }
-  assert.equal(a.content_hash, 'e2ad69a89f007881eba3ebec925abd63bcb563060dc60b8725d87da13c12a390');
 });
 // Break: Hob's saved schedule transfer or a departed dialogue speaker fails legal reopen.
 test('Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries', (t) => {

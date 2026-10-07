@@ -2,6 +2,8 @@
 
 
 - [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, initially CHANGES REQUIRED; scoped fix `388c430e` APPROVE closes BASE-R1 remaining C3/D12 published-status contradictions. Docs check and all 25 historical heading aliases pass.
+- [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
+
 - [E1 loader carry integrated independent review](2026-10-06-e1-loader-integrated-review.md): exact source `03eb7089` against post-D10 base `87ac4cbb`, **APPROVE**, no findings; 78/78 focused tests, two independent red controls and seven negative/v042 probes pass. Loader carry only; final A–D E1 certification remains separate.
 
 - [D10 save/protocol independent review](2026-10-06-d10-save-protocol-review.md): source `806bfe4f`, test-only followup `b8c4e8ec`, scoped APPROVE; 8 focused tests, 9 independent SQLite corruption probes and 3 save-pin tests pass. No findings; foundation/proposal, browser and publication gates remain separate.
@@ -542,3 +544,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D10 primary source review](2026-10-06-d10-primary-source-review.md): source through `8a4b8b04`, independent APPROVE WITH NOTES; no additional source findings, independent v042 hash/211 IDs, real SQLite and reviewer-planted visibility/entry controls verified. Browser/full gate/opinions/CI remain publication gates.
 - [D10 foundation and composition opinion](2026-10-06-d10-foundation-opinion.md): scoped APPROVE at `8a4b8b04`; null-row invariant finding F1 closed, portable differential and knowledge/bleed/deer overlap controls pass. Content pins, browser, authority and final publication gates remain separate.
+
+- [Post-D10 authority fixture repair](2026-10-06-post-d10-fixture-review.md): initial source `c34e22c2`, CHANGES REQUIRED; scoped fix `5402b305`, independent APPROVE, R1 closed. Transport-trigger deletion now fails at forged-event refusal; restored focused 25/25 pass. Genesis, Study custody and Book stale-service controls also fail as intended; production guards and frozen fixtures unchanged.

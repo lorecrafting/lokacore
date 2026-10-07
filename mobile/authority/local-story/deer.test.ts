@@ -175,6 +175,27 @@ test('missed round and +300 flight cold-reopen with closed combat', (t) => {
   assert.equal(reopened.kind, 'open');
   if (reopened.kind === 'open')
     assert.equal(encode(reopened.world().state as never), encode(story.world().state as never));
+
+  // A genuine sight handoff cannot authorize a counterfeit closure/cancel group.
+  const row = q
+    .prepare('SELECT scope, invocation_id, response FROM receipt ORDER BY revision DESC LIMIT 1')
+    .get()!;
+  const response = JSON.parse(row.response as string);
+  const pair = response.delta.ops.filter(
+    (op: any) => op.op === 'encounter.close' || op.op === 'job.cancel',
+  );
+  assert.equal(pair.length, 2);
+  for (const op of pair) op.writer_group = 0;
+  q.prepare('UPDATE receipt SET response=? WHERE scope=? AND invocation_id=?').run(
+    JSON.stringify(response),
+    row.scope as string,
+    row.invocation_id as string,
+  );
+  const bytes = readFileSync(path);
+  q.close();
+  q.open();
+  assert.equal(openStory(adapter(q) as never, selected, p.host).kind, 'save_corrupt');
+  assert.deepEqual(readFileSync(path), bytes);
 });
 
 // Breaks: historical recovery treats a second sight completion as the population arrival cause.

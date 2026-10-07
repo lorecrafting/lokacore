@@ -1,10 +1,18 @@
+// size: allow 507, water custody and fault cases share one real SQLite fixture
 // Real SQLite and the existing fault injector; teacher/gear locations are declared controlled inputs.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, fresh, room, entity, prefix, ref } from '../../../kernel/ts/test/water_fixture.ts';
+import {
+  bundle,
+  genesis,
+  room,
+  entity,
+  prefix,
+  ref,
+} from '../../../kernel/ts/test/water_fixture.ts';
 import { gameView } from '../../../kernel/ts/src/index.ts';
 import { openGame } from './session.ts';
 import { openStory } from './authority.ts';
@@ -14,10 +22,16 @@ import { group, intentOf } from '../../app/book/model.ts';
 
 function setup(path = ':memory:', change: (c: any) => void = () => {}) {
   const b = bundle(change),
-    initial = fresh(change),
+    initial = genesis(change),
     releases = [{ fresh: initial, content_hash: b.sha256 }] as const;
   let p = elapsedHost(path, { wall: 10000, mono: 0 }, b),
     n = 0;
+  const ancestry = p.game.invoke({
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  } as never);
+  assert.equal(ancestry.kind === 'saved' && ancestry.decision.kind, 'accepted');
   const open = () => {
     const s = openStory(p.db, releases, p.host);
     assert.equal(s.kind, 'open', JSON.stringify(s));

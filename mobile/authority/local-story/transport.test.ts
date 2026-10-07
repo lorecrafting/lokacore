@@ -1,4 +1,4 @@
-// size: allow 529, original ferry custody, death recovery and SQLite faults share one transport fixture
+// size: allow 563, original ferry custody, death recovery and SQLite faults share one transport fixture
 // D1 uses the real rollback-journal SQLite host, not browser refresh as a fault oracle.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   bundle,
-  fresh,
+  genesis,
   ref,
   room,
   entity,
@@ -25,10 +25,16 @@ import { group, pagesAfter, intentOf } from '../../app/book/model.ts';
 
 function setup(path = ':memory:', change: (c: any) => void = () => {}) {
   const b = bundle(change),
-    initial = fresh(change),
+    initial = genesis(change),
     releases = [{ fresh: initial, content_hash: b.sha256 }] as const;
   let p = elapsedHost(path, { wall: 10000, mono: 0 }, b),
     n = 0;
+  const ancestry = p.game.invoke({
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  } as never);
+  assert.equal(ancestry.kind === 'saved' && ancestry.decision.kind, 'accepted');
   const open = () => {
     const s = openStory(p.db, releases, p.host);
     assert.equal(s.kind, 'open', JSON.stringify(s));
@@ -476,42 +482,64 @@ test('actual Chapel death return reaches the dark-loft corpse without gear and r
   assert.deepEqual(pennies(a.story.world()), [0, 2]);
 });
 
-// Breaks: transport-only saves skip accepted-history validation because no liquid, service, patrol, exchange or fuel producer activates it.
+// Breaks: transport saves skip accepted-history validation when every other history producer is absent.
 test('a transport-only cartridge validates crossing receipts without another producer', (t) => {
   const a = setup(':memory:', (c) => {
+    delete c.world.water;
+    delete c.bleeds;
+    delete c.map_positions;
+    for (const capability of ['knowledge', 'food']) {
+      delete c.manifest.requires.capabilities[capability];
+      delete c.lock.capabilities[capability];
+    }
     delete c.services;
     delete c.liquids;
     delete c.populations;
     delete c.population_bundles;
+    delete c.reactions[`${prefix}:reaction/d9_suppress_hounds`];
     delete c.items[`${prefix}:item/hound_pelt`];
     delete c.items[`${prefix}:item/hound_corpse`];
     delete c.items[`${prefix}:item/deer_hide`];
     delete c.items[`${prefix}:item/deer_corpse`];
+    delete c.items[`${prefix}:item/crow_corpse`];
     c.scenes = Object.fromEntries(
       Object.entries(c.scenes).filter(([, scene]: any) => !scene.on?.rest),
     );
     for (const [key, npc] of Object.entries(c.npcs) as [string, any][])
       if (npc.spawn_template) delete c.npcs[key];
-    for (const npc of Object.values(c.npcs) as any[]) delete npc.services;
+    for (const npc of Object.values(c.npcs) as any[]) {
+      delete npc.services;
+      if (npc.shop) delete npc.shop.buy_discount;
+    }
     for (const item of Object.values(c.items) as any[]) {
       delete item.vessel;
       delete item.fuel;
+      delete item.readable;
+      delete item.edible;
+      delete item.bandage;
     }
-    for (const room of Object.values(c.rooms) as any[])
-      for (const detail of Object.values(room.details ?? {}) as any[]) delete detail.liquid_source;
+    for (const room of Object.values(c.rooms) as any[]) {
+      for (const exit of Object.values(room.exits) as any[]) delete exit.knock;
+      for (const detail of Object.values(room.details ?? {}) as any[]) {
+        delete detail.liquid_source;
+        if (detail.harvest) delete detail.harvest.careful;
+      }
+    }
     for (const quest of Object.values(c.quests) as any[]) {
-      if (quest.patrol)
+      if (quest.patrol || quest.expedition)
         quest.objective = {
           evidence: 'current_state',
           policy: { policy_version: 1, root: { op: 'all', items: [] } },
         };
       delete quest.patrol;
+      delete quest.expedition;
       delete quest.exchange;
       delete quest.repeatable;
     }
     for (const dialogue of Object.values(c.dialogues) as any[])
       for (const choice of Object.values(dialogue.choices) as any[]) {
         delete choice.patrol;
+        delete choice.expedition;
         delete choice.exchange;
       }
   });
