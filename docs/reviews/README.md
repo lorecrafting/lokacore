@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [Move forward trim](2026-10-07-move-forward-trim-review.md): PR #291 at `e58abb76`, independent **APPROVE WITH NOTES**; 2 should-fix (non-verbatim owner quote; owner-rules "in force only if listed here" contradicts 24 kept in-force records), 2 nits. check_all, check_docs, Beads check and #288 trial merge with the body's recovery pass. Owner approval still required.
 - [E3 authority CI scope correction](2026-10-06-e3-authority-ci-scope-review.md): exact `cb77af0f`, independent **APPROVE**, no findings; focused controls pass, original unsafe-skip classifier fails the new control, controlled pre-push selects app/authority lanes correctly. No E3 certification claim.
 - [E3 authoring navigation](2026-10-06-e3-authoring-navigation-review.md): exact source `6f374d06`, independent **APPROVE**, no findings; source map, spawn-template placement wording, Chapter 1 and schema links checked against current code; docs check passes.
 
