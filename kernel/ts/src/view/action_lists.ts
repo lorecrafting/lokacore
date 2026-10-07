@@ -30,6 +30,7 @@ import { carrying, giveRefused, putRefused } from '../mechanics/containment/shar
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
 import { combatOffered } from './combat.ts';
+import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
@@ -163,10 +164,12 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
-  const target_ids = lightTargets(world, actor, a, id);
+  const target_ids = targetsFor(world, actor, a, id);
   const shown = {
     action_key: a.key,
-    ...((light.VERBS.includes(a.command) || a.command === 'harvest') && { command: a.command }),
+    ...((light.VERBS.includes(a.command) || ['harvest', 'expedition'].includes(a.command)) && {
+      command: a.command,
+    }),
     label: patch && !a.input.includes('method') ? patch.label : a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
@@ -174,12 +177,9 @@ function advertise(
     ...(patch && { target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
-  // Step's order: the action's policy, then the talk rule's not_found and talkRefused.
   const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
-  const gathered =
-    a.command === 'harvest' && target !== undefined
-      ? harvestOffered(world, actor, a, target, steps)
-      : undefined;
+  const gathered = harvestOffered(world, actor, a, target, steps);
+  const excursion = expedition.actionRefused(world, actor, a, target);
   const talk =
     a.command === 'talk' &&
     (speaks(world, target)
@@ -193,6 +193,7 @@ function advertise(
         : undefined) ||
       (typeof admitted === 'string' ? admitted : undefined) ||
       (typeof gathered === 'string' ? gathered : undefined) ||
+      excursion ||
       (a.command === 'take' && target !== undefined ? take(target) : undefined) ||
       (a.command === 'give' && target !== undefined
         ? giveRefused(world, target, steps)
@@ -207,9 +208,10 @@ function harvestOffered(
   world: World,
   actor: CharacterId,
   a: Offered,
-  target: EntityId,
+  target: EntityId | undefined,
   steps: Steps,
 ) {
+  if (a.command !== 'harvest' || target === undefined) return;
   const method = a.input.includes('method') ? ('careful' as const) : undefined;
   const code = refusal(
     world,
@@ -281,6 +283,7 @@ function putPairs(
 
 function noticeOffer(world: World, a: Offered, id: string) {
   return (
+    (a.command === 'expedition' && expedition.atDetail(world, id)) ||
     (a.command === 'harvest' &&
       !!world.details[id]?.harvest &&
       (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
@@ -307,7 +310,8 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
   );
 }
 
-function lightTargets(world: World, actor: CharacterId, a: Offered, id?: string) {
+function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
+  if (a.command === 'expedition' && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
     : undefined;

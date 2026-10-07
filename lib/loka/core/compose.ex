@@ -1,7 +1,7 @@
 # size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
-  alias Loka.Core.{ComposePack, Creation}
+  alias Loka.Core.{ComposeChoice, ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -13,7 +13,6 @@ defmodule Loka.Core.Compose do
     "abandoned" => ["active"]
   }
 
-  # A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec compose(map(), map()) :: %{String.t() => term()}
   def compose(state, %{"ops" => ops}, final \\ true) do
@@ -43,7 +42,7 @@ defmodule Loka.Core.Compose do
         f
 
       overlay ->
-        case Loka.Core.ComposeChoice.pending_at_limit(overlay) do
+        case ComposeChoice.pending_at_limit(overlay) do
           nil -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
           t -> fault("precondition_failed", t)
         end
@@ -189,13 +188,10 @@ defmodule Loka.Core.Compose do
     )
   end
 
-  defp apply_op(%{"op" => "choice." <> _} = op, t, ctx),
-    do:
-      Loka.Core.ComposeChoice.transition(
-        op,
-        read(t, ctx),
-        get_in(elem(ctx, 0), ["choices", op["continuation_id"]])
-      )
+  defp apply_op(%{"op" => "choice." <> _} = op, t, ctx) do
+    initial = get_in(elem(ctx, 0), ["choices", op["continuation_id"]])
+    ComposeChoice.transition(op, read(t, ctx), initial)
+  end
 
   defp apply_op(%{"op" => "job." <> _} = op, t, {_, horizon, _} = ctx),
     do: Loka.Core.ComposeEncounter.job(op, read(t, ctx), horizon)
@@ -233,6 +229,9 @@ defmodule Loka.Core.Compose do
 
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
+
+  defp apply_op(%{"op" => "expedition.transition"} = op, t, ctx),
+    do: Loka.Core.ComposeExpedition.transition(op, read(t, ctx))
 
   defp apply_op(%{"op" => kind} = op, t, ctx)
        when kind in ~w(population.control population.slot crow.transition),
@@ -290,6 +289,9 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "bleed", "body_id" => b}, s), do: section(s, "bleeds")[b]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
+
+  defp base(%{"kind" => "expedition", "quest_instance_id" => q}, s),
+    do: section(s, "expeditions")[q]
 
   defp base(%{"kind" => kind} = t, s) when kind in ~w(population_plan population_slot crow),
     do: Loka.Core.ComposePopulation.base(t, s)

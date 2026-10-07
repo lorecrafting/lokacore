@@ -23,7 +23,22 @@ export function practicalBundle(stat = 10, room = 'willow_shade', pennies = 3, m
   c.resources[named('resource', 'mv')].start = mv;
   c.attributes[named('attribute', 'int')] = { key: 'int', start: stat };
   c.attributes[named('attribute', 'dex')].start = stat;
-  c.text = source('text');
+  const text = source('text');
+  for (const name of [
+    'skill.herbalism.label',
+    'skill.herbalism.requirement',
+    'sedge.herbalism.prompt',
+    'sedge.herbalism.choice',
+    'sedge.herbalism.learned',
+    'skill.haggle.label',
+    'skill.haggle.requirement',
+    'peg.haggle.prompt',
+    'peg.haggle.choice',
+    'peg.haggle.learned',
+    'action.gather_carefully',
+    'narration.gather_carefully',
+  ])
+    c.text[name] ??= text[name];
   for (const [skill, teacher] of [
     ['herbalism', 'sedge'],
     ['haggle', 'peg'],

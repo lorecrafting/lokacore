@@ -86,7 +86,6 @@ defmodule Loka.Content.Checks do
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
     do: Map.update!(p, k, &ref(&1, k, m))
 
-  # A post_activation_event objective (QuestObjective): its short item.
   def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),
     do: Map.put(objective, "item_acquired", ref(k, "item", m))
 
@@ -100,6 +99,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"patrol" => p} = o, m),
     do: o |> Map.delete("patrol") |> expand(m) |> Map.put("patrol", expand(p, m))
+
+  def expand(%{"start_room" => _, "survived_fact" => _} = expedition, m),
+    do: Loka.Content.Expedition.expand(expedition, m)
 
   def expand(%{"transition" => t, "quest" => q, "npc" => _} = p, m)
       when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
@@ -214,7 +216,6 @@ defmodule Loka.Content.Checks do
   def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
     do: Map.put(chapter, "story_point", ref(p, "story_point", m))
 
-  # Scene trigger: outcome remains a key.
   def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
     do:
       trigger

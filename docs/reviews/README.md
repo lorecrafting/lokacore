@@ -512,6 +512,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D8 primary P4 save proof](2026-10-06-d8-primary-review.md#scoped-p4-save-proof--closed-browser-open): source `efc7f5eb`; save portion closed after25 reopens/20 faults and typed-corruption red control. Browser held refresh/Shoo remains open; CHANGES REQUIRED.
 - [D8 final primary browser closure](2026-10-06-d8-primary-review.md#final-scoped-p4-browser-review--approve): exact candidate `e947251e`, overall APPROVE; P4 held refresh/Shoo closed, no open primary findings. Final-head hosted CI and merge publication remain PM gates.
 
+- [C6 provisional primary review](2026-10-06-c6-provisional-primary-review.md): exact source `8acf6825`, CHANGES REQUIRED; failed-attempt Journal guidance and honest detour edge wording. Provisional source only; final release waits D9 publication.
+
+- [C6 provisional primary scoped fix round 1](2026-10-06-c6-provisional-primary-review.md#scoped-fix-round-1--p1p2-closed): source `5658f7c3`, provisional APPROVE; P1/P2 closed after thirteen focused tests and an actual-source SQLite detour/failure/Restart reopen control. Final release remains pending D9.
+- [C6 provisional save/protocol second opinion](2026-10-06-c6-provisional-save-second-opinion.md): exact source `5658f7c3`, scoped APPROVE with no new findings; real SQLite failure/replay, fatal/compiler red controls and active cold-open causation guard verified. Final publication remains pending.
 - [D9 primary source review](2026-10-06-d9-primary-source-review.md): candidate `50b3e67f`, provisional CHANGES REQUIRED; P1 public Aldric S2 dialogue shadowing, cast reconciliation and final browser/publication proof pending.
 
 - [D9 primary scoped source fix review](2026-10-06-d9-primary-source-review.md#scoped-fix-review--source-approve-final-browser-acceptance-pending): source `5bee6811`, source APPROVE; P1 closed for prior/fox, no-Bram cast reconciled, 208-ID pin regenerated, eight red controls fail and restore green. Final browser/independent-opinion/publication gates pending.
@@ -521,3 +525,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D9 foundation scoped fix round 1](2026-10-06-d9-foundation-opinion.md#scoped-fix-round-1--approve): source `5bee6811`, APPROVE; F1/F2 closed, both deadline orders and malformed-group refusal verified, 19 TS/SQLite and 3 Elixir tests green, five live revert controls red. Final browser/full gate remain pending.
 
 - [D9 foundation size-gate correction](2026-10-06-d9-foundation-opinion.md#scoped-size-gate-correction--approve): source `5ac99023`, APPROVE; pair-discovery extraction preserves order/guards, cohesive function allowances accepted, 19 focused tests/typecheck/size green and extracted-helper red control verified. Normal full-gate retry remains required.
+
+- [C6 final actual-publication primary source review](2026-10-06-c6-provisional-primary-review.md#final-actual-publication-source-review): exact source `206ffb39`, APPROVE; v041/API1.36 independent hash/209 IDs, final transcript, hostile Sedge, real D1→D6→C6 and fatal/retry SQLite controls, corrected actual App bundle. Full gate/browser/CI/publication remain delivery gates.
+- [C6 final save/protocol second opinion](2026-10-06-c6-final-save-second-opinion.md): corrected final source `206ffb39`, scoped APPROVE; final v041 oracle/209 IDs, real SQLite route/fatal/fault/replay, actual-shell pin and byte-preserving v040 refusal verified. Browser/full gate/CI remain pending.
+
+- [C6 scoped historical D12 fixture review](2026-10-06-c6-provisional-primary-review.md#scoped-full-gate-d12-fixture-correction): exact `249a9976`, APPROVE; original four behavior/contract tests pass, all frozen text retained, twelve bounded additions and old wholesale-graft loader red control confirmed.

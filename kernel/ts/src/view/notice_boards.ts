@@ -20,7 +20,12 @@ export function noticeViews(
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
     visible(world, world.character, id, steps) &&
-    (detail.readable || detail.harvest || detail.perception || detail.bed || detail.transport) &&
+    (detail.readable ||
+      detail.harvest ||
+      detail.perception ||
+      detail.bed ||
+      detail.transport ||
+      actions(id).some((a) => a.command === 'expedition')) &&
     !grouped.has(id as EntityId)
       ? [
           {
@@ -101,8 +106,9 @@ const detailTitle = (detail: World['details'][string]) =>
   detail.bed?.title ??
   detail.harvest?.title ??
   detail.perception?.title ??
-  detail.readable!.title ??
-  detail.readable!.label;
+  detail.readable?.title ??
+  detail.readable?.label ??
+  detail.description;
 
 function bedActions(
   world: World,

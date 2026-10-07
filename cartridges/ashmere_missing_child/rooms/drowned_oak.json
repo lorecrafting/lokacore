@@ -14,5 +14,15 @@
     "south": {
       "to": "black_pool"
     }
+  },
+  "details": {
+    "marsh_shelter": {
+      "aliases": [
+        "marsh_shelter",
+        "shelter",
+        "hollow"
+      ],
+      "description": "detail.marsh_shelter.description"
+    }
   }
 }

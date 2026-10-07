@@ -138,6 +138,52 @@
           ],
           "additionalProperties": false,
           "description": "Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "expedition"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "attempt_id": {
+              "$ref": "identity.schema.json#/$defs/CommandId"
+            },
+            "cursor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 32
+            },
+            "sheltered": {
+              "type": "boolean"
+            },
+            "status": {
+              "enum": [
+                "active",
+                "failed",
+                "completed"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id",
+            "body_id",
+            "quest_instance_id",
+            "attempt_id",
+            "cursor",
+            "sheltered",
+            "status"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -572,8 +618,12 @@
         },
         "sight_job_id": {
           "anyOf": [
-            { "$ref": "delta.schema.json#/$defs/JobId" },
-            { "type": "null" }
+            {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       },
@@ -649,6 +699,65 @@
         {
           "job_id": "33333333-3333-4333-8333-333333333333",
           "next_wander_due": 210
+        }
+      ]
+    },
+    "ExpeditionAttempt": {
+      "description": "One player's current bounded expedition attempt, bound to its quest instance.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "expedition"
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "quest_instance_id": {
+          "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+        },
+        "attempt_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "cursor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "sheltered": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "failed",
+            "completed"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "actor_id",
+        "body_id",
+        "quest_instance_id",
+        "attempt_id",
+        "cursor",
+        "sheltered",
+        "status"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "expedition",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "quest_instance_id": "33333333-2222-4333-8444-555555555555",
+          "attempt_id": "44444444-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "sheltered": false,
+          "status": "active"
         }
       ]
     }

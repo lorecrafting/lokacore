@@ -11,6 +11,7 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 // registry entry when a second capability contributes a verb outside VERBS (dialogue's talk,
 // choose and close_choice come from mechanics/dialogue/shared.ts).
 export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
+  expedition: [{ kind: 'entity', scopes: ['inspectable_details'] }, ['transition']],
   choose_ancestry: [{ kind: 'none' }, ['ancestry']],
   recover_corpse: [entity('room_contents'), []],
   use_transport: [{ kind: 'entity', scopes: ['inspectable_details'] }, ['route', 'quoted_fare']],

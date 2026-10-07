@@ -1,8 +1,10 @@
 # C6 — Night in the Marsh: start a real survival expedition now
 
-> **Publication note:** PM-selected planning brief, pending independent review and C5 publication. Re-pin current main and predecessors before C6 source; this draft is no claim of implementation or proof.
+> **Publication note:** C6 final candidate is integrated over published D9 main. Final independent reviews, browser closure, full gate and exact-head CI remain pending; C6 is not published.
 
-2026-10-06. Row C6 of [the public plan](../../MISSING-CHILD-PLAN.md); proposed branch `chapter1/c6-marsh-expedition`. [PM decision](../../decisions/pm-decision-c6-night-marsh-2026-10-06.md) and [active C6 mechanics](../../system/mechanics.md#c6-s27-night-in-the-marsh-selected-planning-contract) select the contract. Planning base `a56787439c5319763c1d2da82356fc02ff7e3ef5`, Chapter 1 **23/33**. D6 water depths is published; C5 real bleed/bandage source is provisional. C6 release/API/hash/IDs/source/PR: **null**. No owner-save, mobile/browser or source proof is claimed.
+[Source checks and remaining blockers](../../evidence/2026-10-06-c6-source/README.md) record development proof; final release integration and independent review remain pending.
+
+2026-10-06. Row C6 of [the public plan](../../MISSING-CHILD-PLAN.md); proposed branch `chapter1/c6-marsh-expedition`. [PM decision](../../decisions/pm-decision-c6-night-marsh-2026-10-06.md) and [active C6 mechanics](../../system/mechanics.md#c6-s27-night-in-the-marsh-selected-planning-contract) select the contract. Planning base `a56787439c5319763c1d2da82356fc02ff7e3ef5`, Chapter 1 **23/33**. D6 water depths is published; C5 real bleed/bandage source is provisional. Historical planning pins are retained above. Final implementation predecessor is main `b52eaeff4caca4bcd64e4ba2c7c81cf672f1bc40` (28/33), including D9 merge `fb94a19eeef6966d86ec64f48d6f146af11feabc`. C6 candidate is chapter `0.0.41`, API `1.36`, independent hash `cee92d0a2e460318724ffcc004aaeb6c2bc9f5abf124ca9845958eeb11378f7a`, 209 initial IDs. Exact source/review heads are recorded in the linked evidence; PR remains null. Owner-save and native work remain untouched, browser proof pending.
 
 ## Player outcome and dependencies
 

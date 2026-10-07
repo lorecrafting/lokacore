@@ -1,7 +1,7 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_missing_child",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "title": "Ashmere — The Missing Child",
   "ancestries": {
     "fen_born": {
@@ -10,7 +10,10 @@
       "attribute": "per",
       "modifier": 1,
       "skill": "swim",
-      "faction": { "fact": "priory_fen_axis", "value": -2 }
+      "faction": {
+        "fact": "priory_fen_axis",
+        "value": -2
+      }
     },
     "road_born": {
       "label": "ancestry.road_born.label",
@@ -31,12 +34,15 @@
       "description": "ancestry.fey_touched.description",
       "attribute": "spi",
       "modifier": 1,
-      "faction": { "fact": "priory_fen_axis", "value": -2 }
+      "faction": {
+        "fact": "priory_fen_axis",
+        "value": -2
+      }
     }
   },
   "requires": {
     "kernel_api": {
-      "at_least": "1.35",
+      "at_least": "1.36",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -77,7 +83,8 @@
       "resource": 1,
       "food": 1,
       "bleed": 1,
-      "water": 1
+      "water": 1,
+      "expedition": 1
     },
     "client_features": []
   },

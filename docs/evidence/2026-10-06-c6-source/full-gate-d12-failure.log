@@ -1,0 +1,199 @@
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+No cycles found
+Running ExUnit with seed: 671497, max_cases: 16
+
+..............................................................................................................................................................................................................................................................................................................................................................................................................
+Finished in 21.1 seconds (21.1s async, 0.05s sync)
+
+Result: 398 passed
+Checking 169 source files (this might take a while) ...
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.09 seconds (0.05s to load, 0.04s running 4 checks on 169 files)
+1745 mods/funs, found no issues.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+lib/loka/content/checks.ex:1: info: size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
+lib/loka/content/compiler.ex:1: info: size: allow 315, ancestry source manifest wiring joins the existing compiler boundary
+lib/loka/content/dialogues.ex:1: info: size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+lib/loka/content/scenes.ex:1: info: size: allow 320, action-started scenes validate source and end exports beside modal rules
+lib/loka/core/compose.ex:1: info: size: allow 340, typed patrol, terminal quests and final birth admission share portable composition
+lib/loka/core/creation.ex:78: info: size: allow 55, one final birth-group guard; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+lib/loka/core/invariants.ex:1: info: size: allow 340, patrol, water, bleed and character pairing join precondition replay
+lib/loka/core/invariants_creation.ex:62: info: size: allow 55, independent birth oracle; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+test/loka/core/compose_test.exs:1: info: size: allow 520, patrol and liquid cases share the existing randomized differential pool
+ok   boundary: web reaches store (only platform may)
+ok   boundary: core calls an undeclared external app
+ok   types: a PartyId where a CharacterId is matched (03 §6)
+ok   xref: dependency cycle
+ok   xref: compile-connected edge
+ok   credo: cyclomatic complexity 10
+ok   credo: nesting 3
+ok   credo: ABC size 31
+ok   credo: arity 7
+ok   contracts: schema changed without regenerating the TypeScript
+ok   contracts: schema changed without regenerating the docs
+ok   contracts: unsupported keyword fails compilation
+ok   contracts: unsupported keyword fails generation
+ok   contracts: a map with declared properties fails compilation
+ok   contracts: anyOf with overlapping types fails compilation
+ok   features: a capability implemented without its feature map cells
+ok   features: a ruleless capability implemented without its feature map cells
+ok   features: a transcript added without regenerating the feature map
+ok   docs: AGENTS.md over its word budget
+ok   contracts: elixir host adapter without a differential (ADR-074)
+ok   size: limits and allow markers
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+Running 7 tests
+
+----------- Case Details -----------
+PASS ts-foundation-imports  .........
+PASS ts-rule-registration  .......
+PASS ts-rule-module-pure  ..........................
+PASS ts-rule-module-imports  .........................
+PASS ts-kernel-pure  ............
+PASS elixir-kernel-pure  .....................................
+PASS ts-rule-module-location  .........
+
+test result: ok. 7 passed; 0 failed;
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+ok   elixir-kernel-pure
+ok   ts-foundation-imports
+ok   ts-kernel-pure
+ok   ts-rule-module-imports
+ok   ts-rule-module-location
+ok   ts-rule-module-pure
+ok   ts-rule-registration
+ok   ci_scope: metadata and Book lanes, conservative fallback
+748 docs, 0 broken link(s), 0 unreachable
+ok   docs: stale code pointers
+ok   beads: local paths, missing slices and reserved IDs refused
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+
+
+> loka-kernel@0.0.0 test
+> node --test --test-reporter=${TEST_REPORTER:-spec} "test/**/*.test.ts"
+
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+.................XXX
+X...................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+...........
+
+Failed tests:
+
+✖ loaded careful alias resolves literal input and transfers the two lowest finite IDs (133.74325ms)
+  AssertionError [ERR_ASSERTION]: {"ok":false,"diagnostic":{"severity":"error","code":"UNRESOLVED_REFERENCE","path":".cartridge.rooms[\"ashmere_missing_child@0.0.30:room/drowned_oak\"].description","message_key":"diagnostics.unresolved_reference","data":{"target":"marsh_shelter"},"suggested_capabilities":[]}}
+      at practicalWorld (file://[worktree]/kernel/ts/test/practical_skills_fixture.ts:71:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/practical_skills.test.ts:32:28)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+✖ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (85.077875ms)
+  AssertionError [ERR_ASSERTION]: {"ok":false,"diagnostic":{"severity":"error","code":"UNRESOLVED_REFERENCE","path":".cartridge.rooms[\"ashmere_missing_child@0.0.30:room/drowned_oak\"].description","message_key":"diagnostics.unresolved_reference","data":{"target":"marsh_shelter"},"suggested_capabilities":[]}}
+      at practicalWorld (file://[worktree]/kernel/ts/test/practical_skills_fixture.ts:71:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/practical_skills.test.ts:84:24)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+✖ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (74.820542ms)
+  AssertionError [ERR_ASSERTION]: {"ok":false,"diagnostic":{"severity":"error","code":"UNRESOLVED_REFERENCE","path":".cartridge.rooms[\"ashmere_missing_child@0.0.30:room/drowned_oak\"].description","message_key":"diagnostics.unresolved_reference","data":{"target":"marsh_shelter"},"suggested_capabilities":[]}}
+      at practicalWorld (file://[worktree]/kernel/ts/test/practical_skills_fixture.ts:71:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/practical_skills.test.ts:124:21)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+✖ method is literal and optional declarations enforce every new field and numeric boundary (2240.049583ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/practical_skills_contracts.test.ts:81:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

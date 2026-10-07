@@ -12,6 +12,7 @@ import {
 import * as water from '../water/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import * as patrol from '../patrol/sequence.ts';
+import * as expedition from '../expedition/sequence.ts';
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
@@ -56,14 +57,40 @@ export function moveSequence(
     entity_id: body,
     room_id: there,
   });
-  const joined = patrol.travel(world, command, here, there, ops, mint, steps);
+  const progress = routeProgress(world, command, plan, ops, mint, steps);
   return accepted(
     world,
     outcome,
-    [...ops, ...joined.ops],
-    [entered, ...joined.events],
-    joined.narration.length ? joined.narration : undefined,
+    [...ops, ...progress.ops],
+    [entered, ...progress.events],
+    progress.narration,
   );
+}
+
+function routeProgress(
+  world: World,
+  command: MoveCommand,
+  { here, there }: Exclude<ReturnType<typeof movementPlan>, string>,
+  ops: Parameters<typeof patrol.travel>[4],
+  mint: Mint,
+  steps: { n: number },
+) {
+  const joined = patrol.travel(world, command, here, there, ops, mint, steps);
+  const ventured = expedition.travel(
+    world,
+    command,
+    here,
+    there,
+    [...ops, ...joined.ops],
+    mint,
+    steps,
+  );
+  const narration = [...joined.narration, ...ventured.narration];
+  return {
+    ops: [...joined.ops, ...ventured.ops],
+    events: [...joined.events, ...ventured.events],
+    narration: narration.length ? narration : undefined,
+  };
 }
 
 /** Read-only ordinary movement checks, reused before random escape selection. */

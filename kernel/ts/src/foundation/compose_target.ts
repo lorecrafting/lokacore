@@ -6,6 +6,7 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
  */
 // size: allow 44, one dispatch covers the closed delta target union
 export function target(op: DeltaOp): MutationTarget {
+  if ('instance_id' in op) return { kind: 'quest', instance_id: op.instance_id };
   if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
   if (op.op === 'liquid.set' || op.op === 'fuel.set')
     return { kind: op.op === 'liquid.set' ? 'liquid' : 'fuel', item_id: op.item_id };
@@ -13,7 +14,6 @@ export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'crow.transition') return { kind: 'crow', plan: op.plan, slot: op.slot };
   if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
   if (op.op === 'time.advance') return { kind: 'clock' };
-
   switch (op.op) {
     case 'character.select':
       return { kind: 'character', character_id: op.character_id };
@@ -23,10 +23,6 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'entity', entity_id: op.identity.id };
     case 'entity.transfer':
       return { kind: 'containment', entity_id: op.entity_id };
-    case 'quest.activate':
-    case 'quest.retire':
-    case 'quest.transition':
-      return { kind: 'quest', instance_id: op.instance_id };
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
@@ -36,7 +32,11 @@ export function target(op: DeltaOp): MutationTarget {
     case 'encounter.close':
       return { kind: 'encounter', encounter_id: op.encounter_id };
     case 'patrol.transition':
-      return { kind: 'patrol', quest_instance_id: op.quest_instance_id };
+    case 'expedition.transition':
+      return {
+        kind: op.op === 'patrol.transition' ? 'patrol' : 'expedition',
+        quest_instance_id: op.quest_instance_id,
+      };
     case 'water.transition':
     case 'escort.transition':
       return { kind: op.op === 'water.transition' ? 'water' : 'escort', actor_id: op.actor_id };

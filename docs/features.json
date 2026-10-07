@@ -932,5 +932,35 @@
       "containment_acyclic"
     ],
     "implemented_in": "D6 provisional TypeScript water semantics; portable Elixir/TypeScript occupancy and bound-job composition"
+  },
+  "expedition": {
+    "spec": "docs/system/mechanics.md C6 S27 Night in the Marsh; docs/system/protocol.md C6 expedition composition; docs/system/save.md C6 expedition recovery",
+    "contracts": [
+      "ExpeditionAttempt",
+      "QuestDefinition",
+      "CommandPayload",
+      "DeltaOp",
+      "MutationTarget",
+      "QuestView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/expedition/shared.ts",
+      "kernel/ts/src/mechanics/expedition/sequence.ts",
+      "kernel/ts/src/content/cartridge_expedition.ts",
+      "kernel/ts/src/foundation/compose_expedition.ts",
+      "lib/loka/content/expedition.ex",
+      "lib/loka/core/compose_expedition.ex",
+      "mobile/authority/local-story/expedition-save.ts",
+      "mobile/authority/local-story/expedition-receipt.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/missing_child_v041_hash.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C6 candidate v041/API1.36 over published D9 v040: ordered marsh route, optional shelter, immediate retry, fatal recovery and one bounded reward; publication pending final review"
   }
 }

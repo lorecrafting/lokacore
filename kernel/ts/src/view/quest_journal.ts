@@ -44,8 +44,9 @@ export function journal(world: World, steps: Steps): QuestView[] {
     .filter(([, { scope: s }]) => s.kind === 'player' && s.character_id === world.character)
     .map(([id, q]) => {
       const progress = patrolProgress(world, id, steps);
+      const expedition = expeditionProgress(world, id);
       const d = world.cartridge.quests![refString(q.quest)];
-      const shown = { ...progress, quest: q.quest, state: q.state, title: d.title };
+      const shown = { ...progress, ...expedition, quest: q.quest, state: q.state, title: d.title };
       const j = d.journal;
       if (!j) return shown;
       const variant =
@@ -53,15 +54,42 @@ export function journal(world: World, steps: Steps): QuestView[] {
           ? j.active_variants?.find((v) => holds(world, world.character, v.when.root))?.text
           : undefined;
       const journal =
-        q.state === 'active'
-          ? (variant ??
-            (holdsNow(world, world.character, q.quest, { n: 0 }) ? j.objectives_met : j.active))
-          : q.state === 'objectives_complete'
-            ? j.objectives_met
-            : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
+        expedition.expedition?.status === 'failed'
+          ? j.failed
+          : q.state === 'active'
+            ? (variant ??
+              (holdsNow(world, world.character, q.quest, { n: 0 }) ? j.objectives_met : j.active))
+            : q.state === 'objectives_complete'
+              ? j.objectives_met
+              : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
       return { ...shown, journal };
     })
     .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
+}
+
+function expeditionProgress(world: World, id: string) {
+  const row = world.state.expeditions?.[id];
+  const quest = world.state.quests?.[id];
+  const spec = quest && world.cartridge.quests?.[refString(quest.quest)]?.expedition;
+  if (!row || !spec) return {};
+  const next = row.status === 'active' ? spec.route[row.cursor] : undefined;
+  return {
+    expedition: {
+      quest_instance_id: row.quest_instance_id,
+      attempt_id: row.attempt_id,
+      cursor: row.cursor,
+      required: spec.route.length,
+      sheltered: row.sheltered,
+      status: row.status,
+      ...(next && {
+        next_room: next.to,
+        next_title: world.rooms[world.roomIds[refString(next.to)]].title,
+        ...(world.state.containers[row.body_id] === world.roomIds[refString(next.from)] && {
+          direction: next.direction,
+        }),
+      }),
+    },
+  };
 }
 
 function patrolProgress(world: World, id: string, steps: Steps) {

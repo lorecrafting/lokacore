@@ -365,6 +365,17 @@
         "player"
       ],
       "meaning": "Local continuity memory player.dream_seen; only the acknowledged dream end writes it."
+    },
+    "fen.night_survived": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player completed the accepted five-entry Hound Run marsh expedition alive."
     }
   }
 }

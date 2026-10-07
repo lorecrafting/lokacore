@@ -15,6 +15,15 @@ export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
   `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
+export const expeditionLine = (
+  e: NonNullable<GameView['journal'][number]['expedition']>,
+  text: Say,
+) =>
+  e.status === 'active' && e.next_title
+    ? e.direction
+      ? `Next: ${e.direction} to ${text(e.next_title)}.`
+      : `Next checkpoint: ${text(e.next_title)}.`
+    : '';
 type Press = Omit<Button, 'token'>;
 const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
@@ -302,15 +311,35 @@ function noticeButtons(
         (a) =>
           a.available &&
           (!a.input.length ||
+            a.command === 'expedition' ||
             (a.command === 'harvest' && a.input.length === 1 && a.input[0] === 'method')) &&
           (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
         ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
         ...(a.input.includes('method') && { input: { method: 'careful' } }),
+        ...(a.command === 'expedition' && { input: expeditionInput(v, a.input) }),
         detail_id: n.id,
       })),
   );
+}
+
+function expeditionInput(v: GameView, fields: readonly string[]) {
+  if (!fields.includes('attempt_id')) return { transition: 'start' };
+  const row = v.journal.find((q) => q.expedition)?.expedition;
+  if (!row) return {};
+  return fields.includes('cursor')
+    ? {
+        transition: 'shelter',
+        quest_instance_id: row.quest_instance_id,
+        attempt_id: row.attempt_id,
+        cursor: row.cursor,
+      }
+    : {
+        transition: 'restart',
+        quest_instance_id: row.quest_instance_id,
+        attempt_id: row.attempt_id,
+      };
 }
 
 export function actionContext(

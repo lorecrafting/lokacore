@@ -4,6 +4,7 @@ import { transitionBleed } from './compose_bleed.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
+import { transitionExpedition } from './compose_expedition.ts';
 import { transitionEscort } from './compose_escort.ts';
 import {
   populationTransition,
@@ -131,6 +132,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);
+    case 'expedition.transition':
+      return transitionExpedition(op, row);
   }
   return applyWorld(op, row, ctx);
 }

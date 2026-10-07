@@ -77,7 +77,10 @@ function engine(world: World): ActionSet {
   return Object.fromEntries(
     Object.entries(VERBS)
       .filter(
-        ([verb]) => locked(verb) && !(verb === 'wait' && world.cartridge.manifest.time_policy),
+        ([verb]) =>
+          locked(verb) &&
+          verb !== 'expedition' &&
+          !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
       .filter(
         ([verb]) =>
