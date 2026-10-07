@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
-import { caseHost, coverage } from './e1_case_host.ts';
+import { caseHost, coverage, witnessedObligations } from './e1_case_host.ts';
 import { storageFault, faultSchedule } from './e1_faults.ts';
 import { replayCase, gaps } from './e1_cases.ts';
 import { search } from './e1_paths.ts';
@@ -72,7 +72,7 @@ test('E1 SQLite case requires complete fault schedule and committed commands', (
   }
 });
 
-// Breaks: an executed consequence remains gapped, or a missing/unrelated witness claims it.
+// Breaks: an executed consequence remains gapped, or missing/unrelated/non-transition evidence claims it.
 test('E1 binds only the witnessed study_tracks consequence after semantic replay', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-e1-binding-'));
   const loaded = admitCandidate(bytes);
@@ -92,6 +92,23 @@ test('E1 binds only the witnessed study_tracks consequence after semantic replay
       state_hash: hash(a.story.world().state as never),
     });
     const text = readFileSync(join(dir, 'case.jsonl'), 'utf8');
+    // A retained accepted receipt cannot witness a new assignment when the fact was already true.
+    assert.equal(a.flag('fen_tracks_found'), true);
+    const committed = text
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line))
+      .find(
+        (row) =>
+          row.kind === 'step' &&
+          row.command.payload.type === 'perform' &&
+          row.command.payload.action === 'study_tracks',
+      );
+    assert.equal(committed.decision.kind, 'accepted');
+    assert.deepEqual(
+      witnessedObligations(a.story.world(), a.story.world(), committed.command, committed.decision),
+      [],
+    );
     const replay = replayCase(bytes, text, source);
     assert.deepEqual(replay.obligations, [path]);
     const pending = gaps(loaded, coverage(), new Set(replay.obligations)).authored_obligations;
