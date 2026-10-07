@@ -49,7 +49,7 @@ export function currentRound(world: World, job_id: JobId, job: JobRow) {
   return row && row.status === 'open' && row.job_id === job_id ? row : undefined;
 }
 
-// size: allow 45, one due round checks suppression before existing attack delivery
+// size: allow 46, one due round checks suppression before existing attack and crow settlement delivery
 export function roundSequence(
   world: World,
   command: Pick<Command, 'id'>,

@@ -70,6 +70,7 @@ export function crowsHold(state: Any, ops: Any[], result: Any): boolean {
   );
 }
 
+// size: allow 43, independent full-prior control and slot replay includes bounded suppression
 function legal(kind: string, before: Any, after: Any): boolean {
   if (kind === 'population.control')
     return (

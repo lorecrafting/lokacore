@@ -213,33 +213,38 @@ function react(p: P): Admitted | undefined {
   }
 }
 
-// Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 65, population deadline and bleed round pairing share ordered job delivery
-function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
-  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
-    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
-    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  const populationPairs = new Map<string, string>();
-  for (const [plan, control] of Object.entries(p.world.state.population_plans ?? {})) {
+function populationDeadlinePairs(world: World, until: number) {
+  const pairs = new Map<string, string>();
+  for (const [plan, control] of Object.entries(world.state.population_plans ?? {})) {
     const resume = control.suppression?.job_id;
     const regular = control.job_id;
-    const a = resume && p.world.state.jobs?.[resume];
-    const b = p.world.state.jobs?.[regular];
+    const a = resume && world.state.jobs?.[resume];
+    const b = world.state.jobs?.[regular];
     if (
       resume &&
       a?.status === 'pending' &&
       b?.status === 'pending' &&
       a.due_time === b.due_time &&
       a.due_time === control.suppression?.ends_at &&
-      a.due_time <= (advance?.to ?? -1) &&
+      a.due_time <= until &&
       encode(a.job) === plan &&
       encode(b.job) === plan
     ) {
-      populationPairs.set(resume, regular);
-      populationPairs.set(regular, resume);
+      pairs.set(resume, regular);
+      pairs.set(regular, resume);
     }
   }
+  return pairs;
+}
+
+// Each due job of the root's explicit advance, then its reactions, or the result that ends them.
+// size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
+function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
+  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
+  const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
+    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
+    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
   const groups = new Map<string, number>();
   const bleedPairs = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {

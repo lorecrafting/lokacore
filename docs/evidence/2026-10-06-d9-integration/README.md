@@ -135,3 +135,20 @@ S2 result retained payment/custody after reopen but could not recover its detail
 narration. No cause or resolution is claimed here. Owner save bytes, native mobile
 pause and deferred UI blur remain preserved. Full local/hosted publication gates
 are recorded separately on their actual checked heads.
+
+## Full gate size correction
+
+The normal push hook at `dd37329a` passed the full Elixir/TypeScript suites and
+preceding gates, then blocked publication on four TypeScript size checks. The
+[failed log](full-prepush-size-failure.log) is retained. Exact population deadline
+pair discovery is now a local pure helper; the job loop retains ordering and
+writer-group behavior. Three existing cohesive validators/round delivery paths
+receive exact52/46/43 line allowances within the checker policy; inspection found
+no natural one-line simplification without obscuring validation or changing
+behavior. No cartridge/semantic pin changes.
+
+[Correction controls](size-fix-controls.log) retain focused suppression/portable/
+SQLite, typecheck and size passes. Replacing the helper's `return pairs` with
+`return new Map<string, string>()` makes the existing suppression test fail with
+an assertion; restored source passes. Independent recheck and full-hook retry
+follow on their actual heads.
