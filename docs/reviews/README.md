@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [E1 reviewed-route registration](2026-10-07-e1-route-registration-review.md): exact source `e5a9d695` and evidence checkpoint `fa151bb5`, independent **APPROVE**, no findings; 16/16 named SQLite cases and semantic replays pass, the recipe files are bound into `check_hash`, and docs/focused/typecheck checks pass. E1 remains pending with 609 authored obligations.
 - [E1 recorder integration](2026-10-06-e1-recorder-integration-review.md): exact checkpoint `a1322ea0`, independent **APPROVE**, no findings; 11 focused checks and typecheck pass, retained hashes verify, E1 remains pending with 647 authored paths.
 - [E1 watch route and blocked Night receipt](2026-10-07-e1-night-watch-review.md): exact `e64a6ba4`, independent **APPROVE** for bounded watch checkpoint/blocked diagnosis; three focused cases pass, both red controls fail only the new watch case, 31 commands/24 reopens and retained semantic replay verified. Night path approval and E1 certification remain pending.
 - [E1 Wisp ward and infirmary herb route](2026-10-07-e1-wisp-herbs-review.md): exact checkpoint `747d439e`, independent **APPROVE**, no findings; 2 focused route checks, typecheck and formatting pass; retained source-bound traces replay; routes remain unregistered.
