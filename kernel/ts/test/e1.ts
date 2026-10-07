@@ -32,6 +32,7 @@ export function source() {
     'e1_obligations.ts',
     'e1_knowledge_effects.ts',
     'e1_identity.ts',
+    'e1_creatures.ts',
     'e1_paths.ts',
     'e1_routes.ts',
     'e1_dialogue_circuit.ts',

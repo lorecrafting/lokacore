@@ -26,6 +26,7 @@ import { watchRounds } from './e1_watch_rounds.ts';
 import { wispWard, infirmaryHerbs } from './e1_wisp_herbs.ts';
 import { maudsCellar } from './e1_maud.ts';
 import { lanternServices } from './e1_services.ts';
+import { creatures } from './e1_creatures.ts';
 import { nightMarsh } from './e1_night_marsh.ts';
 import { dialogueCircuit } from './e1_dialogue_circuit.ts';
 import { topology } from './e1_routes.ts';
@@ -64,6 +65,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'night-marsh',
         'dialogue-circuit',
         'lantern-services',
+        'creatures',
       ].includes(start.case_id) ||
       ['debt-on_time', 'dream-follow_fox', 'dream-wake'].includes(start.case_id) ||
       ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
@@ -218,6 +220,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('infirmary-herbs', infirmaryHerbs);
     run('mauds-cellar', maudsCellar);
     run('lantern-services', lanternServices);
+    run('creatures', creatures);
     run('night-marsh', nightMarsh);
     run('debt-on_time', chandlersDebt);
     for (const branch of ['follow_fox', 'wake'] as const)
