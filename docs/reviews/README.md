@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Resource authored interval](2026-10-06-resource-authored-interval-review.md): exact source `7a51883b`, independent **APPROVE**, no findings; 22 TypeScript and 14 Elixir focused tests pass, both old-constant mutants fail, absent-field boundary probes pass. Frozen fixtures and save handling unchanged.
+
 
 - [Current baseline Round 1](2026-10-06-current-baseline-round1-review.md): exact `c6efb420` against published `87ac4cbb`, initially CHANGES REQUIRED; scoped fix `388c430e` APPROVE closes BASE-R1 remaining C3/D12 published-status contradictions. Docs check and all 25 historical heading aliases pass.
 - [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
