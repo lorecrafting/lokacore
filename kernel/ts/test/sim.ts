@@ -189,9 +189,11 @@ type Checked = { world: World; bytes: string; code: string; failure?: Omit<Failu
 // failure, never a crash.
 function checked(kernel: Kernel, before: World, command: Command, revision: number): Checked {
   try {
+    const input = JSON.stringify(before);
     const view = kernel.gameView(before);
     const { decision, world } = kernel.step(before, command, revision);
     const bad =
+      (JSON.stringify(before) !== input ? 'input_mutated' : undefined) ??
       violated(before, command, view, decision, world) ??
       (decision.kind === 'accepted' && !adopted(before, decision, world, revision)
         ? 'adopt_mismatch'
