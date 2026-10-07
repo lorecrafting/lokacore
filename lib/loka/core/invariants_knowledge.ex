@@ -24,23 +24,26 @@ defmodule Loka.Core.InvariantsKnowledge do
   defp replay(op, rows, state, horizon) do
     key = Compose.key(Compose.target(op))
     section = if op["op"] == "visit.record", do: "visited_rooms", else: "observed_npcs"
-    before = Map.get_lazy(rows, key, fn -> get_in(state, [section, key]) end)
 
-    if valid?(op, before, horizon),
+    before =
+      Map.get_lazy(rows, key, fn -> Map.get(Map.get(state, section, %{}), key, :missing) end)
+
+    if before != nil and valid?(op, before, horizon),
       do: {:cont, Map.put(rows, key, op["value"])},
       else: {:halt, false}
   end
 
   defp valid?(%{"op" => "visit.record"} = op, before, _),
     do:
-      before == nil and op["value"]["actor_id"] == op["actor_id"] and
+      before == :missing and op["value"]["actor_id"] == op["actor_id"] and
         op["value"]["room_id"] == op["room_id"] and
         Contracts.validate("VisitedRoom", op["value"]) == :ok
 
   defp valid?(op, before, horizon),
     do:
-      before == op["from"] and op["value"]["actor_id"] == op["actor_id"] and
+      if(before == :missing, do: nil, else: before) == op["from"] and
+        op["value"]["actor_id"] == op["actor_id"] and
         op["value"]["npc_id"] == op["npc_id"] and op["value"]["at"] <= horizon and
-        (before == nil or before["at"] <= op["value"]["at"]) and
+        (before == :missing or before["at"] <= op["value"]["at"]) and
         Contracts.validate("ObservedNpc", op["value"]) == :ok
 end

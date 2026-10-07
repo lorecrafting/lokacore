@@ -11,7 +11,7 @@ export function knowledgeHolds(state: Any, ops: readonly DeltaOp[], result: Any)
     const at = key(target(op));
     const section = op.op === 'visit.record' ? 'visited_rooms' : 'observed_npcs';
     const before: Any = expected.has(at) ? expected.get(at) : state[section]?.[at];
-    if (op.value.actor_id !== op.actor_id) return false;
+    if (before === null || op.value.actor_id !== op.actor_id) return false;
     if (op.op === 'visit.record') {
       if (
         before !== undefined ||

@@ -60,3 +60,14 @@ Those pre-existing failures are retained as baseline debt, without relaxing save
 refusal. Independent source reviews, exact-candidate isolated browser proof and
 final full gate remain required. Native mobile and UI fuzz #254 remain paused or
 deferred under the existing owner decisions.
+
+## Independent finding F1 fix
+
+The foundation reviewer found that the independent invariant treated explicit null
+knowledge as absence, despite both composers correctly refusing it. TS now rejects
+null before precondition comparison; BEAM uses an explicit missing sentinel and
+rejects nil before validation. Forged-success tests reuse the independent literal
+successful rows against the frozen null-row inputs. Both existing focused suites
+passed before these tests; both new tests failed on the defect, then passed after
+the fix. The BEAM randomized differential plus fixtures passes 14 tests. These
+checks and the old/red/green logs are retained in the source evidence directory.
