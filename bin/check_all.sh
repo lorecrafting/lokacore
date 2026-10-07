@@ -10,7 +10,7 @@ export MIX_ENV=test
 export TEST_REPORTER=dot
 m() { mise exec -- "$@"; }
 # A full pass on a clean tree is recorded so pre-push can skip rerunning it unchanged.
-tree() { [ -z "$(git status --porcelain)" ] && git rev-parse HEAD^{tree}; }
+tree() { [ -z "$(git status --porcelain --untracked-files=all)" ] && git rev-parse HEAD^{tree}; }
 start=$(tree || true)
 if [ "${1-}" = --metadata ]; then
   m elixir bin/check_docs.exs

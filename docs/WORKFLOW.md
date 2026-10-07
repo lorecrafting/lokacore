@@ -96,7 +96,7 @@ Report at the end of the slice, not at every step.
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
-   resolved by the PM in `../lokacore-pm` (merge, never rebase; the union driver covers the two lists) without waking the
+   resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the two lists) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    developer runs `git pull --rebase` first when the branch is published (the review record is on the branch), never
@@ -114,10 +114,12 @@ Report at the end of the slice, not at every step.
    published head, and every job started on that head has completed successfully
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
-   Merge with `gh pr merge <N> --auto --merge --match-head-commit <sha>` as soon as the
-   verdict lands on head `<sha>`: `main` requires the CI jobs, so GitHub merges when they
-   pass and nobody waits on hosted CI; a later push makes the merge fail instead of landing
-   unchecked. The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
+   As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
+   nobody waits on hosted CI: `gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge
+   --match-head-commit <sha>`. It merges only after every started job on `<sha>` passes; a
+   later push makes the merge fail instead of landing unchecked, so any PM commit after the
+   verdict re-queues on the new head. (`main` has no required checks and the `browser` job
+   does not run on every PR, so GitHub's `--auto` would not wait.) The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
    other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other

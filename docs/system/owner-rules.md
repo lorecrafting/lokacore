@@ -229,8 +229,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
-  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM queues it with
-  `gh pr merge --auto` against required CI on `main` and may merge PRs ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); the PM runs a slice to its
+  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM may merge PRs and
+  queues each merge in the background behind `gh pr checks --watch` ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E1–E3) of the
@@ -239,6 +239,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E1–E3
   gate closures and audits; Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
+- Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
+  ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
 - Developers default to Sonnet; Opus for kernel and contract-freeze slices
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))

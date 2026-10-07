@@ -20,7 +20,7 @@ done
 [ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
 [ "$seen" = 1 ] || scope=full
 passed=$(cat "$(git rev-parse --git-path loka-checked-tree)" 2>/dev/null || true)
-if [ -n "$passed" ] && [ -z "$(git status --porcelain)" ] && [ "$(git rev-parse HEAD^{tree})" = "$passed" ]; then
+if [ -n "$passed" ] && [ -z "$(git status --porcelain --untracked-files=all)" ] && [ "$(git rev-parse HEAD^{tree})" = "$passed" ]; then
   echo "pre-push: bin/check_all.sh already passed on this clean tree"; exit 0
 fi
 [ "$scope" = metadata ] && exec bin/check_all.sh --metadata

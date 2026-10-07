@@ -18,6 +18,8 @@ The owner moved the project from Codex to Claude Code. All quotes are paraphrase
   [workflow's Claude Code routing](../WORKFLOW.md#delivery-workflow-pm-developer-reviewer).
 - Beads Rust is the permanent PM tracker; the pilot's retirement clause is removed.
   A Claude Code session starts with `bin/session_status.sh`.
-- `main` requires the CI jobs, so the PM queues merges with `gh pr merge --auto` once the
-  reviewer approves; the owner's permission to merge PRs covers it. Review, exact-head
+- Auto-merge: once the reviewer approves, the PM queues the merge in a background shell
+  (`gh pr checks --watch` then `gh pr merge --match-head-commit`), so nobody waits on hosted
+  CI and CI stays the gate; the owner's permission to merge PRs covers it. GitHub's `--auto`
+  is not used: `main` has no required checks and `browser` does not run on every PR. Review, exact-head
   and owner-reserved rules are unchanged.
