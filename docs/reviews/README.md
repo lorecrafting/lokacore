@@ -5,6 +5,7 @@
 # Independent reviews
 
 - [E1 integrated provisional checkpoint risk review](2026-10-07-e1-integrated-checkpoint-risk-review.md): evidence head `3c5d61db`, recorded source `a10a455e`, independent bounded **APPROVE**, no findings; fourteen focused checks, three retained replays, hashes/privacy and exact 407-witness/241-gap inventory verify. Full gate, final 10k review and E1 certification remain separate.
+- [E1 witness extraction and size repair](2026-10-07-e1-size-gate-repair-review.md): exact `e6319500`, independent **APPROVE**, no findings; binder/helper and four moved tests unchanged, fourteen focused cases/typecheck/size/docs pass, old oversized file red control fails. New module is in check digest; E1 remains pending.
 
 - [E1 dialogue choice fact effects](2026-10-07-e1-dialogue-choice-effects-review.md): source `d344aaaa`, evidence `ca651a4d`, independent **APPROVE**, no findings; eleven focused cases, distinct adjustment red control, selected replay/negative probes and hashes pass. E1 remains pending with 243 authored paths open.
 
