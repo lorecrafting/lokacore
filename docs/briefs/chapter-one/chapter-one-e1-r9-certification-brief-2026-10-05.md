@@ -91,3 +91,5 @@ Disjoint path author checkpoint: [watch rounds and the original blocked marsh St
 Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../../evidence/2026-10-07-e1-wisp-herbs/README.md); registration and E1 certification remain pending.
 
 [Dialogue and selected choice binding](../../evidence/2026-10-07-e1-dialogue-binding/README.md) is a bounded checkpoint; other authored paths and final certification remain pending.
+
+[Reviewed Watch, Wisp and herb route registration](../../evidence/2026-10-07-e1-route-registration/README.md) records a corrected-source 16-case replay with 609 authored obligations still pending.
