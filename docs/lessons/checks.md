@@ -17,3 +17,10 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
   comments). `bin/check_docs.exs` now fails a live-doc pointer past the end of its file;
   a moved line inside the file still needs the reviewer
   ([pointer drift review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-02-docs-system-drift-review.md)).
+- The pre-push hook (`bin/check_all.sh`, about 10 minutes) runs after git opens the SSH
+  connection, so the idle connection drops and `git push` exits 141 (SIGPIPE) after green
+  checks, with the remote ref unchanged (PR #288, 2026-10-07). Push with
+  `GIT_SSH_COMMAND="ssh -o ServerAliveInterval=20 -o ServerAliveCountMax=60" git push ...`.
+  Under heavy parallel agent load (load average about 50 on the M1) three Elixir content
+  tests hit the 60 s ExUnit timeout and passed on retry: check load before treating such a
+  timeout as a failure, and limit parallel heavy runs.
