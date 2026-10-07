@@ -16,12 +16,13 @@ echo "## Beads/PR drift"
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
 if command -v br >/dev/null 2>&1 && br list --status all --json > "$tmp/issues" 2>/dev/null \
   && gh pr list --state open --limit 200 --json number --jq '.[] | "\(.number) OPEN"' > "$tmp/states" 2>/dev/null; then
+  none=none
   for n in $(python3 bin/beads_pr_drift.py --in-progress-prs "$tmp/issues"); do
     gh pr view "$n" --json number,state --jq '"\(.number) \(.state)"' >> "$tmp/states" 2>/dev/null \
-      || echo "drift check incomplete: PR #$n state unavailable"
+      || { echo "drift check incomplete: PR #$n state unavailable"; none=; }
   done
   drift=$(python3 bin/beads_pr_drift.py "$tmp/issues" "$tmp/states") || drift="drift check failed"
-  echo "${drift:-none}"
+  [ -z "$drift$none" ] || echo "${drift:-$none}"
 else
   echo "drift check skipped: br or gh unavailable"
 fi

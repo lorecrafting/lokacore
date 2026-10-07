@@ -86,12 +86,14 @@ cat > "$case_file" <<'JSON'
 {"id":"a","status":"in_progress","external_ref":"https://github.com/lorecrafting/lokacore/pull/5"},
 {"id":"b","status":"closed","external_ref":"https://github.com/lorecrafting/lokacore/pull/6#B2"},
 {"id":"c","status":"closed","external_ref":"https://github.com/lorecrafting/lokacore/pull/6#B3"},
-{"id":"d","status":"open","external_ref":"docs/briefs/x.md"}]}
+{"id":"d","status":"open","external_ref":"docs/briefs/x.md"},
+{"id":"e","status":"in_progress","external_ref":"https://github.com/lorecrafting/lokacore/pull/10"}]}
 JSON
-printf '5 MERGED\n6 OPEN\n9 OPEN\n' > "$case_file.states"
+printf '5 MERGED\n6 OPEN\n9 OPEN\n10 CLOSED\n' > "$case_file.states"
 expected='drift: a is in_progress but PR #5 is MERGED
 drift: b is closed but PR #6 is still OPEN
 drift: c is closed but PR #6 is still OPEN
+drift: e is in_progress but PR #10 is CLOSED
 drift: open PR #9 has no Beads issue'
 if [ "$(python3 bin/beads_pr_drift.py "$case_file" "$case_file.states")" != "$expected" ]; then
   echo 'Beads drift control failed: drift lines differ' >&2
@@ -101,9 +103,10 @@ cat > "$case_file" <<'JSON'
 {"issues":[
 {"id":"a","status":"in_progress","external_ref":"https://github.com/lorecrafting/lokacore/pull/7"},
 {"id":"b","status":"closed","external_ref":"https://github.com/lorecrafting/lokacore/pull/8"},
-{"id":"c","status":"open","external_ref":null}]}
+{"id":"c","status":"open","external_ref":null},
+{"id":"d","status":"open","external_ref":"https://github.com/lorecrafting/lokacore/pull/11"}]}
 JSON
-printf '7 OPEN\n8 MERGED\n' > "$case_file.states"
+printf '7 OPEN\n8 MERGED\n11 OPEN\n' > "$case_file.states"
 if [ -n "$(python3 bin/beads_pr_drift.py "$case_file" "$case_file.states")" ] \
   || [ "$(python3 bin/beads_pr_drift.py --in-progress-prs "$case_file")" != 7 ]; then
   echo 'Beads drift control failed: clean tracker reported drift or wrong lookups' >&2
