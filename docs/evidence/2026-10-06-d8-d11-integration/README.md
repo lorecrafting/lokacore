@@ -420,3 +420,28 @@ Bounded timing attempts stopped. Isolated browser remains at Village Green; coin
 is an ordinary room item; original nest remains full8 at Oak Branches. Preview
 uses19288 with Metro19289. Final primary P4 recheck, held-refresh/Shoo UI rows,
 exact final-head hosted checks and approval remain pending. Source PR stays draft.
+
+## Controlled Book held-refresh and Shoo closure
+
+Added one minimal behavior case in mobile/app/tests/crows.e2e.ts, using the
+existing isolated repo E2E harness and its test-owned clock pattern. Stable
+base/+3000ms survives restarts; no production clocks or owner storage changed.
+Actual ordinary ancestry, torch purchase/ignite, well-coin Take/Surface and Green
+Drop precede literal carrying-label assertions before and after refresh. Actual
+Shoo shows release narration and removes its offer; ordinary Leave shows the
+original coin as a room item and removes carrying. Reload retains that custody;
+ordinary Take recovers the coin into inventory.
+
+Focused browser test exit0,1 passed8.97s. Removing the actual Shoo transfer
+survived the old focused Book move test (exit0), then failed the new crow case
+(exit1: room coin absent). Source restored. Initial harness assertions required
+ordinary Leave after Shoo; an arbitrary idlecrow click was removed because two
+legal idlecrows are present. The exact Shoo crow's absent offer already proves
+refusal projection. Compact outcomes are hashed in browser-controlled-results.log.
+
+Saved screenshots hit page-curl animation with frozen monotonic time and are not
+claimed as readable visual proof. DOM assertions and actual browser interactions
+provide this controlled UI proof; deferred UI blur254 remains untouched. Earlier
+real-clock nest/full-fallback screenshots remain distinct. Primary final P4
+recheck, exact final-head hosted checks and PM publication approval still pending;
+PR remains draft. No independent approval or merge is claimed by the developer.
