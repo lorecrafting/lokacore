@@ -270,6 +270,13 @@ resolved witnesses that quest definition and objective. For a current-state
 objective, its satisfied root and required `all` children may also be credited;
 other branches still require separate evidence. A failed or merely active quest
 does not discharge its resolved objective.
+After an accepted command, an active player quest may witness only the first
+satisfied authored journal variant whose exact text appears in the resulting
+GameView journal. Its satisfied policy root and required `all` children are
+credited; other matching variants and `any`/`not` descendants remain pending.
+Resolved or failed journals and a final outcome alone cannot prove an earlier
+active variant. Replay derives the same selection at each committed boundary
+and requires those exact paths in the retained step receipt.
 An accepted `use_transport` reaching the exact authored destination witnesses
 the selected transport definition.
 For authored item and NPC definitions, an accepted room entry may witness only

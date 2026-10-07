@@ -1,6 +1,8 @@
 import { gameView, type World } from '../src/index.ts';
 import type { Command, DecisionResult } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { refString } from '../src/runtime/decision.ts';
 
 // ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
@@ -30,6 +32,7 @@ export function witnessedObligations(
       ...(root ? requiredPolicyPaths(root, `${base}/objective/policy/root`) : []),
     ];
   });
+  questPaths.push(...journalVariantPaths(after));
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
   if (p.type === 'use_transport') {
     const ref = p.route;
@@ -225,4 +228,19 @@ function requiredPolicyPaths(node: unknown, path: string): string[] {
         )
       : []),
   ];
+}
+
+function journalVariantPaths(world: World): string[] {
+  return gameView(world).journal.flatMap((shown) => {
+    if (shown.state !== 'active') return [];
+    const key = refString(shown.quest);
+    const variants = world.cartridge.quests?.[key]?.journal?.active_variants;
+    const index = variants?.findIndex((v) => holds(world, world.character, v.when.root)) ?? -1;
+    const selected = variants?.[index];
+    if (!selected || shown.journal !== selected.text) return [];
+    return requiredPolicyPaths(
+      selected.when.root,
+      `/quests/${key}/journal/active_variants/${index}/when/root`,
+    );
+  });
 }
