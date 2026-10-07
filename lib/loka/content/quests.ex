@@ -53,9 +53,11 @@ defmodule Loka.Content.Quests do
       texts(rel, q, ctx.text) ++
       item(rel, q["objective"], ctx.m, ctx.defs) ++
       deadline(rel, q["deadline"], ctx) ++
-      Loka.Content.Patrol.quest(rel, q, ctx) ++
-      Loka.Content.Expedition.quest(rel, q, ctx)
+      attempts(rel, q, ctx)
   end
+
+  defp attempts(rel, q, ctx),
+    do: Loka.Content.Patrol.quest(rel, q, ctx) ++ Loka.Content.Expedition.quest(rel, q, ctx)
 
   defp deadline(_, nil, _), do: []
 
