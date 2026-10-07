@@ -101,3 +101,5 @@ Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../.
 [Selected dialogue policy binding](../../evidence/2026-10-07-e1-dialogue-policy-binding/README.md) is a bounded checkpoint for an accepted `all` branch; other authored policy paths remain pending.
 
 Disjoint path author checkpoint: [legal Night route after the published checker fix](../../evidence/2026-10-07-e1-night-published/README.md), preserving the original failure receipt; independent review/registration and E1 certification remain pending.
+
+[Integrated Maud/Night routes and reviewed witness rules](../../evidence/2026-10-07-e1-integrated-routes/README.md) passed 18 clean-source SQLite cases and replays; 509 authored paths remain pending.
