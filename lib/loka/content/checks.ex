@@ -61,6 +61,7 @@ defmodule Loka.Content.Checks do
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
     field = fn
+      {"knock", v} -> {"knock", expand(v, m)}
       {"corpse_ingress", v} -> {"corpse_ingress", expand(v, m)}
       {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)}
     end
@@ -71,6 +72,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
     do: Map.put(gate, "fact", ref(f, "fact", m))
+
+  def expand(%{"npc" => npc, "room" => room, "answered" => _} = knock, m),
+    do: knock |> Map.put("npc", ref(npc, "npc", m)) |> Map.put("room", ref(room, "room", m))
 
   # A reaction's trigger (ReactionRule on): its short fact or room.
   def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),

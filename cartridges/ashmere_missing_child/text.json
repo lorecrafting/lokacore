@@ -794,5 +794,14 @@
   "npc.crow.carrying": "The crow grips an old coin in its beak.",
   "actions.a_aldric_debt": "Deliver the tithe ledger",
   "actions.maud_offer": "Ask about cellar work",
-  "actions.maud_turn_in": "Report the cleared cellar"
+  "actions.maud_turn_in": "Report the cleared cellar",
+  "barrier.chapel_door.short": "the chapel door",
+  "knock.chapel.answered": "Aldric calls from the nave, “Come in; the chapel is open.”",
+  "knock.chapel.unanswered": "No one answers your knock.",
+  "item.boot.short": "Wren’s boot",
+  "item.boot.room": "A small muddy [boot] lies among the reeds.",
+  "item.boot.description": "A child’s worn boot, still muddy from the reed bank.",
+  "item.leather_boots.short": "leather boots",
+  "item.leather_boots.room": "A pair of [leather boots] rests by the counter.",
+  "item.leather_boots.description": "Plain leather boots, made for walking."
 }

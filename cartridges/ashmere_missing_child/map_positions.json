@@ -1,0 +1,344 @@
+[
+  {
+    "room": "adder_nest",
+    "x": 4,
+    "y": 4,
+    "z": 0
+  },
+  {
+    "room": "belfry",
+    "x": 0,
+    "y": -10,
+    "z": 2
+  },
+  {
+    "room": "bell_tower",
+    "x": 0,
+    "y": -10,
+    "z": 1
+  },
+  {
+    "room": "black_pool",
+    "x": -2,
+    "y": 8,
+    "z": 0
+  },
+  {
+    "room": "boathouse",
+    "x": -2,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "chandler",
+    "x": -2,
+    "y": -2,
+    "z": 0
+  },
+  {
+    "room": "chandler_storeroom",
+    "x": -2,
+    "y": -2,
+    "z": -1
+  },
+  {
+    "room": "chapel_nave",
+    "x": 0,
+    "y": -10,
+    "z": 0
+  },
+  {
+    "room": "chapel_steps",
+    "x": 0,
+    "y": -8,
+    "z": 0
+  },
+  {
+    "room": "cloister",
+    "x": 0,
+    "y": -12,
+    "z": 0
+  },
+  {
+    "room": "cottage_loft",
+    "x": -1,
+    "y": 4,
+    "z": 1
+  },
+  {
+    "room": "drowned_lantern",
+    "x": 2,
+    "y": -2,
+    "z": 0
+  },
+  {
+    "room": "drowned_oak",
+    "x": -2,
+    "y": 6,
+    "z": 0
+  },
+  {
+    "room": "east_gate",
+    "x": 2,
+    "y": -4,
+    "z": 0
+  },
+  {
+    "room": "elspeth_cottage",
+    "x": -2,
+    "y": -6,
+    "z": 0
+  },
+  {
+    "room": "empty_cottage",
+    "x": -1,
+    "y": 4,
+    "z": 0
+  },
+  {
+    "room": "fen_isle_landing",
+    "x": 8,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "ferry_landing",
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "fishing_shallows",
+    "x": -2,
+    "y": 10,
+    "z": 0
+  },
+  {
+    "room": "fox_den_deep",
+    "x": 0,
+    "y": 8,
+    "z": -1
+  },
+  {
+    "room": "fox_hollow",
+    "x": 0,
+    "y": 8,
+    "z": 0
+  },
+  {
+    "room": "gate_tower",
+    "x": 2,
+    "y": -6,
+    "z": 1
+  },
+  {
+    "room": "herb_garden",
+    "x": 12,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "hound_run",
+    "x": 2,
+    "y": 4,
+    "z": 0
+  },
+  {
+    "room": "hut_loft",
+    "x": 10,
+    "y": 0,
+    "z": 1
+  },
+  {
+    "room": "infirmary",
+    "x": 2,
+    "y": -12,
+    "z": 0
+  },
+  {
+    "room": "inn_attic",
+    "x": 2,
+    "y": -2,
+    "z": 2
+  },
+  {
+    "room": "inn_rooms",
+    "x": 2,
+    "y": -2,
+    "z": 1
+  },
+  {
+    "room": "isle_hut",
+    "x": 10,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "isle_shrine",
+    "x": 8,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "kitchen_garden",
+    "x": -4,
+    "y": -12,
+    "z": 0
+  },
+  {
+    "room": "lantern_cellar",
+    "x": 2,
+    "y": -2,
+    "z": -1
+  },
+  {
+    "room": "marsh_light",
+    "x": 2,
+    "y": 6,
+    "z": 0
+  },
+  {
+    "room": "mill_cellar",
+    "x": -2,
+    "y": 2,
+    "z": -1
+  },
+  {
+    "room": "mill_loft",
+    "x": -2,
+    "y": 2,
+    "z": 1
+  },
+  {
+    "room": "mire_crossing",
+    "x": 0,
+    "y": 6,
+    "z": 0
+  },
+  {
+    "room": "north_gate",
+    "x": 0,
+    "y": -6,
+    "z": 0
+  },
+  {
+    "room": "oak_branches",
+    "x": -2,
+    "y": 6,
+    "z": 1
+  },
+  {
+    "room": "oak_crown",
+    "x": -2,
+    "y": 6,
+    "z": 2
+  },
+  {
+    "room": "old_causeway",
+    "x": 2,
+    "y": 8,
+    "z": 0
+  },
+  {
+    "room": "old_mill",
+    "x": -2,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "orchard",
+    "x": -4,
+    "y": -4,
+    "z": 0
+  },
+  {
+    "room": "pool_bottom",
+    "x": -2,
+    "y": 8,
+    "z": -1
+  },
+  {
+    "room": "prior_study",
+    "x": -2,
+    "y": -10,
+    "z": 0
+  },
+  {
+    "room": "reed_bank",
+    "x": 0,
+    "y": 4,
+    "z": 0
+  },
+  {
+    "room": "reed_path",
+    "x": 0,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "scriptorium",
+    "x": -2,
+    "y": -12,
+    "z": 0
+  },
+  {
+    "room": "smithy",
+    "x": -2,
+    "y": -4,
+    "z": 0
+  },
+  {
+    "room": "spire",
+    "x": 0,
+    "y": -10,
+    "z": 3
+  },
+  {
+    "room": "tide_flats",
+    "x": 4,
+    "y": 8,
+    "z": 0
+  },
+  {
+    "room": "village_green",
+    "x": 0,
+    "y": -4,
+    "z": 0
+  },
+  {
+    "room": "watch_cell",
+    "x": 4,
+    "y": -6,
+    "z": 0
+  },
+  {
+    "room": "watch_post",
+    "x": 2,
+    "y": -6,
+    "z": 0
+  },
+  {
+    "room": "well_bottom",
+    "x": 0,
+    "y": -2,
+    "z": -2
+  },
+  {
+    "room": "well_lane",
+    "x": 0,
+    "y": -2,
+    "z": 0
+  },
+  {
+    "room": "well_shaft",
+    "x": 0,
+    "y": -2,
+    "z": -1
+  },
+  {
+    "room": "willow_shade",
+    "x": -2,
+    "y": 4,
+    "z": 0
+  }
+]

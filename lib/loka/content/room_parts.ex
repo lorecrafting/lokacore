@@ -18,11 +18,17 @@ defmodule Loka.Content.RoomParts do
   end
 
   defp description_keys(r) do
+    knock =
+      for {dir, e} <- r["exits"],
+          e["knock"],
+          field <- ~w(answered unanswered),
+          do: {["exits", dir, "knock", field], e["knock"][field]}
+
     variants = for {s, v} <- variants(r), do: {s ++ ["description"], v["description"]}
 
     if r["dark_description"],
-      do: [{["dark_description"], r["dark_description"]} | variants],
-      else: variants
+      do: [{["dark_description"], r["dark_description"]} | variants ++ knock],
+      else: variants ++ knock
   end
 
   @doc "Each description variant of room `r` and of its details, with its steps in the room file."

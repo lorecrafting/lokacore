@@ -35,11 +35,16 @@ defmodule Loka.Content.Compiler do
     {manifest, located, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
+    {positions, d4} = Loka.Content.MapPositions.source(of(files, :map_positions), manifest, defs)
+    located = Loka.Content.MapPositions.settings(located, positions)
     v2 = v2(defs, located, text, files)
 
-    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
-      {warnings, []} -> {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
-      {_, errors} -> {:error, errors}
+    case split([loaded, d1, d2, d3, d4, checks(manifest, defs, v2, located, registry)]) do
+      {warnings, []} ->
+        {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
+
+      {_, errors} ->
+        {:error, errors}
     end
   end
 

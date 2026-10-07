@@ -6,7 +6,14 @@
       "to": "north_gate"
     },
     "north": {
-      "to": "chapel_nave"
+      "to": "chapel_nave",
+      "barrier": "chapel_door",
+      "knock": {
+        "npc": "aldric",
+        "room": "chapel_nave",
+        "answered": "knock.chapel.answered",
+        "unanswered": "knock.chapel.unanswered"
+      }
     }
   }
 }

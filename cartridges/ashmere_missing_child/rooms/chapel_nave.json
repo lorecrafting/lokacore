@@ -6,14 +6,18 @@
       "to": "bell_tower"
     },
     "south": {
-      "to": "chapel_steps"
+      "to": "chapel_steps",
+      "barrier": "chapel_door"
     },
     "north": {
       "to": "cloister"
     },
     "west": {
       "to": "prior_study",
-      "corpse_ingress": { "fact": "chapel_allegiance", "equals": "fox" }
+      "corpse_ingress": {
+        "fact": "chapel_allegiance",
+        "equals": "fox"
+      }
     }
   },
   "sanctuary": true

@@ -29,7 +29,28 @@ defmodule Loka.Content.Barriers do
 
     Enum.concat(barriers) ++
       Enum.flat_map(defs["room"], &exits(&1, m, defs)) ++
+      knock(m, defs) ++
       items(m, defs) ++ lockout(entry, m, defs)
+  end
+
+  defp knock(m, defs) do
+    for {_, {rel, [], r}} <- defs["room"],
+        {dir, e} <- r["exits"],
+        e["knock"],
+        d <- knock_face(rel, ["exits", dir], e, m, defs),
+        do: d
+  end
+
+  defp knock_face(rel, path, e, m, defs) do
+    response = e["knock"]
+
+    refs =
+      reference(rel, path ++ ["knock"], "npc", response, m, defs) ++
+        reference(rel, path ++ ["knock"], "room", response, m, defs)
+
+    if e["barrier"] && response["room"] == e["to"],
+      do: refs,
+      else: [diag("BARRIER_MISMATCH", at(rel, path ++ ["knock"])) | refs]
   end
 
   # Each item's barrier is a reference that no exit and no other item names.
