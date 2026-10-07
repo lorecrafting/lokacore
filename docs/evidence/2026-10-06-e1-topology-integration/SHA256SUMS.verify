@@ -1,0 +1,8 @@
+README.md: OK
+cli-record.log: OK
+cli-report-summary.json: OK
+cli-topology-replay.log: OK
+focused-green.log: OK
+full-gate.log: OK
+replay-registration-red.log: OK
+topology.jsonl: OK

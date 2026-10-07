@@ -81,4 +81,4 @@ Stop and return evidence if applicability is genuinely unknown, a required mecha
 Planning self-review: Ponytail retained one thin runner over existing tools and a bounded applicability table; no generalized Lab/search/certificate service. Correctness pass checked exact identity, implicit dependencies, invariant-sensitive reproduction, real commit fault branches and host-claim separation. This author check is not independent implementation review.
 
 The [legal 57-room route author checks](../../evidence/2026-10-06-e1-legal-routes/README.md)
-retain the topology recipe's distinct red control; final source-bound registration remains pending.
+retain the topology recipe's distinct red control. The [provisional integration checkpoint](../../evidence/2026-10-06-e1-topology-integration/README.md) records source-bound registration and 57 room visits; final certification remains pending.
