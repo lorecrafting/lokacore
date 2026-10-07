@@ -2,11 +2,16 @@
 
 Owner direction, verbatim:
 
-> we want a 'move forward' policy to move forward faster and dont want to keep old legacy things that dont have anything to do with the newer directions we are morphing into, old fixtures, old historic stuff etc, the only thnig we want to keep are valuable lessons that can be surfaced in the future to design system saround it to prevent similar classes of things from happening
+> please delete all old branches we dont need, we want a 'move forward' policy to move forward faster and dont want to keep old legacy things that dont have anything to do with the newer directions we are morphing into, old fixtures, old historic stuff etc, the only thnig we want to keep are valuable lessons that can be surfaced in the future to design system saround it to prevent similar classes of things from happening and stuff like that, do you understand our direction ?  Lets do a branch hygiene run and lean on the discarding side if we dont need it.  Lets start anew, afresh!
 
-> propose owner-decision PR that trims old evidence archived specs and superseded review records. And first pull those lessons into docs/lessons
+> And yes for repo cleanup please propsoe owner-decision PR that trims old evidence archived specs and upserseded review records.  And first pull those lessons into docs/lessons
 
-PM ruling under the owner's delegation, verbatim: frozen conformance fixtures in protocol/ are KEPT — they are the cross-kernel source of truth, not legacy.
+On the frozen conformance fixtures, the owner delegated the call, verbatim:
+
+> wait what is the preserve frozen conformance fixtures for? if its valuable we can keep it, or we can lift that temporarily for when things stabilize more and then resinstitute it, i leave that up to you
+
+PM decision under that delegation: keep the frozen conformance fixtures in `protocol/`; they
+are the cross-kernel source of truth, not legacy.
 
 ## Rule
 

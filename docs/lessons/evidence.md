@@ -14,7 +14,7 @@ Hard-won lessons for evidence capture and privacy.
   contained three failures that its initial summary mistakenly called green.
 - A README that claims a retained result must name a file present and hashed at the frozen
   head, with counts recomputed from that file. Claimed raw evidence was absent at review
-  (C4-R3), and a focused count disagreed with its log (E1-C6-1); the reviewer verifies the
+  (C4-R3); the reviewer verifies the
   hashes and recounts before approving
   ([C4 primary review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c4-hound-behavior-primary-review.md)).
 - `redact()` misses escaped and nested copies: a private temporary path survived inside a
