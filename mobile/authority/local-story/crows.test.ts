@@ -50,7 +50,8 @@ function setup(path = ':memory:') {
     };
     const result = s.invoke(input);
     assert.equal(result.kind, 'saved', JSON.stringify(result));
-    if (result.kind === 'saved') assert.equal((result.decision as any).kind, 'accepted');
+    if (result.kind === 'saved')
+      assert.equal((result.decision as any).kind, 'accepted', JSON.stringify(result.decision));
     return input;
   };
   invoke('choose_ancestry', [], { ancestry: 'fey_touched' });
@@ -234,5 +235,41 @@ test('cold reopen refuses a forged crow occurrence without rewriting owner progr
     assert.deepEqual(a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), before);
   } finally {
     a.p.sql.close();
+  }
+});
+
+// Breaks: cold reopen rejects a lawful combat-paused carrier or loses its Flee-resumed binding.
+test('paused and Flee-resumed crow saves cold-reopen with exact released custody', (t) => {
+  for (const resume of [false, true]) {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-crow-flee-'));
+    t.after(() => rmSync(dir, { recursive: true }));
+    const path = join(dir, 'save.db');
+    const a = setup(path);
+    a.invoke('take', [a.coin]);
+    a.invoke('drop', [a.coin]);
+    a.elapsed(43500);
+    const carrier = Object.values(a.s.world().state.crows ?? {}).find((r) => r.phase === 'leg')!;
+    a.invoke('move', [], { direction: 'south' });
+    a.invoke('attack', [carrier.member_id]);
+    const last = resume ? a.invoke('flee') : undefined;
+    const before = a.s.world().state;
+    const row = Object.values(before.crows ?? {}).find((r) => r.member_id === carrier.member_id)!;
+    assert.equal(row.phase, resume ? 'return' : 'paused_return');
+    assert.equal(before.containers[a.coin], a.s.world().roomIds[`${prefix}:room/well_lane`]);
+    assert.equal(row.generation, carrier.generation);
+    a.p.sql.close();
+    const q = elapsedHost(path, { wall: 10000, mono: 0 }, a.b);
+    t.after(() => q.sql.close());
+    const opened = openStory(q.db, a.releases, q.host);
+    assert.equal(opened.kind, 'open');
+    if (opened.kind !== 'open') continue;
+    assert.equal(encode(opened.world().state as never), encode(before as never));
+    if (last) {
+      const rows = q.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+      const replay = opened.invoke(last);
+      assert.equal(replay.kind, 'saved');
+      if (replay.kind === 'saved') assert.equal(replay.replay, true);
+      assert.deepEqual(q.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), rows);
+    }
   }
 });

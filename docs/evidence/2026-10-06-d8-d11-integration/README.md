@@ -332,3 +332,17 @@ P1 combat escape settlement and P4 expanded real-SQLite intermediate/fault proof
 remain open. Local browser carrier projection, held refresh and Shoo remain
 pending; full-nest fallback is proved above. No final full gate, new-head hosted
 checks, follow-up independent approval or merge is claimed for this checkpoint.
+
+## Round 1 combat escape fix
+
+P1: ordinary escape closure now uses the existing crow settlement to restart the
+same live crow's checked return (or idle at home). Released coin custody stays
+in the combat room. Kernel regression and real-SQLite paused/resumed cold reopen
+and exact-invocation replay: exit0,20 focused tests passed. Removing settlement
+survived the old focused kernel/authority files (exit0); updated files fail
+(exit1), restored. Kernel typecheck and affected source size checks pass.
+Ponytail/correctness self-review: existing settlement and closure reused; a small
+movement closure helper keeps the required function size gate intact. No new
+world number, source identity, schema or owner-save behavior. P4 wider intermediate
+and uncertain-COMMIT matrix and timed browser rows remain pending; final gate and
+independent follow-up review still required.

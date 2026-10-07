@@ -469,3 +469,55 @@ test('crow allowlist rejects containers, wearable and protected item definitions
     }
   }
 });
+
+// Breaks: accepted Flee closes combat but strands a surviving carrier in paused_return forever.
+test('Flee resumes the same surviving crow and preserves its released coin', () => {
+  let world = initial();
+  const coin = entity(world, 'item', 'old_coin');
+  world = act(world, 'take', coin, 91);
+  world = act(world, 'drop', coin, 92);
+  world = advance(world, START + 300);
+  const carrier = Object.values(world.state.crows ?? {}).find((r) => r.phase === 'leg')!;
+  const command = (payload: any, ordinal: number) => {
+    const result = step(
+      world,
+      {
+        id: `aaaaaaaa-0000-4000-8000-${String(ordinal).padStart(12, '0')}` as never,
+        world_context_id: world.context,
+        payload: { ...payload, actor_id: world.character },
+      },
+      ordinal,
+    );
+    assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
+    world = result.world;
+  };
+  command({ type: 'move', direction: 'south' }, 93);
+  command({ type: 'attack', target_id: carrier.member_id }, 94);
+  assert.equal(
+    Object.values(world.state.crows ?? {}).find((r) => r.member_id === carrier.member_id)?.phase,
+    'paused_return',
+  );
+  command({ type: 'flee' }, 95);
+  const resumed = Object.values(world.state.crows ?? {}).find(
+    (r) => r.member_id === carrier.member_id,
+  )!;
+  assert.equal(resumed.phase, 'return');
+  assert.equal(resumed.generation, carrier.generation);
+  assert.equal(resumed.encounter_id, null);
+  assert.equal(world.state.jobs?.[resumed.job_id!]?.status, 'pending');
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/well_lane`]);
+  assert.equal(
+    Object.values(world.state.encounters ?? {}).some((r) => r.status === 'open'),
+    false,
+  );
+  world = advance(world, START + 450);
+  assert.equal(
+    world.state.containers[carrier.member_id],
+    world.roomIds[`${prefix}:room/village_green`],
+  );
+  assert.equal(
+    Object.values(world.state.crows ?? {}).find((r) => r.member_id === carrier.member_id)?.phase,
+    'idle',
+  );
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/well_lane`]);
+});
