@@ -567,3 +567,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Post-D10 architecture maintenance record](2026-10-06-post-d10-maintenance-review.md): independent docs-only APPROVE at `eeef28b6`; #265/#269 attribution, evidence and bounded post-E3 risks verified; no new audit or implementation claimed.
 - [Post-D10 Beads follow-ups](2026-10-06-post-d10-beads-followups-review.md): exact source `9ac3fa89`, independent **APPROVE**, no findings; four evidence-linked, triggered tasks depend on E3, all 33 Chapter 1 rows remain unchanged, and the focused export check passes.
+- [Active system summaries](2026-10-06-e3-active-summaries-review.md): source `594d5a7e`, CHANGES REQUIRED (E3-SUM-1: retain deferred production clock/resume integration after classifying the elapsed policy as installed).
