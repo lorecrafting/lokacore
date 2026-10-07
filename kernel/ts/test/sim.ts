@@ -160,7 +160,7 @@ export function simulate(seed: number, kernel = KERNEL, cartridges = CARTRIDGES)
 }
 
 /** The first failure of `commands` from `start`, if any. */
-function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
+export function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
   let world = start;
   for (const [at, c] of commands.entries()) {
     const r = checked(kernel, world, c, at + 1);

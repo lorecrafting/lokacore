@@ -1,0 +1,7 @@
+changed-commands.log: OK
+focused.log: OK
+full-check.log: OK
+implicit-fact-dependency.log: OK
+missing-repro-faults.log: OK
+unknown-applicability.log: OK
+wrong-candidate.log: OK

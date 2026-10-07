@@ -4,6 +4,14 @@
 
 Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; not source GO, an adopted certification policy, a gate pass, or native certification.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md).
 
+**2026-10-06 packaging assignment:** implementation begins from published
+`71c3323dee2d9265e59587957eea3e3c90f544ac` under the bounded active
+[exact candidate proof policy](../../system/architecture.md#e1-exact-candidate-proof-policy).
+The [packaging evidence](../../evidence/2026-10-06-e1-runner-packaging/README.md)
+records author checks and pending acceptance. The [current bundled chapter](../../system/cartridge.md#current-bundled-chapter)
+supplies the inspected candidate pin; final published A–D plus Round2 fixes source identity
+and the certification verdict remain unassigned until those dependencies merge and run.
+
 ## Outcome, branch and dependencies
 
 Suggested branch: `proof/e1-r9-minimum-certification`; developer creates its own worktree. A developer can run the applicable minimum checks against one frozen candidate, retain a failing scenario with enough identity to reproduce it, and distinguish a proved gate from an unavailable host row. Reuse the existing compile/load, fixture/differential, simulator, transcript and real-SQLite fault tools. No general search framework, dashboard, signed publication service or generalized CoverageManifest.
