@@ -45,18 +45,22 @@ export function bundle(change: (c: any) => void = () => {}) {
   const canonical = encode(c);
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }
-export function fresh(change: (c: any) => void = () => {}) {
+// A release starts here; authority tests must commit ancestry through invoke.
+export function genesis(change: (c: any) => void = () => {}) {
   const b = bundle(change),
     loaded = loadCartridge(
       new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
       INSTALLED,
     );
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  const world = newWorld(
+  return newWorld(
     loaded.cartridge as Cartridge,
     '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
     [1, 2, 3, 4],
   );
+}
+export function fresh(change: (c: any) => void = () => {}) {
+  const world = genesis(change);
   const selected = step(
     world,
     {

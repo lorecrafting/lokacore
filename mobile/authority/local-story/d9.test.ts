@@ -3,115 +3,45 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, entity, fresh, ref, room } from '../../../kernel/ts/test/transport_fixture.ts';
-import { activation } from '../../../kernel/ts/src/mechanics/quest/lifecycle.ts';
-import { accepted, allocator } from '../../../kernel/ts/src/runtime/decision.ts';
-import { apply } from '../../../kernel/ts/src/runtime/apply.ts';
-import { admit, adopt } from '../../../kernel/ts/src/runtime/proposal.ts';
-import { adjust, level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
-import { deathSequence } from '../../../kernel/ts/src/mechanics/death/sequence.ts';
+import {
+  bundle,
+  entity,
+  genesis,
+  prefix,
+  ref,
+  room,
+} from '../../../kernel/ts/test/transport_fixture.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
-import { gameView, loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
-import type { Command, FactValue } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World, Cartridge } from '../../../kernel/ts/src/index.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
-import { replace, type Meta } from './store.ts';
-import { writeElapsed } from './elapsed-store.ts';
 
-function source() {
-  const change = (c: any) => {
-    c.entry = ref('room', 'belfry');
+function source(change: (c: any) => void = () => {}) {
+  const configure = (c: any) => {
+    c.entry = ref('room', 'chapel_nave');
     c.calendar.start = 64800;
+    change(c);
   };
-  const initial = fresh(change);
-  const command = {
-    id: '00000000-0000-4000-8000-000000000090' as Command['id'],
-    world_context_id: initial.context,
-    payload: { type: 'look', actor_id: initial.character },
-  } as const satisfies Command;
-  const mint = allocator(initial, command);
-  const started = apply(initial, [
-    ...activation(mint, initial.character, ref('quest', 'missing_child')).ops,
-    ...activation(mint, initial.character, ref('quest', 'bell_of_ashmere')).ops,
-  ]);
-  assert.ok('world' in started);
-  return {
-    bundle: bundle(change),
-    fresh: {
-      ...started.world,
-      state: {
-        ...started.world.state,
-        facts: {
-          ...started.world.state.facts,
-          [key({
-            kind: 'fact',
-            fact: ref('fact', 'fen_tracks_found'),
-            scope: { kind: 'player', character_id: initial.character },
-          })]: true as FactValue,
-        },
-      },
-    },
-  };
+  return { bundle: bundle(configure), fresh: genesis(configure) };
 }
 
 function studySource() {
-  const change = (c: any) => {
+  return source((c) => {
     c.entry = ref('room', 'prior_study');
-    c.calendar.start = 64800;
-  };
-  const base = fresh(change);
-  const item = entity(base, 'item', 'brass_key');
-  const held: World = {
-    ...base,
-    state: { ...base.state, containers: { ...base.state.containers, [item]: base.body } },
-  };
-  const command = {
-    id: '00000000-0000-4000-8000-000000000091' as Command['id'],
-    world_context_id: held.context,
-    payload: { type: 'look', actor_id: held.character },
-  } as const satisfies Command;
-  const mint = allocator(held, command);
-  const hp = resourceRef(held, 'hp');
-  const loss = adjust(held, held.body, hp, -level(held, held.body, hp)!, {}).op;
-  const lost = apply(held, [loss]);
-  assert.ok('world' in lost);
-  const death = deathSequence(
-    lost.world,
-    command,
-    { loss, owner_id: held.character, killer_id: null, credited_character_id: null },
-    mint,
-  );
-  const died = adopt(
-    held,
-    admit('death', accepted(held, 'died', [loss, ...death.ops], death.events)),
-    command,
-    mint,
-    1,
-  );
-  assert.equal(died.decision.kind, 'accepted');
-  return { bundle: bundle(change), fresh: died.world };
+    c.items[`${prefix}:item/brass_key`].location = { in: 'room', room: ref('room', 'prior_study') };
+    // Controlled authored combat produces the Study corpse through accepted receipts.
+    c.npcs[`${prefix}:npc/study_test_rat`] = {
+      ...structuredClone(c.npcs[`${prefix}:npc/cellar_rat_1`]),
+      key: 'study_test_rat',
+      room: ref('room', 'prior_study'),
+      attack: { chance: 100, damage_min: 100, damage_max: 100 },
+    };
+    c.world.combat.player_attack.chance = 0;
+  });
 }
 
-function setup(
-  path: string,
-  release: { bundle: ReturnType<typeof source>['bundle']; fresh: World } = source(),
-) {
+function setup(path: string, release = source(), ancestry = 'fey_touched') {
   const p = elapsedHost(path, { wall: 10000, mono: 0 }, release.bundle);
-  const m = p.sql.prepare('SELECT * FROM save').get() as Record<string, string | null>;
-  const meta = {
-    ...m,
-    parent: JSON.parse(m.parent!),
-    seed: JSON.parse(m.seed!),
-    pin: JSON.parse(m.pin!),
-  } as Meta;
-  assert.ok(replace(p.db, release.fresh, meta));
-  writeElapsed(p.db, {
-    run_id: meta.run_id,
-    wall_ms: 10000,
-    remainder: 0,
-    target: release.fresh.state.clock,
-  });
   const host = { kernel_version: p.host.kernel_version, newId: p.host.newId };
   const story = openStory(
     p.db,
@@ -120,6 +50,17 @@ function setup(
   );
   assert.equal(story.kind, 'open');
   if (story.kind !== 'open') throw new Error('save did not open');
+  const selected = story.invoke({
+    invocation_id: 'cccccccc-0000-4000-8000-000000000001',
+    actor_id: story.world().character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry },
+  } as never);
+  assert.equal(
+    selected.kind === 'saved' && (selected.decision as { kind: string }).kind,
+    'accepted',
+  );
   return { ...p, story, release, host };
 }
 
@@ -186,6 +127,7 @@ test('real SQLite cold reopen retains one cause-bound bell cue', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const p = setup(join(dir, 'save.db'));
+  staysToBelfry(p);
   const invocation = {
     invocation_id: 'aaaaaaaa-0000-4000-8000-000000000101',
     actor_id: p.story.world().character,
@@ -225,6 +167,7 @@ test('real SQLite uncertain bell COMMIT reconciles one suppression and one resum
     ['lost', '203'],
   ] as const) {
     const p = setup(join(dir, `${kind}-${suffix}.db`));
+    staysToBelfry(p);
     const invocation = {
       invocation_id: `aaaaaaaa-0000-4000-8000-000000000${suffix}`,
       actor_id: p.story.world().character,
@@ -327,10 +270,6 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
   t.after(() => rmSync(dir, { recursive: true }));
   for (const faultKind of ['failed', 'lost'] as const) {
     const p = setup(join(dir, `${faultKind}.db`), studySource());
-    assert.equal(
-      p.story.world().state.containers[p.story.world().body],
-      room(p.story.world(), 'chapel_nave'),
-    );
     const item = entity(p.story.world(), 'item', 'brass_key');
     const request = (n: number, action_key: string, target_ids: string[], input: object) => ({
       invocation_id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
@@ -360,6 +299,19 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
       invoke(n++, action, target_ids, input);
     const move = (...directions: string[]) =>
       directions.forEach((direction) => ok('move', [], { direction }));
+    ok('take', [item]);
+    ok('attack', [entity(p.story.world(), 'npc', 'study_test_rat')]);
+    const from = p.story.world().state.clock;
+    const due = Object.values(p.story.world().state.jobs!).find(
+      (job) => job.status === 'pending' && job.encounter_id,
+    )!.due_time;
+    const death = p.story.elapsed({ expected_run_id: p.story.runId(), from, until: due });
+    assert.equal(death.kind === 'saved' && (death.decision as { kind: string }).kind, 'accepted');
+    assert.equal(
+      p.story.world().state.containers[p.story.world().body],
+      room(p.story.world(), 'chapel_nave'),
+    );
+    reopen();
     staysToBelfry(p);
     ok('silence_bell', [
       Object.entries(p.story.world().details).find(([, d]) => d.key === 'bell')![0],
@@ -423,35 +375,7 @@ test('real SQLite fox Study corpse permits pickup then closes ingress after cold
 test('real SQLite stays/prior bell scene reopens before Continue', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-stays-bell-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  const change = (c: any) => {
-    c.entry = ref('room', 'chapel_nave');
-    c.calendar.start = 64800;
-  };
-  const artifact = bundle(change);
-  const loaded = loadCartridge(
-    new TextEncoder().encode(
-      `{"cartridge":${artifact.canonical},"content_hash":"${artifact.sha256}"}`,
-    ),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok);
-  if (!loaded.ok) return;
-  const unchosen = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-  const p = setup(join(dir, 'save.db'), { bundle: artifact, fresh: unchosen });
-  const ancestry = p.story.invoke({
-    invocation_id: 'cccccccc-0000-4000-8000-000000000001',
-    actor_id: p.story.world().character,
-    action_key: 'choose_ancestry',
-    target_ids: [],
-    input: { ancestry: 'fen_born' },
-  });
-  assert.equal(ancestry.kind, 'saved');
-  if (ancestry.kind === 'saved')
-    assert.equal((ancestry.decision as { kind: string }).kind, 'accepted');
+  const p = setup(join(dir, 'save.db'), source(), 'fen_born');
   staysToBelfry(p, 50);
   const reply = p.story.invoke({
     invocation_id: 'aaaaaaaa-0000-4000-8000-000000000999',
@@ -479,14 +403,7 @@ test('terminal profiles preserve bound ledger and cellar offers through SQLite r
   const dir = mkdtempSync(join(tmpdir(), 'loka-d9-services-'));
   t.after(() => rmSync(dir, { recursive: true }));
   for (const allegiance of ['prior', 'fox']) {
-    const change = (c: any) => {
-      c.entry = ref('room', 'chapel_nave');
-      c.calendar.start = 64800;
-    };
-    const p = setup(join(dir, `${allegiance}.db`), {
-      bundle: bundle(change),
-      fresh: fresh(change),
-    });
+    const p = setup(join(dir, `${allegiance}.db`));
     let n = 1;
     const invoke = (action_key: string, target_ids: string[] = [], input: object = {}) => {
       const reply = p.story.invoke({
