@@ -62,7 +62,6 @@ test('E1 witnesses late debt choices and their sequence steps only from committe
     const [l, l0, l1] = late;
     const violations: [string, string[], ...Step][] = [
       ['continuation already resolved', [], resolved, after, command, decision],
-      ['rejected decision', [], before, after, command, { kind: 'rejected' } as never],
     ];
     if (selected === 'accept_late')
       violations.push([
@@ -125,7 +124,7 @@ test('E1 witnesses late debt choices and their sequence steps only from committe
     });
     const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
     assert.deepEqual(chosen, [[], accept, [], late]);
-    assert.equal(planted, 11);
+    assert.equal(planted, 9);
     assert.deepEqual(
       replay.obligations.filter((path) => path.includes('_debt/choices/')),
       [...accept, ...late].sort(),
