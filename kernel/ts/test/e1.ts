@@ -20,10 +20,20 @@ const git = (...args: string[]) => {
   return r.stdout.trim();
 };
 
-function source() {
+export function source() {
   if (git('status', '--porcelain', '--untracked-files=normal'))
     throw new Error('dirty source tree: source receipt requires a clean commit');
-  const files = ['e1.ts', 'e1_policy.ts', 'e1_repro.ts', 'sim.ts'];
+  const files = [
+    'e1.ts',
+    'e1_policy.ts',
+    'e1_repro.ts',
+    'sim.ts',
+    'e1_case_host.ts',
+    'e1_paths.ts',
+    'e1_world.ts',
+    'e1_faults.ts',
+    'e1_cases.ts',
+  ];
   return {
     source_sha: git('rev-parse', 'HEAD'),
     check_hash: sha256(files.map((f) => sha256(read(`kernel/ts/test/${f}`))).join('\n')),
@@ -32,7 +42,7 @@ function source() {
 }
 
 // Evidence never carries a checkout, scratch path or host/device identifier.
-function redact(value: string) {
+export function redact(value: string) {
   return value
     .replace(/\/(?:Users|home|private|tmp|var)\/[^\s"'<>]+/g, '[local-path]')
     .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, '[uuid]')
@@ -63,7 +73,7 @@ function run(out: string, name: string, args: string[]): Receipt {
   };
 }
 
-function host() {
+export function host() {
   if (process.version !== 'v24.21.0') throw new Error('E1 requires pinned Node 24.21.0');
   const sql = new DatabaseSync(':memory:');
   try {
