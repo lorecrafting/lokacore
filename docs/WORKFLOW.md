@@ -20,7 +20,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`:
 | Lookup or broad search | `Explore` agent | never for judgment |
 | Bounded copy, content or docs edit from a fixed brief | `developer`, Sonnet | spec conflict or cross-layer behavior: Opus |
 | Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only | — |
-| Independent review, fix re-check | fresh `reviewer`, Opus | E1–E3 gate closure: Fable |
+| Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: two fresh Opus reviewers, Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Hard PM call | `advisor` tool | still unresolved and consequential: Fable, then the owner |
 
 An authored brief narrows exploration but never makes save, receipt or protocol work

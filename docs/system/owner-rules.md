@@ -238,7 +238,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E1–E3) of the
   riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E1–E3
+- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E2, E3 and the release-candidate certification audit ([E1 closure](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md))
   gate closures and audits; Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
