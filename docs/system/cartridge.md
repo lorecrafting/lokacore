@@ -13,11 +13,13 @@ world's definitions and text:
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
-its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). Any other
-`.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
+its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
+file outside these recognized root files and definition directories is `UNKNOWN_FIELD`. A
+source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
 ## Current bundled chapter

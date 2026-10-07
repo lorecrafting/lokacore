@@ -26,7 +26,7 @@ Every contract's
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
 `kernel/ts/src/contracts.gen.ts`, [contracts.gen.md](../contracts.gen.md) and
 [residency.gen.json](../residency.gen.json) and `--check` compares them. Registries
-(`capability_registry.json`, 38 capabilities, all `portable_capability`; `event_registry.json`;
+([`capability_registry.json`](../../protocol/capability_registry.json), all `portable_capability`; `event_registry.json`;
 `error_registry.json`; `effect_registry.json`; `feature_registry.json`; `invariants.json`;
 `residency.json`) are checked in `test/loka/core/registries_test.exs`: every command, event
 and policy op has exactly one owning capability (`:159`).
@@ -77,9 +77,12 @@ storage half):
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
    (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
-   The headless GameView/admission check classifies a foreign-world envelope
-   against the observed world before comparing its action offer: only `not_found`
-   rejection agrees. A current-world offer refused `not_found` remains a mismatch.
+   The headless GameView/admission check classifies service invocation identity before
+   comparing the observed player's offer: a nil CommandId agrees only with
+   `permission_denied`; otherwise a foreign world or actor agrees only with
+   `not_found`. A nonnil current-world, current-actor available service offer
+   refused `not_found` remains a mismatch. Other commands retain the foreign-world
+   envelope check before comparing their action offer.
 6. **Propose** (`runtime/proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`mechanics/fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns

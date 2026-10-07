@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { compose } from '../src/foundation/compose.ts';
 import {
   INSTALLED,
   loadCartridge,
@@ -12,7 +13,8 @@ import {
   type World,
 } from '../src/index.ts';
 import { gameView } from '../src/runtime/world.ts';
-import { checked, KERNEL } from './sim.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { base, checked, KERNEL } from './sim.ts';
 import { read } from './read.ts';
 
 const bundle = read('protocol/fixtures/missing_child_v042_hash.json');
@@ -65,6 +67,37 @@ function driver(start: World) {
       run({ type: 'elapsed', run_id: id(9001), from: world.state.clock, until }),
   };
 }
+
+// Breaks: the simulator rejects a legal C6 Start because its delta checker reads the clock as the prior expedition row.
+test('simulator accepts a legal Night Marsh Start and refuses a false prior attempt', () => {
+  const a = driver(fresh());
+  a.run({ type: 'choose_ancestry', ancestry: 'road_born' });
+  for (const direction of ['south', 'south', 'east']) a.run({ type: 'move', direction });
+  const detail_id = Object.entries(a.world().details).find(([, d]) => d.key === 'gnawed_bones')![0];
+  const start = a.run({ type: 'expedition', detail_id, transition: 'start' });
+  assert.equal(
+    checked({ ...KERNEL, step: () => start.result }, start.before, start.command, start.revision)
+      .failure,
+    undefined,
+  );
+  const decision = start.result.decision;
+  assert.ok(decision.kind === 'accepted');
+  const state = base(start.before);
+  const result = compose(state as never, decision.delta);
+  assert.ok(!('fault' in result));
+  assert.equal(
+    check('delta_preconditions_hold', {
+      state,
+      delta: {
+        ops: decision.delta.ops.map((op) =>
+          op.op === 'expedition.transition' ? { ...op, expected: op.value } : op,
+        ),
+      },
+      result,
+    }),
+    false,
+  );
+});
 
 // Breaks: missing corpse/population/entity world inputs make a lawful fatal receipt fail the simulator's oracle.
 test('simulator accepts the fatal receipt of the chapter combat and bleed journey', () => {

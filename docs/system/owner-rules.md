@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
+
 - D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
 
 - D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
@@ -280,6 +282,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
 
 - Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
+- The pre-production mobile app CI exception excludes `mobile/authority/local-story/`: authority/save changes run the broad code lane and browser checks; native checks remain paused ([scope clarification](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+
 - Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. This supersedes current device/Simulator routing above.
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
 

@@ -16,3 +16,19 @@ Read-only audit of the checks at `06ca984f`, followed by the scoped selector in 
 We did not split the three code jobs further: TypeScript tests compile the authored chapter through Elixir, and a kernel/content/contract edit can change all three results. Browser remains active for game source because current browser behavior depends on those changes. This is a conservative first area split. Checker, workflow, lockfile, generated Markdown, protocol and unknown paths run the broad line. Failed ancestry/API lookup runs broad checks. `mix hex.audit` stays in the hosted Elixir job for source changes; dependency updates always enter that lane. Existing native build workflows remain manual-only.
 
 The selector's planted cases cover metadata, Book-only, mixed code, generated Markdown, rename, empty/non-ancestor range and GitHub API failures. A deliberate wrong classifier must make the planted check fail. Red-control scripts mutate fixed paths, so they run sequentially in an isolated checkout.
+
+## Erratum: local-story authority scope (2026-10-06)
+
+The original selector skipped every `mobile/` path in the code lane, including
+`mobile/authority/local-story/store.ts`. That was broader than the owner decision
+that save changes retain broad code checks. The corrected selector excludes the
+local-story authority directory from the mobile app exception, with a planted
+save-edit comparison that fails under the original selector. App-only changes
+still skip code jobs and run browser checks. The timings and observations above
+remain historical; this correction adds no native or separate authority test lane.
+
+Focused correction controls: the original selector and original controls passed;
+the new save-edit control against the original selector failed with
+`FAIL ci_scope local-story save change runs code: want run, got skip`. Restoring
+the corrected selector passed the same controls, including app-only code skip
+and browser run. Shell syntax and `git diff --check` also passed.

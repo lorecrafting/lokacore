@@ -74,20 +74,23 @@ records its focused baseline, corrected tests and six independent red controls.
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
-  nonempty `source_repo_path` or a local machine path; the full export must contain
-  each Chapter 1 plan slice once with no missing dependency target or Beads-reserved
-  `-wisp-` ID. The pre-commit hook reads the staged export; CI lint and
-  `check_all` read the checkout.
-  `bin/beads_red_controls.sh` plants both path classes, a missing slice and a
-  reserved ID and observes refusal. The check needs no `br` binary.
+  nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
+  slices must appear exactly once with unique issue IDs, while supplemental
+  audit follow-ups are allowed. Missing dependency targets and Beads-reserved
+  `-wisp-` IDs fail. The pre-commit hook reads the staged export; CI lint and
+  `check_all` read the checkout. `bin/beads_red_controls.sh` accepts a valid
+  supplemental task and refuses both path classes, a missing or duplicate slice
+  and a reserved ID. The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
-  changes confined to `mobile/` plus metadata; the browser lane runs for those. All other
+  changes confined to `mobile/` outside `mobile/authority/local-story/`, plus metadata;
+  local-story authority/save changes run the broad code lane. The browser lane runs
+  for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`.
   `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
   force `run`. PR and main pushes use the same classifier. `lint` always runs; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
-  and unsafe-skip cases, including API errors.
+  and unsafe-skip cases, including a local-story save edit and API errors.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled

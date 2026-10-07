@@ -1,0 +1,13 @@
+✔ five ordered post-start entries alone resolve S27 and lower faction once (46.112792ms)
+✔ departure fails only the attempt and Restart immediately binds a new identity (22.432417ms)
+✔ simulator accepts a legal Night Marsh Start and refuses a false prior attempt (40.705667ms)
+✔ simulator accepts the fatal receipt of the chapter combat and bleed journey (44.595667ms)
+✔ simulator accepts repeat Infirmary exchange while detecting a retained retired row (74.527208ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 571.759209

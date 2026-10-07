@@ -57,6 +57,20 @@ The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-o
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
 [#265](https://github.com/lorecrafting/lokacore/pull/265). Neither closes E1 certification.
+The [C6 headless checker evidence](evidence/2026-10-06-e1-expedition-invariant/README.md)
+records a legal expedition Start correction; it grants no E1 path credit.
+
+The [post-D10 architecture record](evidence/2026-10-06-post-d10-architecture-audit.md)
+links that resolved recovery defect and four concrete post-E3 maintenance risks,
+with source evidence, triggers and minimal red controls. The PM owns follow-up
+scheduling and Beads links; this record does not close E1–E3 or start refactors.
+The architecture record was published in [#278](https://github.com/lorecrafting/lokacore/pull/278);
+its supplemental Beads follow-ups were published in [#280](https://github.com/lorecrafting/lokacore/pull/280).
+
+The [one-time documentation audit](evidence/2026-10-06-chapter-one-docs-audit.md)
+records six findings on its dated baseline. Their reviewed
+[repair dispositions](evidence/2026-10-07-chapter-one-docs-repairs.md) are
+published; E1–E3 acceptance remains open.
 
 The [dated publication log](archive/ROADMAP-2026-10-06.md) retains the individual
 PRs, reviewed source identities and historical evidence claims. It is not an
