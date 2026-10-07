@@ -242,10 +242,13 @@ test('E1 witnesses an opened dialogue and only its accepted choice', () => {
       .trim()
       .split('\n')
       .map((line) => JSON.parse(line));
-    assert.deepEqual(rows.filter((r) => r.kind === 'step').at(-1).obligations, [
-      base,
-      `${base}/policy/root`,
-    ]);
+    assert.deepEqual(
+      rows
+        .filter((r) => r.kind === 'step')
+        .at(-1)
+        .obligations.filter((p: string) => p.startsWith(base)),
+      [base, `${base}/policy/root`],
+    );
     a.choose('accept');
     a.record({
       kind: 'finish',
@@ -254,7 +257,9 @@ test('E1 witnesses an opened dialogue and only its accepted choice', () => {
       state_hash: hash(a.story.world().state as never),
     });
     assert.deepEqual(
-      replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations,
+      replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations.filter(
+        (p) => p.startsWith(base),
+      ),
       [base, `${base}/choices/accept`, `${base}/policy/root`],
     );
   } finally {
@@ -288,7 +293,7 @@ test('E1 binds each required predicate of the selected Elspeth report dialogue',
     const observed: string[][] = [];
     a.watch((before, after, command, decision) => {
       const paths = witnessedObligations(before, after, command, decision);
-      if (paths.includes(base)) observed.push(paths);
+      if (paths.includes(base)) observed.push(paths.filter((path) => path.startsWith(base)));
     });
     search(a);
     assert.deepEqual(observed, [expected]);

@@ -4,6 +4,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
+import { identityWitnesses } from './e1_identity.ts';
 
 // ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
@@ -33,7 +34,10 @@ export function witnessedObligations(
       ...(root ? requiredPolicyPaths(root, `${base}/objective/policy/root`) : []),
     ];
   });
-  questPaths.push(...journalVariantPaths(after));
+  questPaths.push(
+    ...journalVariantPaths(after),
+    ...identityWitnesses(before, after, command, decision),
+  );
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
   if (p.type === 'use_transport') {
     const ref = p.route;

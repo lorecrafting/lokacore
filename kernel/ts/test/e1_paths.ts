@@ -111,3 +111,15 @@ export function ending(
     elapsed_commands: a.commands.filter((c) => c.payload.type === 'elapsed').length,
   };
 }
+
+// Literal selected row and faction answer from the v042 fey ancestry declaration.
+export function feyAncestry(a: CaseHost) {
+  assert.equal(a.story.world().state.characters?.[a.initial.character], undefined);
+  a.invoke('choose_ancestry', [], { ancestry: 'fey_touched' });
+  a.reopen();
+  const selected = a.story.world().state.characters![a.initial.character]!;
+  assert.equal(selected.ancestry, 'fey_touched');
+  assert.equal(selected.attributes['ashmere_missing_child@0.0.42:attribute/spi'], 11);
+  assert.equal(a.flag('priory_fen_axis'), -2);
+  return { ancestry: 'fey_touched', spi: 11, faction: -2 };
+}

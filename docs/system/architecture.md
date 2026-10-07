@@ -288,6 +288,15 @@ For authored item and NPC definitions, an accepted room entry may witness only
 entities actually present in the resulting Book's visible room, inventory or
 equipment projection. Hidden, absent and unvisited entities remain pending;
 the definition inventory alone grants no witness.
+An accepted ancestry selection witnesses only its selected authored ancestry when
+an absent character selection becomes that ancestry and the receipt's exact
+`character.select` value matches the committed row. An accepted item transfer
+witnesses only a static authored item whose prior and resulting holders match
+its receipt's `entity.transfer` operation and acquisition or drop event; static
+NPC holders participating in that transfer may also be witnessed. Opening a
+pending dialogue witnesses its exact static NPC target only when that NPC is
+bound in the new continuation. Merely inspecting merchant stock grants no item
+witness; dynamically created entities require separate provenance evidence.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:

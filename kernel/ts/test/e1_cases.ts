@@ -19,7 +19,7 @@ import {
   type Coverage,
 } from './e1_case_host.ts';
 import { checked } from './sim.ts';
-import { ENDINGS } from './e1_paths.ts';
+import { ENDINGS, feyAncestry } from './e1_paths.ts';
 import { epilogueTalks } from './e1_epilogue_talks.ts';
 import { chandlersDebt, lanternDream } from './e1_optional_quests.ts';
 import { watchRounds } from './e1_watch_rounds.ts';
@@ -55,6 +55,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
       start.case_id === 'thirty-days' ||
       start.case_id === 'topology' ||
       [
+        'ancestry-fey',
         'watch-rounds',
         'wisp-ward',
         'infirmary-herbs',
@@ -209,6 +210,7 @@ function recordCases(bytes: Uint8Array, out: string) {
       run(`${child}-${allegiance}`, (a) => epilogueTalks(a, child, allegiance, fox));
     run('topology', topology);
     run('dialogue-circuit', dialogueCircuit);
+    run('ancestry-fey', feyAncestry);
     run('watch-rounds', watchRounds);
     run('wisp-ward', wispWard);
     run('infirmary-herbs', infirmaryHerbs);
