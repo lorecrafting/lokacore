@@ -45,10 +45,50 @@ Removing the compiler's physical-edge guard retained successful valid source com
 then failed the new malformed-edge test (`assert {:error, diagnostics}` received an
 accepted artifact; exit 2). It ran with `mix test --force`; source was restored.
 
+## Feature/source continuation
+
+The expedition feature-map cells now link its governing clauses, owned contracts,
+actual source modules, preserved development input and active invariants. Its
+implemented-in label explicitly leaves final release pin/publication pending.
+The example transcript records 11 accepted commands from the preserved artifact's
+fresh Ferry Landing start through Hound Run, actual encounter/Flee and five route
+stages to completion. `transcripts.test.ts` explicitly accepts that one preserved
+provisional input until the independent final successor replaces it; this is
+source replay proof, not release certification. No artifact copy was added.
+
+Actual checks for this continuation:
+
+- `bin/features.exs --check` and `bin/contracts.exs --check`: exit 0.
+- `node --test kernel/ts/test/transcripts.test.ts`: exit 0, the complete transcript suite passes including the new successful expedition trace.
+- Focused expedition behavior/contract/source/SQLite tests: exit 0, 11 tests passed.
+- The new actual-source controls permit a legitimately cleared pack at noon, five
+  live entries and successful completion at the authored faction floor. The Book's
+  captured shelter action identifies/resolves, executes once, and rejects stale
+  attempt IDs, mismatched aliases, wrong details and later-stage reuse atomically.
+- The existing SQLite route now continues through paid outbound ferry, Sedge's
+  truthful acknowledgement, her independent free D1 lesson, free return and actual
+  D6 pool descent. Cold reopen retains completion, one acknowledgement line, acquired
+  usable swim, no lesson charge and the literal 120-second water budget. Completion
+  itself leaves swim unlearned; an attempted second lesson refuses.
+- Removing the stale-attempt guard passes the old focused kernel route tests,
+  then fails the new captured-shelter test (`accepted` instead of `rejected`). Adding
+  a living-hound requirement passes the old focused route tests, then fails the new
+  cleared-pack source test (`rejected` instead of `accepted`). Both controls were
+  actually run and restored. The old route suite already fails an omitted route-edge
+  guard, so no overlapping repeat-edge test was added.
+- Typecheck: exit 0. Headless simulator: exit 0, 19 tests passed. Focused size and
+  formatting checks pass.
+- The full gate advanced past feature metadata and reached 380/385 Elixir tests
+  (exit 2): dreams/deer/patrol source assertions and the chapter canonical assertion
+  still expect the old `0.0.37` release; the fifth failure was the new contract's
+  missing example. A literal `ExpeditionAttempt` schema example fixes that fifth
+  failure; the complete contract-example test file then passes (9 tests). The full
+  gate remains unclaimed until actual predecessor integration and final pins.
+
 ## Remaining publication work
 
 Full local gate and complete review of the changed schema surface; actual final predecessor integration and independent release pins;
-final feature transcript and known answers; fresh independent reviews and CI on
+replacement of provisional feature transcript/input by final known answers; fresh independent reviews and CI on
 the exact published head; browser/Book closure. The current full gate is blocked,
 and C6 is not complete. Native work remains paused; UI blur remains deferred.
 

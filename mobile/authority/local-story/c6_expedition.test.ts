@@ -49,7 +49,7 @@ function fixture(danger = false) {
 }
 
 // Breaks: a route cursor is credited from room presence or a prior visit, rather than each new accepted edge.
-test('C6 five real entries and optional shelter survive every cold reopen', (t) => {
+test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim survive cold reopen', (t) => {
   const { bundle } = fixture();
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -124,6 +124,52 @@ test('C6 five real entries and optional shelter survive every cold reopen', (t) 
     view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')?.state,
     'resolved',
   );
+  // Completion preserves the independent D1 lesson; it does not grant a skill remotely.
+  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.acquired, false);
+  for (const direction of ['north', 'north', 'west']) invoke('move', [], { direction });
+  const ferry = () => {
+    const offer = view().notices!.find((n) => n.transport)!.transport!;
+    invoke(offer.action.action_key, [...offer.action.target_ids!], {
+      route: offer.route,
+      quoted_fare: offer.fare,
+    });
+  };
+  ferry();
+  invoke('move', [], { direction: 'east' });
+  const sedge = view().entities.find((e) => e.actions.some((a) => a.action_key === 'sedge_marsh'))!;
+  assert.ok(sedge);
+  invoke('sedge_marsh', [sedge.id]);
+  invoke('choose', [], {
+    continuation_id: view().choice!.continuation_id,
+    choice_id: 'acknowledge',
+  });
+  reopen();
+  assert.equal(
+    game.lastNarration()!.lines.filter((line) => line.key === 'marsh.sedge.acknowledged').length,
+    1,
+  );
+  const pennies = view().resources!.find((r) => r.resource.key === 'pennies')!.current;
+  invoke('sedge_swim', [sedge.id]);
+  invoke('choose', [], { continuation_id: view().choice!.continuation_id, choice_id: 'learn' });
+  reopen();
+  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.acquired, true);
+  assert.equal(view().resources!.find((r) => r.resource.key === 'pennies')!.current, pennies);
+  const repeated = game.invoke({
+    action_key: 'sedge_swim' as never,
+    target_ids: [sedge.id],
+    input: {},
+  });
+  assert.equal(repeated.kind, 'saved');
+  if (repeated.kind === 'saved') assert.equal(repeated.decision.kind, 'rejected');
+  invoke('move', [], { direction: 'west' });
+  ferry();
+  for (const direction of ['east', 'south', 'south', 'west', 'south', 'south', 'down'])
+    invoke('move', [], { direction });
+  assert.equal(view().place.title.key, 'room.pool_bottom.title');
+  assert.equal(view().water!.remaining_seconds, 120);
+  reopen();
+  assert.equal(expedition()!.status, 'completed');
+  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.usable, true);
 });
 
 // Breaks: receipt replay accepts a forged shelter flag at Start, a foreign command actor,

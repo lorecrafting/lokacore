@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Relation and provenance contracts",
-  "description": "Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).",
+  "description": "Typed relations and runtime entity identity/provenance (21 \u00a74; 03 \u00a73, \u00a711; 05 \u00a725).",
   "$defs": {
     "Relation": {
-      "description": "A typed, capability-owned relation between runtime entities (21 §4 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 §23). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.",
+      "description": "A typed, capability-owned relation between runtime entities (21 \u00a74 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 \u00a723). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.",
       "oneOf": [
         {
           "description": "entity_id is directly inside container_id (a room, character or container).",
@@ -205,7 +205,7 @@
       ]
     },
     "EntityOrigin": {
-      "description": "Where a runtime entity came from (21 §4 'spawn/population provenance'; 05 §25 'Population provenance': a plan may only replenish or clean up what it spawned).",
+      "description": "Where a runtime entity came from (21 \u00a74 'spawn/population provenance'; 05 \u00a725 'Population provenance': a plan may only replenish or clean up what it spawned).",
       "oneOf": [
         {
           "description": "Placed by the cartridge's authored content.",
@@ -328,7 +328,7 @@
       ]
     },
     "EntityIdentity": {
-      "description": "A runtime entity's identity and provenance (03 §3, §11; 21 §4): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.",
+      "description": "A runtime entity's identity and provenance (03 \u00a73, \u00a711; 21 \u00a74): its own id, the definition it instantiates (never the definition record itself), its origin, and for a player/party overlay entity its StateScope and AudiencePolicy; shared entities omit both. Authority revision is host metadata.",
       "type": "object",
       "properties": {
         "id": {
@@ -710,7 +710,19 @@
         "sheltered",
         "status"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "kind": "expedition",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "quest_instance_id": "33333333-2222-4333-8444-555555555555",
+          "attempt_id": "44444444-2222-4333-8444-555555555555",
+          "cursor": 0,
+          "sheltered": false,
+          "status": "active"
+        }
+      ]
     }
   }
 }
