@@ -16,21 +16,6 @@ const initial = () =>
     c.items[coinRef].location = { in: 'room', room: ref('room', 'village_green') };
   });
 
-// Breaks: a one-way authored transport corridor loads and strands a crow on its return.
-test('loader refuses a crow corridor without its reciprocal return edge', () => {
-  const b = bundle((c: any) => {
-    delete c.rooms[`${prefix}:room/well_lane`].exits.south;
-  });
-  const loaded = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-    INSTALLED,
-  );
-  assert.equal(loaded.ok, false);
-  if (!loaded.ok) {
-    assert.equal(loaded.diagnostic.code, 'SCHEMA_VIOLATION');
-    assert.ok(loaded.diagnostic.path.endsWith('.scavenge'));
-  }
-});
 function act(world: World, type: 'take' | 'drop', item_id: string, ordinal: number) {
   const result = step(
     world,
@@ -448,26 +433,6 @@ test('crow acquisition harmlessly completes when another transfer moved the exac
     Object.values(world.state.crows!).find((row) => row.job_id === job),
     undefined,
   );
-});
-
-// Breaks: a declared shiny container or protected root loads and lets its descendants/quest property travel.
-test('crow allowlist rejects containers, wearable and protected item definitions', () => {
-  for (const patch of [
-    { container: true, capacity: 2 },
-    { give_allowed: false },
-    { slot: 'cloak' },
-  ]) {
-    const b = bundle((c: any) => Object.assign(c.items[coinRef], patch));
-    const loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    );
-    assert.equal(loaded.ok, false);
-    if (!loaded.ok) {
-      assert.equal(loaded.diagnostic.code, 'SCHEMA_VIOLATION');
-      assert.ok(loaded.diagnostic.path.endsWith('.scavenge'));
-    }
-  }
 });
 
 // Breaks: accepted Flee closes combat but strands a surviving carrier in paused_return forever.

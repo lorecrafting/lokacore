@@ -366,3 +366,12 @@ death→replacement→new Drop cold reopen, and failed/uncertain commits at thos
 additional boundaries including combat pause/Flee resume. Browser carrying,
 held refresh and Shoo still unproved. Final full gate on the changed source/test
 head remains required. Branch remains draft/unapproved/unmerged.
+
+## Final-source gate correction
+
+Full gate on 966625cf exited1 at TypeScript size: crow.test.ts523/500. Earlier
+Elixir/core and TypeScript/headless stages passed. Moved loader role and corridor
+cases to crow_loader.test.ts using the existing bundle fixture, preserving all
+assertions and size limits. Focused crow/loader/composition/SQLite: exit0,24 passed;
+both affected test files pass size checks. Normal pre-push full gate will certify
+the final pushed head; P4/browser/follow-up review remain open.
