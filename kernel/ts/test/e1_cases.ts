@@ -25,6 +25,7 @@ import { chandlersDebt, lanternDream } from './e1_optional_quests.ts';
 import { watchRounds } from './e1_watch_rounds.ts';
 import { wispWard, infirmaryHerbs } from './e1_wisp_herbs.ts';
 import { maudsCellar } from './e1_maud.ts';
+import { debtElapsed, debtLate } from './e1_debt.ts';
 import { lanternServices } from './e1_services.ts';
 import { nightMarsh } from './e1_night_marsh.ts';
 import { dialogueCircuit } from './e1_dialogue_circuit.ts';
@@ -70,7 +71,9 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'dialogue-circuit',
         'lantern-services',
       ].includes(start.case_id) ||
-      ['debt-on_time', 'dream-follow_fox', 'dream-wake'].includes(start.case_id) ||
+      ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
+        start.case_id,
+      ) ||
       ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
     'unknown E1 case',
   );
@@ -242,6 +245,8 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('lantern-services', lanternServices);
     run('night-marsh', nightMarsh);
     run('debt-on_time', chandlersDebt);
+    run('debt-late', debtLate);
+    run('debt-elapsed', debtElapsed);
     for (const branch of ['follow_fox', 'wake'] as const)
       run(`dream-${branch}`, (a) => lanternDream(a, branch));
     run('thirty-days', thirtyDays);
