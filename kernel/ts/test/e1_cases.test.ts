@@ -439,3 +439,57 @@ test('E1 binds Maud objective only on its committed resolved transition', () => 
     rmSync(dir, { recursive: true });
   }
 });
+
+// Breaks: entering a room displays its authored item or NPC but leaves that exact definition gapped.
+test('E1 binds only visible entity definitions after committed room entry', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-visible-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    { case_id: 'topology', source, fault_schedule: [] },
+  );
+  const boots = '/items/ashmere_missing_child@0.0.42:item/leather_boots';
+  const sedge = '/npcs/ashmere_missing_child@0.0.42:npc/sedge';
+  const hidden = '/npcs/ashmere_missing_child@0.0.42:npc/wisp';
+  try {
+    const entered: Record<string, string[]> = {};
+    a.watch((before, after, command, decision) => {
+      const paths = witnessedObligations(before, after, command, decision);
+      if (command.payload.type === 'move') entered[gameView(after).place.title.key] = paths;
+      else assert.equal(paths.includes(boots) || paths.includes(sedge), false);
+    });
+    a.invoke('choose_ancestry', [], { ancestry: 'hill_folk' });
+    a.move('north', 'west');
+    a.reopen();
+    assert.equal(entered['room.chandler.title']?.includes(boots), true);
+    a.move('east', 'south', 'west');
+    a.invoke('board_ferry', [a.detail('boathouse', 'ferry')], {
+      route: {
+        cartridge_id: 'ashmere_missing_child',
+        cartridge_version: '0.0.42',
+        kind: 'transport',
+        key: 'fen_outbound',
+      },
+      quoted_fare: 2,
+    });
+    a.move('east');
+    a.reopen();
+    assert.equal(entered['room.isle_hut.title']?.includes(sedge), true);
+    assert.equal(Object.values(entered).flat().includes(hidden), false);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    assert.equal(replay.obligations.includes(boots), true);
+    assert.equal(replay.obligations.includes(sedge), true);
+    assert.equal(replay.obligations.includes(hidden), false);
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});

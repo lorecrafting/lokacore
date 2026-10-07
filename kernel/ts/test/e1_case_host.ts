@@ -41,7 +41,7 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: bind only reviewed dialogue/choice/policy, scene, recipe and quest witnesses;
+// ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -70,6 +70,29 @@ export function witnessedObligations(
     ];
   });
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
+  if (p.type === 'move') {
+    if (before.state.containers[before.body] === after.state.containers[after.body])
+      return questPaths;
+    const view = gameView(after);
+    const refs = new Map(Object.entries(after.entityIds).map(([ref, id]) => [id, ref]));
+    const shown = [
+      ...view.entities,
+      ...view.inventory,
+      ...(view.equipment ?? []).flatMap((slot) => (slot.item ? [slot.item] : [])),
+    ];
+    return withQuests([
+      ...new Set(
+        shown.flatMap(({ id }) => {
+          const ref = refs.get(id);
+          return ref?.includes(':item/')
+            ? [`/items/${ref}`]
+            : ref?.includes(':npc/')
+              ? [`/npcs/${ref}`]
+              : [];
+        }),
+      ),
+    ]);
+  }
   if (p.type === 'talk') {
     return withQuests(
       Object.entries(after.state.choices ?? {})
