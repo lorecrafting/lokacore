@@ -37,3 +37,25 @@ behavior requires expanding this patch for those cases.
 Ponytail Review: Lean already. Ship. No open findings or source recheck required.
 Normal exact-head publication checks and hosted CI, including 10,000 fresh simulation
 sequences within the existing 10-minute job timeout, remain PM-owned delivery gates.
+
+## Hosted exact-head second opinion
+
+```text
+Verdict: APPROVE
+PR: #262
+Head: 780f35edc255ebe6e5c07ebc840520c4fae31321
+Base: 9d9cde51d5343242220a0bb602677c861879ea46
+
+Findings: none.
+
+Verified read-only with in-memory controls:
+- GameView and step input mutations produce input_mutated.
+- Removing the guard makes the new assertion fail; the old simulator misses the planted mutation.
+- Definition-map changes are detected; equal-value replacement causes no false positive.
+- 50 seeds preserve baseline digests.
+- 100-seed timing: baseline 1.28s, guarded 1.58s (~24% overhead), confined to tests.
+
+Known coverage limits—restored writes and non-enumerable/prototype changes—are documented and do not warrant scope expansion here. No unintended production changes or unnecessary machinery found.
+
+Exact-head green CI accepted as supplied. No files or Git state changed.
+```
