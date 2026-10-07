@@ -618,3 +618,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Chapter 1 documentation repair dispositions](2026-10-07-chapter-one-docs-repairs-review.md): `15ead59e`, fresh independent docs-only APPROVE; six merged/local repairs verified, archive digests match supplied originals, 30/33 and E1–E3 remain open.
 
 - [E1 training/social circuit independent review](2026-10-07-e1-dialogue-circuit-independent-review.md): source `bc22d433`, **APPROVE**, no findings; legal SQLite route, literal choices/balances, independent missing-conversation red control and restored 9/9 checks. E1 certification remains pending.
+- [E1 selected knowledge effects](2026-10-07-e1-knowledge-effects-review.md): source `0e07767c`, CHANGES REQUIRED; E1-K1 isolates membership-state negative controls from choice lifecycle. Runtime guard is present; E1 remains pending.
