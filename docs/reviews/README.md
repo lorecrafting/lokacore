@@ -501,3 +501,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 owner-approved scoped fix round 3](2026-10-06-c5-final-primary-review.md#owner-approved-scoped-fix-round-3--approve): source `0e7bbfe8`, APPROVE; SO7 future-cadence skip refused in both kernels and SO8 committed SQLite reopen/receipt/later-tick regression verified. TS/SQLite21/21, Elixir3/3, three mutation controls red; no open primary finding.
 
 - [C5 second opinion on owner-approved fix round 3](2026-10-06-c5-final-primary-review.md#independent-second-opinion-on-owner-approved-fix-round-3): verbatim APPROVE on corrected exact source `0e7bbfe8`; SO7/SO8 closed, no open findings. Both independent reviews approve; exact-head hosted CI remains the merge gate.
+
+- [D8 primary review](2026-10-06-d8-primary-review.md): source `41e86ee7`, CHANGES REQUIRED; combat escape, safe allowlist admission, replacement invariant and remaining save/browser proof.
