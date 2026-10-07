@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
+
 - [E1 loader carry integrated independent review](2026-10-06-e1-loader-integrated-review.md): exact source `03eb7089` against post-D10 base `87ac4cbb`, **APPROVE**, no findings; 78/78 focused tests, two independent red controls and seven negative/v042 probes pass. Loader carry only; final A–D E1 certification remains separate.
 
 - [D10 save/protocol independent review](2026-10-06-d10-save-protocol-review.md): source `806bfe4f`, test-only followup `b8c4e8ec`, scoped APPROVE; 8 focused tests, 9 independent SQLite corruption probes and 3 save-pin tests pass. No findings; foundation/proposal, browser and publication gates remain separate.
