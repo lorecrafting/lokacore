@@ -45,6 +45,7 @@ export function source() {
     'e1_world.ts',
     'e1_faults.ts',
     'e1_cases.ts',
+    'e1_dispositions.json',
   ];
   return {
     source_sha: git('rev-parse', 'HEAD'),
