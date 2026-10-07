@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Designer role](2026-10-07-designer-role-review.md): PR #298 at `e6d7a078`, independent docs-only **APPROVE WITH NOTES**; should-fix: routing row omits the fresh correctness pass that checks designer text; two nits.
+
 - [Push keepalive lesson](2026-10-07-push-keepalive-lesson-review.md): PR #296 at `6d7d3f77`, independent docs-only **APPROVE WITH NOTES**; facts match git (pre-push runs on the open connection) and `.githooks/pre-push`, no duplicate elsewhere, no local paths; 2 nits (7-line bullet mixes two facts; bare PR #288 rather than a permalink).
 
 - [E1 child issues](2026-10-07-e1-child-issues-review.md): PR #295 at `888f7b40`, independent tracker-only **APPROVE**, no findings; 6 rows only, each parent-linked to E1 with recorder/PR #288/`ff63b598` evidence, 157 disjoint paths, `--complete` passes; recorder not re-run.
