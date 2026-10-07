@@ -2,6 +2,7 @@
 
 - [E1 recorder integration](2026-10-06-e1-recorder-integration-review.md): exact checkpoint `a1322ea0`, independent **APPROVE**, no findings; 11 focused checks and typecheck pass, retained hashes verify, E1 remains pending with 647 authored paths.
 - [E1 watch route and blocked Night receipt](2026-10-07-e1-night-watch-review.md): exact `e64a6ba4`, independent **APPROVE** for bounded watch checkpoint/blocked diagnosis; three focused cases pass, both red controls fail only the new watch case, 31 commands/24 reopens and retained semantic replay verified. Night path approval and E1 certification remain pending.
+- [E1 Wisp ward and infirmary herb route](2026-10-07-e1-wisp-herbs-review.md): exact checkpoint `747d439e`, independent **APPROVE**, no findings; 2 focused route checks, typecheck and formatting pass; retained source-bound traces replay; routes remain unregistered.
 
 - [E1 legal topology route proof](2026-10-06-e1-legal-routes-review.md): exact `104701ea`, independent **APPROVE**, no findings; 57-room real SQLite focused route passes, separate elapsed-conversion red control fails, retained evidence hashes verify. Final runner registration and E1 certification remain pending.
 - [E1 optional quest checkpoint](2026-10-06-e1-optional-quests-review.md): exact `dad439c6`, independent **APPROVE**, no findings; three repeated real SQLite cases pass, missing-delivery red control exits 1, retained hashes verify. Bounded routes only; E1 certification remains pending.
