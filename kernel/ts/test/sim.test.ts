@@ -224,6 +224,25 @@ function caught(kernel: Kernel) {
 }
 const types = (cs: Command[]) => cs.map((c) => c.payload.type);
 
+// Breaks: a helper mutates the input once, so rollback and adoption compare against the
+// already-mutated world and the simulator reports no failure.
+test('red control: input mutation is caught before rollback checks read the changed world', () => {
+  let changed = false;
+  const outcome = simulate(
+    1,
+    planted({
+      gameView: (world) => {
+        if (!changed) {
+          (world.state as { clock: number }).clock += 1;
+          changed = true;
+        }
+        return KERNEL.gameView(world);
+      },
+    }),
+  );
+  assert.equal(outcome.failure?.id, 'input_mutated');
+});
+
 test('red control: a planted rule bug (drop puts the item inside itself) is found and shrunk', () => {
   const f = caught(
     planted({
