@@ -79,21 +79,8 @@
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
             },
-            "target_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            },
-            "status": {
-              "enum": [
-                "here",
-                "last_seen",
-                "unknown"
-              ]
-            },
-            "room_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
-            },
-            "at": {
-              "$ref": "command.schema.json#/$defs/LogicalTime"
+            "location": {
+              "$ref": "#/$defs/LocatedNpc"
             }
           },
           "required": [
@@ -201,6 +188,70 @@
               }
             }
           ]
+        }
+      ]
+    },
+    "LocatedNpc": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "here"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "target_id",
+            "status",
+            "room_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "last_seen"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "target_id",
+            "status",
+            "room_id",
+            "at"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "const": "unknown"
+            }
+          },
+          "required": [
+            "target_id",
+            "status"
+          ],
+          "additionalProperties": false
         }
       ]
     }

@@ -245,6 +245,10 @@ The decision result (04 §5, §5.0, §5.2).
   - `accepted`: An admitted attempt.
   - `rejected`: Not admitted.
   - `fault`: Discarded whole.
+- **LocatedNpc**: 
+  - `here`
+  - `last_seen`
+  - `unknown`
 - **RngState**: The four-word gameplay RNG state (numeric profile): integers in 0..2^32-1, not all zero.
 
 ## StateDelta contracts (`protocol/delta.schema.json`)
