@@ -58,6 +58,11 @@ define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
 [#265](https://github.com/lorecrafting/lokacore/pull/265). Neither closes E1 certification.
 
+The [post-D10 architecture record](evidence/2026-10-06-post-d10-architecture-audit.md)
+links that resolved recovery defect and four concrete post-E3 maintenance risks,
+with source evidence, triggers and minimal red controls. The PM owns follow-up
+scheduling and Beads links; this record does not close E1–E3 or start refactors.
+
 The [dated publication log](archive/ROADMAP-2026-10-06.md) retains the individual
 PRs, reviewed source identities and historical evidence claims. It is not an
 assignment queue. Native verification remains paused under the
