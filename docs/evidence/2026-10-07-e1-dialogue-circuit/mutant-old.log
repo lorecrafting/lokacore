@@ -1,0 +1,73 @@
+✔ E1 inventory retains slash-bearing v042 definition roots (222.055625ms)
+✔ E1 world settings retain semantic gates and refuse unknown keys (42.591ms)
+✔ E1 command refuses a different admitted candidate (940.501917ms)
+✔ E1 command fails an unknown applicability obligation (866.919875ms)
+✔ retained repro rechecks the invariant and refuses incomplete or changed inputs (924.891708ms)
+(node:47235) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (1300.447458ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (3347.534667ms)
+✔ E1 binds the exact study_tracks recipe and required policy from committed performance (1483.008792ms)
+✔ E1 binds the two bell assignments and the epilogue event to accepted receipts (4484.41375ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (639.984416ms)
+✔ E1 binds each required predicate of the selected Elspeth report dialogue (1638.770916ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (5826.860209ms)
+✔ E1 binds both selected dream branches and acknowledged scene steps (2213.155834ms)
+(node:47236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 reaches and resolves five post-epilogue conversations in each ending (36885.797208ms)
+(node:47237) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 Maud cellar earns all five separate deaths and the original reward durably (14630.2545ms)
+(node:47238) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 legal Night in the Marsh route cold reopens and replays completion once (4278.869417ms)
+(node:47239) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 binds Maud objective only on its committed resolved transition (7863.384042ms)
+✔ E1 binds selected dialogue fact adjustment and assignment from committed receipt (7454.9055ms)
+✔ E1 binds only visible entity definitions after committed room entry (1113.844125ms)
+✔ E1 binds only the used ferry route on committed arrival (884.533459ms)
+(node:47240) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 optional quest debt-on_time survives SQLite reopen and deterministic repetition (3716.275167ms)
+✔ E1 optional quest dream-follow_fox survives SQLite reopen and deterministic repetition (3900.738584ms)
+✔ E1 optional quest dream-wake survives SQLite reopen and deterministic repetition (4231.378667ms)
+(node:47276) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 fresh authority route visits 57 literal rooms and reopens before each joined consumer (15310.697167ms)
+(node:47280) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 watch rounds cold reopen and replay the four literal post-start checkpoints (9286.425125ms)
+(node:47311) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 wisp-ward cold reopens and replays its literal consequences (4626.554667ms)
+✔ E1 infirmary-herbs cold reopens and replays its literal consequences (8354.4795ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37829.068833
+
+exit_status=0

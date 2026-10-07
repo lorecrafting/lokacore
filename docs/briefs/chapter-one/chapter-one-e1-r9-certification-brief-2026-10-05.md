@@ -125,3 +125,7 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Integrated provisional checkpoint](../../evidence/2026-10-07-e1-integrated-checkpoint/README.md) passed 18 clean-source cases and replays with 241 authored paths still pending. E1 is not certified.
 
 [Post-split clean-source checkpoint](../../evidence/2026-10-07-e1-post-split/README.md) retained the same 241 pending paths while bringing the recorder's test files under the size gate.
+
+[Training and social circuit](../../evidence/2026-10-07-e1-dialogue-circuit/README.md)
+is a source-bound author checkpoint with 46 additional witnessed paths; independent
+review approved; integrated capture and E1 certification remain pending.

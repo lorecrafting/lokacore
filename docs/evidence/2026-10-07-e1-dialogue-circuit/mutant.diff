@@ -1,0 +1,10 @@
+--- a/kernel/ts/test/e1_dialogue_circuit.ts
++++ b/kernel/ts/test/e1_dialogue_circuit.ts
+@@ -36,7 +36,6 @@
+   a.move('west', 'north', 'north');
+   for (const choice of ['bell', 'leave']) talk('aldric', 'b_aldric', choice);
+   a.move('north');
+-  talk('ash', 'ash', 'leave');
+   talk('hale', 'hale', 'leave');
+   a.move('east');
+   learn('wick', 'bandage');
