@@ -56,3 +56,20 @@ unless that test exposes another defect.
 Ponytail Review applied to the actual diff: Lean already. No complexity finding.
 Correctness self-review found only R1. Focused checks are review evidence; full
 publication checks, exact-head CI and final E1 proof remain separate gates.
+
+## Scoped fix recheck
+
+Verdict: **APPROVE** at `0f8cfbaed8aeb78b0fc1853a6537f9d6fb9e3648`.
+**E1-BIND-R1 closed.** The added negative control uses the real searched world
+with literal fact true and the retained accepted study_tracks receipt, passes
+the same world as before/after, and expects the independent literal empty list.
+Removing the false precondition now fails this assertion: actual exact authored
+path versus expected []. Reviewer ran that mutant (exit 1), restored it, and
+reran both focused E1 files (seven tests pass, exit 0).
+
+The fix changes only the existing witness test. Direct witness/replay/policy
+source is unchanged from the reviewed head. Existing positive semantic replay,
+missing/unrelated metadata and pending recipe-root assertions remain intact.
+No false closure or new source behavior was introduced. Ponytail Review: lean
+controlled assertion, no additional abstraction or dependency. This approval
+closes only the scoped policy/binding review, not final E1 certification.
