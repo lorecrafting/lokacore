@@ -101,7 +101,7 @@ exit, departed target, altered choice or other changed interaction context keeps
 the authority refuses the stale invocation, the Book redraws and nothing acts. No substituted
 target, extra movement or optimistic success is permitted. The clock and schedules keep running.
 
-For the planned A3 finale, Continue carries the scene identity and line shown when
+For the A3 finale, Continue carries the scene identity and line shown when
 drawn. A changed line or scene remains stale even if the presenter obtains a fresh
 invocation id; the Book redraws the actual saved line. An exact accepted retry retains
 its receipt and presentation context. The Green's Begin epilogue appears as one
@@ -126,8 +126,8 @@ same offered exits. Gesture/drawing details remain in
 Map is a scrolling projection, distinct from the enlarged joystick. Releases without
 discovery metadata retain the current-room exit/door projection.
 
-The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
-is implemented in the D10 candidate: Map draws only
+The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-contract)
+is installed: Map draws only
 visited rooms at their authored level/position and links whose two endpoints were visited.
 Remote visited links are drawn as known static connections without a current traversal
 claim; only exits from the actor's current room show live availability/refusal from
@@ -418,7 +418,9 @@ original speaker after description and before options, including receipt recover
 Pending/refused/stale replies never narrate success. Journal and Green/Elspeth variants read
 committed following/separated/rescued/stays state; there is no new UI mode.
 
-## Selected S2 Book behavior (pending implementation)
+<a id="selected-s2-book-behavior-pending-implementation"></a>
+
+## Selected S2 Book behavior
 
 Peg's offered choice says the actual on-time deadline before or at 151200, says
 late-only afterward through 237600, and explains an elapsed unaccepted offer at
@@ -427,8 +429,8 @@ ledger is directly held and the actor-owned S2 is eligible. The journal and NPC
 history use confirmed quest, fact and receipt truth for on-time, late or expired
 outcomes; a stale displayed choice can refuse safely after due work, without a
 false success entry. Neither the page nor reading suspends the clock or demands a
-Wait. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
-These controls await B2 implementation.
+Wait. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract).
+These controls are installed in the [current chapter](cartridge.md#current-bundled-chapter).
 
 ## B3 shop detail
 
@@ -443,7 +445,7 @@ detail behavior and the world clock continues while the page is open.
 
 ## D11 character choice interaction
 
-**Selected planning interaction; source pending publication.** The picker projects GameView `ancestry_choices` from pinned content. A fresh Missing Child run presents four authored ancestry choices before World play. The Book sends the exact offered authority invocation using ordinary freshness, pending-save fencing and receipt replay. It does not select a default on render, elapsed update or browser refresh. The current choice page displays the authored attribute difference and actual chapter effects, including deferred Crown/mining/spell effects as deferred; it must not promise a CON/SPI check or a PER11 discovery gate. Pending, stale or refused results claim no selection and do not expose ordinary play. Once confirmed, the Book enters the saved run and the Character page shows the selected ancestry, six confirmed values, acquired skill and current qualification from GameView. Continue/refresh/death never reopens the picker for a selected run. A new game still requires explicit Start over confirmation under the existing pin rules.
+The picker projects GameView `ancestry_choices` from pinned content. A fresh Missing Child run presents four authored ancestry choices before World play. The Book sends the exact offered authority invocation using ordinary freshness, pending-save fencing and receipt replay. It does not select a default on render, elapsed update or browser refresh. The current choice page displays the authored attribute difference and actual chapter effects, including deferred Crown/mining/spell effects as deferred; it must not promise a CON/SPI check or a PER11 discovery gate. Pending, stale or refused results claim no selection and do not expose ordinary play. Once confirmed, the Book enters the saved run and the Character page shows the selected ancestry, six confirmed values, acquired skill and current qualification from GameView. Continue/refresh/death never reopens the picker for a selected run. A new game still requires explicit Start over confirmation under the existing pin rules.
 
 Isolated browser proof selects each ancestry on its own fresh run, refreshes/continues and exercises its actual Swim, Haggle, dark-sight or faction effect. Hill-folk sees ordinary current-room dark content and an adjacent dark destination through a legal Scan while a barred exit stays barred; with no actual lit source, B6's light-off Seek remains available. Authority and real SQLite fault proof are separate. Mobile/native verification and cosmetic UI blur remain deferred.
 
@@ -540,7 +542,7 @@ interaction evidence belongs to the release's later verification record.
 
 ## B7 water details
 
-**Selected, pending implementation.** Well Lane's actual well detail offers Fill
+Well Lane's actual well detail offers Fill
 with an exact currently eligible vessel destination. Inventory and reachable
 item details show confirmed liquid kind, quantity/capacity and authored unit
 label, and offer Drink or Pour to a distinct eligible owned vessel. Distinguish
@@ -564,7 +566,7 @@ the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
 saved state. Book owns neither liquid math nor a consumption effect producer.
 ## C2 watch patrol details
 
-**Local source independently approved; publication pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+[C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
 page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
 current state; C1 lessons remain available at his actual location. The journal names
@@ -642,7 +644,7 @@ recovery and that walk never require waiting for respawn, wandering or darkness.
 
 ## C4 pack response and enemy flight details
 
-**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+[C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
 uses the existing NPC Attack and Combat page. Each hound entry/detail retains its
 exact runtime target. GameView projects the current primary and actual active
 opponents so identical template labels never select another instance; no raw UUID
@@ -689,7 +691,7 @@ native builds/sessions remain paused.
 
 ## B8 Maud and bed details
 
-**Implemented locally, publication pending.** Original Maud's detail follows the canonical
+Original Maud's detail follows the canonical
 [detail order](#detail-page-order), with authored description, nonempty committed
 history, then current S1 dialogue and separate Room/Meal/Drink service offers.
 Each offer states its projected exact price and declared benefit, including
@@ -714,7 +716,7 @@ pause or new store/UI framework is introduced.
 
 ## D2 held book details
 
-Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
+[D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
 ordinary item detail order and custody projection. World → book detail → Take
 confirms the existing return to World. Contents → Equipment & Inventory → held
 book detail offers explicit Read; opening that item sends no Read. For an open
@@ -745,7 +747,7 @@ retains its original identity and follows normal refusal/Leave rules.
 
 ## B9 bed and resumable dream details
 
-**Current consumed source; independent review pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+[S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
 uses World→actual Inn Rooms bed→Dream nesting. The paid bed's accepted ordinary
 Rest may open its first dream at the confirmed first beat. Rental, menu opening,
 unpaid Rest or a pending save never does. First Rest commits beat1 even if
@@ -843,7 +845,7 @@ native verification remains paused.
 
 ## D6 water exits and Chapel recovery
 
-**PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with
+Shaft/bank show Down with
 shared admission's actual availability/refusal. Show authored entry cost and
 submersion/drowning warning before descent. Bottom pages use ordinary World and
 item/container details, with remaining submersion time visible from confirmed
@@ -892,21 +894,23 @@ not an optimistic display callback.
 
 ## D12 practical lessons and benefits
 
-**Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
+[D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
 
 The Willow Shade patch shows current derived finite supply and its ordinary one-item Harvest. A usable opted skill also supplies the authored careful offer and item count through the same pure method-aware admission as execution; insufficient stock/combined carrying has an honest typed refusal and retains ordinary Harvest where legal. The control sends the [exact alias input](protocol.md#d12-harvest-method-and-buy-quote-composition), without presenter-created herbs or skill gating inferred from names. Peg's rows show the effective Buy price and actual Sell price/availability from the shared current query, and bind the displayed Buy number to invocation. Qualification/stock changes refresh or refuse the stale offer before charge.
 
 Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.
 
-## D7 deer sight and hide details (planning contract)
+<a id="d7-deer-sight-and-hide-details-planning-contract"></a>
 
-**PM-selected proposal; independent plan review and source proof pending.** Project each co-present living deer as its own exact runtime NPC detail and Attack target through ordinary GameView/admission. The 300-unit pending sight job does not hide a present target; successful sight flight removes that exact deer from the room/detail and closes its Combat page when no opponent remains, including after a surviving equal-due round. If the encounter remains live, stale or blocked sight leaves Combat and its next round intact. Narrate only confirmed departure, with its actual adjacent direction; a stale pending or refused job claims none. Flight reveals no corpse or hide.
+## D7 deer sight and hide details
+
+Project each co-present living deer as its own exact runtime NPC detail and Attack target through ordinary GameView/admission. The 300-unit pending sight job does not hide a present target; successful sight flight removes that exact deer from the room/detail and closes its Combat page when no opponent remains, including after a surviving equal-due round. If the encounter remains live, stale or blocked sight leaves Combat and its next round intact. Narrate only confirmed departure, with its actual adjacent direction; a stale pending or refused job claims none. Flight reveals no corpse or hide.
 
 A true combat death exposes that deer's real public corpse and exact conserved hide through ordinary Contents/Take/Carrying, including after refresh. A stale target never binds a new generation; render/entry alone gives no item or credit. Demonstrate a legal +150 attack-before-flight kill, an unengaged live sight departure, and a controlled missed attack whose surviving equal-due round hands off to +300 flight, with confirmed receipt routing and refresh. Native device work remains paused; this clause does not promise a Sell/use action for a hide without an admitted consumer.
 
 ## C5 bleeding and bandage details
 
-**Selected planning interaction; source pending.** Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
+Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
 
 Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
 
@@ -914,11 +918,13 @@ Confirmed treatment leaves HP and encounter/round state unchanged, removes the c
 
 ## C6 marsh expedition
 
-**Selected planning interaction; source pending.** At any hour Hound Run's gnawed-bones detail offers one explicit Start or Restart when the shared kernel admission accepts it. The Journal shows the active attempt's next named route edge or immediate retry after failure, then one confirmed completion. It does not ask the player to wait for night or a replacement hound. If a present eligible hound is provoked at Start, the existing Combat page shows the actual encounter and its current Flee/Bandage options; no scripted hit or guaranteed safety is narrated. Ordinary hounds remain passive outside that opt-in.
+At any hour Hound Run's gnawed-bones detail offers one explicit Start or Restart when the shared kernel admission accepts it. The Journal shows the active attempt's next named route edge or immediate retry after failure, then one confirmed completion. It does not ask the player to wait for night or a replacement hound. If a present eligible hound is provoked at Start, the existing Combat page shows the actual encounter and its current Flee/Bandage options; no scripted hit or guaranteed safety is narrated. Ordinary hounds remain passive outside that opt-in.
 
 Map/World use confirmed player transfers for the five ordered entries. A wrong in-footprint move retains the honest next edge; a departure outside the footprint or death shows the attempt failed and the immediate Hound Run retry. The Drowned Oak midpoint may offer Use shelter once for this attempt, without Rest or a time jump. The fifth entry returns to Reed Bank. Only the accepted fifth entry can show `fen.night_survived`, the exact faction consequence and Sedge's later acknowledgement. Her earlier free swim lesson remains independently available. Pending/refused/stale/replayed actions produce no duplicate progress, reward or success line. Browser interaction and refresh prove the route, failure/retry, Book commands and resulting journal; headless and SQLite proof remain separate. Mobile sessions and cosmetic UI blur are deferred.
 
-## D8 crow carrying and nest recovery (selected planning interaction)
+<a id="d8-crow-carrying-and-nest-recovery-selected-planning-interaction"></a>
+
+## D8 crow carrying and nest recovery
 
 World shows the actual crow in its current room and, while held, a truthful authored carrying line for the exact coin. It does not expose the crow's inventory as player-reachable Take. The current crow detail offers Shoo only when the shared kernel admission would accept that exact member/item; confirmed Shoo names the dropped same item once, then ordinary World item Take may recover it. Attack release, death and fallback likewise show only committed custody, with no promised nest loot. During a checked return, World shows the original crow at its actual room; no Shoo offer or second acquisition is promised. On home arrival it can again be selected for a later dropped coin.
 

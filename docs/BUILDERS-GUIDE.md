@@ -2,8 +2,10 @@
 
 Loka currently has a file-based builder workflow. You write JSON source, compile it into a
 versioned [cartridge](system/glossary.md), and play or replay the result. The compiler and
-loader validate content before a world starts. A visual Builder app, live editing and live
-spawning are [future work](system/future.md#authoring-and-certification).
+loader validate content before a world starts. A visual Builder app, live editing and arbitrary builder spawning are
+[future work](system/future.md#authoring-and-certification). Authored bounded
+[population plans](system/mechanics.md#c3-bounded-living-hounds-selected-contract) already
+create and replace live NPC instances.
 
 This is a route through the installed system, not a second specification. The
 [cartridge source and validation rules](system/cartridge.md), [installed mechanics](system/mechanics.md),
@@ -14,7 +16,7 @@ This is a route through the installed system, not a second specification. The
 | Builder term | What you author | What the engine does |
 |---|---|---|
 | Cartridge | A manifest plus JSON files for a world or chapter | Compiles, hashes and pins the whole release and its capability lock |
-| Blueprint | An NPC or item definition | Creates one entity from each blueprint when a new world starts; each entity has its own ID and mutable state |
+| Blueprint | An NPC or item definition | Instantiates ordinary placements at world creation; population/death templates create their admitted instances with separate IDs and state |
 | Room and detail | Places, exits and things to examine | Creates the map and resolves movement, visibility and targets |
 | Fact and policy | Typed world values and conditions | Evaluates whether actions, dialogue and reactions apply |
 | Recipe | A composed player action | Checks target and policy, then applies its registered consequences |
@@ -22,7 +24,9 @@ This is a route through the installed system, not a second specification. The
 
 The [glossary](system/glossary.md) distinguishes a blueprint from a live entity. A compiled
 cartridge is an immutable release; changing source and recompiling creates a different content
-hash. Existing saves remain pinned to the release that created them ([save model](system/save.md)).
+hash. The [current bundled chapter](system/cartridge.md#current-bundled-chapter) owns its
+release and oracle identity. Existing saves remain pinned to the release that created
+them ([save model](system/save.md)).
 
 ## Make and try a cartridge
 
