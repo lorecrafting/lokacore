@@ -535,3 +535,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C6 scoped historical D12 fixture review](2026-10-06-c6-provisional-primary-review.md#scoped-full-gate-d12-fixture-correction): exact `249a9976`, APPROVE; original four behavior/contract tests pass, all frozen text retained, twelve bounded additions and old wholesale-graft loader red control confirmed.
 
 - [Simulator input purity](2026-10-06-sim-input-purity-review.md): exact source `62b2bc7d`, independent APPROVE, no findings; focused test and step-side mutation caught, guard-removal control red. JSON snapshot coverage limit recorded; normal publication checks and hosted CI remain delivery gates.
+
+- [D10 primary source review](2026-10-06-d10-primary-source-review.md): source through `8a4b8b04`, independent APPROVE WITH NOTES; no additional source findings, independent v042 hash/211 IDs, real SQLite and reviewer-planted visibility/entry controls verified. Browser/full gate/opinions/CI remain publication gates.
