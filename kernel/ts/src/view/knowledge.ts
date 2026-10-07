@@ -1,4 +1,4 @@
-import type { GameView } from '../contracts.gen.ts';
+import type { GameView, Key } from '../contracts.gen.ts';
 import { COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
 import { exitOf } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -35,7 +35,7 @@ export function knowledgeView(
           world,
           { type: 'where', actor_id: world.character, target_id: r.npc_id },
           steps,
-          'where',
+          'where' as Key,
         ),
     )
     .sort((a, b) => cmp(a.npc_id, b.npc_id))

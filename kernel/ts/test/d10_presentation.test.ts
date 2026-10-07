@@ -5,6 +5,7 @@ import { locate } from '../src/mechanics/knowledge/query.ts';
 import { knock, decide } from '../src/mechanics/barrier/rule.ts';
 import { knowledgeView } from '../src/view/knowledge.ts';
 import { resolve } from '../src/commands/target.ts';
+import { parse } from '../play/text.ts';
 import { fresh, npc, room } from './light_fixture.ts';
 import type { World } from '../src/runtime/decision.ts';
 const ash = npc('aldric'),
@@ -163,4 +164,11 @@ test('Knock selects actual local responder and produces no writes', () => {
     { text: 'silence' },
   );
   assert.equal(knock(world, fresh.character, 'south' as never), 'invalid_target');
+});
+
+// Break: the terminal adapter turns Where into an item command or cannot name a physical Knock direction.
+test('terminal parses Where and Knock through existing exact target and door paths', () => {
+  assert.deepEqual(parse('where Ash'), { lookup: 'Ash', verb: 'where' });
+  assert.deepEqual(parse('knock north'), { door: 'knock', direction: 'north' });
+  assert.deepEqual(parse('knock chapel door'), { door: 'knock', words: 'chapel door' });
 });
