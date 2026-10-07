@@ -556,3 +556,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Current baseline Round 2](2026-10-06-current-baseline-round2-review.md): local `docs/astra-round2-history` at `ab10c69f`, CHANGES REQUIRED; scoped fix `132b4752`, APPROVE, BASE-R2-01 closed by linking installed D9 labelled selection and service/reopen proof. Archives, relative/heading navigation, release-scope caveat and save/native boundaries verified.
 
 - [Browser SQLite worker deadline second opinion](2026-10-06-web-sqlite-sync-deadline-second-review.md): exact `482f6837`, independent APPROVE; 50 focused tests pass, CPU-cap and missing-deadline controls fail in both modes, install drift refuses with bytes intact; no open findings.
+
+- [Orphan provisional fixtures](2026-10-06-orphan-fixtures-sol-review.md): `cleanup/orphan-story-baselines` at `601e7152c6c04cac9c7a3cb68432e77c7dbf0504`, independent Sol APPROVE; no findings, six recoveries and 29 active transcript pins checked, 26 focused tests pass.
