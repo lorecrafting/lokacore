@@ -334,10 +334,11 @@ nothing is credited):
   command credits no path.
 
 Evaluation uses the state and target the runtime judged: the state before the accepted
-`talk` or `perform` with that action's admission target; for a resolved quest objective, the
-state before the command when the root held there, else the committed resulting state, for
-its instance's player and without a target; and the committed resulting state for the
-selected journal variant. Replay
+`talk` or `perform` with that action's admission target, and the committed resulting state
+for the selected journal variant. A resolved quest objective (its instance's player, no
+target) may be judged before the command or mid-command after effects, so it is evaluated
+in both the before and the committed resulting state: a root holding in both credits only
+the paths credited in both, and a root holding in one state uses that state. Replay
 recomputes these credits from the replayed before/after states and accepts only paths also
 recorded in the retained step receipt, as for journal variants.
 

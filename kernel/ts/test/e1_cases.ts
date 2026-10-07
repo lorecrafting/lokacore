@@ -125,6 +125,38 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   };
 }
 
+// Rows are checked before any case runs; a witnessed row fails when gaps() is computed.
+export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOSITIONS) {
+  const known = new Set(authoredPaths(loaded));
+  assert.equal(
+    new Set(dispositions.map((d) => d.path)).size,
+    dispositions.length,
+    'duplicate disposition',
+  );
+  for (const d of dispositions)
+    assert.ok(
+      known.has(d.path) &&
+        [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x),
+      `invalid disposition ${d.path}`,
+    );
+}
+
+const authoredPaths = (loaded: LoadedCandidate) =>
+  applicability(loaded.cartridge)
+    .uses.filter((u) => u.feature.startsWith('authored.'))
+    .map((u) => u.path);
+
+/** The report's three disjoint obligation lists: witnessed, dispositioned and still open. */
+export function obligationReport(
+  loaded: LoadedCandidate,
+  seen: Coverage,
+  witnessed: Set<string>,
+  dispositions = DISPOSITIONS,
+) {
+  const { dispositioned_obligations, ...open } = gaps(loaded, seen, witnessed, dispositions);
+  return { witnessed_obligations: [...witnessed].sort(), dispositioned_obligations, gaps: open };
+}
+
 export function gaps(
   loaded: LoadedCandidate,
   seen: Coverage,
@@ -132,19 +164,9 @@ export function gaps(
   dispositions = DISPOSITIONS,
 ) {
   const c = loaded.cartridge;
-  const authored = applicability(c)
-    .uses.filter((u) => u.feature.startsWith('authored.'))
-    .map((u) => u.path);
-  const known = new Set(authored),
-    disposed = new Set(dispositions.map((d) => d.path));
-  assert.equal(disposed.size, dispositions.length, 'duplicate disposition');
-  for (const d of dispositions)
-    assert.ok(
-      known.has(d.path) &&
-        !witnessed.has(d.path) &&
-        [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x),
-      `invalid disposition ${d.path}`,
-    );
+  const authored = authoredPaths(loaded);
+  const disposed = new Set(dispositions.map((d) => d.path));
+  for (const path of disposed) assert.ok(!witnessed.has(path), `witnessed disposition ${path}`);
   const missing = (expected: string[], actual: Set<string>) =>
     expected.filter((key) => !actual.has(key)).sort();
   return {
@@ -181,6 +203,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     machine = host(),
     seen = coverage(),
     witnessed = new Set<string>();
+  checkDispositions(loaded);
   assert.equal(existsSync(out), false, 'output directory must be new');
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
@@ -256,7 +279,6 @@ function recordCases(bytes: Uint8Array, out: string) {
   } catch (e) {
     failure = redact(String(e));
   }
-  const { dispositioned_obligations, ...open } = gaps(loaded, seen, witnessed);
   const report = {
     status: failure ? 'fail' : 'pending',
     failure,
@@ -269,9 +291,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     coverage: Object.fromEntries(
       Object.entries(seen).map(([key, values]) => [key, [...values].sort()]),
     ),
-    witnessed_obligations: [...witnessed].sort(),
-    dispositioned_obligations,
-    gaps: open,
+    ...obligationReport(loaded, seen, witnessed),
     pending: [
       'selected 10000-sequence proof on final source/check identity',
       'all applicable path/consequence/beat receipts',

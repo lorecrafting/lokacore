@@ -6,8 +6,8 @@ import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
 import { caseHost, coverage, witnessedObligations } from './e1_case_host.ts';
-import { gaps, replayCase } from './e1_cases.ts';
-import { creditedPolicyPaths } from './e1_obligations.ts';
+import { checkDispositions, obligationReport, replayCase } from './e1_cases.ts';
+import { creditedPolicyPaths, objectivePaths } from './e1_obligations.ts';
 import { maudsCellar } from './e1_maud.ts';
 import { chandlersDebt } from './e1_optional_quests.ts';
 import { hash } from '../src/foundation/canonical.ts';
@@ -272,7 +272,7 @@ const v042 = JSON.parse(pin.canonical);
 const k = 'ashmere_missing_child@0.0.42:';
 const bellRoot: Policy = v042.quests[`${k}quest/bell_of_ashmere`].objective.policy.root;
 const [prior, fox] = (bellRoot as Extract<Policy, { op: 'any' }>).items as [Policy, Policy];
-const priorWorld = () => {
+const allegianceWorld = (allegiance: 'prior' | 'fox') => {
   const world = newWorld(
     admitCandidate(bytes).cartridge,
     'e1-branch' as WorldContextId,
@@ -287,12 +287,12 @@ const priorWorld = () => {
     ...world,
     state: {
       ...world.state,
-      facts: { ...world.state.facts, [key(fact as never)]: 'prior' as Key },
+      facts: { ...world.state.facts, [key(fact as never)]: allegiance as Key },
     },
   };
 };
 const credit = (root: Policy) => {
-  const world = priorWorld();
+  const world = allegianceWorld('prior');
   return creditedPolicyPaths(world, world.character, root, 'r');
 };
 
@@ -301,6 +301,14 @@ const credit = (root: Policy) => {
 test('E1 credits only the true child of an any objective', () => {
   assert.deepEqual(credit(bellRoot), ['r', 'r/items/0']);
   assert.deepEqual(credit({ op: 'all', items: [fox] }), []);
+});
+
+// Breaks: a reaction resolves any(prior, fox) after the command turns prior into fox, but the
+// objective is judged only on the before state, so the no-longer-true prior branch is credited.
+test('E1 credits an objective holding at both boundaries only where both agree', () => {
+  const before = allegianceWorld('prior');
+  const after = allegianceWorld('fox');
+  assert.deepEqual(objectivePaths(before, after, before.character, bellRoot, 'r'), ['r']);
 });
 
 // Breaks: a `not` passes credit to its false child, so Peg's untouched debt guard counts as fired.
@@ -322,18 +330,22 @@ test('E1 not(all) credits only a polarity-restored true leaf', () => {
   );
 });
 
-// Breaks: a reviewed disposition is merged into witnessed or still listed as pending.
+// Breaks: a reviewed disposition is merged into the witnessed list, still listed as pending, or a
+// malformed row (unknown path, duplicate, missing review) is accepted.
 test('E1 reports a disposition apart from witnessed and pending paths', () => {
   const loaded = admitCandidate(bytes);
-  const path = `/dialogues/${k}dialogue/a_peg_debt/policy/root/item`;
+  const root = `/dialogues/${k}dialogue/a_peg_debt/policy/root`;
+  const path = `${root}/item`;
   const row = { path, reason: 'r', evidence: 'e', review: 'v' };
-  const witnessed = new Set<string>();
-  const report = gaps(loaded, coverage(), witnessed, [row]);
+  const report = obligationReport(loaded, coverage(), new Set([root]), [row]);
+  assert.deepEqual(report.witnessed_obligations, [root]);
   assert.deepEqual(report.dispositioned_obligations, [path]);
-  assert.equal(report.authored_obligations.includes(path), false);
-  assert.equal(witnessed.size, 0);
-  assert.throws(() => gaps(loaded, coverage(), new Set([path]), [row]), /invalid disposition/);
-  assert.throws(() => gaps(loaded, coverage(), witnessed, [row, row]), /duplicate disposition/);
-  const unreviewed = { ...row, review: 1 as never };
-  assert.throws(() => gaps(loaded, coverage(), witnessed, [unreviewed]), /invalid disposition/);
+  assert.equal(report.gaps.authored_obligations.includes(path), false);
+  assert.throws(() => obligationReport(loaded, coverage(), new Set([path]), [row]), /witnessed/);
+  assert.throws(() => checkDispositions(loaded, [row, row]), /duplicate disposition/);
+  for (const bad of [
+    { ...row, review: 1 as never },
+    { ...row, path: `${path}/x` },
+  ])
+    assert.throws(() => checkDispositions(loaded, [bad]), /invalid disposition/);
 });

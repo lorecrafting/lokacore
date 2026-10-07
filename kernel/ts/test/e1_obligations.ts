@@ -39,12 +39,10 @@ export function witnessedObligations(
         ? definition.objective.policy.root
         : undefined;
     const actor = quest.scope.kind === 'player' ? quest.scope.character_id : after.character;
-    // Resolution judges the objective before the command (dialogue) or after its effects (reaction).
-    const judged = root && holds(before, actor, root) ? before : after;
     return [
       base,
       `${base}/objective`,
-      ...(root ? creditedPolicyPaths(judged, actor, root, `${base}/objective/policy/root`) : []),
+      ...(root ? objectivePaths(before, after, actor, root, `${base}/objective/policy/root`) : []),
     ];
   });
   questPaths.push(
@@ -364,6 +362,20 @@ export function creditedPolicyPaths(
     ];
   };
   return walk(root, path, holds(world, actor, root, { target, steps: { n: 0 } }), true);
+}
+
+// Resolution judges an objective before the command (dialogue) or mid-command after effects
+// (reaction, scene); credit what holds at both boundaries, else at the one where the root holds.
+export function objectivePaths(
+  before: World,
+  after: World,
+  actor: CharacterId,
+  root: Policy,
+  path: string,
+): string[] {
+  const early = creditedPolicyPaths(before, actor, root, path);
+  const late = creditedPolicyPaths(after, actor, root, path);
+  return early.length && late.length ? early.filter((p) => late.includes(p)) : [...early, ...late];
 }
 
 function journalVariantPaths(world: World): string[] {
