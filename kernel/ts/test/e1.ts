@@ -43,6 +43,7 @@ export function source() {
     'e1_night_marsh.ts',
     'e1_epilogue_talks.ts',
     'e1_world.ts',
+    'e1_items.ts',
     'e1_faults.ts',
     'e1_cases.ts',
   ];
