@@ -315,10 +315,11 @@ A bleed definition is witnessed only when the receipt opens a new active row equ
 committed row, sourced by a created NPC whose attack names that bleed, after its positive-loss
 hit at time t, ending at t + `duration` with its first tick at t + `tick_every`. A reaction
 on a committed `fact_changed` event witnesses its definition, `when` root and each
-`population.suppress` step only when the policy holds after the step and every named plan
-newly gains suppression caused by that event, ending at its time plus the authored duration,
-matching the receipt's `population.control` row. Sightings, wander ticks, bleed refreshes and
-other reaction steps witness none of these paths.
+`population.suppress` step only when it has at least one apply step, every apply step is
+`population.suppress`, the policy holds after the step, and each named plan, unsuppressed
+before the step, newly gains suppression caused by that event, ending at its time plus the
+authored duration, matching the receipt's `population.control` row. Sightings, wander ticks,
+bleed refreshes and reactions with any other apply step witness none of these paths.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:

@@ -261,6 +261,13 @@ test('E1 d9 suppression and authored rat corpse need their exact committed effec
         plan(s, 'before').suppression = plan(s, 'after').suppression;
         control(s).expected.suppression = plan(s, 'after').suppression;
       },
+      'one plan already suppressed': (s) => {
+        const other = Object.keys(s.before.state.population_plans).find(
+          (k) => !k.includes('"fen_hounds"'),
+        )!;
+        s.before.state.population_plans[other].suppression = plan(s, 'after').suppression;
+        rule(s).apply.push({ ...rule(s).apply[0], plan: JSON.parse(other) });
+      },
       'cause id': (s) => {
         plan(s, 'after').suppression.cause_event_id = control(s).value.suppression.job_id;
         control(s).value.suppression.cause_event_id = control(s).value.suppression.job_id;

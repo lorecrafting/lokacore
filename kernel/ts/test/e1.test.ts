@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
+import { CHECK_FILES } from './e1.ts';
 import { admitCandidate, applicability } from './e1_policy.ts';
 import { reproduce, retainFailure } from './e1_repro.ts';
 import { KERNEL, simulate, type Kernel } from './sim.ts';
@@ -153,4 +154,20 @@ test('retained repro rechecks the invariant and refuses incomplete or changed in
     /incomplete E1 repro/,
   );
   assert.throws(() => reproduce(record, bytes, source), /did not reproduce/);
+});
+
+// Breaks: an e1 module the recorder runs is left out of check_hash, so editing it keeps the receipt.
+test('check_hash covers every e1 module e1_cases.ts imports', () => {
+  const seen = new Set<string>(),
+    todo = ['e1_cases.ts'];
+  for (let f; (f = todo.pop());)
+    if (!seen.has(f)) {
+      seen.add(f);
+      const text = readFileSync(fileURLToPath(new URL(f, import.meta.url)), 'utf8');
+      for (const [, dep] of text.matchAll(/from '\.\/(e1(?:_\w+)?\.ts)'/g)) todo.push(dep!);
+    }
+  assert.deepEqual(
+    [...seen].filter((f) => !CHECK_FILES.includes(f)),
+    [],
+  );
 });

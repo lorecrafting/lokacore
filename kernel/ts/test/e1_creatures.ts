@@ -187,6 +187,9 @@ export function creatureWitnesses(before: World, after: World, decision: Decisio
         next = after.state.population_plans?.[key(step.plan)];
       return prior &&
         !prior.suppression &&
+        // ponytail: the row names the cause event, not the reaction, so two reactions on one
+        // event suppressing the same plan could both be credited (v042 cannot reach this);
+        // bind the suppression row to the reaction if a cartridge can.
         next?.suppression?.cause_event_id === cause.id &&
         next.suppression.ends_at === cause.logical_time + step.duration &&
         receipt({ op: 'population.control', plan: step.plan, expected: prior, value: next })
