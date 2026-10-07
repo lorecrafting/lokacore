@@ -1,0 +1,324 @@
+Source head: f644486248d1304772d5f6d38a4130bb8f8293fa
+source uniqueness
+mutation: complete and unique -> complete
+
+source uniqueness old suite under mutant
+command: mix test --force test/loka/content_gate_test.exs
+exit: 0
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 397091, max_cases: 16
+
+..........
+Finished in 0.2 seconds (0.2s async, 0.00s sync)
+
+Result: 10 passed
+    warning: variable "unique" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+ 37 │     unique = Enum.uniq(coords) == coords
+    │     ~~~~~~
+    │
+    └─ lib/loka/content/map_positions.ex:37:5: Loka.Content.MapPositions.check/4
+
+
+
+source uniqueness D10 red
+command: mix test --force test/loka/content_d10_test.exs
+exit: 2
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 250876, max_cases: 16
+
+
+
+  1) test map coverage, coordinate collisions and Knock references fail before artifact output (Loka.ContentD10Test)
+     test/loka/content_d10_test.exs:6
+     match (=) failed
+     code:  assert {:error, _} = Loka.Content.compile(dir)
+     left:  {:error, _}
+     right: {:ok,
+             "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.42:action/begin_marsh_watch\":{\"accessibility\":\"marsh.action.start\",\"command\":\"expedition\",\"input\":[\"transition\"],\"key\":\"begin_marsh_watch\",\"label\":\"marsh.action.start\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/board_ferry\":{\"accessibility\":\"transport.board\",\"command\":\"use_transport\",\"input\":[\"route\",\"quoted_fare\"],\"key\":\"board_ferry\",\"label\":\"transport.board\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.42:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.42:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/gather_carefully\":{\"accessibility\":\"action.gather_carefully\",\"command\":\"harvest\",\"input\":[\"method\"],\"key\":\"gather_carefully\",\"label\":\"action.gather_carefully\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/retry_marsh_watch\":{\"accessibility\":\"marsh.action.restart\",\"command\":\"expedition\",\"input\":[\"transition\",\"quest_instance_id\",\"attempt_id\"],\"key\":\"retry_marsh_watch\",\"label\":\"marsh.action.restart\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/return_ferry\":{\"accessibility\":\"transport.return\",\"command\":\"use_transport\",\"input\":[\"route\",\"quoted_fare\"],\"key\":\"return_ferry\",\"label\":\"transport.return\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/use_marsh_shelter\":{\"accessibility\":\"marsh.action.shelter\",\"command\":\"expedition\",\"input\":[\"transition\",\"quest_instance_id\",\"attempt_id\",\"cursor\"],\"key\":\"use_marsh_shelter\",\"label\":\"marsh.action.shelter\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}}},\"ancestries\":{\"fen_born\":{\"attribute\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"per\",\"kind\":\"attribute\"},\"description\":\"ancestry.fen_born.description\",\"faction\":{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"value\":-2},\"label\":\"ancestry.fen_born.label\",\"modifier\":1,\"skill\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"swim\",\"kind\":\"ski" <> ...,
+             []}
+     stacktrace:
+       test/loka/content_d10_test.exs:28: anonymous fn/3 in Loka.ContentD10Test."test map coverage, coordinate collisions and Knock references fail before artifact output"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_d10_test.exs:16: (test)
+
+
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 0/1 passed
+Failed: 1 test
+    warning: variable "unique" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+ 37 │     unique = Enum.uniq(coords) == coords
+    │     ~~~~~~
+    │
+    └─ lib/loka/content/map_positions.ex:37:5: Loka.Content.MapPositions.check/4
+
+
+
+source uniqueness restored D10 green
+command: mix test --force test/loka/content_d10_test.exs
+exit: 0
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 292193, max_cases: 16
+
+.
+Finished in 0.7 seconds (0.7s async, 0.00s sync)
+
+Result: 1 passed
+
+
+source Knock API
+mutation: if api >= [1, 37] -> if true
+
+source Knock API old suite under mutant
+command: mix test --force test/loka/content_gate_test.exs
+exit: 0
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 473596, max_cases: 16
+
+..........
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+
+Result: 10 passed
+    warning: variable "api" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+ 51 │     api =
+    │     ~~~
+    │
+    └─ lib/loka/content/barriers.ex:51:5: Loka.Content.Barriers.knock_face/5
+
+
+
+source Knock API D10 red
+command: mix test --force test/loka/content_d10_test.exs
+exit: 2
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 151248, max_cases: 16
+
+
+
+  1) test map coverage, coordinate collisions and Knock references fail before artifact output (Loka.ContentD10Test)
+     test/loka/content_d10_test.exs:6
+     match (=) failed
+     code:  assert {:error, diagnostics} = Loka.Content.compile(dir)
+     left:  {:error, diagnostics}
+     right: {:ok,
+             "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.42:action/begin_marsh_watch\":{\"accessibility\":\"marsh.action.start\",\"command\":\"expedition\",\"input\":[\"transition\"],\"key\":\"begin_marsh_watch\",\"label\":\"marsh.action.start\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/board_ferry\":{\"accessibility\":\"transport.board\",\"command\":\"use_transport\",\"input\":[\"route\",\"quoted_fare\"],\"key\":\"board_ferry\",\"label\":\"transport.board\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.42:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.42:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/gather_carefully\":{\"accessibility\":\"action.gather_carefully\",\"command\":\"harvest\",\"input\":[\"method\"],\"key\":\"gather_carefully\",\"label\":\"action.gather_carefully\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.42:action/retry_marsh_watch\":{\"accessibility\":\"marsh.action.restart\",\"command\":\"expedition\",\"input\":[\"transition\",\"quest_instance_id\",\"attempt_id\"],\"key\":\"retry_marsh_watch\",\"label\":\"marsh.action.restart\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/return_ferry\":{\"accessibility\":\"transport.return\",\"command\":\"use_transport\",\"input\":[\"route\",\"quoted_fare\"],\"key\":\"return_ferry\",\"label\":\"transport.return\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}},\"ashmere_missing_child@0.0.42:action/use_marsh_shelter\":{\"accessibility\":\"marsh.action.shelter\",\"command\":\"expedition\",\"input\":[\"transition\",\"quest_instance_id\",\"attempt_id\",\"cursor\"],\"key\":\"use_marsh_shelter\",\"label\":\"marsh.action.shelter\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"inspectable_details\"]}}},\"ancestries\":{\"fen_born\":{\"attribute\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"per\",\"kind\":\"attribute\"},\"description\":\"ancestry.fen_born.description\",\"faction\":{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"value\":-2},\"label\":\"ancestry.fen_born.label\",\"modifier\":1,\"skill\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.42\",\"key\":\"swim\",\"kind\":\"ski" <> ...,
+             []}
+     stacktrace:
+       test/loka/content_d10_test.exs:39: (test)
+
+
+Finished in 0.7 seconds (0.7s async, 0.00s sync)
+
+Result: 0/1 passed
+Failed: 1 test
+    warning: variable "api" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+ 51 │     api =
+    │     ~~~
+    │
+    └─ lib/loka/content/barriers.ex:51:5: Loka.Content.Barriers.knock_face/5
+
+
+
+source Knock API restored D10 green
+command: mix test --force test/loka/content_d10_test.exs
+exit: 0
+Compiling 82 files (.ex)
+Generated loka app
+Running ExUnit with seed: 424915, max_cases: 16
+
+.
+Finished in 0.6 seconds (0.6s async, 0.00s sync)
+
+Result: 1 passed
+
+
+loader uniqueness
+mutation: new Set(coords).size !== coords.length || -> false ||
+
+loader uniqueness old suite under mutant
+command: node --test kernel/ts/test/barriers.test.ts
+exit: 0
+✔ only legal transitions are admitted; an illegal one changes nothing (19.689625ms)
+✔ open proposes one barrier.transition and barrier_changed (2.273958ms)
+✔ lock and unlock need the key, held directly or in a carried bag (12.7695ms)
+✔ both faces of a door are one barrier (4.562833ms)
+✔ moves through closed and locked exits are refused, and the GameView says why (2.827459ms)
+✔ each exit lists only the door verbs step accepts there now (12.370459ms)
+✔ barrier_state reads the door's current state (1.729083ms)
+✔ a door's keywords name the exits it is on (1.766041ms)
+✔ the loader checks barrier references, texts, faces and the lock (8.967167ms)
+✔ two passages between the same rooms may carry different barriers (2.970083ms)
+✔ a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY (3.582916ms)
+✔ a door on a bent passage is BARRIER_MISMATCH (2.319042ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 268.648458
+
+
+loader uniqueness D10 red
+command: node --test kernel/ts/test/d10_contracts.test.ts
+exit: 1
+✔ D10 contracts require each binding and bound with executable schema red controls (192.109791ms)
+✔ compiled map-position arrays reject empty declarations with a minItems red control (2.387416ms)
+✖ D10 loader refuses invalid authored map and Knock declarations (265.522958ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 642.242917
+
+✖ failing tests:
+
+test at kernel/ts/test/d10_contracts.test.ts:134:1
+✖ D10 loader refuses invalid authored map and Knock declarations (265.522958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/d10_contracts.test.ts:174:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+
+loader uniqueness restored D10 green
+command: node --test kernel/ts/test/d10_contracts.test.ts
+exit: 0
+✔ D10 contracts require each binding and bound with executable schema red controls (184.747667ms)
+✔ compiled map-position arrays reject empty declarations with a minItems red control (2.541667ms)
+✔ D10 loader refuses invalid authored map and Knock declarations (712.066375ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1084.167042
+
+
+loader Knock API
+mutation: hasKnock || c.lock.capabilities.knowledge === 1 -> false || c.lock.capabilities.knowledge === 1
+
+loader Knock API old suite under mutant
+command: node --test kernel/ts/test/barriers.test.ts
+exit: 0
+✔ only legal transitions are admitted; an illegal one changes nothing (19.451292ms)
+✔ open proposes one barrier.transition and barrier_changed (2.334583ms)
+✔ lock and unlock need the key, held directly or in a carried bag (12.74275ms)
+✔ both faces of a door are one barrier (4.468459ms)
+✔ moves through closed and locked exits are refused, and the GameView says why (2.786458ms)
+✔ each exit lists only the door verbs step accepts there now (12.146333ms)
+✔ barrier_state reads the door's current state (1.720084ms)
+✔ a door's keywords name the exits it is on (1.738458ms)
+✔ the loader checks barrier references, texts, faces and the lock (9.002333ms)
+✔ two passages between the same rooms may carry different barriers (2.888416ms)
+✔ a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY (3.40525ms)
+✔ a door on a bent passage is BARRIER_MISMATCH (2.314958ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 252.122042
+
+
+loader Knock API D10 red
+command: node --test kernel/ts/test/d10_contracts.test.ts
+exit: 1
+✔ D10 contracts require each binding and bound with executable schema red controls (182.636375ms)
+✔ compiled map-position arrays reject empty declarations with a minItems red control (2.319125ms)
+✖ D10 loader refuses invalid authored map and Knock declarations (481.802083ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 847.630208
+
+✖ failing tests:
+
+test at kernel/ts/test/d10_contracts.test.ts:134:1
+✖ D10 loader refuses invalid authored map and Knock declarations (481.802083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/d10_contracts.test.ts:174:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+
+loader Knock API restored D10 green
+command: node --test kernel/ts/test/d10_contracts.test.ts
+exit: 0
+✔ D10 contracts require each binding and bound with executable schema red controls (193.75175ms)
+✔ compiled map-position arrays reject empty declarations with a minItems red control (2.559083ms)
+✔ D10 loader refuses invalid authored map and Knock declarations (767.012208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1146.333125
+
+
+schema required/bound executable sweep
+command: node --test kernel/ts/test/d10_contracts.test.ts
+exit: 0
+✔ D10 contracts require each binding and bound with executable schema red controls (195.056042ms)
+✔ compiled map-position arrays reject empty declarations with a minItems red control (2.469334ms)
+✔ D10 loader refuses invalid authored map and Knock declarations (746.766708ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1145.86425
+

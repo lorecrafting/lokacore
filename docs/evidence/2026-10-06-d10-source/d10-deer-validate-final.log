@@ -1,0 +1,35 @@
+✔ v042 genesis IDs include all three deer pairs and control jobs (15.901042ms)
+✔ three independent fresh deer each hold one typed hide at their authored home (7.30425ms)
+✔ unengaged +300 sight flight preserves the same live deer and held hide (19.063833ms)
+✔ +150 death transfers the one hide to the corpse and replacement waits until +172800 (16.73425ms)
+✔ equal-time Oak sight does not consume Willow round handoff (11.989542ms)
+✔ same-time harmless Oak sight and Oak arrival rebind the one slot (10.213833ms)
+✔ sight-only completion cannot authorize an equal-time slot rebind (10.052583ms)
+✔ two missed rounds hand off only the matching encounter and successor at +300 (8.558625ms)
+✔ sight-first +300 cancels the pending round before any off-room hit (7.864541ms)
+✔ an unrelated group still conflicts on the encounter target (8.276792ms)
+✔ re-entry replaces the pending generation sight occurrence (7.762916ms)
+✔ intervening population at the sight deadline transfers at most once (8.605625ms)
+✔ generation mismatch makes a sight occurrence harmless (7.13075ms)
+✔ dead deer replacement appears at its exact two-day due time with a new pair (102.021291ms)
+✔ thirty-day replay conserves three live deer and one hide per actual birth (20584.571125ms)
+✔ loader refuses malformed deer roles, missing hide and flight text (180.842125ms)
+✔ loader refuses sight on a hound and pelt bundle (55.493666ms)
+✔ every contract has examples and every example validates (15.015625ms)
+✔ invalid fixtures fail with exactly the listed errors (16.110583ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.829875ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.886125ms)
+✔ a declared __proto__ property survives generation (0.079625ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.407083ms)
+✔ a recursive Policy at the depth cap (0.866375ms)
+✔ narration at 64 and 65 lines (0.587791ms)
+✔ ambiguous candidates at 1024 and 1025 (2.415209ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.275208ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22402.389
