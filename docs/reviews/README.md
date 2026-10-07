@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Paired job completion invariant](2026-10-06-job-complete-owned-run-review.md): source `c9a19d5519d3ff6024ccfc144198509f22e7a150`, independent **APPROVE**, no findings; 3/3 focused checks and three independent red controls. Broader fresh-checkout attempts stopped on missing Mix dependencies; supplied full-gate/SQLite results remain separately attributed.
+
 - [Deer/bleed cold recovery independent save/correctness review](2026-10-06-deer-bleed-recovery-review.md): integrated source `dc6ab907`, **APPROVE**, no findings; 14/14 SQLite checks, old-detector red control, four forged-group red controls and population-only replay reachability verified.
 
 - [E1 loader carry integrated independent review](2026-10-06-e1-loader-integrated-review.md): exact source `03eb7089` against post-D10 base `87ac4cbb`, **APPROVE**, no findings; 78/78 focused tests, two independent red controls and seven negative/v042 probes pass. Loader carry only; final A–D E1 certification remains separate.
