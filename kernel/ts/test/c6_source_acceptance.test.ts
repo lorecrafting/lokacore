@@ -6,7 +6,7 @@ import { key } from '../src/foundation/compose.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { fresh, ref } from './transport_fixture.ts';
 import { fatal } from './death_fixture.ts';
-import { buttonsOf } from '../../../mobile/app/book/model.ts';
+import { buttonsOf, expeditionLine } from '../../../mobile/app/book/model.ts';
 
 function source(cleared = false) {
   let world = fresh((c) => {
@@ -150,4 +150,69 @@ test('actual source shelter offer executes once and stale or mismatched invocati
   assert.equal(a.command({ type: 'move', direction: 'north' }).kind, 'accepted');
   assert.equal(a.command(payload, offered.action_key).kind, 'rejected');
   assert.equal(a.attempt()!.cursor, 4);
+});
+
+// Breaks: the nonterminal quest's active state hides a failed attempt and its immediate retry copy.
+test('departure shows failed journal prose until explicit Restart', () => {
+  const a = source(true);
+  const journal = () =>
+    gameView(a.world()).journal.find((q) => q.quest.key === 'a_night_in_the_marsh')!;
+  assert.equal(
+    a.command({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' })
+      .kind,
+    'accepted',
+  );
+  assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
+  assert.equal(a.command({ type: 'move', direction: 'north' }).kind, 'accepted');
+  assert.equal(journal().state, 'active');
+  assert.equal(journal().expedition!.status, 'failed');
+  assert.equal(journal().journal, 'marsh.journal.failed');
+  assert.equal(a.command({ type: 'move', direction: 'south' }).kind, 'accepted');
+  assert.equal(a.command({ type: 'move', direction: 'east' }).kind, 'accepted');
+  const prior = a.attempt()!;
+  assert.equal(
+    a.command({
+      type: 'expedition',
+      detail_id: a.detail('gnawed_bones'),
+      transition: 'restart',
+      quest_instance_id: prior.quest_instance_id,
+      attempt_id: prior.attempt_id,
+    }).kind,
+    'accepted',
+  );
+  assert.equal(journal().journal, 'marsh.journal.active');
+  assert.equal(journal().expedition!.status, 'active');
+  assert.equal(journal().expedition!.cursor, 0);
+});
+
+// Breaks: a retained stage direction is advertised as the current room's immediate move after a legal detour.
+test('a legal detour retains the next checkpoint and hides an inapplicable direction', () => {
+  const a = source(true);
+  const journal = () =>
+    gameView(a.world()).journal.find((q) => q.quest.key === 'a_night_in_the_marsh')!.expedition!;
+  assert.equal(
+    a.command({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' })
+      .kind,
+    'accepted',
+  );
+  assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
+  assert.equal(journal().direction, 'west');
+  assert.equal(journal().next_title, 'room.willow_shade.title');
+  assert.equal(a.command({ type: 'move', direction: 'east' }).kind, 'accepted');
+  assert.equal(gameView(a.world()).place.title.key, 'room.hound_run.title');
+  assert.equal(journal().cursor, 1);
+  assert.equal(journal().next_title, 'room.willow_shade.title');
+  assert.equal(journal().direction, undefined);
+  assert.equal(
+    expeditionLine(journal(), (key) => (key === 'room.willow_shade.title' ? 'Willow Shade' : key)),
+    'Next checkpoint: Willow Shade.',
+  );
+  assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
+  assert.equal(journal().cursor, 1);
+  assert.equal(journal().direction, 'west');
+  assert.equal(journal().next_title, 'room.willow_shade.title');
+  assert.equal(
+    expeditionLine(journal(), (key) => (key === 'room.willow_shade.title' ? 'Willow Shade' : key)),
+    'Next: west to Willow Shade.',
+  );
 });

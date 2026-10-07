@@ -54,12 +54,14 @@ export function journal(world: World, steps: Steps): QuestView[] {
           ? j.active_variants?.find((v) => holds(world, world.character, v.when.root))?.text
           : undefined;
       const journal =
-        q.state === 'active'
-          ? (variant ??
-            (holdsNow(world, world.character, q.quest, { n: 0 }) ? j.objectives_met : j.active))
-          : q.state === 'objectives_complete'
-            ? j.objectives_met
-            : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
+        expedition.expedition?.status === 'failed'
+          ? j.failed
+          : q.state === 'active'
+            ? (variant ??
+              (holdsNow(world, world.character, q.quest, { n: 0 }) ? j.objectives_met : j.active))
+            : q.state === 'objectives_complete'
+              ? j.objectives_met
+              : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
       return { ...shown, journal };
     })
     .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
@@ -82,7 +84,9 @@ function expeditionProgress(world: World, id: string) {
       ...(next && {
         next_room: next.to,
         next_title: world.rooms[world.roomIds[refString(next.to)]].title,
-        direction: next.direction,
+        ...(world.state.containers[row.body_id] === world.roomIds[refString(next.from)] && {
+          direction: next.direction,
+        }),
       }),
     },
   };

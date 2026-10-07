@@ -116,6 +116,31 @@ Independent final review, full publication gate and browser closure are still
 pending. D9 publication must establish the actual predecessor order before C6's
 independent final answer and replacement of its provisional replay input.
 
+## Primary review fix P1/P2
+
+The independent primary record was carried by cherry-pick with its reviewer
+attribution intact. Both findings reproduced before correction on actual source:
+a real departure showed `marsh.journal.active` instead of the failed-attempt copy;
+a legal cursor-one detour from Reed Bank to Hound Run retained an immediate west
+hint toward Willow Shade, although that exit actually returns to Reed Bank.
+
+P1 now selects the failed-attempt journal text while retaining the nonterminal
+quest's active state. Explicit Restart restores active prose and cursor zero.
+P2 retains the next named checkpoint and offers its direction only while the
+bound body is at the declared edge's origin. The Book renders a checkpoint label
+when that direction is unavailable and restores the directional label on return.
+No schema, cartridge, provisional artifact or transcript pin changes were needed.
+
+The focused source/kernel/contract/real-SQLite suite passes 13 tests; typecheck,
+active size and formatting checks pass. Removing the P1 override fails its new
+regression with active prose instead of failed prose. Removing the P2 room guard
+fails its new regression with `west` instead of no direction. Restoring the old
+Book formatter independently fails with `Next: undefined to Willow Shade.` instead
+of the truthful checkpoint label. All three planted mutations were restored.
+Correctness/Ponytail self-review keeps the two projection guards and one small
+Book text helper; no dependencies or generic rendering machinery were added.
+The same reviewer must recheck P1/P2 on this candidate before approval.
+
 ## Remaining publication work
 
 Full local gate and complete review of the changed schema surface; actual final predecessor integration and independent release pins;

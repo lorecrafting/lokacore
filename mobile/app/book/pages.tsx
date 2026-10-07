@@ -6,7 +6,16 @@ import { SkillDetails, ItemDetails } from './skills.tsx';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, plain, why, type group, type Pool, type Thing } from './model.ts';
+import {
+  bandPhrase,
+  cap,
+  expeditionLine,
+  plain,
+  why,
+  type group,
+  type Pool,
+  type Thing,
+} from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { body, head, paper, prose, note } from './paper.ts';
 import { reason } from './words.ts';
@@ -265,10 +274,7 @@ export function JournalPage({ view, text }: { view: GameView; text: Say }) {
           {q.expedition && (
             <Text style={note}>
               {q.expedition.cursor} of {q.expedition.required} entries.{' '}
-              {q.expedition.status === 'active' && q.expedition.next_title
-                ? `Next: ${q.expedition.direction} to ${text(q.expedition.next_title)}.`
-                : ''}{' '}
-              {q.expedition.sheltered ? 'Shelter used.' : ''}
+              {expeditionLine(q.expedition, text)} {q.expedition.sheltered ? 'Shelter used.' : ''}
             </Text>
           )}
           {q.journal && <Text style={prose}>{plain(text(q.journal))}</Text>}
