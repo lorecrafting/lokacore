@@ -8,8 +8,9 @@ import { admitCandidate } from './e1_policy.ts';
 import { caseHost, coverage, witnessedObligations } from './e1_case_host.ts';
 import { storageFault, faultSchedule } from './e1_faults.ts';
 import { replayCase, gaps } from './e1_cases.ts';
-import { search } from './e1_paths.ts';
+import { ending, search } from './e1_paths.ts';
 import { hash } from '../src/foundation/canonical.ts';
+import { gameView } from '../src/index.ts';
 
 const pin = read('protocol/fixtures/missing_child_v042_hash.json');
 const bytes = new TextEncoder().encode(
@@ -169,6 +170,60 @@ test('E1 witnesses an opened dialogue and only its accepted choice', () => {
     assert.deepEqual(
       replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations,
       [base, `${base}/choices/accept`],
+    );
+  } finally {
+    a.close();
+    rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: a shown modal beat is credited before Continue, or its final acknowledgement is lost.
+test('E1 binds modal scene steps only to accepted acknowledgements', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-e1-modal-'));
+  const a = caseHost(
+    admitCandidate(bytes),
+    join(dir, 'save.db'),
+    join(dir, 'case.jsonl'),
+    undefined,
+    {
+      case_id: 'rescued-prior',
+      source,
+      fault_schedule: [],
+    },
+  );
+  const base = '/scenes/ashmere_missing_child@0.0.42:scene/bell_rung';
+  const bell: string[][] = [];
+  try {
+    a.watch((before, after, command, decision) => {
+      const was = gameView(before).scene;
+      const now = gameView(after).scene;
+      if (!was && now?.scene.key === 'bell_rung')
+        assert.deepEqual(
+          witnessedObligations(before, after, command, decision).filter((path) =>
+            path.startsWith('/scenes/'),
+          ),
+          [],
+        );
+      if (command.payload.type === 'continue' && was?.scene.key === 'bell_rung')
+        bell.push(witnessedObligations(before, after, command, decision));
+    });
+    ending(a, 'rescued', 'prior', 'stilled');
+    assert.deepEqual(bell, [
+      [base, `${base}/steps/0`],
+      [`${base}/steps/1`],
+      [`${base}/steps/2`, `${base}/steps/3`, `${base}/steps/4`],
+    ]);
+    a.record({
+      kind: 'finish',
+      steps: a.commands.length,
+      digest: a.digest(),
+      state_hash: hash(a.story.world().state as never),
+    });
+    assert.deepEqual(
+      replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source).obligations.filter(
+        (path) => path.startsWith(base),
+      ),
+      [base, ...Array.from({ length: 5 }, (_, n) => `${base}/steps/${n}`)],
     );
   } finally {
     a.close();

@@ -231,6 +231,11 @@ definition; only an accepted choice against that pending continuation witnesses 
 specific choice path. Rejected or merely offered choices remain pending. Replay derives
 these witnesses from committed commands and states, and requires their explicit receipt
 paths rather than accepting a coverage claim by itself.
+For modal scenes, only an accepted Continue on the displayed line witnesses that
+line's authored step. The first acknowledgement also witnesses the scene definition;
+the final acknowledgement witnesses the structural `await_ack` and `end` steps only
+when the scene actually closes. Presentation-only dream scenes require separate
+choice/beat evidence and are not credited by this modal rule.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:

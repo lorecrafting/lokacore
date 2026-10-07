@@ -41,7 +41,7 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: bind only the reviewed dialogue/choice and study_tracks witnesses here;
+// ponytail: bind only the reviewed dialogue/choice, modal scene and study_tracks witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -71,6 +71,18 @@ export function witnessedObligations(
           `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
         ]
       : [];
+  }
+  if (p.type === 'continue') {
+    const shown = gameView(before).scene;
+    if (!shown || !p.scene || p.line !== shown.index || p.scene.key !== shown.scene.key) return [];
+    const base = `/scenes/${shown.scene.cartridge_id}@${shown.scene.cartridge_version}:scene/${shown.scene.key}`;
+    return [
+      ...(shown.index === 1 ? [base] : []),
+      `${base}/steps/${shown.index - 1}`,
+      ...(shown.index === shown.count && !gameView(after).scene
+        ? [`${base}/steps/${shown.count}`, `${base}/steps/${shown.count + 1}`]
+        : []),
+    ];
   }
   if (p.type !== 'perform' || p.action !== 'study_tracks') return [];
   const fact = {
