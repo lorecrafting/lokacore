@@ -32,6 +32,7 @@ export function source() {
     'e1_obligations.ts',
     'e1_paths.ts',
     'e1_routes.ts',
+    'e1_dialogue_circuit.ts',
     'e1_optional_quests.ts',
     'e1_watch_rounds.ts',
     'e1_wisp_herbs.ts',

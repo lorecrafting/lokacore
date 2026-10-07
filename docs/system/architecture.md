@@ -222,6 +222,11 @@ For the [Maud cellar contract](cartridge.md#mauds-cellar-content-m20-b2), the co
 route keeps each distinct earned death credit and the final atomic reward visible
 across cold reopens; authored resource recovery occurs through trusted elapsed input.
 
+The training/social circuit uses fresh ancestry selection, authored lesson payments and
+ferry fares, then selects each recorded conversation choice against its pending continuation.
+Skill flags, the original training sword and literal balances survive cold reopen; an
+offered lesson or an unvisited conversation earns no execution credit.
+
 Coverage names actual committed room visits, quest transitions/outcomes, resolved dialogue
 choices, scene beats/consequences and command paths. An offer or a definition count is not
 execution. Check literal terminal facts, all 57 declared room routes and every authored
