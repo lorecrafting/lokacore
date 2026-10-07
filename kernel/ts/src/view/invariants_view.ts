@@ -30,16 +30,15 @@ type Any = any;
 export const gameview_agrees_with_admission = ({
   view,
   command,
-  world_context_id = command.world_context_id,
+  world_context_id: context = command.world_context_id,
   decision,
   resolves = {},
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type;
-  if (type === 'use_service')
-    return serviceAgrees(view, command, decision, world_context_id, action_key);
-  if (command.world_context_id !== world_context_id) return code === 'not_found';
+  if (type === 'use_service') return serviceAgrees(view, command, decision, context, action_key);
+  if (command.world_context_id !== context) return code === 'not_found';
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
