@@ -23,8 +23,8 @@
 `docs/system/owner-rules.md:233`: they say `main` requires the CI jobs. It does not:
 `gh api .../branches/main/protection` returns 404 and `allow_auto_merge` is false. `gh pr merge --help`:
 "If required checks have not yet passed, auto-merge will be enabled". If nothing is required,
-the PR already meets its requirements and the merge happens at once. Failure: the first
-slice merged under this text lands before CI finishes, which breaks step 7 ("every job started
+`--auto` either merges without waiting for CI or fails to queue (with repo auto-merge off). Failure: the first
+slice merged under this text lands before CI finishes, or the merge step fails, which breaks step 7 ("every job started
 on that head has completed successfully"). The order is in the PR body only. Fix: make the
 docs conditional (`--auto` only once `main` requires every CI job, i.e. `changes`, `elixir`, `lint`,
 `sim`, `typescript`, `browser`; until then wait for green and merge without `--auto`). If only
@@ -37,11 +37,11 @@ worktree). `WORKFLOW.md:99` still relies on `../lokacore-pm`. Failure: the index
 no longer lists an in-force owner rule. The owner gave no direction to remove it. Fix: keep a
 short clause with its record link.
 
-**Q1 question** `docs/WORKFLOW.md:119` "a later push makes the merge fail": under `--auto`, a push by
-a user with write access leaves auto-merge enabled. This review did not verify that the
-`--match-head-commit` given when auto-merge is enabled still blocks a later head. If it does not,
-a push after the verdict merges unreviewed once the required CI passes. Verify on the first use,
-or have the docs say `gh pr merge --disable-auto` before any push after the verdict.
+**Q1 question (does not change the verdict; the S1 edit resolves it)** `docs/WORKFLOW.md:117-121`:
+the merge is queued with `--match-head-commit <verdict sha>`, yet the same paragraph still allows the PM's own
+commits after the verdict. If GitHub checks the match-head at merge time, those commits stall the queued merge. If it
+does not, any later push goes through with it unreviewed. Not verified here. Either way the text should say: re-queue
+on the new head, or run `gh pr merge --disable-auto` before any push after the verdict.
 
 **N1 nit** `docs/ROADMAP.md:24`: the link text still says "Beads Rust pilot".
 
@@ -67,7 +67,8 @@ although the working tree differs (demonstrated below). The hook had the same bl
 - Export regex probes: refused `C:\Users\x`, `D:/work`, quoted, after a space, `(`, `,`, `=`, `1`, `_`, `\\?\C:\`,
   `file:///C:/x` and the machine paths; accepted https, http, ftp and `regex:/a/`. Only `pathC:\y` (glued to a word) passes.
   Red: the old regex fails the https control; removing the drive pattern fails the drive control.
-- `session_status.sh` in an isolated repo with a copy of `.beads`: exit 0; tracked JSONL unchanged (only
+- `session_status.sh` in an isolated repo with a copy of `.beads`: exit 0. The tracked JSONL stayed unchanged on a fresh import, after a
+  committed `+00:00` drift row with an existing DB, and with a DB holding an unflushed `br update --no-auto-flush` (only
   ignored DB files appear); "gh unavailable" fallback prints. `.claude/settings.json` parses as JSON.
 - `mise exec -- bin/check_all.sh` exit 0 (2m21s) and wrote a marker matching `HEAD^{tree}`;
   `elixir bin/check_docs.exs`: 269 docs, 0 broken, 0 unreachable.
