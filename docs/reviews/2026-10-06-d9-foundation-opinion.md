@@ -123,3 +123,32 @@ Verification run with the pinned toolchain:
 
 All mutations and receipt probes used a disposable isolated checkout/database.
 No developer source or owner save was changed; temporary probes were removed.
+
+
+## Scoped size-gate correction — APPROVE
+
+Reviewed `5ac990230eee3ad86f2577560dec14571cddf31d` against `dd37329a`.
+No new finding; prior F1/F2 closure stands. The failed normal full gate is retained
+in the integration evidence; a successful normal full-gate retry remains required.
+
+`runtime/proposal.ts` extracts only population pair discovery into
+`populationDeadlinePairs(world, until)`. Inspection confirms identical original-world
+snapshot, pending-current-job checks, exact shared deadline/suppression end, horizon
+comparison, canonical plan equality and symmetric pair mapping. The caller preserves
+`advance?.to ?? -1`, `(due_time, job_id)` sorting, hydrated-prefix reads, group selection
+and causal reaction order. No ownership or generation behavior changes.
+
+The function allowances 52/46/43 for reaction validation, due combat delivery and
+independent population replay are within the documented escape hatch. I agree that
+splitting these short cohesive checks solely to satisfy the line threshold would
+fragment their validation/transition flow. They retain necessary checks and create
+no new abstraction. The existing source-file allowance is not increased. The former
+invalid 65-line `jobs` allowance is replaced by the pure discovery helper and a valid
+45-line allowance. Ponytail Review finds no actionable excess in this scoped diff.
+
+Independent verification: 19 focused suppression/portable/SQLite D9/deer tests pass;
+kernel typecheck and the four-file size check pass. A live mutation returning an
+empty map from the extracted helper makes the exact-deadline regression fail with
+`conflicting_write` (exit 1). Restoring the helper makes all six suppression tests
+pass (exit 0). Source mutations were confined to a disposable review checkout and
+fully restored. No release pin, developer source or owner save was changed.

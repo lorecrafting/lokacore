@@ -519,3 +519,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D9 independent save and protocol recheck](2026-10-06-d9-save-opinion.md): source `5bee6811`, scoped APPROVE; both suppression deadline orders survive real SQLite faults/reopen/replay, malformed receipts refuse, and old-release refusal preserves bytes. Supersedes the provisional save approval; portable foundation and browser/publication gates remain separate.
 - [D9 foundation scoped fix round 1](2026-10-06-d9-foundation-opinion.md#scoped-fix-round-1--approve): source `5bee6811`, APPROVE; F1/F2 closed, both deadline orders and malformed-group refusal verified, 19 TS/SQLite and 3 Elixir tests green, five live revert controls red. Final browser/full gate remain pending.
+
+- [D9 foundation size-gate correction](2026-10-06-d9-foundation-opinion.md#scoped-size-gate-correction--approve): source `5ac99023`, APPROVE; pair-discovery extraction preserves order/guards, cohesive function allowances accepted, 19 focused tests/typecheck/size green and extracted-helper red control verified. Normal full-gate retry remains required.
