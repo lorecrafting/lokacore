@@ -1,3 +1,4 @@
+- [E1 selected dialogue policy witness](2026-10-07-e1-dialogue-policy-binding-review.md): source `783faeeb`, independent **APPROVE**, no findings; exact Elspeth root/all-child paths verified by SQLite trace and semantic replay, focused tests 4/4, old-suite/new-test red control and hashes/privacy verified. Other branches and E1 certification remain pending.
 - [E1 Maud cellar bounded route proof](2026-10-07-e1-maud-path-review.md): source `7e647c9c`, independent **APPROVE**, no findings; focused Maud test 1/1 and owning Maud/reward SQLite tests 4/4 pass, omitted-fifth-kill mutant escapes old suite but fails the new test, retained hashes and privacy checked. Route remains unregistered; E1 certification remains pending.
 # Independent reviews
 
