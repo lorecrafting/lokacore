@@ -43,3 +43,7 @@ and topic definition obligations and other authored paths remain pending. The PM
 will integrate this source and capture the full recorder on its combined source.
 Raw logs are redacted and covered by [SHA256SUMS](SHA256SUMS), with
 [verification](SHA256SUMS.verify).
+
+## Independent review correction
+
+[E1-K1 facts-only negative inputs and red control](round1/README.md) correct the original membership guard test gap; independent scoped recheck is required.
