@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E3 authoring navigation](2026-10-06-e3-authoring-navigation-review.md): exact source `6f374d06`, independent **APPROVE**, no findings; source map, spawn-template placement wording, Chapter 1 and schema links checked against current code; docs check passes.
+
 - [Beads audit follow-ups independent review](2026-10-06-beads-audit-followups-extra-review.md): exact source `18d0c847`, **APPROVE**, no findings; complete export, shipped controls, 13 independent structural probes, distinct duplicate-slice mutation and docs checks pass. PM-owned evidence links and all 33 required slices preserved.
 - [Resource authored interval](2026-10-06-resource-authored-interval-review.md): exact source `7a51883b`, independent **APPROVE**, no findings; 22 TypeScript and 14 Elixir focused tests pass, both old-constant mutants fail, absent-field boundary probes pass. Frozen fixtures and save handling unchanged.
 - [Simulator complete world inputs and quest retirement](2026-10-06-simulator-world-inputs-review.md): exact source `c299195c` against published `747c252d`, independent **APPROVE**, no in-scope findings; 2 new/20 existing focused checks pass, both actual adapter mutants fail the new cases while the old suite misses them. Separate lawful bleed-job replay omission retained as SIM-CARRY-01; no invariant skipped.
@@ -564,8 +566,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Orphan provisional fixtures](2026-10-06-orphan-fixtures-sol-review.md): `cleanup/orphan-story-baselines` at `601e7152c6c04cac9c7a3cb68432e77c7dbf0504`, independent Sol APPROVE; no findings, six recoveries and 29 active transcript pins checked, 26 focused tests pass.
 - [E1 pre-choice view/admission](2026-10-06-e1-prechoice-view-admission-review.md): initial `7ec1837a`, CHANGES REQUIRED; scoped amended source `0893b598`, then size refinement `6e18e144`, **APPROVE**, E1-PRECHOICE-R1 closed by explicit protocol precedence. Typecheck/docs and seven focused tests pass, removed-guard red control fails, selected-v042 seed360 passes 55 steps. Full E1 proof remains pending.
+- [E1 service GameView envelope](2026-10-06-e1-gameview-envelope-review.md): initial `ccb30248`, CHANGES REQUIRED; final `520a747d`, **APPROVE**, E1-ENVELOPE-R1/R2 closed. Service7/7, typecheck/size and existing envelope check pass; actor/nil removal and permissive-nil mutants fail; selected-v042 seed2079 passes 61 steps. Full E1 proof remains pending.
 
 - [Post-D10 architecture maintenance record](2026-10-06-post-d10-maintenance-review.md): independent docs-only APPROVE at `eeef28b6`; #265/#269 attribution, evidence and bounded post-E3 risks verified; no new audit or implementation claimed.
 - [Post-D10 Beads follow-ups](2026-10-06-post-d10-beads-followups-review.md): exact source `9ac3fa89`, independent **APPROVE**, no findings; four evidence-linked, triggered tasks depend on E3, all 33 Chapter 1 rows remain unchanged, and the focused export check passes.
 
 - [Chapter 1 one-time documentation audit](2026-10-06-chapter-one-docs-audit-review.md): `efcc0df`, fresh independent docs-only APPROVE; six open findings/evidence and exclusions verified; repairs and E1–E3 remain open.
+- [Active system summaries](2026-10-06-e3-active-summaries-review.md): source `594d5a7e`, CHANGES REQUIRED; scoped fix `f47591f6`, independent **APPROVE**, E3-SUM-1 closed; installed `real_elapsed` policy is distinguished from future app clock/resume integration.
