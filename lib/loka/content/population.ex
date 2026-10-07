@@ -152,7 +152,7 @@ defmodule Loka.Content.Population do
       Enum.uniq(corridor) == corridor and
       Enum.member?(corridor, p["home"]) and
       Enum.all?(s["drop_rooms"], &Enum.member?(corridor, &1)) and
-      Enum.all?(items, &(is_map(&1) and &1["location"]["in"] == "room")) and
+      Enum.all?(items, &scavenge_item?/1) and
       is_map(nest) and nest["container"] == true and is_integer(nest["capacity"]) and
       nest["location"] == %{"in" => "room", "room" => List.last(corridor)} and
       Enum.all?(rooms, &is_map/1) and
@@ -199,4 +199,10 @@ defmodule Loka.Content.Population do
   end
 
   defp reciprocal?(_, _), do: false
+
+  defp scavenge_item?(item) do
+    is_map(item) and item["location"]["in"] == "room" and item["container"] != true and
+      item["capacity"] == nil and item["slot"] == nil and item["barrier"] == nil and
+      item["give_allowed"] != false
+  end
 end

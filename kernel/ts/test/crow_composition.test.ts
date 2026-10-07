@@ -11,7 +11,14 @@ const cases = JSON.parse(
     new URL('../../../protocol/fixtures/crow_composition.json', import.meta.url),
     'utf8',
   ),
-).cases;
+).cases.concat(
+  JSON.parse(
+    readFileSync(
+      new URL('../../../protocol/fixtures/crow_review_composition.json', import.meta.url),
+      'utf8',
+    ),
+  ).cases,
+);
 
 // Breaks: a crow transition ignores its exact prior row or writes outside the keyed slot.
 test('crow transport composition matches independent literal answers', () => {
@@ -21,6 +28,12 @@ test('crow transport composition matches independent literal answers', () => {
     const result = compose(c.state, delta);
     assert.deepEqual(result, c.expected, c.id);
     assert.equal(check('delta_preconditions_hold', { state: c.state, delta, result }), true, c.id);
+    if (c.counterfeit)
+      assert.equal(
+        check('delta_preconditions_hold', { state: c.state, delta, result: c.counterfeit }),
+        false,
+        c.id,
+      );
   }
 });
 

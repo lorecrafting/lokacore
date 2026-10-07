@@ -1,7 +1,9 @@
 defmodule Loka.Core.CrowCompositionTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}
-  @cases JSON.decode!(File.read!("protocol/fixtures/crow_composition.json"))["cases"]
+
+  @cases JSON.decode!(File.read!("protocol/fixtures/crow_composition.json"))["cases"] ++
+           JSON.decode!(File.read!("protocol/fixtures/crow_review_composition.json"))["cases"]
 
   # Breaks: Elixir accepts a stale crow row or writes a different plan and slot.
   test "crow transport composition matches independent literal answers" do
@@ -17,6 +19,15 @@ defmodule Loka.Core.CrowCompositionTest do
                "result" => result
              }),
              c["id"]
+
+      if c["counterfeit"] do
+        refute Invariants.check("delta_preconditions_hold", %{
+                 "state" => c["state"],
+                 "delta" => delta,
+                 "result" => c["counterfeit"]
+               }),
+               c["id"]
+      end
     end
   end
 

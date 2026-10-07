@@ -48,6 +48,7 @@ export function crowsHold(state: Any, ops: Any[], result: Any): boolean {
       !same(before, op.expected) ||
       !(before === null ? after.phase === 'acquire' : legal[before.phase]?.includes(after.phase)) ||
       (before !== null &&
+        before.phase !== 'idle' &&
         (before.member_id !== after.member_id || before.generation !== after.generation)) ||
       (after.phase === 'idle' &&
         [after.item_id, after.nest_id, after.job_id, after.drop_event_id, after.encounter_id].some(

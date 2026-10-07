@@ -49,7 +49,8 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   if (
     op.crow_member_id !== undefined ||
     op.crow_generation !== undefined ||
-    op.crow_phase !== undefined
+    op.crow_phase !== undefined ||
+    op.job.kind === 'population_bundle'
   )
     return crowBindingValid(op);
   if (

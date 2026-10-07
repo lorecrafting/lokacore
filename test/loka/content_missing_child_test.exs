@@ -166,4 +166,21 @@ defmodule Loka.ContentMissingChildTest do
                  &1["path"] == "populations/fen_hounds.pack.flight_below_percent")
            )
   end
+
+  # Breaks: an authored allowlist admits a container or protected/wearable item before expansion.
+  test "crow source refuses unsafe allowlisted item roles", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "items/old_coin.json")
+    original = path |> File.read!() |> JSON.decode!()
+
+    for patch <- [
+          %{"container" => true, "capacity" => 2},
+          %{"give_allowed" => false},
+          %{"slot" => "cloak"}
+        ] do
+      File.write!(path, JSON.encode!(Map.merge(original, patch)))
+      assert {:error, diagnostics} = Loka.Content.compile(dir)
+      assert Enum.any?(diagnostics, &String.ends_with?(&1["path"], ".scavenge"))
+    end
+  end
 end

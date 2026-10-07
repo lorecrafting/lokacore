@@ -309,3 +309,26 @@ The isolated Chrome tab/preview is retained for handoff, with owner saves untouc
 
 This evidence-only checkpoint is held locally while reviewers finish pinned-source
 findings; do not push or change source until PM coordinates reviewer records/heads.
+
+## Round 1 portable fix checkpoint
+
+Integrated both independent review records without dropping either review-index
+entry. P2 now rejects allowlisted containers, wearable and protected definitions
+in both compiler and loader. P3/S1 permits a new member/generation only when the
+prior crow row is idle; active rebinding still refuses. S2 requires the complete
+crow binding for population_bundle schedules in both TypeScript composition and
+independent replay. The new counterfeit fixture also exposed and fixed the same
+missing semantic-kind check in Elixir independent replay. Frozen fixtures remain
+unchanged; new literal cases live in crow_review_composition.json.
+
+Focused TypeScript crow/composition: exit0,17 passed. Elixir composition/compiler:
+exit0,16 passed. Actual TypeScript idle-rebind, bundle-kind, independent binding
+and unsafe-role mutants each survived the reviewed old focused suite (exit0) and
+failed the updated suite (exit1); all mutations restored. Ponytail and correctness
+self-review: reuse existing validators/fixture runners; preserve active identity,
+closed binding tuples and explicit refusal; no new dependency or abstraction.
+
+P1 combat escape settlement and P4 expanded real-SQLite intermediate/fault proof
+remain open. Local browser carrier projection, held refresh and Shoo remain
+pending; full-nest fallback is proved above. No final full gate, new-head hosted
+checks, follow-up independent approval or merge is claimed for this checkpoint.

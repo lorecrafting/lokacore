@@ -131,7 +131,7 @@ function scavengeValid(c: Obj, p: Obj, bundle: Obj): boolean {
     new Set(corridor.map(ref)).size !== corridor.length ||
     !corridor.some((r) => ref(r) === ref(p.home)) ||
     !s.drop_rooms.every((r: Obj) => corridor.some((cr) => ref(cr) === ref(r))) ||
-    !s.items.every((r: Obj) => c.items?.[ref(r)]?.location.in === 'room') ||
+    !s.items.every((r: Obj) => scavengeItem(c.items?.[ref(r)])) ||
     nest?.container !== true ||
     !Number.isSafeInteger(nest.capacity) ||
     nest.location.in !== 'room' ||
@@ -164,5 +164,17 @@ function reciprocal([a, b]: Obj[], [ar, br]: Obj[]): boolean {
         ([back, reverse]: [string, any]) =>
           back === opposite[direction] && ref(reverse.to) === ref(ar) && !reverse.barrier,
       ),
+  );
+}
+
+function scavengeItem(item: Obj | undefined): boolean {
+  return (
+    !!item &&
+    item.location.in === 'room' &&
+    !item.container &&
+    !item.capacity &&
+    !item.slot &&
+    !item.barrier &&
+    item.give_allowed !== false
   );
 }

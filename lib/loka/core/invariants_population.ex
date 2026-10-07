@@ -43,7 +43,7 @@ defmodule Loka.Core.InvariantsPopulation do
     }
 
     if(before == nil, do: phase == "acquire", else: phase in Map.get(legal, before["phase"], [])) and
-      (before == nil or
+      (before == nil or before["phase"] == "idle" or
          (before["member_id"] == after_row["member_id"] and
             before["generation"] == after_row["generation"])) and
       crow_shape?(phase, after_row)

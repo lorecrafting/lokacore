@@ -249,11 +249,8 @@ defmodule Loka.Core.InvariantsEncounter do
       )
 
     case present do
-      [] ->
-        true
-
-      ["encounter_id"] ->
-        true
+      fields when fields in [[], ["encounter_id"]] ->
+        get_in(op, ["job", "kind"]) != "population_bundle"
 
       ["quest_instance_id", "actor_id"] ->
         get_in(op, ["job", "kind"]) == "quest"

@@ -449,3 +449,23 @@ test('crow acquisition harmlessly completes when another transfer moved the exac
     undefined,
   );
 });
+
+// Breaks: a declared shiny container or protected root loads and lets its descendants/quest property travel.
+test('crow allowlist rejects containers, wearable and protected item definitions', () => {
+  for (const patch of [
+    { container: true, capacity: 2 },
+    { give_allowed: false },
+    { slot: 'cloak' },
+  ]) {
+    const b = bundle((c: any) => Object.assign(c.items[coinRef], patch));
+    const loaded = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
+      INSTALLED,
+    );
+    assert.equal(loaded.ok, false);
+    if (!loaded.ok) {
+      assert.equal(loaded.diagnostic.code, 'SCHEMA_VIOLATION');
+      assert.ok(loaded.diagnostic.path.endsWith('.scavenge'));
+    }
+  }
+});
