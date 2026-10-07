@@ -95,7 +95,10 @@ defmodule Loka.Core.InvariantsPopulation do
   defp legal?("population.control", before, after_row),
     do:
       after_row["next_wander_due"] >= before["next_wander_due"] and
-        after_row["job_id"] != before["job_id"]
+        ((after_row["job_id"] != before["job_id"] and
+            after_row["suppression"] == before["suppression"]) or
+           (after_row["next_wander_due"] == before["next_wander_due"] and
+              suppression_change?(before["suppression"], after_row["suppression"])))
 
   defp legal?(
          "population.slot",
@@ -159,4 +162,21 @@ defmodule Loka.Core.InvariantsPopulation do
            after_row["last_flight_at"] == nil
 
   defp legal?(_, _, _), do: false
+  defp suppression_change?(_, nil), do: false
+
+  defp suppression_change?(nil, after_row),
+    do:
+      after_row["generation"] == 1 and after_row["ends_at"] != nil and
+        after_row["job_id"] != nil
+
+  defp suppression_change?(%{"ends_at" => nil} = before, after_row),
+    do:
+      after_row["generation"] == before["generation"] + 1 and
+        after_row["ends_at"] != nil and after_row["job_id"] != nil
+
+  defp suppression_change?(before, after_row),
+    do:
+      after_row["generation"] == before["generation"] and
+        after_row["cause_event_id"] == before["cause_event_id"] and
+        after_row["ends_at"] == nil and after_row["job_id"] == nil
 end

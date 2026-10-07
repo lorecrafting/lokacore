@@ -1,0 +1,29 @@
+{
+  "npc": "vesper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "fox"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.d9_vesper_fox.prompt",
+  "roles": {
+    "vesper": {
+      "role": "npc",
+      "npc": "vesper"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.d9.leave",
+      "narration": "narration.d9.leave"
+    }
+  }
+}

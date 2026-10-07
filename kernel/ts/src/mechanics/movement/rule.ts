@@ -44,7 +44,7 @@ export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 })
 export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
   return COMPASS.filter((d) => has(room.exits, d)).map((direction) => {
-    const barred = passage(world, room, direction);
+    const barred = passage(world, room, direction, world.character, steps);
     if (barred) return { direction, code: barred };
     if (dark(world, world.character, steps)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];

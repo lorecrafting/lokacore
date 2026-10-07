@@ -1,0 +1,10 @@
+RED: regular-first cold reopen at 237600, exit1 (save_corrupt)
+RED: a_aldric_debt explicit binding removed, exit1 (terminal profile shadows service)
+RED: maud_offer explicit binding removed, exit1 (terminal profile shadows service)
+RED: maud_turn_in explicit binding removed, exit1 (terminal profile shadows service)
+GREEN: restored SQLite D9 and deer guards, exit0
+RED: pre-D9 lib/loka/core/compose_population.ex, exit2 (suppression literal/oracle rejects removal)
+RED: pre-D9 lib/loka/core/invariants_population.ex, exit2 (suppression literal/oracle rejects removal)
+RED: pre-D9 kernel/ts/src/foundation/compose_population.ts, exit1 (suppression literal/oracle rejects removal)
+RED: pre-D9 kernel/ts/src/runtime/invariants_population.ts, exit1 (suppression literal/oracle rejects removal)
+GREEN: restored both-kernel literals and 120 randomized suppression cases, exit0

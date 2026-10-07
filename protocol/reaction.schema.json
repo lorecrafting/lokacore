@@ -164,6 +164,17 @@
                   "outcome"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "description": "Suppress one authored population plan for duration logical seconds from this accepted fact-change cause, preserving current members and closing its current encounter.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "population.suppress" },
+                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "duration": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["op", "plan", "duration"],
+                "additionalProperties": false
               }
             ]
           }

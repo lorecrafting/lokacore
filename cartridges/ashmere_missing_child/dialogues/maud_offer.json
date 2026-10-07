@@ -49,5 +49,6 @@
       "narration": "narration.maud.accept",
       "accept": "mauds_cellar"
     }
-  }
+  },
+  "label": "actions.maud_offer"
 }

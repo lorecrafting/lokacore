@@ -1,4 +1,6 @@
+// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
+import { encode } from '../foundation/canonical.ts';
 import { apply } from './apply.ts';
 import { over, type Limit } from '../foundation/compose.ts';
 import {
@@ -211,13 +213,40 @@ function react(p: P): Admitted | undefined {
   }
 }
 
+function populationDeadlinePairs(world: World, until: number) {
+  const pairs = new Map<string, string>();
+  for (const [plan, control] of Object.entries(world.state.population_plans ?? {})) {
+    const resume = control.suppression?.job_id;
+    const regular = control.job_id;
+    const a = resume && world.state.jobs?.[resume];
+    const b = world.state.jobs?.[regular];
+    if (
+      resume &&
+      a?.status === 'pending' &&
+      b?.status === 'pending' &&
+      a.due_time === b.due_time &&
+      a.due_time === control.suppression?.ends_at &&
+      a.due_time <= until &&
+      encode(a.job) === plan &&
+      encode(b.job) === plan
+    ) {
+      pairs.set(resume, regular);
+      pairs.set(regular, resume);
+    }
+  }
+  return pairs;
+}
+
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
+// size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  const paired = new Map<string, number>();
+  const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
+  const groups = new Map<string, number>();
+  const bleedPairs = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -238,9 +267,12 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const pair = bleedRoundPair(at, job_id as JobId, current);
-    const group = paired.get(job_id) ?? p.group + 1;
-    if (pair) paired.set(pair, group);
+    const partner = populationPairs.get(job_id);
+    const group =
+      (partner ? groups.get(partner) : undefined) ?? bleedPairs.get(job_id) ?? p.group + 1;
+    groups.set(job_id, group);
+    const bleedPair = bleedRoundPair(at, job_id as JobId, current);
+    if (bleedPair) bleedPairs.set(bleedPair, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     const own = ran.delta.ops.map((o) => ({
       ...o,

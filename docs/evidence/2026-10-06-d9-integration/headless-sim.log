@@ -1,0 +1,5 @@
+
+> loka-kernel@0.0.0 test:sim
+> node --test --test-reporter=${TEST_REPORTER:-spec} test/sim.test.ts
+
+...................

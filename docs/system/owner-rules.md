@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
+
 - D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote; source/proof remain pending ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
 
 - D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).

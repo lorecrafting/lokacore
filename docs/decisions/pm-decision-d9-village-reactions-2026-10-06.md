@@ -15,9 +15,9 @@ It consumes archived [00a §10](../archive/spec/00a-chapter-one-content.md#10-re
 subject to the owner's [four child states and three endings](owner-decision-chapter-one-content-2026-10-02.md).
 
 The selected response matrix covers the five valid terminal pairs. Elspeth,
-Bram, Maud and the Green distinguish `rescued`, `stays` and `lost`; Aldric,
-Vesper and Sedge respond to prior or fox. This corrects the provisional brief's
-omission of Bram, whom the owner expressly required to react. These are
+Maud and the Green distinguish `rescued`, `stays` and `lost`; Aldric,
+Vesper and Sedge respond to prior or fox. The [real-cast clarification](pm-decision-d9-real-cast-2026-10-06.md)
+keeps Old Bram outside the active chapter. These are
 fact-derived responses and authored text, not replacement quest writers,
 new relationships or extra endings.
 

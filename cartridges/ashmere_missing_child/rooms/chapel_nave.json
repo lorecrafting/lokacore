@@ -12,7 +12,8 @@
       "to": "cloister"
     },
     "west": {
-      "to": "prior_study"
+      "to": "prior_study",
+      "corpse_ingress": { "fact": "chapel_allegiance", "equals": "fox" }
     }
   },
   "sanctuary": true

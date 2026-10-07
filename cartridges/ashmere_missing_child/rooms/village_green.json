@@ -20,6 +20,111 @@
       "when": {
         "policy_version": 1,
         "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "fox"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued_fox"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.stays_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "fox"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.stays_fox"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "lost"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.lost_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
           "op": "fact_compare",
           "fact": "village_child_status",
           "equals": "lost"

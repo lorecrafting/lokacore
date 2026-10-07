@@ -1,6 +1,11 @@
-import type { EntityId, RoomDefinition } from '../../contracts.gen.ts';
+import type { CharacterId, EntityId, RoomDefinition } from '../../contracts.gen.ts';
 import { type World } from '../../runtime/decision.ts';
 import { barrierState, exitOf } from '../lookups.ts';
+import { bodyOf, refString, type Steps } from '../../runtime/decision.ts';
+import { value } from '../fact.ts';
+import { living } from '../death/shared.ts';
+import { LIMITS } from '../../contracts.gen.ts';
+import { KernelError } from '../../foundation/error.ts';
 import { level, pay, resourceRef } from '../resource.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
@@ -10,10 +15,40 @@ import { mul } from '../../foundation/int.ts';
  * undefined when it has no barrier or its barrier is open. Read-only, shared with the GameView's
  * exits (view/view.ts).
  */
-export function passage(world: World, room: RoomDefinition, direction: string) {
-  const barrier = exitOf(room, direction)?.barrier;
+export function passage(
+  world: World,
+  room: RoomDefinition,
+  direction: string,
+  actor?: CharacterId,
+  steps: Steps = { n: 0 },
+) {
+  const exit = exitOf(room, direction);
+  const barrier = exit?.barrier;
   const state = barrier && barrierState(world, barrier);
-  return state === 'locked' ? 'exit_locked' : state === 'closed' ? 'exit_closed' : undefined;
+  if (state === 'locked') return 'exit_locked';
+  if (state === 'closed') return 'exit_closed';
+  const gate = exit?.corpse_ingress;
+  if (!gate || !actor || value(world, actor, gate.fact) !== gate.equals) return undefined;
+  const body = bodyOf(world, actor);
+  const there = world.roomIds[refString(exit.to)];
+  if (body && living(world, body)) {
+    for (const [id, identity] of Object.entries(world.state.created ?? {})) {
+      if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
+      if (
+        identity.origin.kind !== 'death' ||
+        identity.origin.owner_id !== actor ||
+        identity.origin.victim_id !== body ||
+        world.state.containers[id] !== there ||
+        refString(identity.definition) !== refString(world.cartridge.world!.death!.player_corpse)
+      )
+        continue;
+      for (const [root, holder] of Object.entries(world.state.containers)) {
+        if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
+        if (holder === id && world.entities[root]?.kind === 'item') return undefined;
+      }
+    }
+  }
+  return 'exit_closed';
 }
 
 /**

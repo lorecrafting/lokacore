@@ -1,0 +1,22 @@
+[
+  {
+    "label": "original-saved-scene-recovered-no-reset",
+    "snapshot": "- heading [level=1]\n- generic: The bell's voice shudders through the timber around you.\n- button \"Continue\":\n  - generic: Continue\n- generic \"day 2, 02:19, night, new moon\": day 2, 02:19 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\" [disabled]:\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "bell-scene-second-line",
+    "snapshot": "- heading [level=1]\n- generic: Beyond the slats, the fen lies still beneath the sound.\n- button \"Continue\" [active]:\n  - generic: Continue\n- generic \"day 2, 02:20, night, new moon\": day 2, 02:20 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\" [disabled]:\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "bell-scene-third-line",
+    "snapshot": "- heading [level=1]\n- generic: When the last note fades, even the fox calls have gone quiet.\n- button \"Continue\" [active]:\n  - generic: Continue\n- generic \"day 2, 02:23, night, new moon\": day 2, 02:23 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\" [disabled]:\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "bell-scene-closed",
+    "snapshot": "- heading \"The Missing Child — in progress\" [level=1]\n- button \"Continue\":\n  - generic: Continue\n- button \"Back to World\":\n  - generic: Back to World\n- generic \"day 2, 02:25, night, new moon\": day 2, 02:25 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  },
+  {
+    "label": "recovered-belfry-after-second-reload",
+    "snapshot": "- heading \"Chapel bell\" [level=1]\n- generic: The great bell hangs from a timber crossbeam. Its rope is sound, and the clapper waits just clear of the bronze.\n- generic: \"You pull the rope. The bell answers with a deep note that rolls over Ashmere and into the fen. Earlier: The bell carries across Ashmere.\"\n- generic: \"Leave the bell silent: not now\"\n- generic: \"Ring bell: not now\"\n- button \"Leave\":\n  - generic: Leave\n- generic \"day 2, 02:29, night, new moon\": day 2, 02:29 · night · new moon\n- generic \"Position, standing\": standing\n- button \"Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, pennies 20 of 1000\":\n  - generic: hp 10/10 ma 100/100 mv 100/100 pennies 20/1000"
+  }
+]

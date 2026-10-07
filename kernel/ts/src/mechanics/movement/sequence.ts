@@ -81,7 +81,7 @@ export function movementPlan(
   const to = exitTo(world.rooms[here], direction);
   const there = to && world.roomIds[refString(to)];
   if (!there) return 'not_found' as const;
-  const barred = passage(world, world.rooms[here], direction);
+  const barred = passage(world, world.rooms[here], direction, actor_id, steps);
   if (barred) return barred;
   const wet = water.edge(world, here, there, direction);
   if (wet) {

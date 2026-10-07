@@ -1,7 +1,7 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_missing_child",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "title": "Ashmere — The Missing Child",
   "ancestries": {
     "fen_born": {
@@ -36,7 +36,7 @@
   },
   "requires": {
     "kernel_api": {
-      "at_least": "1.34",
+      "at_least": "1.35",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -304,6 +304,47 @@
           "bottom": "pool_bottom"
         }
       ]
+    },
+    "bell_cue": {
+      "fact": "chapel_bell_rung",
+      "rooms": [
+        "boathouse",
+        "chandler",
+        "chandler_storeroom",
+        "cottage_loft",
+        "drowned_lantern",
+        "east_gate",
+        "elspeth_cottage",
+        "empty_cottage",
+        "ferry_landing",
+        "gate_tower",
+        "inn_attic",
+        "inn_rooms",
+        "lantern_cellar",
+        "mill_cellar",
+        "mill_loft",
+        "north_gate",
+        "old_mill",
+        "orchard",
+        "smithy",
+        "village_green",
+        "watch_cell",
+        "watch_post",
+        "well_bottom",
+        "well_lane",
+        "well_shaft",
+        "chapel_steps",
+        "chapel_nave",
+        "prior_study",
+        "bell_tower",
+        "belfry",
+        "spire",
+        "cloister",
+        "infirmary",
+        "scriptorium",
+        "kitchen_garden"
+      ],
+      "text": "narration.bell_cue"
     }
   }
 }
