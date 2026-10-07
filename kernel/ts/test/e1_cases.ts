@@ -20,6 +20,7 @@ import {
 } from './e1_case_host.ts';
 import { checked } from './sim.ts';
 import { ending, ENDINGS } from './e1_paths.ts';
+import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 
@@ -45,6 +46,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   assert.ok(
     fault ||
       start.case_id === 'thirty-days' ||
+      start.case_id === 'topology' ||
       ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
     'unknown E1 case',
   );
@@ -189,6 +191,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   try {
     for (const [child, allegiance, fox] of ENDINGS)
       run(`${child}-${allegiance}`, (a) => ending(a, child, allegiance, fox));
+    run('topology', topology);
     run('thirty-days', thirtyDays);
     for (const fault of FAULTS)
       run(`sqlite-${fault}`, (a, path) => storageFault(a, path, fault), faultSchedule(fault));

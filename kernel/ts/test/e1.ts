@@ -30,6 +30,7 @@ export function source() {
     'sim.ts',
     'e1_case_host.ts',
     'e1_paths.ts',
+    'e1_routes.ts',
     'e1_world.ts',
     'e1_faults.ts',
     'e1_cases.ts',
