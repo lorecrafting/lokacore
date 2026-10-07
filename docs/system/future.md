@@ -1,22 +1,25 @@
 # Future plans
 
-Short list; each item links the plan it comes from. The open stages and their carries are the
-[ROADMAP](../ROADMAP.md#slices) rows "R7/R8 for chapter one" and "Playtest and tune"; the gate ladder is
+Short list; each item links the plan it comes from. Chapter 1's unfinished E1–E3 gates
+and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechanics are
+[installed contracts](mechanics.md). The historical gate ladder is
 [14](../archive/spec/14-implementation-plan.md) and [R milestones](../archive/spec/R-MILESTONES.md).
 
 ## Next
 
-- **M mechanics continuation**: [official M1–M23 queue](../NEXT-MECHANICS.md), [adopted clock/chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md) and first [M1-A brief](../briefs/m1-a-clock.md), under delegated PM authority.
-
-- **R7/R8 for chapter one**: 12 slices and Gate C1 ([record](../decisions/owner-decision-chapter-one-plan-2026-10-02.md);
-  what stays LATER, with its trigger, is in the record's §2 triage table).
+- **Chapter 1 acceptance**: E1–E3 remain open in the [roadmap](../ROADMAP.md);
+  installed A–D source and its [current identity](cartridge.md#current-bundled-chapter)
+  do not establish completion of those gates.
+- **M mechanics planning**: [official M1–M23 queue](../NEXT-MECHANICS.md) and
+  [adopted policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md),
+  under delegated PM authority; implemented portions are described in [mechanics](mechanics.md).
 - **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
 
 ## Chapter one and the proof cartridge
 
 - The release uses [one shared difficulty](../decisions/owner-decision-single-difficulty-2026-10-03.md);
   the older ladder's selectable difficulty and separate death-mode rules are superseded.
-- The later time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
+- The installed time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
   clock progression is authority-driven elapsed time; gameplay actions offer no time skip.
 - Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
   with its [sourced system reference](../reference/legendmud-system.md). The

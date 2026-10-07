@@ -2,6 +2,13 @@
 
 Hard-won lessons for `mobile/` and physical-device runs.
 
+The [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
+currently forbids Android/iOS development, builds and verification, including Debug
+and Release Simulator sessions. Native procedures below apply only after the owner
+resumes that work; retained results prove their recorded releases. The Node game
+simulator remains an engine check, and isolated browser preview can exercise the
+shared client. Neither closes deferred native proof or the known UI blur carry.
+
 **expo-sqlite and React Native**
 - `expo-sqlite` 57.0.3 on web: first-open WASM/OPFS initialization can outlast a synchronous
   worker request, so open asynchronously before the existing synchronous authority calls.
@@ -36,7 +43,8 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
 
 **Physical-device runs**
-- A slice's automated device rows run on a Release iOS Simulator build ([owner rule](../system/owner-rules.md)).
+- After native work resumes, a slice's automated device rows follow the then-current
+  [owner rule](../system/owner-rules.md). During the pause, those rows remain deferred.
 - Until the first free product gate the only phone is the iPhone 11
   ([owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)). After
   that the owner can connect only one phone at a time: batch all work per phone; ask for a
@@ -62,9 +70,15 @@ Hard-won lessons for `mobile/` and physical-device runs.
   UIScene lifecycle. Expo 57 ships the scene delegate but its template does not wire it;
   `mobile/app/plugins/with-ios-scene.js` does, at every prebuild. Never hand-patch `ios/`.
 - agent-device: its daemon keeps the environment it first started with; after setting
-  `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
-  fresh start, uninstall and reinstall the app.
-- The current validated Release walk follows [Book navigation](../system/book-ui.md) and
+  `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save.
+  Fresh-install tests use a disposable isolated app/profile and save, after native work
+  resumes. Never uninstall the owner's app or clear, replace or re-pin its save.
+  For a bundle-change test, retain a byte witness of the disposable prior-release
+  save and verify explicit pin mismatch refusal leaves its complete bytes unchanged.
+  A fresh test run or confirmed Start over belongs only to the isolated test profile. The
+  [forward-development rule](../decisions/owner-decision-forward-development-2026-10-05.md)
+  permits current pins to advance while preserving that explicit refusal.
+- The retained M1-B2 Release walk follows [Book navigation](../system/book-ui.md) and
   [M1-B2 native evidence](../evidence/2026-10-04-m1-b2-lifecycle/README.md), including status
   Contents, full NPC details, Conversation/Leave after departure, and saved continuation
   recovery. Copy exact current labels from `snapshot -i`; selectors with spaces are one
@@ -74,7 +88,8 @@ Hard-won lessons for `mobile/` and physical-device runs.
   is a plain View for that reason.
 - An `Animated.View` with a `transform` around the footer map's dot displaced the dot after the map tip went and
   the page changed (R6P Polish O-1), even with the transform at identity. The dot is now a `Disc` placed from state.
-  Check a footer fix with a fresh install, the tip still showing: tap Map, then Back, and look at the dot.
+  After native work resumes, check a footer fix with a fresh install in the isolated
+  test profile, the tip still showing: tap Map, then Back, and look at the dot.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
   edit that starts the app on that state; such shots are static and prove layout only,
   not navigation or gestures.

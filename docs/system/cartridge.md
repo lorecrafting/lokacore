@@ -12,7 +12,7 @@ world's definitions and text:
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
-| `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), each actor's value its `start` ([mechanics.md](mechanics.md#attributes1); `lib/loka/content/resources.ex:2`) |
+| `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -20,10 +20,24 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.15`, titled **Ashmere — The Missing Child**,
-in its own `loka-ashmere-missing-child.db` save under the
+## Current bundled chapter
+
+The shared app bundles `ashmere_missing_child@0.0.42` (v042), titled
+**Ashmere — The Missing Child**, requiring kernel API1.37. Its independently derived
+content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
+with 57 rooms and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
+[allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) and
+[independent derivation review](../reviews/2026-10-06-d10-primary-source-review.md) establish those answers.
+D10 is published in [PR #263](https://github.com/lorecrafting/lokacore/pull/263), with
+[source review](../reviews/2026-10-06-d10-primary-source-review.md) and
+[save/protocol review](../reviews/2026-10-06-d10-save-protocol-review.md). A–D source is
+installed; E1–E3 acceptance remains open in the [roadmap](../ROADMAP.md), including
+chapter review and the browser/UI consistency gate. Native verification and known blur
+remain deferred under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
+
+The app uses its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
-This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
+The chapter retains the village and inn routes and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
 — in progress”; Q1, The First Lead, and both Q2 return paths are playable. The temporary Lantern
@@ -66,11 +80,10 @@ S1 offer and turn-in remain independently usable in every Q1 state. No hour or w
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release declares API1.13 for the authored calendar and confirmed status projection, including API1.12's typed bell reaction and scene composition. It retains real_elapsed rate50/start64800, HP10, MV100, carrying
-ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
-reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v015_hash.json`, derived
-by `test/loka/cartridge_missing_child_v015_hash.py`. Historical sampler/proof sources,
+The chapter retains its authored calendar/status, typed bell reaction and scene composition,
+real_elapsed rate50/start64800, HP10, MV100, carrying ceiling12000, move cost1 and
+position recovery18/36 per3600 logical seconds. The current release and independent
+answers are [above](#current-bundled-chapter). Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
@@ -425,7 +438,8 @@ The sampler release after0.0.8 adds five distinct rat credit facts and these pro
 preserving the five finite rats. It removes cellar_door from both reciprocal exits and
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
-The previous0.0.8 pin is retained; changed content gets new version and independent KAT.
+The historical0.0.8 fixture retains its original answer; the
+[current bundled chapter](#current-bundled-chapter) has its own independent oracle.
 
 ## Maud’s Cellar content (M20-B2)
 
@@ -540,7 +554,9 @@ response as narration; he remains present and the chapel route remains open.
 The first accepted Q3 terminal choice closes both recipes. No lost/fox outcome,
 later allegiance switch, dawn scene or export is part of Q3-F.
 
-## A3 Green finale (planned)
+<a id="a3-green-finale-planned"></a>
+
+## A3 Green finale
 
 [A3 adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md) selects one
 explicit **Begin epilogue** action at Village Green after actor-owned terminal Q2
@@ -581,19 +597,21 @@ trigger, references, unique ownership, marker vocabulary and required API capabi
 The chapter's source copy is delegated to the content author under the owner's copy
 direction. This section adopts semantics and values, not final prose, IDs or hashes.
 
-## Selected S2 authoring (pending implementation)
+<a id="selected-s2-authoring-pending-implementation"></a>
 
-The B2 release will author Peg and her one ledger at the chandler, plus the storeroom,
+## Selected S2 authoring
+
+B2 authors Peg and her one ledger at the chandler, plus the storeroom,
 while reusing the existing public Aldric in the Chapel Nave. Peg's offer has no hours
 gate. Source declares S2's fixed absolute deadlines through the authored chapter
 calendar, 10-penny payout, 20-penny player start, Aldric's explicit 10-penny funding,
 the 0..1000 penny resource bound, and the typed fact bounds and outcomes. The
-[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation)
+[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract)
 owns timing, identity and atomic consequences. Compiler and loader must validate the
 receive-plus-accept choice, bound original participants/item, absolute due time,
 resource ownership and exact participating balances. Source may use a narrow typed
 expiry declaration; it must not encode the job as a free-form Effect interpreter.
-This section describes the selected next release, not content already installed.
+B2 is installed in the [current bundled chapter](#current-bundled-chapter).
 
 ## Peg's B3 shelf
 
@@ -664,10 +682,9 @@ invalid profiles/fees, missing teacher balance, collisions and unknown fields.
 Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
 main-story routes stay as currently authored. Training and shop equipment are
 optional; every possession-recovery and required story route stays free of a skill,
-weapon, shield, hour or next-day stock gate. C2 later owns Tobin's reachable watch
-post/patrol. C1 source is carried by the current [B4 successor](#b4-well-and-fuel), which owns
-the current chapter payload and identity pin. Source and checks remain local until
-independent review.
+weapon, shield, hour or next-day stock gate. C2 owns Tobin's reachable watch
+post/patrol. C1 and its B4 consumer are installed in the
+[current bundled chapter](#current-bundled-chapter).
 
 ## B5 herb and bandage stock
 
@@ -744,7 +761,7 @@ the player, room or merchant. No generic stacking, destruction, stock or liquid 
 
 ## B7 water and vessels
 
-**Selected, pending implementation.** The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
+The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
 authors `water` in integer quarter-litre units: **250 grams/unit**, Drink **1 unit**.
 Both waterskins have capacity **4 units**, shell mass **500 grams**, and initial
 `null/0` contents. A full skin therefore weighs **1500 grams**, with no rounded
@@ -781,7 +798,7 @@ on non-detail entities. Non-opted items and historical frozen artifacts retain
 their existing representation; B4's fuel rows are not liquid vessels.
 ## C2 watch route and trust
 
-**Local source implemented; independent review pending.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+[C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
 adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
 Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
 down; Village Green east ↔ East Gate west. The cell is vacant with an open,
@@ -826,18 +843,15 @@ The patrol Start choice owns activation and its final causal join owns resolutio
 ordinary quest-linked dialogue and reaction activation/resolution/failure cannot
 write a patrol quest independently of its row. World route/count values are
 cartridge data, never presenter/engine chapter literals; existing safety budgets
-bound all validation/traversal. The local 0.0.24/API1.22 candidate and independently derived hash/IDs are pinned
-in the [C2 brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
-Publication and independent source approval remain pending.
+bound all validation/traversal. C2 is installed in the
+[current bundled chapter](#current-bundled-chapter); original selection and
+proof remain in the [C2 brief](../briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
 
 ## B6 marsh route and tuning
 
-The current local source release is `ashmere_missing_child@0.0.23`, API1.21,
-with [independent payload](../../protocol/fixtures/missing_child_v023_hash.json),
-[103 initial IDs](../../protocol/fixtures/missing_child_v023_ids.json) and
-[derivation from reviewed B7 v022](../../protocol/fixtures/generate_missing_child_v023.py).
-Its SHA-256 is `e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`.
-Independent B6 source and save/protocol reviews remain pending.
+B6 is installed in the [current bundled chapter](#current-bundled-chapter).
+Its original release derivation remains in the dated
+[B6 evidence](../evidence/2026-10-05-b6-wisp/README.md).
 
 
 The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
@@ -925,13 +939,17 @@ compile/load; inspect actual slot bounds before traversal or allocation.
 
 No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
 in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
-S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
-must amend their actual additional contracts. The published C3 release answer is
-recorded in the [roadmap](../ROADMAP.md); C4 owns its separate successor pin.
+S1 credits retain their declared consumer. Additional installed consumers are
+[C4 pack response/flight](#c4-pack-response-and-wounded-flight),
+[D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
+and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
+The [current bundled chapter](#current-bundled-chapter) owns release answers;
+[C3's publication review](../reviews/2026-10-06-c3-publication-status-review.md)
+retains its original independent source/save proof.
 
 ## C4 pack response and wounded flight
 
-**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+[C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
 opts the existing C3 `fen_hounds` plan into same-plan, admission-time pack assistance
 and strict below25% HP flight. These are cartridge declarations, not template-name
 checks or engine/presenter world constants. Enemy flight has zero fare, chooses
@@ -957,8 +975,7 @@ immunity flag, temporary safe mode, extra return action or night wait is needed.
 C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
 without crossing the strict below25% live flight threshold; misses/defenses retain
 their actual resolver semantics. No weapon/loot is required by the main story.
-C4 successor release/API/hash/fresh IDs are candidate answers pending final integrated review
-and independently pinned against the published predecessor.
+C4 is installed in the [current bundled chapter](#current-bundled-chapter).
 
 ## D1 ferry and Isle declarations
 
@@ -978,9 +995,9 @@ payment. Source definitions own fares, room links, text and balances. D1 adds
 `swim` to the C1 skill definitions with a vacuous `all: []` qualification
 policy: D1 has no water action or new attribute to qualify. Sedge's direct
 free dialogue choice uses `skill.acquire` and does not issue D6 water access
-early. D1 defines no underwater admission. [D6's selected admission](mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation)
+early. D1 defines no underwater admission. [D6's selected admission](mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-contract)
 uses acquired swim plus current load/MV, without an attribute floor;
-selected-docs review is approved; source publication and proof remain pending. The optional
+D6 is installed in the [current bundled chapter](#current-bundled-chapter). The optional
 dark Hut Loft retains B4's
 known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
 herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
@@ -994,9 +1011,7 @@ an empty list. These paired routes add no ordinary compass connection.
 
 Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
 wrong fare/recipient reference, unbounded recipient balance, forged transport
-action, or ordinary exit that bypasses the declared ferry. The final bundled
-release/API/hash/ID answers must be independently derived after the actual
-source predecessor lands; D1 planning assigns no successor values.
+action, or ordinary exit that bypasses the declared ferry. D1 is installed in the [current bundled chapter](#current-bundled-chapter).
 
 ## B8 Maud's service declarations
 
@@ -1037,13 +1052,9 @@ minimal service subset covers only these consumed consequences, not an arbitrary
 Effect interpreter. Independently re-pin the integrated bundled release/API and
 known answers after the shared-source scheduling predecessors integrate.
 
-The local B8 candidate is `ashmere_missing_child@0.0.25`, API1.23, with
-[independent hash](../../protocol/fixtures/missing_child_v025_hash.json) and
-[111 allocated IDs](../../protocol/fixtures/missing_child_v025_ids.json), derived
-and rechecked against published C2/main predecessor `cb7fbc1c`. Source and
-scoped correction reviews approve the implementation; the
-[final evidence](../evidence/2026-10-05-b8-maud-services/README.md) records the
-full gate and independent pin recheck. B8 publication remains pending.
+B8 is installed in the [current bundled chapter](#current-bundled-chapter);
+its source and real SQLite acceptance are recorded in the
+[B8 evidence](../evidence/2026-10-05-b8-maud-services/README.md).
 
 ## D2 public Priory and book authoring
 
@@ -1126,8 +1137,8 @@ choice mixing, body/container operations and a dream end declaring a completion
 report. Reserve engine cursor/choice ownership as for existing scenes; content
 cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
-B9 integrates the published D5/D2 predecessor. Independent current release/API/hash/
-allocated-ID answers and the retained provisional fixtures are recorded in the
+B9 is installed in the [current bundled chapter](#current-bundled-chapter). Its
+original predecessor and provisional answers remain dated
 [source evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
 
 ## D4 homes and orchard declarations
@@ -1211,8 +1222,7 @@ Other landscape details are descriptive and advertise only projected actions.
 Do not add a bottom exit, room placeholder, underwater loot, fishing operation,
 crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
 D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
-current location. Release/hash/IDs advance independently when source exists;
-this plan assigns no successor pin or API increment.
+current location. D5 is installed in the [current bundled chapter](#current-bundled-chapter).
 
 ## D3 Western Ashmere declarations
 
@@ -1243,9 +1253,11 @@ The [final D3 integration proof](../evidence/2026-10-06-d3-final-integration/REA
 records the independently pinned successor and checks; the
 [provisional proof](../evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
 
-## D6 bottom rooms and water tuning (selected, pending implementation)
+<a id="d6-bottom-rooms-and-water-tuning-selected-pending-implementation"></a>
 
-**PM-selected contract; selected-docs review approved, implementation pending.** Reciprocal exits:
+## D6 bottom rooms and water tuning (selected contract)
+
+Reciprocal exits:
 `well_shaft` down ↔ `well_bottom` up and `black_pool` down ↔ `pool_bottom` up.
 Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
 loot needs B4 light. Well Bottom owns one actual old coin and carved initials;
@@ -1261,14 +1273,12 @@ D1's `swim` declaration remains vacuous `all: []`; no new attribute. The
 defines mass/capacity; chest capacity uses direct-item count, not grams, and
 ordinary container eligibility preserves 100% descendant mass.
 
-Current source is the [published D1 v030/API1.26 baseline](../decisions/pm-decision-d6-water-depths-2026-10-06.md#published-dependency-re-pin).
-Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
-shape remain null until actual source and independent derivation. Chapel Nave
+D6 is installed in the [current bundled chapter](#current-bundled-chapter). Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
 ## D11 ancestry declarations (selected contract)
 
-**PM-selected chapter values; source pending publication.** Source `cartridge.json.ancestries` is a closed choice map with label, description, attribute/modifier and optional skill, faction and dark-sight effects. The compiler expands short refs and the loader validates them independently. The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
+Source `cartridge.json.ancestries` is a closed choice map with label, description, attribute/modifier and optional skill, faction and dark-sight effects. The compiler expands short refs and the loader validates them independently. The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
 
 | Ancestry | Selected attribute | Actual Chapter 1 effect |
 |---|---|---|
@@ -1279,12 +1289,19 @@ remains the death shrine; Isle Shrine is descriptive only.
 
 All other values retain their starts. The Priory/Fen axis starts at 0 for road-born and hill-folk; its selected −2 value is within the existing −10..10 bound and means Fen favor. Fen and fey share that numeric starting side but have different skill, sight and attribute outcomes. STR/DEX C1, INT/D12, DEX/D12 and PER/B6 consumers keep their authored thresholds; B6's PER5 difficulty remains immediately passable. D6 Swim has no CON floor. CON/SPI have no Chapter 1 stat-check consumer, so their selected values are truthful character data rather than a fabricated threshold. This preserves the [owner's fey content ruling](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 
-Select the smallest closed source declaration that maps the four keys to these values/effects, with authored labels and no free-form script. The compiler and loader must reject missing/extra keys, unknown attributes/skills/faction reference, unsupported sight effects, unsafe/out-of-range integer values, an absent capability or an effect that cannot be applied atomically. A new release independently derives its pin/hash/IDs. Exact source field names, successor API and output remain null until the source PR amends the protocol and supplies independently checked answers.
+The closed `ancestries` source declaration maps the four keys to these values/effects
+with authored labels and descriptions. Compiler and loader reject missing/extra keys,
+unknown attributes/skills/faction references, unsupported sight effects, unsafe or
+out-of-range values, absent capabilities and effects that cannot apply atomically.
+The [D11 command and changed row](mechanics.md#d11-character-choice-selected-contract)
+consume this shape; the [current identity](#current-bundled-chapter) owns release answers.
 
-## D9 village reaction content (selected, pending implementation)
+<a id="d9-village-reaction-content-selected-pending-implementation"></a>
+
+## D9 village reaction content (selected contract)
 
 The five valid child/allegiance pairs and the Study rule are defined in
-[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
+[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
 Author distinct child responses for Elspeth, five truthful Maud rumor
 variants and Green descriptions, prior/fox Aldric and Vesper responses, and
 bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave. Explicit labelled dialogue bindings keep the ledger handoff and Maud's cellar offer/turn-in independently selectable alongside terminal reaction profiles. Old Bram remains outside the real cast under the [D9 clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md).
@@ -1309,7 +1326,7 @@ v040/API1.35 hash and209 allocation answers are retained with
 
 ## D12 practical skill declarations
 
-**Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
+The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
 
 | Chapter parameter | Selected value |
 |---|---|
@@ -1329,11 +1346,18 @@ The optional closed NPC `shop.buy_discount` object is `{skill: "haggle", numerat
 
 Compiler and loader reject unknown fields, unresolved skill/action/narration references, missing skills capability, a careful action with wrong command/target/input, integer count outside 2..number-of-distinct-eligible-items, or nonpositive/out-of-range discount values. Require numerator≤denominator, minimum≤every base Buy price, and safe exact integer multiplication for every authored base×numerator before division/floor; refuse unsafe tuning rather than round or overflow. The new declarations are typed content, not unrestricted price formulas or arbitrary method names. No absent field may silently enable a benefit. Preserve unknown-method refusal and the ordinary method-omitted path.
 
-D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
+D12 is installed in the [current bundled chapter](#current-bundled-chapter). Its
+[final primary review](../reviews/2026-10-06-d12-final-primary-review.md) and
+[save/protocol opinion](../reviews/2026-10-06-d12-final-save-review.md) record the
+independent source, pin and recovery proof. Existing frozen conformance fixtures
+remain unchanged; explicit incompatible-pin refusal preserves saves without an
+adapter, migration or deletion.
 
-## D7 deer planning declarations
+<a id="d7-deer-planning-declarations"></a>
 
-**PM-selected proposal; independent plan review and source proof pending.** The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+## D7 deer declarations
+
+The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
 
 | Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
 |---|---|---|---|---|---|---|
@@ -1343,25 +1367,24 @@ D12 implementation head, final predecessor re-pin, successor release/API/hash/al
 
 The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
 
-Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
+Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. D7 is installed in the [current bundled chapter](#current-bundled-chapter). No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
 
 ## C5 bleed and bandage declarations
 
-**Selected planning values, not installed source.** [C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1, narration: {applied, refreshed, tick, expired}}` with each narration value a required local TextKey, and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
+[C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1, narration: {applied, refreshed, tick, expired}}` with each narration value a required local TextKey, and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
 
 Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
 
-Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
-## D10 map positions and Chapel door (selected, pending implementation)
+Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef. C5 is installed in the
+[current bundled chapter](#current-bundled-chapter).
 
-**Implementation candidate:** Chapter v042/API1.37 has 57 rooms and 211 initial IDs.
-Its independently derived content hash is
-`5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`;
-[the frozen artifact](../../protocol/fixtures/missing_child_v042_hash.json) and
-[allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) retain the answers.
-Source review and publication are pending.
+<a id="d10-map-positions-and-chapel-door-selected-pending-implementation"></a>
 
-The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
+## D10 map positions and Chapel door (selected contract)
+
+D10 is installed in the [current bundled chapter](#current-bundled-chapter).
+
+The chapter declares one static position `{x, y, z}` for each current room.
 These integer drawing coordinates are content, not an engine inference from compass
 directions: the room graph contains ferry links and loops. Compilation and loading
 require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
@@ -1383,15 +1406,17 @@ Neither replaces Q2 drawing or message credit.
 
 ## C6 S27 expedition declarations
 
-**Selected planning data; source pending C5 publication.** S27 `a_night_in_the_marsh` starts by an explicit no-cost/no-duration action on Hound Run's existing gnawed-bones detail. Its bounded route is five ordered accepted player entries: Hound Run **west→Reed Bank**, Reed Bank **west→Willow Shade**, Willow Shade **south→Drowned Oak**, Drowned Oak **north→Willow Shade**, Willow Shade **east→Reed Bank**. Add one inspectable Drowned Oak shelter detail with optional Use shelter at cursor3, without Rest, healing or clock advance; the final Reed Bank is a safe return boundary. Ordinary reciprocal exits already exist. The allowed attempt footprint is Hound Run, Adder Nest, Reed Bank, Willow Shade and Drowned Oak; Adder Nest accommodates a legal C4 Flee/deviation but earns no route credit. Any accepted exit to a room outside this set before completion fails the attempt. Other travel inside the footprint leaves the cursor unchanged until the exact next edge is later taken.
+S27 `a_night_in_the_marsh` starts by an explicit no-cost/no-duration action on Hound Run's existing gnawed-bones detail. Its bounded route is five ordered accepted player entries: Hound Run **west→Reed Bank**, Reed Bank **west→Willow Shade**, Willow Shade **south→Drowned Oak**, Drowned Oak **north→Willow Shade**, Willow Shade **east→Reed Bank**. Add one inspectable Drowned Oak shelter detail with optional Use shelter at cursor3, without Rest, healing or clock advance; the final Reed Bank is a safe return boundary. Ordinary reciprocal exits already exist. The allowed attempt footprint is Hound Run, Adder Nest, Reed Bank, Willow Shade and Drowned Oak; Adder Nest accommodates a legal C4 Flee/deviation but earns no route credit. Any accepted exit to a room outside this set before completion fails the attempt. Other travel inside the footprint leaves the cursor unchanged until the exact next edge is later taken.
 
 The chapter names one original player-scoped quest and one original player Boolean `fen.night_survived`, initially false. Completion sets that fact true and applies **−1** to the existing bounded Priory/Fen axis at most once. It offers a Sedge acknowledgement of surviving the marsh; her D1 swim lesson remains free, independently accessible before S27 and idempotent if already acquired. No duplicate `skill.acquire`, second swim lesson, fee, item or attribute reward is granted by S27. Sedge's recognition is a fact-selected dialogue/text variant at her existing all-hours location, not a new NPC schedule or persistent behavior profile.
 
-At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. Release/API/hash and allocated IDs remain null until source is derived from its final published predecessor.
+At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. C6 is installed in the [current bundled chapter](#current-bundled-chapter).
 
-## D8 crows, coin and reachable nest (selected planning contract)
+<a id="d8-crows-coin-and-reachable-nest-selected-planning-contract"></a>
 
-**D6 predecessor published; D8 source pending.** Published main `f57f1a8c` includes D6 [#247](https://github.com/lorecrafting/lokacore/pull/247), merge `61f4200c`, chapter `ashmere_missing_child@0.0.35`, API1.30, hash `560e16712f3c04538343e9a3ac767604093656bc527864360ccad6a8ab719581`, and 190 starting IDs in the frozen v035 fixtures. The installed sole `old_coin` is a 10g room item at dark Well Bottom, with reciprocal Up to Well Shaft; Pool Bottom instead holds the chest/ring. D5's Oak Branches route and all seven reciprocal dry corridor legs remain installed. D8's allowlist names that exact item definition in the new compiled chapter; its successor release/API/hash/ID answers and source head remain null until implementation.
+## D8 crows, coin and reachable nest (selected contract)
+
+D8 is installed in the [current bundled chapter](#current-bundled-chapter). The sole `old_coin` is a 10g room item at dark Well Bottom, with reciprocal Up to Well Shaft; Pool Bottom instead holds the chest/ring. D5's Oak Branches route and all seven reciprocal dry corridor legs remain installed. D8's allowlist names that exact item definition in the compiled chapter.
 
 Declare four C3-style **cap-one two-room plans**: two with Green home and Well Lane as ordinary wander neighbor; one with Drowned Oak home and Willow Shade neighbor; one with Oak Branches home and Drowned Oak neighbor. Thus genesis has two Green, one Oak and one Branches crow. Each plan has day/night target one, no aggression window, **86400 logical second** replacement after actual death and **3600** ordinary wander interval. Existing two-room wander remains two-room; a crow on an evidenced transport or return excursion keeps its living slot while that plan skips its wander. After deposit, fallback or Shoo, a checked return job takes one adjacent corridor leg toward the member's authored home every **150 logical seconds** and finishes there in at most seven legs; ordinary wander resumes on a later boundary. Accepted combat pauses return until the encounter closes with the crow alive. This is a narrow crow corridor/location admission, not an N-room wander redesign. Crows have authored HP **1**, attack chance **0** and damage range **1..1**, so they do not initiate a fight. Their exact plan/bundle/corpse references, runtime generation, HP and room must be validated as for C3; one direct held coin goes to the crow's public corpse on death, without crow loot or player credit. Cap is the sum of the four cap-one plans, never historical dead identities.
 

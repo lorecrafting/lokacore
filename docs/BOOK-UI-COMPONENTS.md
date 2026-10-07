@@ -53,12 +53,12 @@ new component. If a piece moves, update this map in the same UI change.
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
 | Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
-| Resume B9's planned bed dream | Ordinary bed → dream detail nesting; component still to be built | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([selected rule](system/book-ui.md#b9-bed-and-resumable-dream-details)). |
+| Resume B9's bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([selected rule](system/book-ui.md#b9-bed-and-resumable-dream-details)). |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |
 
 Use the [Book UI rules](system/book-ui.md) for each pattern's exact behavior.
-The B9 dream is a selected future consumer, not a capability of the current
-`ScenePage`.
+The installed B9 dream uses its own anchored detail page; modal `ScenePage` keeps
+its foreground precedence under the [scene contract](system/mechanics.md#scene1-mechanicsscenerulets).
 When a mechanic genuinely needs a new interaction, amend that specification first,
 identify the real consumer, and add the smallest reusable page/control that serves
 it. Do not create a new screen merely because a mechanic has a new name.
