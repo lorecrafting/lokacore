@@ -73,3 +73,24 @@
 - **nit** (PR body, recovery step). `git diff --name-only --diff-filter=D` with rename detection
   lists 3214 files plus a rename-limit warning; `--no-renames` gives the full 3221. Recovery
   still reached 0 broken here, but `--no-renames` makes it deterministic.
+
+## Re-check of fix `e665ea6b`
+
+Scope: fix commit `e665ea6b` only (fast-forward over `e13b2950`); the four findings and the lines they touched.
+
+- Finding 1 (verbatim quote): **mostly fixed; one residual nit open.** Quote 1 and the
+  delegation quote ("wait what is the preserve frozen conformance fixtures for? …") are exact
+  substrings of the owner's messages in the session transcript. Quote 2 keeps "propsoe",
+  "upserseded" and the double spaces, but opens "And yes" where the owner wrote "ANd yes"
+  (`docs/decisions/owner-decision-move-forward-2026-10-07.md:7`). It is a one-character case
+  fix, so it does not block. The PM decision is now stated as the PM's, not as a quote.
+- Finding 2 (owner-rules in force): **fixed.** `docs/system/owner-rules.md:4` no longer says
+  "in force only if listed here". The PR body (line 96) now gives 27 records without an
+  owner-rules line and names the three linked only from the index.
+- Finding 3 (lesson IDs): **fixed.** C5-SO6 and E1-C6-1 are removed from
+  `docs/lessons/contracts.md:40` and `docs/lessons/evidence.md:17`; the remaining IDs
+  (B4-S1, C4-R3) are in their linked sources.
+- Finding 4 (recovery step): **fixed.** The PR body's `deleted.txt` command uses `--no-renames`.
+- `elixir bin/check_docs.exs` at `e665ea6b`: 269 docs, 0 broken, 0 unreachable.
+
+Re-check verdict: **APPROVE WITH NOTES** (residual "ANd" nit). Owner approval is still required before merge.
