@@ -246,3 +246,15 @@ does not contain. The fixture now retains its frozen shared text and adds only t
 D12 text declarations. Existing D12 behavior/schema checks verify this correction;
 no production source, frozen answer, release pin or browser candidate changes.
 The failed full-gate output is retained separately.
+
+## Full local gate passed
+
+Normal `bin/check_all.sh` passes on clean review-record head
+`7602b26ec3e50ab8859d12dfe37456a117218327`:398 Elixir tests, complete
+TypeScript suite including active headless simulation, compiler/contracts/
+schema/lint/size/budget/documentation/tracker red controls, typecheck, generated
+records and formatting. The scoped independent reviewer approves the D12 helper
+correction, verifies every frozen v030 text value and exactly12 needed additions,
+and reproduces the original helper's real loader refusal. Sanitized successful
+output is retained in `full-gate-pass.log`. Normal pre-push will rerun the gate
+on the final evidence head; hosted exact-head CI and publication remain pending.
