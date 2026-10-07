@@ -9,6 +9,7 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable for E1–E3 gate closures. | independent review, review record |
+| Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
@@ -21,6 +22,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`:
 | Bounded copy, content or docs edit from a fixed brief | `developer`, Sonnet | spec conflict or cross-layer behavior: Opus |
 | Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus | E1–E3 gate closure: Fable |
+| Book UI design check or review | `designer`, Opus | mechanics, save, protocol or kernel in the diff: also the normal `reviewer` |
 | Hard PM call | `advisor` tool | still unresolved and consequential: Fable, then the owner |
 
 An authored brief narrows exploration but never makes save, receipt or protocol work
@@ -250,6 +252,7 @@ complete, including stale actions, misleading pending/refused results, wrong log
 placement and dead-end returns. The Chapter 1 E3 browser walk handles the larger
 cross-page visual consistency pass; it does not defer broken interaction flows
 ([owner decision](decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
+A slice that changes what the player sees consults the [designer](decisions/owner-decision-designer-role-2026-10-07.md) for its brief, its Book UI spec text and its review.
 
 Parallel local work uses one integration owner for local `main`, normally two source
 worktrees whose mechanics do not overlap, and separate worktrees for independent

@@ -34,6 +34,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 
 - [Move forward](owner-decision-move-forward-2026-10-07.md): lessons first, then delete records of closed or superseded work; protocol fixtures, in-force decisions and open work stay.
 - [Claude Code only, Beads permanent, auto-merge](owner-decision-claude-only-auto-merge-2026-10-07.md): Opus reviews (Fable for E1–E3 gates), Codex retired, Beads permanent, background merge after green CI.
+- [Designer role](owner-decision-designer-role-2026-10-07.md): an Opus `designer` subagent owns the Book UI design system and spec text, shapes UI briefs, flags one-offs and gives independent design reviews.
 - [D11 trusted elapsed before character choice](owner-decision-d11-prechoice-elapsed-2026-10-06.md): the owner allows clock and due-job advancement before selection while player commands stay blocked.
 - [C5 bounded third fix round](owner-decision-c5-third-fix-round-2026-10-06.md): owner-approved exception for PR #255 SO7/SO8 correction, scoped re-reviews and exact-head CI; the general two-round cap remains.
 - [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
