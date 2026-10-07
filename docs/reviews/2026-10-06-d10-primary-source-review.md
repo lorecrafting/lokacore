@@ -93,3 +93,25 @@ omits the supported visible-without-a-saved-observation case; runtime and the fo
 unit regression already handle it. PM has assigned the description correction.
 Browser completion, full gate, independent opinions and exact-head CI remain
 publication gates.
+
+## Final description closure and hosted Astra opinion
+
+The `KnownNpcView` description was corrected in `3e2a5b72`; the primary reviewer
+independently rechecked it. Schema constraints, cartridge hash, IDs and behavior did not
+change. The full local gate and hosted checks passed at the PR source head.
+
+```text
+VERDICT: APPROVE WITH NOTES
+
+PR #263
+Head: f1ec101a1f5602a6539e8f2bd5a57b9f117983b2
+Base: 8dbd14bb6cbeb3cde372bcee3616cce69444f706
+
+Findings: none. F1 remains closed.
+
+Verified exact-head CI, including headless simulation and Book E2E; focused tests and additional knowledge-enabled bleed/death, Where and shared-door probes passed. Independently verified the v042 hash, 211 IDs, 57-room coverage and retained evidence digests.
+
+The 24 synthetic authority failures are documented failures reproduced on published main, not D10 regressions.
+
+Read-only limits: filesystem-dependent SQLite/compiler and source-mutation checks were assessed through code, retained red controls and independent review records rather than rerun locally. No files, Git state or owner saves were changed. Explicit pin-mismatch refusal remains intact; mobile and UI blur work remain deferred.
+```
