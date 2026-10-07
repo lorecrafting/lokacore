@@ -72,9 +72,12 @@ storage half):
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
    (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
-   The headless GameView/admission check classifies a foreign-world envelope
-   against the observed world before comparing its action offer: only `not_found`
-   rejection agrees. A current-world offer refused `not_found` remains a mismatch.
+   The headless GameView/admission check classifies service invocation identity before
+   comparing the observed player's offer: a nil CommandId agrees only with
+   `permission_denied`; otherwise a foreign world or actor agrees only with
+   `not_found`. A nonnil current-world, current-actor available service offer
+   refused `not_found` remains a mismatch. Other commands retain the foreign-world
+   envelope check before comparing their action offer.
 6. **Propose** (`runtime/proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`mechanics/fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
