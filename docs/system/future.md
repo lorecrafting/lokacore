@@ -61,6 +61,8 @@ and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechan
   story progress ([23](../archive/spec/23-accounts-progress-admission.md)), typed receipt integrity
   (`result_digest`, [DIFFERENCES](DIFFERENCES.md)), save migrations, release garbage collection
   and the recovery copy ([record](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)),
+  app clock source, background driver and recurring catch-up for the installed `real_elapsed`
+  policy ([contract](mechanics.md#m1-a-elapsed-authority-time)),
   export and import ([10 §§31–33](../archive/spec/10-mobile-commerce-release.md)); commerce
   [§R13](../archive/spec/14-implementation-plan.md#r13--commerce-and-entitlement).
 - Android evidence at the first free product gate
