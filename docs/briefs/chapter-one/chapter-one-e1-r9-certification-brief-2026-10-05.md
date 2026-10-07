@@ -129,3 +129,5 @@ Disjoint path author checkpoint: [legal Night route after the published checker 
 [Training and social circuit](../../evidence/2026-10-07-e1-dialogue-circuit/README.md)
 is a source-bound author checkpoint with 46 additional witnessed paths; independent
 review approved; integrated capture and E1 certification remain pending.
+
+[Selected active journal variants](../../evidence/2026-10-07-e1-journal-variants/README.md) witnessed nine paths in two clean-source ending routes; separated-escort variant 0 and final E1 certification remain pending.
