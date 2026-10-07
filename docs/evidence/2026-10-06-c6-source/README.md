@@ -236,3 +236,13 @@ separate closure gate, with persisted receipt proof owned by SQLite.
 Both final independent source reviews approve exact206ffb39 with no open findings;
 their reviewer-authored records are carried intact. Full local gate and hosted
 exact-head CI/publication remain pending.
+
+## Full gate historical D12 fixture correction
+
+The first final full gate passed398 Elixir tests, then four D12 tests refused their
+controlled fixture: it grafted every current text value over frozen v030 geometry,
+so C6's current Drowned Oak description referenced a shelter that the old geometry
+does not contain. The fixture now retains its frozen shared text and adds missing
+current D12 declarations. Existing D12 behavior/schema checks verify this correction;
+no production source, frozen answer, release pin or browser candidate changes.
+The failed full-gate output is retained separately.
