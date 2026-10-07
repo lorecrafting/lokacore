@@ -21,4 +21,4 @@ Hard-won lessons for evidence capture and privacy.
   JSON-escaped assertion message while the stack paths around it were cleaned, and a capture
   path and a scratch-worktree path reached committed records twice more. Redact after
   unescaping, and give each capture script a red control that plants a nested path
-  ([docs audit DOC-E3-01](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-chapter-one-docs-audit.md)).
+  ([docs audit DOC-E3-01](../evidence/2026-10-06-chapter-one-docs-audit.md)).

@@ -1,7 +1,7 @@
 # Owner rules in force
 
-One line per active rule, with its record. Superseded rules are not listed; their records stay in
-`docs/decisions/` or `docs/archive/decisions/` ([index](../decisions/README.md)). The architecture decisions every agent must
+One line per active rule, with its record. Superseded rules are not listed; their records are deleted
+and linked by permalink from the [index](../decisions/README.md) ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
 and not repeated here.
@@ -264,7 +264,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
   for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
 - Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
-  `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
+  `docs/system` first, then the code. `docs/archive/` holds only cited older records; new
   decision records go in `docs/decisions/` and add a line here
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
 - C5 PR #255 alone has one owner-approved third fix round for SO7/SO8, with scoped independent

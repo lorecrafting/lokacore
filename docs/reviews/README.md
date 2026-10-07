@@ -88,8 +88,8 @@
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
 One line per record: PR, commit reviewed, verdict, and the final round's commit and verdict
 when there were fixes. Findings, dispositions and cross-vendor (codex: Astra or Sol per [the workflow](../WORKFLOW.md)) reviews are in the records
-(PR #1: dispositions in the PR). Records up to 2026-10-02 live in
-[docs/archive/reviews/](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews); new records are written here.
+(PR #1: dispositions in the PR). Records of closed work are
+permalinks ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)); new records are written here.
 
 ## R0/R1
 

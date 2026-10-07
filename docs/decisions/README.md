@@ -4,8 +4,8 @@
 Accepted ADRs live in [document 16](../archive/spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
 text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
-Records before 2026-10-02 live in [docs/archive/decisions/](../archive/decisions/), linked from
-this index; the rules still in force are listed in [owner-rules.md](../system/owner-rules.md).
+Records before 2026-10-02 still in force live in [docs/archive/decisions/](../archive/decisions/); records of
+closed or superseded work are permalinks ([move forward](owner-decision-move-forward-2026-10-07.md)). Rules in force: [owner-rules.md](../system/owner-rules.md).
 
 ## R0/R1
 
