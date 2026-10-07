@@ -41,7 +41,7 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-// ponytail: bind only reviewed dialogue/choice/policy, modal scene and study_tracks witnesses;
+// ponytail: bind only reviewed dialogue/choice/policy, scene and study_tracks witnesses;
 // other authored paths wait for their own exact command/state evidence.
 export function witnessedObligations(
   before: World,
@@ -69,22 +69,48 @@ export function witnessedObligations(
   }
   if (p.type === 'choose') {
     const choice = before.state.choices?.[p.continuation_id];
-    return choice?.status === 'pending' && choice.source.kind === 'dialogue'
-      ? [
-          `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
-        ]
-      : [];
+    if (choice?.status !== 'pending') return [];
+    if (choice.source.kind === 'dialogue')
+      return [
+        `/dialogues/${choice.source.cartridge_id}@${choice.source.cartridge_version}:dialogue/${choice.source.key}/choices/${p.choice_id}`,
+      ];
+    const dream = gameView(before).notices?.find((notice) => notice.bed)?.dream;
+    if (
+      choice.source.kind !== 'scene' ||
+      !dream ||
+      dream.index !== 4 ||
+      dream.choice?.continuation_id !== p.continuation_id ||
+      !p.dream ||
+      gameView(after).notices?.find((notice) => notice.bed)?.dream?.branch !== p.choice_id
+    )
+      return [];
+    const index = dream.choice.choices.findIndex((option) => option.choice_id === p.choice_id);
+    if (index < 0) return [];
+    const base = `/scenes/${choice.source.cartridge_id}@${choice.source.cartridge_version}:scene/${choice.source.key}`;
+    return [`${base}/steps/3`, `${base}/steps/3/choices/${index}`];
   }
   if (p.type === 'continue') {
     const shown = gameView(before).scene;
-    if (!shown || !p.scene || p.line !== shown.index || p.scene.key !== shown.scene.key) return [];
-    const base = `/scenes/${shown.scene.cartridge_id}@${shown.scene.cartridge_version}:scene/${shown.scene.key}`;
+    if (shown && p.scene && p.line === shown.index && p.scene.key === shown.scene.key) {
+      const base = `/scenes/${shown.scene.cartridge_id}@${shown.scene.cartridge_version}:scene/${shown.scene.key}`;
+      return [
+        ...(shown.index === 1 ? [base] : []),
+        `${base}/steps/${shown.index - 1}`,
+        ...(shown.index === shown.count && !gameView(after).scene
+          ? [`${base}/steps/${shown.count}`, `${base}/steps/${shown.count + 1}`]
+          : []),
+      ];
+    }
+    const dream = gameView(before).notices?.find((notice) => notice.bed)?.dream;
+    if (!dream || !p.scene || p.line !== dream.index || p.scene.key !== dream.scene.key) return [];
+    const base = `/scenes/${dream.scene.cartridge_id}@${dream.scene.cartridge_version}:scene/${dream.scene.key}`;
+    const ended =
+      dream.index === dream.count &&
+      gameView(after).notices?.find((notice) => notice.bed)?.dream?.index === -1;
     return [
-      ...(shown.index === 1 ? [base] : []),
-      `${base}/steps/${shown.index - 1}`,
-      ...(shown.index === shown.count && !gameView(after).scene
-        ? [`${base}/steps/${shown.count}`, `${base}/steps/${shown.count + 1}`]
-        : []),
+      ...(dream.index === 1 ? [base] : []),
+      `${base}/steps/${dream.index - 1}`,
+      ...(ended ? [`${base}/steps/${dream.count}`, `${base}/steps/${dream.count + 1}`] : []),
     ];
   }
   if (p.type !== 'perform' || p.action !== 'study_tracks') return [];

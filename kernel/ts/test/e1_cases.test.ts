@@ -9,6 +9,7 @@ import { caseHost, coverage, witnessedObligations } from './e1_case_host.ts';
 import { storageFault, faultSchedule } from './e1_faults.ts';
 import { replayCase, gaps } from './e1_cases.ts';
 import { ending, search } from './e1_paths.ts';
+import { lanternDream } from './e1_optional_quests.ts';
 import { hash } from '../src/foundation/canonical.ts';
 import { gameView } from '../src/index.ts';
 
@@ -277,5 +278,61 @@ test('E1 binds modal scene steps only to accepted acknowledgements', () => {
   } finally {
     a.close();
     rmSync(dir, { recursive: true });
+  }
+});
+
+// Breaks: a dream choice or closing acknowledgement leaves its authored beat gapped.
+test('E1 binds both selected dream branches and acknowledged scene steps', () => {
+  const base = '/scenes/ashmere_missing_child@0.0.42:scene/dream_of_the_fen';
+  for (const [branch, index] of [
+    ['follow_fox', 0],
+    ['wake', 1],
+  ] as const) {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-e1-dream-'));
+    const a = caseHost(
+      admitCandidate(bytes),
+      join(dir, 'save.db'),
+      join(dir, 'case.jsonl'),
+      undefined,
+      { case_id: `dream-${branch}`, source, fault_schedule: [] },
+    );
+    try {
+      const observed: string[][] = [];
+      a.watch((before, after, command, decision) => {
+        const p = command.payload;
+        if (
+          (p.type === 'continue' && p.scene?.key === 'dream_of_the_fen') ||
+          (p.type === 'choose' && p.dream)
+        )
+          observed.push(witnessedObligations(before, after, command, decision));
+      });
+      lanternDream(a, branch);
+      assert.deepEqual(observed, [
+        [base, `${base}/steps/0`],
+        [`${base}/steps/1`],
+        [`${base}/steps/2`],
+        [`${base}/steps/3`, `${base}/steps/3/choices/${index}`],
+        [`${base}/steps/4`, `${base}/steps/5`, `${base}/steps/6`],
+        [],
+      ]);
+      a.record({
+        kind: 'finish',
+        steps: a.commands.length,
+        digest: a.digest(),
+        state_hash: hash(a.story.world().state as never),
+      });
+      const replay = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+      assert.deepEqual(
+        replay.obligations.filter((path) => path.startsWith(base)),
+        [
+          base,
+          ...Array.from({ length: 7 }, (_, n) => `${base}/steps/${n}`),
+          `${base}/steps/3/choices/${index}`,
+        ].sort(),
+      );
+    } finally {
+      a.close();
+      rmSync(dir, { recursive: true });
+    }
   }
 });

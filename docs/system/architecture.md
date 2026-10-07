@@ -236,6 +236,11 @@ line's authored step. The first acknowledgement also witnesses the scene definit
 the final acknowledgement witnesses the structural `await_ack` and `end` steps only
 when the scene actually closes. Presentation-only dream scenes require separate
 choice/beat evidence and are not credited by this modal rule.
+For a presentation-only dream, accepted Continue on the displayed dream line witnesses
+that line's authored narration or branch. The first acknowledgement witnesses the scene
+definition; the last witnesses its closing steps only after the dream ends. An accepted
+choice against the pending dream continuation witnesses the choice beat and its exact
+selected option. A displayed or offered dream alone witnesses none of these paths.
 An accepted `talk` also witnesses the selected dialogue's satisfied policy root.
 Under an `all` node, each child must hold and may be witnessed recursively; an
 `any` or `not` node does not credit its children without separate branch evidence.
