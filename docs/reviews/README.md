@@ -538,3 +538,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [D10 primary source review](2026-10-06-d10-primary-source-review.md): source through `8a4b8b04`, independent APPROVE WITH NOTES; no additional source findings, independent v042 hash/211 IDs, real SQLite and reviewer-planted visibility/entry controls verified. Browser/full gate/opinions/CI remain publication gates.
 - [D10 foundation and composition opinion](2026-10-06-d10-foundation-opinion.md): scoped APPROVE at `8a4b8b04`; null-row invariant finding F1 closed, portable differential and knowledge/bleed/deer overlap controls pass. Content pins, browser, authority and final publication gates remain separate.
+
+- [Post-D10 authority fixture repair](2026-10-06-post-d10-fixture-review.md): initial source `c34e22c2`, CHANGES REQUIRED; scoped fix `5402b305`, independent APPROVE, R1 closed. Transport-trigger deletion now fails at forged-event refusal; restored focused 25/25 pass. Genesis, Study custody and Book stale-service controls also fail as intended; production guards and frozen fixtures unchanged.
