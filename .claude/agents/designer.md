@@ -25,7 +25,8 @@ Per call, do the one job the PM asks for:
   catalogue and `book-ui.md`. Each finding has a severity (blocker / should-fix / nit, at
   most five nits), a `file:line` and a concrete player-visible failure; without one, label
   it a question. Write the slice's spec rules in the same PR. For a pure UI polish batch
-  your review plus a quick correctness pass is the independent review; mechanics, save,
+  your review plus a quick correctness pass by a fresh `reviewer` is the independent review,
+  and that reviewer checks your own spec and token text; mechanics, save,
   protocol or kernel changes still get the normal `reviewer`. Give a verdict (APPROVE /
   APPROVE WITH NOTES / CHANGES REQUIRED); when yours is the independent review, write and
   link the record as in `reviewer.md`'s record step.

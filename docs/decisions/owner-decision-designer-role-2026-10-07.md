@@ -33,4 +33,7 @@ Owner's words (paraphrased):
   [the workflow](../WORKFLOW.md#delivery-workflow-pm-developer-reviewer) routes to it and
   [Book interaction delivery](../WORKFLOW.md#book-interaction-delivery) has UI-changing
   slices consult it.
+- PM clarification: in a pure UI polish batch the quick correctness pass is a fresh
+  reviewer that authored none of the PR, and it checks the designer's own spec and token
+  text, so nobody approves their own text.
 - No tokens or components are created by this decision; that is later polish work.

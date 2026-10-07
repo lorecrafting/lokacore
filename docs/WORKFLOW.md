@@ -1,6 +1,7 @@
 # Delivery workflow: PM, developer, reviewer
 
-Every milestone slice (one PR) runs through three roles. Claude Code runs them as the
+Every milestone slice (one PR) runs through the PM, developer and reviewer roles; UI-changing
+slices also use the designer. Claude Code runs them as the
 main session plus the subagents in [`.claude/agents/`](../.claude/agents/developer.md).
 [AGENTS.md](../AGENTS.md) rules apply to every role.
 
