@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GameView contracts",
-  "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).",
+  "description": "The portable GameView envelope and its freshness (04 \u00a714-\u00a716; 00 \u00a74.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 \u00a715).",
   "$defs": {
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
+      "description": "One action of a resolved ActionSet (04 \u00a719), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 \u00a72, \u00a717) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 \u00a74.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -48,7 +48,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "description": "Shown but not legal now, with the typed reason (00 \u00a74.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
           "type": "object",
           "properties": {
             "available": {
@@ -177,7 +177,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
+          "description": "Shown but not legal now, with the typed reason (00 \u00a74.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).",
           "type": "object",
           "properties": {
             "available": {
@@ -225,7 +225,7 @@
       ]
     },
     "ExitView": {
-      "description": "One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.",
+      "description": "One exit of the current place (04 \u00a714, \u00a715 as amended by c1-doors; 00 \u00a74.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.",
       "oneOf": [
         {
           "description": "Moving through it is legal now.",
@@ -335,7 +335,7 @@
       ]
     },
     "DoorView": {
-      "description": "The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.",
+      "description": "The door (barrier@1) an exit passes through (04 \u00a715 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.",
       "type": "object",
       "properties": {
         "name": {
@@ -378,7 +378,7 @@
       ]
     },
     "SightView": {
-      "description": "What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.",
+      "description": "What is seen through an exit whose door does not bar the way (04 \u00a715 as amended by c1-doors; 00 \u00a74.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.",
       "type": "object",
       "properties": {
         "room": {
@@ -513,7 +513,7 @@
         "kind",
         "actions"
       ],
-      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
+      "description": "A visible entity (04 \u00a714): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 \u00a76). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "examples": [
         {
           "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
@@ -644,7 +644,7 @@
         "container_id",
         "actions"
       ],
-      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
+      "description": "An item inside a container of an EntityView's contents (04 \u00a715 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "examples": [
         {
           "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
@@ -677,7 +677,7 @@
       ]
     },
     "WornSlotView": {
-      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
+      "description": "One equipment slot holder of the actor's body (equipment@1; 04 \u00a714 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
       "type": "object",
       "properties": {
         "slot": {
@@ -720,7 +720,7 @@
       ]
     },
     "PendingChoice": {
-      "description": "The actor's open choice (04 §15 'dialogue choices currently available'; 06 §43): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 §43: never trapped in a modal screen, and closing does not change the outcome).",
+      "description": "The actor's open choice (04 \u00a715 'dialogue choices currently available'; 06 \u00a743): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 \u00a743: never trapped in a modal screen, and closing does not change the outcome).",
       "type": "object",
       "properties": {
         "continuation_id": {
@@ -818,7 +818,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
+      "description": "A journal entry (04 \u00a715 'quest journal state'; 00 \u00a74.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
       "type": "object",
       "properties": {
         "quest": {
@@ -966,7 +966,7 @@
       ]
     },
     "ResourceView": {
-      "description": "One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).",
+      "description": "One of the viewer's body's resources (04 \u00a715 as amended 2026-10-01 and 2026-10-02; 21 \u00a74 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 \u00a715 default table); the UI never computes a threshold (00 \u00a74.10).",
       "type": "object",
       "properties": {
         "resource": {
@@ -1009,7 +1009,7 @@
       ]
     },
     "PlaceView": {
-      "description": "The current place (04 §14 room).",
+      "description": "The current place (04 \u00a714 room).",
       "type": "object",
       "properties": {
         "id": {
@@ -1085,7 +1085,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 \u00a714, \u00a715): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 \u00a74.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -1187,30 +1187,60 @@
             "$ref": "gameview.schema.json#/$defs/AttributeView"
           }
         },
-        "ancestry": { "$ref": "action.schema.json#/$defs/Key" },
+        "ancestry": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "ancestry_choices": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "key": { "$ref": "action.schema.json#/$defs/Key" },
-              "label": { "$ref": "text.schema.json#/$defs/TextKey" },
-              "description": { "$ref": "text.schema.json#/$defs/TextKey" },
-              "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-              "modifier": { "type": "integer", "minimum": 1 },
-              "skill": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "key": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "description": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "modifier": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "skill": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
               "faction": {
                 "type": "object",
                 "properties": {
-                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "value": { "type": "integer" }
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "value": {
+                    "type": "integer"
+                  }
                 },
-                "required": ["fact", "value"],
+                "required": [
+                  "fact",
+                  "value"
+                ],
                 "additionalProperties": false
               },
-              "dark_sight": { "const": true }
+              "dark_sight": {
+                "const": true
+              }
             },
-            "required": ["key", "label", "description", "attribute", "modifier"],
+            "required": [
+              "key",
+              "label",
+              "description",
+              "attribute",
+              "modifier"
+            ],
             "additionalProperties": false
           }
         },
@@ -1243,6 +1273,15 @@
           "type": "array",
           "items": {
             "$ref": "water.schema.json#/$defs/CorpseRecoveryView"
+          }
+        },
+        "map": {
+          "$ref": "gameview.schema.json#/$defs/MapView"
+        },
+        "known_npcs": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownNpcView"
           }
         }
       },
@@ -1445,7 +1484,7 @@
       ]
     },
     "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.",
+      "description": "An authoritative GameView snapshot (04 \u00a716). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 \u00a716). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.",
       "type": "object",
       "properties": {
         "format": {
@@ -1726,7 +1765,7 @@
       ]
     },
     "UnavailableReason": {
-      "description": "Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
+      "description": "Why an action, choice or exit is shown but not legal now (00 \u00a74.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.",
       "type": "object",
       "properties": {
         "code": {
@@ -1753,7 +1792,7 @@
       ]
     },
     "NarrationRecord": {
-      "description": "The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 §43: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 §5.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 §43; 03 §14).",
+      "description": "The committed narration of one accepted command, as this actor sees it: the lines of that command's DecisionResult narration (decision.schema.json), keyed by its command_id (06 \u00a743: required narration is committed with its consequence as a stable record of pinned text keys and bindings; 04 \u00a75.2 steps 7-8). Redisplay is read-only. A retry of that command replays its receipt and returns this same record with a current GameView (06 \u00a743; 03 \u00a714).",
       "type": "object",
       "properties": {
         "command_id": {
@@ -1762,15 +1801,38 @@
         "cue": {
           "type": "object",
           "properties": {
-            "source_event_id": { "$ref": "event.schema.json#/$defs/EventId" },
-            "command_id": { "$ref": "identity.schema.json#/$defs/CommandId" },
-            "actor_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
-            "observer_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
-            "room_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
-            "logical_time": { "type": "integer", "minimum": 0 },
-            "key": { "$ref": "text.schema.json#/$defs/TextKey" }
+            "source_event_id": {
+              "$ref": "event.schema.json#/$defs/EventId"
+            },
+            "command_id": {
+              "$ref": "identity.schema.json#/$defs/CommandId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "observer_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "logical_time": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "key": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
           },
-          "required": ["source_event_id", "command_id", "actor_id", "observer_id", "room_id", "logical_time", "key"],
+          "required": [
+            "source_event_id",
+            "command_id",
+            "actor_id",
+            "observer_id",
+            "room_id",
+            "logical_time",
+            "key"
+          ],
           "additionalProperties": false
         },
         "lines": {
@@ -2465,6 +2527,98 @@
         "next_tick_at",
         "hp_loss",
         "tick_every"
+      ],
+      "additionalProperties": false
+    },
+    "KnownRoomView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "y": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "z": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "x",
+        "y",
+        "z"
+      ],
+      "additionalProperties": false
+    },
+    "KnownConnectionView": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "to": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "direction": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "direction"
+      ],
+      "additionalProperties": false
+    },
+    "KnownNpcView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "MapView": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownRoomView"
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/KnownConnectionView"
+          }
+        }
+      },
+      "required": [
+        "rooms",
+        "links"
       ],
       "additionalProperties": false
     }

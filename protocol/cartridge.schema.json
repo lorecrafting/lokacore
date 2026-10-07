@@ -167,8 +167,12 @@
             "ancestries": {
               "description": "Authored once-only character choices (attributes@1), keyed by choice Key.",
               "type": "object",
-              "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-              "additionalProperties": { "$ref": "#/$defs/AncestrySpec" }
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/AncestrySpec"
+              }
             },
             "entry": {
               "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
@@ -321,6 +325,13 @@
               "additionalProperties": {
                 "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
               }
+            },
+            "map_positions": {
+              "type": "array",
+              "items": {
+                "$ref": "cartridge.schema.json#/$defs/MapPosition"
+              },
+              "minItems": 1
             }
           },
           "required": [
@@ -855,26 +866,63 @@
     },
     "AncestrySpec": {
       "description": "One authored character choice and its bounded initial effects.",
-      "examples": [{"label":"ancestry.fen_born.label","description":"ancestry.fen_born.description","attribute":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.38","kind":"attribute","key":"per"},"modifier":1}],
+      "examples": [
+        {
+          "label": "ancestry.fen_born.label",
+          "description": "ancestry.fen_born.description",
+          "attribute": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.38",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 1
+        }
+      ],
       "type": "object",
       "properties": {
-        "label": { "$ref": "text.schema.json#/$defs/TextKey" },
-        "description": { "$ref": "text.schema.json#/$defs/TextKey" },
-        "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-        "modifier": { "type": "integer", "minimum": 1 },
-        "skill": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "attribute": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "modifier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
         "faction": {
           "type": "object",
           "properties": {
-            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "value": { "type": "integer" }
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "value": {
+              "type": "integer"
+            }
           },
-          "required": ["fact", "value"],
+          "required": [
+            "fact",
+            "value"
+          ],
           "additionalProperties": false
         },
-        "dark_sight": { "const": true }
+        "dark_sight": {
+          "const": true
+        }
       },
-      "required": ["label", "description", "attribute", "modifier"],
+      "required": [
+        "label",
+        "description",
+        "attribute",
+        "modifier"
+      ],
       "additionalProperties": false
     },
     "AttributeSpec": {
@@ -1220,11 +1268,25 @@
         "bell_cue": {
           "type": "object",
           "properties": {
-            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "rooms": { "type": "array", "minItems": 1, "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" } },
-            "text": { "$ref": "text.schema.json#/$defs/TextKey" }
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "rooms": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              }
+            },
+            "text": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
           },
-          "required": ["fact", "rooms", "text"],
+          "required": [
+            "fact",
+            "rooms",
+            "text"
+          ],
           "additionalProperties": false
         }
       },
@@ -1650,10 +1712,16 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "member_role": {
-          "enum": ["hound", "deer"]
+          "enum": [
+            "hound",
+            "deer"
+          ]
         },
         "loot_role": {
-          "enum": ["pelt", "hide"]
+          "enum": [
+            "pelt",
+            "hide"
+          ]
         }
       },
       "required": [
@@ -1743,38 +1811,72 @@
           "properties": {
             "items": {
               "type": "array",
-              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
               "minItems": 1,
               "maxItems": 8
             },
             "drop_rooms": {
               "type": "array",
-              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
               "minItems": 1,
               "maxItems": 8
             },
-            "nest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "nest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
             "corridor": {
               "type": "array",
-              "items": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
               "minItems": 2,
               "maxItems": 16
             },
-            "interval": { "type": "integer", "minimum": 1 },
+            "interval": {
+              "type": "integer",
+              "minimum": 1
+            },
             "narration": {
               "type": "object",
               "properties": {
-                "carrying": { "$ref": "text.schema.json#/$defs/TextKey" },
-                "acquired": { "$ref": "text.schema.json#/$defs/TextKey" },
-                "delivered": { "$ref": "text.schema.json#/$defs/TextKey" },
-                "fallback": { "$ref": "text.schema.json#/$defs/TextKey" },
-                "shoo": { "$ref": "text.schema.json#/$defs/TextKey" }
+                "carrying": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "acquired": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "delivered": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "fallback": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "shoo": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
               },
-              "required": ["carrying", "acquired", "delivered", "fallback", "shoo"],
+              "required": [
+                "carrying",
+                "acquired",
+                "delivered",
+                "fallback",
+                "shoo"
+              ],
               "additionalProperties": false
             }
           },
-          "required": ["items", "drop_rooms", "nest", "corridor", "interval", "narration"],
+          "required": [
+            "items",
+            "drop_rooms",
+            "nest",
+            "corridor",
+            "interval",
+            "narration"
+          ],
           "additionalProperties": false
         },
         "pack": {
@@ -1829,14 +1931,24 @@
         "sight": {
           "type": "object",
           "properties": {
-            "delay": { "type": "integer", "minimum": 1 },
+            "delay": {
+              "type": "integer",
+              "minimum": 1
+            },
             "narration": {
               "type": "object",
-              "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
-              "additionalProperties": { "$ref": "text.schema.json#/$defs/TextKey" }
+              "propertyNames": {
+                "pattern": "^(north|south|east|west|up|down)$"
+              },
+              "additionalProperties": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
             }
           },
-          "required": ["delay", "narration"],
+          "required": [
+            "delay",
+            "narration"
+          ],
           "additionalProperties": false
         }
       },
@@ -1961,6 +2073,36 @@
         "tick_every",
         "hp_loss",
         "narration"
+      ],
+      "additionalProperties": false
+    },
+    "MapPosition": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "y": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        },
+        "z": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "room",
+        "x",
+        "y",
+        "z"
       ],
       "additionalProperties": false
     }
