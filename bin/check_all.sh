@@ -34,6 +34,7 @@ m ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
 m ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
 m bin/lint_red_controls.sh --core-only
 m bin/docs_only_red_controls.sh
+m bin/integration_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 python3 bin/check_beads_export.py

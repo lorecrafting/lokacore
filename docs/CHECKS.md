@@ -92,6 +92,10 @@ records its focused baseline, corrected tests and six independent red controls.
   force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
+- `bin/integration_red_controls.sh` runs the PM's merge queue (`bin/merge_queue.sh`) against a
+  stub `gh` and E1 batch integration (`bin/integrate_batch.sh`) in throwaway repositories:
+  no merge on draft, failing, half-registered or watch-failing checks, and no integration on a
+  pending-count mismatch, a failed recorder, a conflict or an oversized untouched file.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
   ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e

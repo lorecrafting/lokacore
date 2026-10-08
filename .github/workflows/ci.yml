@@ -89,6 +89,7 @@ jobs:
       - run: ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
       - run: bin/lint_red_controls.sh --core-only
       - run: bin/docs_only_red_controls.sh
+      - run: bin/integration_red_controls.sh
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
           otp-version: '28.4'
