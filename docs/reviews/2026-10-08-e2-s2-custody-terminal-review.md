@@ -40,3 +40,11 @@
 2. **nit** `kernel/ts/test/r9c_custody_terminal.test.ts:107`, authority `:139-141`: "Wick binding other IDs" cites `reward_storage.test.ts:68/:100`, which stays green under M5. The actual kills are `bound turn-in refuses stale exact custody…`, `finite harvest selects the lowest real ID at equality…` and `four immediate explicit exchanges conserve…`. Scenario: a reader removes the cited test's neighbours believing reward_storage guards selection order.
 
 Over-engineering: none; setup is inline, reuses `sqliteHost`/`openStory`, no helper file.
+
+## Fix round 1 (head `de08d20a`)
+
+- Scope: commit `de08d20a` only (comments in the two test files, plus the PR body).
+- Nit 1: **closed**. The authority file `:5-6` header and the family 2 `// Breaks:` lines `:238-239` name the Continue receipt skip at `invocation.ts:57` as guarded only here, which matches M4. PR body line 36 now records the exception.
+- Nit 2: **closed**. Kernel `:108` and authority `:142` now cite `infirmary.test.ts:19` (finite harvest selects the lowest real ID) and `:108` (bound turn-in refuses stale exact custody). Both were red under M5. The PR body table row matches.
+- Prettier passes on both files. No code changed, so I did not rerun the tests.
+- Verdict: **APPROVE**.
