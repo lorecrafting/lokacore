@@ -376,6 +376,10 @@ test('world time starts at the ancestry choice: no credit on the picker or acros
     input: { ancestry: 'fey_touched' },
   });
   assert.equal(chosen.kind === 'saved' && (chosen.decision as any).kind, 'accepted');
+  // Reopen before the first post-choice pulse: the saved anchor must be the choice, not the picker.
+  p.sql.close();
+  p = sqliteHost(join(dir, 'save.db'), clock);
+  s = open();
   Object.assign(clock, { wall: 4260000, mono: 660000 });
   for (let n = 0; n < 4 && s.pulse('active', s.runId()).kind !== 'ready'; n++);
   assert.equal(s.world().state.clock, 64800 + 3000);

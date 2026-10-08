@@ -83,6 +83,11 @@ test('trusted elapsed refuses before ancestry choice and drains the due job afte
   const early = stepElapsed(w, span(), 1);
   assert.deepEqual(early.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(early.world, w);
+  const forged = { ...(span() as object), id: '00000000-0000-4000-8000-000000000002' } as never;
+  assert.deepEqual(stepElapsed(w, forged, 1).decision, {
+    kind: 'rejected',
+    error: { code: 'permission_denied' },
+  });
   const foreign = '00000000-0000-4000-8000-000000000001' as never;
   assert.deepEqual(stepElapsed(w, span(foreign), 1).decision, {
     kind: 'rejected',
