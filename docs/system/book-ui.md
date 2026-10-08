@@ -70,7 +70,8 @@ The enabled status/resources tap opens Contents. It lists exactly **Character**,
 Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
 Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
-Settings retains Start over and its confirmation/error handling. Section returns say
+Settings retains Start over and its confirmation/error handling, and holds the
+[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
@@ -80,6 +81,12 @@ plus structured solar and lunar phase labels when authored. It updates from conf
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
+
+The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows confirmed GameView in-game
+time, never the device's light or dark setting: `light` from the cartridge's dawn hour until its
+dusk hour, `dark` otherwise, switching when confirmed time crosses either hour. Dawn and dusk are
+cartridge world values; a cartridge that authors none shows `light`. There is no Settings
+override ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
@@ -148,11 +155,14 @@ on World when no scene, combat, pending save, catch-up or fault owns the flow. E
 controls and dialogs keep their keys; handled movement keys do not scroll the page.
 
 Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
-NPC results and direct position changes are stable-route exceptions below. The existing paper palette, bundled IM Fell
-English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
-height remain. World minimap and status stay outside the body scroll, respecting the safe area.
+NPC results and direct position changes are stable-route exceptions below. The turn's form,
+reduced-motion fallback and sound follow the [page-turn entry](../BOOK-UI-COMPONENTS.md#page-turn);
+it never delays or blocks input. Explicit button labels/roles, section headings and a minimum
+44px touch target in both axes remain. Colours, fonts and sizes come from the
+[design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). World minimap and status stay outside the
+body scroll, respecting the safe area.
 Implementation details live in [book](../../mobile/app/book/Book.tsx),
-[pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
+[pages](../../mobile/app/book/pages.tsx) and [tokens](../../mobile/app/book/tokens.ts).
 
 ## Detail-page order
 

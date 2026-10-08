@@ -605,3 +605,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Retire board dashboards for Beads Rust](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-07-retire-board-review.md): PR #289 at `902ebb57`, independent docs/config-only **APPROVE**; no remaining references, JSONL changes only E1 notes/`updated_at`, notes match draft #288.
 
 - [Skip pre-push checks for deletion-only pushes](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-07-pre-push-deletion-only-review.md): PR #290 at `12fe9ab6`, independent config-only **APPROVE**, no findings; stub matrix (deletion-only, empty, update, mixed both orders) under dash and sh, two guard mutants red.
+
+- [Book design foundation](2026-10-07-design-foundation-review.md): PR #304 at `9ed5fe0b`, quick Book UI spec/token pass, **CHANGES REQUIRED**; unavailable action card contradicts book-ui non-action note, Settings sound control lacks owner record; contrast, token parity and CanvasKit compile verified.
