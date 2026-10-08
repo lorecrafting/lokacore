@@ -54,6 +54,7 @@ case $2 in
     browser) json='{"jobs":[{"name":"browser","conclusion":"success"}]}' ;;
     skipped) json='{"jobs":[{"name":"browser","conclusion":"skipped"}]}' ;;
     failed) json='{"jobs":[{"name":"browser","conclusion":"failure"}]}' ;;
+    recorderfailed) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"},{"name":"e1-recorder","conclusion":"failure"}]}' ;;
     *) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"},{"name":"e1-recorder","conclusion":"success"}]}' ;;
   esac ;;
   *) json='{"workflow_runs":[{"id":7}]}' ;;
@@ -65,6 +66,7 @@ b() { rm -f cnt; got=$(GH=$PWD/fakegh CNT=$PWD/cnt REPO=o/r FAIL_AT=$2 ANSWER=${
 b "$gen" 0 code "code jobs green on parent"
 b "" 1 code "error listing runs"
 b "" 2 code "error reading jobs"
+b "" 0 code "failed recorder is not a green baseline" recorderfailed
 b "$gen" 0 browser "browser green on parent"
 b "" 2 browser "browser API error"
 b "" 0 browser "skipped browser is not a green baseline" skipped
