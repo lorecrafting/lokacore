@@ -116,7 +116,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
             Tide marks stripe the pilings.</p>
           <ul class="ents" aria-label="Here">
             <li><button data-go="talk" aria-label="Elspeth, open"><strong>Elspeth</strong> is here.</button></li>
-            <li><button class="verb">Read the notice</button></li>
+            <li><button aria-label="Landing notice, open"><strong>Landing notice</strong></button></li>
           </ul>
           <div class="log" role="log"><p><span class="tag">locked</span>west</p></div>
         </main>
@@ -326,7 +326,7 @@ function snapshot(layer,dpr){
   return c;
 }
 
-let CK=null, effect=null, running=0;
+let CK=null, effect=null, surface=null, running=0;
 const easeInOutQuad=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
 
@@ -336,11 +336,11 @@ function turn(from,to,dir){
   const dpr=Math.min(2,devicePixelRatio||1), a=snapshot(from,dpr), b=snapshot(to,dpr);
   from.hidden=true; to.hidden=false;               // the arriving page is live now
   const canvas=document.getElementById('curl'); canvas.width=a.width; canvas.height=a.height; canvas.style.display='block';
-  const surface=CK.MakeWebGLCanvasSurface(canvas)||CK.MakeSWCanvasSurface(canvas);
+  if(!surface||surface.width()!==a.width||surface.height()!==a.height){ surface?.delete(); surface=CK.MakeWebGLCanvasSurface(canvas)||CK.MakeSWCanvasSurface(canvas); }
   const opt=img=>img.makeShaderOptions(CK.TileMode.Decal,CK.TileMode.Decal,CK.FilterMode.Linear,CK.MipmapMode.None);
   const ia=CK.MakeImageFromCanvasImageSource(a), ib=CK.MakeImageFromCanvasImageSource(b), sa=opt(ia), sb=opt(ib);
   const paper=rgb(PALETTES[ph.dataset.theme].bg), paint=new CK.Paint(), id=++running, t0=performance.now();
-  const done=()=>{ canvas.style.display='none'; [sa,sb,ia,ib,paint].forEach(o=>o.delete()); surface.delete(); };
+  const done=()=>{ if(id===running) canvas.style.display='none'; [sa,sb,ia,ib,paint].forEach(o=>o.delete()); };
   const frame=()=>{
     if(id!==running) return done();
     const t=Math.min(1,(performance.now()-t0)/TURN.duration);

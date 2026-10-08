@@ -65,7 +65,7 @@ so `em` sizes resolve against that).
 | `size.footerRule` | 92 | flex | fixed width |
 | `radius.card` | 7, 9, 10 | none | one value |
 | `opacity.disabled` | 0.45 (tiles 0.25) | none | one value |
-| `motion.quick` | 0.15–0.18 s ease | 160 linear | |
+| `motion.quick` | 0.15–0.18 s ease | 160, `Animated.timing` default easing | |
 | `motion.turn` | curl, 720 ms in-out quad | swing, 320 ms ease-out cubic | the curl replaces the swing |
 | `sound.pageTurn` | synthesised `pageSound` | none | new |
 
@@ -89,7 +89,27 @@ drawer, chips and shop rows have no live consumer.
 4. A unit test: every `color.light` and `color.dark` role meets WCAG 4.5:1 on `bg` for
    `fg`, `dim`, `action`, `danger`, `warning` (today light `warning` passes on `bg`, 4.74,
    and fails on `card`, 4.4: no warning text may sit on a card).
-5. A compile check: `page-curl.sksl` compiles with `RuntimeEffect.Make` once
+5. A Node test: `specimen.html` inlines `page-curl.sksl` verbatim and its `PALETTES` equal
+   `tokens.ts` `color` (the specimen mirrors both).
+6. A compile check: `page-curl.sksl` compiles with `RuntimeEffect.Make` once
    `canvaskit-wasm` is a dependency.
 
 Each needs a red control in its slice.
+
+## Owner questions (taste)
+
+1. Dark palette: does it follow the system setting, in-game darkness, or both? The mock also
+   has a blue moon palette, left out here.
+2. In dark, `action` (`#e6a650`) and `warning` (`#e6b35a`) are nearly the same amber.
+3. The running head's words (the mock's "Person", "Talking with") are new copy; and was the
+   mock's quest-tracker running head (an Effects item) meant?
+4. Bundle a third font, IM Fell English SC, for the small caps (the mock's), or keep EB
+   Garamond's synthesised small caps?
+5. Action cards replace the live accent text links on detail pages: confirm.
+6. Minimap 44 (mock) against 56 (live).
+7. Curl 720 ms (mock) against the live 320 ms swing.
+8. The page-turn sound: record or choose a sample to replace the mock's synthesised one.
+
+Spec change to note: [Book UI](../../system/book-ui.md#minimap-map-and-presentation-controls)
+now asks for 44px touch targets in both axes, not only height; the riddle tiles fail it
+today, and Settings gains a Sound on/off control (owner-required for the page-turn sound).

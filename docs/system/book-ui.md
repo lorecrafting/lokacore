@@ -70,7 +70,8 @@ The enabled status/resources tap opens Contents. It lists exactly **Character**,
 Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
 Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
-Settings retains Start over and its confirmation/error handling. Section returns say
+Settings retains Start over and its confirmation/error handling, and holds the
+[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
