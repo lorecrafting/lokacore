@@ -120,14 +120,11 @@ Report at the end of the slice, not at every step.
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
-   nobody waits on hosted CI: `until [ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = <sha> ];
-   do sleep 5; done; until s=$(gh pr checks <N> --json name,bucket -q '[.[]|select(.name=="changes").bucket]|join(",")');
-   case "$s" in pass,pass|*fail*|*skipping*|*cancel*) true;; *) false;; esac; do sleep 5; done;
-   [ "$s" = pass,pass ] && gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge
-   --match-head-commit <sha>` (the head wait keeps the watch from reading the previous head's checks;
+   nobody waits on hosted CI: `bin/merge_queue.sh <N> <sha>` (it first waits for the PR head to
+   equal `<sha>`, which keeps the watch from reading the previous head's checks;
    `changes` skips only on a draft, so the queue waits for both `changes` checks on `<sha>`, one
    each from `ci` and `book-e2e`, and merges only if both pass; this covers a ready run or a
-   workflow that has not registered yet, and a new PR workflow raises the count). It merges only after every started job on `<sha>` passes; a
+   workflow that has not registered yet, and a new PR workflow raises the count in the script). It merges only after every started job on `<sha>` passes; a
    later push makes the merge fail instead of landing unchecked, so any PM commit after the
    verdict re-queues on the new head. (`main` has no required checks and the `browser` job
    does not run on every PR, so GitHub's `--auto` would not wait.) The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
