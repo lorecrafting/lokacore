@@ -21,3 +21,7 @@ changes mid-session.
   `origin/main` (never rebases), rebuilds the review index as main's list plus the branch's own
   lines, runs the docs check and pushes; it refuses a conflict outside the union-merged indexes
   ([CHECKS](../CHECKS.md)).
+- Batch to run less CI (paraphrased): a reviewer commits its record locally in a detached worktree and
+  hands back the sha, with no standalone record push; sequential or dependent slices share one draft
+  branch by default, ready once, with the per-PR Hosted lane only for a slice that must merge alone;
+  after several close merges, `bin/sync_pr.sh` runs once per open PR after the last.

@@ -114,8 +114,8 @@ Report at the end of the slice, not at every step.
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
-   A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after each merge, run
-   `bin/sync_pr.sh <branch>` for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
+   A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after the last of several close merges, run
+   `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
    `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
    required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on
@@ -185,11 +185,11 @@ No source merge or CI gate depends on `br`; the export check guards the JSONL.
 ## Delivery lanes
 <a id="local-edit-loop"></a>
 
-The brief names the lane. All three end in step 7's gate on the published head.
+The brief names the lane. Sequential or dependent slices share one draft branch by default: each is reviewed on its exact draft head without CI, the PM marks it ready once, and the final review runs on the ready head. All three end in step 7's gate on the published head.
 
 | Lane | Use | Developer | Review | Merge |
 |---|---|---|---|---|
-| Hosted PR | a single slice or fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer once CI is green on the pushed head (step 4) | step 7 |
+| Hosted PR | a slice that must merge alone, or a single fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer once CI is green on the pushed head (step 4) | step 7 |
 | Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | each slice or batch on its exact head while the PR is a draft; the PM marks it ready before the final review on the publication head, so CI runs ([step 7](#loop)) | step 7 on the ready head |
 | Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: full local checks and red controls once on its head, every review closed, then step 7 |
 
@@ -291,8 +291,7 @@ turning into a catch-all. Findings are fixed in the gate PR.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, pushes from there with `git push origin HEAD:<branch>`,
-  and removes the worktree. During local development, the reviewer commits
+  at `origin/<branch>`, hands back the commit sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
