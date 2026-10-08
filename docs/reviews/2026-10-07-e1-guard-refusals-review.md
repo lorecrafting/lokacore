@@ -39,3 +39,28 @@
 - Path-to-dialogue binding: yes, the recorder should check it. See E1-D2.
 - Duplicated ferry and quest helpers: these are nits, not blockers (see above).
 - `a_wick_offer` and `a_aldric_offer`: out of scope, per the brief.
+
+## Fix round 1 — head `b8a5e845` (commits `e8832ada`, `b8a5e845`)
+
+**Verdict: APPROVE WITH NOTES.** D1 through D4 are closed. One should-fix (E1-D5) is outside this diff and goes to the PM.
+
+- Results:
+  - E1 tests: 48/48 pass. Typecheck: exit 0.
+  - `e1_cases.ts`: exit 2, 35 cases, pending 76, witnessed 557, dispositioned 15.
+  - Against the round-0 run, exactly the 5 new Wick and Aldric paths moved and none were added. The witnessed set is unchanged.
+- D1 closed. The test now replays a run that refuses and then accepts, and asserts the result is null (`e1_obligations.test.ts:386`). Re-applying the round-0 mutant (a refusal stays recorded after a later accepted step) turns that test red.
+- D2 closed. `checkRefusals` now requires the case's final step to carry the dialogue key from the row's path, `path.split('/')[3]` (`e1_cases.ts:176-182`). A mutant that compares the case's action with itself turns the test red. The spec at `architecture.md:373-374` now says the refusal must come from the dialogue the row's path names.
+- D3 closed. The Wisp case asserts `light_off` just before the refusal (`e1_refusals.ts:57`), and the comment is corrected.
+- D4 closed. The new record [pm-decision-e1-controlled-refusals](../decisions/pm-decision-e1-controlled-refusals-2026-10-07.md) is linked from the spec and the decisions index. It keeps owner decision (b) and grants no credit.
+- The `state` nit was declined. Accepted.
+- Wider scope (a), the action key in the E1 host:
+  - Production decides a step with the invoked action key (`local-story/invocation.ts:173`), and the host and replay now do the same.
+  - Byte identity: in all 32 earlier cases, every step's command, decision, state hash and receipt hash, and every finish digest, are identical to the round-0 run.
+  - Every non-elapsed step records an `action_key`.
+  - Removing `action_key` breaks replay for exactly `refuse-wick-active`, `refuse-aldric-active` and `refuse-aldric-resolved`. Unkeyed, the Wick command instead opens `b_wick_turn_in`.
+- Wider scope (b), the 3 new cases: the leaf probe (values from `holds` just before each refusal) shows each case isolates its guard.
+  - Wick active: only `items/0` (active) is true.
+  - Aldric active: the `missing_child` conjunct is true, and only bell `items/0` is true.
+  - Aldric resolved: the conjunct is true through its resolved branch, and only bell `items/2` is true.
+  - The 5 rows match their cases.
+- **E1-D5 should-fix (outside this diff; for the PM)**, `kernel/ts/src/runtime/world.ts:119-120`. The ponytail comment says an unkeyed replay of a host trace can differ only when two actions match one Command, and that none does. The Wick and Aldric talks are such a case: unkeyed, a keyed `invalid_state` refusal of `a_wick_offer` re-decides as an accepted `b_wick_turn_in` choice. Failure scenario: a player's refused Wick offer in a production host trace replays as an opened turn-in, so the replayed state diverges. Fix: file a Beads issue to store the action key in the host trace, or correct the comment's claim. This does not block the E1 test slice.
