@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import { encode } from '../src/foundation/canonical.ts';
 import { GENERATOR, KERNEL, simulate } from './sim.ts';
-import { admitCandidate, type applicability, CANDIDATE, POLICY_HASH, sha256 } from './e1_policy.ts';
+import { admitCandidate, type applicability, POLICY_HASH, sha256 } from './e1_policy.ts';
 import { reproduce, retainFailure } from './e1_repro.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -156,7 +156,7 @@ function certify(bytes: Uint8Array, output: string, count: number) {
   if (existsSync(output)) throw new Error('output directory exists; preserve prior evidence');
   mkdirSync(output, { recursive: true });
   writeFileSync(join(output, 'candidate.json'), loaded.artifact, { flag: 'wx' });
-  const receipts = checks(output);
+  const receipts = checks(output, loaded.row);
   const compiled = join(output, 'compiled.json');
   let sourceMatches = false;
   try {
@@ -210,25 +210,15 @@ function certify(bytes: Uint8Array, output: string, count: number) {
   return failed ? 1 : 2;
 }
 
-function checks(out: string) {
+function checks(out: string, row: ReturnType<typeof admitCandidate>['row']) {
   return [
     run(out, 'toolchain.log', [
       'elixir',
       '-e',
       'otp = File.read!(Path.join([to_string(:code.root_dir()), "releases", to_string(:erlang.system_info(:otp_release)), "OTP_VERSION"])) |> String.trim(); IO.puts("Elixir #{System.version()} / OTP #{otp}"); if System.version() != "1.20.4" or otp != "28.4", do: System.halt(1)',
     ]),
-    run(out, 'compile.log', [
-      'mix',
-      'loka.compile',
-      'cartridges/ashmere_missing_child',
-      join(out, 'compiled.json'),
-    ]),
-    run(out, 'foundation-compiler.log', [
-      'mix',
-      'test',
-      'test/loka/core',
-      'test/loka/content_missing_child_test.exs',
-    ]),
+    run(out, 'compile.log', ['mix', 'loka.compile', row.source, join(out, 'compiled.json')]),
+    run(out, 'foundation-compiler.log', ['mix', 'test', 'test/loka/core', row.content_test]),
     run(out, 'kernel.log', [
       'node',
       '--test',
@@ -259,7 +249,9 @@ function reportOf(
     status: failed ? 'fail' : 'pending',
     certification_verdict: null,
     candidate: {
-      ...CANDIDATE,
+      id: loaded.row.id,
+      version: loaded.row.version,
+      content_hash: loaded.row.content_hash,
       artifact_sha256: sha256(loaded.artifact),
       lock_sha256: sha256(encode(loaded.cartridge.lock as never)),
     },

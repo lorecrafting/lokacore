@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
 import { CHECK_FILES } from './e1.ts';
-import { admitCandidate, applicability } from './e1_policy.ts';
+import { admitCandidate, applicability, POLICY_HASH } from './e1_policy.ts';
 import { reproduce, retainFailure } from './e1_repro.ts';
 import { KERNEL, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
@@ -111,6 +111,48 @@ test('E1 command refuses a different admitted candidate', () => {
   const c = structuredClone(pin.value);
   c.manifest.title = 'Different admitted candidate';
   refused(c, /wrong E1 candidate/);
+});
+
+const r9c = read('protocol/fixtures/r9c_interactions_hash.json');
+const r9cBytes = new TextEncoder().encode(
+  `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
+);
+
+// Breaks: the second table row is unreachable, or v042's normalized artifact bytes drift.
+test('E1 admits exactly the two literal candidates', () => {
+  const v042 = admitCandidate(bytes);
+  assert.equal(v042.hash, '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b');
+  assert.equal(
+    createHash('sha256').update(v042.artifact).digest('hex'),
+    '1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115',
+  );
+  const second = admitCandidate(r9cBytes);
+  assert.equal(second.hash, '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263');
+  assert.equal(second.cartridge.manifest.id, 'r9c_interactions');
+  assert.equal(second.cartridge.manifest.version, '0.0.1');
+});
+
+// Breaks: the hash is compared only for v042, or against a row other than the selected one.
+test('E1 command refuses a changed r9c candidate', () => {
+  const c = structuredClone(r9c.value);
+  c.manifest.title = 'Different admitted candidate';
+  refused(c, /wrong E1 candidate/);
+});
+
+// Breaks: a loader-valid id with no table row skips the comparison (`row && ...`).
+// The bell fixture passes the loader and applicability, so only the candidate check refuses it.
+test('E1 refuses an admitted cartridge with no candidate row', () => {
+  const bell = read('protocol/fixtures/cartridge_bell_hash.json');
+  const bellBytes = new TextEncoder().encode(
+    `{"cartridge":${bell.canonical},"content_hash":"${bell.sha256}"}`,
+  );
+  assert.throws(() => admitCandidate(bellBytes), /wrong E1 candidate: ashmere_bell@0\.0\.1/);
+});
+
+// Breaks: the candidate table (or a row field) leaks into the policy digest, so the E1
+// coverage receipt no longer names the same policy.
+test('E1 policy digest excludes the candidate table', () => {
+  assert.equal(POLICY_HASH, '02d71791e4c8f7849ae7e81677685d2ff85f77f343b13d0b31ed358525d725fd');
 });
 
 // Breaks: an admitted installed capability is silently skipped when its policy row is
