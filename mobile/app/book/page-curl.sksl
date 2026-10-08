@@ -1,0 +1,62 @@
+// The Book's page turn, the single source for web (CanvasKit) and device (Skia), via
+// @shopify/react-native-skia's RuntimeEffect. Rules: docs/BOOK-UI-COMPONENTS.md#page-turn.
+// Duration, easing and the paper colour come from tokens.ts (motion.turn, color.*.bg);
+// the driver eases progress and redraws each frame. Ported from the Chapter 1 mock's
+// CURL_FS (docs/design/ui-exploration/chapter-one-playable.html).
+//
+// The leaving page rolls over a cylinder whose axis is the fold line. For each pixel, find which
+// point of the leaving page lands there: the back of the roll on top, else its underside, else the
+// leaf still lying flat, else nothing, and the arriving page shows through in the roll's shadow.
+
+uniform shader leaving;  // the page being turned away, in page pixels
+uniform shader arriving; // the page underneath, in page pixels
+uniform float2 size;     // page size in pixels
+uniform float progress;  // 0 at rest, 1 when the leaf has gone; already eased
+uniform float direction; // 1 forward (a page opens), -1 back (a return): the leaf mirrors
+uniform half3 paper;     // the leaf's back: the current theme's paper (tokens color.bg)
+
+const float PI = 3.14159265;
+const float SLOPE = 0.28; // fold-line tilt: the lower corner leads
+const float RADIUS = 36;  // roll radius at rest, px
+const float SWELL = 44;   // extra radius at mid-turn, px
+
+bool inPage(float2 p) {
+  return p.x >= 0 && p.y >= 0 && p.x <= size.x && p.y <= size.y;
+}
+
+// The leaf in mirrored (fold) space, sampled in page space.
+half4 leaf(float2 p) {
+  if (direction < 0) p.x = size.x - p.x;
+  return leaving.eval(p);
+}
+
+half4 main(float2 xy) {
+  float2 n = normalize(float2(1, SLOPE));
+  float c = RADIUS + SWELL * sin(PI * progress);
+  float far = size.x * n.x + size.y * n.y;
+  float f = mix(far, -PI * RADIUS / 2 - 8, progress);
+  float2 q = xy;
+  if (direction < 0) q.x = size.x - q.x;
+  float s = dot(q, n) - f;
+  if (s <= c) { // the back of the roll, on top
+    float th = s < 0 ? PI : PI - asin(clamp(s / c, 0, 1));
+    float u = s < 0 ? PI * c - s : c * th;
+    float2 p = q + (u - s) * n;
+    if (inPage(p)) return half4(mix(paper, leaf(p).rgb, 0.13) * half(0.72 - 0.28 * cos(th)), 1);
+  }
+  if (s >= 0 && s <= c) { // the underside of the roll
+    float th = asin(clamp(s / c, 0, 1));
+    float2 p = q + (c * th - s) * n;
+    if (inPage(p)) {
+      half4 t = leaf(p);
+      return half4(t.rgb * half(0.6 + 0.4 * cos(th)), t.a);
+    }
+  }
+  if (s < 0) { // the leaf still flat, shaded towards the fold
+    half4 t = leaf(q);
+    return half4(t.rgb * half(1 - 0.22 * exp(s / (0.3 * c))), t.a);
+  }
+  float shade = 0.38 * pow(clamp(1 - max(s - c, 0) / (1.4 * c), 0, 1), 2);
+  half4 under = arriving.eval(xy);
+  return half4(under.rgb * half(1 - shade), under.a);
+}

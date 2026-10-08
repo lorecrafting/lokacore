@@ -148,11 +148,14 @@ on World when no scene, combat, pending save, catch-up or fault owns the flow. E
 controls and dialogs keep their keys; handled movement keys do not scroll the page.
 
 Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
-NPC results and direct position changes are stable-route exceptions below. The existing paper palette, bundled IM Fell
-English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
-height remain. World minimap and status stay outside the body scroll, respecting the safe area.
+NPC results and direct position changes are stable-route exceptions below. The turn's form,
+reduced-motion fallback and sound follow the [page-turn entry](../BOOK-UI-COMPONENTS.md#page-turn);
+it never delays or blocks input. Explicit button labels/roles, section headings and a minimum
+44px touch target in both axes remain. Colours, fonts and sizes come from the
+[design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). World minimap and status stay outside the
+body scroll, respecting the safe area.
 Implementation details live in [book](../../mobile/app/book/Book.tsx),
-[pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
+[pages](../../mobile/app/book/pages.tsx) and [tokens](../../mobile/app/book/tokens.ts).
 
 ## Detail-page order
 
