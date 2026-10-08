@@ -5,19 +5,17 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
+import { Act, note, RoomPage } from './pages.tsx';
 import {
-  Act,
-  note,
+  AncestryPage,
   CarryingPage,
-  CharacterPage,
   ChapterPage,
+  CharacterPage,
   JournalPage,
   MapPage,
-  RoomPage,
   ScenePage,
   SettingsPage,
-  AncestryPage,
-} from './pages.tsx';
+} from './sections.tsx';
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 type BodyProps = {
@@ -65,7 +63,6 @@ function PageBody(p: BodyProps) {
     return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)
     return <ChapterPage title={text(view.chapter.title)} done={p.chapterDone} />;
-  const openThing = (id: string) => p.open({ kind: 'thing', id });
   if (!page) return <WorldPage {...p} />;
   if (page.kind === 'dialogue' || npcPage(page, view))
     return (
@@ -79,6 +76,13 @@ function PageBody(p: BodyProps) {
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
+  return sectionPage(p, page);
+}
+
+// A Contents section's page; Carrying is the last.
+function sectionPage(p: BodyProps, page: Page) {
+  const { view, text } = p.screen;
+  const openThing = (id: string) => p.open({ kind: 'thing', id });
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character') return <CharacterPage view={view} text={text} />;
   if (page.kind === 'map')

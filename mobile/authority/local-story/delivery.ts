@@ -7,7 +7,8 @@ import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { stepElapsed } from '../../../kernel/ts/src/runtime/world.ts';
 import type { Reply } from './authority.ts';
 import { block, budget, ids, save, scope, settle, type Story, type Trace } from './save.ts';
-import { receipt, identityOf, type Captured } from './store.ts';
+import type { Captured } from './commit.ts';
+import { receipt, identityOf } from './store.ts';
 import { ElapsedRecoveryError, changedRun, type Checkpoint } from './elapsed-store.ts';
 import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
 

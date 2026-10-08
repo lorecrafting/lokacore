@@ -1,6 +1,5 @@
 import { waterValid } from '../../../kernel/ts/src/mechanics/water/saved.ts';
 import { receiptRecovery } from './receipt-save.ts';
-// size: allow 304, shared save boundary retains quest reference checks before receipt recovery
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
 import { sightsValid } from '../../../kernel/ts/src/mechanics/population/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
@@ -20,11 +19,8 @@ import {
 // Every write is one transaction opened and committed here, never by a driver helper (mobile
 // lessons).
 import { encode, type Json } from '../../../kernel/ts/src/foundation/canonical.ts';
-import { target } from '../../../kernel/ts/src/foundation/compose.ts';
-import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
-import { row } from '../../../kernel/ts/src/runtime/world.ts';
 import { recoveryFault } from '../../../kernel/ts/src/mechanics/resource.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
@@ -86,8 +82,8 @@ export type Meta = {
   readonly binding: string | null;
 };
 
-const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
-const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
+export const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
+export const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 
 /** The identity's receipt scope and replay ids are UUIDs (03 §14), its binding a string or null. */
 const whole = (m: Record<string, Json>) =>
@@ -100,7 +96,6 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
-// size: allow 52, one save-load boundary checks elapsed, quest references and pinned resource rows
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
@@ -109,12 +104,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   const table = (t: string) => db.getFirstSync('SELECT 1 FROM sqlite_master WHERE name = ?', t);
   const any = (t: string) => !!table(t) && !!db.getFirstSync(`SELECT 1 FROM ${t} LIMIT 1`);
   const [head, save] = ['head', 'save'].map(any);
-  if (!head && !save && !['state_row', 'receipt'].some(any)) {
-    const meta = first();
-    const saved = replace(db, fresh, meta);
-    if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
-    return { world: fresh, revision: 0, meta };
-  }
+  if (!head && !save && !['state_row', 'receipt'].some(any)) return firstSave(db, fresh, first());
   // Half a save (rows or receipts without their table too): never taken for a new one, unwritten.
   if (!head || !save || !['state_row', 'receipt'].every(table)) return undefined;
   db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report, observation)
@@ -133,19 +123,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
-    if (!world || !waterValid(world) || !encountersValid(world) || !sightsValid(world))
-      return undefined;
-    if (
-      Object.values(world.state.quests ?? {}).some(
-        (q) =>
-          validate('DefinitionRef', q?.quest).length || validate('StateScope', q?.scope).length,
-      )
-    )
-      return undefined;
-    if (recoveryFault(world)) return undefined;
-    for (const [target, spec] of Object.entries(world.entityResourceSpecs))
-      if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
-        return undefined;
+    if (!world || !restorable(world)) return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
     receiptRecovery(fresh, world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
@@ -154,6 +132,25 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     throw e;
   }
 }
+
+function firstSave(db: Db, fresh: World, meta: Meta) {
+  const saved = replace(db, fresh, meta);
+  if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
+  return { world: fresh, revision: 0, meta };
+}
+
+// The hydrated world's mechanic rows, quest references and pinned resource rows are usable.
+const restorable = (world: World) =>
+  waterValid(world) &&
+  encountersValid(world) &&
+  sightsValid(world) &&
+  !Object.values(world.state.quests ?? {}).some(
+    (q) => validate('DefinitionRef', q?.quest).length || validate('StateScope', q?.scope).length,
+  ) &&
+  !recoveryFault(world) &&
+  Object.entries(world.entityResourceSpecs).every(([target, spec]) =>
+    validOverrideRow(world.state.resources?.[target], spec, world.state.clock),
+  );
 
 function headOf(db: Db, format: Json) {
   type Head = { revision?: number; clock?: number; rng?: string };
@@ -249,62 +246,4 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
         response: JSON.parse(r.response as string),
       } as Receipt)
     : undefined;
-}
-
-/**
- * A story point report captured with its gameplay commit (23 §§4-5; 03 §26): the payload, the
- * originating lineage and its run's account/profile binding (null: a guest). A
- * host record outside `state_row`, so never in the canonical state, and kept by a new game
- * (23 §11).
- */
-export type Captured = { report: StoryPointReport; lineage_id: string; binding: string | null };
-
-/**
- * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
- * wrote, the revision, clock and RNG of `next`, and its pending story point reports; always the
- * receipt. Throws, with nothing written, on a definite failure; false when the outcome is
- * unknown (`transaction`; then `reconcile`). The caller adopts `next` only after this returns
- * true.
- */
-export function commit(
-  db: Db,
-  next: World,
-  decision: DecisionResult,
-  r: Receipt,
-  reports: Captured[],
-  elapsed?: Checkpoint,
-): boolean {
-  return transaction(db, () => {
-    if (elapsed) persistElapsed(db, elapsed);
-    for (const c of reports)
-      db.runSync(
-        "INSERT INTO report (report_id, lineage_id, binding, report, disposition) VALUES (?, ?, ?, ?, 'pending')",
-        c.report.report_id,
-        c.lineage_id,
-        c.binding,
-        encode(c.report as never),
-      );
-    if (decision.kind === 'accepted') {
-      db.runSync(HEAD, r.revision, next.state.clock, encode(next.state.rng as Json));
-      for (const op of decision.delta.ops) {
-        const [section, key] = row(target(op)) ?? [];
-        if (op.op === 'quest.retire')
-          db.runSync('DELETE FROM state_row WHERE section=? AND key=?', section!, key!);
-        else if (section)
-          db.runSync(UPSERT, section, key!, encode(next.state[section]![key!] as Json));
-      }
-    }
-    db.runSync(
-      'INSERT INTO receipt VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      r.scope,
-      r.invocation_id,
-      r.command_id,
-      r.actor_id,
-      r.intent_digest_version,
-      r.intent_digest,
-      encode(r.command),
-      r.revision,
-      encode(r.response),
-    );
-  });
 }
