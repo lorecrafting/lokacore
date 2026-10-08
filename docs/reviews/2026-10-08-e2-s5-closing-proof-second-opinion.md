@@ -38,3 +38,11 @@ No blocker. The claim statement (`README.md:6-8`) is exactly the brief's handoff
 - `shasum -a 256 -c SHA256SUMS` at this head: 36/36 OK, `README.md` listed. Cited `r9c_faults.test.ts:162`, `:168-172`, `:324-335` still point at the named assertions (header edit kept the line count).
 
 Verdict for this round: **APPROVE WITH NOTES**; one should-fix wording error above, nothing else open from my side.
+
+## Round 2 re-check at `5e972bbae0dcf4cac0f0100efad7877933ecd4d0` (scoped: the should-fix line, the cap row, the hashes)
+
+- `docs/evidence/2026-10-08-e2-r9c/README.md:58` now "so F2 never shows `pending`": correct (F4 `:335` is the lost-ack row and fences). Fixed.
+- `shasum -a 256 -c SHA256SUMS`: 36/36 OK; path grep over the folder (excluding the retained grep log): no hits.
+- `chapter-one-e2-gate-checklist-2026-10-08.md:34` cap row: `kernel/ts/test/hounds.test.ts:154-158` and `:170-172` assert `live`, `hounds` and `pelts` at exactly 6 across advances; `c4_pack.test.ts:15` asserts six admitted members. Those are real bound assertions, so "cap linked to focused test" stands; the honest note that the deer test has no cap assertion is retained.
+
+Verdict for this round: **APPROVE**. Nothing open from my side.
