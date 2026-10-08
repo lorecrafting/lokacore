@@ -186,8 +186,7 @@ test('D1: bleed, Flee west, board while bleeding, die on the isle, cross free fo
   a.press('take', [apple]);
   a.move('south', 'south', 'south', 'south', 'east');
   a.press('attack', [hound]);
-  // First round 150 later (combat interval): a positive fen_hound hit, 1 damage, opens bleeding
-  // with its first tick due at +100 (bleeds/bleeding.json tick_every).
+  // Round 1 at +150: a fen_hound hit (1 damage) opens bleeding, first tick at +100 (tick_every).
   a.tick();
   assert.equal(a.w.state.clock, 64950);
   assert.equal(a.hp(), 9);
@@ -221,8 +220,7 @@ test('D1: bleed, Flee west, board while bleeding, die on the isle, cross free fo
     D1,
   );
   assert.equal(a.holder(body), ID['room/fen_isle_landing'], D1);
-  // Ticks at 65450 (HP 1) and 65550 (HP 0): death on the isle; the corpse stays there holding the
-  // apple; the same body returns to chapel_nave at HP 10 with the bleed closed.
+  // Ticks at 65450 (HP 1) and 65550 (HP 0): isle death; same body to chapel_nave, HP 10.
   a.tick();
   assert.deepEqual(
     [a.w.state.clock, a.hp(), a.holder(body)],
@@ -443,8 +441,7 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   a.press('take', [coin]);
   const roots = held();
   assert.deepEqual(roots, [item('bandage_01'), item('bandage_09'), coin].sort());
-  // One drowning at entry + 6000 (world.water duration): Chapel at HP 10, a corpse below holding
-  // exactly the body's roots.
+  // One drowning at entry + 6000 (world.water duration); the corpse holds the body's roots.
   while (a.holder(body) === ID['room/well_bottom']) a.tick();
   assert.deepEqual([a.w.state.clock, a.holder(body), a.hp()], [71050, ID['room/chapel_nave'], 10]);
   const corpse = a.holder(coin)!;
@@ -455,7 +452,6 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
     recovery.map((r) => [r.corpse_id, r.room_id, r.roots.map((x) => x.id).sort()]),
     [[corpse, ID['room/well_bottom'], roots]],
   );
-  // The view offers recovery by corpse row, not by action entry; the invocation takes its ID.
   assert.equal(a.send('recover_corpse', [corpse], {}).kind, 'accepted');
   assert.deepEqual(held(), roots);
   // Crows: wait on the Green until crow_green_1 is home (hourly wander), Drop, Take: no carry.
