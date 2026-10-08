@@ -38,16 +38,17 @@ records its focused baseline, corrected tests and six independent red controls.
 - TypeScript: Prettier (`.prettierrc.json`, scope in `.prettierignore`, `npm ci` at the
   root) formats on edit and is checked in pre-commit and CI (run from the repo root;
   `.prettierignore` only applies there). CI and `bin/check_all.sh` currently select
-  non-mobile files; `mobile/` formatting is deferred. The mobile app's
+  non-mobile files; `mobile/` formatting is deferred in both, but the pre-commit hook
+  still runs Prettier and `ast-grep scan --error` on staged `mobile/` files. The mobile app's
   `npx tsc --noEmit` and `npm test` are also deferred. Active TypeScript verification is
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
   passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
-  40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt); current
-  TypeScript CI and local checks select non-mobile files, with mobile files deferred:
-  `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (CI red control
-  `bin/ts_size_red_controls.sh --core-only`). Escape hatch: a `size: allow N, reason` comment in lines
+  40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt), `mobile/` included:
+  `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs`. With no paths the TypeScript check
+  selects the tracked files itself; CI, `bin/check_all.sh` and `bin/integrate_batch.sh` all call it
+  that way (red control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse. Source files: a file at its limit (300 lines, or its existing
   `size: allow`) splits instead of growing; no new `size: allow` is added to a source file and

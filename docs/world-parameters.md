@@ -67,7 +67,7 @@ From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "ave
 - **Encoding/hash/id**: foundation/canonical.ts:10-20 (SAFE 2^53-1, MAX_DEPTH 128, surrogates), lib/loka/core/canonical.ex:10, :161; sha256.ts (all); foundation/id_source.ts:34-43 (UUIDv8); rng.ts / rng.ex (xoshiro constants); `INTENT_DIGEST_VERSION`.
 - **Schema sizes**: aliases/keywords/variants 16, recipe sequence 16, costs 8, room details 64, actions 64, narration lines 64, entity capacity max 1024, target_ids 8, ResourceInt 32-bit bounds, ARTIFACT_MAX_BYTES 4 MiB; lib/loka/content/checks.ex:24 `@enclosing 3` (nesting depth bookkeeping).
 - **Mechanism tables**: COMPASS (runtime/decision.ts:205, from room.schema), barrier `MOVES` transitions (kernel/ts/src/mechanics/barrier/rule.ts:39-44), check order (target, cooldown, costs, check), target `normalize` stop-words (target.ts).
-- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:201 `*1000` (µs); session.ts:21 ID_PREFIX.
+- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:202 `*1000` (µs); session.ts:21 ID_PREFIX.
 - **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, Turn.tsx, Book.tsx, pages.tsx sizes, paper.ts colours.
 - **Test-only**: all `*.test.ts` seeds and fixtures (faults.test.ts SEEDS, saves.test.ts SEED, etc.).
 
@@ -77,10 +77,10 @@ Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtu
 
 | id | path:line | baked value | should come from |
 |---|---|---|---|
-| P1 | mobile/app/book/model.ts:77-78 | `branch(t)` = double-hour branch from 3600 s per hour, `% 24` | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
+| P1 | mobile/app/book/model.ts:75-76 | `branch(t)` = double-hour branch from 3600 s per hour, `% 24` | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
 | P2 | removed | the wait offer (whole hours, 3600 step) was removed with Wait ([record](decisions/owner-decision-untimed-lantern-2026-10-02.md)) | calendar (hours_per_day, units_per_hour) and `world.wait` (W16) |
 | P3 | DONE | Content catalog supplies `band.<key>` phrases; projected W13 tone selects the palette in the touch presenter ([#141](https://github.com/lorecrafting/lokacore/pull/141), [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md)) | text.json and world.bands |
-| P4 | mobile/app/book/model.ts:59-64; pages.tsx:183 | `hp` is the condition pool (phrase shown on hp only) | `resources.json <pool>.condition: true` or `world.condition_pool` |
+| P4 | mobile/app/book/model.ts:57-62; pages.tsx:183 | `hp` is the condition pool (phrase shown on hp only) | `resources.json <pool>.condition: true` or `world.condition_pool` |
 | P5 | mobile/app/book/model.ts:51-55 | story ends when every journal quest is resolved/failed/abandoned | a cartridge ending (story point / `world.ending`); already an OWNER item in the comment |
 | P7 | kernel/ts/play/text.ts:226-233 (`loka play` CLI) | `clock()` "day N, HH:MM" from 86400/3600/24/60 | calendar (W5/W6) |
 | P8 | kernel/ts/play/text.ts:101-105; play/main.ts:99 | `wait [hours]` 1..24, converted with `* 3600` | calendar units_per_hour / hours_per_day; `world.wait.max` (W16) |
