@@ -8,14 +8,20 @@ for Beads issue `loka-e1-r9-certification-2rz.11`.
    path. The rule names that literal for each path. Multipliers and other fields of the same
    setting are not separate obligations, and crediting one path never certifies the owner's
    capability family. For bands, one label shown for its exact percent is enough.
-2. **`/resources/ma` is outside batch F.** No v042 content or engine rule spends or reads it, and
-   it starts at its maximum. Batch E records its disposition; batch F credits it under no rule.
-3. **`/world/carry` extends the [controlled refusal](pm-decision-e1-controlled-refusals-2026-10-07.md)
-   attribution to a world setting.** An accepted pickup at or under `max_grams`, together with a
-   refusal over it, witnesses the path. Unlike a negated guard, the refusal names the setting
-   (`too_heavy`) and the load is derived from committed custody, so this pair adds a witness, not
-   a disposition. v042 item masses are multiples of 5 g, so "one gram over" cannot be committed;
-   the rule requires the accepted load to equal `max_grams` exactly, which bounds the literal to
-   [`max_grams`, `max_grams` + m) for the refused mass m. A new recorder case may reach that load.
-4. **`death` and `water`** need a lawful committed case with the authored literals. Neither may
-   be closed by a disposition; if none exists, the batch stops and reports.
+2. **`/resources/ma` is outside batch F.** Batch E records its disposition; batch F has 13 paths.
+3. **`/world/carry`: option (a).** The [controlled refusal](pm-decision-e1-controlled-refusals-2026-10-07.md)
+   rule extends to world settings: an accepted pickup at or under `max_grams`, plus a refusal one
+   gram over, together witness `/world/carry`. A minimal new recorder case is allowed if no
+   existing case reaches the limit.
+4. **`death` and `water`:** if no existing case commits them with the authored literals, add a
+   minimal new case. If neither a lawful case nor a defensible rule exists, stop and report; no
+   disposition.
+
+## Developer note (pending PM confirmation)
+
+- v042 item masses are multiples of 5 g, so no load lies one gram over `max_grams`. The rule
+  credits a `too_heavy` refusal whose committed before load equals `max_grams` exactly; the
+  refused mass m bounds the literal to [`max_grams`, `max_grams` + m). The accepted half is the
+  committed load itself; no pickup step is checked separately.
+- The gain-pool clause also matches `ma`, but no v042 execution changes `ma`, so it is never
+  credited.

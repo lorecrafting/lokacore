@@ -339,7 +339,7 @@ the primary literal named below ([PM decision](../decisions/pm-decision-e1-batch
 Each clause judges an accepted step (carry: a refused one) against its before state, its
 committed after state and its receipt ops; a band or bell cue clause judges the projection of
 the committed after state. Each credits only its own path: never the setting's other fields
-or the owner's capability family named above. Definitions, fresh pools, offers and other
+or the owner's capability family ([world-key owners](#e1-exact-candidate-proof-policy)). Definitions, fresh pools, offers and other
 refusals credit nothing.
 - `movement`: a `move` whose receipt adjusts the body's `cost.resource` by exactly
   −`cost.amount`, from its before level to its after level.
@@ -358,9 +358,9 @@ refusals credit nothing.
 - `bell_cue`: a step that changes `bell_cue.fact` from false to true for the player in one of
   `rooms`, whose caused `fact_changed` event projects the cue `text` into that room.
 - `carry`: a `take` refused with `too_heavy`, state unchanged, of an item with positive mass,
-  from a before state whose committed load equals `max_grams` exactly. The accepted pickups
-  that reached that load and this refusal bound the literal to [`max_grams`, `max_grams` + m)
-  for the refused mass m; v042 masses are multiples of 5 g, so no load lies one gram over.
+  from a before state whose committed load equals `max_grams` exactly; that committed load and
+  this refusal bound the literal to [`max_grams`, `max_grams` + m) for the refused mass m
+  (v042 masses are multiples of 5 g, so no load lies one gram over).
 - A pool with positive `gain` and no `regen`: a step whose receipt advances time and has no
   adjust of that pool on the body, while its level rises to
   min(before + `gain` × `gain_every` boundaries crossed, `maximum`).
