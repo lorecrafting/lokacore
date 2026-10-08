@@ -10,7 +10,7 @@ archived [09 §1a and §20](../archive/spec/09-cartridge-lab-certification.md) a
 The private runner accepts exactly two literal candidates and refuses every other admitted
 artifact, selecting the row by the admitted id and requiring its version and content hash:
 the [current bundled candidate](cartridge.md#current-bundled-chapter)
-`ashmere_missing_child@0.0.42` (`5d8b0e3a…50fc8b`) and the [R9C](future.md#authoring-and-certification) synthetic cartridge
+`ashmere_missing_child@0.0.42` (`5d8b0e3a…50fc8b`) and the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
 `r9c_interactions@0.0.1` (`7d74fac7…d17263`). The table is not part of the policy digest.
 It freezes normalized artifact bytes before execution, checks the independent known answer,
 and admits those bytes through the real loader. In particular the loader owns the implicit
@@ -67,8 +67,8 @@ through trusted elapsed input. Reuse existing clock segmentation and invariant c
 player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
 implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
 labeled when needed for a controlled admission or fault boundary.
-The recorder (`e1_cases.ts`) records the v042 chapter only; on r9c bytes its chapter cases
-fail (exit 1), which never yields a pass.
+The recorder (`e1_cases.ts`) records the v042 chapter only; on r9c bytes it refuses (exit 1)
+before recording any case, because its v042 dispositions do not resolve, so r9c never yields a pass.
 Independently checked chapter routes enter the recorder as named fresh cases only with
 their literal result assertions intact; their committed steps must pass the same semantic
 replay, SQLite observation and candidate/source checks as the ending cases.
