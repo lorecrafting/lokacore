@@ -3,6 +3,8 @@
 # lines; its last line passes) and an ambiguous bare name, and require bin/check_docs.exs to
 # report each as a stale pointer and exit non-zero. Only the file this script created is removed.
 set -eu
+# A git hook exports GIT_DIR and friends: without this the throwaway repo's git add lands in the real index.
+unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
 cd "$(dirname "$0")/.."
 P=$(mktemp "${TMPDIR:-/tmp}/pointers.XXXXXX")
 D=$(mktemp -d "${TMPDIR:-/tmp}/anchors.XXXXXX")
