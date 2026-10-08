@@ -1,4 +1,4 @@
-// Controlled refusals behind e1_dispositions.json `refusal` rows (architecture.md#e1-policy-branch-evidence).
+// Controlled refusals behind e1_dispositions.json `refusal` rows (e1-certification.md#e1-policy-branch-evidence).
 // Each case ends on its guarded talk: the same talk was accepted before the quest existed, and now
 // every other admission condition holds and only the named quest-state guard is true.
 import assert from 'node:assert/strict';

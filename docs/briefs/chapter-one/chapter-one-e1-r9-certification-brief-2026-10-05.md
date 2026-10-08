@@ -8,7 +8,7 @@ Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; 
 
 **2026-10-06 packaging assignment:** implementation begins from published
 `71c3323dee2d9265e59587957eea3e3c90f544ac` under the bounded active
-[exact candidate proof policy](../../system/architecture.md#e1-exact-candidate-proof-policy).
+[exact candidate proof policy](../../system/e1-certification.md#e1-exact-candidate-proof-policy).
 The [packaging evidence](../../evidence/2026-10-06-e1-runner-packaging/README.md)
 records author checks and pending acceptance. The [current bundled chapter](../../system/cartridge.md#current-bundled-chapter)
 supplies the inspected candidate pin; final published A–D plus Round2 fixes source identity
@@ -82,58 +82,4 @@ Stop and return evidence if applicability is genuinely unknown, a required mecha
 
 Planning self-review: Ponytail retained one thin runner over existing tools and a bounded applicability table; no generalized Lab/search/certificate service. Correctness pass checked exact identity, implicit dependencies, invariant-sensitive reproduction, real commit fault branches and host-claim separation. This author check is not independent implementation review.
 
-The [legal 57-room route author checks](../../evidence/2026-10-06-e1-legal-routes/README.md)
-retain the topology recipe's distinct red control. The [provisional integration checkpoint](../../evidence/2026-10-06-e1-topology-integration/README.md) records source-bound registration and 57 room visits; final certification remains pending.
-
-Optional quest route checkpoint: [controlled debt and Lantern dream receipts](../../evidence/2026-10-06-e1-optional-quests/README.md), with remaining outcomes pending.
-
-Optional exact recorder/replay integration: [provisional receipts and remaining-path breakdown](../../evidence/2026-10-06-e1-optional-integration/README.md); final E1 proof remains pending.
-Disjoint path author checkpoint: [watch rounds and the original blocked marsh Start](../../evidence/2026-10-06-e1-night-watch/README.md); Watch was later registered and Night resolved against the published checker fix. E1 certification remains pending.
-
-Disjoint path author checkpoint: [Wisp ward and four funded herb exchanges](../../evidence/2026-10-07-e1-wisp-herbs/README.md); both were later registered. E1 certification remains pending.
-
-[Dialogue and selected choice binding](../../evidence/2026-10-07-e1-dialogue-binding/README.md) is a bounded checkpoint; other authored paths and final certification remain pending.
-
-[Reviewed Watch, Wisp and herb route registration](../../evidence/2026-10-07-e1-route-registration/README.md) records a corrected-source 16-case replay with 609 authored obligations still pending.
-
-[Maud's five-credit cellar route](../../evidence/2026-10-07-e1-maud-cellar/README.md) is a source-bound author checkpoint, later registered in the integrated recorder. E1 certification remains pending.
-
-[Modal scene acknowledgement binding](../../evidence/2026-10-07-e1-modal-scene-binding/README.md) is a clean-source recorder checkpoint with ten dream scene paths and other authored obligations pending.
-
-[Selected dialogue policy binding](../../evidence/2026-10-07-e1-dialogue-policy-binding/README.md) is a bounded checkpoint for an accepted `all` branch; other authored policy paths remain pending.
-
-[Presentation-only dream binding](../../evidence/2026-10-07-e1-dream-binding/README.md) discharged the ten dream scene paths in an 18-case clean-source replay; 499 authored paths remain pending.
-
-Disjoint path author checkpoint: [legal Night route after the published checker fix](../../evidence/2026-10-07-e1-night-published/README.md), preserving the original failure receipt; its independent review and registration are complete. E1 certification remains pending.
-
-[Integrated Maud/Night routes and reviewed witness rules](../../evidence/2026-10-07-e1-integrated-routes/README.md) passed 18 clean-source SQLite cases and replays; 509 authored paths remain pending.
-
-[Accepted recipe and required-policy binding](../../evidence/2026-10-07-e1-recipe-policy-binding/README.md) passed 18 clean-source cases and replays; 29 recipe paths and 438 authored paths remain pending on its isolated source.
-
-[Combined dream and recipe witnesses](../../evidence/2026-10-07-e1-dream-recipe-combined/README.md) passed 18 clean-source cases and replays; dream scene paths are closed, and 428 authored paths remain pending.
-
-[Resolved quest objective binding](../../evidence/2026-10-07-e1-quest-objective-binding/README.md) passed 18 clean-source cases and replays; 14 quest paths and 395 authored paths remain pending on its isolated source.
-
-[Combined quest, visible entity and epilogue witnesses](../../evidence/2026-10-07-e1-quest-visible-epilogue/README.md) passed 18 clean-source cases and replays; 273 authored paths remain pending.
-
-[Recipe outcome effect binding](../../evidence/2026-10-07-e1-recipe-outcomes/README.md) passed 18 clean-source cases and replays; 255 authored paths remain pending on its isolated source.
-
-[Ferry route destination binding](../../evidence/2026-10-07-e1-ferry-routes/README.md) passed 18 clean-source cases and replays; 271 authored paths remain pending on its isolated source.
-
-[Selected dialogue choice effect binding](../../evidence/2026-10-07-e1-dialogue-choice-effects/README.md) passed 18 clean-source cases and replays; 243 authored paths remain pending on its isolated source.
-
-[Exact ferry room identity repair](../../evidence/2026-10-07-e1-ferry-room-identity/README.md) replaces the display-title witness, passes 18 clean-source cases and replays, and retains 271 authored paths pending.
-
-[Integrated provisional checkpoint](../../evidence/2026-10-07-e1-integrated-checkpoint/README.md) passed 18 clean-source cases and replays with 241 authored paths still pending. E1 is not certified.
-
-[Post-split clean-source checkpoint](../../evidence/2026-10-07-e1-post-split/README.md) retained the same 241 pending paths while bringing the recorder's test files under the size gate.
-
-[Training and social circuit](../../evidence/2026-10-07-e1-dialogue-circuit/README.md)
-is a source-bound author checkpoint with 46 additional witnessed paths; independent
-review approved; integrated capture and E1 certification remain pending.
-
-[Selected active journal variants](../../evidence/2026-10-07-e1-journal-variants/README.md) witnessed nine paths in two clean-source ending routes; separated-escort variant 0 and final E1 certification remain pending.
-
-[Selected skill and topic effect binding](../../evidence/2026-10-07-e1-knowledge-effects/README.md) is an author checkpoint for two committed dialogue sequence effects; integrated recorder evidence and E1 certification remain pending.
-
-[Ancestry and static entity witnesses](../../evidence/2026-10-07-e1-ancestry-items/README.md) retain six bounded clean-source SQLite traces; E1 remains pending.
+Checkpoint history (closed): 28 checkpoint evidence directories; the last revision with the full log is [this permalink](https://github.com/lorecrafting/lokacore/blob/7fe5918769d502283c12891941deb002996ef0b2/docs/briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md). Retained until the PM prunes them: [legal-routes](../../evidence/2026-10-06-e1-legal-routes/README.md), [topology-integration](../../evidence/2026-10-06-e1-topology-integration/README.md), [optional-quests](../../evidence/2026-10-06-e1-optional-quests/README.md), [optional-integration](../../evidence/2026-10-06-e1-optional-integration/README.md), [night-watch](../../evidence/2026-10-06-e1-night-watch/README.md), [wisp-herbs](../../evidence/2026-10-07-e1-wisp-herbs/README.md), [dialogue-binding](../../evidence/2026-10-07-e1-dialogue-binding/README.md), [route-registration](../../evidence/2026-10-07-e1-route-registration/README.md), [maud-cellar](../../evidence/2026-10-07-e1-maud-cellar/README.md), [modal-scene-binding](../../evidence/2026-10-07-e1-modal-scene-binding/README.md), [dialogue-policy-binding](../../evidence/2026-10-07-e1-dialogue-policy-binding/README.md), [dream-binding](../../evidence/2026-10-07-e1-dream-binding/README.md), [night-published](../../evidence/2026-10-07-e1-night-published/README.md), [integrated-routes](../../evidence/2026-10-07-e1-integrated-routes/README.md), [recipe-policy-binding](../../evidence/2026-10-07-e1-recipe-policy-binding/README.md), [dream-recipe-combined](../../evidence/2026-10-07-e1-dream-recipe-combined/README.md), [quest-objective-binding](../../evidence/2026-10-07-e1-quest-objective-binding/README.md), [quest-visible-epilogue](../../evidence/2026-10-07-e1-quest-visible-epilogue/README.md), [recipe-outcomes](../../evidence/2026-10-07-e1-recipe-outcomes/README.md), [ferry-routes](../../evidence/2026-10-07-e1-ferry-routes/README.md), [dialogue-choice-effects](../../evidence/2026-10-07-e1-dialogue-choice-effects/README.md), [ferry-room-identity](../../evidence/2026-10-07-e1-ferry-room-identity/README.md), [integrated-checkpoint](../../evidence/2026-10-07-e1-integrated-checkpoint/README.md), [post-split](../../evidence/2026-10-07-e1-post-split/README.md), [dialogue-circuit](../../evidence/2026-10-07-e1-dialogue-circuit/README.md), [journal-variants](../../evidence/2026-10-07-e1-journal-variants/README.md), [knowledge-effects](../../evidence/2026-10-07-e1-knowledge-effects/README.md), [ancestry-items](../../evidence/2026-10-07-e1-ancestry-items/README.md). E1 closes at coverage complete under the [recorder pass result](../../system/e1-certification.md#e1-exact-candidate-proof-policy); the recorder passed in the [coverage-complete evidence](../../evidence/2026-10-07-e1-coverage-complete/README.md).

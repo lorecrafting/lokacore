@@ -339,7 +339,7 @@ export function witnessedObligations(
   ]);
 }
 
-// docs/system/architecture.md#e1-policy-branch-evidence: credit a node only at positive polarity,
+// docs/system/e1-certification.md#e1-policy-branch-evidence: credit a node only at positive polarity,
 // when it holds and every ancestor evaluated to its own polarity, starting from a root that holds.
 export function creditedPolicyPaths(
   world: World,

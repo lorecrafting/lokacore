@@ -1,5 +1,5 @@
 // Run: e1_cases.ts artifact.json new-output-dir; replay: add a retained case.jsonl.
-// Exit 2 always leaves certification pending; replay success exits 0, failures exit 1.
+// Exit 0 pass (all cases pass, nothing pending), 2 pending, 1 failure; replay success exits 0.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -39,7 +39,7 @@ import { carryLimit } from './e1_world_witness.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 import { REFUSALS } from './e1_refusals.ts';
 
-// Reviewed {path, reason, evidence, review} rows: architecture.md#e1-policy-branch-evidence.
+// Reviewed {path, reason, evidence, review} rows: e1-certification.md#e1-policy-branch-evidence.
 // An optional `refusal` binds the row to a controlled case whose final replayed step is refused with `code`.
 type Disposition = {
   path: string;
@@ -247,6 +247,10 @@ export function gaps(
   };
 }
 
+/** Recorder exit: 1 on failure, 2 while any authored path or family gap is open, else 0. */
+export const recorderExit = (failure: string | null, open: Record<string, string[]>) =>
+  failure ? 1 : Object.values(open).some((x) => x.length) ? 2 : 0;
+
 function recordCases(bytes: Uint8Array, out: string) {
   const loaded = admitCandidate(bytes),
     identity = source(),
@@ -338,8 +342,11 @@ function recordCases(bytes: Uint8Array, out: string) {
   } catch (e) {
     failure = redact(String(e));
   }
+  const obligations = obligationReport(loaded, seen, witnessed),
+    exit = recorderExit(failure, obligations.gaps),
+    status = failure ? 'fail' : exit ? 'pending' : 'pass';
   const report = {
-    status: failure ? 'fail' : 'pending',
+    status,
     failure,
     certification_verdict: null,
     source: identity,
@@ -350,11 +357,10 @@ function recordCases(bytes: Uint8Array, out: string) {
     coverage: Object.fromEntries(
       Object.entries(seen).map(([key, values]) => [key, [...values].sort()]),
     ),
-    ...obligationReport(loaded, seen, witnessed),
-    pending: [
-      'selected 10000-sequence proof on final source/check identity',
-      'all applicable path/consequence/beat receipts',
-      'independent final candidate review',
+    ...obligations,
+    deferred: [
+      'E1 closure: independent review and exact-head CI',
+      'release candidate: freeze, selected 10000-sequence proof and gate audit',
       'E2/E3 browser human receipts',
       'native mobile paused',
     ],
@@ -368,10 +374,8 @@ function recordCases(bytes: Uint8Array, out: string) {
     files.map((f) => `${sha256(readFileSync(join(out, f)))}  ${f}\n`).join(''),
     { flag: 'wx' },
   );
-  process.stdout.write(
-    `${failure ? 'fail' : 'pending'}: ${receipts.length} real SQLite cases passed; explicit coverage gaps retained\n`,
-  );
-  return failure ? 1 : 2;
+  process.stdout.write(`${status}: ${receipts.length} real SQLite cases passed\n`);
+  return exit;
 }
 
 if (import.meta.main) {
