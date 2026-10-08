@@ -9,7 +9,7 @@
   [2026-10-06 ruling](../decisions/owner-decision-d11-prechoice-elapsed-2026-10-06.md);
   [WORKFLOW Review stance](../WORKFLOW.md).
 
-## Verdict: APPROVE
+## Verdict: APPROVE WITH NOTES
 
 ## Must be true (written before reading the diff)
 
@@ -31,8 +31,14 @@
   re-anchors wall; `reserve` → `capture('active')` → `drain` persists the anchor before the choice
   commits. Book: Catching up only shows when target > clock (never on a new picker); `Fault` with
   Start over renders outside the picker gate (`Book.tsx:192`).
-- 5: diff adds no compatibility code; PR body and decision record state case (a) `save_corrupt`
-  for every v042 save with a pre-choice receipt, and case (b) "Time stopped: invalid_state".
+- 5: diff adds no compatibility code. Case (a) code path: `liquid-save.ts:20-30` replays
+  receipt history whenever the content has knowledge, water, population or services (v042 does),
+  so every v042 save with a pre-choice receipt hits `receipt-history.ts:18-20` `SyntaxError`; open
+  catches it at `authority.ts:104-107` and returns `save_corrupt` through `refuse`
+  (`authority.ts:79`, adds only `newGame`, writes nothing); `SaveError.tsx:8,24` shows "damaged"
+  with Start over. Case (b): "Time stopped: invalid_state" beside Start over. Both stated in the PR.
+- No Elixir counterpart: `lib/` holds the content compiler only; `stepElapsed` and `ClockDriver`
+  exist in TypeScript alone.
 - 6: all brief spec edits present; book-ui sentence matches the designer text; protocol anchors
   (`world.ts:114, :146, :162, :179, :207`) verified on the head.
 - Tests: expected values literal (`68400`, `64800`, `64800 + 3000`); no fixtures or frozen answers
@@ -45,9 +51,22 @@
 | Delete kernel gate line | red (accepted vs `invalid_state`) | green |
 | Gate moved before validate/identity | red (`invalid_state` vs `not_found`) | n/a |
 | Drop `needsAncestry` from driver `d` | green | red (`fault invalid_state` vs `ready`) |
+| Drop `capture('active')` in `ClockDriver.reserve` | n/a | red (`97800` vs `67800`) |
+| Gate moved between `identity` and command-id check | green (also kernel `elapsed.test.ts`) | n/a |
 
 Unmutated head: kernel 7/7, mobile 4/4.
 
 ## Findings
 
-None.
+- **nit** `kernel/ts/test/character_choice.test.ts:86`: only the foreign-context `not_found`
+  pins the gate order. Moving the gate between `identity` and the command-id check stays green, so
+  a regression where a forged wrong-id elapsed before selection returns `invalid_state` instead of
+  `permission_denied` would pass. The brief asked for one assertion, so not blocking; one more
+  `deepEqual` with a wrong `id` would close it.
+
+## Open item (owner-facing, not blocking)
+
+- The brief's case (a) "plain reopen opens cleanly" does not occur on chapter one v042: effectively
+  every existing chapter-one device save that showed the picker under the old build now opens as
+  `save_corrupt`. Permitted by the forward-development policy and stated plainly in the PR and the
+  decision record; the PM should carry it to the owner.
