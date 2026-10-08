@@ -168,6 +168,38 @@ mkdir "$tmp/brstub"; mv "$tmp/br-create" "$tmp/brstub/br"; chmod +x "$tmp/brstub
 got=$(BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title') || bad 'br_create: failed'
 [ "$got" = loka-n1 ] && [ "$(tail -1 "$tmp/br.log")" = 'update loka-n1 --source-repo lokacore --source-repo-path ' ] \
   || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
+# --- after_merge.sh ------------------------------------------------------------------------
+# Bare origin; branch pr (worktree, review-7 on its tip) is merged on origin/main by another clone,
+# local main is behind with a dirty Beads export. Stub gh reports $PR_STATE; stub br close appends
+# to the export. Break: the local export write is lost in the pull, the issue is not closed, the
+# worktree or refs survive, nothing is pushed, or a refusal still changes something.
+printf '#!/bin/sh\necho "$PR_STATE pr"\n' > "$tmp/brstub/gh"
+printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in close) echo "closed $2" >> .beads/issues.jsonl ;; esac\n' > "$tmp/brstub/br"
+chmod +x "$tmp/brstub/gh"
+am() { # <case> <want-rc> [subject]
+  rc=0; BR_LOG=$R.br PR_STATE=${PR_STATE-MERGED} PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a ${3+"$3"} > "$R.out" 2>&1 || rc=$?
+  [ "$rc" = "$2" ] || { bad "after_merge $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
+}
+amk() {
+  O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
+  git checkout -qb main; mkdir -p .beads docs; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
+  git add . && git commit -qm base && git push -q origin main
+  git checkout -qb pr; echo feature > f; git add f && git commit -qm pr && git push -q origin pr; git branch review-7
+  git checkout -q main; git worktree add -q "$R.wt" pr 2>/dev/null
+  M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && git push -q origin main)
+  echo local-write >> .beads/issues.jsonl; : > "$R.br"
+}
+amk; head=$(git rev-parse HEAD); echo stray > s; am dirty 1; rm s
+[ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
+PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
+echo r2 > docs/ROADMAP.md; am success 0 'ROADMAP status: X merged (#7)'
+git fetch -q origin
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
+  && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
+[ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf 'base\nlocal-write\nclosed loka-a')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
+grep -qx 'sync --flush-only' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+[ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
+  && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor

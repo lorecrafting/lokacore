@@ -93,6 +93,9 @@ their rules and red controls remain available for resumption.
   recorder, a conflict or an oversized untouched file.
   It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
+  It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR or a stray
+  file is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
+  branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared).
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
   pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
