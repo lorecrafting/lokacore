@@ -31,3 +31,30 @@ docs check ignored red, no `merge --abort` red, no own-line append red; **no ind
 Checked, no finding: step 7 text agrees with #315 (arm after final verdict, disarm before other pushes,
 re-arm note); routing rows; plugin line; record marked (paraphrased), index and owner-rules lines;
 `63d9fa92` touches only `.beads/issues.jsonl`. CI was still running at review time (elixir, sim, lint pass).
+
+## Fix round 1: `69252b7b`, `8a8a7e02` (head `8a8a7e02`)
+
+**Verdict: CHANGES REQUIRED** (one should-fix in the new item 5 text; every earlier finding is closed).
+
+- Blocker: fixed. The whole-file check is at `bin/integration_red_controls.sh:116`. Deleting only the rebuild
+  line (`git show origin/main:$idx > $idx`) now fails with "index not exactly main list + own line"; the
+  unmodified head passes.
+- Should-fix: fixed. `bin/sync_pr.sh:17` treats the sync as done only when `origin/<branch>` has main; a
+  rerun skips the merge, runs the docs check and pushes. Restoring the old `HEAD` early exit fails with
+  "sync_pr rerun: not pushed".
+- Nit: fixed by the script comment and the step 7 sentence (check the order by hand).
+- Question: closed (docs link added).
+- Item 5, **should-fix** `docs/WORKFLOW.md:100` and `.claude/agents/developer.md:53`: both still say
+  "`git pull --rebase` (the review record is on the branch)". Under the new rule (`WORKFLOW.md:294`,
+  `.claude/agents/reviewer.md:41`) the record is never pushed, so the pull does not bring it. The
+  developer's fix push then goes out without the record, and the round 2 reviewer appends to a file that
+  is not there. The text also never names how the sha reaches the developer, or the ref that keeps it
+  reachable once the worktree is removed (the PM now asks for `git branch review-<N>`; WORKFLOW does not
+  say this). Fix: step 5 and developer.md cherry-pick the reviewer's sha (or merge `review-<N>`) before
+  fixing, and the git-hygiene bullet names the ref.
+- Item 5, **nit** `docs/system/owner-rules.md:210` and the record bullet "After each merge to `main`": both
+  still say to sync after each merge, while step 7 and the new record bullet say once after the last of
+  several close merges.
+
+Delivery lanes text and step 7 do not contradict each other: the shared draft branch is the default, and
+Hosted is kept for a slice that must merge alone.
