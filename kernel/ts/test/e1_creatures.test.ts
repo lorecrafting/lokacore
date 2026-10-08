@@ -286,20 +286,26 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
       s.decision.events.find((e: Loose) => e.payload.fact?.key === k).payload;
   const bell = prior.steps.get(a)!,
     report = prior.steps.get(start)!;
-  // A rule sharing b's trigger and effect whose `when` fails at its real delivery (after b) is
-  // never delivered, so it must not borrow b's op and event.
-  const dup = structuredClone(bell) as Loose,
-    b0 = rule(dup, 'b_lost_before_meeting');
-  dup.before.cartridge.reactions['ashmere_missing_child@0.0.42:reaction/e_dup'] = {
-    ...b0,
-    key: 'e_dup',
-    when: { policy_version: 1, root: b0.when.root.items[4] },
-    apply: [b0.apply[1]],
-  };
-  assert.deepEqual(
-    reactions(dup).filter((p) => p.includes('/e_dup')),
-    [],
-  );
+  // A rule sharing b's second op whose `when` fails at its real delivery (after b) is never
+  // delivered; the shared op is ambiguous, so neither rule gets credit, in either key order.
+  for (const first of [false, true]) {
+    const dup = structuredClone(bell) as Loose,
+      b0 = rule(dup, 'b_lost_before_meeting'),
+      e = {
+        ['ashmere_missing_child@0.0.42:reaction/e_dup']: {
+          ...b0,
+          key: 'e_dup',
+          when: { policy_version: 1, root: b0.when.root.items[4] },
+          apply: [b0.apply[1]],
+        },
+      };
+    const rs = dup.before.cartridge.reactions;
+    dup.before.cartridge.reactions = first ? { ...e, ...rs } : { ...rs, ...e };
+    assert.deepEqual(
+      reactions(dup).filter((p) => p.includes('/e_dup') || p.includes(b)),
+      [],
+    );
+  }
   for (const path of expected.a)
     planted(
       bell,
