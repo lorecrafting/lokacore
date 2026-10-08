@@ -7,7 +7,10 @@ defmodule Loka.ContentSource do
 
   @doc "Copies `src` once (call from `setup_all`); the copy is removed after the module."
   def copy(src) do
-    dir = Path.join(System.tmp_dir!(), "loka-source-#{System.unique_integer([:positive])}")
+    # The OS pid keeps concurrent test runs apart; a leftover copy is replaced, not merged.
+    name = "loka-source-#{System.pid()}-#{System.unique_integer([:positive])}"
+    dir = Path.join(System.tmp_dir!(), name)
+    File.rm_rf!(dir)
     File.cp_r!(src, dir)
     on_exit(fn -> File.rm_rf!(dir) end)
     dir
