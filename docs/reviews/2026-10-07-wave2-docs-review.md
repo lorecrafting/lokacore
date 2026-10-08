@@ -75,3 +75,25 @@
 
 Over-engineering: none found. `docs/BEADS.md` is a focused operations page, and WORKFLOW links it
 without restating it. The new red-control code is minimal.
+
+## Fix round `66ccb601` (scoped re-check)
+
+Scope: `2de547a7..66ccb601` and neighbouring lines only
+([WORKFLOW step 6](../WORKFLOW.md#loop)). `bin/check_docs.exs`: 288 docs, 0 broken links or anchors, 0 unreachable.
+
+Verdict: **APPROVE WITH NOTES**. Nothing blocks the merge.
+
+1. Closed. `owner-rules.md:224` names all three records as resuming with native work, and all
+   three paths resolve. The hook's "second resume trigger" reading is wrong: native work starts
+   only when the owner resumes it, so the trigger stays owner-resume only. The line now lists them
+   as rules in force, so move-forward cannot delete them as superseded. WORKFLOW:201-204 needs no
+   change.
+2. Closed. `owner-rules.md:203` keeps only the owner default and links the routing table. No
+   restated model list remains in owner-rules. New nit: the link is `../WORKFLOW.md`, not
+   `../WORKFLOW.md#work-routing` (the anchor is at WORKFLOW:18), so it lands at the top of the
+   file. The table is 5 lines below, so this is optional.
+3. Closed. WORKFLOW:115-116 "before the final review" matches the lanes row at `:182` and the
+   skip-CI-on-drafts record.
+4. Closed. One "Mobile size debt" line remains in `docs/reviews/README.md`.
+5. Closed. `owner-rules.md:3` no longer claims a spec link for each adoption; the index covers
+   them.
