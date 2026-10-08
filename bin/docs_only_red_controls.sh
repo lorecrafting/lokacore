@@ -54,7 +54,7 @@ case $2 in
     browser) json='{"jobs":[{"name":"browser","conclusion":"success"}]}' ;;
     skipped) json='{"jobs":[{"name":"browser","conclusion":"skipped"}]}' ;;
     failed) json='{"jobs":[{"name":"browser","conclusion":"failure"}]}' ;;
-    *) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"}]}' ;;
+    *) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"},{"name":"e1-recorder","conclusion":"success"}]}' ;;
   esac ;;
   *) json='{"workflow_runs":[{"id":7}]}' ;;
 esac
