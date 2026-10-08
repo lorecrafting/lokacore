@@ -1,0 +1,13 @@
+diff --git a/mobile/authority/local-story/r9c_faults.test.ts b/mobile/authority/local-story/r9c_faults.test.ts
+index 66e03f99..d01bf38b 100644
+--- a/mobile/authority/local-story/r9c_faults.test.ts
++++ b/mobile/authority/local-story/r9c_faults.test.ts
+@@ -280,7 +280,7 @@ test('F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT',
+   });
+   const call = (s: Open) => s.invoke(last);
+   row(base, 'commit', 'prior', call);
+-  row(base, 'before', 'prior', call, last);
++  row(base, 'before', 'next', call, last);
+   row(base, 'after', 'next', call, last);
+ });
+ 

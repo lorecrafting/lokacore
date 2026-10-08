@@ -1,0 +1,13 @@
+diff --git a/mobile/authority/local-story/save.ts b/mobile/authority/local-story/save.ts
+index 651bbe7a..ad193b28 100644
+--- a/mobile/authority/local-story/save.ts
++++ b/mobile/authority/local-story/save.ts
+@@ -95,7 +95,7 @@ function reconciled(s: Story, r: Receipt, checkpoint?: Checkpoint) {
+           'unexpected elapsed checkpoint; recovery required',
+         );
+     }
+-    return got;
++    return got ?? r;
+   });
+ }
+ 

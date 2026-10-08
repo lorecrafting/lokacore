@@ -1,0 +1,9 @@
+candidate.json: OK
+report.json: OK
+toolchain.log: OK
+compile.log: OK
+foundation-compiler.log: OK
+kernel.log: OK
+sqlite.log: OK
+compiled.json: OK
+sim.log: OK

@@ -1,0 +1,25 @@
+# chapter tests cited in r9c_faults.test.ts headers, against rc1 and rc2 (filtered: red test locations and summary)
+# rc1-memory-before-commit.diff applied
+$ node --test mobile/authority/local-story/{faults,bell_receipts,finale,transport}.test.ts
+   1 ℹ fail 20
+   1 ℹ pass 17
+   1 ℹ tests 37
+   1 test at mobile/authority/local-story/bell_receipts.test.ts:10:1
+   1 test at mobile/authority/local-story/bell_receipts.test.ts:305:1
+  15 test at mobile/authority/local-story/faults.test.ts:213:3
+   1 test at mobile/authority/local-story/faults.test.ts:357:1
+   1 test at mobile/authority/local-story/faults.test.ts:387:1
+   1 test at mobile/authority/local-story/transport.test.ts:210:1
+exit 1
+$ cp <saved copy> mobile/authority/local-story/save.ts; git status --porcelain
+exit 0
+# rc2-reconcile-assumes-committed.diff applied
+$ node --test mobile/authority/local-story/{faults,bell_receipts,finale,transport}.test.ts
+   1 ℹ fail 18
+   1 ℹ pass 19
+   1 ℹ tests 37
+  17 test at mobile/authority/local-story/faults.test.ts:213:3
+   1 test at mobile/authority/local-story/transport.test.ts:210:1
+exit 1
+$ cp <saved copy> mobile/authority/local-story/save.ts; git status --porcelain
+exit 0

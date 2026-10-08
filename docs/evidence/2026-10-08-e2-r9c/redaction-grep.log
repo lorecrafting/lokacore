@@ -1,0 +1,2 @@
+$ grep -rn --exclude=redaction-grep.log -e '/private/' -e '/Users/' -e '/var/folders' -e 'e2-s5-mutant' -e 'scratchpad' .
+exit 1
