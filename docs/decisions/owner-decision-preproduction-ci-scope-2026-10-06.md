@@ -14,3 +14,8 @@ Implementation clarification (2026-10-06): the mobile exception covers app work;
 `mobile/authority/local-story/` contains story authority and save code and stays in
 the broad code lane under the save rule above. Browser checks still run for both
 mobile app and authority changes. This does not resume paused native checks.
+
+Amendment (owner, 2026-10-08, paraphrased): the mobile exception narrows to Book views and
+assets (`*.tsx`, fonts, `.sksl`, e2e specs, plugins, `app.json`); mobile `.ts` and package files,
+including Book `model.ts` and `presenter.ts` that kernel tests import, run the code lane. Local
+pre-push only: a push whose code changes are only `*.test.ts` files skips `mix test` and credo.
