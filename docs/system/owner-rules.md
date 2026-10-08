@@ -202,7 +202,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
 - Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for the E1 closure second opinion
-  ([record](../decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), the E2 and E3 gate closures and audits, and the release-candidate certification audit; Codex and cross-vendor review are retired; Beads Rust is the
+  ([record](../decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), the E2 and E3 gate closures and audits, the release-candidate certification audit, and once the pre-polish area audits ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)); Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
 - An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout

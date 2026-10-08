@@ -12,6 +12,11 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
 - [Review: pre-polish batch 1 (process, scripts, CI)](2026-10-08-prepolish-batch1-review.md): **CHANGES REQUIRED**
+- [Pre-polish audit B: save and persistence (2026-10-08)](2026-10-08-prepolish-audit-save.md)
+- [Pre-polish audit C: protocol / portable foundation / Elixir (2026-10-08)](2026-10-08-prepolish-audit-protocol.md)
+- [Pre-polish audit A: kernel (loka-v9q)](2026-10-08-prepolish-audit-kernel.md)
+- [Pre-polish audit, area E: CI, scripts, docs hygiene (loka-v9q)](2026-10-08-prepolish-audit-ci-docs.md)
+- [Pre-polish audit D: Book UI / presenter / app (loka-v9q)](2026-10-08-prepolish-audit-book-ui.md)
 - [Review: merge gate on GitHub required checks (loka-0a4)](2026-10-08-merge-gate-required-checks-review.md): **APPROVE WITH NOTES**
 - [Review: loka-mkm forged deadline receipt checks on reopen](2026-10-08-loka-mkm-forged-deadline-receipts-review.md): **APPROVE WITH NOTES**
 - [Review: loka-8mm world time starts at first entry, second opinion (save and reopen)](2026-10-08-loka-8mm-world-time-second-opinion.md): **APPROVE**
