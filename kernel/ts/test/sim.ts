@@ -186,19 +186,18 @@ export function shrink(s: Sequence, failed: string, kernel = KERNEL): Command[] 
 
 type Checked = { world: World; bytes: string; code: string; failure?: Omit<Failure, 'at'> };
 
-// One step through `kernel`, as the commit at `revision`: a throw or a broken invariant is a
-// failure, never a crash.
+// One step through `kernel` as commit `revision`: a throw or broken invariant fails, never crashes.
 export function checked(
   kernel: Kernel,
   before: World,
   command: Command,
   revision: number,
-  action?: string,
+  action?: Key,
 ): Checked {
   try {
     const input = JSON.stringify(before);
     const view = kernel.gameView(before);
-    const { decision, world } = kernel.step(before, command, revision, action as Key | undefined);
+    const { decision, world } = kernel.step(before, command, revision, action);
     const bad =
       (JSON.stringify(before) !== input ? 'input_mutated' : undefined) ??
       violated(before, command, view, decision, world) ??

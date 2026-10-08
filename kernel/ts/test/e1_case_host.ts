@@ -18,10 +18,10 @@ import { witnessedObligations } from './e1_obligations.ts';
 export const AUTHORITY_KERNEL = {
   ...KERNEL,
   // `action` is the invoked action key production decides with (local-story/invocation.ts).
-  step: (world: World, command: Command, revision: number, action?: string) =>
+  step: (world: World, command: Command, revision: number, action?: Key) =>
     command.payload.type === 'elapsed'
       ? stepElapsed(world, command, revision)
-      : KERNEL.step(world, command, revision, action as Key | undefined),
+      : KERNEL.step(world, command, revision, action),
 };
 
 export type LoadedCandidate = ReturnType<typeof admitCandidate>;
@@ -120,7 +120,8 @@ export function caseHost(
       after = story.world();
     if (command) {
       commands.push(command);
-      const action_key = invocations.find((i) => i.invocation_id === r.invocation_id)?.action_key;
+      const action_key = invocations.find((i) => i.invocation_id === r.invocation_id)
+        ?.action_key as Key | undefined;
       const observation = checked(
         AUTHORITY_KERNEL,
         previous,
