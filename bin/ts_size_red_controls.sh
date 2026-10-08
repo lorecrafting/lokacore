@@ -71,8 +71,9 @@ x 301 > "$M/tracked.ts"
 x 301 > "$M/untracked.ts"
 rm "$I" && GIT_INDEX_FILE=$I git read-tree HEAD
 GIT_INDEX_FILE=$I git add -f "$M/tracked.ts"
-# Run CI's own invocation (its check_ts_size step; none found fails below), so a mobile/ exclusion added there fails.
+# Run CI's own invocation (its single check_ts_size step), so a mobile/ exclusion added there fails.
 ci=$(sed -n 's/^ *- run: \(.*check_ts_size\.mjs.*\)$/\1/p' .github/workflows/ci.yml)
+[ "$(printf '%s\n' "$ci" | grep -c .)" -eq 1 ] || { echo "FAIL ts size: expected one check_ts_size step in ci.yml, got: $ci"; exit 1; }
 scan_status=0
 scan=$(GIT_INDEX_FILE=$I sh -c "$ci") || scan_status=$?
 if [ "$status" -ne 0 ] && [ "$got" = "$want" ] && [ "$scan_status" -ne 0 ] &&

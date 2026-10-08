@@ -4,13 +4,12 @@ import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bellCue } from '../../../kernel/ts/src/mechanics/bell/cue.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
-import { bodyOf, refString } from '../../../kernel/ts/src/runtime/decision.ts';
+import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import { defenseEvidence } from './combat-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
-import type { Accepted } from './receipt-history.ts';
 import { scope, type Story } from './save.ts';
 
 /**

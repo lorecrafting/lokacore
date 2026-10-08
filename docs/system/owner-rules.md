@@ -1,6 +1,6 @@
 # Owner rules in force
 
-One line per active rule, with its record. Superseded rules are not listed; their records are deleted
+One line per active rule, with its record. PM adoptions whose contract is installed in `docs/system` are not listed here: the spec section links its record, and the [index](../decisions/README.md) lists every record. Superseded rules are not listed; their records are deleted
 and linked by permalink from the [index](../decisions/README.md), or kept only where code or `protocol/` cites them ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)

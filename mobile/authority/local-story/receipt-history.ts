@@ -7,8 +7,6 @@ import { step, stepElapsed } from '../../../kernel/ts/src/runtime/world.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
-export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
-
 type Row = {
   invocation_id: string;
   command_id: string;

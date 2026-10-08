@@ -87,8 +87,10 @@ neither a sealed room nor an unimplemented quest option earns completion credit.
 | **E2 R9C interaction proof:** exercise cross-mechanic cases in a compact synthetic cartridge. | E1, final changed contracts | 0.6–0.9 |
 | **E3 R10 browser content gate:** prove reachable rooms, quests, all five ending variants, bounded long runs and a human Book walkthrough on one candidate. | A–D, E1, E2 | 0.7–1.0 |
 
-Browser storage evidence does not certify native SQLite, backgrounding, touch or Hermes; that
-prelaunch work waits for the end of the [mobile pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
+The shared TypeScript engine simulation, real SQLite transaction/fault checks and contract checks
+remain part of development proof. Browser storage evidence does not certify native SQLite,
+backgrounding, touch or Hermes; public release readiness requires that separate prelaunch work
+after the [mobile pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md) is lifted.
 
 ## Rules for each brief
 

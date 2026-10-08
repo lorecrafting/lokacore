@@ -35,8 +35,8 @@ Before handing off:
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
 3. Commit (attribution lines per the session). Provisional local:
-   hand the branch and exact head to the PM without pushing; otherwise push the
-   branch and open the PR (a draft when the brief says so) citing the governing `docs/system` sections and
+   hand the branch and exact head to the PM without pushing; draft PR: push only when the brief
+   says (the branch is pushed once per wave); hosted PR: push the branch and open the PR citing the governing `docs/system` sections and
    including the ponytail result. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.

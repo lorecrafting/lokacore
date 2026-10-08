@@ -10,8 +10,7 @@ import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { elapsedCommandId, jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { scopeOf, value } from '../../../kernel/ts/src/mechanics/fact.ts';
-import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { Accepted } from './receipt-history.ts';
+import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db } from './store.ts';
 
 export const invalid = (): never => {

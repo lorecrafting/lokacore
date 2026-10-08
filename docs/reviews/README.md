@@ -1,9 +1,9 @@
 # Independent reviews
 
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
-One line per record, newest first: PR, commit reviewed, verdict, and the final round's commit
+One line per record: PR, commit reviewed, verdict, and the final round's commit
 and verdict when there were fixes; findings and dispositions are in the records. Records of
-closed work are deleted and linked by permalink ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md));
+closed work are deleted once their lesson is folded, and linked by permalink ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md));
 their index lines are in [this index at `15c7d41b`](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/reviews/README.md). Reviews before R2 live in the
 [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy) (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 

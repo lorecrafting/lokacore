@@ -1,9 +1,8 @@
 // The original Begin, bell and finale Continue receipts that a Green outcome must be bound to.
 import type { Command, DefinitionRef } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
-import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import { ref } from './bell-receipt.ts';
-import type { Accepted } from './receipt-history.ts';
 
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent Green finale');

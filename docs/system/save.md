@@ -10,7 +10,7 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 `openStory(db, releases, host)` (`authority.ts:76`) takes the bundled releases newest first
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
 call (`newId`), an optional account binding read once when a run starts, an optional clock
-for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
+for latency, and an optional random source shaped like `getRandomValues` (`:57`). It opens the
 save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
 (below), else the release's own fresh world.
@@ -78,7 +78,7 @@ and `bram` choices, and narration ids follow them; outcome `accept` is the kerne
 `Reply` (`authority.ts:31`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
 `pending` (a COMMIT whose outcome is unknown; retry the same invocation), `stale_view` (a NEW
 invocation whose `view_freshness_token` starts with `view:` and is not the current
-`view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. Accepted invocation replies also identify their committed
+`view:<run_id>:<revision>`, `save.ts:120`; any other token is not checked), or `saved {replay, revision, decision}`. Accepted invocation replies also identify their committed
 `command_id` for exact narration recovery, including eventless wrong answers. A failed commit throws with memory and
 storage unchanged.
 
@@ -86,7 +86,7 @@ storage unchanged.
 
 `commit` (`commit.ts:25`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
-then always the receipt. `transaction` (`:265`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
+then always the receipt. `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
 transaction open, returns false: the outcome is unknown. Then the story is **fenced**
 (`save.ts:65`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
@@ -170,7 +170,7 @@ unknown COMMIT fences like an invocation's. The host confirms with the player fi
 ## Narration on reopen
 
 The latest committed narration is read from the receipts, never memory, so a crash before
-display shows it again; no acknowledgement is stored (`narration.ts:22`;
+display shows it again; no acknowledgement is stored (`narration.ts:23`;
 `start_over.test.ts` "the latest committed narration is read again on reopen, from the
 receipts").
 

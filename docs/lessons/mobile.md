@@ -43,8 +43,9 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
   write/read/parse/encode); measure it split.
 
 **Mobile builds**
-- Iterate on the M1 (a JS change rebuilds in about 9 s on either platform); CI builds are
-  clean-build proof, not the edit loop (2026-09-24: CI Android job about 6 min).
+- Iterate on the M1; CI builds are clean-build proof, not the edit loop. Measured 2026-09-24
+  (Expo 57, arm64 release): Android clean 78 s (346 s first, with NDK), JS change 9 s; iOS
+  `pod install` 23 s, clean `xcodebuild` 50 s, JS change 9 s; CI Android uncached job 6 min 15 s.
 - `pod install` writes React Native codegen into `ios/build/generated`. Never
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
 
