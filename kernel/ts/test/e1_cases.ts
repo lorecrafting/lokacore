@@ -154,7 +154,7 @@ export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOS
       known.has(d.path) &&
         [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x) &&
         (d.refusal === undefined ||
-          [d.refusal.case, d.refusal.code].every((x) => typeof x === 'string' && x)),
+          [d.refusal?.case, d.refusal?.code].every((x) => typeof x === 'string' && x)),
       `invalid disposition ${d.path}`,
     );
 }
