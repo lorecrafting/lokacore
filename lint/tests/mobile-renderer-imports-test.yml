@@ -16,7 +16,11 @@ valid:
   - "import { hint } from './model.ts';"
   - "import type { Game } from '../../packages/game-view/session.ts';"
   - "import type { Failed } from '../packages/game-view/session.ts';"
+  - "import { Canvas } from '@shopify/react-native-skia';"
+  - "import curl from './page-curl.sksl';"
 invalid:
+  - "import other from './other.sksl';"
+  - "import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';"
   - "import font from './fonts/EBGaramond.ttf';"
   - "const f = require('./fonts/EBGaramond.ttf');"
   - "const f = require('x' as const);"
