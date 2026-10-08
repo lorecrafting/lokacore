@@ -2,17 +2,12 @@ defmodule Loka.ContentChaptersTest do
   # Chapter references and structure (mechanics.md Chapters). Literal expected diagnostics
   # follow DiagnosticCode; the compiled answer is independently written by Python.
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_chapters")}
   @src "cartridges/ashmere_chapters"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_chapters_hash.json"))
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
-
-  defp compile(dir, files) do
-    File.cp_r!(@src, dir)
-    for {rel, value} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(value))
-    Loka.Content.compile(dir)
-  end
 
   defp ref(kind, key),
     do: %{
@@ -44,7 +39,7 @@ defmodule Loka.ContentChaptersTest do
 
   # Breaks: chapter settings misplaced/lost, or a source short story_point left unexpanded.
   test "chapters compile to the independent answer with either reference spelling", %{
-    tmp_dir: dir
+    dir: dir
   } do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
     m = src("cartridge.json")
@@ -60,14 +55,14 @@ defmodule Loka.ContentChaptersTest do
   end
 
   # Breaks: the source manifest uses a weaker array shape than the artifact and admits no opening chapter.
-  test "empty source chapters are rejected", %{tmp_dir: dir} do
+  test "empty source chapters are rejected", %{dir: dir} do
     assert compile(dir, %{"cartridge.json" => Map.put(src("cartridge.json"), "chapters", [])}) ==
              {:error, [d("SCHEMA_VIOLATION", "", %{"error" => "too_few_items"})]}
   end
 
   # Breaks: a chapter title, point or outcome bypasses reference checking, or opening/later
   # structural restrictions are skipped in the compiler's settings path.
-  test "chapter references and opening structure fail closed", %{tmp_dir: dir} do
+  test "chapter references and opening structure fail closed", %{dir: dir} do
     m = src("cartridge.json")
 
     for {i, field, value, code, data} <- [
@@ -78,13 +73,13 @@ defmodule Loka.ContentChaptersTest do
           {0, "outcome", "carry", "UNKNOWN_FIELD", %{}},
           {1, "story_point", nil, "SCHEMA_VIOLATION", %{"error" => "missing_property"}}
         ] do
-      assert compile(Path.join(dir, "#{i}-#{field}"), %{
+      assert compile(dir, %{
                "cartridge.json" => marker(m, i, field, value)
              }) ==
                {:error, [d(code, "[#{i}].#{field}", data)]}
     end
 
-    assert compile(Path.join(dir, "text"), %{
+    assert compile(dir, %{
              "text.json" => Map.delete(src("text.json"), "chapter.dusk")
            }) ==
              {:error, [d("UNRESOLVED_REFERENCE", "[1].title", %{"target" => "chapter.dusk"})]}
@@ -92,17 +87,17 @@ defmodule Loka.ContentChaptersTest do
 
   # Breaks: the same quest/choice in another dialogue silently reaches a marker, or rejecting
   # every multi-dialogue quest rather than only ambiguous counted triggers.
-  test "only ambiguity in a counted quest choice is rejected", %{tmp_dir: dir} do
+  test "only ambiguity in a counted quest choice is rejected", %{dir: dir} do
     dialogue = src("dialogues/bram.json")
     take = Map.take(dialogue["choices"], ["take_it"])
     leave = Map.take(dialogue["choices"], ["leave_it"])
     other = Map.put(dialogue, "choices", take)
 
-    assert compile(Path.join(dir, "both"), %{"dialogues/bram_again.json" => other}) ==
+    assert compile(dir, %{"dialogues/bram_again.json" => other}) ==
              {:error,
               [d("OUTCOME_MISMATCH", "[1].story_point"), d("OUTCOME_MISMATCH", "[2].story_point")]}
 
-    assert compile(Path.join(dir, "leave"), %{
+    assert compile(dir, %{
              "dialogues/bram_again.json" => Map.put(other, "choices", leave)
            }) ==
              {:error, [d("OUTCOME_MISMATCH", "[1].story_point")]}
@@ -110,12 +105,12 @@ defmodule Loka.ContentChaptersTest do
     unrelated = Map.put(other, "choices", %{"unrelated_choice" => take["take_it"]})
 
     assert {:ok, _, []} =
-             compile(Path.join(dir, "unrelated"), %{"dialogues/bram_again.json" => unrelated})
+             compile(dir, %{"dialogues/bram_again.json" => unrelated})
 
     different = Map.put(other, "quest", "other")
 
     assert {:ok, _, []} =
-             compile(Path.join(dir, "different"), %{
+             compile(dir, %{
                "dialogues/bram_again.json" => different,
                "quests/other.json" => src("quests/lantern.json")
              })

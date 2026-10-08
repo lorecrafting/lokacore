@@ -6,26 +6,11 @@ defmodule Loka.ContentDuskTest do
   # protocol/fixtures/cartridge_dusk_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_dusk")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_dusk_hash.json"))
   @src "cartridges/ashmere_dusk"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-
-  # ashmere_dusk's source with `files` merged over it (nil removes a file).
-  defp compile(dir, files) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          into: %{},
-          do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
-
-    for {rel, v} <- Map.merge(base, files), v != nil do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
@@ -50,7 +35,7 @@ defmodule Loka.ContentDuskTest do
 
   # Breaks: the check, a failure outcome, a duration or a time_window node dropped or reshaped,
   # or a failure step's short fact reference left short.
-  test "ashmere_dusk compiles to its Python known answer without warnings", %{tmp_dir: dir} do
+  test "ashmere_dusk compiles to its Python known answer without warnings", %{dir: dir} do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
     # A failure step's short fact reference expands like a success step's.
     step = %{"op" => "fact.assign", "fact" => "crypt_gate_open", "value" => false}
@@ -68,18 +53,18 @@ defmodule Loka.ContentDuskTest do
 
   # Breaks: a checked recipe without a failure outcome, or a failure outcome without a check,
   # compiles (the loader rejects both).
-  test "a recipe has a failure outcome exactly when it has a check", %{tmp_dir: dir} do
+  test "a recipe has a failure outcome exactly when it has a check", %{dir: dir} do
     mismatch = {:error, [d("OUTCOME_MISMATCH", "recipes/pick_lock.outcomes")]}
     drop = fn key -> fn r -> Map.delete(r, key) end end
     assert compile(dir, pick(["outcomes"], drop.("failure"))) == mismatch
 
-    assert compile(Path.join(dir, "b"), %{
+    assert compile(dir, %{
              "recipes/pick_lock.json" => Map.delete(src("recipes/pick_lock.json"), "check")
            }) == mismatch
   end
 
   # Breaks: a failure outcome's fact, narration or step owner, or the check's owner, unchecked.
-  test "a failure outcome's references and owners, and the check's, are checked", %{tmp_dir: dir} do
+  test "a failure outcome's references and owners, and the check's, are checked", %{dir: dir} do
     step = %{"op" => "fact.assign", "fact" => "gate_rusted", "value" => true}
 
     assert compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end)) ==
@@ -95,7 +80,7 @@ defmodule Loka.ContentDuskTest do
               ]}
 
     assert compile(
-             Path.join(dir, "b"),
+             dir,
              pick(["outcomes", "failure", "narration", "actor"], fn _ -> "narration.none" end)
            ) ==
              {:error,
@@ -105,7 +90,7 @@ defmodule Loka.ContentDuskTest do
                 })
               ]}
 
-    assert compile(Path.join(dir, "c"), without("check")) ==
+    assert compile(dir, without("check")) ==
              {:error,
               [
                 d(
@@ -126,7 +111,7 @@ defmodule Loka.ContentDuskTest do
         pick(["outcomes", "failure", "sequence"], fn _ -> [emit, step] end)
       )
 
-    {:error, diags} = compile(Path.join(dir, "d"), files)
+    {:error, diags} = compile(dir, files)
 
     assert d(
              "UNDECLARED_CAPABILITY",
@@ -137,7 +122,7 @@ defmodule Loka.ContentDuskTest do
   end
 
   # Breaks: time_window compiles without schedule@1, or with an empty window.
-  test "time_window needs schedule@1 and a non-empty window", %{tmp_dir: dir} do
+  test "time_window needs schedule@1 and a non-empty window", %{dir: dir} do
     assert compile(dir, without("schedule")) ==
              {:error,
               [
@@ -151,13 +136,13 @@ defmodule Loka.ContentDuskTest do
 
     ring = put_in(src("recipes/ring_bell.json"), ["policy", "root", "to"], 18)
 
-    assert compile(Path.join(dir, "b"), %{"recipes/ring_bell.json" => ring}) ==
+    assert compile(dir, %{"recipes/ring_bell.json" => ring}) ==
              {:error, [d("EMPTY_TIME_WINDOW", "recipes/ring_bell.policy.root")]}
   end
 
   # Review S2. Breaks: two recipes' checks with one key compile, so one check DefinitionRef names
   # two checks.
-  test "two recipes' checks with one key are DUPLICATE_DEFINITION", %{tmp_dir: dir} do
+  test "two recipes' checks with one key are DUPLICATE_DEFINITION", %{dir: dir} do
     ring = Map.put(src("recipes/ring_bell.json"), "check", src("recipes/pick_lock.json")["check"])
 
     ring =

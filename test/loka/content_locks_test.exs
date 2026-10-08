@@ -5,16 +5,12 @@ defmodule Loka.ContentLocksTest do
   # kernel/ts/test/locks.test.ts.
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_locks")}
   @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_locks_hash.json"))
   @src "cartridges/ashmere_locks"
 
   # ashmere_locks' source in `dir` with `files` (relative path => JSON value) written over it.
-  defp compile(dir, files) do
-    File.cp_r!(@src, dir)
-    for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp item(key, f), do: {"items/#{key}.json", f.(src("items/#{key}.json"))}
@@ -43,8 +39,8 @@ defmodule Loka.ContentLocksTest do
 
   # Breaks: lockout treating a locked chest's contents as in reach, skipping item barriers or a
   # missing key_item, or rejecting a key that is reachable.
-  test "only keys that can never be reached are rejected", %{tmp_dir: dir} do
-    run = fn name, files -> errors(compile(Path.join(dir, name), Map.new(files))) end
+  test "only keys that can never be reached are rejected", %{dir: dir} do
+    run = fn _case, files -> errors(compile(dir, Map.new(files))) end
     unreachable = &d("BARRIER_UNREACHABLE_KEY", "barriers/#{&1}")
 
     assert run.("own", [item("brass_key", &inside(&1, "trunk"))]) == [unreachable.("trunk_lid")]
@@ -56,7 +52,7 @@ defmodule Loka.ContentLocksTest do
     assert run.("keyless", keyless) == [unreachable.("coffer_lid")]
 
     keyed = [lid("coffer_lid", %{"initial" => "locked", "key_item" => "letter"})]
-    assert {:ok, _, []} = compile(Path.join(dir, "keyed"), Map.new(keyed))
+    assert {:ok, _, []} = compile(dir, Map.new(keyed))
 
     up = src("rooms/inn_rooms.json")
     down = src("rooms/inn_attic.json")
@@ -78,18 +74,18 @@ defmodule Loka.ContentLocksTest do
   end
 
   # Breaks: an item's barrier not a checked reference, or shared with an exit.
-  test "an item's barrier names a barrier no exit names", %{tmp_dir: dir} do
+  test "an item's barrier names a barrier no exit names", %{dir: dir} do
     up = put_in(src("rooms/inn_rooms.json"), ["exits", "up", "barrier"], "trunk_lid")
     down = put_in(src("rooms/inn_attic.json"), ["exits", "down", "barrier"], "trunk_lid")
     files = %{"rooms/inn_rooms.json" => up, "rooms/inn_attic.json" => down}
 
-    assert errors(compile(Path.join(dir, "shared"), files)) == [
+    assert errors(compile(dir, files)) == [
              d("BARRIER_MISMATCH", "items/trunk.barrier")
            ]
 
     unknown = Map.new([item("trunk", &%{&1 | "barrier" => "nope"})])
 
-    assert errors(compile(Path.join(dir, "unknown"), unknown)) == [
+    assert errors(compile(dir, unknown)) == [
              d("UNRESOLVED_REFERENCE", "items/trunk.barrier", %{
                "target" => "ashmere_locks@0.0.1:barrier/nope"
              })

@@ -1,14 +1,8 @@
 defmodule Loka.ContentLightTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
   @src "cartridges/ashmere_missing_child"
   defp source(path), do: JSON.decode!(File.read!(Path.join(@src, path)))
-
-  defp compile(dir, replacements) do
-    File.cp_r!(@src, dir)
-    for {path, value} <- replacements, do: File.write!(Path.join(dir, path), JSON.encode!(value))
-    Loka.Content.compile(dir)
-  end
 
   # Break: the real chapter drops bounded torch/oil metadata, short supply expansion or the public stair.
   test "authored torch and well consumer compile with independent light tuning" do
@@ -47,8 +41,8 @@ defmodule Loka.ContentLightTest do
   end
 
   # Break: an overfilled or incompatible fuel definition compiles into an impossible fresh save.
-  test "impossible fuel metadata and unresolved dark text refuse", %{tmp_dir: dir} do
-    for {name, replacements} <- [
+  test "impossible fuel metadata and unresolved dark text refuse", %{dir: dir} do
+    for {_case, replacements} <- [
           {"overfilled",
            %{"items/torch.json" => put_in(source("items/torch.json"), ["fuel", "initial"], 7201)}},
           {"wrong_supply",
@@ -67,7 +61,7 @@ defmodule Loka.ContentLightTest do
                put_in(source("rooms/well_shaft.json"), ["dark_description"], "missing.dark")
            }}
         ] do
-      assert {:error, diagnostics} = compile(Path.join(dir, name), replacements)
+      assert {:error, diagnostics} = Loka.ContentSource.compile(dir, replacements)
       assert Enum.any?(diagnostics, &(&1["code"] in ~w(SCHEMA_VIOLATION UNRESOLVED_REFERENCE)))
     end
   end
