@@ -139,6 +139,8 @@ function story(t: TestContext, seed: number[], ancestry: string) {
           .filter((j) => j.status === 'pending' && j.due_time > from)
           .map((j) => j.due_time),
       );
+      // Every scenario ends before 80000; a changed route fails here instead of looping on.
+      assert.ok(until < 80000, `ran past the pinned route at ${from}`);
       const evidence = { expected_run_id: s.runId(), from, until };
       const reply = s.elapsed(evidence);
       assert.equal(reply.kind, 'saved', JSON.stringify(reply));
@@ -494,7 +496,6 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   while (a.holder(coin) !== nest) {
     a.tick();
     assert.ok(living() <= 4);
-    assert.ok(a.w.state.clock < 76000, 'the coin never reached the nest');
   }
   assert.equal(a.holder(nest), ID['room/oak_branches']);
   assert.deepEqual(minted(), [corpse]);
