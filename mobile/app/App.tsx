@@ -22,7 +22,7 @@ import chapter from '../../protocol/fixtures/missing_child_v042_hash.json';
 import { SaveError } from './SaveError';
 
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
-const fonts = {
+export const fonts = {
   IMFellEnglish: require('./book/fonts/IMFellEnglish.ttf'),
   EBGaramond: require('./book/fonts/EBGaramond.ttf'),
 };
