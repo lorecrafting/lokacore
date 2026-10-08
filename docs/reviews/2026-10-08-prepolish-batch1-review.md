@@ -42,3 +42,21 @@
 9. question `bin/after_merge.sh:36-42`: the red control stubs `br`. That a dirty export survives the real post-merge import (`jsonl_newer`, run against the checked-out export) rests on the 2026-10-08 manual check.
 
 Open: watch the first hosted typescript run of `mobile/app npm ci && npm test` against the 15-minute timeout.
+
+## Fix round 1 re-check (`d30d7765..cf132ee9`, reviewed at `cf132ee9`)
+
+Verdict: **APPROVE WITH NOTES**. `docs_only_red_controls.sh`, `integration_red_controls.sh`,
+`docs_red_controls.sh` and `check_docs.exs` exit 0. Reviewer mutants, each red and restored:
+the `check_all.sh:69` guard removed; `review_index.sh --check` made a no-op; the stale-index
+problem dropped in `check_docs.exs`; the `origin/<branch>` ancestor check in `after_merge.sh` made `true`.
+
+- F1 resolved: a new harness case checks that `--no-mix-test` records no tree and a full pass does (the mutant goes red).
+- F2 resolved: `ci_scope.sh:15` now skips only `mobile/app/plugins/` and `app.json`; the `tests/steps.ts` row runs. The docs, decision amendment and owner-rules agree.
+- F3 resolved: `after_merge.sh:29-34` fetches the branch and refuses before any change; the remote-ahead case leaves HEAD, `br` and the remote branch untouched.
+- F4 and F5 resolved: the dead clause is gone; `check_all.sh:4` is reworded. F6 resolved: `book-ui.md:17`.
+- Q7 resolved: the index is generated, as the owner approved. Callers checked: `sync_pr.sh` regenerates only when `docs/reviews/README.md` is the sole conflict. `after_merge.sh` regenerates after the pull, and its refusal of untracked files keeps an untracked draft record out of the index.
+- Q8 and Q9: still open for the PM.
+
+New finding:
+
+1. should-fix `bin/review_index.sh:26`: the index shows each record's first verdict, which is usually round 1. Merged, approved work therefore reads **CHANGES REQUIRED**. That happens on 26 lines of the generated README (for example `2026-10-08-forged-guards-review.md` and `2026-10-08-e1-recorder-in-ci-review.md`). The owner asked for the record's verdict, and the index is the only place it is summarized. Fix: take the last verdict word (`tail -1`), or the last line containing "Verdict"; keep the red-control line assertion.
