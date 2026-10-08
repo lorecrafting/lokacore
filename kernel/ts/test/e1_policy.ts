@@ -1,4 +1,4 @@
-// Private E1 policy: docs/system/architecture.md, E1 exact candidate proof policy.
+// Private E1 policy: docs/system/e1-certification.md.
 import { createHash } from 'node:crypto';
 import { encode } from '../src/foundation/canonical.ts';
 import { CAPABILITY_OWNERS } from '../src/contracts.gen.ts';

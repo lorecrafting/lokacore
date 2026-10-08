@@ -8,7 +8,7 @@ Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; 
 
 **2026-10-06 packaging assignment:** implementation begins from published
 `71c3323dee2d9265e59587957eea3e3c90f544ac` under the bounded active
-[exact candidate proof policy](../../system/architecture.md#e1-exact-candidate-proof-policy).
+[exact candidate proof policy](../../system/e1-certification.md#e1-exact-candidate-proof-policy).
 The [packaging evidence](../../evidence/2026-10-06-e1-runner-packaging/README.md)
 records author checks and pending acceptance. The [current bundled chapter](../../system/cartridge.md#current-bundled-chapter)
 supplies the inspected candidate pin; final published A–D plus Round2 fixes source identity

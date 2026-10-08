@@ -39,7 +39,7 @@ import { carryLimit } from './e1_world_witness.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 import { REFUSALS } from './e1_refusals.ts';
 
-// Reviewed {path, reason, evidence, review} rows: architecture.md#e1-policy-branch-evidence.
+// Reviewed {path, reason, evidence, review} rows: e1-certification.md#e1-policy-branch-evidence.
 // An optional `refusal` binds the row to a controlled case whose final replayed step is refused with `code`.
 type Disposition = {
   path: string;

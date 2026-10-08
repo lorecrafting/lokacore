@@ -268,7 +268,7 @@ test('E1 credits a dialogue-resolved objective on the state before the turn-in',
   }
 });
 
-// Branch evidence (architecture.md#e1-policy-branch-evidence) over v042 policy roots and facts.
+// Branch evidence (e1-certification.md#e1-policy-branch-evidence) over v042 policy roots and facts.
 const v042 = JSON.parse(pin.canonical);
 const k = 'ashmere_missing_child@0.0.42:';
 const bellRoot: Policy = v042.quests[`${k}quest/bell_of_ashmere`].objective.policy.root;

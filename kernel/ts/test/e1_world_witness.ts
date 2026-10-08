@@ -1,4 +1,4 @@
-// World-setting, resource-pool and ale-cask witnesses (architecture.md#e1-exact-candidate-proof-policy,
+// World-setting, resource-pool and ale-cask witnesses (e1-certification.md#e1-exact-candidate-proof-policy,
 // pm-decision-e1-batch-f-world-witness-2026-10-07.md), plus the fixed v042 carry-limit route.
 import assert from 'node:assert/strict';
 import { gameView, type World } from '../src/index.ts';
