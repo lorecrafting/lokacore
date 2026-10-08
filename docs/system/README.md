@@ -10,6 +10,7 @@ records and [docs/archive/](../archive/README.md).
 | File | Covers |
 |---|---|
 | [architecture.md](architecture.md) | repository layout, primitive composition and layer ownership, the compile-checked boundaries, hosts, checks, observability |
+| [e1-certification.md](e1-certification.md) | the E1 exact candidate proof policy: witness rules, dispositions, the recorder's pass result |
 | [book-ui.md](book-ui.md) | book views, entries, actions/logs, destinations, scene/state rules |
 | [Book component guide](../BOOK-UI-COMPONENTS.md) | current shared-client pieces and the page pattern to reuse for a new mechanic; Book UI above remains normative |
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |

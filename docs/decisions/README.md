@@ -11,6 +11,10 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-07 [Owner decision: E1 branch evidence for `any` and `not` policy descendants](owner-decision-e1-branch-evidence-2026-10-07.md)
+- 2026-10-07 [PM decision: E1 batch E dispositions](pm-decision-e1-batch-e-dispositions-2026-10-07.md)
+- 2026-10-07 [PM decision: E1 batch F world, resource and cask witnesses](pm-decision-e1-batch-f-world-witness-2026-10-07.md)
+- 2026-10-07 [PM decision: E1 controlled refusal dispositions](pm-decision-e1-controlled-refusals-2026-10-07.md)
 - 2026-10-07 [Skip hosted CI on draft PRs (owner decision)](owner-decision-skip-ci-on-drafts-2026-10-07.md)
 - 2026-10-07 [Owner decision: move forward, lessons first](owner-decision-move-forward-2026-10-07.md)
 - 2026-10-07 [Owner decision: designer role for Book UI work](owner-decision-designer-role-2026-10-07.md)
