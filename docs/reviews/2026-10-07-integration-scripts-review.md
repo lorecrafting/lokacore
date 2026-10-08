@@ -29,3 +29,15 @@
 5. **nit**, `bin/integration_red_controls.sh:97`. The stub recorder refuses a dirty tree, but the real one does not. This divergence is what hides finding 1.
 
 Over-engineering: none found. Both scripts stay close to the commands they replace. The `rebuild` hint (line 14) is hard to read but has a use.
+
+## Fix round 1: `8ea4f559` — APPROVE WITH NOTES
+
+Scope: `8ea4f559` only (dirty-tree case, stub recorder, push-failure message) and their direct callers.
+
+- Blocker 1 closed. The new case `integration_red_controls.sh:127-130` dirties tracked `f.txt` and asserts exit 1 **and** an unmoved HEAD. Deleting `integrate_batch.sh:29` now fails the suite (`dirty-tree: exit 0, want 1` and `merged`). The suite passes at `8ea4f559`.
+- Nit 5 closed. The stub recorder has no clean-tree check, which matches the real recorder. Caller check: with `integrate_batch.sh:34` deleted, the `dirty-worktree` case still fails (`merged`), so removing the stub check hid no other guard.
+- Nit 4 closed. `hint=` moved above the push (`integrate_batch.sh:58`), so a push that fails twice prints "all checks passed; only the push failed, twice (log …)" with no reset advice. `die` at :66 already ran without a hint.
+- Should-fix 2 and nit 3: kept by PM ruling (the remote copy stays; worktree removal unchanged). Not reopened.
+- Hosted CI on `8ea4f559` at check time: `changes` ×2 and `lint` pass; `browser`, `elixir`, `sim` and `typescript` pending. The record head `465c072e` was green on both workflows.
+
+No open findings beyond the PM rulings.
