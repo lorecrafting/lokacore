@@ -16,3 +16,7 @@
 
 - **should-fix**, `.beads/issues.jsonl:45` (.6, still `open`): its notes say the 14 world/resource paths "await world/resource witness spec text". .11 now owns exactly those paths. Scenario: `br ready` lists both .6 and .11, and two agents witness the same 14 paths. Fix: in the .6 notes, say that the paths moved to .11 (as the .1 notes do), or close .6 once #288 merges.
 - **nit**, same row: "14 world/resource paths and lantern_ale_cask" counts 15. The real split is 13 world/resource paths plus lantern_ale_cask, 14 in all (.11).
+
+## Fix round 1 (`5e370a70`)
+
+**APPROVE**, nothing open. The fix changes only the .6 row: status is now `in_progress` and the notes say "13 world/resource paths and lantern_ale_cask (14 in all) moved to loka-e1-r9-certification-2rz.11". This closes both the should-fix and the nit. The only open E1 children are .10 and .11, so no path is offered twice. `--complete` exits 0. The diff adds no local paths and no `-wisp-` IDs.
