@@ -29,6 +29,22 @@ function act(world: World, type: 'take' | 'drop', item_id: string, ordinal: numb
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   return result.world;
 }
+const elapse = (world: World, until: number, ordinal: number) =>
+  stepElapsed(
+    world,
+    {
+      id: elapsedCommandId(run, world.context, world.state.clock, until) as never,
+      world_context_id: world.context,
+      payload: {
+        type: 'elapsed',
+        actor_id: world.character,
+        run_id: run,
+        from: world.state.clock,
+        until,
+      },
+    },
+    ordinal,
+  );
 function advance(world: World, until: number) {
   while (world.state.clock < until) {
     const due = Object.values(world.state.jobs ?? {})
@@ -36,21 +52,7 @@ function advance(world: World, until: number) {
       .map((j) => j.due_time)
       .filter((at) => at > world.state.clock);
     const to = Math.min(until, ...due);
-    const result = stepElapsed(
-      world,
-      {
-        id: elapsedCommandId(run, world.context, world.state.clock, to) as never,
-        world_context_id: world.context,
-        payload: {
-          type: 'elapsed',
-          actor_id: world.character,
-          run_id: run,
-          from: world.state.clock,
-          until: to,
-        },
-      },
-      100 + to,
-    );
+    const result = elapse(world, to, 100 + to);
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     world = result.world;
   }
@@ -296,21 +298,27 @@ test('crow job phase must match the current occurrence before moving custody', (
       jobs: { ...world.state.jobs, [row.job_id!]: { ...job, crow_phase: 'return' } },
     },
   };
-  const result = stepElapsed(
-    world,
-    {
-      id: elapsedCommandId(run, world.context, world.state.clock, START + 300) as never,
-      world_context_id: world.context,
-      payload: {
-        type: 'elapsed',
-        actor_id: world.character,
-        run_id: run,
-        from: world.state.clock,
-        until: START + 300,
-      },
-    },
-    173,
-  );
+  const result = elapse(world, START + 300, 173);
+  assert.equal(result.decision.kind, 'fault');
+  assert.equal(result.world.state.containers[coin], row.member_id);
+});
+
+// Breaks: a crow row whose member was not spawned for that slot generation still moves custody.
+test('crow job refuses a carrier whose spawn origin names another generation', () => {
+  let world = initial();
+  const coin = entity(world, 'item', 'old_coin');
+  world = act(world, 'take', coin, 71);
+  world = act(world, 'drop', coin, 72);
+  world = advance(world, START + 150);
+  const row = Object.values(world.state.crows ?? {}).find((r) => r.phase === 'leg')!;
+  const created = { ...world.state.created };
+  const member = created[row.member_id];
+  created[row.member_id] = {
+    ...member,
+    origin: { ...member.origin, generation: row.generation + 1 },
+  } as typeof member;
+  world = { ...world, state: { ...world.state, created } };
+  const result = elapse(world, START + 300, 173);
   assert.equal(result.decision.kind, 'fault');
   assert.equal(result.world.state.containers[coin], row.member_id);
 });
