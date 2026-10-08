@@ -43,6 +43,8 @@ and not repeated here.
   retrieval does not jump the clock ([record](../decisions/owner-decision-fixed-time-2026-10-03.md)).
 - Backgrounding does not pause the world; the later time model preserves elapsed combat, recovery
   and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
+  World time starts at first entry (D11 selection); before it there is no world clock to pause
+  ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
 - Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
 
 - The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).

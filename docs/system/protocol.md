@@ -67,8 +67,9 @@ storage half):
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
 5. **Step** (`kernel/ts/src/runtime/world.ts:79`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
-   refuses ordinary player commands as `invalid_state` before ActionSet matching. Otherwise,
-   the capability owning the command type
+   refuses ordinary player commands as `invalid_state` before ActionSet matching;
+   `stepElapsed` applies the same gate to trusted elapsed (`invalid_state`). Otherwise,
+   for Step, the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:106`): the nil CommandId is `permission_denied`
    (`:115`), another world or actor `not_found`, and the ActionSet must offer an action that

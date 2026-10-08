@@ -15,7 +15,7 @@ import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory } from './authority.ts';
-import { sqliteHost } from './__tests__/elapsed-host.test.ts';
+import { receipts, sqliteHost } from './__tests__/elapsed-host.test.ts';
 
 const pin = read('protocol/fixtures/r9c_interactions_hash.json');
 const ID: Record<string, string> = read('protocol/fixtures/r9c_interactions_ids.json');
@@ -325,4 +325,56 @@ test('family 5 durable: deer flight at the boundary and the fatal hit reopen exa
   assert.deepEqual(a.w.state.rng, [12295, 1029, 1029, 25165824]);
   a.elapse(68700);
   assert.equal(a.w.state.containers[ID['population/oak_deer/slot1/hide']], corpse.id);
+});
+
+// Breaks: wall time spent on the ancestry screen is credited after the choice (or across a
+// reopen), or the driver faults on the ancestry screen because the kernel refuses that elapsed.
+test('world time starts at the ancestry choice: no credit on the picker or across its reopen', (t) => {
+  const loaded = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  const initial = newWorld(
+    loaded.cartridge as never,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const releases = [{ fresh: initial, content_hash: pin.sha256 }] as const;
+  const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-entry-'));
+  const clock = { wall: 0, mono: 0 };
+  let p = sqliteHost(join(dir, 'save.db'), clock);
+  t.after(() => {
+    p.sql.close();
+    rmSync(dir, { recursive: true });
+  });
+  const open = () => {
+    const s = openStory(p.db, releases, p.host);
+    if (s.kind !== 'open') throw new Error('r9c save did not open');
+    return s;
+  };
+  let s = open();
+  s.pulse('resume', s.runId());
+  Object.assign(clock, { wall: 120000, mono: 120000 });
+  assert.deepEqual(s.pulse('active', s.runId()), { kind: 'ready' });
+  assert.equal(s.world().state.clock, 64800);
+  assert.equal(receipts(p.sql), 0);
+  // Close on the picker; reopen an hour later in a new process (monotonic restarts at 0).
+  p.sql.close();
+  Object.assign(clock, { wall: 3600000, mono: 0 });
+  p = sqliteHost(join(dir, 'save.db'), clock);
+  s = open();
+  assert.deepEqual(s.pulse('resume', s.runId()), { kind: 'ready' });
+  assert.equal(s.world().state.clock, 64800);
+  const chosen = s.invoke({
+    invocation_id: 'cccccccc-0000-4000-8000-000000000001',
+    actor_id: initial.character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'fey_touched' },
+  });
+  assert.equal(chosen.kind === 'saved' && (chosen.decision as any).kind, 'accepted');
+  Object.assign(clock, { wall: 3660000, mono: 60000 });
+  for (let n = 0; n < 4 && s.pulse('active', s.runId()).kind !== 'ready'; n++);
+  assert.equal(s.world().state.clock, 64800 + 3000);
 });

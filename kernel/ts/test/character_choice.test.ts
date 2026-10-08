@@ -68,21 +68,32 @@ const command = (w: ReturnType<typeof fresh>, type: string, ancestry?: string) =
     payload: { type, actor_id: w.character, ...(ancestry && { ancestry }) },
   }) as never;
 
-// Breaks: a character-choice guard blocks trusted time or due jobs, or the exit view gives a
-// different refusal than player admission before selection.
-test('trusted elapsed drains a due job before ancestry choice without admitting player movement', () => {
+// Breaks: trusted elapsed bypasses the D11 gate again (world time must start at selection), or
+// the exit view gives a different refusal than player admission before selection.
+test('trusted elapsed refuses before ancestry choice and drains the due job after it', () => {
   const w = fresh();
   const run = '6f6f6f6f-1111-4222-8333-444444444444';
   const until = 68400;
-  const advanced = stepElapsed(
-    w,
-    {
-      id: elapsedCommandId(run, w.context, w.state.clock, until),
-      world_context_id: w.context,
+  const span = (context = w.context) =>
+    ({
+      id: elapsedCommandId(run, context, w.state.clock, until),
+      world_context_id: context,
       payload: { type: 'elapsed', actor_id: w.character, run_id: run, from: w.state.clock, until },
-    } as never,
-    1,
-  );
+    }) as never;
+  const early = stepElapsed(w, span(), 1);
+  assert.deepEqual(early.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.equal(early.world, w);
+  const foreign = '00000000-0000-4000-8000-000000000001' as never;
+  assert.deepEqual(stepElapsed(w, span(foreign), 1).decision, {
+    kind: 'rejected',
+    error: { code: 'not_found' },
+  });
+  const north = gameView(w).exits.find((exit) => exit.direction === 'north');
+  assert.ok(north && !north.available);
+  assert.equal(north.reason.code, 'invalid_state');
+  const chosen = step(w, command(w, 'choose_ancestry', 'fen_born'), 1);
+  assert.equal(chosen.decision.kind, 'accepted');
+  const advanced = stepElapsed(chosen.world, span(), 2);
   assert.equal(advanced.decision.kind, 'accepted');
   assert.equal(advanced.world.state.clock, 68400);
   assert.equal(
@@ -91,25 +102,8 @@ test('trusted elapsed drains a due job before ancestry choice without admitting 
     )?.status,
     'completed',
   );
-  assert.equal(advanced.world.state.characters?.[w.character], undefined);
-  const north = gameView(advanced.world).exits.find((exit) => exit.direction === 'north');
-  assert.ok(north && !north.available);
-  assert.equal(north.reason.code, 'invalid_state');
-  const movement = step(
-    advanced.world,
-    {
-      id: '11111111-2222-4333-8444-555555555555',
-      world_context_id: advanced.world.context,
-      payload: { type: 'move', actor_id: w.character, direction: 'north' },
-    } as never,
-    2,
-  );
-  assert.deepEqual(movement.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
-  assert.equal(movement.world, advanced.world);
 });
 
-// Breaks: a fresh actor can play without a choice, a choice writes only part of the character,
-// or a second selection rerolls the six saved values and inherited effects.
 test('one creation receipt saves the selected six values and effects exactly once', () => {
   const expected = [
     ['fen_born', [10, 10, 10, 10, 6, 10], 'swim', -2],

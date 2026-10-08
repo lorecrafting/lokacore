@@ -40,8 +40,8 @@ command and its body from `bodyOf` (`runtime/decision.ts`). When `knowledge@1` i
 fresh creation records the entry room for that character and observations of exactly the
 visible co-present NPCs at the birth clock, after population initialization. This grants
 no remote map knowledge. A chapter declaring ancestries starts without a selected character
-row; [D11 selection](#d11-character-choice-selected-contract) precedes ordinary player commands,
-while trusted elapsed updates retain their separately authorized admission.
+row; [D11 selection](#d11-character-choice-selected-contract) precedes ordinary player commands
+and trusted elapsed updates; world time starts at selection.
 
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
 
@@ -300,7 +300,7 @@ The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) 
 
 Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
 
-Under the [owner's elapsed ruling](../decisions/owner-decision-d11-prechoice-elapsed-2026-10-06.md), trusted schedule-owned elapsed updates may advance the clock and due jobs before selection. They do not choose an ancestry or open player command admission.
+Under the [owner's world-time ruling](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md), world time starts when the player first enters the world: the accepted selection. Before selection, `stepElapsed` refuses trusted elapsed updates as `invalid_state`, as Step refuses ordinary commands, so the clock and due jobs stay at the birth clock. The local driver credits no wall time before selection; credited time starts at the selection invocation's reservation. This supersedes the [2026-10-06 pre-choice elapsed ruling](../decisions/owner-decision-d11-prechoice-elapsed-2026-10-06.md).
 
 `stat_compare` and `attribute_threshold` read the selected character value after choice on each check; neither caches qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate, both in their current room and when ordinary Scan projects a legal adjacent dark destination. It does not create a lit source or change `illuminated`; B6 `light_off` therefore retains its physical-light answer, including Seek and Talk for a hill-folk character. Barred passages still stop Scan, and hidden-exit, closed-door, custody and other perception checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
 
@@ -581,7 +581,7 @@ the group does not identify a unique job completion.
 
 ## M1-A elapsed authority time
 
-[Contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md). `manifest.time_policy.profile = real_elapsed` disables player Wait and recipe time skips; omitted policy retains legacy behavior. `stepElapsed(world, command, revision)` admits only schedule-owned `elapsed {actor_id, run_id, from, until}`. It validates schema and derived CommandId, rejects nil ID (`permission_denied`), wrong world/actor (`not_found`), and refuses wrong derived ID (`permission_denied`), wrong profile or interval (`invalid_state`). A valid interval has `from == world.state.clock`, `until > from`. Accepted outcome `elapsed` contains one root `time.advance`, no own narration/event/RNG; the existing proposal supplies due jobs, reactions, owned events and all budgets. Faults adopt nothing. Normal `step` refuses elapsed (`permission_denied`) even if supplied a forged ActionSet action. Scenes retain Continue-only player admission while this trusted path advances time.
+[Contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md). `manifest.time_policy.profile = real_elapsed` disables player Wait and recipe time skips; omitted policy retains legacy behavior. `stepElapsed(world, command, revision)` admits only schedule-owned `elapsed {actor_id, run_id, from, until}`. It validates schema and derived CommandId, rejects nil ID (`permission_denied`), wrong world/actor (`not_found`), and refuses wrong derived ID (`permission_denied`), and before D11 selection, wrong profile or interval (`invalid_state`). A valid interval has `from == world.state.clock`, `until > from`. Accepted outcome `elapsed` contains one root `time.advance`, no own narration/event/RNG; the existing proposal supplies due jobs, reactions, owned events and all budgets. Faults adopt nothing. Normal `step` refuses elapsed (`permission_denied`) even if supplied a forged ActionSet action. Scenes retain Continue-only player admission while this trusted path advances time.
 
 A single advance still faults when a job it schedules would be due at or before its target; M1-B must segment at earliest due boundaries. M1-A does not implement a clock source, background driver or recurring catch-up.
 

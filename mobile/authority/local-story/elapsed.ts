@@ -11,6 +11,7 @@ import {
   type Checkpoint,
   natural,
 } from './elapsed-store.ts';
+import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
 import { adopt, type Story } from './save.ts';
 import { identityOf, persistElapsed, reconcile, transaction } from './store.ts';
 
@@ -104,11 +105,13 @@ export class ClockDriver {
       remainder: 0,
     };
     const resumed = this.resumeNeeded || mode === 'resume';
-    const d = !this.s.elapsed
-      ? 0
-      : !resumed && this.baseline !== undefined
-        ? mono - this.baseline
-        : Math.max(0, wall - old.wall_ms);
+    // World time starts at D11 selection: before it a capture only re-anchors, crediting nothing.
+    const d =
+      !this.s.elapsed || needsAncestry(this.s.world, this.s.world.character)
+        ? 0
+        : !resumed && this.baseline !== undefined
+          ? mono - this.baseline
+          : Math.max(0, wall - old.wall_ms);
     const rate = this.s.world.cartridge.manifest.time_policy!.rate;
     this.candidate = { row: accounted(old, d, rate, wall), mono, pause: mode === 'pause' };
     if (resumed) this.resumeNeeded = false;

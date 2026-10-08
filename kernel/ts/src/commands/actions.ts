@@ -52,7 +52,7 @@ export type Offered = {
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
 
-const needsAncestry = (world: World, actor: CharacterId) =>
+export const needsAncestry = (world: World, actor: CharacterId) =>
   !!world.cartridge.ancestries && !characterChoice(world, actor);
 
 /** `set` with contribution `c` applied by one of ADR-016's operations. */
