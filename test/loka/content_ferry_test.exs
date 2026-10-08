@@ -6,27 +6,12 @@ defmodule Loka.ContentFerryTest do
   # protocol/fixtures/cartridge_ferry_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_ferry")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_ferry_hash.json"))
   @src "cartridges/ashmere_ferry"
   @point "story_points/lantern_resolved.json"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-
-  # ashmere_ferry's source with `files` merged over it (a nil file removed).
-  defp compile(dir, files) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          into: %{},
-          do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
-
-    for {rel, v} <- Map.merge(base, files), v != nil do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
@@ -57,7 +42,7 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: a schedule's short room left short (Checks.expand; the loader would reject it).
-  test "full schedule rooms compile to the same artifact", %{tmp_dir: dir} do
+  test "full schedule rooms compile to the same artifact", %{dir: dir} do
     full = %{"6" => ref("ferry_landing"), "19" => ref("village_green")}
     assert compile(dir, schedule(full)) == {:ok, @expected, []}
   end
@@ -71,28 +56,28 @@ defmodule Loka.ContentFerryTest do
   @bram "recipes/coil_rope.outcomes.success.narration.participants.bram"
 
   # Breaks: a participant's short npc left short (Checks.expand; the loader would reject it).
-  test "a full participant reference compiles to the same artifact", %{tmp_dir: dir} do
+  test "a full participant reference compiles to the same artifact", %{dir: dir} do
     full = %{"role" => "npc", "npc" => Map.put(ref("bram"), "kind", "npc")}
     assert compile(dir, bram(full)) == {:ok, @expected, []}
   end
 
   # Breaks: a participant naming no npc or item of its role compiling (the kernel would pin an
   # undefined EntityId).
-  test "a participant naming no definition of its role is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+  test "a participant naming no definition of its role is UNRESOLVED_REFERENCE", %{dir: dir} do
     unresolved = &{:error, [d("UNRESOLVED_REFERENCE", @bram <> &1, %{"target" => &2})]}
 
-    assert compile(Path.join(dir, "a"), bram(%{"role" => "npc", "npc" => "ada"})) ==
+    assert compile(dir, bram(%{"role" => "npc", "npc" => "ada"})) ==
              unresolved.(".npc", "ashmere_ferry@0.0.1:npc/ada")
 
-    assert compile(Path.join(dir, "b"), bram(%{"role" => "npc", "npc" => ref("ferry_landing")})) ==
+    assert compile(dir, bram(%{"role" => "npc", "npc" => ref("ferry_landing")})) ==
              unresolved.(".npc", "ashmere_ferry@0.0.1:room/ferry_landing")
 
-    assert compile(Path.join(dir, "c"), bram(%{"role" => "item", "item" => "bram"})) ==
+    assert compile(dir, bram(%{"role" => "item", "item" => "bram"})) ==
              unresolved.(".item", "ashmere_ferry@0.0.1:item/bram")
   end
 
   # Breaks: a schedule naming a room the cartridge lacks compiling (run_job would crash).
-  test "a schedule's unknown room is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+  test "a schedule's unknown room is UNRESOLVED_REFERENCE", %{dir: dir} do
     assert compile(dir, schedule(%{"6" => "ferry_landing", "19" => "shed"})) ==
              {:error,
               [
@@ -104,11 +89,11 @@ defmodule Loka.ContentFerryTest do
 
   # Breaks: a daily schedule compiling without behavior@1, or a calendar without calendar@1, in
   # the manifest (capability_registry.json definitions).
-  test "a schedule needs behavior@1 and a calendar calendar@1", %{tmp_dir: dir} do
+  test "a schedule needs behavior@1 and a calendar calendar@1", %{dir: dir} do
     m = src("cartridge.json")
     without = &update_in(m, ["requires", "capabilities"], fn c -> Map.delete(c, &1) end)
 
-    assert compile(Path.join(dir, "a"), %{"cartridge.json" => without.("behavior")}) ==
+    assert compile(dir, %{"cartridge.json" => without.("behavior")}) ==
              {:error,
               [
                 d(
@@ -119,7 +104,7 @@ defmodule Loka.ContentFerryTest do
                 )
               ]}
 
-    assert compile(Path.join(dir, "b"), %{"cartridge.json" => without.("calendar")}) ==
+    assert compile(dir, %{"cartridge.json" => without.("calendar")}) ==
              {:error,
               [
                 d("UNDECLARED_CAPABILITY", "cartridge.calendar", %{"capability" => "calendar"}, [
@@ -129,8 +114,8 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: an invalid schedule key or a calendar without start compiling.
-  test "schedule hours and the calendar are schema-checked", %{tmp_dir: dir} do
-    assert compile(Path.join(dir, "a"), schedule(%{"06" => "ferry_landing"})) ==
+  test "schedule hours and the calendar are schema-checked", %{dir: dir} do
+    assert compile(dir, schedule(%{"06" => "ferry_landing"})) ==
              {:error,
               [
                 d("SCHEMA_VIOLATION", "npcs/bram.daily_schedule.06", %{
@@ -140,7 +125,7 @@ defmodule Loka.ContentFerryTest do
 
     m = Map.put(src("cartridge.json"), "calendar", %{})
 
-    assert compile(Path.join(dir, "b"), %{"cartridge.json" => m}) ==
+    assert compile(dir, %{"cartridge.json" => m}) ==
              {:error,
               [
                 d("SCHEMA_VIOLATION", "cartridge.calendar.start", %{
@@ -150,7 +135,7 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: an action built on run_job compiling (authority-internal, 04 §1: a dead action).
-  test "an action's command is never run_job", %{tmp_dir: dir} do
+  test "an action's command is never run_job", %{dir: dir} do
     action = %{
       "label" => "actions.coil_rope",
       "accessibility" => "actions.coil_rope",
@@ -171,7 +156,7 @@ defmodule Loka.ContentFerryTest do
 
   # Breaks: a room contribution naming a dialogue's talk unresolved (its key is an ActionSet
   # identity; kernel/ts/test/dialogue.test.ts loads the same).
-  test "a room contribution may name a dialogue's talk", %{tmp_dir: dir} do
+  test "a room contribution may name a dialogue's talk", %{dir: dir} do
     room = src("rooms/ferry_landing.json")
 
     files = %{
@@ -184,7 +169,7 @@ defmodule Loka.ContentFerryTest do
 
   # Breaks: a dialogue's short speaker, quest, role or fact left short (Checks.expand; the loader
   # would reject the artifact).
-  test "a full-reference dialogue compiles to the same artifact", %{tmp_dir: dir} do
+  test "a full-reference dialogue compiles to the same artifact", %{dir: dir} do
     full = fn kind, key -> Map.merge(ref(key), %{"kind" => kind}) end
 
     files =
@@ -206,7 +191,7 @@ defmodule Loka.ContentFerryTest do
   # through a role of the wrong kind; a missing text; an undeclared fact or a wrong value; a role
   # named actor; no choice; a talk key another action's; dialogue@1 not required.
   test "the compiler checks dialogue references, roles, texts, facts, keys and the lock", %{
-    tmp_dir: dir
+    dir: dir
   } do
     at = "dialogues/bram"
     unresolved = &d("UNRESOLVED_REFERENCE", at <> &1, %{"target" => &2})
@@ -251,8 +236,8 @@ defmodule Loka.ContentFerryTest do
     ]
 
     # Story points, which name bram, have their own test below.
-    for {{files, diag}, n} <- Enum.with_index(cases) do
-      assert compile(Path.join(dir, "#{n}"), Map.put(files, @point, nil)) == {:error, [diag]},
+    for {files, diag} <- cases do
+      assert compile(dir, Map.put(files, @point, nil)) == {:error, [diag]},
              inspect(diag)
     end
   end
@@ -260,7 +245,7 @@ defmodule Loka.ContentFerryTest do
   # Breaks (twin of kernel/ts/test/quest_dialogue.test.ts): one dialogue per speaker still
   # enforced; the compiler admitting an accept of no quest, an accept in a dialogue that resolves
   # a quest, or an accept with a hand_over; a short accept left unexpanded.
-  test "a second dialogue of Bram's may accept the quest, checked", %{tmp_dir: dir} do
+  test "a second dialogue of Bram's may accept the quest, checked", %{dir: dir} do
     at = "dialogues/bram_offer.choices.accept"
     choice = %{"label" => "quest.lantern.accept", "narration" => "narration.bram.carry"}
 
@@ -277,7 +262,7 @@ defmodule Loka.ContentFerryTest do
       }
     end
 
-    assert {:ok, _, []} = compile(Path.join(dir, "ok"), offer.(& &1))
+    assert {:ok, _, []} = compile(dir, offer.(& &1))
 
     cases = [
       {&put_in(&1, ~w(choices accept accept), "missing"),
@@ -292,8 +277,8 @@ defmodule Loka.ContentFerryTest do
        end, d("OUTCOME_MISMATCH", at <> ".hand_over", %{})}
     ]
 
-    for {{f, diag}, n} <- Enum.with_index(cases) do
-      assert compile(Path.join(dir, "#{n}"), offer.(f)) == {:error, [diag]}, inspect(diag)
+    for {f, diag} <- cases do
+      assert compile(dir, offer.(f)) == {:error, [diag]}, inspect(diag)
     end
   end
 
@@ -301,7 +286,7 @@ defmodule Loka.ContentFerryTest do
   # dependencies): the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts):
   # a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes, a dialogue
   # without a quest (its choice repeatable), a story point with no outcome, dialogue@1 not required.
-  test "the compiler checks story point triggers, outcomes and the lock", %{tmp_dir: dir} do
+  test "the compiler checks story point triggers, outcomes and the lock", %{dir: dir} do
     at = "story_points/lantern_resolved"
     point = &%{@point => update_in(src(@point), ["outcomes"], &1)}
     carry = &point.(fn o -> put_in(o, ["carry", &1], &2) end)
@@ -330,8 +315,8 @@ defmodule Loka.ContentFerryTest do
        )}
     ]
 
-    for {{files, diags}, n} <- Enum.with_index(cases) do
-      assert compile(Path.join(dir, "#{n}"), files) == {:error, diags}, inspect(diags)
+    for {files, diags} <- cases do
+      assert compile(dir, files) == {:error, diags}, inspect(diags)
     end
   end
 
@@ -350,7 +335,7 @@ defmodule Loka.ContentFerryTest do
 
   # Breaks: opted-in policy dropped from the compiled artifact, or legacy duration rules
   # applied to an elapsed release despite removing the recipe's time skip.
-  test "elapsed release preserves its policy in its artifact", %{tmp_dir: dir} do
+  test "elapsed release preserves its policy in its artifact", %{dir: dir} do
     assert {:ok, bytes, []} = compile(dir, elapsed_files())
     artifact = JSON.decode!(bytes)
 
@@ -359,11 +344,11 @@ defmodule Loka.ContentFerryTest do
   end
 
   # Breaks: elapsed mechanics can be claimed by an API 1.0 release or without a schedule owner.
-  test "elapsed policy requires API 1.1 and schedule ownership", %{tmp_dir: dir} do
+  test "elapsed policy requires API 1.1 and schedule ownership", %{dir: dir} do
     files = elapsed_files()
     low = put_in(files, ["cartridge.json", "requires", "kernel_api", "at_least"], "1.0")
 
-    assert compile(Path.join(dir, "low"), low) ==
+    assert compile(dir, low) ==
              {:error,
               [
                 d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
@@ -374,7 +359,7 @@ defmodule Loka.ContentFerryTest do
       |> update_in(["cartridge.json", "requires", "capabilities"], &Map.delete(&1, "schedule"))
       |> Map.put("npcs/bram.json", Map.delete(src("npcs/bram.json"), "daily_schedule"))
 
-    assert compile(Path.join(dir, "owner"), missing) ==
+    assert compile(dir, missing) ==
              {:error,
               [
                 d(
@@ -388,7 +373,7 @@ defmodule Loka.ContentFerryTest do
 
   # Breaks: a cartridge alias can manufacture authority elapsed evidence or skip real time
   # through Wait; duration recipes likewise cannot opt into elapsed time.
-  test "elapsed release refuses time-skip recipes and player clock aliases", %{tmp_dir: dir} do
+  test "elapsed release refuses time-skip recipes and player clock aliases", %{dir: dir} do
     files = elapsed_files()
 
     action = %{
@@ -403,7 +388,7 @@ defmodule Loka.ContentFerryTest do
     for name <- ~w(elapsed wait) do
       alias_files = Map.put(files, "actions/hurry.json", Map.put(action, "command", name))
 
-      assert compile(Path.join(dir, name), alias_files) ==
+      assert compile(dir, alias_files) ==
                {:error,
                 [
                   d("UNKNOWN_COMMAND", "actions/hurry.command", %{})
@@ -412,7 +397,7 @@ defmodule Loka.ContentFerryTest do
 
     duration = Map.put(files, "recipes/coil_rope.json", src("recipes/coil_rope.json"))
 
-    assert compile(Path.join(dir, "duration"), duration) ==
+    assert compile(dir, duration) ==
              {:error,
               [
                 d("INVALID_TIME_POLICY", "recipes/coil_rope.duration", %{})

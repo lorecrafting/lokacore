@@ -1,5 +1,6 @@
 defmodule Loka.ContentPatrolTest do
   use ExUnit.Case, async: true
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
 
   # Breaks: new short NPC/route/checkpoint/trust/quest references remain strings, compiling an artifact the loader refuses.
   test "authored patrol references expand at their own boundary" do
@@ -29,8 +30,7 @@ defmodule Loka.ContentPatrolTest do
   end
 
   # Breaks: source authoring installs malformed finite routes, competing location writers or ordinary reserved trust consequences.
-  @tag :tmp_dir
-  test "compiler refuses bounded route and patrol ownership violations", %{tmp_dir: dir} do
+  test "compiler refuses bounded route and patrol ownership violations", %{dir: dir} do
     mutations = [
       {"quests/watch_rounds.json", "OUTCOME_MISMATCH",
        fn q -> put_in(q, ["patrol", "initial_cursor"], 6) end},
@@ -64,12 +64,8 @@ defmodule Loka.ContentPatrolTest do
        end}
     ]
 
-    for {{file, expected, change}, i} <- Enum.with_index(mutations) do
-      source = Path.join(dir, Integer.to_string(i))
-      File.cp_r!("cartridges/ashmere_missing_child", source)
-      path = Path.join(source, file)
-      File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
-      assert {:error, diagnostics} = Loka.Content.compile(source)
+    for {file, expected, change} <- mutations do
+      assert {:error, diagnostics} = Loka.ContentSource.compile(dir, [{file, change}])
 
       assert Enum.any?(diagnostics, &(&1["code"] == expected)),
              inspect({file, expected, diagnostics})

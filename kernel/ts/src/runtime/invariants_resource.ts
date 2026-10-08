@@ -58,7 +58,7 @@ export function recovered(op: Any, spec: Any, row: Any, now: number): Json | und
     : undefined;
 }
 
-export const effectiveSpec = (op: Any, s: Any) =>
+const effectiveSpec = (op: Any, s: Any) =>
   s.entity_resource_specs?.[key(target(op))] ?? s.resource_specs?.[key(op.resource)];
 
 // Legacy rows also retain timestamps in the replay overlay: later ops cannot settle backwards.

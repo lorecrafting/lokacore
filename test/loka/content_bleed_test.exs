@@ -1,10 +1,10 @@
 defmodule Loka.ContentBleedTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
 
   # Breaks: a non-hound source or mismatched bandage is compiled as a real C5 producer.
   test "hound and bandage declarations keep exact effect, skill and item boundaries", %{
-    tmp_dir: dir
+    dir: dir
   } do
     cases = [
       {"npcs/fen_hound.json", &put_in(&1, ["attack", "on_positive_hit", "effect"], "missing")},
@@ -15,12 +15,8 @@ defmodule Loka.ContentBleedTest do
       {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.29")}
     ]
 
-    Enum.with_index(cases, fn {file, change}, n ->
-      source = Path.join(dir, Integer.to_string(n))
-      File.cp_r!("cartridges/ashmere_missing_child", source)
-      path = Path.join(source, file)
-      File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
-      assert {:error, _} = Loka.Content.compile(source), file
-    end)
+    for {file, change} <- cases do
+      assert {:error, _} = Loka.ContentSource.compile(dir, [{file, change}]), file
+    end
   end
 end

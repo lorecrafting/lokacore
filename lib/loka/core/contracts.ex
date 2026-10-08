@@ -44,8 +44,7 @@ defmodule Loka.Core.Contracts do
   # through Enum/Map or decoded JSON, and a runtime-chosen union are unchecked
   # (test/loka/core/nominal_ids_test.exs). So: construct at the boundary, and match the tag
   # explicitly at every domain boundary.
-  for {name, %{"type" => "string"} = s} <- @defs,
-      not is_map_key(s, "enum") and not is_map_key(s, "const") do
+  for {name, s} <- @defs, Schema.nominal?(s) do
     tag = name |> Macro.underscore() |> String.to_atom()
     @type unquote(tag)() :: {unquote(tag), String.t()}
     @doc "Validates `value` as `#{name}` and tags it."
