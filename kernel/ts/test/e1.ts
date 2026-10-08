@@ -234,7 +234,7 @@ function checks(out: string, row: ReturnType<typeof admitCandidate>['row']) {
   ];
 }
 
-function reportOf(
+export function reportOf(
   loaded: ReturnType<typeof admitCandidate>,
   identity: ReturnType<typeof source>,
   hostIdentity: ReturnType<typeof host>,
@@ -260,7 +260,7 @@ function reportOf(
     schema_sha256: sha256(read('protocol/cartridge.schema.json')),
     toolchain_sha256: sha256(read('mise.toml')),
     host: hostIdentity,
-    deployment: { status: 'not_applicable', reason: 'bundled private Story candidate' },
+    deployment: { status: 'not_applicable', reason: 'private candidate; no deployment identity' },
     source_artifact: { status: sourceMatches ? 'pass' : 'fail' },
     receipts,
     simulation: sim,
@@ -273,7 +273,7 @@ function reportOf(
       },
       {
         gate: 'INDEPENDENT_REVIEW',
-        reason: 'PM assigns fresh review after final published A-D plus fixes candidate',
+        reason: 'PM assigns fresh review of this candidate report at its published head',
       },
       { gate: 'BROWSER_HUMAN', reason: 'E2/E3 interaction and complete-content browser receipts' },
       {

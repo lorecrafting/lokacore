@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { createHash } from 'node:crypto';
-import { CHECK_FILES } from './e1.ts';
+import { CHECK_FILES, reportOf } from './e1.ts';
 import { admitCandidate, applicability, POLICY_HASH } from './e1_policy.ts';
 import { reproduce, retainFailure } from './e1_repro.ts';
 import { KERNEL, simulate, type Kernel } from './sim.ts';
@@ -118,7 +118,8 @@ const r9cBytes = new TextEncoder().encode(
   `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
 );
 
-// Breaks: the second table row is unreachable, or v042's normalized artifact bytes drift.
+// Breaks: the second table row is unreachable, v042's normalized artifact bytes drift, or the
+// report's candidate block names a row other than the selected one.
 test('E1 admits exactly the two literal candidates', () => {
   const v042 = admitCandidate(bytes);
   assert.equal(v042.hash, '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b');
@@ -130,6 +131,13 @@ test('E1 admits exactly the two literal candidates', () => {
   assert.equal(second.hash, '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263');
   assert.equal(second.cartridge.manifest.id, 'r9c_interactions');
   assert.equal(second.cartridge.manifest.version, '0.0.1');
+  // The report names the selected row, not the chapter.
+  const { candidate } = reportOf(second, source, {} as never, second.policy, [], {}, true, false);
+  assert.equal(candidate.id, 'r9c_interactions');
+  assert.equal(
+    candidate.content_hash,
+    '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263',
+  );
 });
 
 // Breaks: the hash is compared only for v042, or against a row other than the selected one.

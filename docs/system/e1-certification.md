@@ -16,7 +16,7 @@ It freezes normalized artifact bytes before execution, checks the independent kn
 and admits those bytes through the real loader. In particular the loader owns the implicit
 position/scene → fact dependency; certification does not replace that check.
 
-The executable policy is bounded to the admitted candidate's admitted forms. Derive used definitions,
+The executable policy is bounded to the admitted candidate's forms. Derive used definitions,
 policy operations, authored commands and engine commands from the admitted artifact and the
 engine ownership tables; retain each use and its location. Every admitted locked capability
 also supplies conservative dependency obligations, including capabilities that own no command.
