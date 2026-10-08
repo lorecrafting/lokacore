@@ -40,3 +40,25 @@ Beads checker, new control:
 - Agent `model:` frontmatter matches the WORKFLOW `sonnet`/`opus` rows. The `#building-mechanics-by-composition` target is the one WORKFLOW:70,90 already uses.
 - LATER-ENDINGS keeps "awaiting" (F38 ruling).
 - CI on `a8ef943b`: all 7 jobs pass.
+
+## Fix round 1 (`23bb022c`)
+
+**Verdict: APPROVE**. Nothing is open.
+
+1. Finding 1 is closed.
+   - check_docs.exs:47 now reads `<a id>`/`<a name>` targets.
+   - All decision and archive-spec anchor rewrites now match base. The only remaining rewrite is `WORKFLOW.md#beads-rust-pilot` in the 10-06 review record, and that fragment has no heading or alias at base.
+   - The a3 links are unchanged from base and resolve through the cartridge.md:556 alias.
+   - The repo check passes: 0 broken anchors.
+2. Finding 2 is closed. docs_red_controls.sh now plants a `sub/` file with `../` links, a `-1` suffix, a heading with link syntax and an alias. It also checks that exactly 4 anchors are reported. Mutants run once each, all killed:
+   - path resolved from root;
+   - no duplicate suffix;
+   - no link-text strip;
+   - aliases dropped;
+   - inverted match;
+   - broken same-file link.
+3. The new swap variant kills the beads mutant that drops the sorted comparison (it survived in round 0).
+4. MISSING-CHILD-PLAN:90 now names ARCH-D10-02 to 05 as open. WORKFLOW:193 lists the three drift categories, which match `beads_pr_drift.py` as described at review time.
+5. Nit 5 has no change, by PM ruling.
+
+When this round was written, CI on `23bb022c` showed changes and lint passing, with browser, elixir, sim and typescript still pending.
