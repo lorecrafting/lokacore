@@ -127,7 +127,7 @@ commits or the developer worktree. I classified the ponytail clauses instead:
 
 - **S1 closed in code and spec.** `e1_obligations.ts:437-451` counts each fired rule's matched
   ops (deduplicated per rule) and withholds every rule that touches an op claimed twice;
-  `:493` withholds quest.fail-only rules. Matches architecture.md:330-335 word for word. The
+  `:495` withholds quest.fail-only rules. Matches architecture.md:330-335 word for word. The
   e_dup plant fails on the old code (R0 below).
 - **S2 closed.** `:496-498` reads the prefix before the first op of group >= G and withholds
   when a lower group appears at or after it; the "lower group after G" plant gives no credit
