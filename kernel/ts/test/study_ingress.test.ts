@@ -104,6 +104,13 @@ test('fox Study ingress rechecks actual owned nonempty corpse and never closes e
   const west = gameView(noRoot).exits.find((e) => e.direction === 'west');
   assert.ok(west && !west.available);
   assert.deepEqual(west.reason, { code: 'exit_closed' });
+  // Only a direct item root counts: an NPC held by the corpse does not open the Study.
+  const npc = Object.keys(noRoot.entities).find((id) => noRoot.entities[id].kind === 'npc')!;
+  const npcRoot: World = {
+    ...noRoot,
+    state: { ...noRoot.state, containers: { ...noRoot.state.containers, [npc]: death.corpse_id } },
+  };
+  assert.equal(move(npcRoot, 'west', 4).decision.kind, 'rejected');
   const foreign: World = {
     ...closed,
     state: {
