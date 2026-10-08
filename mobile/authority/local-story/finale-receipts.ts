@@ -1,24 +1,13 @@
 // The original Begin, bell and finale Continue receipts that a Green outcome must be bound to.
-import type {
-  Command,
-  DecisionResult,
-  DefinitionRef,
-} from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Command, DefinitionRef } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { ref } from './bell-receipt.ts';
+import type { Accepted } from './receipt-history.ts';
 
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent Green finale');
 };
-export const ref = (world: World, kind: string, key: string) =>
-  ({
-    cartridge_id: world.cartridge.manifest.id,
-    cartridge_version: world.cartridge.manifest.version,
-    kind,
-    key,
-  }) as DefinitionRef;
-
-export type Accepted = DecisionResult & { kind: 'accepted' };
 export type Receipt = { command: Command; decision: Accepted; revision: number };
 export type Row = { child: string; bell: string; fox: string; name: string; line: number };
 export type Ctx = { world: World; actor: World['character']; fact: (name: string) => unknown };

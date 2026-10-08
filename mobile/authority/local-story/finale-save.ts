@@ -15,11 +15,11 @@ import {
   checkBell,
   checkScene,
   invalid,
-  ref,
   type Ctx,
   type Receipt,
   type Row,
 } from './finale-receipts.ts';
+import { ref } from './bell-receipt.ts';
 import type { Db, Meta } from './store.ts';
 
 const rows = [

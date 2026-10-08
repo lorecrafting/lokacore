@@ -1,5 +1,5 @@
 // Committed narration and its routing (cue, combat lines, detail), read back from receipts.
-import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Command } from '../../../kernel/ts/src/contracts.gen.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bellCue } from '../../../kernel/ts/src/mechanics/bell/cue.ts';
@@ -10,9 +10,8 @@ import { defenseEvidence } from './combat-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
+import type { Accepted } from './receipt-history.ts';
 import { scope, type Story } from './save.ts';
-
-type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 
 /**
  * The latest committed narration in this story's receipts, shown again on reopen after a crash

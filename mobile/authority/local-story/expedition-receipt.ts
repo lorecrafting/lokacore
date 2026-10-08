@@ -8,11 +8,11 @@ import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { definition, detailFor } from '../../../kernel/ts/src/mechanics/expedition/shared.ts';
+import type { Accepted } from './receipt-history.ts';
 
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent expedition receipt');
 };
-export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 export type Receipt = {
   command_id: string;
   actor_id: string;

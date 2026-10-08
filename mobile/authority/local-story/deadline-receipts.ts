@@ -11,13 +11,13 @@ import { elapsedCommandId, jobCommandId } from '../../../kernel/ts/src/foundatio
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { scopeOf, value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import type { Accepted } from './receipt-history.ts';
 import type { Db } from './store.ts';
 
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent bound deadline');
 };
 type ReceiptRow = { command_id: string; actor_id: string; command: string; response: string };
-type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 
 export function terminalAxis(
   world: World,
