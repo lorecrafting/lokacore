@@ -21,6 +21,6 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
   connection, so the idle connection drops and `git push` exits 141 (SIGPIPE) after green
   checks, with the remote ref unchanged (PR #288, 2026-10-07). Push with
   `GIT_SSH_COMMAND="ssh -o ServerAliveInterval=20 -o ServerAliveCountMax=60" git push ...`.
-  Under heavy parallel agent load (load average about 50 on the M1) three Elixir content
+- Under heavy parallel agent load (load average about 50 on the M1) three Elixir content
   tests hit the 60 s ExUnit timeout and passed on retry: check load before treating such a
   timeout as a failure, and limit parallel heavy runs.

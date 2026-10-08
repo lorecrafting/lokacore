@@ -8,23 +8,22 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 | Role | Who | Model | Owns |
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
-| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: `sonnet`; `opus` for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: per the [routing table](#work-routing). | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
 | Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
 reviewer on the highest Opus; Fable reviews only the E2–E3 gate closures and the release-candidate audit. Codex and
-other cross-vendor reviews are retired. Every `Agent` spawn names its `model`:
+other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a id="work-routing"></a>:
 
 | Work | Claude Code default | Escalate when |
 |---|---|---|
 | Lookup or broad search | `Explore` agent | never for judgment |
 | Bounded copy, content or docs edit from a fixed brief | `developer`, Sonnet | spec conflict or cross-layer behavior: Opus |
-| Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only | — |
+| Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: two fresh Opus reviewers, Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Opus, plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text) | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
-| Hard PM call | `advisor` tool | still unresolved and consequential: Fable, then the owner |
 
 An authored brief narrows exploration but never makes save, receipt or protocol work
 mechanical. Run independent agents in the background and in parallel (one message,
@@ -39,7 +38,6 @@ portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a 
 gate; the PM may add one for a concrete risk found in the first review. Small content,
 copy and docs changes receive one short review. A second opinion supplements the
 independent reviewer; it never replaces that reviewer.
-Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
 
@@ -59,7 +57,7 @@ Report at the end of the slice, not at every step.
    Get the owner's OK on the plan and on any decision that is theirs.
 2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
    stays thin; the PM decides ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
-   worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
+   worktree). Spawn `developer` (`model` per the [routing table](#work-routing)) with a self-contained brief: goal, its [lane](#delivery-lanes),
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
@@ -73,15 +71,12 @@ Report at the end of the slice, not at every step.
    view-to-invocation check for any new availability rule. Where authored keys may differ from
    commands, include such an alias in that check. Reuse an existing same-layer check if it
    catches that break.
-3. **Build and self-review (developer).** Implement; run focused checks for the changed behavior
-   and required red controls, then let the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md) make the final local publication run (do not repeat it immediately before pushing); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
-   (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
-   docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
-   both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
+3. **Build and self-review (developer).** Implement, check and self-review as
+   [`developer.md`](../.claude/agents/developer.md) says, in the developer's own worktree, never the
+   main checkout; the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)
+   makes the final local publication run. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
-   the PR or keep a [local draft PR](#local-draft-pr-cadence) (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
-   branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
-   dispositions, deviations from the brief, open questions.
+   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the ponytail result) and hand back the note `developer.md` specifies.
 4. **Verify and review.** PM does not relay claims: for a hosted PR it confirms CI
    is green on the pushed commit (or reruns the check line) before review; for
    provisional local work it verifies the focused-check evidence and can spawn
@@ -153,44 +148,18 @@ deleted and linked by permalink ([move forward](decisions/owner-decision-move-fo
 ### Beads Rust
 
 Beads Rust ([adopted](decisions/owner-decision-beads-rust-pilot-2026-10-06.md), made permanent by the
-[owner](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)) tracks all 33 Chapter 1 slices in `.beads/issues.jsonl`; the export may also
-contain concrete, evidence-linked audit follow-ups under the [owner's extension](decisions/owner-decision-beads-audit-followups-2026-10-06.md).
+[owner](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)) tracks the Chapter 1 slices in `.beads/issues.jsonl`, plus
+concrete, evidence-linked audit follow-ups under the [owner's extension](decisions/owner-decision-beads-audit-followups-2026-10-06.md)
+(the [export check](CHECKS.md) guards completeness, paths and IDs). Install, sync, path hygiene,
+the board view and hooks: [Beads operations](BEADS.md).
 The PM owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
 Active issues carry one `stage:` label (building, review, fixing, recheck, integrated, gate), which the PM moves at each step; status stays `in_progress` until the reviewed merge to `main`.
-It replaces the retired `bin/board` and `$board` dashboards; `bv` is the board view.
-
-Install `br` (version 0.7.4) with
-`brew tap dicklesworthstone/tap && brew install dicklesworthstone/tap/br`,
-then use `br ready --brief --json`,
-`br show <id> --json` and `br blocked --json`. Install the optional viewer with
-`brew install dicklesworthstone/tap/bv`; run `bv` from a checkout with current
-`.beads` data, then press `b` for the board or `g` for the dependency graph.
-`bv` views the data on that checkout's branch, so use the main integration
-checkout for the latest merged status. From another checkout, set
-`LOKA_INTEGRATION_CHECKOUT` to the main integration checkout directory and run
-`bv --db "$LOKA_INTEGRATION_CHECKOUT/.beads"`. This is read-only; it does not
-change the branch or move tracker data. Agents can add `--robot-triage`; human
-readers can use
-the interactive board and graph. `br` mutates local
-SQLite and exports Git-tracked JSONL. Beads Rust 0.7.4 auto-flushes mutations
-and auto-imports newer JSONL on commands by default; use `br sync --status --json`
-to inspect drift, `br sync --import-only` to recover an out-of-date index, and
-`br sync --flush-only` before a tracker commit if the index is dirty. Review the JSONL diff
-and verify it contains no local machine path; the installed release writes
-`source_repo_path` on creation, so clear it with
-`br update <id> --source-repo lokacore --source-repo-path ''` before committing.
-Avoid `-wisp-` in an issue ID: Beads Rust reserves it for ephemeral records,
-even when the task itself is durable.
-The [export check](CHECKS.md) rejects path, ID and completeness errors in the
-staged commit and CI. All 33 plan slices must remain present exactly once;
-additional tasks need a concrete audit finding and evidence link.
-Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
-`br` run from any worktree reads and writes the integration checkout's database and
-JSONL (`br where` shows it), so commit tracker changes from that checkout, not a slice
-branch. A Claude Code session starts with `bin/session_status.sh` (in-progress, ready and blocked issues, open PRs, and report-only drift: in progress with the PR merged or closed; an open PR with no issue; closed with the PR open), so Beads, not a memory file, holds current status.
+Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
+checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
+A Claude Code session starts with `bin/session_status.sh`, so Beads, not a memory file, holds current status.
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to
@@ -200,47 +169,40 @@ or green local test alone does not close a slice. Ad hoc findings that need
 follow-up become linked issues only when they are real work; the review record
 keeps the finding and disposition. Beads gate records are not used; CI and
 review records own the gate evidence.
-The [hook comparison](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-beads-hooks-pilot.md) set up repo-owned
-`post-merge` and `post-checkout` imports only in the main integration checkout.
-After `git config core.hooksPath .githooks`, opt in there with
-`git config --local loka.beads.integrationRoot "$(pwd -P)"`; remove that setting
-with `git config --local --unset loka.beads.integrationRoot`. The hook checks for
-unexported local changes before importing and never stages, commits, pushes or
-closes an issue. A failed import prints a recovery instruction; Git's completed
-merge/checkout cannot be rolled back by a post-hook. Do not install Beads-provided hooks
-or let the tracker rewrite `AGENTS.md`.
-
 No source merge or CI gate depends on `br`; the export check guards the JSONL.
 
-## Local edit loop
+## Delivery lanes
+<a id="local-edit-loop"></a>
 
-### Local draft-PR cadence
+The brief names the lane. All three end in step 7's gate on the published head.
 
-For new work after [PR #200 (Book keyboard exits)](https://github.com/lorecrafting/lokacore/pull/200)
-through [PR #204 (Green finale plan)](https://github.com/lorecrafting/lokacore/pull/204),
-the [owner's cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
-and [fast provisional integration decision](decisions/owner-decision-local-provisional-integration-2026-10-05.md)
-use steps 3–6 in a separate worktree and branch per new slice. Give an independent
-reviewer a different worktree. Treat the brief, base and exact head, local check
-result, fresh review record in `docs/reviews/`, and proposed PR description as the
-draft PR. For a complete source outcome, the developer runs focused checks for
-the touched layers and self-reviews; the PM can then merge it into local `main` with a
-**provisional** merge commit before independent review. Record that merge SHA in
-the next handoff and start the next dependency-ready slice while the fresh reviewer
-checks the exact head. Run required second opinions in parallel. Fix findings
-on the original branch and merge those fixes locally with their review records.
-Keep unresolved findings visible and do not count the slice complete until they
-close. Periodically publish the accumulated local `main` history as a GitHub PR,
-run the full active local checks and red controls once on its exact accumulated
-head, then merge to remote `main` only after every
-review is closed and required hosted CI is green. A later source edit needs the
-usual scoped re-review. Keep the owner's checkout and remote `main`
-untouched during local development. Local Git branches, merge commits and review
-records provide the trail without running another server. A local check is not
-hosted CI proof. Step 7's hosted-CI gate applies to the later remote merge, not
-to the provisional local integration merge. A settled small spec change may be
-committed before code on the same branch and reviewed with the complete outcome;
-cross-mechanic/save planning still gets a focused review when it prevents rework.
+| Lane | Use | Developer | Review | Merge |
+|---|---|---|---|---|
+| Hosted PR | a single slice or fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer once CI is green on the pushed head (step 4) | step 7 |
+| Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | after the PM marks the PR ready, which starts hosted CI | step 7 on the ready head |
+| Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: full local checks and red controls once on its head, every review closed, then step 7 |
+
+Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
+one CI run per wave, not per small change. Collect tracker, process and docs changes into one
+housekeeping PR per session, or into the next real PR.
+
+Provisional local lane: one integration owner for local `main`; source branches, plans and reviews
+each in their own worktree; the owner's checkout and remote `main` stay untouched. Record each
+provisional merge SHA in the next handoff and start the next dependency-ready slice while review
+runs. Fix findings on the original branch and merge the fixes with their review records; a slice
+is complete only when its findings close, and a later source edit gets the usual scoped re-review.
+Integrate one branch at a time; when branches share a cartridge release, generated contract, save
+schema or portable primitive, fix the integration order first and derive each successor pin after
+its predecessor lands. Never have two agents edit one worktree or treat parallel green checks as
+proof of the combined head. A local check is not hosted CI proof. A settled small spec change may
+be committed before code on the same branch and reviewed with the complete outcome; cross-mechanic
+or save planning still gets a focused review when it prevents rework.
+
+Mobile development and verification are [paused](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md):
+use focused kernel tests, the headless Node simulator and the browser preview. The
+[Debug/Release Simulator procedure](decisions/owner-decision-local-edit-loop-2026-10-04.md) applies
+again when the owner resumes native work; do not silently reset or re-pin a save then.
+Chapter closure follows the [browser E2E loop](decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md).
 
 ### Book interaction delivery
 
@@ -256,28 +218,6 @@ placement and dead-end returns. The Chapter 1 E3 browser walk handles the larger
 cross-page visual consistency pass; it does not defer broken interaction flows
 ([owner decision](decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 A slice that changes what the player sees consults the [designer](decisions/owner-decision-designer-role-2026-10-07.md) for its brief, its Book UI spec text and its review.
-
-Parallel local work uses one integration owner for local `main`, normally two source
-worktrees whose mechanics do not overlap, and separate worktrees for independent
-plans and reviews. Plan the next dependency-ready slices while source work runs.
-Each source branch keeps its own checks and review head; integrate one branch at a
-time. When branches touch the same cartridge release, generated contract, save
-schema or portable primitive, choose the integration order first and derive the
-successor pin only after its predecessor lands. A plan may leave those values
-unknown. Never have two agents edit one worktree or treat parallel green checks
-as proof of their combined head; run accumulated checks before publication.
-
-The owner has [paused mobile development and verification](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
-including Debug and Release Simulator sessions. Browser preview work may provide a local test
-view in a separate slice. Use focused kernel tests and the headless Node simulator during
-development; batch related WIP edits into one coherent PR. The active local checks,
-closed independent reviews and exact-head CI gate remote publication (steps 3–7).
-
-At each chapter closure, follow the [owner's browser E2E loop](decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md): add and walk deterministic tests for required chapter routes and UI, run an exploratory E2E pass, show the owner a headed run or its video, and fix findings on an isolated chapter-polish branch. Rerun each failed path and the complete chapter walk after fixes, then get a fresh independent review of the exact final head. This browser loop complements the kernel, authority, save and contract checks. Deep mechanics or save findings become narrow tests and reviewed fixes in the owning slice; do not accumulate a large unreviewed polish batch.
-
-The prior [Debug/Release Simulator procedure](decisions/owner-decision-local-edit-loop-2026-10-04.md)
-remains historical guidance for when the owner resumes native work. Do not silently reset or
-re-pin a save when that happens.
 
 ## Token hygiene
 
@@ -301,7 +241,8 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff; read the index once on takeover and reopen only changed sections.
+handoff; on takeover read that handoff once and reopen only changed sections (the reviews and
+decisions indexes are not part of it).
 
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
@@ -312,8 +253,6 @@ Claude Code specifics:
 - No plugin or `CLAUDE.md` changes mid-session (they bust the prompt cache).
 - "Small" context means about 220k tokens or less, read from the subagent token count in its
   last completion notice.
-
-Another harness, if adopted, gets its own short adapter list next to this one.
 
 ## Milestone gate
 
@@ -327,10 +266,9 @@ turning into a catch-all. Findings are fixed in the gate PR.
 
 ## Git hygiene
 
-- During the local draft-PR cadence above, the local integration clone owns `main`;
-  PM, developer and reviewer each use separate worktrees. The local cadence's
-  review-record and merge steps replace the hosted push steps below until batch
-  publication. Keep in-flight older clones intact.
+- In the provisional local [lane](#delivery-lanes), the local integration clone owns `main`;
+  PM, developer and reviewer each use separate worktrees, and its review-record and merge
+  steps replace the hosted push steps below until publication. Keep in-flight older clones intact.
 - Every developer and concurrent planner works in a distinct worktree and branch.
   Keep a single integration worktree for local `main`; keep the owner's checkout
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
@@ -364,18 +302,6 @@ turning into a catch-all. Findings are fixed in the gate PR.
   definition file, so the PM never does review steps. Add a tool to `tools:` if a slice keeps
   hitting the same block.
 
-## Why these steps (keep them only while they earn their cost)
-
-- The brief is the biggest quality lever: a vague brief yields confident wrong work.
-  Acceptance is written as checkable items before any code.
-- Same-model reviewers share blind spots with the developer. Derive requirements from
-  the spec first and break the code to test the tests; add the second opinion for
-  the risks named above, rather than for every mechanics PR.
-- The developer keeps its context across small fix rounds, so fixes are cheap and consistent;
-  a large context makes every call expensive, so a fresh developer takes over (step 5). The
-  reviewer stays fresh so its judgment is independent.
-- If a step keeps finding nothing across slices, the PM proposes dropping it to the owner.
-
 ## Review stance
 
 Review depth scales with risk: a docs-only or config-only slice, or one that only changes
@@ -384,6 +310,8 @@ gets a short review (no mutation testing), a contract freeze gets the full one.
 For save-affecting work, the developer supplies a compact result from the existing real-SQLite
 reopen, failed-COMMIT, lost-acknowledgement and receipt-replay tests, plus the relevant red
 control. The reviewer reads failures and the changed contract/code, not full passing logs.
+
+If a step keeps finding nothing across slices, the PM proposes dropping it to the owner.
 
 Adversarial in proportion: the reviewer tries to break the change, not to redesign it.
 Every finding states a concrete failure scenario (input or state, then the wrong result),
