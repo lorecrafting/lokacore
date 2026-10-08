@@ -2,8 +2,10 @@ name: book-e2e
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: book-e2e-${{ github.ref }}
@@ -14,6 +16,8 @@ permissions:
 
 jobs:
   changes:
+    # Draft PRs run no hosted CI; downstream jobs skip with this one (CHECKS.md).
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:

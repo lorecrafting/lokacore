@@ -89,11 +89,12 @@ records its focused baseline, corrected tests and six independent red controls.
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`.
   `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
-  force `run`. PR and main pushes use the same classifier. `lint` always runs; browser jobs
+  force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
-  cancelled; `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
+  cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
+  ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions

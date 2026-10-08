@@ -117,8 +117,10 @@ Report at the end of the slice, not at every step.
    published head, and every job started on that head has completed successfully
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
+   A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
+   before review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
-   nobody waits on hosted CI: `until [ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = <sha> ];
+   nobody waits on hosted CI: `[ "$(gh pr view <N> --json isDraft -q .isDraft)" = false ] && until [ "$(gh pr view <N> --json headRefOid -q .headRefOid)" = <sha> ];
    do sleep 5; done; gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge
    --match-head-commit <sha>` (the wait keeps the watch from reading the previous head's checks;
    a head with no checks yet makes `gh pr checks` fail, not merge). It merges only after every started job on `<sha>` passes; a

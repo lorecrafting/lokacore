@@ -265,6 +265,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.
 
 - [Pre-production CI scope, 2026-10-06](owner-decision-preproduction-ci-scope-2026-10-06.md): metadata and Book-only changes use narrower local and hosted check lanes, with conservative full fallback.
+- [Skip hosted CI on draft PRs, 2026-10-07](owner-decision-skip-ci-on-drafts-2026-10-07.md): drafts run no hosted CI until marked ready; manual runs stay possible; the merge gate is unchanged.
 - [Post-Chapter-1 tiered checks](owner-decision-tiered-ci-after-chapter-one-2026-10-06.md): after E3, use fast iteration, full PR and milestone sweeps while retaining save and release safety gates; current checks remain in force until a reviewed implementation.
 
 - [C5 real bleeding and bandage](pm-decision-c5-bleeding-bandage-2026-10-06.md): one hound-produced timed bleed, Wick's skill lesson and exact held-bandage treatment during combat.

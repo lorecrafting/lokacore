@@ -2,8 +2,10 @@ name: ci
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -14,6 +16,8 @@ permissions:
 
 jobs:
   changes:
+    # Draft PRs run no hosted CI; downstream jobs skip with this one (CHECKS.md).
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -70,6 +74,7 @@ jobs:
       - run: elixir bin/red_controls.exs
 
   lint:
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
