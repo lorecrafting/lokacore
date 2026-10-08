@@ -46,3 +46,10 @@ Every item holds, with the two notes below. `git diff --stat` shows two new file
 - **`hill_folk`: accept.** `cartridge.json:25-31` gives `dark_sight` with a CON modifier, so DEX and INT stay at 10.
 - **Dropped per-plan crow cap claim: accept.** The cap is linked, and the existing cap tests fail under the cap mutant.
 - The crow origin guard at `crow/shared.ts:74-80` is filed separately and is not a finding here.
+
+## Fix round 1 at `8414a8e78fdaf97aaf048dcea4af1d3d7f545456`: **APPROVE**
+
+- **Finding 1: fixed.** The `8414a8e7` change to the authority file touches comments only: the header at `:257-261` and the notes at `:294` and `:318`. They now say the stale-cursor half is not sensed here and point to the two `c6_expedition` tests. The PR coverage-table row links `c6_expedition.test.ts:112` and `local-story/c6_expedition.test.ts:285`.
+- **Finding 2: fixed.** The PR body row for `crow/job.ts:103` now lists `transcripts.test.ts:24` as well.
+- **Merge `c913b0c0`:** `origin/main` is an ancestor of the head. `git diff origin/main..8414a8e7` shows only the two new test files and the two review files. The index line is last in `README.md`.
+- Nothing is open.
