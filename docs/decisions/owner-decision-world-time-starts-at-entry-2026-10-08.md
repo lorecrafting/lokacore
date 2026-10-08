@@ -24,9 +24,10 @@ ruling](owner-decision-d11-prechoice-elapsed-2026-10-06.md).
 
 ## Save impact (pre-production, [forward development](owner-decision-forward-development-2026-10-05.md))
 
-- (a) Older chapter-one saves with accepted pre-choice elapsed receipts: a plain reopen keeps
-  the committed clock. A reopen that replays receipt history (exchange or liquid history) now
-  refuses as a corrupt save, because replay rejects those receipts. No compatibility code.
+- (a) Older saves with accepted pre-choice elapsed receipts (nearly every chapter-one device
+  save): a reopen that replays receipt history now refuses as `save_corrupt`, because replay
+  rejects those receipts. Chapter one v042 content always takes that replay path, so every such
+  v042 save refuses, with or without exchange or liquid history. No compatibility code.
 - (b) Older saves closed with pending pre-choice debt (target above clock): the driver delivers
   it, the kernel refuses, and the Book shows "Time stopped: invalid_state"; Start over is the
   way out. The target is not clamped.
