@@ -49,9 +49,10 @@ export function witnessedObligations(
   after: World,
   command: Command,
   decision: DecisionResult,
+  carry: { full?: boolean } = {},
 ) {
   const paths = obligations(before, after, command, decision);
-  return [...paths, ...worldWitnesses(before, after, command, decision, paths)];
+  return [...paths, ...worldWitnesses(before, after, command, decision, paths, carry)];
 }
 
 export function caseHost(
@@ -73,6 +74,7 @@ export function caseHost(
     n = 0,
     lastRow = 0,
     previous = initial;
+  const carry = {};
   const releases = [{ fresh: initial, content_hash: loaded.hash }] as const;
   const open = () => {
     const opened = openStory(p.db, releases, p.host);
@@ -141,7 +143,7 @@ export function caseHost(
       digest.update(observation.bytes);
       record({
         kind: 'step',
-        obligations: witnessedObligations(previous, after, command, decision),
+        obligations: witnessedObligations(previous, after, command, decision, carry),
         command,
         action_key: action_key ?? null,
         revision: r.revision,

@@ -13,13 +13,15 @@ import { load } from '../src/mechanics/containment/shared.ts';
 import { bellCue } from '../src/mechanics/bell/cue.ts';
 import type { CaseHost } from './e1_case_host.ts';
 
-/** Paths this step witnesses; `credited` is the step's other witnessed paths (services). */
+/** Paths this step witnesses; `credited` is the step's other witnessed paths (services); `carry`
+ * is per-case state, set once an accepted take commits a load of exactly `max_grams`. */
 export function worldWitnesses(
   before: World,
   after: World,
   command: Command,
   decision: DecisionResult,
   credited: readonly string[],
+  carry: { full?: boolean },
 ): string[] {
   const w = before.cartridge.world ?? {},
     p = command.payload,
@@ -31,6 +33,7 @@ export function worldWitnesses(
       w.carry &&
       p.type === 'take' &&
       p.actor_id === me &&
+      carry.full &&
       decision.kind === 'rejected' &&
       decision.error.code === 'too_heavy' &&
       encode(before.state as never) === encode(after.state as never) &&
@@ -39,6 +42,13 @@ export function worldWitnesses(
       (item.mass_grams ?? 0) > 0;
     return limited ? ['/world/carry'] : [];
   }
+  if (
+    w.carry &&
+    p.type === 'take' &&
+    p.actor_id === me &&
+    load(after, body, { n: 0 }) === w.carry.max_grams
+  )
+    carry.full = true;
   const ops = decision.delta.ops,
     events = decision.events,
     paths: string[] = [],

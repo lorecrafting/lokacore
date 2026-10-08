@@ -117,7 +117,8 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   const digest = createHash('sha256');
   let steps = 0,
     final: { code: string; action: string | null } | null = null;
-  const obligations = new Set<string>();
+  const obligations = new Set<string>(),
+    carry = {};
   for (const e of events) {
     if (e.kind !== 'step') continue;
     const observed = checked(
@@ -130,7 +131,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     assert.equal(observed.failure, undefined, JSON.stringify(observed.failure));
     assert.equal(e.invariant_failure, null, 'case recorded an invariant failure');
     assert.equal(observed.bytes, `${encode(e.decision)}\n${e.state_hash}\n`);
-    for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
+    for (const path of witnessedObligations(world, observed.world, e.command, e.decision, carry))
       if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
     final =
