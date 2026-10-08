@@ -1,0 +1,2 @@
+$ (cd kernel/ts && npx tsc -p test)   # includes mobile/authority/**/*.test.ts
+exit 0

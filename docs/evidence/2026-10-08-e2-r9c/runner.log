@@ -1,0 +1,5 @@
+$ mise exec -- mix loka.compile cartridges/r9c_interactions <scratch>/r9c.json
+exit 0
+$ mise exec -- node kernel/ts/test/e1.ts <scratch>/r9c.json <scratch>/e2-r9c-runner 100
+E1 pending: report.json; full certification requires content coverage and independent review
+exit 2

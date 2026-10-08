@@ -1,0 +1,17 @@
+# flip-kill-after: flip-kill-after.diff applied (filtered: failing tests, failure lines and summary)
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:192:12)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:284:3)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+✖ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (2755.838375ms)
+ℹ fail 1
+ℹ pass 3
+ℹ tests 4
+exit 1
+$ cp <saved copy> mobile/authority/local-story/r9c_faults.test.ts; git status --porcelain
+exit 0
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
+exit 0
