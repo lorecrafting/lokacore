@@ -39,3 +39,16 @@ The refusal is not weakened: every surviving mutant still refuses any artifact w
 ## Findings
 
 - nit, `docs/system/e1-certification.md:19`: "the admitted candidate's admitted forms" repeats "admitted"; "the admitted candidate's forms" reads the same.
+
+## Fix round 1 re-check at `ac2ca37e`
+
+Scope: fix commit `ac2ca37e` only, the code it touched and its direct callers. **Verdict: APPROVE.**
+
+| Disposition | Proof |
+|---|---|
+| `e1.ts:263` deployment reason now `private candidate; no deployment identity` | Holds for both rows; spec still says "record the reason". Old string survives only in the archived E1 brief and historical evidence, which are correct for their time |
+| `e1.ts:276` review reason now `PM assigns fresh review of this candidate report at its published head` | Row-neutral; no test or evidence pin on the old text outside `docs/evidence` |
+| `reportOf` exported; test A asserts an r9c report names `r9c_interactions` and `7d74fac7…` | Only caller in code is `certify` (`e1.ts:175`); export is safe because the CLI runs under `import.meta.main` (`e1.ts:301`). Red controls in a throwaway worktree: hard-code `candidate.id` to the chapter, A red; hard-code `candidate.content_hash` to `5d8b0e3a…`, A red; baseline 10/10 |
+| nit `e1-certification.md:19` | Fixed: "the admitted candidate's forms" |
+
+Open: none from this reviewer.
