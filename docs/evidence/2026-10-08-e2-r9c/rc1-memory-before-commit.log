@@ -1,0 +1,23 @@
+# rc1-memory-before-commit: rc1-memory-before-commit.diff applied (filtered: failing tests, failure lines and summary)
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:187:14)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:232:3)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:282:3)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:316:3)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:334:3)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+✖ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (256.402ms)
+✖ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (583.534292ms)
+✖ F3 family 3 paid Rest settlement: full write, lost ack (145.823583ms)
+✖ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (41.722833ms)
+ℹ fail 4
+ℹ pass 0
+ℹ tests 4
+exit 1
+$ cp <saved copy> mobile/authority/local-story/save.ts; git status --porcelain
+exit 0
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
+exit 0

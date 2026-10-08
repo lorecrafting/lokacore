@@ -1,0 +1,12 @@
+diff --git a/mobile/authority/local-story/save.ts b/mobile/authority/local-story/save.ts
+index 651bbe7a..3f65bd3a 100644
+--- a/mobile/authority/local-story/save.ts
++++ b/mobile/authority/local-story/save.ts
+@@ -49,6 +49,7 @@ export function save(
+ ): Reply {
+   const at = r.revision;
+   let committed: boolean;
++  [s.world, s.revision] = [next.world, at];
+   try {
+     committed = commit(s.db, next.world, next.decision, r, reports, checkpoint);
+   } catch (e) {

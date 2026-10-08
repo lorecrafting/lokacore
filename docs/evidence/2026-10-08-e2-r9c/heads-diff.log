@@ -1,0 +1,4 @@
+$ git diff --stat 78a77cde 7a734d92 -- . ":!docs"
+ mobile/authority/local-story/r9c_faults.test.ts | 47 +++++++++++++++----------
+ 1 file changed, 28 insertions(+), 19 deletions(-)
+exit 0

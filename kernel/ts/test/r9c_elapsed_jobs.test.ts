@@ -210,7 +210,8 @@ test('family 3: one ledger, liquid and fuel carried through the paid dream and e
   a.press('refuel', [ID['item/torch'], ID['item/lamp_oil']]);
   assert.deepEqual([fuel(a, 'item/torch'), fuel(a, 'item/lamp_oil')], [7200, 6600]);
 
-  // The water-gated shaft exit: each exit's offer equals its keyed admission, lit and dark.
+  // The water-gated shaft exit: both exits' offers, lit and dark; only the refused `down` is
+  // invoked in the dark, and the torch is relit before `up` (light.test.ts covers `up` dark).
   a.move('down');
   for (const lit of [true, false]) {
     if (!lit) a.press('douse', [ID['item/torch']]);

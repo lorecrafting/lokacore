@@ -1,0 +1,22 @@
+# rc4-fence-not-pending: rc4-fence-not-pending.diff applied (filtered: failing tests, failure lines and summary)
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+      at call (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:231:31)
+      at call (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:315:31)
+      at call (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:333:31)
+      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:170:25)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:317:3)
+  Error: no such table: unavailable_elapsed_reads
+✖ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (632.094042ms)
+✖ F3 family 3 paid Rest settlement: full write, lost ack (211.196167ms)
+✖ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (79.021542ms)
+ℹ fail 3
+ℹ pass 1
+ℹ tests 4
+exit 1
+$ cp <saved copy> mobile/authority/local-story/delivery.ts; git status --porcelain
+exit 0
+$ node --test mobile/authority/local-story/r9c_faults.test.ts
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
+exit 0

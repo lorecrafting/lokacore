@@ -1,0 +1,13 @@
+diff --git a/mobile/authority/local-story/delivery.ts b/mobile/authority/local-story/delivery.ts
+index e4908adf..a18be0e0 100644
+--- a/mobile/authority/local-story/delivery.ts
++++ b/mobile/authority/local-story/delivery.ts
+@@ -102,7 +102,7 @@ export function fenced(s: Story): boolean {
+     return false;
+   } catch (e) {
+     if (e instanceof ElapsedRecoveryError) block(s, e);
+-    return true;
++    return false;
+   }
+ }
+ 

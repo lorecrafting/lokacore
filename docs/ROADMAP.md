@@ -22,11 +22,11 @@ excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-dec
 
 ## Chapter one completion
 
-**31 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6, D1–D12 and E1 ([#288](https://github.com/lorecrafting/lokacore/pull/288)).
+**32 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6, D1–D12, E1 ([#288](https://github.com/lorecrafting/lokacore/pull/288)) and E2.
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
 D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-bundled-chapter)
-owns the release/API/hash/ID pins. **E2 and E3 remain open**; E2 S1, the synthetic cartridge, merged in [#309](https://github.com/lorecrafting/lokacore/pull/309); S0, the runner's second candidate, in [#312](https://github.com/lorecrafting/lokacore/pull/312); S2, custody and terminal fork tests, in [#314](https://github.com/lorecrafting/lokacore/pull/314); S3, elapsed jobs tests, in [#316](https://github.com/lorecrafting/lokacore/pull/316); S4, creatures and transport tests, in [#319](https://github.com/lorecrafting/lokacore/pull/319).
-Order: E1 (coverage complete), E2, a Chapter 1 UI polish phase, release-candidate
+owns the release/API/hash/ID pins. **E3 remains open.** E2, the R9C interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
+Order: E1 (coverage complete), E2 (done), a Chapter 1 UI polish phase, release-candidate
 certification on one frozen source, then E3 and release
 ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
