@@ -1,0 +1,20 @@
+{
+  "title": "quest.first_lead.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "has_item",
+        "item": "fox_drawing"
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.first_lead.active",
+    "objectives_met": "quest.first_lead.ready",
+    "resolved": "quest.first_lead.resolved",
+    "failed": "quest.first_lead.failed",
+    "abandoned": "quest.first_lead.abandoned"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "provider": "maud",
+  "currency": "pennies",
+  "action": "drink_lantern_ale",
+  "label": "service.ale",
+  "narration": "service.ale.used",
+  "price": 1,
+  "benefit": {
+    "kind": "drink",
+    "vessel": "lantern_ale_cask",
+    "liquid": "ale",
+    "recovery": "mv",
+    "amount": 4
+  }
+}

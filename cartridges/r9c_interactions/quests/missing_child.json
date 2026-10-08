@@ -1,0 +1,118 @@
+{
+  "title": "quest.missing_child.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "fen_tracks_found",
+        "equals": true
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.missing_child.active",
+    "objectives_met": "quest.missing_child.lead",
+    "resolved": "quest.missing_child.resolved",
+    "failed": "quest.missing_child.failed",
+    "abandoned": "quest.missing_child.abandoned",
+    "active_variants": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_return_branch",
+                "equals": "rescue"
+              },
+              {
+                "op": "escort_state",
+                "quest": "missing_child",
+                "state": "separated"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.separated"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_return_branch",
+                "equals": "rescue"
+              },
+              {
+                "op": "escort_state",
+                "quest": "missing_child",
+                "state": "following"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.following"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_return_branch",
+                "equals": "stays"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.deliver"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_vesper_riddle_answered",
+                "equals": true
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.answered"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_wren_met",
+                "equals": true
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.met"
+      }
+    ],
+    "outcomes": {
+      "stays": "quest.missing_child.stays",
+      "rescued": "quest.missing_child.rescued",
+      "lost": "quest.missing_child.lost"
+    }
+  }
+}

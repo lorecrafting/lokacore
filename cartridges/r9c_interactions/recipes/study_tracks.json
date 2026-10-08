@@ -1,0 +1,44 @@
+{
+  "label": "actions.study_tracks",
+  "aliases": [
+    "study"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "reed_bank",
+    "detail": "tracks"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_tracks_found",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fen_tracks_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.study_tracks"
+      }
+    }
+  }
+}

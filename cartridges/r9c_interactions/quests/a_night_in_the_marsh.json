@@ -1,0 +1,69 @@
+{
+  "title": "quest.a_night_in_the_marsh.title",
+  "objective": {
+    "evidence": "expedition"
+  },
+  "expedition": {
+    "start_room": "hound_run",
+    "start_detail": "gnawed_bones",
+    "shelter_room": "drowned_oak",
+    "shelter_detail": "marsh_shelter",
+    "route": [
+      {
+        "from": "hound_run",
+        "direction": "west",
+        "to": "reed_bank"
+      },
+      {
+        "from": "reed_bank",
+        "direction": "west",
+        "to": "willow_shade"
+      },
+      {
+        "from": "willow_shade",
+        "direction": "south",
+        "to": "drowned_oak"
+      },
+      {
+        "from": "drowned_oak",
+        "direction": "north",
+        "to": "willow_shade"
+      },
+      {
+        "from": "willow_shade",
+        "direction": "east",
+        "to": "reed_bank"
+      }
+    ],
+    "footprint": [
+      "hound_run",
+      "adder_nest",
+      "reed_bank",
+      "willow_shade",
+      "drowned_oak"
+    ],
+    "survived_fact": "fen_night_survived",
+    "faction": "priory_fen_axis",
+    "faction_delta": -1,
+    "hound_population": "fen_hounds",
+    "narration": {
+      "start": "marsh.start",
+      "restart": "marsh.restart",
+      "shelter": "marsh.shelter",
+      "failed": "marsh.failed",
+      "completed": "marsh.completed"
+    },
+    "actions": {
+      "start": "begin_marsh_watch",
+      "restart": "retry_marsh_watch",
+      "shelter": "use_marsh_shelter"
+    }
+  },
+  "journal": {
+    "active": "marsh.journal.active",
+    "objectives_met": "marsh.journal.completed",
+    "resolved": "marsh.journal.completed",
+    "failed": "marsh.journal.failed",
+    "abandoned": "marsh.journal.failed"
+  }
+}

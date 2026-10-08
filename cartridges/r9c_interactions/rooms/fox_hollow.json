@@ -1,0 +1,22 @@
+{
+  "title": "room.fox_hollow.title",
+  "description": "room.fox_hollow.description",
+  "exits": {
+    "north": {
+      "to": "mire_crossing"
+    }
+  },
+  "details": {
+    "hollow": {
+      "aliases": [
+        "hollow"
+      ],
+      "description": "detail.hollow.description",
+      "readable": {
+        "label": "actions.read_hollow",
+        "text": "readable.hollow",
+        "title": "detail.hollow.title"
+      }
+    }
+  }
+}

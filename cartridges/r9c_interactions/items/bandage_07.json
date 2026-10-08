@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "bandage",
+    "bandage_07"
+  ],
+  "short": "item.bandage.short",
+  "room_line": "item.bandage.room",
+  "description": "item.bandage.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "npc",
+    "npc": "wick"
+  },
+  "bandage": {
+    "effect": "bleeding",
+    "skill": "bandage",
+    "action": "bandage",
+    "narration": "narration.bandaged"
+  }
+}

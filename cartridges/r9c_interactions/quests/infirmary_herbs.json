@@ -1,0 +1,56 @@
+{
+  "title": "quest.infirmary_herbs.title",
+  "repeatable": true,
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    }
+  },
+  "exchange": {
+    "npc": "wick",
+    "outgoing": [
+      "fenwort_01",
+      "fenwort_02",
+      "fenwort_03",
+      "fenwort_04",
+      "fenwort_05",
+      "fenwort_06",
+      "fenwort_07",
+      "fenwort_08",
+      "fenwort_09",
+      "fenwort_10",
+      "fenwort_11",
+      "fenwort_12"
+    ],
+    "incoming": [
+      "bandage_01",
+      "bandage_02",
+      "bandage_03",
+      "bandage_04",
+      "bandage_05",
+      "bandage_06",
+      "bandage_07",
+      "bandage_08",
+      "bandage_09",
+      "bandage_10",
+      "bandage_11",
+      "bandage_12"
+    ],
+    "quantity": 3,
+    "contribution": "infirmary_contribution",
+    "faction": "priory_fen_axis",
+    "increment": 1
+  },
+  "journal": {
+    "active": "quest.infirmary_herbs.active",
+    "objectives_met": "quest.infirmary_herbs.ready",
+    "resolved": "quest.infirmary_herbs.resolved",
+    "failed": "quest.infirmary_herbs.failed",
+    "abandoned": "quest.infirmary_herbs.abandoned"
+  }
+}

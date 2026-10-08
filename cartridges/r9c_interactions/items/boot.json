@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "boot",
+    "wrens_boot"
+  ],
+  "short": "item.boot.short",
+  "room_line": "item.boot.room",
+  "description": "item.boot.description",
+  "location": {
+    "in": "room",
+    "room": "reed_bank"
+  },
+  "mass_grams": 300
+}

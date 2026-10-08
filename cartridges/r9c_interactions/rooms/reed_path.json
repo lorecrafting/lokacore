@@ -1,0 +1,44 @@
+{
+  "title": "room.reed_path.title",
+  "description": "room.reed_path.description",
+  "exits": {
+    "north": {
+      "to": "ferry_landing"
+    },
+    "south": {
+      "to": "reed_bank"
+    }
+  },
+  "details": {
+    "fox_prints": {
+      "aliases": [
+        "fox_prints",
+        "prints"
+      ],
+      "description": "detail.fox_prints.description",
+      "readable": {
+        "label": "actions.read_fox_prints",
+        "text": "readable.fox_prints",
+        "title": "detail.fox_prints.title"
+      }
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "chapel_bell_rung",
+              "equals": true
+            }
+          ]
+        }
+      },
+      "description": "room.reed_path.flooded"
+    }
+  ]
+}

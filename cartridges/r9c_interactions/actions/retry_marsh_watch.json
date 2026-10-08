@@ -1,0 +1,24 @@
+{
+  "label": "marsh.action.restart",
+  "command": "expedition",
+  "target": {
+    "kind": "entity",
+    "scopes": [
+      "inspectable_details"
+    ]
+  },
+  "input": [
+    "transition",
+    "quest_instance_id",
+    "attempt_id"
+  ],
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "accessibility": "marsh.action.restart"
+}

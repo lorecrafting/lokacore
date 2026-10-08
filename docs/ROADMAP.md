@@ -22,10 +22,10 @@ excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-dec
 
 ## Chapter one completion
 
-**30 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6 and D1–D12.
+**31 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6, D1–D12 and E1 ([#288](https://github.com/lorecrafting/lokacore/pull/288)).
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
 D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-bundled-chapter)
-owns the release/API/hash/ID pins. **E1–E3 remain open.**
+owns the release/API/hash/ID pins. **E2 and E3 remain open**; E2 S1, the synthetic cartridge, merged in [#309](https://github.com/lorecrafting/lokacore/pull/309).
 Order: E1 (coverage complete), E2, a Chapter 1 UI polish phase, release-candidate
 certification on one frozen source, then E3 and release
 ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).

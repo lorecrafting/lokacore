@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "wren"
+  ],
+  "short": "npc.wren.short",
+  "room_line": "npc.wren.room",
+  "description": "npc.wren.description",
+  "room": "fox_hollow"
+}

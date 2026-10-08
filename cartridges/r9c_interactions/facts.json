@@ -1,0 +1,227 @@
+{
+  "facts": {
+    "fen.tracks_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player studied the Reed Bank tracks during the search for Wren."
+    },
+    "fen.wren_met": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player accepted the bound meeting with Wren and Vesper."
+    },
+    "fen.vesper_riddle_answered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Vesper accepted the player’s letter-bank answer."
+    },
+    "fen.return_branch": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unselected",
+          "stays",
+          "rescue"
+        ],
+        "default": "unselected"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player’s chosen return: Vesper’s message while Wren stays, or escorting Wren to Elspeth."
+    },
+    "chapel.bell_rung": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player rang the Belfry bell for the priory in the accepted Q3 action."
+    },
+    "chapel.allegiance": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unknown",
+          "prior",
+          "fox"
+        ],
+        "default": "unknown"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player's committed chapel allegiance; first set by Ring or Silence."
+    },
+    "village.child_status": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "missing",
+          "rescued",
+          "stays",
+          "lost"
+        ],
+        "default": "missing"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The committed outcome of the search for Wren."
+    },
+    "priory.fen_axis": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -10,
+        "maximum": 10,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player’s standing between Priory and Fen."
+    },
+    "memory.village_ending": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "rescued",
+          "stays",
+          "lost"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.village_ending."
+    },
+    "memory.fox_fate": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "stilled",
+          "free"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.fox_fate."
+    },
+    "memory.chapter_1_guild_tilt": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "prior",
+          "fox"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.chapter_1_guild_tilt."
+    },
+    "infirmary.contribution": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 3,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Cumulative Priory gain actually awarded by Infirmary Herbs; unrelated faction changes never reset it."
+    },
+    "watch_gate_trusts_player": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Watch recognition: only successful patrol completion writes it."
+    },
+    "lantern_bed_paid": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player paid Maud for the Inn Rooms bed in this lineage."
+    },
+    "slept_at_lantern": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "First actual paid Lantern Rest; only its declared Rest reaction grants this credit."
+    },
+    "dream_seen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Local continuity memory player.dream_seen; only the acknowledged dream end writes it."
+    },
+    "fen.night_survived": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player completed the accepted five-entry Hound Run marsh expedition alive."
+    }
+  }
+}
