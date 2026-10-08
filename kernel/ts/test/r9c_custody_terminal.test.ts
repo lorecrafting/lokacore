@@ -105,7 +105,7 @@ function player() {
 // touch moving the wrong apple (play.test.ts:248, target.test.ts:87); a lesson or quote not
 // charged as authored (practical_skills.test.ts:123, commerce.test.ts:79/:97); a Put past capacity
 // or a dropped identity (put.test.ts:17, containment.test.ts:457); Wick binding other IDs
-// (reward_storage.test.ts:68/:100); Knock writing state (d10_knowledge.test.ts); Where reading the
+// (infirmary.test.ts:19 lowest-ID harvest, :108 stale exact custody); Knock writing state (d10_knowledge.test.ts); Where reading the
 // live room (knowledge_composition.test.ts:7).
 test('family 1: identity, custody and trade on r9c keep every ID and literal', () => {
   const p = player();

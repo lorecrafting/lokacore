@@ -2,7 +2,8 @@
 // authority and rollback-journal SQLite: every committed intermediate is closed and reopened by
 // the real loader before the next command; the belfry snapshot forks by file copy; the Ring path
 // replays exactly; a genuinely failed final COMMIT applies nothing. Standing integration scenario
-// (E2 brief acceptance 4-5): the breaks are killed by the focused authority tests linked below.
+// (E2 brief acceptance 4-5): the breaks are killed by the focused authority tests linked below,
+// except the Continue-replay break named in family 2's header, which only this file catches.
 // Expected values come from the cartridge files and r9c_interactions_ids.json.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -138,7 +139,7 @@ function save(path: string) {
 
 // Breaks (shared): partial lesson or payment on a failed write (practical_skills.test.ts:146);
 // a committed custody, exchange, door or knowledge row the loader rejects or alters on reopen
-// (reward_storage, barriers and d10 suites; the mechanics lesson on committed intermediates).
+// (infirmary.test.ts:19/:108, barriers and d10 suites; the mechanics lesson on committed intermediates).
 test('family 1 commits and reopens every custody, trade, door and knowledge step', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s2-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -234,6 +235,8 @@ const MEMORY = [
 // report or ending written before the final line (finale.test.ts:13, story_points.test.ts:283);
 // memory adopted before a failed COMMIT (faults.test.ts:207, bell_receipts.test.ts:9); a replay
 // starting a second scene or report (bell_receipts.test.ts:304).
+// Breaks (only guard; review of PR 314, mutant M4): a replayed exact Continue that skips its stored
+// receipt (local-story/invocation.ts:57) and is decided again instead of returning that receipt.
 test('family 2 forks one belfry save into Ring and Silence, each acknowledged once', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s2-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
