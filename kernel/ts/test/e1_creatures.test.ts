@@ -13,6 +13,8 @@ import { replayCase } from './e1_cases.ts';
 import { ending } from './e1_paths.ts';
 import { maudsCellar } from './e1_maud.ts';
 import { creatures, creatureWitnesses } from './e1_creatures.ts';
+import { reactionWitnesses } from './e1_obligations.ts';
+import { hourOf } from '../src/mechanics/calendar.ts';
 
 const pin = read('protocol/fixtures/missing_child_v042_hash.json');
 const bytes = new TextEncoder().encode(
@@ -35,9 +37,10 @@ type Step = { before: World; after: World; command: Command; decision: DecisionR
 // Test-only mutation of a cloned committed step.
 type Loose = any;
 const witness = (s: Step) => creatureWitnesses(s.before, s.after, s.decision);
+const reactions = (s: Step) => reactionWitnesses(s.before, s.after, s.decision);
 
 // Runs one route on a fresh real-SQLite save and keeps the first step crediting each named path.
-function capture(name: string, route: (a: CaseHost) => unknown, wanted: string[]) {
+function capture(name: string, route: (a: CaseHost) => unknown, wanted: string[], see = witness) {
   const dir = mkdtempSync(join(tmpdir(), `loka-e1-${name}-`));
   const a = caseHost(loaded, join(dir, 'save.db'), join(dir, 'case.jsonl'), undefined, {
     case_id: name,
@@ -48,7 +51,7 @@ function capture(name: string, route: (a: CaseHost) => unknown, wanted: string[]
     seen = new Set<string>();
   try {
     a.watch((before, after, command, decision) => {
-      const paths = creatureWitnesses(before, after, decision);
+      const paths = see({ before, after, command, decision });
       for (const p of paths) seen.add(p);
       for (const p of wanted)
         if (paths.includes(p) && !steps.has(p))
@@ -70,12 +73,17 @@ function capture(name: string, route: (a: CaseHost) => unknown, wanted: string[]
 }
 
 // Plants one violation in a clone of a real step; the named path must then disappear.
-function planted(step: Step, path: string, cases: Record<string, (s: Loose) => void>) {
-  assert.ok(witness(step).includes(path), `control: ${path}`);
+function planted(
+  step: Step,
+  path: string,
+  cases: Record<string, (s: Loose) => void>,
+  see = witness,
+) {
+  assert.ok(see(step).includes(path), `control: ${path}`);
   for (const [name, plant] of Object.entries(cases)) {
     const s = structuredClone(step) as Loose;
     plant(s);
-    assert.equal(witness(s).includes(path), false, `${name} still credits ${path}`);
+    assert.equal(see(s).includes(path), false, `${name} still credits ${path}`);
   }
 }
 const ops = (s: Loose, op: string) => s.decision.delta.ops.filter((o: Loose) => o.op === op);
@@ -222,63 +230,203 @@ test('E1 creature deaths witness only exact corpse, loot, population and bleed e
   });
 });
 
-// Breaks: the prior-bell suppression or an authored rat corpse is credited without its exact cause,
-// policy and committed population/corpse transition.
-test('E1 d9 suppression and authored rat corpse need their exact committed effects', () => {
-  const d9 = '/reactions/ashmere_missing_child@0.0.42:reaction/d9_suppress_hounds',
-    rat = P('item', 'rat_corpse');
-  const prior = capture('lost-prior', (a) => ending(a, 'lost', 'prior', 'stilled'), [d9]);
-  assert.deepEqual(prior.seen, [d9, `${d9}/apply/0`, `${d9}/when/root`]);
-  const bell = prior.steps.get(d9)!,
-    rule = (s: Loose) =>
-      s.before.cartridge.reactions['ashmere_missing_child@0.0.42:reaction/d9_suppress_hounds'],
+// Breaks: a reaction is credited without its exact committed effects in one writer group, or its
+// `when` is judged on a boundary state instead of the state its delivery read (the bell reactions
+// hold at neither boundary). Answers from cartridges/ashmere_missing_child/reactions/*.json.
+test('E1 reactions need every exact apply effect and a when holding in their read state', () => {
+  const R = (k: string) => P('reaction', k),
+    [a, b, c, d9, start] = [
+      'a_resolve_bell',
+      'b_lost_before_meeting',
+      'c_resolve_silence',
+      'd9_suppress_hounds',
+      'start_search',
+    ].map(R) as [string, string, string, string, string],
+    when = (r: string, n: number) => [
+      `${r}/when/root`,
+      ...Array.from({ length: n }, (_, i) => `${r}/when/root/items/${i}`),
+    ];
+  const expected = {
+    a: [a, `${a}/apply/0`, ...when(a, 2)],
+    b: [b, `${b}/apply/0`, `${b}/apply/1`, ...when(b, 5)],
+    c: [c, `${c}/apply/0`, ...when(c, 2)],
+    d9: [d9, `${d9}/apply/0`, `${d9}/when/root`],
+    start: [start, `${start}/apply/0`],
+  };
+  const prior = capture(
+    'lost-prior',
+    (h) => ending(h, 'lost', 'prior', 'stilled'),
+    [start, a],
+    reactions,
+  );
+  const lost = [...expected.a, ...expected.b, ...expected.d9, ...expected.start].sort();
+  assert.deepEqual(prior.seen, lost);
+  assert.deepEqual(
+    lost.filter((p) => !prior.replayed.includes(p)),
+    [],
+  );
+  const fox = capture('rescued-fox', (h) => ending(h, 'rescued', 'fox', 'free'), [c], reactions);
+  const silenced = [...expected.c, ...expected.start].sort();
+  assert.deepEqual(fox.seen, silenced);
+  assert.deepEqual(
+    silenced.filter((p) => !fox.replayed.includes(p)),
+    [],
+  );
+
+  const rule = (s: Loose, k: string) =>
+      s.before.cartridge.reactions[`ashmere_missing_child@0.0.42:reaction/${k}`],
+    quest = (s: Loose, w: 'before' | 'after', k: string) =>
+      Object.values(s[w].state.quests).find((q: Loose) => q.quest.key === k) as Loose,
+    questId = (s: Loose, k: string) =>
+      Object.keys(s.after.state.quests).find((i) => s.after.state.quests[i].quest.key === k)!,
+    fact = (s: Loose, k: string) =>
+      Object.keys(s.after.state.facts).find((f) => f.includes(`"${k}"`))!,
+    assign = (s: Loose, k: string) => ops(s, 'fact.assign').find((o: Loose) => o.fact.key === k),
+    changed = (s: Loose, k: string) =>
+      s.decision.events.find((e: Loose) => e.payload.fact?.key === k).payload;
+  const bell = prior.steps.get(a)!,
+    report = prior.steps.get(start)!;
+  for (const path of expected.a)
+    planted(
+      bell,
+      path,
+      {
+        'read state': (s) =>
+          drop(s, (o) => o.op === 'fact.assign' && o.fact.key === 'chapel_bell_rung'),
+        'when holds only after': (s) =>
+          (rule(s, 'a_resolve_bell').when.root.items[1].state = 'resolved'),
+        'no open instance': (s) => {
+          quest(s, 'before', 'bell_of_ashmere').state = 'failed';
+          rule(s, 'a_resolve_bell').when.root.items.pop();
+        },
+        'no instance': (s) => delete s.before.state.quests[questId(s, 'bell_of_ashmere')],
+        'cause time': (s) => {
+          const cause = s.decision.events.find(
+              (e: Loose) => e.payload.fact?.key === 'chapel_bell_rung',
+            ),
+            h = hourOf(s.before.cartridge, cause.logical_time);
+          cause.logical_time += 6 * 3600;
+          assert.notEqual(hourOf(s.before.cartridge, cause.logical_time), h);
+          rule(s, 'a_resolve_bell').when.root.items[0] = { op: 'time_window', from: h, to: h + 1 };
+        },
+        'transition instance': (s) =>
+          (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').instance_id =
+            'other'),
+        'transition to': (s) =>
+          (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').to = 'failed'),
+        'transition outcome': (s) =>
+          (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').outcome = 'fox'),
+        'after state': (s) => (quest(s, 'after', 'bell_of_ashmere').state = 'active'),
+        'after outcome': (s) => (quest(s, 'after', 'bell_of_ashmere').outcome = 'fox'),
+        'resolved event': (s) => (event(s, 'quest_resolved').outcome = 'fox'),
+      },
+      reactions,
+    );
+  for (const path of expected.b)
+    planted(
+      bell,
+      path,
+      {
+        'two groups': (s) => (assign(s, 'village_child_status').writer_group += 2),
+        'fail op': (s) => drop(s, (o) => o.op === 'quest.transition' && o.to === 'failed'),
+        'fail state': (s) => (quest(s, 'after', 'missing_child').state = 'active'),
+        'fail outcome': (s) => (quest(s, 'after', 'missing_child').outcome = 'rescued'),
+        'assign op': (s) =>
+          drop(s, (o) => o.op === 'fact.assign' && o.fact.key === 'village_child_status'),
+        'assign value': (s) => (assign(s, 'village_child_status').value = 'rescued'),
+        'assign unchanged': (s) => {
+          assign(s, 'village_child_status').expected = 'lost';
+          changed(s, 'village_child_status').old = 'lost';
+        },
+        'assign after': (s) => (s.after.state.facts[fact(s, 'village_child_status')] = 'missing'),
+        'assign event': (s) => (changed(s, 'village_child_status').new = 'rescued'),
+      },
+      reactions,
+    );
+  for (const path of expected.start)
+    planted(
+      report,
+      path,
+      {
+        'other outcome': (s) => (rule(s, 'start_search').on.outcome = 'lost'),
+        'activate op': (s) => drop(s, (o) => o.op === 'quest.activate'),
+        'activate quest': (s) =>
+          (ops(s, 'quest.activate')[0].quest = ref('quest', 'bell_of_ashmere')),
+        'prior instance': (s) => {
+          const id = questId(s, 'missing_child');
+          s.before.state.quests[id] = s.after.state.quests[id];
+        },
+        'not active': (s) => (quest(s, 'after', 'missing_child').state = 'resolved'),
+        'other player': (s) => (quest(s, 'after', 'missing_child').scope.character_id = 'other'),
+        'activated event': (s) => (event(s, 'quest_activated').instance_id = 'other'),
+      },
+      reactions,
+    );
+
+  const d9rule = (s: Loose) => rule(s, 'd9_suppress_hounds'),
     plan = (s: Loose, w: 'before' | 'after') =>
       s[w].state.population_plans[
         Object.keys(s[w].state.population_plans).find((k) => k.includes('"fen_hounds"'))!
       ],
     control = (s: Loose) => ops(s, 'population.control')[0];
-  for (const path of [d9, `${d9}/when/root`, `${d9}/apply/0`])
-    planted(bell, path, {
-      'cause type': (s) => {
-        for (const e of s.decision.events)
-          if (e.payload.fact?.key === 'chapel_bell_rung') e.payload.type = 'fact_seen';
+  planted(bell, `${d9}/when/root`, { 'no when': (s) => delete d9rule(s).when }, reactions);
+  for (const path of expected.d9)
+    planted(
+      bell,
+      path,
+      {
+        'cause type': (s) => {
+          for (const e of s.decision.events)
+            if (e.payload.fact?.key === 'chapel_bell_rung') e.payload.type = 'fact_seen';
+        },
+        'other fact': (s) => {
+          for (const e of s.decision.events)
+            if (e.payload.type === 'fact_changed' && e.payload.fact.key === 'chapel_bell_rung')
+              e.payload.fact = ref('fact', 'chapel_allegiance');
+        },
+        'other trigger': (s) =>
+          (d9rule(s).on = {
+            event: 'quest_resolved',
+            quest: ref('quest', 'bell_of_ashmere'),
+            outcome: 'fox',
+          }),
+        'when fails': (s) => (d9rule(s).when.root.equals = 'fox'),
+        'no steps': (s) => (d9rule(s).apply = []),
+        'other op': (s) => (d9rule(s).apply[0].op = 'population.release'),
+        'no plan row': (s) =>
+          delete s.before.state.population_plans[
+            Object.keys(s.before.state.population_plans).find((k) => k.includes('"fen_hounds"'))!
+          ],
+        'already suppressed': (s) => {
+          plan(s, 'before').suppression = plan(s, 'after').suppression;
+          control(s).expected.suppression = plan(s, 'after').suppression;
+        },
+        'one plan already suppressed': (s) => {
+          const other = Object.keys(s.before.state.population_plans).find(
+            (k) => !k.includes('"fen_hounds"'),
+          )!;
+          s.before.state.population_plans[other].suppression = plan(s, 'after').suppression;
+          d9rule(s).apply.push({ ...d9rule(s).apply[0], plan: JSON.parse(other) });
+        },
+        'cause id': (s) => {
+          plan(s, 'after').suppression.cause_event_id = control(s).value.suppression.job_id;
+          control(s).value.suppression.cause_event_id = control(s).value.suppression.job_id;
+        },
+        'ends at': (s) => {
+          plan(s, 'after').suppression.ends_at += 1;
+          control(s).value.suppression.ends_at += 1;
+        },
+        'control expected': (s) => (control(s).expected.next_wander_due += 1),
+        'control value': (s) => (control(s).value.next_wander_due += 1),
+        'control receipt': (s) => drop(s, (o) => o.op === 'population.control'),
       },
-      'other fact': (s) => {
-        for (const e of s.decision.events)
-          if (e.payload.type === 'fact_changed' && e.payload.fact.key === 'chapel_bell_rung')
-            e.payload.fact = ref('fact', 'chapel_allegiance');
-      },
-      'other trigger': (s) => (rule(s).on.event = 'quest_resolved'),
-      'when fails': (s) => (rule(s).when.root.equals = 'fox'),
-      'no when': (s) => delete rule(s).when,
-      'no steps': (s) => (rule(s).apply = []),
-      'other op': (s) => (rule(s).apply[0].op = 'population.release'),
-      'no plan row': (s) =>
-        delete s.before.state.population_plans[
-          Object.keys(s.before.state.population_plans).find((k) => k.includes('"fen_hounds"'))!
-        ],
-      'already suppressed': (s) => {
-        plan(s, 'before').suppression = plan(s, 'after').suppression;
-        control(s).expected.suppression = plan(s, 'after').suppression;
-      },
-      'one plan already suppressed': (s) => {
-        const other = Object.keys(s.before.state.population_plans).find(
-          (k) => !k.includes('"fen_hounds"'),
-        )!;
-        s.before.state.population_plans[other].suppression = plan(s, 'after').suppression;
-        rule(s).apply.push({ ...rule(s).apply[0], plan: JSON.parse(other) });
-      },
-      'cause id': (s) => {
-        plan(s, 'after').suppression.cause_event_id = control(s).value.suppression.job_id;
-        control(s).value.suppression.cause_event_id = control(s).value.suppression.job_id;
-      },
-      'ends at': (s) => {
-        plan(s, 'after').suppression.ends_at += 1;
-        control(s).value.suppression.ends_at += 1;
-      },
-      'control receipt': (s) => drop(s, (o) => o.op === 'population.control'),
-    });
+      reactions,
+    );
+});
 
+// Breaks: an authored rat corpse is credited without its exact committed corpse transition.
+test('E1 authored rat corpse needs its exact committed effects', () => {
+  const rat = P('item', 'rat_corpse');
   const cellar = capture('mauds-cellar', maudsCellar, [rat]);
   assert.deepEqual(cellar.seen, [rat]);
   planted(cellar.steps.get(rat)!, rat, {

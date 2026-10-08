@@ -2,7 +2,6 @@
 import assert from 'node:assert/strict';
 import type { DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { holds } from '../src/mechanics/policy.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { key, same } from '../src/foundation/compose.ts';
 import { refString } from '../src/runtime/decision.ts';
@@ -174,30 +173,6 @@ export function creatureWitnesses(before: World, after: World, decision: Decisio
       value.next_tick_at === hit.logical_time + bleed.tick_every
     )
       paths.push(path(effect));
-  }
-  for (const [ref, rule] of Object.entries(before.cartridge.reactions ?? {})) {
-    const cause = events.find(
-      ({ payload: e }) =>
-        rule.on.event === 'fact_changed' && e.type === 'fact_changed' && same(e.fact, rule.on.fact),
-    );
-    if (!cause || !rule.when || !holds(after, after.character, rule.when.root)) continue;
-    const applied = rule.apply.map((step, i) => {
-      if (step.op !== 'population.suppress') return undefined;
-      const prior = before.state.population_plans?.[key(step.plan)],
-        next = after.state.population_plans?.[key(step.plan)];
-      return prior &&
-        !prior.suppression &&
-        // ponytail: the row names the cause event, not the reaction, so two reactions on one
-        // event suppressing the same plan could both be credited (v042 cannot reach this);
-        // bind the suppression row to the reaction if a cartridge can.
-        next?.suppression?.cause_event_id === cause.id &&
-        next.suppression.ends_at === cause.logical_time + step.duration &&
-        receipt({ op: 'population.control', plan: step.plan, expected: prior, value: next })
-        ? `/reactions/${ref}/apply/${i}`
-        : undefined;
-    });
-    if (applied.length && applied.every(Boolean))
-      paths.push(`/reactions/${ref}`, `/reactions/${ref}/when/root`, ...(applied as string[]));
   }
   return [...new Set(paths)];
 }

@@ -1,3 +1,4 @@
+// size: allow 520, the reaction witness reuses creditedPolicyPaths beside the other obligation witnesses
 import { gameView, type World } from '../src/index.ts';
 import type {
   CharacterId,
@@ -15,7 +16,10 @@ import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 import { identityWitnesses } from './e1_identity.ts';
 import { creatureWitnesses } from './e1_creatures.ts';
 import { level, resourceSpec } from '../src/mechanics/resource.ts';
-import { same } from '../src/foundation/compose.ts';
+import { key, same } from '../src/foundation/compose.ts';
+import { apply } from '../src/runtime/apply.ts';
+import { triggered } from '../src/mechanics/reaction.ts';
+import { questOf } from '../src/mechanics/lookups.ts';
 
 // ponytail: bind only reviewed dialogue/choice/policy, scene, recipe, quest, service and visible-entity witnesses;
 // other authored paths wait for their own exact command/state evidence.
@@ -50,6 +54,7 @@ export function witnessedObligations(
     ...journalVariantPaths(after),
     ...identityWitnesses(before, after, command, decision),
     ...creatureWitnesses(before, after, decision),
+    ...reactionWitnesses(before, after, decision),
   );
   const withQuests = (paths: string[]) => [...paths, ...questPaths];
   if (p.type === 'use_service') {
@@ -378,6 +383,114 @@ export function objectivePaths(
   const early = creditedPolicyPaths(before, actor, root, path);
   const late = creditedPolicyPaths(after, actor, root, path);
   return early.length && late.length ? early.filter((p) => late.includes(p)) : [...early, ...late];
+}
+
+// architecture.md creatures paragraph: every apply step has an exact committed effect in one writer
+// group G; the `when` is judged on the state the delivery read (before + ops of groups before G).
+// ponytail: each step takes its first matching op and the first matching cause, and the actor is the
+// world's player (v042 has one player and one delivery per rule); bind per delivery when that grows.
+export function reactionWitnesses(before: World, after: World, decision: DecisionResult): string[] {
+  if (decision.kind !== 'accepted') return [];
+  const ops = decision.delta.ops,
+    events = decision.events,
+    actor = before.character;
+  return Object.entries(before.cartridge.reactions ?? {}).flatMap(([ref, rule]) => {
+    const cause = events.find((e) => triggered(before, e).includes(rule));
+    if (!cause) return [];
+    const groups = rule.apply.map((step) => {
+      if (step.op === 'quest.activate') {
+        const op = ops.find((o) => o.op === 'quest.activate' && same(o.quest, step.quest));
+        const row = op?.op === 'quest.activate' ? after.state.quests?.[op.instance_id] : undefined;
+        return op?.op === 'quest.activate' &&
+          !questOf(before, actor, step.quest) &&
+          row?.state === 'active' &&
+          same(row.scope, { kind: 'player', character_id: actor }) &&
+          events.some(
+            (e) => e.payload.type === 'quest_activated' && e.payload.instance_id === op.instance_id,
+          )
+          ? op.writer_group
+          : undefined;
+      }
+      if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
+        const to = step.op === 'quest.resolve' ? 'resolved' : 'failed';
+        const prior = questOf(before, actor, step.quest);
+        const op = ops.find(
+          (o) =>
+            o.op === 'quest.transition' &&
+            o.instance_id === prior?.[0] &&
+            o.to === to &&
+            o.outcome === step.outcome,
+        );
+        const row = prior && after.state.quests?.[prior[0]];
+        return op &&
+          prior &&
+          (prior[1].state === 'active' || prior[1].state === 'objectives_complete') &&
+          row?.state === to &&
+          row.outcome === step.outcome &&
+          (to === 'failed' ||
+            events.some(
+              (e) =>
+                e.payload.type === 'quest_resolved' &&
+                e.payload.instance_id === prior[0] &&
+                e.payload.outcome === step.outcome,
+            ))
+          ? op.writer_group
+          : undefined;
+      }
+      if (step.op === 'fact.assign') {
+        const op = ops.find(
+          (o) => o.op === 'fact.assign' && same(o.fact, step.fact) && o.value === step.value,
+        );
+        return op?.op === 'fact.assign' &&
+          op.expected !== step.value &&
+          value(after, actor, step.fact) === step.value &&
+          events.some(
+            (e) =>
+              e.payload.type === 'fact_changed' &&
+              same(e.payload.fact, step.fact) &&
+              e.payload.old === op.expected &&
+              e.payload.new === step.value,
+          )
+          ? op.writer_group
+          : undefined;
+      }
+      if (step.op !== 'population.suppress') return undefined;
+      const prior = before.state.population_plans?.[key(step.plan)],
+        next = after.state.population_plans?.[key(step.plan)];
+      const op = ops.find((o) => o.op === 'population.control' && same(o.plan, step.plan));
+      // ponytail: the row names the cause event, not the reaction, so two reactions on one
+      // event suppressing the same plan could both be credited (v042 cannot reach this);
+      // bind the suppression row to the reaction if a cartridge can.
+      return op?.op === 'population.control' &&
+        prior &&
+        !prior.suppression &&
+        next?.suppression?.cause_event_id === cause.id &&
+        next.suppression.ends_at === cause.logical_time + step.duration &&
+        same(op.expected, prior) &&
+        same(op.value, next)
+        ? op.writer_group
+        : undefined;
+    });
+    const group = groups[0]; // undefined without apply steps
+    if (group === undefined || groups.some((g) => g !== group)) return [];
+    const read = apply(
+      before,
+      ops.filter((o) => o.writer_group < group),
+      false,
+    );
+    if ('fault' in read) return [];
+    const base = `/reactions/${ref}`;
+    const when = rule.when
+      ? creditedPolicyPaths(
+          { ...read.world, state: { ...read.world.state, clock: cause.logical_time } },
+          actor,
+          rule.when.root,
+          `${base}/when/root`,
+        )
+      : [];
+    if (rule.when && !when.length) return [];
+    return [base, ...when, ...rule.apply.map((_, i) => `${base}/apply/${i}`)];
+  });
 }
 
 function journalVariantPaths(world: World): string[] {
