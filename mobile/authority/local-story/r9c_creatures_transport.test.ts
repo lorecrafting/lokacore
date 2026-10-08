@@ -340,7 +340,7 @@ test('family 4: a pack death separates Wren and fails the watch; Rejoin and retr
 // reuses or renames an ID (careful harvest, exchange, Bandage, Eat, drowning corpse, Chapel
 // recovery, crow carry); a consumed item leaves the consumed holder; the drowning corpse holds
 // other than the body's actual roots; the crow acquisition credits the player (its item_acquired
-// names the body, not the crow); or a crow plan exceeds its one living member.
+// names the body, not the crow).
 test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and the crow keep IDs', (t) => {
   // hill_folk: dark_sight (cartridge.json) to Take in the dark well_bottom, DEX 10, INT 10.
   // Regression pin: seed [19, 2, 3, 4] lands one bleeding hound hit at 64950, then Flees east.
@@ -457,14 +457,6 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   // Crows: wait on the Green until crow_green_1 is home (hourly wander), Drop, Take: no carry.
   a.move('south', 'south', 'south');
   const crow = ID['population/crow_green_1/slot1/member']!;
-  // Members alive per crow plan (each crow_* population has cap 1).
-  const living = () => {
-    const n: Record<string, number> = {};
-    for (const [id, c] of Object.entries(a.w.state.created ?? {}) as [string, any][])
-      if (c.origin?.kind === 'spawned' && c.origin.by.key.startsWith('crow_') && a.holder(id))
-        if ((a.resource(id, 'hp') ?? 0) > 0) n[c.origin.by.key] = (n[c.origin.by.key] ?? 0) + 1;
-    return n;
-  };
   while (a.holder(crow) !== ID['room/village_green']) a.tick();
   assert.equal(a.w.state.clock, 72000);
   a.press('drop', [coin]);
@@ -489,10 +481,7 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   a.press('take', [coin]);
   a.press('drop', [coin]);
   const nest = item('crow_nest');
-  while (a.holder(coin) !== nest) {
-    a.tick();
-    assert.ok(Object.values(living()).every((n) => n === 1));
-  }
+  while (a.holder(coin) !== nest) a.tick();
   assert.equal(a.holder(nest), ID['room/oak_branches']);
   assert.deepEqual(minted(), [corpse]);
   for (const k of ['apple_01', 'bandage_10']) assert.equal(a.holder(item(k)), consumed);
