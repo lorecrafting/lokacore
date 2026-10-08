@@ -189,8 +189,11 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
-  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM may merge PRs and
-  queues each merge in the background behind `gh pr checks --watch` ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); the PM runs a slice to its
+  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM may merge PRs
+  ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)) with GitHub auto-merge on
+  the required `ci-green` and `book-e2e-green` checks; admins (the owner, or the PM when asked or
+  for status-only commits) may push to `main` or merge directly, never for unreviewed code or past
+  a red check ([record](../decisions/owner-decision-required-checks-merge-2026-10-08.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the

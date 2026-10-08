@@ -154,3 +154,13 @@ jobs:
           name: game-trace
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
+
+  # The one check `main` requires. Skipped scoped jobs pass; a draft (changes skipped) fails.
+  ci-green:
+    needs: [changes, elixir, lint, sim, typescript]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
