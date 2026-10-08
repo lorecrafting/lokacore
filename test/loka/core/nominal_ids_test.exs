@@ -76,17 +76,12 @@ defmodule Loka.Core.NominalIdsTest do
     assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
   end
 
-  # Breaks if the brand rule in bin/contracts.exs and the tag rule in contracts.ex drift apart.
-  test "every TypeScript-branded contract has an Elixir tag constructor, and no other does" do
-    branded =
-      for [_, name] <-
-            Regex.scan(
-              ~r/^export type (\w+) = string & \{ readonly __brand/m,
-              File.read!("kernel/ts/src/contracts.gen.ts")
-            ),
-          do: {name |> Macro.underscore() |> String.to_atom(), 1}
-
-    constructors = Contracts.__info__(:functions) -- [defs: 0, validate: 2, validate: 3]
-    assert Enum.sort(constructors) == Enum.sort(branded)
+  # Breaks if the one brand rule (TypeScript brands and Elixir tag constructors both use it)
+  # takes in an enum, a const or a non-string contract, or leaves out a plain string.
+  test "a plain string contract is a nominal id; an enum, a const or another type is not" do
+    assert Contracts.Schema.nominal?(%{"type" => "string", "pattern" => "^a$"})
+    refute Contracts.Schema.nominal?(%{"type" => "string", "enum" => ["a"]})
+    refute Contracts.Schema.nominal?(%{"type" => "string", "const" => "a"})
+    refute Contracts.Schema.nominal?(%{"type" => "integer"})
   end
 end
