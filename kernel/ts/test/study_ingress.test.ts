@@ -112,7 +112,8 @@ test('fox Study ingress rechecks actual owned nonempty corpse and never closes e
   };
   assert.equal(move(npcRoot, 'west', 4).decision.kind, 'rejected');
   const npcWest = gameView(npcRoot).exits.find((e) => e.direction === 'west');
-  assert.deepEqual(npcWest?.reason, { code: 'exit_closed' });
+  assert.ok(npcWest && !npcWest.available);
+  assert.deepEqual(npcWest.reason, { code: 'exit_closed' });
   const foreign: World = {
     ...closed,
     state: {
