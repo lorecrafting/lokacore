@@ -64,3 +64,5 @@
   - Aldric resolved: the conjunct is true through its resolved branch, and only bell `items/2` is true.
   - The 5 rows match their cases.
 - **E1-D5 should-fix (outside this diff; for the PM)**, `kernel/ts/src/runtime/world.ts:119-120`. The ponytail comment says an unkeyed replay of a host trace can differ only when two actions match one Command, and that none does. The Wick and Aldric talks are such a case: unkeyed, a keyed `invalid_state` refusal of `a_wick_offer` re-decides as an accepted `b_wick_turn_in` choice. Failure scenario: a player's refused Wick offer in a production host trace replays as an opened turn-in, so the replayed state diverges. Fix: file a Beads issue to store the action key in the host trace, or correct the comment's claim. This does not block the E1 test slice.
+
+- Follow-up `00e5a8cf` (milestone branch): **APPROVE**. It changes types only: `action?: Key` in `checked`/`AUTHORITY_KERNEL.step`, the two casts dropped, one cast at the invocation read, and a comment joined onto one line; no behaviour change. Size gate exit 0 (`sim.ts` within 515), typecheck exit 0, E1 tests 50/50.
