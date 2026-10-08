@@ -13,6 +13,7 @@ dated line below, newest first.
 
 - 2026-10-08 [PM decision: E2 fixtures, simulator scope and E1 closure follow-ups](pm-decision-e2-fixtures-e1-closure-2026-10-08.md)
 - 2026-10-07 [Owner decision: E2 slice plan and its open questions](owner-decision-e2-plan-2026-10-07.md)
+- 2026-10-07 [Owner decision: E1 closure reviewers](owner-decision-e1-closure-reviewers-2026-10-07.md)
 - 2026-10-07 [Owner decision: E1 branch evidence for `any` and `not` policy descendants](owner-decision-e1-branch-evidence-2026-10-07.md)
 - 2026-10-07 [PM decision: E1 batch E dispositions](pm-decision-e1-batch-e-dispositions-2026-10-07.md)
 - 2026-10-07 [PM decision: E1 batch F world, resource and cask witnesses](pm-decision-e1-batch-f-world-witness-2026-10-07.md)

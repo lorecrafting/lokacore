@@ -75,6 +75,12 @@ mq watch-cancel 0 "1 0" "$A" "[$P,$P]" "[$P,$P,$E]" "[$P,$P,$E]" "[$P,$P]"
 grep -qx 'run rerun 43' "$Q/calls" || bad 'merge_queue watch-cancel: did not rerun run 43'
 # Break: reruns repeat forever instead of refusing a second cancel.
 mq cancel-twice 1 0 "$A" "[$C,$P]" "[$C,$P]" "[$W,$P]" "[$C,$P]"
+# Break: a failed job beside a cancelled one (fail-fast) is rerun instead of refused, at the
+# gate or after the watch.
+mq fail-cancel-gate 1 0 "$A" "[$F,$C]"
+grep -q '^run rerun' "$Q/calls" && bad 'merge_queue fail-cancel-gate: reran'
+mq fail-cancel-watch 1 1 "$A" "[$P,$P]" "[$P,$P,$F,$E]"
+grep -q '^run rerun' "$Q/calls" && bad 'merge_queue fail-cancel-watch: reran'
 # Break: a cancelled row with no Actions run to rerun waits forever instead of refusing.
 mq cancel-no-run 1 0 "$A" '[{"name":"changes","bucket":"cancel"},'"$P]"
 # Break: one rerunnable cancel next to an unrerunnable one waits forever on the latter.
@@ -86,15 +92,14 @@ rc=0; PATH="$tmp/stub:$PATH" capped sh "$bin/merge_queue.sh" 7 01234567 > /dev/n
 [ "$rc" = 2 ] || bad "merge_queue short-sha: exit $rc, want 2"
 
 # --- guard_merge.sh (Claude PreToolUse hook) -------------------------------------------------
-# Break: a direct or --auto merge passes, malformed input fails open, or the queue or a
-# command that only mentions the words is blocked. guard <want-rc> <payload>
+# Break: a direct, --auto, compound-command or flag-separated merge passes, malformed input
+# fails open, or the queue or another `pr` subcommand is blocked. guard <want-rc> <payload>
 guard() { rc=0; printf '%s' "$2" | sh "$bin/guard_merge.sh" 2> /dev/null || rc=$?; [ "$rc" = "$1" ] || bad "guard_merge: exit $rc, want $1: $2"; }
 guard 2 '{"tool_input":{"command":"cd x && gh pr merge 1 --auto"}}'
 guard 2 '{"tool_input":{"command":"gh pr merge 1'
+guard 2 '{"tool_input":{"command":"for p in 1 2; do\n/usr/bin/gh pr -R o/r merge $p; done"}}'
 guard 0 "{\"tool_input\":{\"command\":\"bin/merge_queue.sh 1 $A\"}}"
-guard 0 '{"tool_input":{"command":"grep -n \"gh pr merge\" docs/WORKFLOW.md"}}'
-guard 2 '{"tool_input":{"command":"/usr/bin/gh -R o/r pr merge 1"}}'
-guard 0 '{"tool_input":{"command":"git commit -m \"merge, never `gh pr merge` by hand\""}}'
+guard 0 '{"tool_input":{"command":"gh pr view 1 --json merged,mergeable"}}'
 
 # --- integrate_batch.sh ---------------------------------------------------------------------
 # A repo on branch int with stub checks at the paths the script calls; batch adds g.txt and

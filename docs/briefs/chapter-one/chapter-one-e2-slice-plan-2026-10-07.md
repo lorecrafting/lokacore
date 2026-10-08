@@ -138,7 +138,7 @@ Wherever an E1 receipt or a focused composition test already catches the same br
 - **Shared index files:** the `docs/reviews/README.md` lines use the union merge.
 
 ## What the designer's foundation pass must not touch
-E2 makes no Book changes, so no designer consultation is needed (WORKFLOW:249, :260). The designer's `design/book-foundation` branch (`~/dev/lokacore-design`, clean at `294062aa`) must stay out of:
+E2 makes no Book changes, so no designer consultation is needed (WORKFLOW:249, :260). The designer's `design/book-foundation` branch (clean at `294062aa`) must stay out of:
 - `kernel/**`, `mobile/authority/**`, `protocol/**`, `cartridges/**`, `test/loka/**`, `bin/**`;
 - the logic and output of `mobile/app/book/{presenter,model,offers,logs,pages}.ts(x)` (action keys, ordering, invocations, GameView mapping);
 - the rule clauses in `docs/system/book-ui.md` (Live action freshness :92, the Chapters/scenes/recovery and Shared elapsed sections, and the per-mechanic action rules);

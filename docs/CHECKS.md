@@ -90,9 +90,9 @@ their rules and red controls remain available for resumption.
   run and no merge on a second cancel, and no integration on a
   pending-count mismatch, a failed recorder, a conflict or an oversized untouched file. It also
   feeds the merge guard hook its payloads (below).
-- Claude hooks (`.claude/settings.json`): `bin/guard_merge.sh` (PreToolUse, Bash) blocks a
-  command that runs `gh pr merge`, `--auto` included, so merges go through `bin/merge_queue.sh`;
-  unparseable input that mentions it is blocked too. `bin/worktree_warn.sh` (Stop) only warns,
+- Claude hooks (`.claude/settings.json`): `bin/guard_merge.sh` (PreToolUse, Bash) blocks any
+  command with the words `gh`, then `pr`, then `merge` (`--auto` included, unparseable input too),
+  so merges go through `bin/merge_queue.sh`; a message that names the command must be reworded. `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
