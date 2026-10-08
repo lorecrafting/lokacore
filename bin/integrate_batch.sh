@@ -55,13 +55,13 @@ counts=$(node -p 'const r = require(process.argv[1]); [r.receipts.length, r.gaps
 set -- $counts
 echo "counts: $1 cases pass, $2 pending, $3 dispositioned, $4 witnessed"
 [ "$2" = "$want" ] || die "pending $2, expected $want"
+hint=
 if [ -n "$push" ]; then
   export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-ssh} -o ServerAliveInterval=30"
   git push origin HEAD > "$logs/push.log" 2>&1 || git push origin HEAD >> "$logs/push.log" 2>&1 ||
-    { tail -n 20 "$logs/push.log"; die 'push failed twice'; }
+    { tail -n 20 "$logs/push.log"; die "all checks passed; only the push failed, twice (log $logs/push.log)"; }
   echo 'push: exit 0'
 fi
-hint=
 # -D: the cherry-picked record is not on the branch's upstream, but it is in HEAD.
 git merge-base --is-ancestor "$branch" HEAD || die "$branch not in HEAD"
 step cleanup sh -c 'git worktree remove "$1" && git branch -D "$2"' - "$wt" "$branch"

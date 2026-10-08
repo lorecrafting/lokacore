@@ -90,11 +90,9 @@ for (const f of big) console.log(`${f}:1: file, 999 lines, limit 300`);
 process.exit(big.length ? 1 : 0);
 EOF
   cat > kernel/ts/test/e1_cases.ts <<'EOF'
-// Stub recorder: needs a clean tree and a new outdir; reports STUB_PENDING open obligations.
-import { execFileSync } from 'node:child_process';
+// Stub recorder: needs a new outdir; reports STUB_PENDING open obligations.
 import { mkdirSync, writeFileSync } from 'node:fs';
 const out = process.argv[3];
-if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' })) throw new Error('dirty source tree');
 mkdirSync(out);
 const gaps = { authored_obligations: Array(Number(process.env.STUB_PENDING)).fill('p') };
 const report = { receipts: [1, 2], gaps, dispositioned_obligations: [1], witnessed_obligations: [1, 2, 3] };
@@ -126,6 +124,10 @@ git rev-parse -q --verify batch > /dev/null && bad 'integrate_batch success: bat
 mk; tip=$(git rev-parse HEAD); git worktree add -q "$R.wt" batch && echo edit > "$R.wt/g.txt"
 ib dirty-worktree 1 3 2
 [ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch dirty-worktree: merged'
+# Break: a dirty integration tree is merged and checked as if committed.
+mk; tip=$(git rev-parse HEAD); echo dirty > f.txt
+ib dirty-tree 1 3 2
+[ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch dirty-tree: merged'
 # Break: the recorder runs on another candidate than v042.
 mk; echo '{}' > tmp/e1-selected-v042.json
 ib wrong-artifact 1 3 2
