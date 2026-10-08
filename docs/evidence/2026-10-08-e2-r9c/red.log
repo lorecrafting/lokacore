@@ -1,0 +1,55 @@
+# mutant: mutant.diff applied
+$ node --test kernel/ts/test/r9c_*.test.ts mobile/authority/local-story/r9c_*.test.ts
+✔ family 4: a refused move draws nothing; a missed round draws once per attack (443.583292ms)
+✔ family 4: a learned but DEX-9 actor cannot Bandage; at DEX 10 the same item cures (214.890542ms)
+✔ family 1: identity, custody and trade on r9c keep every ID and literal (425.963542ms)
+✔ family 2: one belfry snapshot forks into exactly one terminal and one acknowledged ending (406.291959ms)
+✔ family 3: one ledger, liquid and fuel carried through the paid dream and elapsed jobs (1927.050833ms)
+✔ family 5: watch credit pauses through the crow jobs and completes at four (773.309083ms)
+✔ family 5: deer sight at a population boundary in both orders, then a fatal hit (543.879625ms)
+✔ the synthetic artifact loads with its pinned hash and lock and allocates the oracle IDs (386.933459ms)
+✔ malformed and unknown-capability variants are refused before any world exists (306.388583ms)
+✔ D1: bleed, Flee west, board while bleeding, die on the isle, cross free for the corpse (4520.164625ms)
+✖ family 4: a pack death separates Wren and fails the watch; Rejoin and retry restart cleanly (4680.046291ms)
+✔ families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and the crow keep IDs (11780.221209ms)
+✔ family 1 commits and reopens every custody, trade, door and knowledge step (4201.4695ms)
+✔ family 2 forks one belfry save into Ring and Silence, each acknowledged once (7489.772667ms)
+✔ family 3 durable: ledger, liquid, fuel and dream reopen and replay at every step (3739.38275ms)
+✔ family 5 durable: patrol detour through crow jobs reopens and completes at four (4014.388375ms)
+✔ family 5 durable: deer flight at the boundary and the fatal hit reopen exactly (732.759916ms)
+✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (1451.049459ms)
+✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (4141.127666ms)
+✔ F3 family 3 paid Rest settlement: full write, lost ack (396.121042ms)
+✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (125.538ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 20
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22064.110417
+
+✖ failing tests:
+
+test at mobile/authority/local-story/r9c_creatures_transport.test.ts:262:1
+✖ family 4: a pack death separates Wren and fails the watch; Rejoin and retry restart cleanly (4680.046291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_creatures_transport.test.ts:306:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+exit 1

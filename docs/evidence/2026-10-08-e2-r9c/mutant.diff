@@ -1,0 +1,16 @@
+diff --git a/kernel/ts/src/mechanics/policy.ts b/kernel/ts/src/mechanics/policy.ts
+index c59073f7..34cc407f 100644
+--- a/kernel/ts/src/mechanics/policy.ts
++++ b/kernel/ts/src/mechanics/policy.ts
+@@ -42,7 +42,10 @@ export function holds(
+     case 'barrier_state':
+       return barrierState(world, p.barrier) === p.equals;
+     case 'escort_state':
+-      return stateIs(world, actor, p.quest, p.state);
++      return (
++        stateIs(world, actor, p.quest, p.state) ||
++        (p.state === 'following' && stateIs(world, actor, p.quest, 'separated'))
++      );
+     case 'quest_state': // false in every state while the actor has no instance
+       return questOf(world, actor, p.quest)?.[1].state === p.state;
+     case 'time_window': {

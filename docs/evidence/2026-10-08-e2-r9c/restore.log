@@ -1,0 +1,9 @@
+$ cp <saved copy> kernel/ts/src/mechanics/policy.ts
+exit 0
+$ git status --porcelain
+exit 0
+$ node --test kernel/ts/test/r9c_*.test.ts mobile/authority/local-story/r9c_*.test.ts
+ℹ tests 21
+ℹ pass 21
+ℹ fail 0
+exit 0

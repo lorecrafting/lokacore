@@ -15,5 +15,5 @@ The merged A–D briefs are in the [tree at `f8513671`](https://github.com/lorec
 ## E. Proof and closure
 
 - **E1:** [E1 — Repeatable R9 headless/browser certification](chapter-one-e1-r9-certification-brief-2026-10-05.md)
-- **E2:** [E2 — Compact R9C interaction cartridge](chapter-one-e2-r9c-interactions-brief-2026-10-05.md)
+- **E2:** [E2 — Compact R9C interaction cartridge](chapter-one-e2-r9c-interactions-brief-2026-10-05.md); S5 closing evidence: [2026-10-08-e2-r9c](../../evidence/2026-10-08-e2-r9c/README.md)
 - **E3:** [E3 — Full-chapter R10 browser content gate](chapter-one-e3-r10-browser-gate-brief-2026-10-05.md)

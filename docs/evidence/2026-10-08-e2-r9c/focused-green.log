@@ -1,0 +1,15 @@
+# mutant: mutant.diff (kernel/ts/src/mechanics/policy.ts:44-48), worktree at 78a77cde
+$ node --test $(cat focused-kernel.txt)   # kernel/ts/test/**/*.test.ts minus r9c_* (169 files)
+ℹ tests 906
+ℹ pass 906
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+exit 0
+$ node --test $(cat focused-authority.txt)   # mobile/authority/local-story/*.test.ts minus r9c_* (67 files)
+ℹ tests 474
+ℹ pass 473
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+exit 0

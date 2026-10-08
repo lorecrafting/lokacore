@@ -1,0 +1,5 @@
+$ node -e 'const r=JSON.parse(require("fs").readFileSync("report.json","utf8")); const a=require("assert"); a.equal(r.status,"pending"); a.equal(r.certification_verdict,null); a.deepEqual([r.candidate.id,r.candidate.version,r.candidate.content_hash],["r9c_interactions","0.0.1","7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263"]); a.equal(r.source_sha,"78a77cde5327c468c50bbf045bfb6043eeaad3ba"); a.equal(r.source_artifact.status,"pass"); a.deepEqual(r.receipts.map(x=>x.exit_status),[0,0,0,0,0]); a.deepEqual([r.simulation.status,r.simulation.sequences],["pending",100]); a.deepEqual(r.pending.map(p=>p.gate),["PATH_COVERAGE","INDEPENDENT_REVIEW","BROWSER_HUMAN","NATIVE"]); console.log("report.json ok:", r.candidate.id, r.candidate.version, r.candidate.content_hash)'
+report.json ok: r9c_interactions 0.0.1 7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263
+exit 0
+$ test ! -e repro.json   # in the runner output directory
+exit 0

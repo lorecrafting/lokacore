@@ -1,0 +1,31 @@
+$ node --test kernel/ts/test/r9c_*.test.ts mobile/authority/local-story/r9c_*.test.ts
+✔ family 4: a refused move draws nothing; a missed round draws once per attack (175.905416ms)
+✔ family 4: a learned but DEX-9 actor cannot Bandage; at DEX 10 the same item cures (159.303375ms)
+✔ family 1: identity, custody and trade on r9c keep every ID and literal (180.698209ms)
+✔ family 2: one belfry snapshot forks into exactly one terminal and one acknowledged ending (229.483625ms)
+✔ family 3: one ledger, liquid and fuel carried through the paid dream and elapsed jobs (811.924375ms)
+✔ family 5: watch credit pauses through the crow jobs and completes at four (337.534958ms)
+✔ family 5: deer sight at a population boundary in both orders, then a fatal hit (204.5695ms)
+✔ the synthetic artifact loads with its pinned hash and lock and allocates the oracle IDs (215.461291ms)
+✔ malformed and unknown-capability variants are refused before any world exists (170.906708ms)
+✔ D1: bleed, Flee west, board while bleeding, die on the isle, cross free for the corpse (1882.49ms)
+✔ family 4: a pack death separates Wren and fails the watch; Rejoin and retry restart cleanly (2744.727375ms)
+✔ families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and the crow keep IDs (4920.758334ms)
+✔ family 1 commits and reopens every custody, trade, door and knowledge step (1821.086875ms)
+✔ family 2 forks one belfry save into Ring and Silence, each acknowledged once (3354.167084ms)
+✔ family 3 durable: ledger, liquid, fuel and dream reopen and replay at every step (1756.030375ms)
+✔ family 5 durable: patrol detour through crow jobs reopens and completes at four (1707.3065ms)
+✔ family 5 durable: deer flight at the boundary and the fatal hit reopen exactly (314.638542ms)
+✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (698.406167ms)
+✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (1973.486625ms)
+✔ F3 family 3 paid Rest settlement: full write, lost ack (207.130958ms)
+✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (107.535959ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10136.86825
+exit 0
