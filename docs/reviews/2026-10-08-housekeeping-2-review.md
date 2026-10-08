@@ -58,3 +58,20 @@ re-arm note); routing rows; plugin line; record marked (paraphrased), index and 
 
 Delivery lanes text and step 7 do not contradict each other: the shared draft branch is the default, and
 Hosted is kept for a slice that must merge alone.
+
+## Fix round 2: `d10a1bb7` (merge `336d469b`, record cherry-pick `85fc001a`)
+
+**Verdict: APPROVE WITH NOTES**
+
+- Cherry-pick `85fc001a` has the same content as the round 1 record `41a45f76`.
+- Merge `336d469b` (parents `85fc001a`, main `7a1b0bf9`): every file it brings in has main's content,
+  except `docs/CHECKS.md` (only this branch's two `sync_pr.sh` lines) and `docs/reviews/README.md`. Commit
+  `d10a1bb7` then moves this branch's index line last, after main's #317 line.
+- Should-fix (record not pushed): fixed. `docs/WORKFLOW.md:100` (PM passes the sha kept as `review-<N>`,
+  developer cherry-picks it, otherwise the PM's sync or merge push carries it, PM deletes the ref after the
+  merge), `.claude/agents/developer.md:53`, `docs/WORKFLOW.md:294` and `.claude/agents/reviewer.md:41`
+  agree with each other.
+- Nit (sync after each merge): fixed in `docs/system/owner-rules.md:210` and the decision record bullet.
+- **Nit** `.claude/agents/reviewer.md:41` and `docs/WORKFLOW.md:294`: `git branch review-<N> HEAD` fails
+  with "already exists" in a re-check round, because the ref lives until the merge. The PM's round 2 brief
+  used `git branch -f`. The sha is still returned, so nothing is lost.
