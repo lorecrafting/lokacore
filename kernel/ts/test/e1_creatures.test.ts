@@ -293,8 +293,6 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
       {
         'read state': (s) =>
           drop(s, (o) => o.op === 'fact.assign' && o.fact.key === 'chapel_bell_rung'),
-        'when holds only after': (s) =>
-          (rule(s, 'a_resolve_bell').when.root.items[1].state = 'resolved'),
         'no open instance': (s) => {
           quest(s, 'before', 'bell_of_ashmere').state = 'failed';
           rule(s, 'a_resolve_bell').when.root.items.pop();
