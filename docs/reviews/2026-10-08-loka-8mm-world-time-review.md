@@ -70,3 +70,21 @@ Unmutated head: kernel 7/7, mobile 4/4.
   every existing chapter-one device save that showed the picker under the old build now opens as
   `save_corrupt`. Permitted by the forward-development policy and stated plainly in the PR and the
   decision record; the PM should carry it to the owner.
+
+## Fix round 1 at `b924d1f2`: APPROVE WITH NOTES
+
+Scoped to fix commit `b924d1f2`, the merge `898efcc5` and the cherry-picked records.
+
+- Merge `898efcc5` (parents `849ae329`, `a8135997` = `origin/main`): `git diff a8135997 898efcc5`
+  is exactly the PR's 13 files with the same line counts as `c66efda9..849ae329`, so it brings in only main's content.
+- Cherry-picked records: this record is byte-identical to `1d3de561`. The index drops only the
+  superseded APPROVE line for #323, and the last two lines are this review and the second opinion.
+- Nit disposition (`kernel/ts/test/character_choice.test.ts:86-90`): **fixed**. A forged id before
+  the choice now pins `permission_denied`. With the gate moved between `identity` and the command-id
+  check, the test fails (`invalid_state` instead of `permission_denied`).
+- Second-opinion should-fix (`mobile/authority/local-story/r9c_elapsed_jobs.test.ts:379-382`):
+  **fixed**. The test now closes and reopens between the choice and the first post-choice pulse.
+  Mutant: before selection, keep `old.wall_ms` in `capture` (no wall re-anchor). Result: fails
+  with `274800` instead of `67800`.
+- Unmutated `b924d1f2`: kernel `character_choice` and mobile `r9c_elapsed_jobs` pass. Logs: `pr323-r1.log`.
+- The open item above (every pre-choice v042 device save refuses) is unchanged and not blocking.
