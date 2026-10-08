@@ -3,17 +3,13 @@ defmodule Loka.ContentJournalTest do
   # Known answer: independent Python extension of the frozen ferry artifact, never a kernel.
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_journal")}
   @src "cartridges/ashmere_journal"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_journal_hash.json"))
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
-  defp compile(dir, file, change) do
-    File.cp_r!(@src, dir)
-    path = Path.join(dir, file)
-    File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
-    Loka.Content.compile(dir)
-  end
+  defp compile(dir, file, change), do: compile(dir, [{file, change}])
 
   defp diagnostic(code, path, data) do
     %{
@@ -33,12 +29,12 @@ defmodule Loka.ContentJournalTest do
 
   # Breaks: the compiler skips a journal's text checks, producing undefined journal text; the
   # loader's matching cases are in fixtures/cartridge_loader.json with literal paths/data.
-  test "journal stage and outcome texts need catalog entries", %{tmp_dir: dir} do
+  test "journal stage and outcome texts need catalog entries", %{dir: dir} do
     for {key, suffix} <- [
           {"quest.lantern.return", "objectives_met"},
           {"quest.lantern.carried", "outcomes.carry"}
         ] do
-      assert compile(Path.join(dir, suffix), "text.json", &Map.delete(&1, key)) ==
+      assert compile(dir, "text.json", &Map.delete(&1, key)) ==
                {:error,
                 [
                   diagnostic("UNRESOLVED_REFERENCE", "quests/lantern.journal." <> suffix, %{
@@ -49,7 +45,7 @@ defmodule Loka.ContentJournalTest do
   end
 
   # Breaks: a journal without failed text passes schema validation and has no terminal fallback.
-  test "the failed stage is required", %{tmp_dir: dir} do
+  test "the failed stage is required", %{dir: dir} do
     assert compile(
              dir,
              "quests/lantern.json",

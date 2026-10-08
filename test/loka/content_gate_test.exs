@@ -6,26 +6,11 @@ defmodule Loka.ContentGateTest do
   # protocol/fixtures/cartridge_gate_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_gate")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_gate_hash.json"))
   @src "cartridges/ashmere_gate"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-
-  # ashmere_gate's source with `files` merged over it (nil removes a file).
-  defp compile(dir, files) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          into: %{},
-          do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
-
-    for {rel, v} <- Map.merge(base, files), v != nil do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp edit(rel, path, v), do: %{rel => put_in(src(rel), path, v)}
@@ -58,7 +43,7 @@ defmodule Loka.ContentGateTest do
 
   # Breaks: a short barrier or key_item reference left short (the loader would reject it).
   test "full barrier, key_item and barrier_state references compile to the same artifact",
-       %{tmp_dir: dir} do
+       %{dir: dir} do
     gatehouse =
       src("rooms/gatehouse.json")
       |> put_in(["exits", "north", "barrier"], ref("barrier", "oak_door"))
@@ -75,7 +60,7 @@ defmodule Loka.ContentGateTest do
 
   # Breaks: the key_item expansion catching a details map with a detail keyed key_item (its
   # siblings' short references then stay short).
-  test "a detail keyed key_item leaves its siblings' references expanded", %{tmp_dir: dir} do
+  test "a detail keyed key_item leaves its siblings' references expanded", %{dir: dir} do
     sill = %{"aliases" => ["sill"], "description" => "detail.oak_door"}
 
     {:ok, a, _touch_link_warning} =
@@ -87,13 +72,13 @@ defmodule Loka.ContentGateTest do
 
   # Breaks: an exit, key_item or barrier_state naming what the cartridge lacks compiles (the
   # loader rejects it).
-  test "an unknown barrier or key item is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+  test "an unknown barrier or key item is UNRESOLVED_REFERENCE", %{dir: dir} do
     trapdoor = %{"target" => "ashmere_gate@0.0.1:barrier/trapdoor"}
     courtyard = edit("rooms/courtyard.json", ["exits", "south", "barrier"], "trapdoor")
     gatehouse = put_in(src("rooms/gatehouse.json"), ["exits", "north", "barrier"], "trapdoor")
 
     assert compile(
-             Path.join(dir, "a"),
+             dir,
              Map.put(courtyard, "rooms/gatehouse.json", gatehouse)
            ) ==
              {:error,
@@ -103,7 +88,7 @@ defmodule Loka.ContentGateTest do
               ]}
 
     assert compile(
-             Path.join(dir, "b"),
+             dir,
              edit("barriers/cell_door.json", ["key_item"], ref("room", "cell"))
            ) ==
              {:error,
@@ -113,7 +98,7 @@ defmodule Loka.ContentGateTest do
                 })
               ]}
 
-    assert compile(Path.join(dir, "c"), edit("rooms/gatehouse.json", variant(), "trapdoor")) ==
+    assert compile(dir, edit("rooms/gatehouse.json", variant(), "trapdoor")) ==
              {:error,
               [
                 d(
@@ -123,7 +108,7 @@ defmodule Loka.ContentGateTest do
                 )
               ]}
 
-    assert compile(Path.join(dir, "d"), %{
+    assert compile(dir, %{
              "text.json" => Map.delete(src("text.json"), "barrier.oak_door.short")
            }) ==
              {:error,
@@ -136,9 +121,9 @@ defmodule Loka.ContentGateTest do
 
   # Breaks: two faces of one passage with independent state (one names another barrier, or
   # none) compile, so a door is closed from one side and open from the other.
-  test "both faces of a passage name one barrier (BARRIER_MISMATCH)", %{tmp_dir: dir} do
+  test "both faces of a passage name one barrier (BARRIER_MISMATCH)", %{dir: dir} do
     assert compile(
-             Path.join(dir, "a"),
+             dir,
              edit("rooms/cell.json", ["exits", "west", "barrier"], "oak_door")
            ) ==
              {:error,
@@ -154,7 +139,7 @@ defmodule Loka.ContentGateTest do
         update_in(courtyard, ["exits", "south"], &Map.delete(&1, "barrier"))
     }
 
-    assert compile(Path.join(dir, "b"), open) ==
+    assert compile(dir, open) ==
              {:error,
               [
                 d("BARRIER_MISMATCH", "rooms/courtyard.exits.south"),
@@ -163,7 +148,7 @@ defmodule Loka.ContentGateTest do
   end
 
   # Breaks: a barrier or barrier_state compiling without barrier@1 in the manifest.
-  test "a barrier needs barrier@1 (UNDECLARED_CAPABILITY)", %{tmp_dir: dir} do
+  test "a barrier needs barrier@1 (UNDECLARED_CAPABILITY)", %{dir: dir} do
     m = src("cartridge.json")
 
     files = %{
@@ -183,7 +168,7 @@ defmodule Loka.ContentGateTest do
 
   # Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection (room and
   # opposite direction), so two passages between the same rooms cannot carry two doors.
-  test "two passages between the same rooms may carry different barriers", %{tmp_dir: dir} do
+  test "two passages between the same rooms may carry different barriers", %{dir: dir} do
     blue = %{"keywords" => ["hatch"], "short" => "barrier.oak_door.short", "initial" => "open"}
     way = fn b -> %{"to" => "courtyard", "barrier" => b} end
     back = fn b -> %{"to" => "gatehouse", "barrier" => b} end
@@ -201,9 +186,9 @@ defmodule Loka.ContentGateTest do
       }
     end
 
-    assert {:ok, _, []} = compile(Path.join(dir, "a"), files.("blue"))
+    assert {:ok, _, []} = compile(dir, files.("blue"))
 
-    assert compile(Path.join(dir, "b"), files.("oak_door")) ==
+    assert compile(dir, files.("oak_door")) ==
              {:error,
               [
                 d("BARRIER_MISMATCH", "rooms/courtyard.exits.east"),
@@ -214,20 +199,20 @@ defmodule Loka.ContentGateTest do
   # Review #50 A1. Breaks: a locked door whose key lies only behind it (or that has no key)
   # compiling into a cartridge no one can finish. ashmere_gate itself is the passing case: the
   # iron key lies past the oak door, which starts closed, not locked.
-  test "a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY", %{tmp_dir: dir} do
+  test "a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY", %{dir: dir} do
     behind = edit("items/iron_key.json", ["location", "room"], "cell")
     stuck = {:error, [d("BARRIER_UNREACHABLE_KEY", "barriers/cell_door")]}
-    assert compile(Path.join(dir, "a"), behind) == stuck
+    assert compile(dir, behind) == stuck
 
     keyless = %{
       "barriers/cell_door.json" => Map.delete(src("barriers/cell_door.json"), "key_item")
     }
 
-    assert compile(Path.join(dir, "b"), keyless) == stuck
+    assert compile(dir, keyless) == stuck
 
     oak = edit("barriers/oak_door.json", ["initial"], "locked")
 
-    assert compile(Path.join(dir, "c"), oak) ==
+    assert compile(dir, oak) ==
              {:error,
               [
                 # the key the oak door now hides: the cell door is out of reach too
@@ -237,7 +222,7 @@ defmodule Loka.ContentGateTest do
   end
 
   # Review #50 re-review B1. Breaks: a key inside a container item not counted as in reach.
-  test "a key inside a container in a reachable room is in reach", %{tmp_dir: dir} do
+  test "a key inside a container in a reachable room is in reach", %{dir: dir} do
     satchel =
       src("items/iron_key.json")
       |> Map.put("keywords", ["satchel"])
@@ -255,7 +240,7 @@ defmodule Loka.ContentGateTest do
 
   # Review #50 re-review S2. Breaks: a face paired without the "leads back" condition, so a door
   # on A.north to B and B.south to C (a bent passage) is taken for one door.
-  test "a door on a bent passage is BARRIER_MISMATCH", %{tmp_dir: dir} do
+  test "a door on a bent passage is BARRIER_MISMATCH", %{dir: dir} do
     bent = %{"to" => "cell", "barrier" => "oak_door"}
 
     assert compile(dir, edit("rooms/courtyard.json", ["exits", "south"], bent)) ==

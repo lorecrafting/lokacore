@@ -1,17 +1,9 @@
 defmodule Loka.ContentNoticeBoardsTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
-
-  defp source(dir, change) do
-    File.cp_r!("cartridges/ashmere_missing_child", dir)
-    path = Path.join(dir, "rooms/drowned_lantern.json")
-    room = path |> File.read!() |> JSON.decode!()
-    File.write!(path, JSON.encode!(change.(room)))
-    Loka.Content.compile(dir)
-  end
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
 
   # Breaks: malformed same-room membership or unbound board/notice title keys compile.
-  test "compiler rejects board references and missing catalog keys", %{tmp_dir: dir} do
+  test "compiler rejects board references and missing catalog keys", %{dir: dir} do
     for {name, change, suffix, target} <- [
           {"remote",
            &put_in(
@@ -49,7 +41,9 @@ defmodule Loka.ContentNoticeBoardsTest do
              "text" => "readable.notice"
            }), "", nil}
         ] do
-      assert {:error, errors} = source(Path.join(dir, name), change)
+      assert {:error, errors} =
+               Loka.ContentSource.compile(dir, [{"rooms/drowned_lantern.json", change}])
+
       path = "rooms/drowned_lantern.details.rumor_board.notice_board" <> suffix
 
       assert Enum.any?(
@@ -63,35 +57,27 @@ defmodule Loka.ContentNoticeBoardsTest do
 
   # Breaks: a board with no readable sibling bypasses readable@1 ownership checks.
   test "board metadata still requires readable capability when sibling Read fields are absent", %{
-    tmp_dir: dir
+    dir: dir
   } do
-    root = Path.join(dir, "lock")
-    File.cp_r!("cartridges/ashmere_missing_child", root)
-    manifest = Path.join(root, "cartridge.json")
-
-    File.write!(
-      manifest,
-      manifest
-      |> File.read!()
-      |> JSON.decode!()
-      |> update_in(["requires", "capabilities"], &Map.delete(&1, "readable"))
-      |> JSON.encode!()
-    )
-
-    for path <- Path.wildcard(Path.join(root, "rooms/*.json")) do
+    unread = fn room ->
       room =
-        path
-        |> File.read!()
-        |> JSON.decode!()
-        |> update_in(["details"], fn ds ->
+        update_in(room, ["details"], fn ds ->
           if ds, do: Map.new(ds, fn {k, d} -> {k, Map.delete(d, "readable")} end), else: nil
         end)
 
-      room = if is_nil(room["details"]), do: Map.delete(room, "details"), else: room
-      File.write!(path, JSON.encode!(room))
+      if is_nil(room["details"]), do: Map.delete(room, "details"), else: room
     end
 
-    assert {:error, errors} = Loka.Content.compile(root)
+    rooms =
+      for path <- Path.wildcard(Path.join(dir, "rooms/*.json")), do: Path.relative_to(path, dir)
+
+    changes = [
+      {"cartridge.json",
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "readable") end)}
+      | Enum.map(rooms, &{&1, unread})
+    ]
+
+    assert {:error, errors} = Loka.ContentSource.compile(dir, changes)
 
     assert Enum.any?(
              errors,

@@ -47,5 +47,4 @@ for ordinal,label in enumerate(labels):
  domain=['loka-id-v1','0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f','00000000-0000-0000-0000-000000000000',ordinal]
  digest=bytearray(hashlib.sha256(json.dumps(domain,separators=(',',':')).encode()).digest()[:16]);digest[6]=(digest[6]&15)|128;digest[8]=(digest[8]&63)|128
  answers[label]=str(uuid.UUID(bytes=bytes(digest)))
-here.joinpath('missing_child_v019_ids.json').write_text(json.dumps(answers,indent=2)+'\n')
 print(f'Independent v019: {hash}, {len(answers)} initial IDs.')
