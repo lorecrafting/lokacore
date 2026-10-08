@@ -34,3 +34,12 @@
 
 - N1 (nit) `kernel/ts/test/e1.ts:252-254`: no test pins the report `candidate` block to the selected row; the hard-coded-id mutant stays green and an r9c report would name `ashmere_missing_child` beside r9c's hash. The brief chose a manual receipt here (PR body receipt 1 shows `candidate.id` `r9c_interactions`). Ask S5 to assert `candidate.id` on its retained report.
 - N2 (nit) `kernel/ts/test/e1.ts:276`: `INDEPENDENT_REVIEW` reason "final published A-D plus fixes candidate" is chapter wording on an r9c report; same class as the known `deployment.reason` item, fold into that fix.
+
+## Fix round 1 at `ac2ca37e`
+
+Scoped to the dispositions and their direct callers (`reportOf`: `certify` and `e1.test.ts` only).
+
+- N1 fixed: `reportOf` exported (`e1.ts:237`); test A asserts the r9c report `candidate.id` and `content_hash`. Re-ran mutants: hard-coded chapter id: only A red (exit 1); hard-coded chapter content hash: only A red.
+- N2 fixed: `e1.ts:276` reason is candidate-neutral. Also `e1.ts:263` `deployment.reason` is "private candidate; no deployment identity", which matches the spec's "no deployment identity; record the reason".
+- Spec `:19` wording ("the admitted candidate's forms") keeps the meaning.
+- **Verdict: APPROVE.** Nothing open.
