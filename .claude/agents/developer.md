@@ -45,7 +45,7 @@ Before handing off:
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 
-Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A run you expect to take over ~10 minutes: stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Past about 220k tokens, hand the remaining work back to the PM for a fresh agent.
+Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Past about 220k tokens, hand the remaining work back to the PM for a fresh agent.
 
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 

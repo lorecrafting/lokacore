@@ -24,13 +24,13 @@ print("open housekeeping issues: %d" % len(open_))
 for i in open_:
     print("  %s %s" % (i["id"], i["title"]))
 print("newest=" + max([i["created_at"][:19] for i in issues] or [""]))
-' 2>/dev/null) || hk=
+' 2>/dev/null)
 fi
 if [ -z "$hk" ]; then
   echo "housekeeping queue unavailable (br or json error)"
 else
-  echo "$hk" | grep -v '^newest='
-  newest=$(echo "$hk" | sed -n 's/^newest=//p')
+  printf '%s\n' "$hk" | grep -v '^newest='
+  newest=$(printf '%s\n' "$hk" | sed -n 's/^newest=//p')
   merged=$(TZ=UTC git log -1 --merges --date=format-local:%Y-%m-%dT%H:%M:%S --format=%cd origin/main 2>/dev/null)
   if [ -n "$merged" ] && [ "$(printf '%s\n%s\n' "$newest" "$merged" | sort | tail -1)" = "$merged" ] && [ "$newest" != "$merged" ]; then
     echo "last session may have ended without a retro: write one from merged PRs, review records and CI since then"

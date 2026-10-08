@@ -9,14 +9,16 @@
 set -u
 [ $# -eq 2 ] && [ -f "$1" ] || { echo "usage: $0 <mutants-file> <full-test-command>" >&2; exit 2; }
 list=$1 full=$2
-tab=$(printf '\t')
 tmp=$(mktemp -d)
 cur=
 trap '[ -z "$cur" ] || cp "$tmp/orig" "$cur"; rm -rf "$tmp"' EXIT
 trap 'exit 130' INT TERM
 rc=0
-while IFS=$tab read -r file old new narrow; do
-  case $file in ''|'#'*) continue ;; esac
+while IFS= read -r line; do
+  case $line in ''|'#'*) continue ;; esac
+  # cut keeps empty fields (a deletion mutant has an empty new text); read with IFS=tab would merge them.
+  file=$(printf '%s\n' "$line" | cut -f1) old=$(printf '%s\n' "$line" | cut -f2)
+  new=$(printf '%s\n' "$line" | cut -f3) narrow=$(printf '%s\n' "$line" | cut -f4)
   cp "$file" "$tmp/orig" || { echo "FAIL	$file	not readable"; rc=1; continue; }
   cur=$file
   if ! python3 -I -c 'import sys
@@ -24,8 +26,8 @@ f, o, n = sys.argv[1:]
 s = open(f).read()
 sys.exit(1) if s.count(o) != 1 else open(f, "w").write(s.replace(o, n))' "$file" "$old" "$new"; then
     res=APPLY-FAIL rc=1
-  elif [ -n "$narrow" ] && ! sh -c "$narrow" > /dev/null 2>&1; then res=red-narrow
-  elif ! sh -c "$full" > /dev/null 2>&1; then res=red-full
+  elif [ -n "$narrow" ] && ! sh -c "$narrow" > /dev/null 2>&1 < /dev/null; then res=red-narrow
+  elif ! sh -c "$full" > /dev/null 2>&1 < /dev/null; then res=red-full
   else res=SURVIVED
   fi
   cp "$tmp/orig" "$file"
