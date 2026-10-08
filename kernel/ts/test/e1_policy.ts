@@ -8,11 +8,23 @@ import { uses as dialogueUses } from '../src/content/cartridge_dialogues.ts';
 import { uses as reactionUses } from '../src/content/cartridge_reactions.ts';
 import { VERBS } from '../src/commands/verbs.ts';
 
-export const CANDIDATE = {
-  id: 'ashmere_missing_child',
-  version: '0.0.42',
-  content_hash: '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b',
-};
+// The only admitted E1 candidates; outside POLICY_HASH (docs/system/e1-certification.md).
+const CANDIDATES = [
+  {
+    id: 'ashmere_missing_child',
+    version: '0.0.42',
+    content_hash: '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b',
+    source: 'cartridges/ashmere_missing_child',
+    content_test: 'test/loka/content_missing_child_test.exs',
+  },
+  {
+    id: 'r9c_interactions',
+    version: '0.0.1',
+    content_hash: '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263',
+    source: 'cartridges/r9c_interactions',
+    content_test: 'test/loka/content_r9c_interactions_test.exs',
+  },
+] as const;
 export const sha256 = (bytes: string | Uint8Array) =>
   createHash('sha256').update(bytes).digest('hex');
 
@@ -78,16 +90,11 @@ export function admitCandidate(bytes: Uint8Array) {
   const cartridge = admitted.cartridge as Cartridge;
   const policy = applicability(cartridge);
   const { id, version } = cartridge.manifest;
-  if (
-    id !== CANDIDATE.id ||
-    version !== CANDIDATE.version ||
-    admitted.hash !== CANDIDATE.content_hash
-  )
-    throw new Error(
-      'wrong E1 candidate: expected ashmere_missing_child@0.0.42 and its frozen hash',
-    );
+  const row = CANDIDATES.find((r) => r.id === id);
+  if (!row || version !== row.version || admitted.hash !== row.content_hash)
+    throw new Error(`wrong E1 candidate: ${id}@${version} is not a listed release and frozen hash`);
   const artifact = encode({ cartridge, content_hash: admitted.hash } as never);
-  return { cartridge, hash: admitted.hash, artifact, policy };
+  return { cartridge, hash: admitted.hash, artifact, policy, row };
 }
 
 /** No fallback row: an admitted engine feature with no proof disposition blocks. */

@@ -7,12 +7,16 @@ The E1 exact candidate proof policy, split out of [Architecture](architecture.md
 E1 implements the bounded minimum from [the E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md),
 archived [09 §1a and §20](../archive/spec/09-cartridge-lab-certification.md) and
 [14 R9](../archive/spec/14-implementation-plan.md#r9--cartridge-lab-v1).
-The private runner accepts only the [current bundled candidate](cartridge.md#current-bundled-chapter).
+The private runner accepts exactly two literal candidates and refuses every other admitted
+artifact, selecting the row by the admitted id and requiring its version and content hash:
+the [current bundled candidate](cartridge.md#current-bundled-chapter)
+`ashmere_missing_child@0.0.42` (`5d8b0e3a…50fc8b`) and the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
+`r9c_interactions@0.0.1` (`7d74fac7…d17263`). The table is not part of the policy digest.
 It freezes normalized artifact bytes before execution, checks the independent known answer,
 and admits those bytes through the real loader. In particular the loader owns the implicit
 position/scene → fact dependency; certification does not replace that check.
 
-The executable policy is bounded to this candidate's admitted forms. Derive used definitions,
+The executable policy is bounded to the admitted candidate's forms. Derive used definitions,
 policy operations, authored commands and engine commands from the admitted artifact and the
 engine ownership tables; retain each use and its location. Every admitted locked capability
 also supplies conservative dependency obligations, including capabilities that own no command.
@@ -63,6 +67,8 @@ through trusted elapsed input. Reuse existing clock segmentation and invariant c
 player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
 implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
 labeled when needed for a controlled admission or fault boundary.
+The recorder (`e1_cases.ts`) records the v042 chapter only; on r9c bytes it refuses (exit 1)
+before recording any case, because its v042 dispositions do not resolve, so r9c never yields a pass.
 Independently checked chapter routes enter the recorder as named fresh cases only with
 their literal result assertions intact; their committed steps must pass the same semantic
 replay, SQLite observation and candidate/source checks as the ending cases.
