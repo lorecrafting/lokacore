@@ -29,3 +29,15 @@
 3. nit `deadline-receipts.ts:82`: `<=`→`<` survives. This only makes the check stricter (a lawful resolution exactly at `through` would be refused), so it is outside the forged-accept scope.
 
 Over-engineering: none found.
+
+## Fix round 1 re-check at `df5bbe39`
+
+- Reviewer: fresh independent Opus, acting as the same reviewer from this record. Scope: fix commit `7cfdfabd` only. `3fc2b0ab` and `df5bbe39` are main merges and `382fde19` rebuilds the index: `git diff 9acaf2b5 df5bbe39` touches only this PR's six `*.test.ts` files and its review files. No production change.
+- **Verdict: APPROVE**
+
+1. Blocker `deadline-save.ts:156`: **fixed.** New case `chandlers_debt_rows.test.ts:176`: the `expire` stage, job `pending`, `head.clock=237600`. It expects the literal `save_corrupt` (`:233`). Narrow `chandlers_debt*.test.ts` on the head: 96/0. With `:156` deleted: 95/1, and the only red test is the new case.
+2. Question `deadline-receipts.ts:37`: **the reason holds, including with exchanges.** Forgery: `deliver` stage, terminal receipt `priory_fen_axis` op `expected` plus event `old` set to a string. All runs below are on v016, with exchanges forced on through a throwaway `exchange-save.ts` edit (v019+ bundles carry exchanges and the deadline).
+   - Replay on, `:37` deleted: refused at `receipt-history.ts:37`, because the replayed decision differs. This is the developer's reason.
+   - Replay skipped, `:37` deleted: still refused, at `deadline-save.ts:274`. A string that passes the schema must match the `Key` pattern `^[a-z][a-z0-9_]*$` (`""` and `"0"` fail `validate` at `deadline-receipts.ts:100`). So `expected + amount` starts with a letter, `Math.max` gives `NaN`, and the check at `:39-40` fails.
+   - So `:37` is not reachable alone, and there is no production bug. The row could also cite the `:40` NaN reason. That is optional.
+3. Fix-touched helpers: the new case uses only the existing `forgeRows` and `job`. No helper was changed.
