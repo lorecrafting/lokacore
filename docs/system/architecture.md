@@ -312,15 +312,22 @@ bundle loot item only when the receipt moves that member's own spawned loot from
 A bleed definition is witnessed only when the receipt opens a new active row equal to the
 committed row, sourced by a created NPC whose attack names that bleed, after its positive-loss
 hit at time t, ending at t + `duration` with its first tick at t + `tick_every`. A reaction
-on a committed `fact_changed` event witnesses its definition, `when` root and each
-`population.suppress` step only when it has at least one apply step, every apply step is
-`population.suppress`, the policy holds after the accepted step, and each named plan,
-unsuppressed before the accepted step, newly gains suppression caused by that event, ending
-at its time plus the authored duration, matching the receipt's `population.control` row.
-Descendants of that `when` root stay pending: the [branch evidence rule](#e1-policy-branch-evidence)
-is not yet bound for reactions.
-Sightings, wander ticks, bleed refreshes and reactions with any other apply step witness none
-of these paths.
+triggered by a committed event of the accepted step witnesses its definition and each apply
+step only when it has at least one apply step and every apply step has an exact committed
+effect witness in one writer group G of the receipt. If it has a `when`, that root must also
+hold in the [reaction's state](#e1-policy-branch-evidence), which then credits the root and
+its descendants by the branch evidence rule. The effect witnesses, each in G and matching the
+committed after state:
+`quest.activate` needs no prior instance of the quest, a `quest.activate` op creating an
+active player instance and a `quest_activated` event naming it; `quest.resolve` needs the
+quest's active or objectives_complete instance to become resolved with the authored outcome
+and a matching `quest_resolved` event; `quest.fail` needs the same transition to failed with
+the authored outcome (the runtime emits no event); `fact.assign` needs the fact to change from
+the op's expected value to the authored value, with a matching `fact_changed` event;
+`population.suppress` needs each named plan, unsuppressed before the accepted step, to newly
+gain suppression caused by that event, ending at its time plus the authored duration, matching
+the receipt's `population.control` row. A step of any other kind has no effect witness.
+Sightings, wander ticks and bleed refreshes witness none of these paths.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
@@ -358,9 +365,14 @@ Evaluation uses the state and target the runtime judged: the state before the ac
 for the selected journal variant. A resolved quest objective (its instance's player, no
 target) may be judged before the command or mid-command after effects, so it is evaluated
 in both the before and the committed resulting state: a root holding in both credits only
-the paths credited in both, and a root holding in one state uses that state. Replay
-recomputes these credits from the replayed before/after states and accepts only paths also
-recorded in the retained step receipt, as for journal variants.
+the paths credited in both, and a root holding in one state uses that state. A reaction's
+`when` root (the step's player, no target) holds at neither boundary in general, so it is
+evaluated in the state that reaction's delivery read: the before state composed with the
+receipt's ops of writer groups before G (the group holding its effects), at its cause event's
+logical time. The same polarity rule applies below that root; a negative-polarity node is
+never credited. Replay recomputes these credits from the replayed before/after states and
+the retained receipt ops, and accepts only paths also recorded in the retained step receipt,
+as for journal variants.
 
 A negative-polarity path, or any other authored path no execution can witness, closes only
 by a reviewed disposition: a row `{path, reason, evidence, review}` in the checked-in table
