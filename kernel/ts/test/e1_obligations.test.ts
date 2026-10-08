@@ -358,39 +358,41 @@ test('E1 reports a disposition apart from witnessed and pending paths', () => {
 test('E1 binds a refusal row to its case final replayed refusal', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-e1-refusal-'));
   const [name, recipe] = REFUSALS.find(([n]) => n === 'refuse-peg-active')!;
-  const a = caseHost(
-    admitCandidate(bytes),
-    join(dir, 'save.db'),
-    join(dir, 'case.jsonl'),
-    undefined,
-    {
-      case_id: name,
-      source,
-      fault_schedule: [],
-    },
-  );
+  const replayed = (run: string, steps: (a: ReturnType<typeof caseHost>) => unknown) => {
+    const log = join(dir, `${run}.jsonl`),
+      a = caseHost(admitCandidate(bytes), join(dir, `${run}.db`), log, undefined, {
+        case_id: name,
+        source,
+        fault_schedule: [],
+      });
+    try {
+      steps(a);
+      a.record({
+        kind: 'finish',
+        steps: a.commands.length,
+        digest: a.digest(),
+        state_hash: hash(a.story.world().state as never),
+      });
+    } finally {
+      a.close();
+    }
+    return replayCase(bytes, readFileSync(log, 'utf8'), source).final;
+  };
   try {
-    recipe(a);
-    a.record({
-      kind: 'finish',
-      steps: a.commands.length,
-      digest: a.digest(),
-      state_hash: hash(a.story.world().state as never),
-    });
-    const { final } = replayCase(bytes, readFileSync(join(dir, 'case.jsonl'), 'utf8'), source);
+    const final = replayed('refused', recipe);
     assert.equal(final, 'invalid_state');
+    const accepted = replayed('accepted', (a) =>
+      a.invoke('choose_ancestry', [], { ancestry: 'road_born' }),
+    );
     const path = `/dialogues/${k}dialogue/a_peg_debt/policy/root/item/items/0`;
     const row = { path, reason: 'r', evidence: 'e', review: 'v' };
     const bound = [{ ...row, refusal: { case: name, code: 'invalid_state' } }];
     checkRefusals(new Map([[name, final]]), bound);
-    for (const wrong of [
-      new Map(),
-      new Map([[name, 'accepted']]),
-      new Map([[name, 'not_present']]),
-    ])
-      assert.throws(() => checkRefusals(wrong, bound), /refusal/); // missing, accepted, other reason
+    for (const wrong of [new Map(), new Map([[name, 'not_present']])])
+      assert.throws(() => checkRefusals(wrong, bound), /refusal/); // missing, other reason
+    const acceptedRow = [{ ...row, refusal: { case: name, code: 'accepted' } }];
+    assert.throws(() => checkRefusals(new Map([[name, accepted]]), acceptedRow), /refusal/);
   } finally {
-    a.close();
     rmSync(dir, { recursive: true });
   }
 });

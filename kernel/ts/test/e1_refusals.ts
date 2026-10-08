@@ -82,7 +82,8 @@ export const REFUSALS: [string, (a: CaseHost) => object][] = [
     'refuse-peg-failed',
     (a) => {
       peg(a);
-      a.elapsed(3_457_000); // debt-elapsed's clock 237650, past the 237601 deadline
+      a.elapsed(3_457_000);
+      assert.equal(a.story.world().state.clock, 237650); // debt-elapsed's clock, past the 237601 deadline
       return refuse(a, 'a_peg_debt', 'peg', 'chandlers_debt', 'failed');
     },
   ],

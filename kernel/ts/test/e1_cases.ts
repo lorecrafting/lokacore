@@ -122,7 +122,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
       if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
-    final = e.decision.kind === 'rejected' ? e.decision.error.code : e.decision.kind;
+    final = e.decision.kind === 'rejected' ? e.decision.error.code : null;
     assert.equal(world.state.clock, e.clock);
     assert.deepEqual(world.state.rng, e.rng);
     digest.update(observed.bytes);
@@ -159,7 +159,7 @@ export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOS
     );
 }
 
-/** Fails unless each `refusal` row's case was recorded and its final replayed step was refused with that code. */
+/** Fails unless each `refusal` row's case was recorded and its final replayed step was refused (`finals` holds the code, else null) with that code. */
 export function checkRefusals(finals: Map<string, string | null>, dispositions = DISPOSITIONS) {
   for (const { path, refusal } of dispositions)
     if (refusal) assert.equal(finals.get(refusal.case), refusal.code, `refusal ${path}`);
@@ -301,10 +301,10 @@ function recordCases(bytes: Uint8Array, out: string) {
     for (const branch of ['follow_fox', 'wake'] as const)
       run(`dream-${branch}`, (a) => lanternDream(a, branch));
     for (const [name, recipe] of REFUSALS) run(name, recipe);
+    checkRefusals(finals);
     run('thirty-days', thirtyDays);
     for (const fault of FAULTS)
       run(`sqlite-${fault}`, (a, path) => storageFault(a, path, fault), faultSchedule(fault));
-    checkRefusals(finals);
     assert.deepEqual(source(), identity, 'source changed while recording');
   } catch (e) {
     failure = redact(String(e));
