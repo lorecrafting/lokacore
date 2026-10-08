@@ -57,9 +57,13 @@ function wisp(a: CaseHost, resolve: boolean) {
   return refuse(a, 'a_wisp_offer', 'wisp', 'wisp_ward', resolve ? 'resolved' : 'active');
 }
 
+// Accepting infirmary_herbs with no fenwort is refused (quest_requirement); 3 is its exchange
+// quantity (quests/infirmary_herbs.json).
 const wick = (a: CaseHost) => {
   a.invoke('choose_ancestry', [], { ancestry: 'road_born' });
-  a.move('north', 'north', 'north', 'north', 'north', 'north', 'east');
+  a.move('south', 'south', 'west');
+  for (let n = 0; n < 3; n++) a.invoke('harvest', [a.detail('willow_shade', 'fenwort_patch')]);
+  a.move('east', 'north', 'north', 'north', 'north', 'north', 'north', 'north', 'north', 'east');
   offer(a, 'a_wick_offer', 'wick', 'accept', 'infirmary_herbs');
   return refuse(a, 'a_wick_offer', 'wick', 'infirmary_herbs', 'active');
 };
