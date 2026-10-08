@@ -70,12 +70,13 @@ rc=0; PATH="$tmp/stub:$PATH" capped sh "$bin/merge_queue.sh" 7 01234567 > /dev/n
 # --- integrate_batch.sh ---------------------------------------------------------------------
 # A repo on branch int with stub checks at the paths the script calls; batch adds g.txt and
 # the review commit (on rv) adds a review record on top of batch.
+python3 -c "import json,sys;f=json.load(open('$bin/../protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\"cartridge\":'+f['canonical']+',\"content_hash\":\"'+f['sha256']+'\"}')" > "$tmp/v042.json"
 mk() {
   R=$(mktemp -d); cd "$R"
   git init -q -b int
   mkdir -p kernel/ts/test bin tmp docs/reviews
   echo /tmp/ > .gitignore
-  echo '{}' > tmp/e1-selected-v042.json
+  cp "$tmp/v042.json" tmp/e1-selected-v042.json
   echo '{"scripts":{"typecheck":"node -e 0"}}' > kernel/ts/package.json
   echo "import test from 'node:test'; test('e1', () => {});" > kernel/ts/test/e1.test.ts
   cat > bin/check_ts_size.mjs <<'EOF'
@@ -125,6 +126,9 @@ git rev-parse -q --verify batch > /dev/null && bad 'integrate_batch success: bat
 mk; tip=$(git rev-parse HEAD); git worktree add -q "$R.wt" batch && echo edit > "$R.wt/g.txt"
 ib dirty-worktree 1 3 2
 [ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch dirty-worktree: merged'
+# Break: the recorder runs on another candidate than v042.
+mk; echo '{}' > tmp/e1-selected-v042.json
+ib wrong-artifact 1 3 2
 # Break: the pending count is printed but not compared.
 mk; ib count-mismatch 1 4 2
 # Break: recorder exit 1 (a failed case) is accepted; only exit 2 means pending.

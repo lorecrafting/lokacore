@@ -9,7 +9,9 @@ push=
 [ "${1-}" = --push ] && { push=1; shift; }
 [ $# -eq 3 ] || { echo "usage: $0 [--push] <branch> <review-sha> <expected-pending>" >&2; exit 2; }
 branch=$1 review=$2 want=$3
-artifact=tmp/e1-selected-v042.json # v042 candidate, sha256 1c53bcd8...; gitignored
+artifact=tmp/e1-selected-v042.json # gitignored
+artifact_sha=1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115
+rebuild="python3 -c \"import json,sys;f=json.load(open('protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\\\"cartridge\\\":'+f['canonical']+',\\\"content_hash\\\":\\\"'+f['sha256']+'\\\"}')\" > $artifact"
 cd "$(git rev-parse --show-toplevel)" || exit 2
 logs=$(mktemp -d "${TMPDIR:-/tmp}/integrate_batch.XXXXXX") || exit 2
 echo "logs: $logs"
@@ -25,7 +27,8 @@ step() {
   die "$name failed"
 }
 [ -z "$(git status --porcelain)" ] || die 'working tree not clean'
-[ -f "$artifact" ] || die "missing $artifact"
+[ "$(shasum -a 256 < "$artifact" 2>/dev/null | cut -d' ' -f1)" = "$artifact_sha" ] ||
+  die "$artifact missing or not sha256 $artifact_sha; rebuild with: $rebuild"
 wt=$(git worktree list --porcelain | awk -v b="branch refs/heads/$branch" '/^worktree /{w=substr($0,10)} $0==b{print w}')
 if [ -z "$wt" ]; then wt=$logs/branch; step worktree git worktree add "$wt" "$branch"; fi
 [ -z "$(git -C "$wt" status --porcelain)" ] || die "$wt not clean"
