@@ -114,17 +114,25 @@ Report at the end of the slice, not at every step.
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
-   As soon as the verdict lands on head `<sha>`, run `gh pr merge <N> --auto --merge --match-head-commit <sha>`:
-   GitHub merges when the required checks `ci-green` and `book-e2e-green` pass on that head, so
-   nobody waits on hosted CI, and a later push invalidates it. Each gate fails unless its
-   workflow's `changes` job succeeded (so a draft run never passes) and no job failed or was
-   cancelled. A cancelled run fails the gate: rerun it (`gh run rerun <id>`) and auto-merge proceeds
+   Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
+   `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
+   required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on
+   hosted CI. GitHub keeps auto-merge armed after a later push, so `--match-head-commit` does not
+   guard later pushes. After arming, the only commits allowed on the branch are the PM's own
+   post-verdict commits (a `main` merge, an index line); they need only green CI on the new head,
+   and the PM puts them in one push. Any other push first disarms auto-merge
+   (`gh pr merge <N> --disable-auto`) and sends the PR back to the reviewer; re-arm after the new
+   verdict. Each gate fails unless its workflow's `changes` job succeeded (so a draft run never
+   passes) and no job failed or was cancelled. A cancelled run fails the gate: rerun it
+   (`gh run rerun <id>`) and auto-merge proceeds
    ([owner decision](decisions/owner-decision-required-checks-merge-2026-10-08.md)).
-   Branch protection does not bind admins: the owner, or the PM when the owner asks or for
-   status-only commits (ROADMAP status lines, Beads export, review index lines), may push to
-   `main` directly or merge with `--admin`; never for unreviewed code or to bypass a red check.
-   The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push and re-arms auto-merge on that head; any
-   other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
+   One-time setup, applied by the PM right after the PR that added the gates merges and before the
+   next merge: branch protection on `main` requiring status checks `ci-green` and
+   `book-e2e-green`, `enforce_admins` off, and the repository setting "allow auto-merge" on.
+   Because `enforce_admins` is off, branch protection does not bind admins: the owner, or the PM
+   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, review index
+   lines), may push to `main` directly or merge with `--admin`; never for unreviewed code or to
+   bypass a red check. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
