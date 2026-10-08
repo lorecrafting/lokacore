@@ -140,7 +140,7 @@ function story(t: TestContext, seed: number[], ancestry: string) {
           .map((j) => j.due_time),
       );
       // Every scenario ends before 80000; a changed route fails here instead of looping on.
-      assert.ok(until < 80000, `ran past the pinned route at ${from}`);
+      assert.ok(until < 80000, `no due job or past the pinned route at ${from}`);
       const evidence = { expected_run_id: s.runId(), from, until };
       const reply = s.elapsed(evidence);
       assert.equal(reply.kind, 'saved', JSON.stringify(reply));
@@ -148,7 +148,7 @@ function story(t: TestContext, seed: number[], ancestry: string) {
       assert.equal(s.world().state.clock, until);
       reopen();
       const disk = rows();
-      s.elapsed({ ...evidence, expected_run_id: s.runId() });
+      assert.equal(s.elapsed({ ...evidence, expected_run_id: s.runId() }).kind, 'saved');
       assert.deepEqual(rows(), disk);
       return (reply as any).decision;
     },
@@ -457,14 +457,14 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   // Crows: wait on the Green until crow_green_1 is home (hourly wander), Drop, Take: no carry.
   a.move('south', 'south', 'south');
   const crow = ID['population/crow_green_1/slot1/member']!;
-  const living = () =>
-    Object.entries(a.w.state.created ?? {}).filter(
-      ([id, c]: [string, any]) =>
-        c.origin?.kind === 'spawned' &&
-        c.origin.by.key.startsWith('crow_') &&
-        a.holder(id) &&
-        (a.resource(id, 'hp') ?? 0) > 0,
-    ).length;
+  // Members alive per crow plan (each crow_* population has cap 1).
+  const living = () => {
+    const n: Record<string, number> = {};
+    for (const [id, c] of Object.entries(a.w.state.created ?? {}) as [string, any][])
+      if (c.origin?.kind === 'spawned' && c.origin.by.key.startsWith('crow_') && a.holder(id))
+        if ((a.resource(id, 'hp') ?? 0) > 0) n[c.origin.by.key] = (n[c.origin.by.key] ?? 0) + 1;
+    return n;
+  };
   while (a.holder(crow) !== ID['room/village_green']) a.tick();
   assert.equal(a.w.state.clock, 72000);
   a.press('drop', [coin]);
@@ -491,7 +491,7 @@ test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and
   const nest = item('crow_nest');
   while (a.holder(coin) !== nest) {
     a.tick();
-    assert.ok(living() <= 4);
+    assert.ok(Object.values(living()).every((n) => n === 1));
   }
   assert.equal(a.holder(nest), ID['room/oak_branches']);
   assert.deepEqual(minted(), [corpse]);

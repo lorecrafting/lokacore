@@ -2,7 +2,6 @@
 // durable scenarios are mobile/authority/local-story/r9c_creatures_transport.test.ts). Literals
 // cite content under cartridges/r9c_interactions/ (owner decision (d): update in place).
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { World } from '../src/index.ts';
@@ -25,9 +24,8 @@ const run_id = 'bbbbbbbb-0000-4000-8000-000000000004' as never;
 
 // A fey_touched character (DEX 10, attributes.json) engaged with the first hound in hound_run.
 function engaged(seed: number[]) {
-  const hash = createHash('sha256').update(pin.canonical).digest('hex');
   const loaded = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${hash}"}`),
+    new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
     INSTALLED,
   );
   assert.ok(loaded.ok);
@@ -89,7 +87,7 @@ const next = ([a, b, c, d]: number[]) => {
 // Breaks: a refused input during the hound fight consumes RNG, or the round draws for damage
 // after a missed accuracy roll (mechanics.md combat@1: uniform(100) per eligible attack; only a
 // hit with variable damage draws again; fixed damage draws nothing). Focused rows:
-// combat_flee.test.ts:39/:62; this is the standing r9c integration row.
+// combat_flee.test.ts:123 (refused move), :39 (Flee draw); this is the standing r9c integration row.
 test('family 4: a refused move draws nothing; a missed round draws once per attack', () => {
   // Regression pin: seed [1, 2654435761, 3, 4] gives a player miss in the first round.
   const { w, invoke, elapse } = engaged([1, 2654435761, 3, 4]);
@@ -164,5 +162,6 @@ test('family 4: a learned but DEX-9 actor cannot Bandage; at DEX 10 the same ite
   const cured = invoke(ok, 'bandage', [bandage], { effect_generation: generation });
   assert.equal(cured.decision.kind, 'accepted', JSON.stringify(cured.decision));
   assert.equal(cured.world.state.containers[bandage as never], first.consumed);
+  assert.equal(cured.world.state.bleeds![body]!.active, false);
   assert.deepEqual(cured.world.state.rng, first.state.rng);
 });
