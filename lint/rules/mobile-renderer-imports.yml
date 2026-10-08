@@ -1,7 +1,7 @@
 id: mobile-renderer-imports
 language: tsx
 severity: error
-message: 'The renderer imports only react, named React Native building blocks from the list, its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
+message: 'The renderer imports only react, named React Native building blocks from the list, Skia, Reanimated and Worklets (the page curl), its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
 files: [mobile/app/book/**, mobile/app/SaveError.tsx]
 ignores: ['**/*.test.ts']
 # Allowlists, not blocklists: every other form or name is flagged. ponytail: a new renderer file, or a new

@@ -25,8 +25,8 @@ records its focused baseline, corrected tests and six independent red controls.
   (`mobile-session-contracts-only`); the authority holds no display text, that is a string with
   two words or a final full stop outside an `Error`, a module specifier or SQL
   (`mobile-authority-no-display-text`, tests exempt); the renderer (`app/book/`,
-  `SaveError.tsx`, tests exempt) imports only `react`, `react-native` without `Alert`, its own
-  files and `packages/game-view`, and calls no `require()` or `import()` (`mobile-renderer-imports`, so react-native-web can mount it;
+  `SaveError.tsx`, tests exempt) imports only `react`, `react-native` without `Alert`, Skia, Reanimated and Worklets (the page
+  curl), its own files and `packages/game-view`, and calls no `require()` or `import()` (`mobile-renderer-imports`, so react-native-web can mount it;
   [owner wish](decisions/owner-decision-presenter-split-2026-10-02.md)); rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and

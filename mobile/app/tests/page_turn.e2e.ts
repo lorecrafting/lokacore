@@ -31,6 +31,9 @@ const turn = async ({ from, to }: { from: string; to: string }) => {
   return { curl, hit, stayed };
 };
 
+// A cold Metro builds the preview's Skia chunk on first request; that once outlasted the default wait.
+const COLD = 60_000;
+
 // Breaks: the curl (or the leaving page held under it) takes the arriving page's touches, the
 // leaving page's picture fails on web so nothing curls, or a back turn breaks the next press.
 test('the page curl draws over a live arriving page, both ways', async ({
@@ -39,7 +42,7 @@ test('the page curl draws over a live arriving page, both ways', async ({
   browser,
 }) => {
   await app.open('/?preview=page-turn');
-  await expect(screen.getByRole('button', 'Continue')).toBeVisible();
+  await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
   const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true });
   await app.screenshot('page-curl-forward');
@@ -58,7 +61,7 @@ test('under reduced motion the pages cross-fade with no curl', async ({ app, scr
         : media(q);
   });
   await app.open('/?preview=page-turn');
-  await expect(screen.getByRole('button', 'Continue')).toBeVisible();
+  await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
   const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: false, hit: true });
   // Timed on the way back: the first mount of a page can stall the frames past the whole fade.
