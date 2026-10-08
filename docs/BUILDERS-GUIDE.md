@@ -95,7 +95,7 @@ These limits matter when planning a new chapter or a Builder UI.
 ## Carry lessons into another story
 
 Use the [active mechanics specification](system/mechanics.md) and [examples above](#authoring-paths-and-examples)
-for current behavior. The [review index](reviews/README.md) retains each PR's findings
+for current behavior. The [review records](reviews/README.md) retain each PR's findings
 and fixes; the [mechanics](lessons/mechanics.md), [storage](lessons/storage.md) and
 [contract](lessons/contracts.md) lessons explain failures that apply beyond one chapter.
 Compiler and loader checks, contract fixtures and regression tests enforce reusable

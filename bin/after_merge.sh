@@ -6,7 +6,8 @@
 # Refuses unless the PR is MERGED, main is checked out and the tree is clean apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
 # A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
-# rewrites it from the database; it is refused when main also changed the export. Every refusal
+# rewrites it from the database; it is refused when main also changed the export (the post-merge
+# import is not proven to run first, so copying back could drop main's rows). Every refusal
 # (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change.
 set -u
 GH=${GH:-gh}

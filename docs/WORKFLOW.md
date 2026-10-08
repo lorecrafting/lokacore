@@ -88,8 +88,8 @@ Report at the end of the slice, not at every step.
    requirements from them before reading the diff, checks the [composition record](system/architecture.md#building-mechanics-by-composition)
    against the actual consumer and diff, checks changed actions' exact offered invocations
    against keyed admission, and tests the tests by breaking
-   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
-   [the index](reviews/README.md), and returns the findings.
+   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md` (no index line; [records](reviews/README.md)
+   are found by listing the directory) and returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
    developer, whose context is intact, while that context is small
    (the threshold is in [Claude Code specifics](#token-hygiene)); past that, or after a PM
@@ -97,7 +97,7 @@ Report at the end of the slice, not at every step.
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
-   resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the two lists) without waking the
+   resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the decisions list) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
@@ -120,7 +120,7 @@ Report at the end of the slice, not at every step.
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after the last of several close merges, run
-   `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
+   `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
    `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
    required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on
@@ -137,7 +137,7 @@ Report at the end of the slice, not at every step.
    next merge: branch protection on `main` requiring status checks `ci-green` and
    `book-e2e-green`, `enforce_admins` off, and the repository setting "allow auto-merge" on.
    Because `enforce_admins` is off, branch protection does not bind admins: the owner, or the PM
-   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, review index
+   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, decisions index
    lines), may push to `main` directly or merge with `--admin`; never for unreviewed code or to
    bypass a red check. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
@@ -268,8 +268,8 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the reviews and
-decisions indexes are not part of it).
+handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
+decisions index is not part of it).
 
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
@@ -319,7 +319,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Place worktrees outside paths the checks scan, and preserve unfinished ones.
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
-- `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
+- `.gitattributes` merges `docs/decisions/README.md` (an append-only list) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
   check may still report a conflict, so the PM still merges `main` locally and checks the merged index for order (`bin/check_docs.exs` fails a duplicate, twice-edited or missing line).
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared

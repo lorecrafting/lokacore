@@ -64,8 +64,9 @@ their rules and red controls remain available for resumption.
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name);
-  `docs/reviews/README.md` and `docs/decisions/README.md` have exactly one index line per record
-  file in their directory (catches a union merge that duplicated a twice-edited line, or a missing line).
+  `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
+  duplicated a twice-edited line, or a missing line); each `docs/reviews/` record counts as reachable
+  without an index and is named `<YYYY-MM-DD>-<slug>.md`.
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental
@@ -92,8 +93,8 @@ their rules and red controls remain available for resumption.
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
-  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
-  index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
+  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a conflict is refused, the merge is
+  pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
   PR worktree, an unmerged `review-<N>` or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.

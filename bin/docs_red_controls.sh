@@ -27,3 +27,20 @@ for want in "x.md#nope" "x.md#dup-2" "x.md#al-missing" "b.md: #no-self"; do
 done
 if [ "$(echo "$out" | grep -c '^broken anchor')" != 4 ]; then echo "FAIL: good anchor reported\n$out"; exit 1; fi
 echo "ok   docs: broken anchors"
+
+# Review records: a throwaway repo whose docs/reviews/README.md links no record. An unlinked
+# well-named record must pass (no index); a badly named one must fail.
+R=$(mktemp -d "${TMPDIR:-/tmp}/reviews.XXXXXX")
+trap 'rm -rf "$P" "$D" "$R"' EXIT
+mkdir -p "$R/bin" "$R/docs/reviews" "$R/docs/decisions"
+cp bin/check_docs.exs "$R/bin/"
+printf '[a](AGENTS.md) [r](docs/reviews/README.md) [d](docs/decisions/README.md)\n' > "$R/README.md"
+printf '# A\n' > "$R/AGENTS.md"
+printf '# R\n' > "$R/docs/reviews/README.md"
+printf '# D\n' > "$R/docs/decisions/README.md"
+printf '# Rec\n[a](../../AGENTS.md)\n' > "$R/docs/reviews/2026-01-01-x-review.md"
+(cd "$R" && git init -q && git add . && elixir bin/check_docs.exs > out 2>&1) || { echo "FAIL: unlinked review record refused"; cat "$R/out"; exit 1; }
+printf '# Bad\n' > "$R/docs/reviews/Bad.md"
+if (cd "$R" && git add . && elixir bin/check_docs.exs > out 2>&1); then echo "FAIL: badly named review record passed"; exit 1; fi
+grep -q 'review record docs/reviews/Bad.md' "$R/out" || { echo "FAIL: no naming message"; cat "$R/out"; exit 1; }
+echo "ok   docs: review records found without an index, named by date"

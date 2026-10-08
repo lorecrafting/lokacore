@@ -14,9 +14,10 @@ if [ -n "$base" ] && git merge-base --is-ancestor "$base" "$after" 2>/dev/null; 
     # Mobile code is code: kernel tests import Book model/presenter, mobile tests run App.tsx.
     lane == "code" && /^mobile\// && !/^mobile\/app\/book\// && (/\.(ttf|txt|sksl)$/ || /^mobile\/app\/(tests|plugins)\// || $0 == "mobile/app/app.json") { next }
     { bad = 1 }
-    END { exit !bad }
-  ' && { echo run; exit 0; }
-  echo skip
+    END { exit bad ? 0 : 1 }
+  '
+  # Exit 1 means every file is skippable; a code file (0) or a classifier error (other) runs.
+  [ $? = 1 ] && echo skip || echo run
   exit 0
 fi
 echo run

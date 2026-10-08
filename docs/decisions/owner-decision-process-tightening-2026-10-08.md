@@ -47,3 +47,11 @@ rules instead of copying them. Whenever a PR number is cited to the owner, its B
 description are cited too. Effect: [developer](../../.claude/agents/developer.md),
 [reviewer](../../.claude/agents/reviewer.md), [workflow loop](../WORKFLOW.md#loop),
 [token hygiene](../WORKFLOW.md#token-hygiene).
+
+## Review records without an index
+
+(paraphrased) Delete the review index and let the docs check find records in `docs/reviews`
+(chosen over landing records on the housekeeping branch). `docs/reviews/README.md` keeps only a
+static description; `bin/check_docs.exs` treats each record as reachable and checks its name.
+Effect: [review records](../reviews/README.md), [CHECKS](../CHECKS.md),
+[reviewer](../../.claude/agents/reviewer.md).

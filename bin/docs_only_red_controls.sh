@@ -53,6 +53,9 @@ t run "$gen" "$ren" code "a code file renamed to .md"
 t run "" "$md" code "no before"
 t run "$other" "$md" code "before not an ancestor"
 t run "$md" "$md" code "empty diff"
+# Break: a classifier error (awk exits 2) reads as skip.
+mkdir fakebin; printf '#!/bin/sh\nexit 2\n' > fakebin/awk; chmod +x fakebin/awk
+got=$(PATH="$PWD/fakebin:$PATH" "$script" "$base" "$md" code); [ "$got" = run ] || { echo "FAIL ci_scope classifier error: want run, got $got"; fail=1; }
 # Break: the pre-push elixir lane skips mix test for a peer Elixir tests run, or for kernel source.
 t skip "$ren" "$tests" elixir "only *.test.ts and .md changed"
 t run "$ren" "$tests" code "*.test.ts still runs the code lane"

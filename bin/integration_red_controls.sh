@@ -15,27 +15,26 @@ bad() { echo "FAIL $*"; fail=1; }
 capped() { perl -e 'alarm shift; exec @ARGV' 20 "$@"; }
 
 # --- sync_pr.sh -----------------------------------------------------------------------------
-# A bare origin; main adds m2 to the review index (and code in c.txt); branch pr adds its own
-# line at the top of the index. Stub `elixir` stands in for the docs checker.
+# A bare origin; main adds m2 (and code in c.txt); branch pr adds own. Stub `elixir` stands in
+# for the docs checker.
 mkdir "$tmp/stub"; printf '#!/bin/sh\nexit "${STUB_DOCS:-0}"\n' > "$tmp/stub/elixir"; chmod +x "$tmp/stub/elixir"
 sp() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
   git clone -q "$O" . 2>/dev/null; git checkout -qb main
-  mkdir -p docs/reviews; printf 'docs/reviews/README.md merge=union\n' > .gitattributes
-  printf '# i\n- m1\n' > docs/reviews/README.md; echo base > c.txt
+  echo base > c.txt
   git add . && git commit -qm base && git push -q origin main
-  git checkout -qb pr; printf '# i\n- own\n- m1\n' > docs/reviews/README.md; echo "$1" > c.txt
-  git commit -qam pr && git push -q origin pr
-  git checkout -q main; printf '# i\n- m1\n- m2\n' > docs/reviews/README.md; echo main > c.txt
-  git commit -qam main2 && git push -q origin main; git checkout -q pr
+  git checkout -qb pr; echo own > own; echo "$1" > c.txt
+  git add . && git commit -qm pr && git push -q origin pr
+  git checkout -q main; echo m2 > m2; echo main > c.txt
+  git add . && git commit -qm main2 && git push -q origin main; git checkout -q pr
 }
 sy() { # <case> <want-rc> [docs-rc]
   rc=0; STUB_DOCS=${3:-0} PATH="$tmp/stub:$PATH" capped sh "$bin/sync_pr.sh" pr > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] || { bad "sync_pr $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
 }
-# Break: the index keeps the union-merge order (own line first), or the merge is not pushed.
+# Break: the merge is not made or not pushed.
 sp base; sy success 0
-[ "$(cat docs/reviews/README.md)" = "$(printf '# i\n- m1\n- m2\n- own')" ] || bad 'sync_pr success: index not exactly main list + own line'
+[ -f m2 ] && [ -f own ] || bad 'sync_pr success: merge lost a side'
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] && [ "$(git rev-list --parents -1 HEAD | wc -w)" -eq 3 ] || bad "sync_pr success: not a pushed merge commit"
 # Break: a code conflict is auto-resolved (-X) or left half-merged instead of refused.
 sp other; tip=$(git rev-parse HEAD); sy conflict 1

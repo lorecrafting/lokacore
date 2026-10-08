@@ -212,6 +212,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Mechanical PM chores and docs-only slices run on Sonnet, searches on Haiku (`Explore` override), briefs paste `ast-grep outline` signatures, plugin changes are allowed mid-session, and `bin/sync_pr.sh` merges `main` into each open PR once after the last of several close merges ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)).
 - Self-review is one pass, `/code-review medium`, reported in the PR description (the reviewer notes a missing one). Full-suite mutant sweeps run only at release-candidate certification and the E3 gate; elsewhere `bin/mutate.sh` runs narrow first, reviewers sample 2-3 mutants, and any run expected over ~10 minutes is announced to the owner first ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A retro (at most 5 evidence-backed items, kept as `housekeeping` Beads issues) is written at every handoff and as a pattern retro at each milestone gate; `bin/session_status.sh` reminds ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
+- PR-body claims ("catches", "only here", "every") and `file:line` cites come from a same-turn run listed in the PR; doc-only nit fixes need no re-review agent; briefs are stored durably and link process rules; every PR cited to the owner carries its Beads id and a short description; review records have no index line ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).
 - Native mobile builds run only when native inputs change; the merge rule is every CI job that ran
@@ -229,7 +230,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
 
-- The pre-production mobile app CI exception excludes `mobile/authority/local-story/`: authority/save changes run the broad code lane and browser checks; native checks remain paused ([scope clarification](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+- The pre-production mobile app CI exception covers only mobile assets, e2e specs, plugins and `app.json` outside `mobile/app/book/` (2026-10-08 amendment): authority/save code, the Book and every mobile `.ts`/`.tsx` run the broad code lane and browser checks; native checks remain paused ([scope clarification](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
 
 - Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. These resume with native work: [agent-device UI walks](../archive/decisions/owner-decision-agent-device-2026-10-01.md), [iPhone 11 at gates](../decisions/owner-decision-simulator-device-rows-2026-10-02.md), [simulator-first validation](../decisions/owner-decision-simulator-first-validation-2026-10-04.md).
 
