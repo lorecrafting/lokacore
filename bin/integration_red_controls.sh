@@ -75,6 +75,8 @@ mq watch-cancel 0 "1 0" "$A" "[$P,$P]" "[$P,$P,$E]" "[$P,$P,$E]" "[$P,$P]"
 grep -qx 'run rerun 43' "$Q/calls" || bad 'merge_queue watch-cancel: did not rerun run 43'
 # Break: reruns repeat forever instead of refusing a second cancel.
 mq cancel-twice 1 0 "$A" "[$C,$P]" "[$C,$P]" "[$W,$P]" "[$C,$P]"
+# Break: a cancelled row with no Actions run to rerun waits forever instead of refusing.
+mq cancel-no-run 1 0 "$A" '[{"name":"changes","bucket":"cancel"},'"$P]"
 # Break: a short SHA never equals gh's full head, so the queue waits forever.
 rc=0; PATH="$tmp/stub:$PATH" capped sh "$bin/merge_queue.sh" 7 01234567 > /dev/null 2>&1 || rc=$?
 [ "$rc" = 2 ] || bad "merge_queue short-sha: exit $rc, want 2"

@@ -12,10 +12,11 @@ buckets() { checks '[.[]|select(.name=="changes").bucket]|join(",")'; }
 rerun() {
   [ -z "$reran" ] || { echo "merge_queue: a run on $sha was cancelled again; not merging" >&2; exit 1; }
   reran=1
-  for id in $(checks '[.[]|select(.bucket=="cancel").link|capture("runs/(?<id>[0-9]+)").id]|unique|.[]'); do
-    gh run rerun "$id" || exit 1
-  done
-  # The stale cancelled rows linger until the rerun registers.
+  ids=$(checks '[.[]|select(.bucket=="cancel").link|(capture("runs/(?<id>[0-9]+)").id)?]|unique|.[]')
+  [ -n "$ids" ] || { echo "merge_queue: no Actions run to rerun on $sha; not merging" >&2; exit 1; }
+  for id in $ids; do gh run rerun "$id" || exit 1; done
+  # Stale cancelled rows linger until the rerun registers. ponytail: a rerun cancelled again
+  # before a poll sees it pending keeps this loop waiting; stop the queue by hand.
   while checks '[.[].bucket]|join(",")' | grep -q cancel; do sleep "$poll"; done
 }
 until [ "$(gh pr view "$pr" --json headRefOid -q .headRefOid)" = "$sha" ]; do sleep "$poll"; done
