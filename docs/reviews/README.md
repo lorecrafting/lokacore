@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [E1 re-split issues](2026-10-07-e1-resplit-issues-review.md): PR #299 at `013f0a66`, independent tracker-only **APPROVE WITH NOTES**; 5 new E1 rows parent-linked with recorder/PR #288/`cad4e3a3` evidence, 21+23+19+18+14=95 matching the pending list, .2–.4 closed as superseded, `--complete` passes; 1 should-fix (.6 still open, but .11 now owns its 14 paths), 1 nit (.6 note counts 15).
+
 - [Designer role](2026-10-07-designer-role-review.md): PR #298 at `e6d7a078`, independent docs-only **APPROVE WITH NOTES**; fix round 1 at `07edea35` **APPROVE**: routing row now always adds a fresh reviewer for designer text.
 - [Chapter 1 polish order](2026-10-07-polish-order-review.md): PR #297 at `ff7c35ab`, independent docs/tracker **APPROVE WITH NOTES**; order, polish lane and Beads chain (E2 → loka-51b → loka-4xk → E3) match the brief, `--complete` passes, the duplicate-slice control goes red on the `rows[0]` mutant; 1 should-fix (the E1 closure reviewer is unclear against the WORKFLOW rule Fable for E1–E3), 1 nit (stale sentence in the E1 notes). Fix round `7332ef06`: **APPROVE WITH NOTES**. The nit is closed and the three edited places agree. Still open: 1 should-fix (WORKFLOW.md:11, :15, :308 and owner-rules.md:238 still say Fable for E1–E3) and 1 nit (owner-rules.md:241 sentence broken by the inserted link). Fix round `c301aff7`: **APPROVE**, nothing open; every active Fable mention agrees (E1: two Opus reviewers; Fable at release-candidate certification, E2 and E3).
 
