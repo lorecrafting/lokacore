@@ -400,8 +400,8 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 API1.37: the permanent, unpolished interaction corpus of the
 [E2 brief](../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
 It is not bundled, has its own identity and save, and does not inherit the chapter's hash
-or acceptance. Its content hash is `1ed655467a862ef920e063ed0305eb2546ef179efd56a98b68342fcf31f7664e`,
-with 26 rooms and 130 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
+or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
+with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
 and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) come from
 `test/loka/cartridge_r9c_interactions_hash.py`. The fixture names stay outside the
 simulator's default `cartridge_*hash.json` corpus.
@@ -411,11 +411,11 @@ shared topology: Ferry Landing, Well Lane, Village Green, North and East Gate, W
 Chapel Steps and Nave, Bell Tower, Belfry, Drowned Lantern, Inn Rooms, Chandler, Well Shaft and
 Bottom, Boathouse, Fen Isle Landing, Reed Path, Reed Bank, Willow Shade, Drowned Oak, Oak
 Branches, Mire Crossing, Fox Hollow, Hound Run and Adder Nest. Reciprocal exits to removed
-rooms are dropped; the Pool route, rats, Maud's cellar quest, Chandler's debt, the wisp, topics,
+rooms are dropped; the Pool route, rats, the inn rumor board, Maud's cellar quest, Chandler's debt, the wisp, topics,
 D9 village replies and scheduled villagers are absent, so `check@1` and `topics@1` are not
 locked. Sedge stands at Fen Isle Landing (the only recovery room), Wick in Chapel Nave, and the
 three apples on the Green. Two numbers deliberately differ from the chapter: the outbound
-ferry fare is 3 pennies and Maud's room costs 4.
+ferry fare is 5 pennies and Maud's room costs 4.
 
 | Family | Entities |
 |---|---|

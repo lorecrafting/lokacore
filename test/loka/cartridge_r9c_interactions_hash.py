@@ -63,6 +63,8 @@ for field, (kind, keys) in dropped.items():
 del v['topics']  # an artifact omits the optional topic map when no topic remains
 for room in v['rooms'].values():
     room['exits'] = {d: e for d, e in room['exits'].items() if e['to']['key'] not in dropped_rooms}
+# The inn's rumor board only advertised the removed whistle and cellar quest.
+del v['rooms'][named('room', 'drowned_lantern')]['details']
 v['map_positions'] = [p for p in v['map_positions'] if p['room']['key'] not in dropped_rooms]
 for caps in (v['manifest']['requires']['capabilities'], v['lock']['capabilities']):
     del caps['check'], caps['topics']
@@ -77,7 +79,7 @@ for n in (1, 2, 3):
     v['items'][named('item', f'apple_0{n}')]['location'] = {'in': 'room', 'room': ref('room', 'village_green')}
 # Synthetic numbers differ from the chapter's, so an engine literal equal to a chapter value shows.
 outbound = v['transports'][named('transport', 'fen_outbound')]
-outbound['fare'] = 3
+outbound['fare'] = 5
 outbound['recovery_rooms'] = [ref('room', 'fen_isle_landing')]
 v['services'][named('service', 'lantern_room')]['price'] = 4
 v['text'] = json.loads(Path(f'cartridges/{ID}/text.json').read_text())

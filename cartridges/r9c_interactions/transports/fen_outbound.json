@@ -5,7 +5,7 @@
   "reverse": "fen_return",
   "recipient": "sedge",
   "currency": "pennies",
-  "fare": 3,
+  "fare": 5,
   "recovery_rooms": [
     "fen_isle_landing"
   ],
