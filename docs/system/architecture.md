@@ -327,6 +327,8 @@ the op's expected value to the authored value, with a matching `fact_changed` ev
 `population.suppress` needs each named plan, unsuppressed before the accepted step, to newly
 gain suppression caused by that event, ending at its time plus the authored duration, matching
 the receipt's `population.control` row. A step of any other kind has no effect witness.
+Each event named above must have the triggering event as its causation, which binds the effect
+to that event's delivery; a `quest.fail` has no event, so it is bound only through G.
 Sightings, wander ticks and bleed refreshes witness none of these paths.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
