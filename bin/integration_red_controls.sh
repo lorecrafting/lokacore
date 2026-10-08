@@ -146,6 +146,21 @@ for b in p2:kernel/ts/test/differential_peer.ts t2:kernel/ts/test/k.test.ts; do
 done; rm -f "$R.d/lane"
 capped git push -q origin p2 t2 > /dev/null 2>&1 || bad 'pre-push two refs: push failed'
 [ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=" ] || bad "pre-push two refs: $(cat "$R.d/lane" 2>/dev/null), want lane="
+# --- check_all.sh lock --------------------------------------------------------------------
+# Stub mise logs each call. Break: a second run overlaps a live holder instead of waiting, a dead
+# holder's lock blocks forever, or the lock outlives the run.
+printf '#!/bin/sh\necho "$*" >> "$MISE_LOG"\n' > "$tmp/stub/mise"; chmod +x "$tmp/stub/mise"
+R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; cp "$bin/check_all.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh
+lk=$(git rev-parse --absolute-git-dir)/loka-check.lock
+ca() { MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-ts; }
+sleep 30 & holder=$!; mkdir "$lk"; echo $holder > "$lk/pid"
+ca > out 2>&1 & run=$!
+sleep 3
+grep -q "waiting for $holder" out && [ ! -s "$R.log" ] || { bad 'check_all lock: did not wait for a live holder'; cat out; }
+{ kill $holder; wait $holder || true; } 2>/dev/null; wait $run || bad 'check_all lock: run failed after the holder ended'
+[ -s "$R.log" ] && [ ! -d "$lk" ] || bad 'check_all lock: no run after the holder ended, or lock left behind'
+sh -c 'exit 0' & dead=$!; wait $dead; mkdir "$lk"; echo $dead > "$lk/pid"; : > "$R.log"
+ca > out 2>&1 && [ -s "$R.log" ] || { bad 'check_all lock: a dead holder blocked the run'; cat out; }
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor

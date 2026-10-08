@@ -20,6 +20,21 @@ if [ "${1-}" = --metadata ]; then
   sh bin/beads_red_controls.sh
   exit 0
 fi
+# One heavy run at a time across worktrees (pre-push execs this script): a second run waits.
+lock=$(git rev-parse --git-common-dir)/loka-check.lock
+until mkdir "$lock" 2>/dev/null; do
+  pid=$(cat "$lock/pid" 2>/dev/null || true)
+  if [ -z "$pid" ] || kill -0 "$pid" 2>/dev/null; then
+    [ "$pid" = "${said-x}" ] || { echo "check_all: waiting for ${pid:-a starting run} (another check run holds $lock)"; said=$pid; }
+    sleep 2
+  else
+    rm -rf "$lock" # its holder died without cleanup
+  fi
+done
+# ponytail: a run killed between mkdir and this write leaves a pid-less lock; remove it by hand.
+echo $$ > "$lock/pid"
+trap 'rm -rf "$lock"' EXIT
+trap 'exit 130' INT TERM
 m mix deps.get --check-locked
 m mix format --check-formatted
 m mix compile --warnings-as-errors

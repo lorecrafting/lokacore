@@ -93,7 +93,9 @@ their rules and red controls remain available for resumption.
   recorder, a conflict or an oversized untouched file.
   It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
-  It also pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
+  It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
+  pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
+  a dead holder's lock is taken over, the lock is removed at exit. It pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
   a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
