@@ -35,7 +35,8 @@ native or product proof.
 | `shasum -a 256 -c SHA256SUMS` | 0 | [SHA256SUMS.verify](SHA256SUMS.verify) |
 
 The runner's own capture-time hashes are [runner-SHA256SUMS](runner-SHA256SUMS) and its
-[verification](runner-SHA256SUMS.verify); `candidate.json` and `compiled.json` (199,820 bytes each,
+[verification](runner-SHA256SUMS.verify). `compile.log` is empty: the Elixir build was already current, and
+the receipt's exit status is in `report.json`; `candidate.json` and `compiled.json` (199,820 bytes each,
 sha256 `6e484e84…a6ea`, the artifact hash above) are not retained.
 
 ## 3. Criteria 3, 4, 6 and 7
@@ -91,8 +92,8 @@ in "family 4: a pack death separates Wren and fails the watch" (`:262`). Wrong r
 `a_elspeth_rescue` offer is `available: true` while Wren is separated; expected `false`. Invariant: no
 `missing_child` rescue credit while the escort is separated. The kernel family 4 tests stay green. Restore
 (copy of the saved file, empty `git status --porcelain`, r9c rerun) exit 0. Measured at `78a77cde`;
-`7a734d92` differs from it only in `r9c_faults.test.ts`, which is not in the focused suite and is not the
-failing scenario.
+`7a734d92` differs from it only in `r9c_faults.test.ts` ([heads-diff.log](heads-diff.log)), which is not in
+the focused suite and is not the failing scenario.
 
 **Criterion 7 (browser rows).** Named pending; see section 6. Nothing was added to the browser harness.
 

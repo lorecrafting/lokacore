@@ -9,6 +9,7 @@ focused-authority.txt: OK
 focused-green.log: OK
 focused-kernel.txt: OK
 foundation-compiler.log: OK
+heads-diff.log: OK
 kernel.log: OK
 mutant.diff: OK
 r9c-all.log: OK
