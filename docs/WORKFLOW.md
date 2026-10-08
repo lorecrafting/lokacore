@@ -113,7 +113,7 @@ Report at the end of the slice, not at every step.
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
-   before review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+   before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
    nobody waits on hosted CI: `bin/merge_queue.sh <N> <sha>` (it first waits for the PR head to
    equal `<sha>`, which keeps the watch from reading the previous head's checks;

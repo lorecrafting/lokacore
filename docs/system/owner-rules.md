@@ -1,6 +1,6 @@
 # Owner rules in force
 
-One line per active rule, with its record. PM adoptions whose contract is installed in `docs/system` are not listed here: the spec section links its record, and the [index](../decisions/README.md) lists every record. Superseded rules are not listed; their records are deleted
+One line per active rule, with its record. PM adoptions whose contract is installed in `docs/system` are not listed here: the [index](../decisions/README.md) lists every record. Superseded rules are not listed; their records are deleted
 and linked by permalink from the [index](../decisions/README.md), or kept only where code or `protocol/` cites them ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
@@ -200,7 +200,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-- Developers default to Sonnet; Opus for kernel and contract-freeze slices
+- Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md) says
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).
@@ -221,7 +221,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - The pre-production mobile app CI exception excludes `mobile/authority/local-story/`: authority/save changes run the broad code lane and browser checks; native checks remain paused ([scope clarification](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
 
-- Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check.
+- Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. These resume with native work: [agent-device UI walks](../archive/decisions/owner-decision-agent-device-2026-10-01.md), [iPhone 11 at gates](../decisions/owner-decision-simulator-device-rows-2026-10-02.md), [simulator-first validation](../decisions/owner-decision-simulator-first-validation-2026-10-04.md).
 
 - Carrying admission follows the [M3-A PM selection](../decisions/pm-decision-m3-a-carrying-ceiling-2026-10-04.md) under mechanics delegation.
 - First live fight narration and the corrected brass-key room line use the [owner-approved seven-line copy batch](../decisions/owner-decision-m6-a-combat-copy-2026-10-04.md).
