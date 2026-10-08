@@ -1,6 +1,7 @@
 // Legal v042 S27 route; literal answers from mechanics.md C6 and cartridge.md S27.
 import assert from 'node:assert/strict';
 import type { CaseHost } from './e1_case_host.ts';
+import { ferry } from './e1_paths.ts';
 
 export function nightMarsh(a: CaseHost) {
   a.invoke('choose_ancestry', [], { ancestry: 'road_born' });
@@ -68,11 +69,20 @@ export function nightMarsh(a: CaseHost) {
   assert.equal(attempt().cursor, 5);
   assert.equal(a.flag('fen_night_survived'), true);
   assert.equal(a.flag('priory_fen_axis'), -1);
+  // Sedge's marsh talk holds only once fen_night_survived is true (dialogues/sedge_marsh.json).
+  a.move('west', 'north', 'north', 'west');
+  ferry(a, 'boathouse', 'board_ferry', 'fen_outbound', 2);
+  a.move('east');
+  a.invoke('sedge_marsh', [a.entity('npc', 'sedge')]);
+  a.choose('acknowledge');
+  a.reopen();
+  assert.equal(a.view().choice, undefined);
   return {
     outcome: 'completed',
     cursor: 5,
     sheltered: true,
     faction: -1,
     start_after_completion: 'refused',
+    sedge: 'acknowledge',
   };
 }

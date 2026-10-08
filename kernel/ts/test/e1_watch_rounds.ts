@@ -1,10 +1,19 @@
 // Legal v042 watch route; literal answers from mechanics.md S3 and cartridge.md C2.
 import assert from 'node:assert/strict';
 import type { CaseHost } from './e1_case_host.ts';
+import { ferry } from './e1_paths.ts';
 
 export function watchRounds(a: CaseHost) {
   a.invoke('choose_ancestry', [], { ancestry: 'road_born' });
-  a.move('north', 'north', 'north', 'east');
+  // Swim admits the well dive whose drowning is the death that fails the patrol (mechanics.md S3).
+  a.move('west');
+  ferry(a, 'boathouse', 'board_ferry', 'fen_outbound', 2);
+  a.move('east');
+  a.invoke('sedge_swim', [a.entity('npc', 'sedge')]);
+  a.choose('learn');
+  a.move('west');
+  ferry(a, 'fen_isle_landing', 'return_ferry', 'fen_return', 0);
+  a.move('east', 'north', 'north', 'north', 'east');
   const leader = a.entity('npc', 'tobin');
   const patrol = () => Object.values(a.story.world().state.patrols ?? {})[0]!;
   const choose = (choice_id: string) => {
@@ -21,7 +30,16 @@ export function watchRounds(a: CaseHost) {
     a.reopen();
   };
   choose('start');
+  const failed = patrol().attempt_id;
+  a.move('west', 'south', 'south', 'down', 'down');
+  a.elapsed(120_000); // water duration 6000 at rate 50; death.shrine is chapel_nave
+  a.reopen();
+  assert.equal(a.view().place.title.key, 'room.chapel_nave.title');
+  assert.equal(patrol().status, 'failed');
+  a.move('south', 'south', 'east');
+  choose('restart');
   const attempt = patrol().attempt_id;
+  assert.notEqual(attempt, failed);
   assert.equal(patrol().status, 'together');
   assert.equal(patrol().credit.length, 0);
   assert.equal(a.flag('watch_gate_trusts_player'), false);
@@ -82,5 +100,11 @@ export function watchRounds(a: CaseHost) {
   a.reopen();
   assert.equal(patrol().credit.length, 4);
   assert.equal(a.flag('watch_gate_trusts_player'), true);
-  return { outcome: 'completed', checkpoints: 4, rejoined: true, terminal_room: 'watch_post' };
+  return {
+    outcome: 'completed',
+    checkpoints: 4,
+    rejoined: true,
+    restarted: true,
+    terminal_room: 'watch_post',
+  };
 }

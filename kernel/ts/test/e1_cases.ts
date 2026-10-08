@@ -36,9 +36,17 @@ import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { itemRound } from './e1_items.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
+import { REFUSALS } from './e1_refusals.ts';
 
 // Reviewed {path, reason, evidence, review} rows: architecture.md#e1-policy-branch-evidence.
-type Disposition = { path: string; reason: string; evidence: string; review: string };
+// An optional `refusal` binds the row to a controlled case whose final replayed step is refused with `code`.
+type Disposition = {
+  path: string;
+  reason: string;
+  evidence: string;
+  review: string;
+  refusal?: { case: string; code: string };
+};
 const DISPOSITIONS: Disposition[] = read('kernel/ts/test/e1_dispositions.json');
 
 export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType<typeof source>) {
@@ -78,6 +86,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'rejoin',
         'elspeth-stays',
       ].includes(start.case_id) ||
+      REFUSALS.some(([name]) => start.case_id === name) ||
       ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
         start.case_id,
       ) ||
@@ -104,17 +113,28 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   assert.equal(world.character, start.identity.character);
   assert.equal(world.body, start.identity.body);
   const digest = createHash('sha256');
-  let steps = 0;
+  let steps = 0,
+    final: { code: string; action: string | null } | null = null;
   const obligations = new Set<string>();
   for (const e of events) {
     if (e.kind !== 'step') continue;
-    const observed = checked(AUTHORITY_KERNEL, world, e.command as Command, e.revision);
+    const observed = checked(
+      AUTHORITY_KERNEL,
+      world,
+      e.command as Command,
+      e.revision,
+      e.action_key ?? undefined,
+    );
     assert.equal(observed.failure, undefined, JSON.stringify(observed.failure));
     assert.equal(e.invariant_failure, null, 'case recorded an invariant failure');
     assert.equal(observed.bytes, `${encode(e.decision)}\n${e.state_hash}\n`);
     for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
       if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
+    final =
+      e.decision.kind === 'rejected'
+        ? { code: e.decision.error.code, action: e.action_key ?? null }
+        : null;
     assert.equal(world.state.clock, e.clock);
     assert.deepEqual(world.state.rng, e.rng);
     digest.update(observed.bytes);
@@ -129,6 +149,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     obligations: [...obligations].sort(),
     state_hash: finish.state_hash,
     fault_schedule: start.fault_schedule,
+    final,
   };
 }
 
@@ -143,9 +164,25 @@ export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOS
   for (const d of dispositions)
     assert.ok(
       known.has(d.path) &&
-        [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x),
+        [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x) &&
+        (d.refusal === undefined ||
+          (REFUSALS.some(([name]) => name === d.refusal?.case) &&
+            typeof d.refusal.code === 'string' &&
+            d.refusal.code !== '')),
       `invalid disposition ${d.path}`,
     );
+}
+
+type Final = ReturnType<typeof replayCase>['final'];
+/** Fails unless each `refusal` row's case was recorded and its final replayed step was refused with that code by the row's dialogue (`/dialogues/<ref>/<key>/policy/...`). */
+export function checkRefusals(finals: Map<string, Final>, dispositions = DISPOSITIONS) {
+  for (const { path, refusal } of dispositions)
+    if (refusal)
+      assert.deepEqual(
+        finals.get(refusal.case),
+        { code: refusal.code, action: path.split('/')[3] },
+        `refusal ${path}`,
+      );
 }
 
 const authoredPaths = (loaded: LoadedCandidate) =>
@@ -214,7 +251,8 @@ function recordCases(bytes: Uint8Array, out: string) {
   assert.equal(existsSync(out), false, 'output directory must be new');
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
-  const receipts: object[] = [];
+  const receipts: object[] = [],
+    finals = new Map<string, Final>();
   const run = (
     name: string,
     recipe: (a: ReturnType<typeof caseHost>, path: string) => object | void,
@@ -239,6 +277,7 @@ function recordCases(bytes: Uint8Array, out: string) {
       });
       const replay = replayCase(bytes, readFileSync(log, 'utf8'), identity);
       for (const path of replay.obligations) witnessed.add(path);
+      finals.set(name, replay.final);
       for (const key of Object.keys(seen) as (keyof Coverage)[])
         for (const item of a.seen[key]) seen[key].add(item);
       receipts.push({
@@ -283,6 +322,8 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('debt-elapsed', debtElapsed);
     for (const branch of ['follow_fox', 'wake'] as const)
       run(`dream-${branch}`, (a) => lanternDream(a, branch));
+    for (const [name, recipe] of REFUSALS) run(name, recipe);
+    checkRefusals(finals);
     run('thirty-days', thirtyDays);
     for (const fault of FAULTS)
       run(`sqlite-${fault}`, (a, path) => storageFault(a, path, fault), faultSchedule(fault));

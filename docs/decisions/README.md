@@ -32,6 +32,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [E1 controlled refusal dispositions](pm-decision-e1-controlled-refusals-2026-10-07.md): a negated guard that can fire closes by a reviewed row citing a controlled refusal case, machine-bound to path, case and code; no witness credit.
 - [D11 trusted elapsed before character choice](owner-decision-d11-prechoice-elapsed-2026-10-06.md): the owner allows clock and due-job advancement before selection while player commands stay blocked.
 - [C5 bounded third fix round](owner-decision-c5-third-fix-round-2026-10-06.md): owner-approved exception for PR #255 SO7/SO8 correction, scoped re-reviews and exact-head CI; the general two-round cap remains.
 - [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
