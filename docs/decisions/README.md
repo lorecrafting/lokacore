@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-08 [Owner decision: process tightening (self-review, mutants, retro)](owner-decision-process-tightening-2026-10-08.md)
 - 2026-10-08 [Owner decision: agent models and tooling](owner-decision-agent-tooling-2026-10-08.md)
 - 2026-10-08 [Owner decision: merge on GitHub required checks](owner-decision-required-checks-merge-2026-10-08.md)
 - 2026-10-08 [PM decision: E2 fixtures, simulator scope and E1 closure follow-ups](pm-decision-e2-fixtures-e1-closure-2026-10-08.md)

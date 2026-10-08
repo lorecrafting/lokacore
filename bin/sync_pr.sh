@@ -24,5 +24,5 @@ if ! git merge-base --is-ancestor origin/main HEAD; then
   git commit -qm "Merge origin/main into $1" || die 'commit failed'
   fi
   elixir bin/check_docs.exs || die 'docs check failed; not pushed'
-git push -q origin "$1" || die 'push failed'
+git push origin "$1" || die 'push failed'
 echo "sync_pr: $1 merged with origin/main and pushed"

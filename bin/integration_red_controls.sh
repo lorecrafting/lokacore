@@ -123,4 +123,53 @@ sp base; pushed=$(git rev-parse origin/pr); sy docs-fail 1 1
 [ "$(git rev-parse origin/pr)" = "$pushed" ] || bad 'sync_pr docs-fail: pushed'
 # Break: the rerun sees the local merge, says "already has main" and exits 0 without pushing.
 sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] || bad 'sync_pr rerun: not pushed'
+# --- mutate.sh -----------------------------------------------------------------------------
+# a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
+# place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor
+# reported red, or the narrow command skipped/the full command run when narrow is already red.
+mt() { R=$(mktemp -d); cd "$R"; printf 'x=1\ny=1\n' > a.txt; cp a.txt a.orig; T=$(printf '\t'); }
+mt
+printf 'a.txt\tx=1\tx=2\n a.txt\tn\tn\n' > m.tsv   # second line: file name " a.txt" is unreadable
+rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q '^FAIL' out || bad 'mutate unreadable-file: exit 0 or no FAIL line'
+mt
+printf 'a.txt\tx=1\tx=2\na.txt\ty=1\ty=2\na.txt\tz=1\tz=2\na.txt\tx=1\tx=3\tfalse\na.txt\tx=1\tx=4\ttrue\na.txt\ty=1\t\t! grep -q ^$ a.txt\n' > m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 1 ] || bad "mutate sweep: exit $rc, want 1 (apply failure)"
+[ "$(cut -f1 out | tr '\n' ,)" = 'red-full,SURVIVED,APPLY-FAIL,red-narrow,red-full,red-narrow,' ] || { bad 'mutate sweep: wrong results'; cat out; }
+cmp -s a.txt a.orig || bad 'mutate sweep: file not restored'
+# Break: a test command that reads stdin eats the rest of the mutant list (two mutants, one line out).
+mt
+printf 'a.txt\ty=1\ty=2\na.txt\ty=1\ty=3\n' > m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "cat > /dev/null; grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(wc -l < out)" -eq 2 ] || bad "mutate stdin-reader: exit $rc, $(wc -l < out) result lines, want 0 and 2"
+mt
+printf 'a.txt\ty=1\ty=2\n' > m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 0 ] || bad "mutate survivor-only: exit $rc, want 0"
+# --- session_status.sh ----------------------------------------------------------------------
+# A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
+# Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
+# issue is newer than the last merge, or stays silent when none is; closed issues counted as open.
+printf '#!/bin/sh\ncase "$*" in *housekeeping*) cat "$HK" ;; *) exit 1 ;; esac\n' > "$tmp/stub/br"
+printf '#!/bin/sh\nexit 1\n' > "$tmp/stub/gh"; chmod +x "$tmp/stub/br" "$tmp/stub/gh"
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin; cp "$bin/session_status.sh" bin/
+echo a > a; git add . && git commit -qm base; git checkout -qb x; echo b > a; git commit -qam x; git checkout -q main
+GIT_COMMITTER_DATE='2026-10-08T12:00:00+00:00' git merge -q --no-ff x -m merge; git update-ref refs/remotes/origin/main HEAD
+ss() { # <case> <issues-json> <must-match> <must-not-match>
+  printf '{"issues":%s}' "$2" > hk.json
+  rc=0; HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
+  [ "$rc" = 0 ] || bad "session_status $1: exit $rc"
+  grep -q "$3" out || { bad "session_status $1: missing '$3'"; sed 's/^/  /' out; }
+  if grep -q "$4" out; then bad "session_status $1: unexpected '$4'"; fi
+}
+new='{"id":"hk-1","title":"Open one","status":"open","created_at":"2026-10-08T13:00:00.5Z"}'
+old='{"id":"hk-2","title":"Old closed","status":"closed","created_at":"2026-10-08T11:00:00Z"}'
+ss fresh-open "[$new,$old]" 'open housekeeping issues: 1' 'without a retro'
+ss stale "[$old]" 'open housekeeping issues: 0' 'hk-2 Old closed'
+ss stale-note "[$old]" 'ended without a retro' 'NEVER'
+ss none "[]" 'ended without a retro' 'NEVER'
+printf 'x' > hk.json; rc=0; HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && grep -q 'queue unavailable' out || bad 'session_status bad-json: failed or no note'
+grep -q 'Before you clear: ask the PM for handoff + retro' out || bad 'session_status: no clear reminder'
 exit $fail
