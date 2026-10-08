@@ -84,22 +84,25 @@ their rules and red controls remain available for resumption.
   force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
-- `bin/integration_red_controls.sh` runs the PM's merge queue (`bin/merge_queue.sh`) against a
-  stub `gh` and E1 batch integration (`bin/integrate_batch.sh`) in throwaway repositories:
-  no merge on draft, failing, half-registered or watch-failing checks, one rerun of a cancelled
-  run and no merge on a second cancel, and no integration on a
-  pending-count mismatch, a failed recorder, a conflict or an oversized untouched file. It also
-  feeds the merge guard hook its payloads (below).
-- Claude hooks (`.claude/settings.json`): `bin/guard_merge.sh` (PreToolUse, Bash) blocks any
-  command with the words `gh`, then `pr`, then `merge` (`--auto` included, unparseable input too),
-  so merges go through `bin/merge_queue.sh`; a message that names the command must be reworded. `bin/worktree_warn.sh` (Stop) only warns,
+- `bin/integration_red_controls.sh` runs E1 batch integration (`bin/integrate_batch.sh`) in
+  throwaway repositories with stub checks: no integration on a pending-count mismatch, a failed
+  recorder, a conflict or an oversized untouched file.
+- Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
   ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled
-  in GitHub and retain only manual triggers in source for eventual resumption. The simulator (`kernel/ts/test/sim.ts`) runs its
+  in GitHub and retain only manual triggers in source for eventual resumption. `main` requires
+  one gate job per workflow, `ci-green` and `book-e2e-green` (`if: always()`): each fails unless
+  its `changes` job succeeded and no other job failed or was cancelled, so a skipped scoped job
+  passes and a draft run fails ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
+  The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
+  on the selected v042 artifact, rebuilt and sha-checked as `bin/integrate_batch.sh` does, and
+  fails on a pending obligation, a gap or a failed case (about 6 minutes). It is not in
+  `bin/check_all.sh`: that line has no area lanes, so it would add those minutes to every run.
+  The code lane's green baseline (`bin/ci_base.sh`) includes it.

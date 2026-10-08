@@ -121,6 +121,27 @@ jobs:
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
+  # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
+  # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
+  # tree, so its artifact and output stay outside the checkout. Artifact as in bin/integrate_batch.sh.
+  e1-recorder:
+    needs: changes
+    if: needs.changes.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+      - run: |
+          a=$RUNNER_TEMP/e1-selected-v042.json
+          python3 -c "import json,sys;f=json.load(open('protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\"cartridge\":'+f['canonical']+',\"content_hash\":\"'+f['sha256']+'\"}')" > "$a"
+          echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
+          node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
+
   typescript:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
@@ -154,3 +175,13 @@ jobs:
           name: game-trace
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
+
+  # The one check `main` requires. Skipped scoped jobs pass; a draft (changes skipped) fails.
+  ci-green:
+    needs: [changes, e1-recorder, elixir, lint, sim, typescript]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

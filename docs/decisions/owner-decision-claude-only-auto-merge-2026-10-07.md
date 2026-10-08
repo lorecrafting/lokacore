@@ -23,3 +23,4 @@ The owner moved the project from Codex to Claude Code. All quotes are paraphrase
   CI and CI stays the gate; the owner's permission to merge PRs covers it. GitHub's `--auto`
   is not used: `main` has no required checks and `browser` does not run on every PR. Review, exact-head
   and owner-reserved rules are unchanged.
+  Superseded for merging by [owner-decision-required-checks-merge-2026-10-08.md](owner-decision-required-checks-merge-2026-10-08.md).
