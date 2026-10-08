@@ -29,7 +29,7 @@ Before handing off:
    run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)); the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
-2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
+2. Self-review the diff once: `/code-review medium` on the branch
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
@@ -37,13 +37,15 @@ Before handing off:
 3. Commit (attribution lines per the session). Provisional local:
    hand the branch and exact head to the PM without pushing; draft PR: push only when the brief
    says (the branch is pushed once per wave); hosted PR: push the branch and open the PR citing the governing `docs/system` sections and
-   including the ponytail result. A slice that adds or changes a mechanic
+   including the `/code-review` result. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
 4. Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
    findings with dispositions, deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
+
+Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A run you expect to take over ~10 minutes: stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Past about 220k tokens, hand the remaining work back to the PM for a fresh agent.
 
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 

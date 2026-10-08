@@ -89,6 +89,9 @@ their rules and red controls remain available for resumption.
   recorder, a conflict or an oversized untouched file.
   It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
+  It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
+  leaves a diff or a skipped narrow command fails) and `bin/session_status.sh` with stub `br` (the
+  housekeeping list, the missed-retro note, a failing `br` still exits 0).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs

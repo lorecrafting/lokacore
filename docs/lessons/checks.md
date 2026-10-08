@@ -31,3 +31,6 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
   misses have been seen; never hook a judgment rule. Prose otherwise ([workflow step 7](../WORKFLOW.md#loop)).
 - A new delta operation kind needs handling in the independent precondition checker: production committed an expedition Start that independent replay rejected (`delta_preconditions_hold`) because the checker lacked `expedition.transition`. Replay every new operation through the independent checker before trusting a green authority run ([night-watch blocker](https://github.com/lorecrafting/lokacore/tree/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-06-e1-night-watch)).
 - A coverage witness compares resolved IDs, never display titles: a same-titled wrong room credited a ferry route. Plant that wrong-but-same-title case as the red control ([ferry room identity](https://github.com/lorecrafting/lokacore/tree/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-ferry-room-identity)).
+- A full-suite mutant sweep costs tens of minutes and most of its survivors are "already caught" by a narrow
+  test: run `bin/mutate.sh` narrow first, and a full-suite sweep only at release-candidate certification and the E3 gate
+  ([workflow](../WORKFLOW.md#token-hygiene)).

@@ -12,6 +12,31 @@ else
 fi
 echo "## Open PRs"
 gh pr list --limit 10 2>/dev/null || echo "gh unavailable"
+echo "## Housekeeping queue"
+# One br query (open ids/titles and the newest created_at) and one git query; failure prints a note.
+hk=
+if command -v br >/dev/null 2>&1; then
+  hk=$(br list -l housekeeping --status all --json 2>/dev/null | python3 -I -c '
+import json, sys
+issues = json.load(sys.stdin)["issues"]
+open_ = [i for i in issues if i["status"] != "closed"]
+print("open housekeeping issues: %d" % len(open_))
+for i in open_:
+    print("  %s %s" % (i["id"], i["title"]))
+print("newest=" + max([i["created_at"][:19] for i in issues] or [""]))
+' 2>/dev/null) || hk=
+fi
+if [ -z "$hk" ]; then
+  echo "housekeeping queue unavailable (br or json error)"
+else
+  echo "$hk" | grep -v '^newest='
+  newest=$(echo "$hk" | sed -n 's/^newest=//p')
+  merged=$(TZ=UTC git log -1 --merges --date=format-local:%Y-%m-%dT%H:%M:%S --format=%cd origin/main 2>/dev/null)
+  if [ -n "$merged" ] && [ "$(printf '%s\n%s\n' "$newest" "$merged" | sort | tail -1)" = "$merged" ] && [ "$newest" != "$merged" ]; then
+    echo "last session may have ended without a retro: write one from merged PRs, review records and CI since then"
+  fi
+fi
+echo "Before you clear: ask the PM for handoff + retro"
 echo "## Beads/PR drift"
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
 if command -v br >/dev/null 2>&1 && br list --status all --json > "$tmp/issues" 2>/dev/null \

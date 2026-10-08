@@ -76,7 +76,7 @@ Report at the end of the slice, not at every step.
    main checkout; the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)
    makes the final local publication run. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
-   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the ponytail result) and hand back the note `developer.md` specifies.
+   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
 4. **Verify and review.** PM does not relay claims: for a hosted PR it confirms CI
    is green on the pushed commit (or reruns the check line) before review; for
    provisional local work it verifies the focused-check evidence and can spawn
@@ -236,6 +236,15 @@ A slice that changes what the player sees consults the [designer](decisions/owne
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
+- Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion
+  notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
+  mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
+  ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
+- Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
+  same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
+  caught?") run narrow first against the test files that import the mutated module, the full suite
+  only for survivors; reviewers sample 2-3 narrow mutants. Schema fixture sweeps
+  ([contract lessons](lessons/contracts.md)) stay: they rerun fixtures only.
 - Delegate mechanical work. At a stable publication checkpoint, update the
   roadmap, Beads and shared handoff before a fresh session; do not reset during
   an open review merely to shorten context.
@@ -252,7 +261,7 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff; on takeover read that handoff once and reopen only changed sections (the reviews and
+handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the reviews and
 decisions indexes are not part of it).
 
 This preserves the brief, review records and failing evidence on disk;
@@ -263,7 +272,8 @@ Claude Code specifics:
 
 - No `CLAUDE.md` changes mid-session (they bust the prompt cache). Plugin changes are allowed; each costs one cache rebuild.
 - "Small" context means about 220k tokens or less, read from the subagent token count in its
-  last completion notice.
+  last completion notice. Past it, any agent (fix round or long sweep) hands the remaining work to a
+  fresh agent with a short brief.
 
 ## Milestone gate
 
@@ -273,7 +283,24 @@ code; and a short checklist, checked by one reviewer without narrative (no secon
 and the docs tidy pass over the docs changed during the milestone (not `docs/archive/`, nor review
 or decision records, which are history): a fact stated
 in two places (keep one, link to it), a lesson that is stale or now enforced by a check, a doc
-turning into a catch-all. Findings are fixed in the gate PR.
+turning into a catch-all. Findings are fixed in the gate PR. The checklist also records the pattern retro done (link; see
+[Retro](#retro-and-housekeeping-queue)).
+
+## Retro and housekeeping queue
+
+A retro item is an improvement candidate backed by evidence (run id, token count or `file:line`) and
+an expected saving; at most 5 per retro ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
+- **When:** at every handoff, including an early clear the owner asks for, the PM writes the handoff and
+  the retro. At each milestone gate (E3, release-candidate certification, release) a pattern retro: a
+  Sonnet subagent reads the housekeeping issues, review records and `gh` CI timings since the last gate
+  and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
+- **Beads:** `br create -l housekeeping --description-file <file>`, then clear `source_repo_path`
+  ([BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
+  to the next housekeeping PR, rejected ones to `br close` with the reason.
+- **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
+  PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last
+  merge on `origin/main`. The PM reminds the owner of the retro when suggesting a wrap-up or when
+  context is large.
 
 ## Git hygiene
 
@@ -291,7 +318,7 @@ turning into a catch-all. Findings are fixed in the gate PR.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, runs `git branch review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
+  at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
