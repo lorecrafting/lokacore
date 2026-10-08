@@ -82,3 +82,13 @@ jobs:
             mobile/app/.e2e/artifacts/**/*.log
           include-hidden-files: true
           if-no-files-found: ignore
+
+  # The one check `main` requires. A skipped browser job passes; a draft (changes skipped) fails.
+  book-e2e-green:
+    needs: [changes, browser]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
