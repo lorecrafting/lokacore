@@ -93,8 +93,8 @@ Report at the end of the slice, not at every step.
    the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
    [the index](reviews/README.md), and returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
-   developer, whose context is intact, while that context is small (about 220k tokens or
-   less, the subagent token count in its last completion notice); past that, or after a PM
+   developer, whose context is intact, while that context is small
+   (the threshold is in [Claude Code specifics](#token-hygiene)); past that, or after a PM
    session restart, a fresh developer gets the brief, the review record, the PR diff and the
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
@@ -162,6 +162,7 @@ The PM owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
+Active issues carry one `stage:` label (building, review, fixing, recheck, integrated, gate), which the PM moves at each step; status stays `in_progress` until the reviewed merge to `main`.
 It replaces the retired `bin/board` and `$board` dashboards; `bv` is the board view.
 
 Install `br` (version 0.7.4) with
@@ -291,8 +292,7 @@ re-pin a save when that happens.
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
 - Delegate mechanical work. At a stable publication checkpoint, update the
   roadmap, Beads and shared handoff before a fresh session; do not reset during
-  an open review merely to shorten context. No plugin or `CLAUDE.md` changes
-  mid-session (they bust the prompt cache).
+  an open review merely to shorten context.
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
@@ -311,6 +311,14 @@ handoff; read the index once on takeover and reopen only changed sections.
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
 silently closes unfinished work.
+
+Claude Code specifics:
+
+- No plugin or `CLAUDE.md` changes mid-session (they bust the prompt cache).
+- "Small" context means about 220k tokens or less, read from the subagent token count in its
+  last completion notice.
+
+Another harness, if adopted, gets its own short adapter list next to this one.
 
 ## Milestone gate
 
