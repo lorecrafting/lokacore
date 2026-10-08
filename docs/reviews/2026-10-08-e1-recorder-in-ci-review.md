@@ -57,3 +57,22 @@
 
 Accepted per PM: separate job (about 6 min), not in `check_all.sh`, literal candidate id, no fast
 test for the `checkRefusals` call (pre-existing).
+
+## Fix round 1 at `0209de81d1bd32cb119c7bc1850da9d9c7e27414`
+
+Scope: commits after `1c9ca812`. The only code change in this PR's own diff is
+`bin/docs_only_red_controls.sh` (+2). The kernel test files in the range come from origin/main
+(#314, #316) and are not part of the PR's diff against main.
+
+- **S1 fixed.** New stub `recorderfailed` (`docs_only_red_controls.sh:57`): elixir, typescript and
+  sim succeed, `e1-recorder` fails. New case `b "" 0 code "failed recorder is not a green baseline"
+  recorderfailed` (`:69`). I re-ran the controls myself:
+  - Unmutated: rc 0.
+  - Mutant A (`ci_base.sh:8` back to three jobs, `count=3`): rc 1, with
+    `FAIL ci_base failed recorder is not a green baseline: want '', got '<sha>'`.
+  - Restored from a saved copy: tree clean.
+  - The PR body's Baseline control is corrected.
+- **Nit kept, reason accepted.** A separate expected count would be a change detector. Exit 2 and
+  the gap line name a dropped case (mutant C above).
+- Index line is last in `docs/reviews/README.md`.
+- Verdict, round 1: **APPROVE**. Nothing open.
