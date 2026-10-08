@@ -92,4 +92,33 @@ git rev-parse -q --verify MERGE_HEAD > /dev/null || bad 'integrate_batch conflic
 # Break: the size gate checks only changed files, missing an oversized file the batch did not touch.
 mk; echo '// OVERSIZE' > old.ts && git add old.ts && git commit -qm 'int old.ts'
 ib size-gate 1 3 2
+# --- sync_pr.sh -----------------------------------------------------------------------------
+# A bare origin; main adds m2 to the review index (and code in c.txt); branch pr adds its own
+# line at the top of the index. Stub `elixir` stands in for the docs checker.
+mkdir "$tmp/stub"; printf '#!/bin/sh\nexit "${STUB_DOCS:-0}"\n' > "$tmp/stub/elixir"; chmod +x "$tmp/stub/elixir"
+sp() {
+  O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
+  git clone -q "$O" . 2>/dev/null; git checkout -qb main
+  mkdir -p docs/reviews; printf 'docs/reviews/README.md merge=union\n' > .gitattributes
+  printf '# i\n- m1\n' > docs/reviews/README.md; echo base > c.txt
+  git add . && git commit -qm base && git push -q origin main
+  git checkout -qb pr; printf '# i\n- own\n- m1\n' > docs/reviews/README.md; echo "$1" > c.txt
+  git commit -qam pr && git push -q origin pr
+  git checkout -q main; printf '# i\n- m1\n- m2\n' > docs/reviews/README.md; echo main > c.txt
+  git commit -qam main2 && git push -q origin main; git checkout -q pr
+}
+sy() { # <case> <want-rc> [docs-rc]
+  rc=0; STUB_DOCS=${3:-0} PATH="$tmp/stub:$PATH" capped sh "$bin/sync_pr.sh" pr > "$R.out" 2>&1 || rc=$?
+  [ "$rc" = "$2" ] || { bad "sync_pr $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
+}
+# Break: the index keeps the union-merge order (own line first), or the merge is not pushed.
+sp base; sy success 0
+[ "$(tail -n 3 docs/reviews/README.md | tr '\n' ' ')" = '- m1 - m2 - own ' ] || bad 'sync_pr success: index not main list + own line'
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] && [ "$(git rev-list --parents -1 HEAD | wc -w)" -eq 3 ] || bad "sync_pr success: not a pushed merge commit"
+# Break: a code conflict is auto-resolved (-X) or left half-merged instead of refused.
+sp other; tip=$(git rev-parse HEAD); sy conflict 1
+[ "$(git rev-parse HEAD)" = "$tip" ] && [ -z "$(git status --porcelain)" ] || bad 'sync_pr conflict: HEAD moved or tree dirty'
+# Break: a failing docs check still pushes.
+sp base; pushed=$(git rev-parse origin/pr); sy docs-fail 1 1
+[ "$(git rev-parse origin/pr)" = "$pushed" ] || bad 'sync_pr docs-fail: pushed'
 exit $fail

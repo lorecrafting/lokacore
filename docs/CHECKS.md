@@ -87,6 +87,8 @@ their rules and red controls remain available for resumption.
 - `bin/integration_red_controls.sh` runs E1 batch integration (`bin/integrate_batch.sh`) in
   throwaway repositories with stub checks: no integration on a pending-count mismatch, a failed
   recorder, a conflict or an oversized untouched file.
+  It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
+  index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
