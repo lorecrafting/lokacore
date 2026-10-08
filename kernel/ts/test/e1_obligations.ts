@@ -1,14 +1,16 @@
-// size: allow 540, the reaction witness reuses creditedPolicyPaths beside the other obligation witnesses
+// size: allow 540, the AB brief places the reaction witness here; new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import type {
   CharacterId,
   Command,
   DecisionResult,
   DefinitionRef,
+  DeltaOp,
   EntityId,
   Policy,
+  ReactionRule,
 } from '../src/contracts.gen.ts';
-import { value } from '../src/mechanics/fact.ts';
+import { scopeOf, value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { detailOf } from '../src/commands/actions.ts';
@@ -386,110 +388,114 @@ export function objectivePaths(
 }
 
 // architecture.md creatures paragraph: every apply step has an exact committed effect in one writer
-// group G; the `when` is judged on the state the delivery read (before + ops of groups before G).
-// Effect events must name the cause; a quest.fail (no event) is bound only by sharing G.
-// ponytail: each step takes its first matching op and the first matching cause, the actor is the
-// world's player, and groups below G are taken as the read prefix (v042: one player, one delivery
-// per rule, no due-job group reuse in a reacting step); bind per delivery when that grows.
+// group G, no other reaction triggered in the step matches the same op, effect events name the
+// cause, and `when` is judged on before + ops of groups before G, all of which precede G's ops.
+// ponytail: the first matching cause and the world's player (v042: one player, one change per
+// trigger fact per step); bind per delivery when a cartridge can repeat a trigger in one step.
 export function reactionWitnesses(before: World, after: World, decision: DecisionResult): string[] {
   if (decision.kind !== 'accepted') return [];
   const ops = decision.delta.ops,
     events = decision.events,
     actor = before.character;
-  return Object.entries(before.cartridge.reactions ?? {}).flatMap(([ref, rule]) => {
+  // The op whose shape a step authors; a delivery's op matches only its own rule's steps.
+  const shape = (step: ReactionRule['apply'][number]) => {
+    if (step.op === 'quest.activate')
+      return ops.find((o) => o.op === 'quest.activate' && same(o.quest, step.quest));
+    if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
+      const instance = questOf(before, actor, step.quest)?.[0];
+      const to = step.op === 'quest.resolve' ? 'resolved' : 'failed';
+      return ops.find(
+        (o) =>
+          o.op === 'quest.transition' &&
+          o.instance_id === instance &&
+          o.to === to &&
+          o.outcome === step.outcome,
+      );
+    }
+    if (step.op === 'fact.assign')
+      return ops.find(
+        (o) =>
+          o.op === 'fact.assign' &&
+          same(o.fact, step.fact) &&
+          same(o.scope, scopeOf(before, actor, step.fact)) &&
+          o.value === step.value,
+      );
+    const prior = before.state.population_plans?.[key(step.plan)];
+    const next = after.state.population_plans?.[key(step.plan)];
+    return ops.find(
+      (o) =>
+        o.op === 'population.control' &&
+        same(o.plan, step.plan) &&
+        same(o.expected, prior) &&
+        same(o.value, next),
+    );
+  };
+  const fired = Object.entries(before.cartridge.reactions ?? {}).flatMap(([ref, rule]) => {
     const cause = events.find((e) => triggered(before, e).includes(rule));
-    if (!cause) return [];
+    return cause ? [{ ref, rule, cause, matched: rule.apply.map(shape) }] : [];
+  });
+  const claims = new Map<DeltaOp, number>();
+  for (const { matched } of fired)
+    for (const op of new Set(matched)) if (op) claims.set(op, (claims.get(op) ?? 0) + 1);
+  return fired.flatMap(({ ref, rule, cause, matched }) => {
     const causeId: string = cause.id;
-    const groups = rule.apply.map((step) => {
+    // An event of this delivery: caused by the trigger, with every wanted payload field.
+    const caused = (want: Record<string, unknown>) =>
+      events.some(
+        (e) =>
+          e.causation_id === causeId &&
+          Object.entries(want).every(([k, v]) =>
+            same((e.payload as Record<string, unknown>)[k], v),
+          ),
+      );
+    if (matched.some((op) => op && claims.get(op)! > 1)) return [];
+    const groups = rule.apply.map((step, i) => {
+      const op = matched[i];
       if (step.op === 'quest.activate') {
-        const op = ops.find((o) => o.op === 'quest.activate' && same(o.quest, step.quest));
         const row = op?.op === 'quest.activate' ? after.state.quests?.[op.instance_id] : undefined;
         return op?.op === 'quest.activate' &&
           !questOf(before, actor, step.quest) &&
           row?.state === 'active' &&
           same(row.scope, { kind: 'player', character_id: actor }) &&
-          events.some(
-            (e) =>
-              e.causation_id === causeId &&
-              e.payload.type === 'quest_activated' &&
-              e.payload.instance_id === op.instance_id,
-          )
+          caused({ type: 'quest_activated', instance_id: op.instance_id })
           ? op.writer_group
           : undefined;
       }
       if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
-        const to = step.op === 'quest.resolve' ? 'resolved' : 'failed';
-        const prior = questOf(before, actor, step.quest);
-        const op = ops.find(
-          (o) =>
-            o.op === 'quest.transition' &&
-            o.instance_id === prior?.[0] &&
-            o.to === to &&
-            o.outcome === step.outcome,
-        );
-        const row = prior && after.state.quests?.[prior[0]];
-        return op &&
-          prior &&
-          (prior[1].state === 'active' || prior[1].state === 'objectives_complete') &&
-          row?.state === to &&
+        if (op?.op !== 'quest.transition') return undefined;
+        const prior = before.state.quests?.[op.instance_id],
+          row = after.state.quests?.[op.instance_id];
+        return (prior?.state === 'active' || prior?.state === 'objectives_complete') &&
+          row?.state === op.to &&
           row.outcome === step.outcome &&
-          (to === 'failed' ||
-            events.some(
-              (e) =>
-                e.causation_id === causeId &&
-                e.payload.type === 'quest_resolved' &&
-                e.payload.instance_id === prior[0] &&
-                e.payload.outcome === step.outcome,
-            ))
+          (op.to === 'failed' ||
+            caused({ type: 'quest_resolved', instance_id: op.instance_id, outcome: step.outcome }))
           ? op.writer_group
           : undefined;
       }
-      if (step.op === 'fact.assign') {
-        const op = ops.find(
-          (o) => o.op === 'fact.assign' && same(o.fact, step.fact) && o.value === step.value,
-        );
+      if (step.op === 'fact.assign')
         return op?.op === 'fact.assign' &&
           op.expected !== step.value &&
           value(after, actor, step.fact) === step.value &&
-          events.some(
-            (e) =>
-              e.causation_id === causeId &&
-              e.payload.type === 'fact_changed' &&
-              same(e.payload.fact, step.fact) &&
-              e.payload.old === op.expected &&
-              e.payload.new === step.value,
-          )
+          caused({ type: 'fact_changed', fact: step.fact, old: op.expected, new: step.value })
           ? op.writer_group
           : undefined;
-      }
-      if (step.op !== 'population.suppress') return undefined;
-      const prior = before.state.population_plans?.[key(step.plan)],
-        next = after.state.population_plans?.[key(step.plan)];
-      const op = ops.find(
-        (o) =>
-          o.op === 'population.control' &&
-          same(o.plan, step.plan) &&
-          same(o.expected, prior) &&
-          same(o.value, next),
-      );
-      // ponytail: the row names the cause event, not the reaction, so two reactions on one
-      // event suppressing the same plan could both be credited (v042 cannot reach this);
-      // bind the suppression row to the reaction if a cartridge can.
-      return op?.op === 'population.control' &&
-        prior &&
-        !prior.suppression &&
-        next?.suppression?.cause_event_id === cause.id &&
-        next.suppression.ends_at === cause.logical_time + step.duration
+      // The shape matched op.expected/op.value to the before/after plan rows.
+      if (step.op !== 'population.suppress' || op?.op !== 'population.control') return undefined;
+      return op.expected &&
+        !op.expected.suppression &&
+        op.value.suppression?.cause_event_id === cause.id &&
+        op.value.suppression.ends_at === cause.logical_time + step.duration
         ? op.writer_group
         : undefined;
     });
     const group = groups[0]; // undefined without apply steps
+    // A quest.fail has no event: a rule of only quest.fail steps has nothing naming its cause.
     if (group === undefined || groups.some((g) => g !== group)) return [];
-    const read = apply(
-      before,
-      ops.filter((o) => o.writer_group < group),
-      false,
-    );
+    if (rule.apply.every((step) => step.op === 'quest.fail')) return [];
+    const first = ops.findIndex((o) => o.writer_group >= group);
+    if (ops.slice(first).some((o) => o.writer_group < group)) return [];
+    const read = apply(before, ops.slice(0, first), false);
     if ('fault' in read) return [];
     const base = `/reactions/${ref}`;
     const when = rule.when

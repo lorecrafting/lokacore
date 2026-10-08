@@ -286,11 +286,30 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
       s.decision.events.find((e: Loose) => e.payload.fact?.key === k).payload;
   const bell = prior.steps.get(a)!,
     report = prior.steps.get(start)!;
+  // A rule sharing b's trigger and effect whose `when` fails at its real delivery (after b) is
+  // never delivered, so it must not borrow b's op and event.
+  const dup = structuredClone(bell) as Loose,
+    b0 = rule(dup, 'b_lost_before_meeting');
+  dup.before.cartridge.reactions['ashmere_missing_child@0.0.42:reaction/e_dup'] = {
+    ...b0,
+    key: 'e_dup',
+    when: { policy_version: 1, root: b0.when.root.items[4] },
+    apply: [b0.apply[1]],
+  };
+  assert.deepEqual(
+    reactions(dup).filter((p) => p.includes('/e_dup')),
+    [],
+  );
   for (const path of expected.a)
     planted(
       bell,
       path,
       {
+        'lower group after G': (s) => {
+          const ops = s.decision.delta.ops,
+            i = ops.findIndex((o: Loose) => o.fact?.key === 'chapel_allegiance');
+          ops.push(...ops.splice(i, 1));
+        },
         'read state': (s) =>
           drop(s, (o) => o.op === 'fact.assign' && o.fact.key === 'chapel_bell_rung'),
         'no open instance': (s) => {
@@ -307,11 +326,18 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
           assert.notEqual(hourOf(s.before.cartridge, cause.logical_time), h);
           rule(s, 'a_resolve_bell').when.root.items[0] = { op: 'time_window', from: h, to: h + 1 };
         },
-        'transition instance': (s) =>
-          (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').instance_id =
-            'other'),
-        'transition to': (s) =>
-          (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').to = 'failed'),
+        // Another open instance resolved as prior, with its event: only the quest differs.
+        'transition instance': (s) => {
+          const other = questId(s, 'missing_child');
+          ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').instance_id = other;
+          Object.assign(s.after.state.quests[other], { state: 'resolved', outcome: 'prior' });
+          event(s, 'quest_resolved').instance_id = other;
+        },
+        // A fail transition needs no event, so a resolve step must not accept one.
+        'transition to': (s) => {
+          ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').to = 'failed';
+          quest(s, 'after', 'bell_of_ashmere').state = 'failed';
+        },
         'transition outcome': (s) =>
           (ops(s, 'quest.transition').find((o: Loose) => o.to === 'resolved').outcome = 'fox'),
         'after state': (s) => (quest(s, 'after', 'bell_of_ashmere').state = 'active'),
@@ -334,6 +360,10 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
         'fail outcome': (s) => (quest(s, 'after', 'missing_child').outcome = 'rescued'),
         'assign op': (s) =>
           drop(s, (o) => o.op === 'fact.assign' && o.fact.key === 'village_child_status'),
+        'only quest.fail': (s) => rule(s, 'b_lost_before_meeting').apply.pop(),
+        'assign fact': (s) =>
+          (assign(s, 'village_child_status').fact = ref('fact', 'chapel_allegiance')),
+        'assign scope': (s) => (assign(s, 'village_child_status').scope = { kind: 'world' }),
         'assign value': (s) => (assign(s, 'village_child_status').value = 'rescued'),
         'assign unchanged': (s) => {
           assign(s, 'village_child_status').expected = 'lost';
