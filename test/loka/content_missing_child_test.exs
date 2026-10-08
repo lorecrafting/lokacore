@@ -116,18 +116,25 @@ defmodule Loka.ContentMissingChildTest do
            end)
   end
 
-  # Breaks: the compiler admits a period that cannot revisit a newly eligible fatal slot in time.
-  test "hound wander must be no slower than replacement", %{dir: dir} do
-    slow = &%{&1 | "wander_interval" => 7200, "replacement_delay" => 3600}
+  # Breaks: the compiler admits a period that cannot revisit a newly eligible fatal slot in time,
+  # or a night window that does not wrap midnight (night every hour).
+  test "hound wander is no slower than replacement and the night window wraps", %{dir: dir} do
+    for change <- [
+          %{"wander_interval" => 7200, "replacement_delay" => 3600},
+          %{"night_start" => 1, "night_end" => 5}
+        ] do
+      assert {:error, diagnostics} =
+               Loka.ContentSource.compile(dir, [
+                 {"populations/fen_hounds.json", &Map.merge(&1, change)}
+               ])
 
-    assert {:error, diagnostics} =
-             Loka.ContentSource.compile(dir, [{"populations/fen_hounds.json", slow}])
-
-    assert Enum.any?(
-             diagnostics,
-             &(&1["code"] == "SCHEMA_VIOLATION" and
-                 &1["path"] == "populations/fen_hounds.wander_interval")
-           )
+      assert Enum.any?(
+               diagnostics,
+               &(&1["code"] == "SCHEMA_VIOLATION" and
+                   &1["path"] == "populations/fen_hounds.wander_interval")
+             ),
+             inspect(change)
+    end
   end
 
   # Break: a zero flight threshold compiles, so no living hound can ever flee.

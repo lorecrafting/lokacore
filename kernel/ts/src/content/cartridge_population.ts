@@ -86,7 +86,7 @@ function periods(p: Obj, calendar?: Obj): boolean {
   return (
     !!calendar &&
     p.night_start < calendar.hours_per_day &&
-    p.night_end < calendar.hours_per_day &&
+    p.night_end < p.night_start && // the night window wraps midnight
     p.wander_interval <= p.replacement_delay &&
     p.wander_interval % calendar.units_per_hour === 0 &&
     p.replacement_delay <= Math.floor(Number.MAX_SAFE_INTEGER / 2)
