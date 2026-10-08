@@ -11,16 +11,16 @@
 /* Values mirror mobile/app/book/tokens.ts, which wins on any difference. */
 :root, [data-theme=light] {
   --bg:#ebe6d7; --fg:#241f19; --dim:#645c4f; --line:#d0c7b0; --card:#e4decd;
-  --action:#7b2d20; --danger:#7b2d20; --warning:#8a5a14; color-scheme:light;
+  --action:#7b2d20; --danger:#7b2d20; --warning:#845512; color-scheme:light;
 }
 [data-theme=dark] {
   --bg:#0c0b09; --fg:#ecdfc3; --dim:#a79a83; --line:#2d271f; --card:#17140f;
-  --action:#e6a650; --danger:#eb9676; --warning:#e6b35a; color-scheme:dark;
+  --action:#e6a650; --danger:#eb9676; --warning:#d0712a; color-scheme:dark;
 }
 :root {
   --head:'IM Fell English',Georgia,serif; --caps:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
   --hair:2px; --xs:4px; --sm:6px; --md:8px; --lg:12px; --block:14px; --xl:16px; --page:24px;
-  --touch:44px; --cardh:48px; --rule:1px; --speech:2px; --underline:1.5px; --minimap:44px; --footrule:92px;
+  --touch:44px; --cardh:48px; --rule:1px; --speech:2px; --underline:1.5px; --minimap:56px; --footrule:92px;
   --r-tag:3px; --r-card:10px; --disabled:.45; --quick:160ms; --fade:160ms;
 }
 *{box-sizing:border-box}
@@ -35,7 +35,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
 :focus-visible{outline:2px solid var(--action); outline-offset:2px}
 
 /* tokens */
-.pals{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:var(--xl)}
+.pals{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:var(--xl)}
 .pal{background:var(--bg); color:var(--fg); border:var(--rule) solid var(--line); border-radius:var(--r-card); padding:var(--xl)}
 .pal b{font:400 14px var(--caps); letter-spacing:1.1px}
 .sw{display:grid; grid-template-columns:32px 1fr auto; gap:var(--md); align-items:center; font-size:15px; line-height:22px; margin-top:var(--md)}
@@ -72,6 +72,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
 .log .sys{color:var(--dim); font-style:italic}
 .tag{font:13px var(--caps); letter-spacing:.7px; color:var(--danger); border:var(--rule) solid currentColor; border-radius:var(--r-tag); padding:0 var(--xs); margin-right:var(--sm); white-space:nowrap}
 .pg{flex:1; overflow-y:auto; padding:var(--page); display:flex; flex-direction:column; gap:var(--block)}
+.pg .rh{font:12px var(--caps); letter-spacing:1.7px; color:var(--dim); margin-bottom:calc(-1 * var(--block))}
 .pg h3{margin:0; font:400 31px/33px var(--head)}
 .pg p{margin:0}
 .acts{display:flex; flex-direction:column; gap:var(--sm)}
@@ -100,8 +101,8 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
     <code>docs/BOOK-UI-COMPONENTS.md</code>. Text is the Chapter 1 cartridge's; the states shown are a sample.</p>
 
   <div class="tools" role="group" aria-label="Specimen settings">
-    <button id="t-light" aria-pressed="true">Light</button>
-    <button id="t-dark" aria-pressed="false">Dark</button>
+    <button data-clock="6" aria-pressed="true">06:00</button>
+    <button data-clock="22" aria-pressed="false">22:00</button>
     <button id="t-sound" aria-pressed="true">Sound on</button>
     <button id="t-motion" aria-pressed="false">Reduce motion</button>
   </div>
@@ -130,7 +131,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
             </svg>
           <i class="rl"></i></div>
           <div class="st" role="status">
-            <span>06:00</span>·<button>standing</button>·
+            <span class="clock">06:00</span>·<button>standing</button>·
             <button class="res" aria-label="Contents, hp 20 of 20, ma 100 of 100, mv 82 of 82"><span class="lb">hp</span>20/20&ensp;<span class="lb">ma</span>100/100&ensp;<span class="lb">mv</span>82/82</button>
           </div>
         </footer>
@@ -138,6 +139,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
 
       <section class="layer" id="talk" aria-label="Elspeth" hidden>
         <div class="pg">
+          <div class="rh">Look for a sign of Wren on Village Green.</div>
           <h3>Elspeth</h3>
           <p>A woman in a worn shawl keeps turning toward the river. One hand worries the edge of her sleeve; her eyes search every face on the landing.</p>
           <div class="log" role="log">
@@ -153,7 +155,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
           <button class="control" data-go="room">Leave</button>
         </div>
         <div class="base"><div class="st" role="status">
-          <span>06:00</span>·<span>standing</span>·
+          <span class="clock">06:00</span>·<span>standing</span>·
           <span class="res"><span class="lb">hp</span>20/20&ensp;<span class="lb">ma</span>100/100&ensp;<span class="lb">mv</span>82/82</span>
         </div></div>
       </section>
@@ -165,8 +167,10 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
         The arriving page takes taps from the first frame; the curl is a picture over it.</p>
       <p>The curl is <code>page-curl.sksl</code>, inlined verbatim in this page's source and run by
         CanvasKit 0.42.0, the same file Skia will run on the phone. This sample's page snapshot
-        skips the minimap drawing. Reduce motion swaps the curl for a 160 ms cross-fade.
-        Sound plays the mock's synthesised paper turn; a recorded sample comes later.</p>
+        skips the minimap drawing. The curl takes 500 ms (to be tuned on a device); reduce motion swaps it for a 160 ms cross-fade.
+        Sound plays the mock's synthesised paper turn until a recorded CC0 sample replaces it.
+        The clock sets in-game time: the page is light from dawn (05:00) to dusk (18:00), the
+        Chapter 1 calendar's sample hours, and dark otherwise.</p>
       <p>Not in the base: grain, ink shadows, weather, glow, burns, flashes, pickup pops,
         chapter cards and every other mock effect.</p>
       <p id="ck-status">Loading CanvasKit…</p>
@@ -183,7 +187,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
     <div><code>body 18/28</code><span>Reeds crowd a slick wooden landing.</span></div>
     <div><code>log 17/26</code><span style="font:17px/26px var(--body)">You agree to look around Village Green.</span></div>
     <div><code>small 13/19</code><span style="font:13px/19px var(--body); color:var(--dim)">06:00 · standing</span></div>
-    <div><code>runningHead 12</code><span style="font:12px var(--caps); letter-spacing:1.7px; color:var(--action)">Talking with</span> <small style="color:var(--dim)">(mock words; open question)</small></div>
+    <div><code>runningHead 12</code><span style="font:12px var(--caps); letter-spacing:1.7px; color:var(--dim)">Look for a sign of Wren on Village Green.</span></div>
     <div><code>control 14</code><span style="font:14px var(--caps); letter-spacing:1.1px">Back to World</span></div>
     <div><code>tag 13</code><span><span class="tag">locked</span></span></div>
     <div><code>speaker 17</code><span style="font:17px var(--caps); letter-spacing:.5px">Elspeth</span></div>
@@ -197,16 +201,16 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
 
 <script>
 // ---- the specimen's token tables (mirrors of tokens.ts) ----
-const PALETTES={light:{bg:'#ebe6d7',fg:'#241f19',dim:'#645c4f',line:'#d0c7b0',card:'#e4decd',action:'#7b2d20',danger:'#7b2d20',warning:'#8a5a14'},
-  dark:{bg:'#0c0b09',fg:'#ecdfc3',dim:'#a79a83',line:'#2d271f',card:'#17140f',action:'#e6a650',danger:'#eb9676',warning:'#e6b35a'}};
-const SPACE={hair:2,xs:4,sm:6,md:8,lg:12,block:14,xl:16,page:24}, SIZE={touch:44,card:48,minimap:44,footerRule:92}, RADIUS={tag:3,card:10};
-const TURN={duration:720}, FADE=160, VOLUME=1;
+const PALETTES={light:{bg:'#ebe6d7',fg:'#241f19',dim:'#645c4f',line:'#d0c7b0',card:'#e4decd',action:'#7b2d20',danger:'#7b2d20',warning:'#845512'},
+  dark:{bg:'#0c0b09',fg:'#ecdfc3',dim:'#a79a83',line:'#2d271f',card:'#17140f',action:'#e6a650',danger:'#eb9676',warning:'#d0712a'}};
+const SPACE={hair:2,xs:4,sm:6,md:8,lg:12,block:14,xl:16,page:24}, SIZE={touch:44,card:48,minimap:56,footerRule:92}, RADIUS={tag:3,card:10};
+const TURN={duration:500}, FADE=160, VOLUME=1;
 
 const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(x=>x<=.03928?x/12.92:((x+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
-const ratio=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return ((x+.05)/(y+.05)).toFixed(1);};
+const ratio=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return ((x+.05)/(y+.05)).toFixed(2);};
 document.getElementById('pals').innerHTML=Object.entries(PALETTES).map(([name,p])=>
   `<div class="pal" data-theme="${name}"><b>${name}</b>${Object.entries(p).map(([k,v])=>
-    `<div class="sw"><i style="background:${v}"></i><span>${k} <small>${v}</small></span><small>${k==='bg'||k==='line'||k==='card'?'':ratio(v,p.bg)+':1'}</small></div>`).join('')}</div>`).join('');
+    `<div class="sw"><i style="background:${v}"></i><span>${k} <small>${v}</small></span><small>${['bg','line','card'].includes(k)?'':`${ratio(v,p.bg)} bg · ${ratio(v,p.card)} card`}</small></div>`).join('')}</div>`).join('');
 document.getElementById('sp').innerHTML=[...Object.entries(SPACE).map(([k,v])=>[`space.${k} ${v}`,v]),...Object.entries(SIZE).map(([k,v])=>[`size.${k} ${v}`,v])]
   .map(([k,v])=>`<div><code>${k}</code><span style="width:${v}px"></span></div>`).join('')+
   Object.entries(RADIUS).map(([k,v])=>`<div><code>radius.${k} ${v}</code><span style="width:${SIZE.card}px;height:${SIZE.card/2}px;border-radius:${v}px;background:var(--card);border:1px solid var(--line)"></span></div>`).join('');
@@ -214,13 +218,17 @@ document.getElementById('sp').innerHTML=[...Object.entries(SPACE).map(([k,v])=>[
 // ---- settings ----
 const ph=document.getElementById('ph'), state={sound:true,still:matchMedia('(prefers-reduced-motion: reduce)').matches};
 const press=(id,on)=>document.getElementById(id).setAttribute('aria-pressed',on);
-const theme=t=>{ph.dataset.theme=t; document.documentElement.dataset.theme=t; press('t-light',t==='light'); press('t-dark',t==='dark');};
-document.getElementById('t-light').onclick=()=>theme('light');
-document.getElementById('t-dark').onclick=()=>theme('dark');
+// Day and night follow in-game time (book-ui.md#world-and-status-entry). Sample dawn and dusk: the
+// Chapter 1 calendar's solar cuts; on the phone they are cartridge world values, never literals.
+const DAWN=5, DUSK=18;
+const clock=h=>{const t=h>=DAWN&&h<DUSK?'light':'dark'; ph.dataset.theme=t; document.documentElement.dataset.theme=t;
+  document.querySelectorAll('.clock').forEach(s=>s.textContent=String(h).padStart(2,'0')+':00');
+  document.querySelectorAll('[data-clock]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.clock===h));};
+document.querySelectorAll('[data-clock]').forEach(b=>b.onclick=()=>clock(+b.dataset.clock));
 document.getElementById('t-sound').onclick=e=>{state.sound=!state.sound; press('t-sound',state.sound); e.target.textContent=state.sound?'Sound on':'Sound off';};
 document.getElementById('t-motion').onclick=()=>{state.still=!state.still; press('t-motion',state.still);};
 press('t-motion',state.still);
-if(matchMedia('(prefers-color-scheme: dark)').matches) theme('dark');
+clock(6);
 
 // ---- the paper page-turn sound: the mock's pageSound, without its damp variant ----
 let actx;

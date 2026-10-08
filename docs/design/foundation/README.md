@@ -48,25 +48,25 @@ so `em` sizes resolve against that).
 |---|---|---|---|
 | Light palette `bg fg dim line action` | `.ph` | same | `paper.ts` already matches |
 | `card` | `#e4decd` | none | new: action cards, tiles |
-| `danger` / `warning` | `--p-bad`, `.foot .mid` | `accent`, `mid` | renamed by role |
-| Dark palette | `.ph.unlit, .ph.lamp` | none | new |
+| `danger` / `warning` | `--p-bad`, `.foot .mid` | `accent`, `mid` | renamed by role; light `warning` `#845512` passes on `card` |
+| Dark palette | `.ph.unlit, .ph.lamp` | none | new; `warning` moved to burnt orange `#d0712a` |
 | `type.body` | 18 / 1.55 | 18 / 28 | same |
 | `type.log` | 17 (0.95em) | 18 | smaller |
 | `type.roomTitle` | 22.4 / 1.1 | 26 | smaller |
 | `type.pageTitle` | 31 / 1.05 | 32 (Combat 26) | one size |
-| small caps | IM Fell English SC, 11–14 | EB Garamond `small-caps`, 15 and 17 | third font to bundle |
+| small caps | IM Fell English SC, 11–14 | EB Garamond `small-caps`, 15 and 17 | third font, bundled |
 | `type.small` (status) | 13 | 15 small caps | body face |
 | `space.page` | 24 (22 top) | 24 | 22 → 24 |
 | `space.block` | 14 | 8 (`Sheet` gap) | wider |
 | `space.sm` | 6 (7 in the footer) | none | |
 | room title padding | 18 / 10 | 24 / 10 | → `space.xl` / `space.md` |
 | `size.touch` | 38–48 | 44 (height) | 44 both axes; the spec wins over the mock's 38–40 |
-| `size.minimap` | 44 | 56 | |
+| `size.minimap` | 44 | 56 | live kept |
 | `size.footerRule` | 92 | flex | fixed width |
 | `radius.card` | 7, 9, 10 | none | one value |
 | `opacity.disabled` | 0.45 (tiles 0.25) | none | one value |
 | `motion.quick` | 0.15–0.18 s ease | 160, `Animated.timing` default easing | |
-| `motion.turn` | curl, 720 ms in-out quad | swing, 320 ms ease-out cubic | the curl replaces the swing |
+| `motion.turn` | curl, 720 ms in-out quad | swing, 320 ms ease-out cubic | curl at about 500 ms, tuned on a device |
 | `sound.pageTurn` | synthesised `pageSound` | none | new |
 
 Adopted from the mock: the paper palette and its dark counterpart, both fonts and the small-caps
@@ -86,9 +86,8 @@ drawer, chips and shop rows have no live consumer.
    `padding*`, `margin*`, `gap`, `rowGap`, `columnGap`, `borderRadius` or `minHeight` in
    `mobile/app/book/**`, except `MapDrawing.tsx`, `DiscoveredMap.tsx` and `joystick.ts`.
 3. ast-grep rule: no `fontFamily` string literal outside `tokens.ts`.
-4. A unit test: every `color.light` and `color.dark` role meets WCAG 4.5:1 on `bg` for
-   `fg`, `dim`, `action`, `danger`, `warning` (today light `warning` passes on `bg`, 4.74,
-   and fails on `card`, 4.4: no warning text may sit on a card).
+4. A unit test: in `color.light` and `color.dark`, each text role (`fg`, `dim`, `action`,
+   `danger`, `warning`) meets WCAG 4.5:1 on both `bg` and `card`.
 5. A Node test: `specimen.html` inlines `page-curl.sksl` verbatim and its `PALETTES` equal
    `tokens.ts` `color` (the specimen mirrors both).
 6. A compile check: `page-curl.sksl` compiles with `RuntimeEffect.Make` once
@@ -96,19 +95,32 @@ drawer, chips and shop rows have no live consumer.
 
 Each needs a red control in its slice.
 
-## Owner questions (taste)
+## Owner questions (taste): closed
 
-1. Dark palette: does it follow the system setting, in-game darkness, or both? The mock also
-   has a blue moon palette, left out here.
-2. In dark, `action` (`#e6a650`) and `warning` (`#e6b35a`) are nearly the same amber.
-3. The running head's words (the mock's "Person", "Talking with") are new copy; and was the
-   mock's quest-tracker running head (an Effects item) meant?
-4. Bundle a third font, IM Fell English SC, for the small caps (the mock's), or keep EB
-   Garamond's synthesised small caps?
-5. Action cards replace the live accent text links on detail pages: confirm.
-6. Minimap 44 (mock) against 56 (live).
-7. Curl 720 ms (mock) against the live 320 ms swing.
-8. The page-turn sound: record or choose a sample to replace the mock's synthesised one.
+All eight are answered in the [owner decision](../../decisions/owner-decision-design-foundation-2026-10-07.md):
+(1) day and night follow in-game time, no Settings override for now, no moon palette;
+(2) dark `warning` is burnt orange; (3) the running head shows the current quest objective, no
+new words; (4) IM Fell English SC is bundled; (5) action cards replace accent text links;
+(6) minimap 56; (7) curl about 500 ms, tuned on a device; (8) the synthesised sound stays until
+a recorded CC0 sample is found.
+
+| Role | Light | on bg | on card | Dark | on bg | on card |
+|---|---|---|---|---|---|---|
+| `fg` | `#241f19` | 13.10 | 12.16 | `#ecdfc3` | 14.90 | 13.91 |
+| `dim` | `#645c4f` | 5.28 | 4.91 | `#a79a83` | 7.11 | 6.64 |
+| `action` | `#7b2d20` | 7.52 | 6.98 | `#e6a650` | 9.31 | 8.69 |
+| `danger` | `#7b2d20` | 7.52 | 6.98 | `#eb9676` | 8.58 | 8.01 |
+| `warning` | `#845512` | 5.12 | 4.75 | `#d0712a` | 5.69 | 5.32 |
+
+## Open items for the polish phase
+
+- **Dawn and dusk hours.** The palette rule needs them as a cartridge world setting; no engine
+  or presenter literal. Chapter 1's calendar already authors solar cuts (dawn 05:00, dusk
+  18:00), which may serve; the choice is a developer slice's. The specimen uses them as samples.
+- **IM Fell English SC.** Its OFL file goes into `mobile/app/book/fonts` and loads through
+  expo-font with the other two.
+- **Running head.** Which active quest's objective shows when several are active needs a
+  GameView answer.
 
 Spec change to note: [Book UI](../../system/book-ui.md#minimap-map-and-presentation-controls)
 now asks for 44px touch targets in both axes, not only height; the riddle tiles fail it

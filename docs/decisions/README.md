@@ -275,4 +275,4 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - [D9 real cast clarification](pm-decision-d9-real-cast-2026-10-06.md): retain October 5 no-Bram ruling after owner delegation.
 
 - [Orphan provisional fixture cleanup](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
-- [Book design foundation](owner-decision-design-foundation-2026-10-07.md): mock base look, Skia curl and paper sound, in-game day/night with an override, accepted token choices (2026-10-07).
+- [Book design foundation](owner-decision-design-foundation-2026-10-07.md): mock base look, Skia curl and paper sound, in-game day/night, accepted token choices (2026-10-07).

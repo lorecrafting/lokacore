@@ -82,6 +82,12 @@ time after actions, elapsed delivery and reopen, without settling elapsed on ren
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
+The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows confirmed GameView in-game
+time, never the device's light or dark setting: `light` from the cartridge's dawn hour until its
+dusk hour, `dark` otherwise, switching when confirmed time crosses either hour. Dawn and dusk are
+cartridge world values; a cartridge that authors none shows `light`. There is no Settings
+override ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
+
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
 order, skipping unavailable/absent actions. If none is offered, position stays informational.

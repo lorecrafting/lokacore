@@ -76,9 +76,12 @@ still reads [`paper.ts`](../mobile/app/book/paper.ts) until the polish phase mov
   paper, without its glow), with the same roles: `bg`, `fg` (ink), `dim`, `line`, `card`,
   `action`, `danger`, `warning`. Use roles, never a hex value. `action` marks what can be
   pressed; `danger` and `warning` are the projected bands, barred ways and refusal tags, never
-  decoration. Which palette shows is an open owner question; nothing selects `dark` yet.
+  decoration. The text roles (`fg`, `dim`, `action`, `danger`, `warning`) are each at least
+  4.5:1 on `bg` and on `card` in both palettes; `line` is a hairline, not text. Which palette
+  shows follows in-game time, per the [day and night rule](system/book-ui.md#world-and-status-entry).
 - **Type.** IM Fell English for titles and letter tiles, EB Garamond for prose, logs and status,
-  IM Fell English SC for small-caps controls, tags and the running head. Use a named style
+  IM Fell English SC (bundled, loaded through expo-font on the phone with the other two) for
+  small-caps controls, tags and the running head. Use a named style
   from `type`; do not set a font size, line height or letter spacing in a component.
 - **Space, size, radius.** Margins, gaps and padding come from `space`; touch, card, rule
   and minimap sizes from `size`; corners from `radius`. Map drawing geometry
@@ -96,12 +99,12 @@ these; a new component needs a real consumer and its entry here in the same slic
 
 | Component | Form and rules | States | Consumer (live) |
 |---|---|---|---|
-| Page | Page margin `space.page`, blocks `space.block` apart, `type.pageTitle` header in `fg`; an optional running head (`type.runningHead`, `action`) above the title. One shell for every detail and section. | none | `Sheet` [`pages.tsx:143`](../mobile/app/book/pages.tsx#L143). Polish: `NpcPage` [`Menu.tsx:128`](../mobile/app/book/Menu.tsx#L128) and `Combat` [`Combat.tsx:16`](../mobile/app/book/Combat.tsx#L16) rebuild it; fold them in. |
+| Page | Page margin `space.page`, blocks `space.block` apart, `type.pageTitle` header in `fg`; an optional running head above the title: the current quest objective, the active quest's projected journal text (no presenter copy), in `type.runningHead` `dim`, not pressable; none when no quest is active. One shell for every detail and section. | none | `Sheet` [`pages.tsx:143`](../mobile/app/book/pages.tsx#L143). Polish: `NpcPage` [`Menu.tsx:128`](../mobile/app/book/Menu.tsx#L128) and `Combat` [`Combat.tsx:16`](../mobile/app/book/Combat.tsx#L16) rebuild it; fold them in. |
 | Room page | Fixed centred `type.roomTitle` (the Look tap, per the [room rule](system/book-ui.md#world-and-status-entry)); then prose in `type.body`, entity lines, verb lines and the log. | title tappable or plain | `RoomPage` [`pages.tsx:67`](../mobile/app/book/pages.tsx#L67) |
 | Fixture link | Inline in prose; ink colour with a `size.underline` dotted underline (solid where the platform has no dotted line). | linked, or plain prose when no detail is projected | room description; no live projection yet |
 | Entity line | MUD line: the name in weight 500 with the dotted underline, then the rest ("is here."). The whole line is the touch target. A carried-item note follows in `dim`. Also every list row that opens a detail: held and worn items, Inside, notices, Contents entries. | none | `Here` [`pages.tsx:124`](../mobile/app/book/pages.tsx#L124). Polish: held items [`pages.tsx:298`](../mobile/app/book/pages.tsx#L298) show no affordance. |
 | Verb line | A room's offered place action: italic `type.body` in `action`, in the room's list after the entity lines. | available only | place actions via `Act` [`pages.tsx:116`](../mobile/app/book/pages.tsx#L116) |
-| Action card | A detail page's offered action or dialogue choice: `card` fill, `size.rule` `line` border, `radius.card`, minimum height `size.card`, label in `type.body` ink. | available; unavailable: dashed border, `dim` label, reason tag, not pressable, `disabled` to assistive tech | `Act` [`pages.tsx:48`](../mobile/app/book/pages.tsx#L48), `Choice` [`Menu.tsx:24`](../mobile/app/book/Menu.tsx#L24). Polish: unavailable choices are plain notes today. |
+| Action card | A detail page's offered action or dialogue choice (never an accent text link): `card` fill, `size.rule` `line` border, `radius.card`, minimum height `size.card`, label in `type.body` ink. | available; unavailable: dashed border, `dim` label, reason tag, not pressable, `disabled` to assistive tech | `Act` [`pages.tsx:48`](../mobile/app/book/pages.tsx#L48), `Choice` [`Menu.tsx:24`](../mobile/app/book/Menu.tsx#L24). Polish: these are accent text links today (audit duplicate 2), and unavailable choices are plain notes. |
 | Continue button | A scene or chapter continuation: `fg` fill, `bg` label in `type.control`, `radius.card`, height `size.card`. | available | `ScenePage`, `ChapterPage` [`pages.tsx:403`](../mobile/app/book/pages.tsx#L403) |
 | Control | Local navigation that is not an offered action (Leave, Back to World, Back to board, Back to container, Back to map, Close, Resume dream, Continue conversation, Got it, Start over): `type.control` in `fg`, at least `size.touch` both ways. A section return sits centred below a `line` hairline. | enabled; disabled: `dim` at `opacity.disabled` | `Leave`/`Tap` [`pages.tsx:35`](../mobile/app/book/pages.tsx#L35), `Back` [`Book.tsx:318`](../mobile/app/book/Book.tsx#L318). Polish: these are drawn in four styles today. |
 | Log line | `type.log`. Narration in ink; a system line (Journal updated, a detail note) in `dim` italic; a refused line starts with a reason tag (`type.tag`, `danger`, `size.rule` border, `radius.tag`). A speech line (a `size.speechBar` `line` bar, `space.lg` indent, the speaker in `type.speaker`) waits until the log projects a speaker. | none | room log [`pages.tsx:118`](../mobile/app/book/pages.tsx#L118); detail history [`pages.tsx:168`](../mobile/app/book/pages.tsx#L168) and [`Menu.tsx:143`](../mobile/app/book/Menu.tsx#L143), one renderer twice |
@@ -111,7 +114,7 @@ these; a new component needs a real consumer and its entry here in the same slic
 | Page turn | See [Page turn](#page-turn). | turning, settled | `Turn` [`Turn.tsx:6`](../mobile/app/book/Turn.tsx#L6) |
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
-chips, shop price rows, scene pick cards and the quest-tracker running head (an Effects item).
+chips, shop price rows and scene pick cards.
 
 ## Page turn
 
@@ -123,15 +126,16 @@ eased progress, direction and the paper colour; there is no second CSS or WebGL 
 - **Direction.** A page that opens turns forward (`direction` 1); a return turns back (-1),
   as the [presentation rule](system/book-ui.md#minimap-map-and-presentation-controls) says.
   Stable-route updates do not turn.
-- **Timing.** `motion.turn`: the driver eases progress 0 to 1 over its duration with its
-  easing. A new turn replaces a running one.
+- **Timing.** `motion.turn` (about 500 ms, tuned on a device): the driver eases progress 0 to 1
+  over its duration with its easing. A new turn replaces a running one.
 - **Input.** The arriving page is live from the first frame; the curl is a picture over it that
   takes no touches, so input is never blocked.
 - **Reduced motion.** When the system asks for reduced motion, the pages cross-fade over
   `motion.fade` instead, with no curl.
 - **Sound.** The paper page-turn sound plays with each curl at `sound.pageTurn.volume`. It is on
-  by default; Settings has a Sound on/off control kept on the device. No sample is bundled
-  yet; the [specimen](design/foundation/specimen.html) plays the mock's synthesised sound.
+  by default; Settings has a Sound on/off control kept on the device. Until a short recorded
+  CC0 page-turn sample (under 1 s, bundled) is found and replaces it, the mock's synthesised
+  sound plays, as in the [specimen](design/foundation/specimen.html).
 
 ## Delivery cadence
 

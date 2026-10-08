@@ -12,10 +12,13 @@ const light = {
   card: '#e4decd', // action cards and letter tiles
   action: '#7b2d20', // what can be tapped to act
   danger: '#7b2d20', // the danger band, barred ways, refusal tags
-  warning: '#8a5a14', // the warning band
+  warning: '#845512', // the warning band
 };
 
-// The mock's unlit/lamp paper (`.ph.unlit,.ph.lamp`), without its glow.
+// The mock's unlit/lamp paper (`.ph.unlit,.ph.lamp`), without its glow; `warning` is a burnt orange
+// apart from `action`. Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg`
+// and on `card` in both palettes; `line` is a hairline, not text. Which palette shows: in-game
+// time, docs/system/book-ui.md#world-and-status-entry.
 const dark: typeof light = {
   bg: '#0c0b09',
   fg: '#ecdfc3',
@@ -24,12 +27,13 @@ const dark: typeof light = {
   card: '#17140f',
   action: '#e6a650',
   danger: '#eb9676',
-  warning: '#e6b35a',
+  warning: '#d0712a',
 };
 
 export const color = { light, dark };
 
-// Bundled family names (OFL files in ./fonts). `caps` (IM Fell English SC) is not bundled yet.
+// Bundled family names (OFL files in ./fonts). `caps` (IM Fell English SC) is chosen; the polish
+// phase adds its OFL file to ./fonts and loads it with the others through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
 
 // Text styles without colour; a component adds a colour from the palette.
@@ -39,7 +43,7 @@ export const type = {
   small: { fontFamily: font.body, fontSize: 13, lineHeight: 19 }, // status line, the tip
   roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 },
   pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 },
-  runningHead: { fontFamily: font.caps, fontSize: 12, letterSpacing: 1.7 },
+  runningHead: { fontFamily: font.caps, fontSize: 12, letterSpacing: 1.7 }, // the quest objective
   control: { fontFamily: font.caps, fontSize: 14, letterSpacing: 1.1 }, // Back to World, Got it
   tag: { fontFamily: font.caps, fontSize: 13, letterSpacing: 0.7 }, // a refusal's reason tag
   label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // hp/ma/mv in the status
@@ -64,7 +68,7 @@ export const size = {
   rule: 1, // hairline
   speechBar: 2,
   underline: 1.5, // fixture and entity links
-  minimap: 44, // the endpaper map at rest
+  minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
 };
 
@@ -75,10 +79,10 @@ export const opacity = { disabled: 0.45 };
 // Plain state changes only. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion.
 export const motion = {
   quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return
-  turn: { duration: 720, easing: 'inOutQuad' }, // the page curl
+  turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
 };
 
-// The paper page-turn sound, on by default, off in Settings. No recorded sample is bundled yet; the
-// specimen plays the mock's synthesised `pageSound` at this level.
+// The paper page-turn sound, on by default, off in Settings. The mock's synthesised `pageSound` plays
+// at this level until a recorded CC0 sample (under 1 s, bundled) replaces it.
 export const sound = { pageTurn: { volume: 1 } };
