@@ -1,0 +1,1 @@
+{"case_id":"sqlite-full","steps":2,"obligations":["/ancestries/fen_born","/world/movement"],"state_hash":"b3605bf4326894bdf795ce4a45b70b34ef4402443ae62731a3da3353eee065da","fault_schedule":[{"after_revision":1,"operation":"next transaction write: SQLITE_FULL","fault_kind":"full","receipt_reads_unavailable":false}],"final":null}

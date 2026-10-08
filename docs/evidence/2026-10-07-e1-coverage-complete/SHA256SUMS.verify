@@ -1,0 +1,8 @@
+report.json: OK
+sqlite-full.jsonl: OK
+replay-sqlite-full.json: OK
+recorder.log: OK
+replay.log: OK
+e1-tests.log: OK
+case-SHA256SUMS: OK
+case-SHA256SUMS.verify: OK
