@@ -101,3 +101,8 @@ their rules and red controls remain available for resumption.
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
+  The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
+  on the selected v042 artifact, rebuilt and sha-checked as `bin/integrate_batch.sh` does, and
+  fails on a pending obligation, a gap or a failed case (about 6 minutes). It is not in
+  `bin/check_all.sh`: that line has no area lanes, so it would add those minutes to every run.
+  The code lane's green baseline (`bin/ci_base.sh`) includes it.
