@@ -109,9 +109,9 @@ EOF
   # A pushed batch branch tracks its remote, which lacks the cherry-picked record.
   git remote add origin "$R.none" && git update-ref refs/remotes/origin/batch batch && git branch -qu origin/batch batch
 }
-# ib <case> <want-rc> <pending> <recorder-rc>
+# ib <case> <want-rc> <pending> <recorder-rc> [expected-pending, default 3]
 ib() {
-  rc=0; STUB_PENDING=$3 STUB_RC=$4 capped sh "$bin/integrate_batch.sh" batch "$review" 3 > "$R.out" 2>&1 || rc=$?
+  rc=0; STUB_PENDING=$3 STUB_RC=$4 capped sh "$bin/integrate_batch.sh" batch "$review" "${5:-3}" > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] || { bad "integrate_batch $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
 }
 # Break: no --no-ff (fast-forward), a lost review record, or a kept source branch.
@@ -135,6 +135,9 @@ ib wrong-artifact 1 3 2
 mk; ib count-mismatch 1 4 2
 # Break: recorder exit 1 (a failed case) is accepted; only exit 2 means pending.
 mk; ib recorder-fails 1 3 1
+# Break: at zero expected pending, exit 2 (an open family gap) is accepted, or pass (0) refused.
+mk; ib zero-pass 0 0 0 0
+mk; ib zero-gap 1 0 2 0
 # Break: the merge auto-resolves a conflict (-X ours/theirs) instead of stopping.
 mk; echo other > g.txt && git add g.txt && git commit -qm 'int g'; tip=$(git rev-parse HEAD)
 ib conflict 1 3 2

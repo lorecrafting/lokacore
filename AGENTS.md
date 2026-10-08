@@ -64,16 +64,10 @@ Keep lessons in area files; link here only when relevant to all work.
 - Nothing invented; unknowns stay null.
 - zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
 
-**Performance**
-- Whole-state copying kills phones. On a Pixel 3a (Hermes), copying a 190 KB state per
-  step took 216 ms; structural sharing took under 1 ms. Never deep-clone or re-encode
-  the whole state per action. BEAM maps share structure; plain JS objects do not.
-- Per-action SQLite commits are cheap when they write only changed rows (about 190 bytes,
-  6 to 11 ms p99 on the Pixel 3a; 1 to 3 ms on an M1 even for whole-state writes).
-  The disk is not the bottleneck; work per action is.
-- A full canonical checkpoint of a 730 KB state still took about 490 ms on the Pixel 3a
-  (not split into write/read/parse/encode). Keep it off the player-action path and
-  measure it split.
+**Performance** ([measurements](docs/lessons/mobile.md#performance))
+- Never deep-clone or re-encode the whole state per action: BEAM maps share structure;
+  plain JS objects do not. Per-action commits write only changed rows; the disk is not the
+  bottleneck, work per action is. Keep full checkpoints off the player-action path.
 - Declare any performance variant before tuning it, and keep failing results.
 
 ## Conventions
@@ -149,12 +143,12 @@ Checks: [current gates](docs/CHECKS.md), focused [provisional lane](docs/decisio
 - Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
-- Merge record-bearing PRs with merge commits, never squash.
+- Merge per [workflow step 7](docs/WORKFLOW.md#loop).
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
-- Follow [token hygiene](docs/WORKFLOW.md#token-hygiene); skip rereading unchanged documents.
+- Follow [token hygiene](docs/WORKFLOW.md#token-hygiene).
 - Expected failing readiness probes need no fix.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.

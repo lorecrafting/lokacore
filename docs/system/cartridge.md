@@ -27,7 +27,7 @@ source with rooms, text or an entry compiles to
 The shared app bundles `ashmere_missing_child@0.0.42` (v042), titled
 **Ashmere — The Missing Child**, requiring kernel API1.37. Its independently derived
 content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
-with 57 rooms and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
+with 57 rooms, 10 quests, 54 dialogues, 8 scenes, 38 locked capabilities and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
 [allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) and
 [independent derivation review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) establish those answers.
 D10 is published in [PR #263](https://github.com/lorecrafting/lokacore/pull/263), with

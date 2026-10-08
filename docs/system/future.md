@@ -7,13 +7,7 @@ and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechan
 
 ## Next
 
-- **Chapter 1 acceptance**: E1–E3 remain open in the [roadmap](../ROADMAP.md);
-  installed A–D source and its [current identity](cartridge.md#current-bundled-chapter)
-  do not establish completion of those gates.
-- **M mechanics planning**: [official M1–M23 queue](../NEXT-MECHANICS.md) and
-  [adopted policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md),
-  under delegated PM authority; implemented portions are described in [mechanics](mechanics.md).
-- **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
+Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
 
 ## Chapter one and the proof cartridge
 
@@ -52,6 +46,9 @@ and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechan
   conformance cartridge [§R9C](../archive/spec/14-implementation-plan.md#r9c--synthetic-v3-conformance-cartridge),
   Builder API [§R11](../archive/spec/14-implementation-plan.md#r11--builder-api-v1-and-script-surface-generalization);
   specs [08](../archive/spec/08-builder-api-ai-factory.md), [09](../archive/spec/09-cartridge-lab-certification.md).
+- E1 starts with the bounded [exact candidate proof policy](e1-certification.md#e1-exact-candidate-proof-policy)
+  over existing headless and real SQLite tools. The full Lab remains future work; runner
+  implementation alone establishes no E1, browser-human or native certification verdict.
 - YAML source after JSON ([record](../archive/decisions/owner-decisions-r4-2026-09-25.md)); downloadable
   content after the store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 

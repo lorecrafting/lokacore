@@ -4,12 +4,7 @@ The active checks run in CI; pre-push runs the relevant local lane selected by
 [`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md).
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
-their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
-which every agent loads every session.
-The [post-D10 fixture repair evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-post-d10-fixture-repair.md) records
-a separate targeted Node authority check.
-The [E1 bleed job oracle evidence](evidence/2026-10-06-encounter-bleed-oracle/README.md)
-records its focused baseline, corrected tests and six independent red controls.
+their rules and red controls remain available for resumption.
 
 - `boundary` (strict, every boundary): the dependency directions in
   [architecture.md](system/architecture.md#elixir-boundaries-compile-checked) are a compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).
@@ -18,16 +13,9 @@ records its focused baseline, corrected tests and six independent red controls.
   compile-connected edges. When a compile edge is justified, replace the zero with a
   reviewed allowed list.
 - `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): active CI checks the Elixir kernel
-  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) rules and paths. The deferred mobile rules say that, in `mobile/`,
-  shared packages never import an authority, Story and Realm never import each other, and
-  only `authority/local-story` imports the kernel ([mobile import rules](system/architecture.md#mobile-import-rules)) and
-  `packages/game-view/session.ts` imports only the generated contracts, as types
-  (`mobile-session-contracts-only`); the authority holds no display text, that is a string with
-  two words or a final full stop outside an `Error`, a module specifier or SQL
-  (`mobile-authority-no-display-text`, tests exempt); the renderer (`app/book/`,
-  `SaveError.tsx`, tests exempt) imports only `react`, `react-native` without `Alert`, its own
-  files and `packages/game-view`, and calls no `require()` or `import()` (`mobile-renderer-imports`, so react-native-web can mount it;
-  [owner wish](decisions/owner-decision-presenter-split-2026-10-02.md)); rule
+  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) rules and paths. The paused mobile rules
+  (`lint/rules/mobile-*.yml`: [mobile import rules](system/architecture.md#mobile-import-rules), session
+  contracts, no display text in the authority, renderer imports) keep their cases. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
@@ -105,6 +93,4 @@ records its focused baseline, corrected tests and six independent red controls.
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
-  (r1-acceptance-envelope.md §3). [Foreign-world envelope oracle evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-sim-foreign-world-envelope/README.md)
-  retains the published-v030 failure and its focused fix controls, all run on Node. Separately, the historical simulator sample (seeds 1-19) ran on Hermes in
-  [R6P P6b](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074); it does not certify the later foreign-world oracle fix.
+  (r1-acceptance-envelope.md §3).

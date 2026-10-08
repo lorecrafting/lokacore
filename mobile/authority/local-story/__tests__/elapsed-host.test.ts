@@ -16,10 +16,9 @@ export function elapsedBundle() {
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }
 
-export function elapsedHost(
+export function sqliteHost(
   path = ':memory:',
   clock = { wall: 10000, mono: 0 },
-  bundle = elapsedBundle(),
   kernel_version = `loka-kernel@${'0'.repeat(40)}`,
 ) {
   const sql = new DatabaseSync(path);
@@ -69,8 +68,17 @@ export function elapsedHost(
     newId: () => `aaaaaaaa-0000-4000-8000-${(++n).toString().padStart(12, '0')}`,
     time: { wall: () => clock.wall, monotonic: () => clock.mono },
   };
-  const game = openGame(db, bundle, host);
-  return { sql, db, host, bundle, game, clock, fault };
+  return { sql, db, host, clock, fault };
+}
+
+export function elapsedHost(
+  path = ':memory:',
+  clock = { wall: 10000, mono: 0 },
+  bundle = elapsedBundle(),
+  kernel_version = `loka-kernel@${'0'.repeat(40)}`,
+) {
+  const p = sqliteHost(path, clock, kernel_version);
+  return { ...p, bundle, game: openGame(p.db, bundle, p.host) };
 }
 
 export const checkpoint = (sql: DatabaseSync) => ({

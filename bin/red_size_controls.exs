@@ -83,6 +83,7 @@ uniq = "red_size_#{System.unique_integer([:positive])}"
 dirs = %{"L/" => "lib/#{uniq}/", "T/" => "test/#{uniq}/"}
 real = &String.replace(&1, Map.keys(dirs), fn d -> dirs[d] end)
 sorted = &(&1 |> String.split("\n", trim: true) |> Enum.sort())
+index = Path.join(System.tmp_dir!(), uniq <> ".index")
 
 {out, status, scan_out, scan_status} =
   try do
@@ -95,18 +96,24 @@ sorted = &(&1 |> String.split("\n", trim: true) |> Enum.sort())
 
     args = ["bin/check_size.exs" | Enum.map(Map.keys(sized), real)]
     {out, status} = System.cmd("elixir", args, cd: root, stderr_to_stdout: true)
-    # The no-argument scan (what CI runs) must find a planted file too.
-    {scan_out, scan_status} = System.cmd("elixir", ["bin/check_size.exs"], cd: root)
+    # The no-argument scan (what CI runs) reads tracked files only: big.ex is staged in a
+    # throwaway index read from HEAD; fn.ex stays untracked.
+    env = [{"GIT_INDEX_FILE", index}]
+    {_, 0} = System.cmd("git", ~w(read-tree HEAD), cd: root, env: env)
+    {_, 0} = System.cmd("git", ["add", "-f", real.("L/big.ex")], cd: root, env: env)
+    {scan_out, scan_status} = System.cmd("elixir", ["bin/check_size.exs"], cd: root, env: env)
     {out, status, scan_out, scan_status}
   after
     Enum.each(dirs, fn {_, dir} -> File.rm_rf!(Path.join(root, dir)) end)
+    File.rm(index)
   end
 
 failures =
   verdict.(
     "size: limits and allow markers",
     status != 0 and sorted.(out) == sorted.(real.(expected)) and scan_status != 0 and
-      String.contains?(scan_out, real.("L/big.ex:1: file, 301 lines, limit 300")),
+      String.contains?(scan_out, real.("L/big.ex:1: file, 301 lines, limit 300")) and
+      not String.contains?(scan_out, real.("L/fn.ex")),
     "exit #{status}, expected\n#{real.(expected)}got\n#{out}" <>
       "no-argument scan: exit #{scan_status}\n#{scan_out}"
   )

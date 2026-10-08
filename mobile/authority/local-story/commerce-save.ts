@@ -10,9 +10,8 @@ import type {
 import { id } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
-import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
-type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 type Row = {
   command_id: string;
   actor_id: string;

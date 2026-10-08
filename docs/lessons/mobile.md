@@ -34,11 +34,18 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
 - Record the AGP version with the root `./gradlew buildEnvironment`, not
   `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
 
-**Mobile builds (measured 2026-09-24, minimal Expo 57 app, arm64 release)**
-- M1 Air: Android clean 78 s with warm download caches (first ever, with NDK download,
-  346 s); JS change with a warm Gradle daemon 9 s. iOS `pod install` 23 s, clean
-  `xcodebuild` 50 s, JS change 9 s. GitHub CI Android, uncached: Gradle 349 s, job 6 min 15 s.
-  Iterate on the M1; CI builds are clean-build proof, not the edit loop.
+<a id="performance"></a>
+**Performance (R1, Pixel 3a, Hermes)**
+- Copying a 190 KB state per step took 216 ms; structural sharing took under 1 ms.
+- Per-action SQLite commits of only changed rows (about 190 bytes) took 6 to 11 ms p99 on the
+  Pixel 3a; 1 to 3 ms on an M1 even for whole-state writes.
+- A full canonical checkpoint of a 730 KB state took about 490 ms (not split into
+  write/read/parse/encode); measure it split.
+
+**Mobile builds**
+- Iterate on the M1; CI builds are clean-build proof, not the edit loop. Measured 2026-09-24
+  (Expo 57, arm64 release): Android clean 78 s (346 s first, with NDK), JS change 9 s; iOS
+  `pod install` 23 s, clean `xcodebuild` 50 s, JS change 9 s; CI Android uncached job 6 min 15 s.
 - `pod install` writes React Native codegen into `ios/build/generated`. Never
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
 

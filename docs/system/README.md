@@ -10,6 +10,7 @@ records and [docs/archive/](../archive/README.md).
 | File | Covers |
 |---|---|
 | [architecture.md](architecture.md) | repository layout, primitive composition and layer ownership, the compile-checked boundaries, hosts, checks, observability |
+| [e1-certification.md](e1-certification.md) | the E1 exact candidate proof policy: witness rules, dispositions, the recorder's pass result |
 | [book-ui.md](book-ui.md) | book views, entries, actions/logs, destinations, scene/state rules |
 | [Book component guide](../BOOK-UI-COMPONENTS.md) | current shared-client pieces and the page pattern to reuse for a new mechanic; Book UI above remains normative |
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |
@@ -34,7 +35,7 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 [release scope](../spec/release-scope.md).
 
 Chapter 1 A–D mechanics are published; E1–E3 remain open in the
-[roadmap](../ROADMAP.md). The [M1–M23 queue](../NEXT-MECHANICS.md) records mechanic
+[roadmap](../ROADMAP.md). The [M1–M23 queue](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md) records mechanic
 planning and [future work](future.md) links later work. A plan alone does not establish
 installed behavior. Native verification and the known UI blur carry remain deferred
 under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).

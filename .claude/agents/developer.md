@@ -23,9 +23,9 @@ normative documents disagreeing means stop and ask. Never edit
 spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026-10-07.md) writes or approves it.
 
 Before handing off:
-1. In the [provisional local lane](../../docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md),
-   run touched-layer type/compile checks and focused behavior tests; the PM runs
-   the full active line on the accumulated publication head. For a hosted PR,
+1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). Provisional local or
+   draft PR: run touched-layer type/compile checks and focused behavior tests; the full
+   active line runs on the accumulated head. Hosted PR:
    run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)); the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
@@ -34,9 +34,9 @@ Before handing off:
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
-3. Commit (attribution lines per the session). In the provisional local lane,
-   hand the branch and exact head to the PM without pushing; otherwise push the
-   branch and open the PR citing the governing `docs/system` sections and
+3. Commit (attribution lines per the session). Provisional local:
+   hand the branch and exact head to the PM without pushing; draft PR: push only when the brief
+   says (the branch is pushed once per wave); hosted PR: push the branch and open the PR citing the governing `docs/system` sections and
    including the ponytail result. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
@@ -50,7 +50,7 @@ Never use `--no-verify` or force-push (including `--force-with-lease`) without t
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
 above and follows only the next paragraph.
 
-When review findings arrive on a hosted PR: `git pull --rebase` (the review record is on the branch; never force-push). In the provisional local lane, keep the original branch and have the PM attach the review-only record before fixes. Then fix each or dispute it with a concrete reason, rerun affected checks once, push only for a hosted PR, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
+When review findings arrive on a published PR: `git pull --rebase` (the review record is on the branch; never force-push). In the provisional local lane, keep the original branch and have the PM attach the review-only record before fixes. Then fix each or dispute it with a concrete reason, rerun affected checks once, push only for a published PR, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
 If the same issue survives two fix attempts within a round, stop: write down the assumption
 both attempts shared and test that, or escalate to the PM. A finding still open after fix
 round 2 goes to the owner, not a third round.

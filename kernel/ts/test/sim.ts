@@ -13,7 +13,7 @@ import { createHash } from 'node:crypto';
 import { globSync, mkdirSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
 import { compose, key, same } from '../src/foundation/compose.ts';
-import type { Command, DecisionResult } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, Key } from '../src/contracts.gen.ts';
 import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -161,7 +161,7 @@ export function simulate(seed: number, kernel = KERNEL, cartridges = CARTRIDGES)
 }
 
 /** The first failure of `commands` from `start`, if any. */
-function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
+export function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
   let world = start;
   for (const [at, c] of commands.entries()) {
     const r = checked(kernel, world, c, at + 1);
@@ -186,18 +186,18 @@ export function shrink(s: Sequence, failed: string, kernel = KERNEL): Command[] 
 
 type Checked = { world: World; bytes: string; code: string; failure?: Omit<Failure, 'at'> };
 
-// One step through `kernel`, as the commit at `revision`: a throw or a broken invariant is a
-// failure, never a crash.
+// One step through `kernel` as commit `revision`: a throw or broken invariant fails, never crashes.
 export function checked(
   kernel: Kernel,
   before: World,
   command: Command,
   revision: number,
+  action?: Key,
 ): Checked {
   try {
     const input = JSON.stringify(before);
     const view = kernel.gameView(before);
-    const { decision, world } = kernel.step(before, command, revision);
+    const { decision, world } = kernel.step(before, command, revision, action);
     const bad =
       (JSON.stringify(before) !== input ? 'input_mutated' : undefined) ??
       violated(before, command, view, decision, world) ??

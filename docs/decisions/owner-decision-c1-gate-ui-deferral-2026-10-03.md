@@ -40,4 +40,4 @@ the owner's current preview and save. Mechanics, world time, story prose, frozen
 fixtures and kernel contracts are unaffected.
 
 Tracking: [ROADMAP checkpoint row](../ROADMAP.md#c1-carry-checkpoints).
-Gate proof and pending closure conditions: [C1 checklist](../C1-GATE.md).
+Gate proof and pending closure conditions: [C1 checklist](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/C1-GATE.md).

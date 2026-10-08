@@ -2,7 +2,7 @@
 # Plant TypeScript size cases in fresh directories and require bin/check_ts_size.mjs, run on
 # exactly those files, to report exactly the expected lines: one line over each limit fails,
 # exactly at it passes; markers at 1.5x pass, and over it, without a reason, not needed or
-# not attached fail. The no-argument scan must report a tracked file under mobile/ (staged in a
+# not attached fail. CI's check_ts_size step must report a tracked file under mobile/ (staged in a
 # throwaway index read from HEAD) and skip an untracked one. Only what this script created is removed.
 set -eu
 cd "$(dirname "$0")/.."
@@ -66,13 +66,16 @@ status=0
 out=$(node bin/check_ts_size.mjs $(find "$L" "$T" -type f)) || status=$?
 got=$(printf '%s\n' "$out" | LC_ALL=C sort)
 want=$(printf '%s\n' "$expected" | LC_ALL=C sort)
-# The production (no-argument) selection: tracked files, mobile included, untracked skipped.
+# The production selection: tracked files, mobile included, untracked skipped.
 x 301 > "$M/tracked.ts"
 x 301 > "$M/untracked.ts"
 rm "$I" && GIT_INDEX_FILE=$I git read-tree HEAD
 GIT_INDEX_FILE=$I git add -f "$M/tracked.ts"
+# Run CI's own invocation (its single check_ts_size step), so a mobile/ exclusion added there fails.
+ci=$(sed -n 's/^ *- run: \(.*check_ts_size\.mjs.*\)$/\1/p' .github/workflows/ci.yml)
+[ "$(printf '%s\n' "$ci" | grep -c .)" -eq 1 ] || { echo "FAIL ts size: expected one check_ts_size step in ci.yml, got: $ci"; exit 1; }
 scan_status=0
-scan=$(GIT_INDEX_FILE=$I node bin/check_ts_size.mjs) || scan_status=$?
+scan=$(GIT_INDEX_FILE=$I sh -c "$ci") || scan_status=$?
 if [ "$status" -ne 0 ] && [ "$got" = "$want" ] && [ "$scan_status" -ne 0 ] &&
   printf '%s\n' "$scan" | grep -qxF "$M/tracked.ts:1: file, 301 lines, limit 300" &&
   ! printf '%s\n' "$scan" | grep -qF "$M/untracked.ts"; then
