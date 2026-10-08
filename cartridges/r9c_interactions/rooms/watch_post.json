@@ -1,0 +1,22 @@
+{
+  "title": "room.watch_post.title",
+  "description": "room.watch_post.description",
+  "exits": {
+    "west": {
+      "to": "north_gate"
+    }
+  },
+  "details": {
+    "duty_roster": {
+      "aliases": [
+        "duty_roster"
+      ],
+      "description": "detail.duty_roster.description",
+      "readable": {
+        "label": "actions.read_duty_roster",
+        "text": "readable.duty_roster",
+        "title": "detail.duty_roster.title"
+      }
+    }
+  }
+}

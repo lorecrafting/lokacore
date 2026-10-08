@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "vesper"
+  ],
+  "short": "npc.vesper.short",
+  "room_line": "npc.vesper.room",
+  "description": "npc.vesper.description",
+  "room": "fox_hollow"
+}

@@ -1,0 +1,22 @@
+{
+  "label": "skill.haggle.label",
+  "requirement": "skill.haggle.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "stat_compare",
+          "attribute": "dex",
+          "at_least": 10
+        },
+        {
+          "op": "resource_compare",
+          "resource": "mv",
+          "at_least": 5
+        }
+      ]
+    }
+  }
+}

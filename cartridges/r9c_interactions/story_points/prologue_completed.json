@@ -1,0 +1,19 @@
+{
+  "outcomes": {
+    "rescued_prior": {
+      "scene": "epilogue_rescued_prior"
+    },
+    "rescued_fox": {
+      "scene": "epilogue_rescued_fox"
+    },
+    "stays_prior": {
+      "scene": "epilogue_stays_prior"
+    },
+    "stays_fox": {
+      "scene": "epilogue_stays_fox"
+    },
+    "lost_prior": {
+      "scene": "epilogue_lost_prior"
+    }
+  }
+}

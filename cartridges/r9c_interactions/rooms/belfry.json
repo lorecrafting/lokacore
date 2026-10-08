@@ -1,0 +1,22 @@
+{
+  "title": "room.belfry.title",
+  "description": "room.belfry.description",
+  "exits": {
+    "down": {
+      "to": "bell_tower"
+    }
+  },
+  "details": {
+    "bell": {
+      "aliases": [
+        "bell"
+      ],
+      "description": "detail.bell.description",
+      "readable": {
+        "label": "actions.read_bell",
+        "text": "readable.bell",
+        "title": "detail.bell.title"
+      }
+    }
+  }
+}

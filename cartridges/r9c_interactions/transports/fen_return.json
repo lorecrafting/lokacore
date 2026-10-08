@@ -1,0 +1,13 @@
+{
+  "room": "fen_isle_landing",
+  "detail": "ferry",
+  "destination": "boathouse",
+  "reverse": "fen_outbound",
+  "recipient": "sedge",
+  "currency": "pennies",
+  "fare": 0,
+  "recovery_rooms": [],
+  "action": "return_ferry",
+  "label": "transport.return",
+  "narration": "transport.return.used"
+}

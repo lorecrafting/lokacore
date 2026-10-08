@@ -1,0 +1,20 @@
+{
+  "command": "continue",
+  "target": {
+    "kind": "none"
+  },
+  "input": [
+    "scene",
+    "line"
+  ],
+  "label": "action.continue",
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "accessibility": "action.continue"
+}

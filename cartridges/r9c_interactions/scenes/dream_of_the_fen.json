@@ -1,0 +1,64 @@
+{
+  "control": "presentation_only",
+  "title": "dream.title",
+  "description": "dream.description",
+  "on": {
+    "rest": {
+      "room": "inn_rooms",
+      "detail": "bed",
+      "entitlement": "lantern_bed_paid",
+      "credit": "slept_at_lantern",
+      "quest": "a_room_at_the_lantern"
+    }
+  },
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "dream.opening"
+    },
+    {
+      "type": "narrate",
+      "text": "dream.fen"
+    },
+    {
+      "type": "narrate",
+      "text": "dream.fox"
+    },
+    {
+      "type": "choice",
+      "key": "fen_fork",
+      "prompt": "dream.choice",
+      "choices": [
+        {
+          "choice_id": "follow_fox",
+          "label": "dream.follow",
+          "text": "dream.follow.final"
+        },
+        {
+          "choice_id": "wake",
+          "label": "dream.wake",
+          "text": "dream.wake.final"
+        }
+      ]
+    },
+    {
+      "type": "branch"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "on_end": {
+    "assign": [
+      {
+        "fact": "dream_seen",
+        "value": true
+      }
+    ],
+    "quest": "a_room_at_the_lantern",
+    "outcome": "acknowledged"
+  }
+}

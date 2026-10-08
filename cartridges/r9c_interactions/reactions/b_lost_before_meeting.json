@@ -1,0 +1,14 @@
+{
+  "on": { "event": "fact_changed", "fact": "chapel_bell_rung" },
+  "when": { "policy_version": 1, "root": { "op": "all", "items": [
+    { "op": "fact_compare", "fact": "chapel_bell_rung", "equals": true },
+    { "op": "quest_state", "quest": "missing_child", "state": "active" },
+    { "op": "fact_compare", "fact": "fen_wren_met", "equals": false },
+    { "op": "fact_compare", "fact": "fen_return_branch", "equals": "unselected" },
+    { "op": "fact_compare", "fact": "village_child_status", "equals": "missing" }
+  ] } },
+  "apply": [
+    { "op": "quest.fail", "quest": "missing_child", "outcome": "lost" },
+    { "op": "fact.assign", "fact": "village_child_status", "value": "lost" }
+  ]
+}

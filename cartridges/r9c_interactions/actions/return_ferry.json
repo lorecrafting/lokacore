@@ -1,0 +1,23 @@
+{
+  "label": "transport.return",
+  "command": "use_transport",
+  "target": {
+    "kind": "entity",
+    "scopes": [
+      "inspectable_details"
+    ]
+  },
+  "input": [
+    "route",
+    "quoted_fare"
+  ],
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "accessibility": "transport.return"
+}

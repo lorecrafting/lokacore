@@ -1,0 +1,8 @@
+{
+  "keywords": ["pelt", "hound_pelt"],
+  "short": "item.hound_pelt.short",
+  "room_line": "item.hound_pelt.room",
+  "description": "item.hound_pelt.description",
+  "mass_grams": 250,
+  "location": { "in": "template" }
+}

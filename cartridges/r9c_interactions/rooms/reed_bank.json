@@ -1,0 +1,31 @@
+{
+  "title": "room.reed_bank.title",
+  "description": "room.reed_bank.description",
+  "exits": {
+    "north": {
+      "to": "reed_path"
+    },
+    "west": {
+      "to": "willow_shade"
+    },
+    "south": {
+      "to": "mire_crossing"
+    },
+    "east": {
+      "to": "hound_run"
+    }
+  },
+  "details": {
+    "tracks": {
+      "aliases": [
+        "tracks"
+      ],
+      "description": "detail.tracks.description",
+      "readable": {
+        "label": "actions.read_tracks",
+        "text": "readable.tracks",
+        "title": "detail.tracks.title"
+      }
+    }
+  }
+}

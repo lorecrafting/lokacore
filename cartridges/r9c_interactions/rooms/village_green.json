@@ -1,0 +1,174 @@
+{
+  "title": "room.village_green.title",
+  "description": "room.village_green.description",
+  "exits": {
+    "north": {
+      "to": "north_gate"
+    },
+    "south": {
+      "to": "well_lane"
+    },
+    "east": {
+      "to": "east_gate"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "fox"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued_fox"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.stays_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "fox"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.stays_fox"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "lost"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_allegiance",
+              "equals": "prior"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.lost_prior"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "lost"
+        }
+      },
+      "description": "room.village_green.lost"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.stays"
+    }
+  ],
+  "details": {
+    "market_cross": {
+      "aliases": [
+        "market_cross",
+        "cross"
+      ],
+      "description": "detail.market_cross.description"
+    }
+  }
+}

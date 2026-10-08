@@ -1,0 +1,47 @@
+{
+  "on": {
+    "action": "begin_epilogue_stays_fox",
+    "room": "village_green",
+    "detail": "market_cross",
+    "outcome": "success"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_stays_fox.1"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_stays_fox.2"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_stays_fox.3"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "on_end": {
+    "assign": [
+      {
+        "fact": "memory_village_ending",
+        "value": "stays"
+      },
+      {
+        "fact": "memory_fox_fate",
+        "value": "free"
+      },
+      {
+        "fact": "memory_chapter_1_guild_tilt",
+        "value": "fox"
+      }
+    ],
+    "story_point": "prologue_completed",
+    "outcome": "stays_fox"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "title": "room.east_gate.title",
+  "description": "room.east_gate.description",
+  "exits": {
+    "west": {
+      "to": "village_green"
+    }
+  },
+  "details": {
+    "road_sign": {
+      "aliases": [
+        "road_sign"
+      ],
+      "description": "detail.road_sign.description",
+      "readable": {
+        "label": "actions.read_road_sign",
+        "text": "readable.road_sign",
+        "title": "detail.road_sign.title"
+      }
+    }
+  }
+}

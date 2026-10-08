@@ -1,0 +1,15 @@
+{
+  "provider": "maud",
+  "currency": "pennies",
+  "action": "eat_lantern_meal",
+  "label": "service.meal",
+  "narration": "service.meal.used",
+  "price": 2,
+  "benefit": {
+    "kind": "meal",
+    "stock": "lantern_meals",
+    "debit": 1,
+    "recovery": "mv",
+    "amount": 12
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "drawing",
+    "fox_drawing"
+  ],
+  "short": "item.fox_drawing.short",
+  "room_line": "item.fox_drawing.room",
+  "description": "item.fox_drawing.description",
+  "mass_grams": 20,
+  "location": {
+    "in": "room",
+    "room": "village_green"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "label": "actions.silence_bell",
+  "aliases": [
+    "silence"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "belfry",
+    "detail": "bell"
+  },
+  "priority": 11,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "bell_of_ashmere",
+          "state": "active"
+        },
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "resolved"
+        },
+        {
+          "op": "any",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "stays"
+            }
+          ]
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_bell_rung",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "unknown"
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "chapel_allegiance",
+          "value": "fox"
+        }
+      ],
+      "narration": {
+        "actor": "narration.silence_bell"
+      }
+    }
+  }
+}
