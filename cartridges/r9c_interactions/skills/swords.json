@@ -1,0 +1,12 @@
+{
+  "label": "skill.swords.label",
+  "requirement": "skill.swords.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "stat_compare",
+      "attribute": "str",
+      "at_least": 10
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "title": "room.inn_rooms.title",
+  "description": "room.inn_rooms.description",
+  "exits": {
+    "down": {
+      "to": "drowned_lantern"
+    }
+  },
+  "details": {
+    "bed": {
+      "aliases": [
+        "bed"
+      ],
+      "description": "detail.bed.free",
+      "bed": {
+        "entitlement": "lantern_bed_paid",
+        "title": "detail.bed.title"
+      },
+      "variants": [
+        {
+          "description": "detail.bed.paid",
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "lantern_bed_paid",
+              "equals": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

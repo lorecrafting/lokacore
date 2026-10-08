@@ -1,0 +1,25 @@
+{
+  "title": "room.drowned_oak.title",
+  "description": "room.drowned_oak.description",
+  "exits": {
+    "north": {
+      "to": "willow_shade"
+    },
+    "east": {
+      "to": "mire_crossing"
+    },
+    "up": {
+      "to": "oak_branches"
+    }
+  },
+  "details": {
+    "marsh_shelter": {
+      "aliases": [
+        "marsh_shelter",
+        "shelter",
+        "hollow"
+      ],
+      "description": "detail.marsh_shelter.description"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "iron_sword",
+    "sword"
+  ],
+  "short": "item.iron_sword.short",
+  "room_line": "item.iron_sword.room",
+  "description": "item.iron_sword.description",
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "mass_grams": 600,
+  "weapon": {
+    "skill": "swords",
+    "attack": {
+      "chance": 95,
+      "damage_min": 4,
+      "damage_max": 4
+    }
+  },
+  "slot": "wield"
+}

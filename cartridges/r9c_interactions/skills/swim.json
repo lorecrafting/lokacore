@@ -1,0 +1,11 @@
+{
+  "label": "skill.swim.label",
+  "requirement": "skill.swim.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  }
+}

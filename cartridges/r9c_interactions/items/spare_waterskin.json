@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "spare",
+    "waterskin",
+    "skin"
+  ],
+  "short": "item.spare_waterskin.short",
+  "room_line": "item.spare_waterskin.room",
+  "description": "item.spare_waterskin.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": null,
+      "quantity": 0
+    }
+  }
+}

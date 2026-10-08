@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "corpse",
+    "rat_corpse"
+  ],
+  "short": "item.rat_corpse.short",
+  "room_line": "item.rat_corpse.room",
+  "description": "item.rat_corpse.description",
+  "location": {
+    "in": "template"
+  },
+  "mass_grams": 0,
+  "container": true
+}

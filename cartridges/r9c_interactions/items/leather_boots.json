@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "boot",
+    "leather_boots"
+  ],
+  "short": "item.leather_boots.short",
+  "room_line": "item.leather_boots.room",
+  "description": "item.leather_boots.description",
+  "location": {
+    "in": "room",
+    "room": "chandler"
+  },
+  "mass_grams": 600
+}

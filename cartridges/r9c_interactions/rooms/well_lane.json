@@ -1,0 +1,36 @@
+{
+  "title": "room.well_lane.title",
+  "description": "room.well_lane.description",
+  "exits": {
+    "south": {
+      "to": "ferry_landing"
+    },
+    "east": {
+      "to": "drowned_lantern"
+    },
+    "north": {
+      "to": "village_green"
+    },
+    "west": {
+      "to": "chandler"
+    },
+    "down": {
+      "to": "well_shaft"
+    }
+  },
+  "details": {
+    "well": {
+      "aliases": [
+        "well",
+        "water"
+      ],
+      "description": "detail.well.description",
+      "liquid_source": "water",
+      "readable": {
+        "title": "detail.well.title",
+        "label": "detail.well.read",
+        "text": "detail.well.description"
+      }
+    }
+  }
+}

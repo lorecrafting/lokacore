@@ -1,0 +1,36 @@
+{
+  "npc": "wick",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "infirmary_herbs",
+          "state": "active"
+        },
+        {
+          "op": "quest_state",
+          "quest": "infirmary_herbs",
+          "state": "objectives_complete"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.b_wick_turn_in.prompt",
+  "roles": {
+    "wick": {
+      "role": "npc",
+      "npc": "wick"
+    }
+  },
+  "choices": {
+    "exchange": {
+      "label": "quest.infirmary_herbs.turn_in",
+      "narration": "narration.wick.exchange",
+      "exchange": true
+    }
+  },
+  "quest": "infirmary_herbs"
+}

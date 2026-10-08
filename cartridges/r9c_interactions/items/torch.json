@@ -1,0 +1,26 @@
+{
+  "keywords": [
+    "torch",
+    "torch"
+  ],
+  "short": "item.torch.short",
+  "room_line": "item.torch.room",
+  "description": "item.torch.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "slot": "light",
+  "fuel": {
+    "kind": "source",
+    "capacity": 7200,
+    "initial": 7200,
+    "rate": 1,
+    "unit": "oil",
+    "supply": "lamp_oil",
+    "ignited": "light.ignited",
+    "doused": "light.doused",
+    "refueled": "light.refueled"
+  }
+}

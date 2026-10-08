@@ -1,0 +1,18 @@
+{
+  "title": "room.adder_nest.title",
+  "description": "room.adder_nest.description",
+  "exits": {
+    "west": {
+      "to": "hound_run"
+    }
+  },
+  "details": {
+    "empty_nest": {
+      "aliases": [
+        "empty_nest",
+        "nest"
+      ],
+      "description": "detail.empty_nest.description"
+    }
+  }
+}

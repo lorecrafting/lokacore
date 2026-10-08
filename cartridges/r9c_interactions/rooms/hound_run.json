@@ -1,0 +1,21 @@
+{
+  "title": "room.hound_run.title",
+  "description": "room.hound_run.description",
+  "exits": {
+    "west": {
+      "to": "reed_bank"
+    },
+    "east": {
+      "to": "adder_nest"
+    }
+  },
+  "details": {
+    "gnawed_bones": {
+      "aliases": [
+        "gnawed_bones",
+        "bones"
+      ],
+      "description": "detail.gnawed_bones.description"
+    }
+  }
+}

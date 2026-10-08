@@ -4,7 +4,9 @@ const { execFileSync } = require('child_process');
 const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
-config.resolver.assetExts.push('wasm'); // expo-sqlite's browser worker loads wa-sqlite.
+config.resolver.assetExts.push('wasm'); // expo-sqlite's worker loads wa-sqlite; the web page curl, CanvasKit.
+config.resolver.sourceExts.push('sksl');
+config.transformer.babelTransformerPath = require.resolve('./sksl-transformer.cjs');
 config.watchFolders = [
   path.resolve(__dirname, '..'),
   path.resolve(__dirname, '../../kernel/ts/src'),

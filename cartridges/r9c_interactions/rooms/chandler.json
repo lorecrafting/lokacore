@@ -1,0 +1,9 @@
+{
+  "title": "room.chandler.title",
+  "description": "room.chandler.description",
+  "exits": {
+    "east": {
+      "to": "well_lane"
+    }
+  }
+}

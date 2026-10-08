@@ -1,0 +1,64 @@
+{
+  "npc": "elspeth",
+  "quest": "missing_child",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_vesper_riddle_answered",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_return_branch",
+          "equals": "stays"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "missing"
+        },
+        {
+          "op": "has_item",
+          "item": "vesper_message"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.elspeth_return.prompt",
+  "roles": {
+    "elspeth": {
+      "role": "npc",
+      "npc": "elspeth"
+    },
+    "message": {
+      "role": "item",
+      "item": "vesper_message"
+    }
+  },
+  "choices": {
+    "stays": {
+      "label": "dialogue.elspeth_return.stays",
+      "narration": "narration.elspeth_return",
+      "hand_over": {
+        "item": "message",
+        "to": "elspeth"
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "village_child_status",
+          "value": "stays"
+        }
+      ]
+    }
+  }
+}

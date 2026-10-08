@@ -1,0 +1,15 @@
+{
+  "title": "room.north_gate.title",
+  "description": "room.north_gate.description",
+  "exits": {
+    "south": {
+      "to": "village_green"
+    },
+    "north": {
+      "to": "chapel_steps"
+    },
+    "east": {
+      "to": "watch_post"
+    }
+  }
+}

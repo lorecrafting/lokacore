@@ -394,6 +394,42 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 (`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundles the
 [current Missing Child chapter](#current-bundled-chapter).
 
+### R9C synthetic interaction cartridge (E2)
+
+`cartridges/r9c_interactions` is `r9c_interactions@0.0.1`, **R9C interactions (synthetic)**,
+API1.37: the permanent, unpolished interaction corpus of the
+[E2 brief](../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
+It is not bundled, has its own identity and save, and does not inherit the chapter's hash
+or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
+with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
+and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) come from
+`test/loka/cartridge_r9c_interactions_hash.py`. The fixture names stay outside the
+simulator's default `cartridge_*hash.json` corpus.
+
+The source is the v042 chapter's own definitions, short references and keys, cut to one
+shared topology: Ferry Landing, Well Lane, Village Green, North and East Gate, Watch Post,
+Chapel Steps and Nave, Bell Tower, Belfry, Drowned Lantern, Inn Rooms, Chandler, Well Shaft and
+Bottom, Boathouse, Fen Isle Landing, Reed Path, Reed Bank, Willow Shade, Drowned Oak, Oak
+Branches, Mire Crossing, Fox Hollow, Hound Run and Adder Nest. Reciprocal exits to removed
+rooms are dropped; the Pool route, rats, the inn rumor board, Maud's cellar quest, Chandler's debt, the wisp, topics,
+D9 village replies and scheduled villagers are absent, so `check@1` and `topics@1` are not
+locked. Sedge stands at Fen Isle Landing (the only recovery room), Wick in Chapel Nave, and the
+three apples on the Green. Two numbers deliberately differ from the chapter: the outbound
+ferry fare is 5 pennies and Maud's room costs 4.
+
+| Family | Entities |
+|---|---|
+| Identity, custody, trade | apples and fenwort (matching nouns), Peg's shop, satchel and haggle lesson, Vesper's message, Chapel door with Knock and Aldric, readable details, `where` |
+| Terminal fork | Q2 stays/rescued (Vesper, Wren, Elspeth), Q3 prior/fox (Aldric, belfry bell), bell scenes and reactions, five Green epilogues, `prologue_completed` |
+| Rest, dream, liquid, light | Maud's room, meal and ale, Inn Rooms bed and dream, waterskins and well, torch and lamp oil, dark well rooms |
+| Hound, bleed, escort, expedition | `fen_hounds`, `bleeding`, Wick's lesson and bandages, Wren's escort, Night in the Marsh from Hound Run |
+| Patrol and deer | Tobin's `watch_rounds`, `oak_deer`, `willow_deer` |
+| Crow provenance | four crow plans, `old_coin` at Well Bottom, the Oak Branches nest |
+| Skill, water, terminal consumption | Sedge's swim and herbalism, the well water route, both ferry routes, careful Harvest at Willow Shade, Wick's exchange, apples |
+
+A later mechanic change that breaks these answers updates them in the same slice
+(owner approval 2026-10-07, paraphrased).
+
 ## M1-A elapsed policy
 
 Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). The installed API follows the [current bundled chapter](#current-bundled-chapter); current requirement ranges are validated; obsolete development fixtures follow the [forward-development policy](../decisions/owner-decision-forward-development-2026-10-05.md).

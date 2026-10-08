@@ -1,0 +1,31 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "chapel_allegiance"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "fox"
+        },
+        {
+          "op": "quest_state",
+          "quest": "bell_of_ashmere",
+          "state": "active"
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "quest.resolve",
+      "quest": "bell_of_ashmere",
+      "outcome": "fox"
+    }
+  ]
+}

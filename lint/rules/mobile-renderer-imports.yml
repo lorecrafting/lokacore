@@ -1,11 +1,12 @@
 id: mobile-renderer-imports
 language: tsx
 severity: error
-message: 'The renderer imports only react, named React Native building blocks from the list, its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
+message: 'The renderer imports only react, named React Native building blocks from the list, Skia, Reanimated and Worklets (the page curl), its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
 files: [mobile/app/book/**, mobile/app/SaveError.tsx]
 ignores: ['**/*.test.ts']
 # Allowlists, not blocklists: every other form or name is flagged. ponytail: a new renderer file, or a new
-# React Native building block, needs adding here (one name in each regex).
+# React Native building block, needs adding here (one name in each regex). Skia, Reanimated and Worklets
+# (the page curl, owner decision 2026-10-07) mount on react-native-web too.
 rule:
   any:
     # Every require(...) and import(...) call, whatever its argument (the shell, App.tsx, loads the fonts).
@@ -16,7 +17,7 @@ rule:
       inside: { matches: module-specifier }
       any:
         - not:
-            regex: '^(react|react-native|\./(book/)?(Book|Body|DreamPage|Combat|Footer|MapDrawing|DiscoveredMap|Menu|Turn|SaveError|buttons|item-pages|joystick|logs|model|notices|dreams|positions|offers|pages|paper|presenter|received|sections|skills|updates|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+            regex: '^(react|react-native|@shopify/react-native-skia|react-native-reanimated|react-native-worklets|\./page-curl\.sksl|\./(book/)?(Book|Body|DreamPage|Combat|Footer|MapDrawing|DiscoveredMap|Menu|Turn|PageTurn|SaveError|buttons|item-pages|joystick|logs|model|notices|dreams|positions|offers|pages|paper|presenter|received|sections|skills|snapshot|tokens|updates|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
         # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
         # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
         - regex: '^react-native$'
