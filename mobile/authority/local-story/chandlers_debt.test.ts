@@ -273,3 +273,133 @@ test('reopen refuses an expiry receipt with a forged trust event', () => {
     'save_corrupt',
   );
 });
+
+type Forged = {
+  delta: { ops: { op: string; [field: string]: unknown }[] };
+  events: { logical_time: number; payload: { type: string; [field: string]: unknown } }[];
+};
+
+// Saves the accept receipt (and with `expire`, the expiry receipt), forges one field of it, and reopens.
+function forge(expire: boolean, mutate: (receipt: Forged) => void) {
+  const a = setup();
+  a.move('north', 'west');
+  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+  a.answer('accept_on_time');
+  if (expire) {
+    const story = a.story();
+    const from = story.world().state.clock;
+    assert.equal(
+      story.elapsed({ expected_run_id: story.runId(), from, until: 237601 }).kind,
+      'saved',
+    );
+  }
+  const rows = a.sql
+    .prepare("SELECT rowid,response FROM receipt WHERE json_extract(command,'$.payload.type')=?")
+    .all(expire ? 'elapsed' : 'choose') as { rowid: number; response: string }[];
+  assert.equal(rows.length, 1);
+  const receipt = JSON.parse(rows[0].response) as Forged;
+  mutate(receipt);
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE rowid=?')
+    .run(JSON.stringify(receipt), rows[0].rowid);
+  return openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind;
+}
+
+const only = (receipt: Forged, op: string, key?: string) => {
+  const ops = receipt.delta.ops.filter(
+    (o) => o.op === op && (!key || (o.fact as { key: string }).key === key),
+  );
+  assert.equal(ops.length, 1);
+  return ops[0];
+};
+const otherId = 'eeeeeeee-0000-4000-8000-000000000001';
+
+// Breaks: reopen accepts an on-time acceptance resolved after the on-time window closed.
+test('reopen refuses an accept receipt resolved outside its availability window', () => {
+  const kind = forge(false, (r) => {
+    r.events.find((e) => e.payload.type === 'choice_resolved')!.logical_time = 151201;
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an accept receipt that activates the quest twice.
+test('reopen refuses an accept receipt with two quest activations', () => {
+  const kind = forge(false, (r) => r.delta.ops.push({ ...only(r, 'quest.activate') }));
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an accept receipt that activates another quest instance.
+test('reopen refuses an accept receipt that activates another instance', () => {
+  const kind = forge(false, (r) => {
+    only(r, 'quest.activate').instance_id = otherId;
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an accept receipt whose activation binds other entities to its roles.
+test('reopen refuses an accept receipt with swapped role bindings', () => {
+  const kind = forge(false, (r) => {
+    const bindings = only(r, 'quest.activate').bindings as { entity_id: string }[];
+    [bindings[0].entity_id, bindings[1].entity_id] = [bindings[1].entity_id, bindings[0].entity_id];
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an accept receipt that schedules the due job twice.
+test('reopen refuses an accept receipt with two due job schedules', () => {
+  const kind = forge(false, (r) => r.delta.ops.push({ ...only(r, 'job.schedule') }));
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an accept receipt that schedules a job other than the saved due job.
+test('reopen refuses an accept receipt that schedules another job', () => {
+  const kind = forge(false, (r) => {
+    only(r, 'job.schedule').job_id = otherId;
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an expiry receipt whose outcome fact_changed event disagrees with the deadline (M5 twin).
+test('reopen refuses an expiry receipt with a forged outcome event', () => {
+  const kind = forge(true, (r) => {
+    const event = r.events.find(
+      (e) =>
+        e.payload.type === 'fact_changed' &&
+        (e.payload.fact as { key: string }).key === 'priory_tithe_delivered',
+    )!;
+    event.payload.new = 'late';
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an expiry receipt whose trust assignment is not the deadline penalty.
+test('reopen refuses an expiry receipt with another trust value', () => {
+  const kind = forge(true, (r) => {
+    only(r, 'fact.assign', 'peg_trust').value = -4;
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an expiry receipt whose trust assignment is outside the expiry's writer group.
+test('reopen refuses an expiry receipt with trust in another writer group', () => {
+  const kind = forge(true, (r) => {
+    only(r, 'fact.assign', 'peg_trust').writer_group = 2;
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an expiry receipt that fails the quest with another outcome.
+test('reopen refuses an expiry receipt that transitions to another outcome', () => {
+  const kind = forge(true, (r) => {
+    only(r, 'quest.transition').outcome = 'late';
+  });
+  assert.equal(kind, 'save_corrupt');
+});
+
+// Breaks: reopen accepts an expiry receipt that assigns another outcome fact value.
+test('reopen refuses an expiry receipt that assigns another outcome value', () => {
+  const kind = forge(true, (r) => {
+    only(r, 'fact.assign', 'priory_tithe_delivered').value = 'late';
+  });
+  assert.equal(kind, 'save_corrupt');
+});
