@@ -9,9 +9,10 @@ const fonts = new Map<string, Promise<string>>();
 
 const dataUrl = async (url: string) => {
   const blob = await (await fetch(url)).blob();
-  return new Promise<string>((done) => {
+  return new Promise<string>((done, fail) => {
     const reader = new FileReader();
     reader.onload = () => done(reader.result as string);
+    reader.onerror = () => fail(reader.error);
     reader.readAsDataURL(blob);
   });
 };
@@ -25,7 +26,12 @@ async function styles() {
       if (!(rule instanceof CSSFontFaceRule)) return rule.cssText;
       const url = /url\("?([^")]+)"?\)/.exec(rule.cssText)?.[1];
       if (!url) return rule.cssText;
-      if (!fonts.has(url)) fonts.set(url, dataUrl(url));
+      // A failed fetch is forgotten, so the next turn tries again.
+      if (!fonts.has(url))
+        fonts.set(
+          url,
+          dataUrl(url).catch((e) => (fonts.delete(url), Promise.reject(e))),
+        );
       return rule.cssText.replace(url, await fonts.get(url)!);
     }),
   );
@@ -40,7 +46,7 @@ export async function snapshot(view: View) {
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width * scale}" height="${height * scale}">` +
     `<foreignObject width="${width}" height="${height}" transform="scale(${scale})">` +
     `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;display:flex">` +
-    `<style>${await styles()}</style>${new XMLSerializer().serializeToString(node)}` +
+    `<style><![CDATA[${await styles()}]]></style>${new XMLSerializer().serializeToString(node)}` +
     `</div></foreignObject></svg>`;
   const image = new Image();
   image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

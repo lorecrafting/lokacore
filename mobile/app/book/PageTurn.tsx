@@ -5,7 +5,6 @@
 // ponytail: `arriving` is transparent so the live page shows through; the roll's shadow on it is
 // lost until the shader draws its shadow without sampling the arriving page.
 import {
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -98,13 +97,14 @@ function useMotion(leaving: Leaving | undefined, setLeaving: SetLeaving, reduced
     if (view) pages.set(turn, view);
     else pages.delete(turn);
   };
-  useEffect(() => {
+  // Before paint, so a new curl or fade never shows the last turn's finished progress for a frame.
+  useLayoutEffect(() => {
     if (!leaving) return;
     const timing = leaving.image ? motion.turn : reduced ? motion.fade : undefined;
     if (timing) return animate(progress, timing, leaving, setLeaving);
     let live = true;
     snapshot(pages.get(leaving.turn)!).then(
-      (image) => live && setLeaving(image ? { ...leaving, image } : undefined),
+      (image) => (live ? setLeaving(image ? { ...leaving, image } : undefined) : image?.dispose()),
       () => live && setLeaving(undefined), // no picture: the page has simply changed
     );
     return () => {
