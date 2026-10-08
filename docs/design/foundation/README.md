@@ -54,7 +54,7 @@ so `em` sizes resolve against that).
 | `type.log` | 17 (0.95em) | 18 | smaller |
 | `type.roomTitle` | 22.4 / 1.1 | 26 | smaller |
 | `type.pageTitle` | 31 / 1.05 | 32 (Combat 26) | one size |
-| small caps | IM Fell English SC, 11–14 | EB Garamond `small-caps`, 15 and 17 | third font, bundled |
+| small caps | IM Fell English SC, 11–14 | EB Garamond `small-caps`, 15 and 17 | third font, chosen; its file is not in `fonts` yet |
 | `type.small` (status) | 13 | 15 small caps | body face |
 | `space.page` | 24 (22 top) | 24 | 22 → 24 |
 | `space.block` | 14 | 8 (`Sheet` gap) | wider |
@@ -100,7 +100,7 @@ Each needs a red control in its slice.
 All eight are answered in the [owner decision](../../decisions/owner-decision-design-foundation-2026-10-07.md):
 (1) day and night follow in-game time, no Settings override for now, no moon palette;
 (2) dark `warning` is burnt orange; (3) the running head shows the current quest objective, no
-new words; (4) IM Fell English SC is bundled; (5) action cards replace accent text links;
+new words; (4) IM Fell English SC is chosen for bundling; (5) action cards replace accent text links;
 (6) minimap 56; (7) curl about 500 ms, tuned on a device; (8) the synthesised sound stays until
 a recorded CC0 sample is found.
 
@@ -116,7 +116,8 @@ a recorded CC0 sample is found.
 
 - **Dawn and dusk hours.** The palette rule needs them as a cartridge world setting; no engine
   or presenter literal. Chapter 1's calendar already authors solar cuts (dawn 05:00, dusk
-  18:00), which may serve; the choice is a developer slice's. The specimen uses them as samples.
+  18:00, night 20:00), which may serve, but solar phases are labels, not engine values; its
+  `start` is 18:00, so with dusk at the `dusk` cut Chapter 1 opens dark, at the `night` cut light. The specimen uses them as samples.
 - **IM Fell English SC.** Its OFL file goes into `mobile/app/book/fonts` and loads through
   expo-font with the other two.
 - **Running head.** Which active quest's objective shows when several are active needs a

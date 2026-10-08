@@ -80,8 +80,8 @@ still reads [`paper.ts`](../mobile/app/book/paper.ts) until the polish phase mov
   4.5:1 on `bg` and on `card` in both palettes; `line` is a hairline, not text. Which palette
   shows follows in-game time, per the [day and night rule](system/book-ui.md#world-and-status-entry).
 - **Type.** IM Fell English for titles and letter tiles, EB Garamond for prose, logs and status,
-  IM Fell English SC (bundled, loaded through expo-font on the phone with the other two) for
-  small-caps controls, tags and the running head. Use a named style
+  IM Fell English SC (chosen; its bundling is noted in `tokens.ts`) for small-caps controls,
+  tags and the running head. Use a named style
   from `type`; do not set a font size, line height or letter spacing in a component.
 - **Space, size, radius.** Margins, gaps and padding come from `space`; touch, card, rule
   and minimap sizes from `size`; corners from `radius`. Map drawing geometry
@@ -99,7 +99,7 @@ these; a new component needs a real consumer and its entry here in the same slic
 
 | Component | Form and rules | States | Consumer (live) |
 |---|---|---|---|
-| Page | Page margin `space.page`, blocks `space.block` apart, `type.pageTitle` header in `fg`; an optional running head above the title: the current quest objective, the active quest's projected journal text (no presenter copy), in `type.runningHead` `dim`, not pressable; none when no quest is active. One shell for every detail and section. | none | `Sheet` [`pages.tsx:143`](../mobile/app/book/pages.tsx#L143). Polish: `NpcPage` [`Menu.tsx:128`](../mobile/app/book/Menu.tsx#L128) and `Combat` [`Combat.tsx:16`](../mobile/app/book/Combat.tsx#L16) rebuild it; fold them in. |
+| Page | Page margin `space.page`, blocks `space.block` apart, `type.pageTitle` header in `fg`; an optional running head above the title: the current quest objective, the active quest's projected journal text (no presenter copy), in `type.runningHead` `dim`, not pressable, wrapping rather than cutting authored words; none when no quest is active. One shell for every detail and section. | none | `Sheet` [`pages.tsx:143`](../mobile/app/book/pages.tsx#L143). Polish: `NpcPage` [`Menu.tsx:128`](../mobile/app/book/Menu.tsx#L128) and `Combat` [`Combat.tsx:16`](../mobile/app/book/Combat.tsx#L16) rebuild it; fold them in. |
 | Room page | Fixed centred `type.roomTitle` (the Look tap, per the [room rule](system/book-ui.md#world-and-status-entry)); then prose in `type.body`, entity lines, verb lines and the log. | title tappable or plain | `RoomPage` [`pages.tsx:67`](../mobile/app/book/pages.tsx#L67) |
 | Fixture link | Inline in prose; ink colour with a `size.underline` dotted underline (solid where the platform has no dotted line). | linked, or plain prose when no detail is projected | room description; no live projection yet |
 | Entity line | MUD line: the name in weight 500 with the dotted underline, then the rest ("is here."). The whole line is the touch target. A carried-item note follows in `dim`. Also every list row that opens a detail: held and worn items, Inside, notices, Contents entries. | none | `Here` [`pages.tsx:124`](../mobile/app/book/pages.tsx#L124). Polish: held items [`pages.tsx:298`](../mobile/app/book/pages.tsx#L298) show no affordance. |
