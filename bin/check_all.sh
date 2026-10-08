@@ -56,10 +56,11 @@ m bin/docs_red_controls.sh
 python3 bin/check_beads_export.py
 sh bin/beads_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
-for d in . kernel/ts; do
+for d in . kernel/ts mobile/app; do
   [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
+(cd mobile/app && m npm test)
 m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh

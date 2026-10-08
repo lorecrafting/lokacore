@@ -29,8 +29,9 @@ their rules and red controls remain available for resumption.
   `.prettierignore` only applies there). CI and `bin/check_all.sh` currently select
   non-mobile files; `mobile/` formatting is deferred in both, but the pre-commit hook
   still runs Prettier and `ast-grep scan --error` on staged `mobile/` files. The mobile app's
-  `npx tsc --noEmit` and `npm test` are also deferred. Active TypeScript verification is
-  `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
+  `npx tsc --noEmit` is also deferred. Active TypeScript verification is
+  `npm run typecheck && npm test` in `kernel/ts` and `npm test` in `mobile/app` (local-story
+  authority and Book tests), in CI's `typescript` job and `bin/check_all.sh` (Node's built-in test runner).
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
   passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
