@@ -125,4 +125,4 @@ a recorded CC0 sample is found.
 
 Spec change to note: [Book UI](../../system/book-ui.md#minimap-map-and-presentation-controls)
 now asks for 44px touch targets in both axes, not only height; the riddle tiles fail it
-today, and Settings gains a Sound on/off control (owner-required for the page-turn sound).
+today, and Settings gains a Sound on/off control (PM addition for accessibility; spec only until the polish phase).

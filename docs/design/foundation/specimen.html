@@ -77,8 +77,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
 .pg p{margin:0}
 .acts{display:flex; flex-direction:column; gap:var(--sm)}
 .act{all:unset; box-sizing:border-box; cursor:pointer; min-height:var(--cardh); padding:var(--md) var(--lg); background:var(--card); border:var(--rule) solid var(--line); border-radius:var(--r-card); font:18px/26px var(--body); color:var(--fg)}
-.act.off{cursor:default; border-style:dashed; color:var(--dim)}
-.act small{display:block; font-size:15px; line-height:22px}
+.pg .note{color:var(--dim)}
 .control{all:unset; cursor:pointer; align-self:center; min-height:var(--touch); min-width:var(--touch); padding:0 var(--lg); text-align:center; line-height:var(--touch); font:14px/44px var(--caps); letter-spacing:1.1px; color:var(--fg)}
 .foot{flex-shrink:0; padding:var(--hair) var(--page) var(--md); display:flex; flex-direction:column; align-items:center; gap:var(--xs)}
 .mo{display:flex; align-items:center; gap:var(--sm)}
@@ -150,7 +149,7 @@ h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40p
           <div class="acts">
             <button class="act">“Which way is the village?”</button>
             <button class="act">“Is there an inn nearby?”</button>
-            <div class="act off" role="button" aria-disabled="true">“Who is Wren?”<small><span class="tag">not now</span></small></div>
+            <p class="note">“Who is Wren?” <span class="tag">not now</span></p>
           </div>
           <button class="control" data-go="room">Leave</button>
         </div>
@@ -284,7 +283,8 @@ half4 leaf(float2 p) {
 
 half4 main(float2 xy) {
   float2 n = normalize(float2(1, SLOPE));
-  float c = RADIUS + SWELL * sin(PI * progress);
+  float e = sin(PI * progress); // 0 at both ends, so the first and last frames are flat pages
+  float c = RADIUS + SWELL * e;
   float far = size.x * n.x + size.y * n.y;
   float f = mix(far, -PI * RADIUS / 2 - 8, progress);
   float2 q = xy;
@@ -306,9 +306,9 @@ half4 main(float2 xy) {
   }
   if (s < 0) { // the leaf still flat, shaded towards the fold
     half4 t = leaf(q);
-    return half4(t.rgb * half(1 - 0.22 * exp(s / (0.3 * c))), t.a);
+    return half4(t.rgb * half(1 - 0.22 * e * exp(s / (0.3 * c))), t.a);
   }
-  float shade = 0.38 * pow(clamp(1 - max(s - c, 0) / (1.4 * c), 0, 1), 2);
+  float shade = 0.38 * e * pow(clamp(1 - max(s - c, 0) / (1.4 * c), 0, 1), 2);
   half4 under = arriving.eval(xy);
   return half4(under.rgb * half(1 - shade), under.a);
 }
