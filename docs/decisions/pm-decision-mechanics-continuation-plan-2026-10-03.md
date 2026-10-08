@@ -6,7 +6,7 @@ The owner’s [autonomous mechanics delegation](owner-decision-autonomous-mechan
 
 > ok yes please make more mechanic slices beyond M1-M.. so we have more in the queue, and continue with the queue. I will be away from keyboard now
 
-The root PM adopts the [M1–M23 queue](../NEXT-MECHANICS.md), informed by actual `gpt-6-astra` core and expanded chapter-mechanics planning advice. Advice examined composed source `0e49963f893192d193fac65851aa882be0f597b8`, active feature/applicability maps and linked archived chapter plans. It is advice, not independent code approval. These are PM choices under delegation, not invented exact owner preferences. Individual implementations amend active specs first, undergo independent review and required checks, and merge with records. No runtime or installed contract changes in this planning decision.
+The root PM adopts the [M1–M23 queue](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/NEXT-MECHANICS.md), informed by actual `gpt-6-astra` core and expanded chapter-mechanics planning advice. Advice examined composed source `0e49963f893192d193fac65851aa882be0f597b8`, active feature/applicability maps and linked archived chapter plans. It is advice, not independent code approval. These are PM choices under delegation, not invented exact owner preferences. Individual implementations amend active specs first, undergo independent review and required checks, and merge with records. No runtime or installed contract changes in this planning decision.
 
 ## Clock and interaction policy
 

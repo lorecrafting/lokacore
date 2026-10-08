@@ -34,7 +34,7 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 [release scope](../spec/release-scope.md).
 
 Chapter 1 A–D mechanics are published; E1–E3 remain open in the
-[roadmap](../ROADMAP.md). The [M1–M23 queue](../NEXT-MECHANICS.md) records mechanic
+[roadmap](../ROADMAP.md). The [M1–M23 queue](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md) records mechanic
 planning and [future work](future.md) links later work. A plan alone does not establish
 installed behavior. Native verification and the known UI blur carry remain deferred
 under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).

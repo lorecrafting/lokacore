@@ -4,7 +4,7 @@
 The PM selected separate C2, C3 and CC candidates under the existing
 [mechanics delegation](decisions/owner-decision-autonomous-mechanics-2026-10-03.md),
 informed by read-only planning at merged main `6d53e8a`. The active
-[M1–M23 queue](NEXT-MECHANICS.md) keeps its identifiers and priority;
+[M1–M23 queue](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md) keeps its identifiers and priority;
 [ROADMAP](ROADMAP.md) owns delivery status. This page proposes future boundaries,
 not installed behavior, frozen contracts or release dates. Five future story policies are
 [PM-selected, with implementation/review pending](decisions/pm-decision-later-story-reconciliation-2026-10-04.md);

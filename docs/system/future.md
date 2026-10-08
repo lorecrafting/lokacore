@@ -7,13 +7,7 @@ and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechan
 
 ## Next
 
-- **Chapter 1 acceptance**: E1–E3 remain open in the [roadmap](../ROADMAP.md);
-  installed A–D source and its [current identity](cartridge.md#current-bundled-chapter)
-  do not establish completion of those gates.
-- **M mechanics planning**: [official M1–M23 queue](../NEXT-MECHANICS.md) and
-  [adopted policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md),
-  under delegated PM authority; implemented portions are described in [mechanics](mechanics.md).
-- **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
+Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
 
 ## Chapter one and the proof cartridge
 
