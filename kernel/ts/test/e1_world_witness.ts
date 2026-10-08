@@ -6,8 +6,8 @@ import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/co
 import { encode } from '../src/foundation/canonical.ts';
 import { key, same } from '../src/foundation/compose.ts';
 import { refString } from '../src/runtime/decision.ts';
-import { value } from '../src/mechanics/fact.ts';
-import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { scopeOf, value } from '../src/mechanics/fact.ts';
+import { level, resourceRef, resourceSpec } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { load } from '../src/mechanics/containment/shared.ts';
 import { bellCue } from '../src/mechanics/bell/cue.ts';
@@ -30,6 +30,7 @@ export function worldWitnesses(
     const limited =
       w.carry &&
       p.type === 'take' &&
+      p.actor_id === me &&
       decision.kind === 'rejected' &&
       decision.error.code === 'too_heavy' &&
       encode(before.state as never) === encode(after.state as never) &&
@@ -74,7 +75,8 @@ export function worldWitnesses(
         op.op === 'water.transition' &&
         op.actor_id === me &&
         op.value?.room_id === room(after) &&
-        op.value.deadline === op.value.entered_at! + water.duration &&
+        op.value.entered_at === after.state.clock &&
+        op.value.deadline === after.state.clock + water.duration &&
         encode(op.value as never) === encode(after.state.water?.[me] as never),
     )
   )
@@ -103,31 +105,30 @@ export function worldWitnesses(
         (op) =>
           op.op === 'fact.assign' &&
           same(op.fact, c.fact) &&
+          encode(op.scope as never) === encode(scopeOf(before, me, c.fact) as never) &&
           op.expected === false &&
           op.value === true,
       ),
   );
   if (credit) paths.push('/world/death_credit');
+  // A pending round of the encounter resolved at the attack's time, and the next one scheduled.
   const interval = w.combat?.interval;
+  const round = (encounter: string, at: number) =>
+    interval !== undefined &&
+    ops.some((op) => {
+      const job = op.op === 'job.complete' ? before.state.jobs?.[op.job_id] : undefined;
+      return job?.status === 'pending' && job.due_time === at && job.encounter_id === encounter;
+    }) &&
+    ops.some(
+      (op) =>
+        op.op === 'job.schedule' && op.encounter_id === encounter && op.due_time === at + interval,
+    );
   if (
     events.some(
       (e) =>
         e.payload.type === 'attack_result' &&
         e.payload.attacker_id === body &&
-        ops.some((op) => {
-          const job = op.op === 'job.complete' ? before.state.jobs?.[op.job_id] : undefined;
-          return (
-            job?.status === 'pending' &&
-            job.due_time === e.logical_time &&
-            job.encounter_id === (e.payload as { encounter_id: string }).encounter_id
-          );
-        }) &&
-        ops.some(
-          (op) =>
-            op.op === 'job.schedule' &&
-            op.encounter_id === (e.payload as { encounter_id: string }).encounter_id &&
-            op.due_time === e.logical_time + interval!,
-        ),
+        round(e.payload.encounter_id, e.logical_time),
     )
   )
     paths.push('/world/combat');
@@ -141,10 +142,11 @@ export function worldWitnesses(
     paths.push('/world/bell_cue');
   const advance = ops.find((op) => op.op === 'time.advance');
   let view: ReturnType<typeof gameView> | undefined;
-  for (const spec of Object.values(before.cartridge.resources ?? {})) {
-    const ref = resourceRef(before, spec.key),
-      old = level(before, body, ref)!,
-      next = level(after, body, ref)!,
+  for (const { key: k } of Object.values(before.cartridge.resources ?? {})) {
+    const ref = resourceRef(before, k),
+      spec = resourceSpec(before, body, ref)!,
+      old = level(before, body, ref),
+      next = level(after, body, ref),
       path = `/resources/${refString(ref)}`;
     if (old === undefined || next === undefined) continue;
     const band = (w.bands ?? []).find(
@@ -185,8 +187,10 @@ export function worldWitnesses(
     }
   }
   for (const path of credited) {
-    const service = before.cartridge.services?.[path.replace(/^\/services\//, '')];
-    if (!service || !path.startsWith('/services/')) continue;
+    const service = path.startsWith('/services/')
+      ? before.cartridge.services?.[path.slice('/services/'.length)]
+      : undefined;
+    if (!service) continue;
     const benefit = service.benefit;
     paths.push(`/resources/${refString(service.currency)}`);
     if (benefit.kind === 'meal') paths.push(`/resources/${refString(benefit.stock)}`);

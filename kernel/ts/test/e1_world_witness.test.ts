@@ -84,7 +84,10 @@ const cellar = record(maudsCellar);
 // a water entry (cost 10) as an ordinary move.
 test('movement is witnessed by a move debiting exactly cost 1 mv', () => {
   const moves = carry.filter((s) => s.command.payload.type === 'move');
-  assert.deepEqual(witnessing(carry, '/world/movement'), moves);
+  assert.deepEqual(
+    carry.map((s) => credits(s, '/world/movement')),
+    carry.map((s) => s.command.payload.type === 'move'),
+  );
   for (const s of moves) assert.equal(mv(s.before)! - mv(s.after)!, 1);
   assert.equal(
     credits(
@@ -134,7 +137,7 @@ test('death is witnessed by the player respawning at chapel_nave with hp 10 and 
     false,
   );
   controls(s, '/world/death', 'resource.adjust');
-  assert.deepEqual(witnessing(cellar, '/world/death'), []);
+  assert.equal(witnessing(cellar, '/world/death').length, 0);
 });
 
 // Breaks: death_credit credits a kill without the named rat's fact turning true, or the wrong fact.
@@ -268,10 +271,12 @@ test('carry is witnessed by a too_heavy refusal at exactly 12000 g', () => {
   const [s, ...more] = witnessing(carry, '/world/carry');
   assert.equal(more.length, 0);
   assert.deepEqual(s!.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
-  assert.equal(s, carry.at(-1));
+  assert.equal(carry.indexOf(s!), carry.length - 1);
   const carryAt = (max_grams: number) =>
     credits(authored(s!, { carry: { max_grams } }), '/world/carry');
   assert.deepEqual([carryAt(12000), carryAt(11999), carryAt(12001)], [true, false, false]);
+  const other = { kind: 'rejected', error: { code: 'invalid_state' } } as DecisionResult;
+  assert.equal(credits({ ...s!, decision: other }, '/world/carry'), false);
   assert.equal(
     credits({ ...s!, decision: { ...(carry.at(-2)!.decision as Accepted) } }, '/world/carry'),
     false,

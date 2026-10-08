@@ -346,13 +346,13 @@ refusals credit nothing.
 - `water`: a `move` from a route's `surface` into its `bottom` whose receipt adjusts the body's
   mv by exactly −`entry_cost` and opens a water row in that bottom room with deadline equal to
   entry time plus `duration`.
-- `death`: a step whose `entity_died` event names the player body, after which the body lies in
-  `shrine` and the receipt sets its hp to `restore.hp`.
+- `death`: a step whose `entity_died` event names the player body in the room it occupied
+  before, after which the body lies in `shrine` and the receipt sets its hp to `restore.hp`.
 - `death_credit`: a step whose `entity_died` event names an entry's static `npc` in that entry's
   `room`, credited to the player, while the entry's `fact` changes from false to true for the
   player with a matching receipt `fact.assign`.
-- `combat`: a step resolving a round in which the player body attacks, whose receipt schedules
-  that encounter's next round exactly `interval` after the attack's time.
+- `combat`: a step completing an encounter's pending round in which the player body attacks,
+  whose receipt schedules that encounter's next round exactly `interval` after the attack's time.
 - `bands`: a step that changes the level of a body pool without its own bands, after which the
   GameView shows the world band whose `at_percent` equals the pool's exact percent.
 - `bell_cue`: a step that changes `bell_cue.fact` from false to true for the player in one of
