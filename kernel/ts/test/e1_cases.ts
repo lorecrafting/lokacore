@@ -210,6 +210,7 @@ export function gaps(
   const c = loaded.cartridge;
   const authored = authoredPaths(loaded);
   const disposed = new Set(dispositions.map((d) => d.path));
+  const dialogues = Object.entries(c.dialogues ?? {});
   for (const path of disposed) assert.ok(!witnessed.has(path), `witnessed disposition ${path}`);
   const missing = (expected: string[], actual: Set<string>) =>
     expected.filter((key) => !actual.has(key)).sort();
@@ -223,12 +224,14 @@ export function gaps(
       new Set([...seen.quests].map((x) => x.split('/')[0]!)),
     ),
     dialogues: missing(
-      Object.values(c.dialogues ?? {}).map((x) => x.key),
+      dialogues.filter(([ref]) => !disposed.has(`/dialogues/${ref}`)).map(([, x]) => x.key),
       seen.dialogues,
     ),
     choices: missing(
-      Object.values(c.dialogues ?? {}).flatMap((x) =>
-        Object.keys(x.choices).map((choice) => `${x.key}/${choice}`),
+      dialogues.flatMap(([ref, x]) =>
+        Object.keys(x.choices)
+          .filter((choice) => !disposed.has(`/dialogues/${ref}/choices/${choice}`))
+          .map((choice) => `${x.key}/${choice}`),
       ),
       seen.choices,
     ),

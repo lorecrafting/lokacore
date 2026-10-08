@@ -354,6 +354,22 @@ test('E1 reports a disposition apart from witnessed and pending paths', () => {
     assert.throws(() => checkDispositions(loaded, [bad]), /invalid disposition/);
 });
 
+// Breaks: a dispositioned dialogue or choice path still shows as a family gap, or one row closes
+// a sibling choice it does not name.
+test('E1 a dispositioned dialogue or choice path closes its family gap', () => {
+  const root = `/dialogues/${k}dialogue/a_elspeth_lost`;
+  const rows = [root, `${root}/choices/acknowledge`].map((path) => ({
+    path,
+    reason: 'r',
+    evidence: 'e',
+    review: 'v',
+  }));
+  const { gaps } = obligationReport(admitCandidate(bytes), coverage(), new Set(), rows);
+  assert.equal(gaps.dialogues.includes('a_elspeth_lost'), false);
+  assert.equal(gaps.choices.includes('a_elspeth_lost/acknowledge'), false);
+  assert.equal(gaps.choices.includes('a_elspeth_lost/directions'), true);
+});
+
 // Breaks: a refusal row passes although its case is missing, its guarded talk was accepted, it was
 // refused for another reason or by another dialogue; or replay keeps a refusal a later accepted step
 // overrode.
