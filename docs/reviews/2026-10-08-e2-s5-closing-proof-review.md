@@ -50,4 +50,4 @@
    - This is correct behaviour under save.md, but a reader could take F2 and F4 as fence evidence.
 2. **nit** `docs/evidence/2026-10-08-e2-r9c/README.md:117`: the transport row cites "F4 `r9c_faults.test.ts:315`". `:315` is F3's elapsed call; F4 is `:324-335`.
 
-No blocker or should-fix findings. A follow-up for the nits is optional (docs and comments only; the evidence hashes do not cover the test file, but README:117 is not hashed either).
+No blocker or should-fix findings. Fixing the nits is optional. The README is listed in SHA256SUMS, so a README edit must regenerate SHA256SUMS and the verify file. The test comment is not hashed.
