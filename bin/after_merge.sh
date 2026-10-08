@@ -21,6 +21,8 @@ for f in $(git status --porcelain --untracked-files=all | cut -c4-); do
   [ "$f" = $j ] || { [ -n "$subject" ] && [ "$f" = docs/ROADMAP.md ]; } || die "uncommitted $f"
 done
 [ -z "$subject" ] || ! git diff --quiet -- docs/ROADMAP.md || die 'subject given but docs/ROADMAP.md is unchanged'
+wt=$(git worktree list --porcelain | awk -v b="branch refs/heads/$branch" '/^worktree /{w=substr($0, 10)} $0 == b {print w}')
+[ -z "$wt" ] || [ -z "$(git -C "$wt" status --porcelain)" ] || die "the $branch worktree has uncommitted work"
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
 git diff --quiet -- $j || { cp $j "$tmp/export" && git checkout -- $j; } || die 'cannot set the export aside'
 if ! git pull -q --ff-only origin main; then
@@ -30,7 +32,6 @@ fi
 [ ! -f "$tmp/export" ] || cp "$tmp/export" $j
 br sync --flush-only > /dev/null || die 'br sync --flush-only failed'
 br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
-wt=$(git worktree list --porcelain | awk -v b="branch refs/heads/$branch" '/^worktree /{w=substr($0, 10)} $0 == b {print w}')
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 for b in "$branch" "review-$pr"; do
   ! git rev-parse -q --verify "refs/heads/$b" > /dev/null || git branch -q -d "$b" || die "$b is not merged; not deleted"

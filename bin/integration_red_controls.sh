@@ -113,6 +113,8 @@ amk() {
 }
 amk; head=$(git rev-parse HEAD); echo stray > s; am dirty 1; rm s
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
+touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
+[ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge dirty-worktree: changed something'
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; am success 0 'ROADMAP status: X merged (#7)'
 git fetch -q origin
