@@ -28,13 +28,14 @@ export function rejoin(a: CaseHost) {
   const w = a.story.world();
   const [hound] = Object.entries(w.state.created ?? {}).find(
     ([id, c]) =>
+      c.definition.kind === 'npc' &&
       c.origin.kind === 'spawned' &&
       c.origin.by.key === 'fen_hounds' &&
       w.state.containers[id] === w.state.containers[w.body],
   )!;
   a.invoke('attack', [hound]);
   for (let round = 0; round < 40 && a.view().combat; round++) a.elapsed(3_000);
-  assert.equal(a.view().place.title.key, 'room.chapel_nave.title');
+  assert.equal(a.view().place.title.key, 'room.chapel_nave.title', 'the pack must kill the player');
   assert.equal(journal(a), 'quest.missing_child.separated');
   a.reopen();
   a.move('south', 'south', 'south', 'south', 'south', 'south', 'south', 'east');

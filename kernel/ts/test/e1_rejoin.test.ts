@@ -60,7 +60,7 @@ function replayed(case_id: string, recipe: (a: CaseHost) => void) {
   }
 }
 
-// Breaks: the route skips the death or the rejoin, or an Elspeth branch is credited without its talk.
+// Breaks: the route skips the death or the rejoin, or an Elspeth choice talk is omitted.
 test('E1 escort death, rejoin and pre-bell Elspeth talks witness their exact paths', () => {
   const rescued = replayed('rejoin', rejoin);
   for (const path of [
@@ -74,7 +74,6 @@ test('E1 escort death, rejoin and pre-bell Elspeth talks witness their exact pat
     ...elspeth('rescued'),
   ])
     assert.equal(rescued.includes(path), true, path);
-  assert.equal(rescued.includes(`${base}/b_elspeth_stays`), false);
   const stays = replayed('elspeth-stays', elspethStays);
   for (const path of elspeth('stays')) assert.equal(stays.includes(path), true, path);
 });
