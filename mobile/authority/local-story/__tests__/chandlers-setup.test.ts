@@ -129,12 +129,12 @@ export function forge(
 ) {
   const a = staged(stage);
   const rows = a.sql
-    .prepare(
-      `SELECT rowid,command,response FROM receipt WHERE json_extract(command,'$.payload.${
-        stage === 'expire' ? "type')='elapsed'" : "choice_id')=?"
-      }`,
-    )
-    .all(...(stage === 'expire' ? [] : [choiceOf[stage]])) as {
+    .prepare('SELECT rowid,command,response FROM receipt WHERE json_extract(command,?)=?')
+    .all(
+      ...(stage === 'expire'
+        ? ['$.payload.type', 'elapsed']
+        : ['$.payload.choice_id', choiceOf[stage]]),
+    ) as {
     rowid: number;
     command: string;
     response: string;
@@ -196,3 +196,4 @@ export const only = (receipt: Forged, op: string, key?: string) => {
   return ops[0];
 };
 export const otherId = 'eeeeeeee-0000-4000-8000-000000000001';
+export const otherPlayer = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };

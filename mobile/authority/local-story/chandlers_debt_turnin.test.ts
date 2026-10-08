@@ -1,7 +1,14 @@
 // Breaks (each case): reopen accepts an on-time turn-in receipt forged as named.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { forge, forgeRows, only, otherId, type Forged } from './__tests__/chandlers-setup.test.ts';
+import {
+  forge,
+  forgeRows,
+  only,
+  otherId,
+  otherPlayer as other,
+  type Forged,
+} from './__tests__/chandlers-setup.test.ts';
 
 const axis = (r: Forged) => only(r, 'fact.assign', 'priory_fen_axis');
 const axisEvent = (r: Forged) =>
@@ -10,7 +17,6 @@ const axisEvent = (r: Forged) =>
       e.payload.type === 'fact_changed' &&
       (e.payload.fact as { key: string }).key === 'priory_fen_axis',
   )!;
-const other = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };
 const turnIn = (forged: (r: Forged) => void) => forge('deliver', forged);
 // Moves the saved axis, the turn-in's assignment and its event together.
 const axisMoved = (expected: number, value: number) =>

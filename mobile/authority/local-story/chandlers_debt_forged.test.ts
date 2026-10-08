@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { elapsedCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
-import { forge, fresh, only, otherId, type Forged } from './__tests__/chandlers-setup.test.ts';
+import {
+  forge,
+  fresh,
+  only,
+  otherId,
+  type Forged,
+  otherPlayer,
+} from './__tests__/chandlers-setup.test.ts';
 
 // Breaks: reopen accepts an expiry receipt that fails another quest instance.
 test('reopen refuses an expiry receipt that transitions another instance', () => {
@@ -38,10 +45,7 @@ test('reopen refuses an expiry receipt with the outcome in another writer group'
 // Breaks: reopen accepts an expiry receipt that assigns the outcome at another player's scope.
 test('reopen refuses an expiry receipt with the outcome at another scope', () => {
   const kind = forge('expire', (r) => {
-    only(r, 'fact.assign', 'priory_tithe_delivered').scope = {
-      kind: 'player',
-      character_id: 'aaaaaaaa-1111-4222-8333-444444444444',
-    };
+    only(r, 'fact.assign', 'priory_tithe_delivered').scope = otherPlayer;
   });
   assert.equal(kind, 'save_corrupt');
 });
@@ -86,10 +90,7 @@ test('reopen refuses an expiry outcome event with another cause', () => {
 // Breaks: reopen accepts an expiry outcome event at another player's scope.
 test('reopen refuses an expiry outcome event at another scope', () => {
   const kind = forge('expire', (r) => {
-    outcomeEvent(r).scope = {
-      kind: 'player',
-      character_id: 'aaaaaaaa-1111-4222-8333-444444444444',
-    };
+    outcomeEvent(r).scope = otherPlayer;
   });
   assert.equal(kind, 'save_corrupt');
 });
@@ -166,8 +167,8 @@ test('reopen refuses an accept receipt scheduling the due job for another actor'
 });
 
 // Breaks (each case): reopen accepts an acceptance or expiry receipt forged as named.
-const command = (stage: 'expire', change: (c: { [field: string]: any }) => void) =>
-  forge(stage, () => {}, change);
+const command = (change: (c: { [field: string]: any }) => void) =>
+  forge('expire', () => {}, change);
 const cases: [string, () => string][] = [
   [
     'an accept receipt whose choice resolution names another revision',
@@ -183,7 +184,7 @@ const cases: [string, () => string][] = [
   [
     'an expiry command with an unknown field',
     () =>
-      command('expire', (c) => {
+      command((c) => {
         c.extra = 1;
       }),
   ],
@@ -197,21 +198,21 @@ const cases: [string, () => string][] = [
   [
     'an expiry command for another actor',
     () =>
-      command('expire', (c) => {
-        c.payload.actor_id = 'aaaaaaaa-1111-4222-8333-444444444444';
+      command((c) => {
+        c.payload.actor_id = otherPlayer.character_id;
       }),
   ],
   [
     'an expiry command in another world context',
     () =>
-      command('expire', (c) => {
+      command((c) => {
         c.world_context_id = otherId;
       }),
   ],
   [
     'an expiry command whose id is not its interval id',
     () =>
-      command('expire', (c) => {
+      command((c) => {
         c.id = otherId;
       }),
   ],

@@ -1,7 +1,13 @@
 // Breaks (each case): reopen accepts the named forged Chandler's Debt state row or receipt column.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { forgeRows, otherId, type Stage } from './__tests__/chandlers-setup.test.ts';
+import {
+  forgeRows,
+  fresh,
+  otherId,
+  otherPlayer as other,
+  type Stage,
+} from './__tests__/chandlers-setup.test.ts';
 
 type Rows = Parameters<Parameters<typeof forgeRows>[1]>[0];
 type Story = Parameters<Parameters<typeof forgeRows>[1]>[1];
@@ -12,14 +18,13 @@ const one = (rows: Rows, section: string, pick: (value: any, key: string) => boo
 };
 const job = (r: Rows) => r.jobs[one(r, 'jobs', (j) => !!j.quest_instance_id)];
 const quest = (r: Rows) => r.quests[one(r, 'quests', () => true)];
-const offerChoice = (r: Rows) => r.choices[one(r, 'choices', (c) => c.beat === 'a_peg_debt')];
 const ref = (key: string) => ({
-  cartridge_id: 'ashmere_missing_child',
-  cartridge_version: '0.0.16',
+  cartridge_id: fresh.cartridge.manifest.id,
+  cartridge_version: fresh.cartridge.manifest.version,
   key,
   kind: 'fact',
 });
-const character = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
+const character = fresh.character;
 const trust = JSON.stringify({
   fact: ref('peg_trust'),
   kind: 'fact',
@@ -28,7 +33,7 @@ const trust = JSON.stringify({
 const tithe = JSON.stringify({
   fact: ref('priory_tithe_delivered'),
   kind: 'fact',
-  scope: { kind: 'instance', world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' },
+  scope: { kind: 'instance', world_context_id: fresh.context },
 });
 const ledger = (a: Story) => a.entity('item', 'tithe_ledger');
 // The player's 20-penny purse and Aldric's coins (the only resource row on him).
@@ -40,12 +45,12 @@ const aldric = (r: Rows, a: Story) =>
   r.resources[one(r, 'resources', (_, k) => JSON.parse(k).entity_id === a.entity('npc', 'aldric'))];
 const swap = (b: { entity_id: string }[]) =>
   ([b[0].entity_id, b[1].entity_id] = [b[1].entity_id, b[0].entity_id]);
-const other = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };
-const column = (stage: Stage, set: string, where: string, value: string) =>
+// Rewrites one column of the stage's receipt whose command has `path` = `match`.
+const column = (stage: Stage, set: string, path: string, match: string, value: string) =>
   forgeRows(stage, (_, a) => {
     a.sql
-      .prepare(`UPDATE receipt SET ${set}=? WHERE json_extract(command,'$.payload.${where}`)
-      .run(value);
+      .prepare(`UPDATE receipt SET ${set}=? WHERE json_extract(command,?)=?`)
+      .run(value, path, match);
   });
 
 // Each row: the condition the forgery breaks, then the forged save.
@@ -274,20 +279,30 @@ const cases: [string, () => string][] = [
   // Receipt columns: the acceptance and expiry are this player's, in this save's scope.
   [
     'an accept receipt stored for another actor',
-    () => column('accept', 'actor_id', "choice_id')='accept_on_time'", other.character_id),
+    () => column('accept', 'actor_id', '$.payload.choice_id', 'accept_on_time', other.character_id),
   ],
   [
     'an expiry receipt stored in another scope',
-    () => column('expire', 'scope', "type')='elapsed'", 'story/forged/scope'),
+    () => column('expire', 'scope', '$.payload.type', 'elapsed', 'story/forged/scope'),
   ],
   [
     'an expiry receipt stored for another actor',
-    () => column('expire', 'actor_id', "type')='elapsed'", other.character_id),
+    () => column('expire', 'actor_id', '$.payload.type', 'elapsed', other.character_id),
   ],
   [
     'an expiry receipt stored under another command id',
-    () => column('expire', 'command_id', "type')='elapsed'", otherId),
+    () => column('expire', 'command_id', '$.payload.type', 'elapsed', otherId),
   ],
 ];
 for (const [name, forged] of cases)
   test(`reopen refuses ${name}`, () => assert.equal(forged(), 'save_corrupt'));
+
+// Breaks: a stage the cases forge is itself refused, so every case passes for nothing.
+test('every unforged stage reopens', () => {
+  for (const stage of ['offered', 'accept', 'late', 'expire', 'deliver', 'kept'] as const)
+    assert.equal(
+      forgeRows(stage, () => {}),
+      'open',
+      stage,
+    );
+});

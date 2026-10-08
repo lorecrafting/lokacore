@@ -6,6 +6,7 @@ import {
   fresh,
   only,
   otherId,
+  otherPlayer,
   setup,
   staged,
 } from './__tests__/chandlers-setup.test.ts';
@@ -31,10 +32,7 @@ test('saved B2 acceptance and funded turn-in reopen with their exact rows', () =
 
 // Breaks: deleting the occurrence's pending due job silently discards a saved obligation.
 test('reopen refuses a missing bound expiry job', () => {
-  const a = setup();
-  a.move('north', 'west');
-  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
-  a.answer('accept_on_time');
+  const a = staged('accept');
   const job = Object.entries(a.world().state.jobs ?? {}).find(([, j]) => !!j.quest_instance_id)![0];
   a.sql.prepare("DELETE FROM state_row WHERE section='jobs' AND key=?").run(job);
   const result = openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host);
@@ -43,14 +41,7 @@ test('reopen refuses a missing bound expiry job', () => {
 
 // Breaks: an elapsed expiry commits a failed quest that its own saved receipt cannot justify.
 test('expired B2 obligation reopens with one trust penalty', () => {
-  const a = setup();
-  a.move('north', 'west');
-  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
-  a.answer('accept_on_time');
-  const story = a.story();
-  const from = story.world().state.clock;
-  const result = story.elapsed({ expected_run_id: story.runId(), from, until: 237601 });
-  assert.equal(result.kind, 'saved', JSON.stringify(result));
+  const a = staged('expire');
   a.reopen();
   assert.equal(
     Object.values(a.world().state.quests ?? {}).find((q) => q.quest.key === 'chandlers_debt')
@@ -121,7 +112,7 @@ test('expiry receipt trust scope must name its bound actor', () => {
     (o: { op: string; fact?: { key: string } }) =>
       o.op === 'fact.assign' && o.fact?.key === 'peg_trust',
   );
-  trust.scope = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };
+  trust.scope = otherPlayer;
   a.sql
     .prepare('UPDATE receipt SET response=? WHERE rowid=?')
     .run(JSON.stringify(response), row.rowid);
