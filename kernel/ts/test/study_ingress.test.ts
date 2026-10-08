@@ -111,6 +111,8 @@ test('fox Study ingress rechecks actual owned nonempty corpse and never closes e
     state: { ...noRoot.state, containers: { ...noRoot.state.containers, [npc]: death.corpse_id } },
   };
   assert.equal(move(npcRoot, 'west', 4).decision.kind, 'rejected');
+  const npcWest = gameView(npcRoot).exits.find((e) => e.direction === 'west');
+  assert.deepEqual(npcWest?.reason, { code: 'exit_closed' });
   const foreign: World = {
     ...closed,
     state: {
