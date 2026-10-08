@@ -111,18 +111,27 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   assert.equal(world.body, start.identity.body);
   const digest = createHash('sha256');
   let steps = 0,
-    final: string | null = null;
+    final: { code: string; action: string | null } | null = null;
   const obligations = new Set<string>();
   for (const e of events) {
     if (e.kind !== 'step') continue;
-    const observed = checked(AUTHORITY_KERNEL, world, e.command as Command, e.revision);
+    const observed = checked(
+      AUTHORITY_KERNEL,
+      world,
+      e.command as Command,
+      e.revision,
+      e.action_key ?? undefined,
+    );
     assert.equal(observed.failure, undefined, JSON.stringify(observed.failure));
     assert.equal(e.invariant_failure, null, 'case recorded an invariant failure');
     assert.equal(observed.bytes, `${encode(e.decision)}\n${e.state_hash}\n`);
     for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
       if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
-    final = e.decision.kind === 'rejected' ? e.decision.error.code : null;
+    final =
+      e.decision.kind === 'rejected'
+        ? { code: e.decision.error.code, action: e.action_key ?? null }
+        : null;
     assert.equal(world.state.clock, e.clock);
     assert.deepEqual(world.state.rng, e.rng);
     digest.update(observed.bytes);
@@ -161,10 +170,16 @@ export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOS
     );
 }
 
-/** Fails unless each `refusal` row's case was recorded and its final replayed step was refused (`finals` holds the code, else null) with that code. */
-export function checkRefusals(finals: Map<string, string | null>, dispositions = DISPOSITIONS) {
+type Final = ReturnType<typeof replayCase>['final'];
+/** Fails unless each `refusal` row's case was recorded and its final replayed step was refused with that code by the row's dialogue (`/dialogues/<ref>/<key>/policy/...`). */
+export function checkRefusals(finals: Map<string, Final>, dispositions = DISPOSITIONS) {
   for (const { path, refusal } of dispositions)
-    if (refusal) assert.equal(finals.get(refusal.case), refusal.code, `refusal ${path}`);
+    if (refusal)
+      assert.deepEqual(
+        finals.get(refusal.case),
+        { code: refusal.code, action: path.split('/')[3] },
+        `refusal ${path}`,
+      );
 }
 
 const authoredPaths = (loaded: LoadedCandidate) =>
@@ -234,7 +249,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
   const receipts: object[] = [],
-    finals = new Map<string, string | null>();
+    finals = new Map<string, Final>();
   const run = (
     name: string,
     recipe: (a: ReturnType<typeof caseHost>, path: string) => object | void,

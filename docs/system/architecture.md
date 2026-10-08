@@ -366,11 +366,13 @@ A negative-polarity path, or any other authored path no execution can witness, c
 by a reviewed disposition: a row `{path, reason, evidence, review}` in the checked-in table
 `kernel/ts/test/e1_dispositions.json`, naming an authored path, a reason (for example an
 unreachable or always-false guard), a pointer to the evidence and the independent review
-record. A negative-polarity guard that can fire is dispositioned from a controlled refusal: its
+record. A negative-polarity guard that can fire is dispositioned from a controlled refusal
+([PM decision](../decisions/pm-decision-e1-controlled-refusals-2026-10-07.md)): its
 row adds `refusal: {case, code}`, naming a recorded case built so that every other admission
 condition holds and only that guard's condition is true, and the refusal code. The recorder
-fails unless that case's final replayed step is refused with exactly that code; attribution
-comes from the controlled setup, since the runtime names no refusing node.
+fails unless that case's final replayed step is refused with exactly that code by the dialogue
+the row's path names; attribution comes from the controlled setup, since the runtime names no
+refusing node.
 The recorder reports dispositioned paths separately from witnessed and pending ones;
 a disposition never adds to the witnessed set, and a row for an unknown or witnessed path
 fails the run.
