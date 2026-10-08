@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
@@ -459,4 +461,30 @@ test('E1 recorder passes only with nothing pending and no failure', () => {
   assert.equal(recorderExit(null, { ...none, authored_obligations: ['/quests/q/outcomes/0'] }), 2);
   assert.equal(recorderExit(null, { ...none, rooms: ['shrine'] }), 2);
   assert.equal(recorderExit('Error: replay', none), 1);
+});
+
+// Breaks: the recorder starts recording another admitted candidate (r9c) and fails only by accident.
+test('E1 recorder refuses a non-v042 candidate before writing anything', () => {
+  const r9c = read('protocol/fixtures/r9c_interactions_hash.json'),
+    dir = mkdtempSync(join(tmpdir(), 'loka-e1-recorder-'));
+  try {
+    writeFileSync(
+      join(dir, 'r9c.json'),
+      `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
+    );
+    const r = spawnSync(
+      process.execPath,
+      [
+        fileURLToPath(new URL('./e1_cases.ts', import.meta.url)),
+        join(dir, 'r9c.json'),
+        join(dir, 'out'),
+      ],
+      { encoding: 'utf8' },
+    );
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /records ashmere_missing_child v042 only, not r9c_interactions/);
+    assert.equal(existsSync(join(dir, 'out')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
