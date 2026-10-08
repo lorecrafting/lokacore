@@ -29,3 +29,12 @@
 3. **Open item for G, not S5** (criterion 5 is outside S5's brief): the README has no criterion-5 row, and the five breaks are traceable only through the S2/S3/S4 review tables as listed above. The gate checklist should carry that table, with the terminal-exclusivity and cap rows marked "linked to chapter tests" and provenance "known untested".
 
 No blocker. The claim statement (`README.md:6-8`) is exactly the brief's handoff claim.
+
+## Fix re-check at `aa87cd04735f047652794a989bbf7d3fc328f743` (scoped: my dispositions and the touched text)
+
+- Nit 1 (fence wording): `r9c_faults.test.ts:1-9` now names the unreadable-store and lost-ack rows as the only fencing rows: correct. `README.md:55-58` says the same, then adds "so F2 and F4 never show `pending`". **F4 is wrong**: its second row is `row(base, 'lost', 'next', call)` (`:335`), which fences and asserts `pending` at `:168-170` (the rc4 control is red there, README control table). Only F2 has no fencing row. **should-fix** `docs/evidence/2026-10-08-e2-r9c/README.md:58`: "so F2 never shows `pending`" (then regenerate SHA256SUMS and its verify). One word; the test is right, the lifted report is not.
+- Nit 2 (gates paragraph): `README.md:143` now labelled "evidence touching each gate; disposition pending": fixed.
+- Item 3 (criterion-5 table): `docs/briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md:26-34` carries the five breaks with S2 M1/M2/M3, S3 M2, S4 cap and the origin guard, marked "E2 row", "linked" and "known untested": matches the trace in my first pass. Handled.
+- `shasum -a 256 -c SHA256SUMS` at this head: 36/36 OK, `README.md` listed. Cited `r9c_faults.test.ts:162`, `:168-172`, `:324-335` still point at the named assertions (header edit kept the line count).
+
+Verdict for this round: **APPROVE WITH NOTES**; one should-fix wording error above, nothing else open from my side.
