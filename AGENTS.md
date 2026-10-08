@@ -82,7 +82,8 @@ Keep lessons in area files; link here only when relevant to all work.
 ## Simplicity (every change, every agent)
 
 Follow the installed Ponytail skill: the least code that correctly does the job. It never
-simplifies away anything the spec requires. Before asking for review, run `/ponytail-review`
+simplifies away validation at trust boundaries, data-loss handling, security or anything the
+spec requires. Before asking for review, run `/ponytail-review`
 on the diff (agents without the skill: the same questions by hand) and include the result in
 the PR. Pass this section into subagent prompts. [Mechanic composition](docs/system/architecture.md#building-mechanics-by-composition).
 

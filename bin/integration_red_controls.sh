@@ -77,6 +77,10 @@ grep -qx 'run rerun 43' "$Q/calls" || bad 'merge_queue watch-cancel: did not rer
 mq cancel-twice 1 0 "$A" "[$C,$P]" "[$C,$P]" "[$W,$P]" "[$C,$P]"
 # Break: a cancelled row with no Actions run to rerun waits forever instead of refusing.
 mq cancel-no-run 1 0 "$A" '[{"name":"changes","bucket":"cancel"},'"$P]"
+# Break: one rerunnable cancel next to an unrerunnable one waits forever on the latter.
+mq cancel-mixed 1 0 "$A" "[$C,"'{"name":"x","bucket":"cancel"}]'
+# Break: an empty read after the rerun (a gh error) ends the wait, so the stale row refuses.
+mq cancel-gh-error 0 0 "$A" "[$C,$P]" "[$C,$P]" "" "[$C,$P]" "[$W,$P]" "[$P,$P]"
 # Break: a short SHA never equals gh's full head, so the queue waits forever.
 rc=0; PATH="$tmp/stub:$PATH" capped sh "$bin/merge_queue.sh" 7 01234567 > /dev/null 2>&1 || rc=$?
 [ "$rc" = 2 ] || bad "merge_queue short-sha: exit $rc, want 2"
@@ -89,6 +93,7 @@ guard 2 '{"tool_input":{"command":"cd x && gh pr merge 1 --auto"}}'
 guard 2 '{"tool_input":{"command":"gh pr merge 1'
 guard 0 "{\"tool_input\":{\"command\":\"bin/merge_queue.sh 1 $A\"}}"
 guard 0 '{"tool_input":{"command":"grep -n \"gh pr merge\" docs/WORKFLOW.md"}}'
+guard 2 '{"tool_input":{"command":"/usr/bin/gh -R o/r pr merge 1"}}'
 guard 0 '{"tool_input":{"command":"git commit -m \"merge, never `gh pr merge` by hand\""}}'
 
 # --- integrate_batch.sh ---------------------------------------------------------------------
