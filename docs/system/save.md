@@ -129,7 +129,7 @@ context and rebuilds wrong ids (dev reinstalls only; no app is released).
 Loading (`store.ts:99`) rebuilds the world from the release's cartridge under the pinned
 `world_context_id`, or from the release's own fresh world when the pin has none (a save from
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
-so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
+so a reopen replays the same luck. Reopen refuses a head clock or revision behind the newest committed receipt as `save_corrupt`, bytes unchanged: receipt-history replay (`receipt-history.ts`) must reproduce the head (loka-b60 tracks cartridges outside today's replay gates). A `world_context_id` that is not a WorldContextId is
 `save_corrupt`. Only sections with rows exist, so the state hash matches a headless run
 (`smoke.test.ts`, the Gate R6 reference). Opted recovery player-body rows are required
 and checked at this load boundary against the saved clock and the player's saved/default
