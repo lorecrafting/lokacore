@@ -178,7 +178,7 @@ jobs:
 
   # The one check `main` requires. Skipped scoped jobs pass; a draft (changes skipped) fails.
   ci-green:
-    needs: [changes, elixir, lint, sim, typescript]
+    needs: [changes, e1-recorder, elixir, lint, sim, typescript]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
