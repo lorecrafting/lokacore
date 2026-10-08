@@ -10,8 +10,7 @@ defmodule Loka.ContentLocksTest do
   @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_locks_hash.json"))
   @src "cartridges/ashmere_locks"
 
-  # ashmere_locks' source in `dir` with `files` (relative path => JSON value) written over it.
-
+  # A file of the clean ashmere_locks source, decoded.
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp item(key, f), do: {"items/#{key}.json", f.(src("items/#{key}.json"))}
   defp lid(key, v), do: {"barriers/#{key}.json", Map.merge(src("barriers/#{key}.json"), v)}

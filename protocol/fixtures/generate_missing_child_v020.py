@@ -65,5 +65,4 @@ for ordinal, label in enumerate(labels):
     raw[6] = (raw[6] & 15) | 128
     raw[8] = (raw[8] & 63) | 128
     answers[label] = str(uuid.UUID(bytes=bytes(raw)))
-(here / 'missing_child_v020_ids.json').write_text(json.dumps(answers, indent=2) + '\n')
 print(f'Independent v020: {digest}, {len(answers)} initial IDs.')

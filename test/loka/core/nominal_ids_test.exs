@@ -84,4 +84,32 @@ defmodule Loka.Core.NominalIdsTest do
     refute Contracts.Schema.nominal?(%{"type" => "string", "const" => "a"})
     refute Contracts.Schema.nominal?(%{"type" => "integer"})
   end
+
+  @nominal ~w(AccountId Alias AuthorityDomainId CampaignId CapabilityKey CartridgeId CausationId
+              CharacterId ClientFeature CommandId ContentHash ContinuationId CorrelationId
+              DefinitionRefString EffectId EncounterId EntityId EventId EventName InvocationId
+              JobId KernelApiVersion KernelVersion Key LocalProfileId PartyId QuestInstanceId
+              RealmId ReleaseVersion RequirementId StoryPointReportId StoryRunId TextKey
+              WorldContextId ZoneShardId)
+
+  # Breaks if the Elixir tag constructors (contracts.ex) or the TypeScript brands
+  # (bin/contracts.exs decl, regenerated into contracts.gen.ts) stop using the one rule:
+  # each side must equal this hand-written list of nominal contracts.
+  test "Elixir tag constructors and TypeScript brands are the same nominal contracts" do
+    tags = for n <- @nominal, do: n |> Macro.underscore() |> String.to_atom()
+
+    exported =
+      for {f, 1} <- Contracts.__info__(:functions),
+          Contracts.defs()[Macro.camelize(Atom.to_string(f))],
+          do: f
+
+    assert Enum.sort(exported) == Enum.sort(tags)
+
+    brands =
+      Regex.scan(~r/__brand: '(\w+)'/, File.read!("kernel/ts/src/contracts.gen.ts"),
+        capture: :all_but_first
+      )
+
+    assert brands |> List.flatten() |> Enum.sort() == Enum.sort(@nominal)
+  end
 end
