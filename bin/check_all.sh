@@ -47,6 +47,6 @@ done
 m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
-git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
+git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
 [ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
 true
