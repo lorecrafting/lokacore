@@ -77,10 +77,10 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
-  mobile app views and assets outside `mobile/app/book/` (`*.tsx`, `.sksl`, fonts, `mobile/app/tests/`
-  e2e specs, `mobile/app/plugins/`, `app.json`), plus metadata; `mobile/app/book/` (kernel tests
-  import its `model.ts` and `presenter.ts`), every other mobile `.ts` and local-story
-  authority/save code run the broad code lane. The browser lane runs
+  mobile assets and config outside `mobile/app/book/` (`.sksl`, fonts, `mobile/app/tests/` e2e specs,
+  `mobile/app/plugins/`, `app.json`), plus metadata; `mobile/app/book/` (kernel tests import its
+  `model.ts` and `presenter.ts`), every mobile `.ts`/`.tsx` (mobile tests run `App.tsx`) and
+  local-story authority/save code run the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
   lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
@@ -94,8 +94,8 @@ their rules and red controls remain available for resumption.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
-  It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR or a stray
-  file is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
+  It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
+  PR worktree, an unmerged `review-<N>` or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared).
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for

@@ -77,7 +77,7 @@ lk=$(git rev-parse --absolute-git-dir)/loka-check.lock
 ca() { MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-ts; }
 sleep 30 & holder=$!; mkdir "$lk"; echo $holder > "$lk/pid"
 ca > out 2>&1 & run=$!
-sleep 3
+i=0; until grep -q waiting out || [ $i -ge 40 ]; do sleep 0.5; i=$((i + 1)); done; sleep 1
 grep -q "waiting for $holder" out && [ ! -s "$R.log" ] || { bad 'check_all lock: did not wait for a live holder'; cat out; }
 { kill $holder; wait $holder || true; } 2>/dev/null; wait $run || bad 'check_all lock: run failed after the holder ended'
 [ -s "$R.log" ] && [ ! -d "$lk" ] || bad 'check_all lock: no run after the holder ended, or lock left behind'
@@ -115,6 +115,12 @@ amk; head=$(git rev-parse HEAD); echo stray > s; am dirty 1; rm s
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
 touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge dirty-worktree: changed something'
+git branch -q -f review-7 HEAD~0 2>/dev/null; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
+am unmerged-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge unmerged-review: changed something'
+git branch -q -f review-7 pr
+(cd "$M" && echo m >> .beads/issues.jsonl && git commit -qam beads && git push -q origin main)
+am export-both 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge export-both: changed something'
+(cd "$M" && git revert --no-edit HEAD > /dev/null && git push -q origin main)
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
 echo r2 > docs/ROADMAP.md; am success 0 'ROADMAP status: X merged (#7)'
 git fetch -q origin
@@ -156,8 +162,9 @@ rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=
 # Break: the restore check compares only the mutated file, so a test that edits another tracked file passes.
 mt; git init -q; git add a.txt a.orig; git commit -qm a
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
-rc=0; capped sh "$bin/mutate.sh" m.tsv "echo z >> a.orig" > out 2>&1 || rc=$?
-[ "$rc" = 1 ] && grep -q 'RESTORE-FAIL' out || { bad "mutate tracked-diff: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
+printf 'a.txt\ty=1\ty=3\n' >> m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "echo z > a.orig" > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && [ "$(grep -c 'RESTORE-FAIL' out)" = 1 ] || { bad "mutate tracked-diff: exit $rc, want 1 and one RESTORE-FAIL (the mutant that drifted)"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
@@ -191,4 +198,6 @@ HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || 
 wt=$(cd "$R.wt" && pwd -P)
 grep -qxF "worktree $wt" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
   && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
+HK=hk.json PATH="$tmp/stub:$PATH" capped sh "$R.wt/bin/session_status.sh" > out 2>&1 || true
+if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout listed from a linked worktree'; fi
 exit $fail

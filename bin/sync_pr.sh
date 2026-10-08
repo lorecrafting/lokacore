@@ -24,6 +24,5 @@ if ! git merge-base --is-ancestor origin/main HEAD; then
   git commit -qm "Merge origin/main into $1" || die 'commit failed'
   fi
   elixir bin/check_docs.exs || die 'docs check failed; not pushed'
-# The pre-push hook runs while the SSH connection idles; keepalives stop GitHub dropping it.
-GIT_SSH_COMMAND=${GIT_SSH_COMMAND:-ssh -o ServerAliveInterval=30} git push origin "$1" || die 'push failed'
+git push origin "$1" || die 'push failed'
 echo "sync_pr: $1 merged with origin/main and pushed"

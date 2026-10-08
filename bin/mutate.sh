@@ -35,7 +35,9 @@ sys.exit(1) if s.count(o) != 1 else open(f, "w").write(s.replace(o, n))' "$file"
   else res=SURVIVED
   fi
   cp "$tmp/orig" "$file"
-  cmp -s "$tmp/orig" "$file" && [ "$(git diff HEAD 2>/dev/null | cksum)" = "$start" ] || { res="$res RESTORE-FAIL"; rc=1; }
+  now=$(git diff HEAD 2>/dev/null | cksum)
+  # A drifted tree is reported once, on the mutant that caused it.
+  cmp -s "$tmp/orig" "$file" && [ "$now" = "$start" ] || { res="$res RESTORE-FAIL"; rc=1; start=$now; }
   cur=
   printf '%s\t%s\t%s -> %s\n' "$res" "$file" "$old" "$new"
 done < "$list"

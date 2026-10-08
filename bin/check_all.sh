@@ -31,7 +31,8 @@ until mkdir "$lock" 2>/dev/null; do
     rm -rf "$lock" # its holder died without cleanup
   fi
 done
-# ponytail: a run killed between mkdir and this write leaves a pid-less lock; remove it by hand.
+# ponytail: a run killed between mkdir and this write (or a reused pid) leaves a lock to remove by hand,
+# and two waiters taking over one dead lock can race; use flock if that ever bites.
 echo $$ > "$lock/pid"
 trap 'rm -rf "$lock"' EXIT
 trap 'exit 130' INT TERM
