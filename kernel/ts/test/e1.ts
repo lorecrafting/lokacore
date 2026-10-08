@@ -43,6 +43,7 @@ export const CHECK_FILES = [
   'e1_services.ts',
   'e1_night_marsh.ts',
   'e1_epilogue_talks.ts',
+  'e1_rejoin.ts',
   'e1_world.ts',
   'e1_items.ts',
   'e1_faults.ts',
