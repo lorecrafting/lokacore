@@ -149,7 +149,27 @@ pointers =
       problem != nil,
       do: "stale pointer #{file}: #{path}:#{line} (#{problem})"
 
-problems = Enum.sort(broken) ++ Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers
+# Each record in docs/reviews and docs/decisions has exactly one index line (a list line whose
+# first link is the bare file name): a union merge (.gitattributes) duplicates a twice-edited line.
+index =
+  for dir <- ["docs/reviews", "docs/decisions"],
+      readme = Path.join(dir, "README.md"),
+      counts =
+        Regex.scan(
+          ~r/^- (?:(?!\]\().)*\]\(([^)\/#\s]+\.md)(?:#[^)]*)?\)/m,
+          File.read!(Path.join(root, readme)),
+          capture: :all_but_first
+        )
+        |> List.flatten()
+        |> Enum.frequencies(),
+      records = for(f <- docs, Path.dirname(f) == dir, f != readme, do: {Path.basename(f), 0}),
+      {name, n} <- Map.merge(Map.new(records), counts),
+      n != 1,
+      do: "#{readme}: #{name} has #{n} index lines, want 1"
+
+problems =
+  Enum.sort(broken) ++ Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ index
+
 Enum.each(problems, &IO.puts/1)
 
 IO.puts(

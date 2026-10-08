@@ -81,14 +81,10 @@ Keep lessons in area files; link here only when relevant to all work.
 
 ## Simplicity (every change, every agent)
 
-Write the least code that correctly does the job. Before writing, stop at the first rung
-that holds: does it need to exist at all; is it already in this repo; does the standard
-library or platform do it; does an installed dependency do it; can it be one line. No
-abstraction with one implementation, no config nobody sets, no scaffolding for later.
-Never simplify away validation at trust boundaries, data-loss handling, security or
-anything the spec requires. Mark a deliberate shortcut with a `ponytail:` comment naming
-its limit. Before asking for review, audit the diff for over-engineering (Claude Code:
-`/ponytail-review`; other agents: the same questions by hand) and include the result in
+Follow the installed Ponytail skill: the least code that correctly does the job. It never
+simplifies away validation at trust boundaries, data-loss handling, security or anything the
+spec requires. Before asking for review, run `/ponytail-review`
+on the diff (agents without the skill: read its rules and apply them by hand) and include the result in
 the PR. Pass this section into subagent prompts. [Mechanic composition](docs/system/architecture.md#building-mechanics-by-composition).
 
 ## Writing tests (every change, every agent)
