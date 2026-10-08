@@ -279,11 +279,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
   const receipts: object[] = [],
     finals = new Map<string, Final>();
-  const run = (
-    name: string,
-    recipe: (a: ReturnType<typeof caseHost>, path: string) => object | void,
-    fault_schedule: object[] = [],
-  ) => {
+  const run = (name: string, recipe: (typeof CASES)[number][1], fault_schedule: object[] = []) => {
     const path = join(out, `${name}.db`),
       log = join(out, `${name}.jsonl`);
     const a = caseHost(loaded, path, log, `loka-kernel@${identity.source_sha}`, {
@@ -329,8 +325,8 @@ function recordCases(bytes: Uint8Array, out: string) {
   let failure: string | null = null;
   try {
     for (const [name, recipe, schedule] of CASES) {
-      if (name === 'thirty-days') checkRefusals(finals); // after every refusal case, before the rest
       run(name, recipe, schedule);
+      if (name === REFUSALS.at(-1)?.[0]) checkRefusals(finals); // before the cases after them
     }
     assert.deepEqual(source(), identity, 'source changed while recording');
   } catch (e) {
@@ -371,7 +367,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   process.stdout.write(
     `${status}: ${receipts.length} of ${CASES.length} real SQLite cases passed\n`,
   );
-  // CI reads only the log: name what failed or is still open.
+  // Name what failed or is still open, so the log alone shows it.
   if (failure) process.stdout.write(`failure: ${failure}\n`);
   for (const [family, open] of Object.entries(obligations.gaps))
     if (open.length) process.stdout.write(`gap ${family}: ${open.join(' ')}\n`);
