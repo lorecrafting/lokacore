@@ -36,3 +36,21 @@ Scope: `482416e3` only (WORKFLOW.md:122-129 queue, ci.yml:33 comment).
 - Open item (pending names from memory): **no false merge.** Only the exact string `SUCCESS` merges, so any state that is missing from the list or misnamed stops without a merge. An endless loop happens only on a listed pending state or an empty string.
 - nit, `docs/WORKFLOW.md:125`: an empty `s` counts as pending, so a persistent `gh` error after the head wait (expired auth, outage) polls every 5 s forever without merging. The stub ran 925 polls before it was killed. This fails safe, and a wrong `<N>` already hangs the head wait the same way. Optional: select gh's computed `bucket` (`pass`/`pending`/...) instead of a hand-listed `state` set; that removes the from-memory list.
 - Question, not new: the loop proceeds once any `changes` row exists. If `book-e2e` registers after `ci`, the watch could pass before `browser` appears. This race existed before this round.
+
+## Fix round 2: `04c5f0ae` — APPROVE
+
+Scope: `04c5f0ae` only (WORKFLOW.md:122-130 queue and prose).
+
+- Nit closed: the queue reads gh's `bucket`. `gh pr checks --help` (2.101) lists exactly `pass`, `fail`, `pending`, `skipping` and `cancel`, so no state names come from memory. Live PR 300 prints `pass,pass`.
+- Race question closed by the PM decision (both `changes` rows must read `pass,pass`). The doc command was extracted and run under sh, bash and zsh with a stub `gh` and real `jq`, capped by a 3 s alarm:
+  - book-e2e registers late (ci pass, then pass+pending, then pass+pass in reversed order): 3 polls, then merge.
+  - book-e2e never appears: waits, no merge (about 180 polls until the alarm).
+  - One row skipping: stops, rc 1. Both rows skipping (draft): stops. Fail: stops. Cancel next to pending: stops.
+  - All green in either row order, with `lint` between them: merges. Green `changes` with a failing watch: no merge.
+  - Persistent `gh` error: polls without merging until killed.
+- Order: the pass case needs both rows `pass`, so `pass,pass` is the same in any order. Every mixed order either waits (`pass,pending` / `pending,pass`) or stops on a substring match. No sort is needed.
+- Precedence: unchanged from round 1. The `case` status ends the `until` condition, and `[ ] && watch && merge` runs once, all or nothing.
+- Persistent `gh` error polling forever: acceptable. It never merges, it runs in a background shell the PM watches, and the head wait before it has the same property.
+- Question (fails safe): a third `changes` row (for example a manual dispatch run on the same head, if gh does not deduplicate across events) gives `pass,pass,pass`, and the queue waits forever without merging. Not observed live.
+
+No open findings.
