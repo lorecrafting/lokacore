@@ -1,4 +1,4 @@
-// size: allow 520, the reaction witness reuses creditedPolicyPaths beside the other obligation witnesses
+// size: allow 540, the reaction witness reuses creditedPolicyPaths beside the other obligation witnesses
 import { gameView, type World } from '../src/index.ts';
 import type {
   CharacterId,
@@ -387,8 +387,10 @@ export function objectivePaths(
 
 // architecture.md creatures paragraph: every apply step has an exact committed effect in one writer
 // group G; the `when` is judged on the state the delivery read (before + ops of groups before G).
-// ponytail: each step takes its first matching op and the first matching cause, and the actor is the
-// world's player (v042 has one player and one delivery per rule); bind per delivery when that grows.
+// Effect events must name the cause; a quest.fail (no event) is bound only by sharing G.
+// ponytail: each step takes its first matching op and the first matching cause, the actor is the
+// world's player, and groups below G are taken as the read prefix (v042: one player, one delivery
+// per rule, no due-job group reuse in a reacting step); bind per delivery when that grows.
 export function reactionWitnesses(before: World, after: World, decision: DecisionResult): string[] {
   if (decision.kind !== 'accepted') return [];
   const ops = decision.delta.ops,
@@ -397,6 +399,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
   return Object.entries(before.cartridge.reactions ?? {}).flatMap(([ref, rule]) => {
     const cause = events.find((e) => triggered(before, e).includes(rule));
     if (!cause) return [];
+    const causeId: string = cause.id;
     const groups = rule.apply.map((step) => {
       if (step.op === 'quest.activate') {
         const op = ops.find((o) => o.op === 'quest.activate' && same(o.quest, step.quest));
@@ -406,7 +409,10 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           row?.state === 'active' &&
           same(row.scope, { kind: 'player', character_id: actor }) &&
           events.some(
-            (e) => e.payload.type === 'quest_activated' && e.payload.instance_id === op.instance_id,
+            (e) =>
+              e.causation_id === causeId &&
+              e.payload.type === 'quest_activated' &&
+              e.payload.instance_id === op.instance_id,
           )
           ? op.writer_group
           : undefined;
@@ -430,6 +436,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           (to === 'failed' ||
             events.some(
               (e) =>
+                e.causation_id === causeId &&
                 e.payload.type === 'quest_resolved' &&
                 e.payload.instance_id === prior[0] &&
                 e.payload.outcome === step.outcome,
@@ -446,6 +453,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           value(after, actor, step.fact) === step.value &&
           events.some(
             (e) =>
+              e.causation_id === causeId &&
               e.payload.type === 'fact_changed' &&
               same(e.payload.fact, step.fact) &&
               e.payload.old === op.expected &&
@@ -457,7 +465,13 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
       if (step.op !== 'population.suppress') return undefined;
       const prior = before.state.population_plans?.[key(step.plan)],
         next = after.state.population_plans?.[key(step.plan)];
-      const op = ops.find((o) => o.op === 'population.control' && same(o.plan, step.plan));
+      const op = ops.find(
+        (o) =>
+          o.op === 'population.control' &&
+          same(o.plan, step.plan) &&
+          same(o.expected, prior) &&
+          same(o.value, next),
+      );
       // ponytail: the row names the cause event, not the reaction, so two reactions on one
       // event suppressing the same plan could both be credited (v042 cannot reach this);
       // bind the suppression row to the reaction if a cartridge can.
@@ -465,9 +479,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
         prior &&
         !prior.suppression &&
         next?.suppression?.cause_event_id === cause.id &&
-        next.suppression.ends_at === cause.logical_time + step.duration &&
-        same(op.expected, prior) &&
-        same(op.value, next)
+        next.suppression.ends_at === cause.logical_time + step.duration
         ? op.writer_group
         : undefined;
     });

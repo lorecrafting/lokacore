@@ -317,6 +317,9 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
         'after state': (s) => (quest(s, 'after', 'bell_of_ashmere').state = 'active'),
         'after outcome': (s) => (quest(s, 'after', 'bell_of_ashmere').outcome = 'fox'),
         'resolved event': (s) => (event(s, 'quest_resolved').outcome = 'fox'),
+        'resolved cause': (s) =>
+          (s.decision.events.find((e: Loose) => e.payload.type === 'quest_resolved').causation_id =
+            'other'),
       },
       reactions,
     );
@@ -338,6 +341,10 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
         },
         'assign after': (s) => (s.after.state.facts[fact(s, 'village_child_status')] = 'missing'),
         'assign event': (s) => (changed(s, 'village_child_status').new = 'rescued'),
+        'assign cause': (s) =>
+          (s.decision.events.find(
+            (e: Loose) => e.payload.fact?.key === 'village_child_status',
+          ).causation_id = 'other'),
       },
       reactions,
     );
@@ -357,6 +364,9 @@ test('E1 reactions need every exact apply effect and a when holding in their rea
         'not active': (s) => (quest(s, 'after', 'missing_child').state = 'resolved'),
         'other player': (s) => (quest(s, 'after', 'missing_child').scope.character_id = 'other'),
         'activated event': (s) => (event(s, 'quest_activated').instance_id = 'other'),
+        'activated cause': (s) =>
+          (s.decision.events.find((e: Loose) => e.payload.type === 'quest_activated').causation_id =
+            'other'),
       },
       reactions,
     );
