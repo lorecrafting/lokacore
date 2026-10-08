@@ -303,24 +303,23 @@ test('crow job phase must match the current occurrence before moving custody', (
   assert.equal(result.world.state.containers[coin], row.member_id);
 });
 
-// Breaks: a crow row whose member was not spawned for that slot generation still moves custody.
-test('crow job refuses a carrier whose spawn origin names another generation', () => {
+// Breaks: a crow row whose member was not spawned as this slot's hound generation still moves custody.
+test('crow job refuses a carrier whose spawn origin names another role or generation', () => {
   let world = initial();
   const coin = entity(world, 'item', 'old_coin');
   world = act(world, 'take', coin, 71);
   world = act(world, 'drop', coin, 72);
   world = advance(world, START + 150);
   const row = Object.values(world.state.crows ?? {}).find((r) => r.phase === 'leg')!;
-  const created = { ...world.state.created };
-  const member = created[row.member_id];
-  created[row.member_id] = {
-    ...member,
-    origin: { ...member.origin, generation: row.generation + 1 },
-  } as typeof member;
-  world = { ...world, state: { ...world.state, created } };
-  const result = elapse(world, START + 300, 173);
-  assert.equal(result.decision.kind, 'fault');
-  assert.equal(result.world.state.containers[coin], row.member_id);
+  const member = world.state.created![row.member_id];
+  const origin = member.origin as { generation: number };
+  for (const forged of [{ role: 'deer' }, { generation: origin.generation + 1 }]) {
+    const created = { ...world.state.created };
+    created[row.member_id] = { ...member, origin: { ...origin, ...forged } } as typeof member;
+    const result = elapse({ ...world, state: { ...world.state, created } }, START + 300, 173);
+    assert.equal(result.decision.kind, 'fault', JSON.stringify(forged));
+    assert.equal(result.world.state.containers[coin], row.member_id);
+  }
 });
 
 // Breaks: a stale first Drop job steals a coin that was Taken and dropped again under a new cause.

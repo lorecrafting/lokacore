@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { elapsedCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
-import { forge, fresh, only, otherId } from './__tests__/chandlers-setup.test.ts';
+import { forge, fresh, only, otherId, type Forged } from './__tests__/chandlers-setup.test.ts';
 
 // Breaks: reopen accepts an expiry receipt that fails another quest instance.
 test('reopen refuses an expiry receipt that transitions another instance', () => {
@@ -68,14 +68,17 @@ test('reopen refuses an expiry receipt with two trust assignments', () => {
   assert.equal(kind, 'save_corrupt');
 });
 
+const outcomeEvent = (r: Forged) =>
+  r.events.find(
+    (e) =>
+      e.payload.type === 'fact_changed' &&
+      (e.payload.fact as { key: string }).key === 'priory_tithe_delivered',
+  )!;
+
 // Breaks: reopen accepts an expiry outcome event caused by something other than the due job.
 test('reopen refuses an expiry outcome event with another cause', () => {
   const kind = forge(true, (r) => {
-    r.events.find(
-      (e) =>
-        e.payload.type === 'fact_changed' &&
-        (e.payload.fact as { key: string }).key === 'priory_tithe_delivered',
-    )!.causation_id = otherId;
+    outcomeEvent(r).causation_id = otherId;
   });
   assert.equal(kind, 'save_corrupt');
 });
@@ -83,11 +86,10 @@ test('reopen refuses an expiry outcome event with another cause', () => {
 // Breaks: reopen accepts an expiry outcome event at another player's scope.
 test('reopen refuses an expiry outcome event at another scope', () => {
   const kind = forge(true, (r) => {
-    r.events.find(
-      (e) =>
-        e.payload.type === 'fact_changed' &&
-        (e.payload.fact as { key: string }).key === 'priory_tithe_delivered',
-    )!.scope = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };
+    outcomeEvent(r).scope = {
+      kind: 'player',
+      character_id: 'aaaaaaaa-1111-4222-8333-444444444444',
+    };
   });
   assert.equal(kind, 'save_corrupt');
 });
