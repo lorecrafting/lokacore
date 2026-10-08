@@ -51,3 +51,28 @@
 2. **nit** `docs/evidence/2026-10-08-e2-r9c/README.md:117`: the transport row cites "F4 `r9c_faults.test.ts:315`". `:315` is F3's elapsed call; F4 is `:324-335`.
 
 No blocker or should-fix findings. Fixing the nits is optional. The README is listed in SHA256SUMS, so a README edit must regenerate SHA256SUMS and the verify file. The test comment is not hashed.
+
+## Fix round 1 and gate PR G (head `aa87cd04735f047652794a989bbf7d3fc328f743`)
+
+Scope: `31a85fe7` (S5 fixes) and `4845cbbf` and `aa87cd04` (gate PR G, docs only). The `origin/main` merge `53ac4d7f` is not reviewed here.
+
+**A. Fix re-check: APPROVE.**
+- Nit 1 is closed. `r9c_faults.test.ts:5-8` and evidence `README.md:55-60` now say that only the unreadable-store and lost-ack rows fence and answer `pending`, that SQLITE_FULL never fences, and that a failed COMMIT settles inside the call. The comment is still 4 lines, so the cited lines (`:162`, `:168-172`, `:324-335`) still point to the same code. Since `266fa6b2`, the only code-side change is that comment.
+- Nit 2 is closed: README:119 now cites F4 `:324-335`.
+- Fable's notes:
+  - The gates paragraph is relabelled "disposition pending", which is accurate.
+  - The paired-job paragraph names six kernel tests, and all six exist. Their red status is taken from the [Fable audit](2026-10-08-e2-gate-fable-audit.md); I did not rerun it.
+- Hashes: `shasum -a 256 -c SHA256SUMS` exits 0. The local-path grep finds nothing beyond `redaction-grep.log`'s own command line. `SHA256SUMS.verify` needed no change, because the file names are the same.
+
+**B. Gate checklist (`docs/briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md`): APPROVE WITH NOTES.** Governing: [WORKFLOW Milestone gate](../WORKFLOW.md#milestone-gate).
+- Criteria 1-8 each link a slice PR, a review record or an evidence section. For criterion 8, exact-head CI is honestly stated as still to come.
+- Criterion 5: I checked each cited line against the S2 review M1, M2 and M3 rows. `r9c_custody_terminal.test.ts` authority `:323` and `:308`, kernel `:288`, and `missing_child_bell.test.ts:136` all match. The S3 M2 row for `service/shared.ts:105` and the provenance row ("known untested", loka-zfq) are correct.
+- Every carry has a row: the 11 commands, browser and native rows, the pending gates, the crow guard, forged deadlines, the paired-job invariant, loka-8mm and the recorder scope. The owner touch is a short report (owner answer (b)).
+- ROADMAP: A1-A3, B1-B9, C1-C6, D1-D12 and E1-E3 make 33 slices, matching `MISSING-CHILD-PLAN.md:27-88`. With E2 done that is 32 of 33, which is correct. "E3 remains open" is correct, and the E2 slice list now lives once, in the checklist.
+- The docs tidy pass claims are consistent with the diff.
+- The review index in `aa87cd04` keeps main's lines, then this branch's three lines. Nothing was lost.
+
+Finding:
+1. **nit** `chapter-one-e2-gate-checklist-2026-10-08.md:34`: the cap half of "Omit provenance / cap" says "existing cap tests fail under the cap mutant (S4 review)". That review (`:47`) does not name the test either, so the guard has no test `file:line` anywhere. A reader cannot find which test catches the cap break.
+
+Open: none blocking. Hosted CI on `aa87cd04` is still the merge condition.
