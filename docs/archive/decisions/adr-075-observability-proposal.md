@@ -1,15 +1,15 @@
 # ADR-075 — One observation record format, four stores, a registered name list — 2026-09-25
 
-**Status: Accepted by the owner 2026-09-25 ([record](owner-decision-adr-075-2026-09-25.md));
+**Status: Accepted by the owner 2026-09-25 ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-adr-075-2026-09-25.md));
 entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Amended 2026-09-25 by R5 slice 1's
-review ([record](../reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
+review ([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
 *Amendment* notes in §4 and §6; amended again by R5 slice 2 ([owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):
 the `target.unresolved` diagnostics record and its §6 note; amended again by R6 slice 2's review
-([record](../reviews/2026-09-30-r6-s2-review.md)): the phone placement in §2 and the trace
+([record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r6-s2-review.md)): the phone placement in §2 and the trace
 segments in §§3-4; amended again by R6 slice 6a (PM decision): the phone trace cap in §2.
 Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
-([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
+([owner decision](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-observability-astra-2026-09-25.md)).
 
 ## In plain words
 

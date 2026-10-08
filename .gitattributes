@@ -5,4 +5,3 @@ docs/archive/spec/** -whitespace
 # Append-only lists: two branches each adding a line merge without a conflict (keep the order check in the PM's merge).
 docs/reviews/README.md merge=union
 docs/decisions/README.md merge=union
-docs/evidence/2026-10-06-d8-d11-integration/** -whitespace

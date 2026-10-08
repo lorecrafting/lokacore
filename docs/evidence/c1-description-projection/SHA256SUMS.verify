@@ -1,9 +1,0 @@
-focused.log: OK
-frozen.json: OK
-generated-check.log: OK
-mutant-ContentView-textkey.log: OK
-mutant-EntityView-textkey.log: OK
-mutant-inferred-key.log: OK
-mutant-omission.log: OK
-mutant-wrong-field.log: OK
-restored.log: OK

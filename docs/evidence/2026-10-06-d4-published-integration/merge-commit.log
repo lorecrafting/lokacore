@@ -1,8 +1,0 @@
-Checking formatting...
-All matched files use Prettier code style!
-[warn] postinstall script did not run; falling back to runtime binary resolution.
-Enable postinstall to avoid the per-invocation overhead.
-646 docs, 0 broken link(s), 0 unreachable
-[slice/d4-homes-orchard 03a68811] Integrate published C3 and D1 into D4 homes and food successor
-
-EXIT 0

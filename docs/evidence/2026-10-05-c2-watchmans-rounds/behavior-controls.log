@@ -1,9 +1,0 @@
-TS full-prior comparison: old exit 0; new exit 1
-drawn attempt/cursor comparison: old exit 0; new exit 1
-leader departure improperly grants credit: old exit 0; new exit 1
-checkpoint deduplication: old exit 0; new exit 1
-fatal attempt reset: old exit 0; new exit 1
-reserved trust authoring: old exit 0; new exit 1
-EX original identity: old exit 0; new exit 2
-EX route adjacency: old exit 0; new exit 2
-Behavior controls: 8 planted breaks observed red; originals restored.

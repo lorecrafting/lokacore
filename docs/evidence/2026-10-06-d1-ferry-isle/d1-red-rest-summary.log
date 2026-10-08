@@ -1,8 +1,0 @@
-forged_quote old 0 new 1
-missing_offer old 0 new 1
-transport_receipt old 0 new 1
-authoring_validation old 0 new 2
-Traceback (most recent call last):
-  File "<redacted-path>", line 23, in <module>
-    path.write_text(original[path]);print(name,'old',results[0],'new',results[1],flush=True);assert results==[0,1],(name,results)
-AssertionError: ('authoring_validation', [0, 2])

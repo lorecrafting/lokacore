@@ -3,7 +3,7 @@
 Under the [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [B7's selected mechanics](../system/mechanics.md#b7-well-and-waterskin-selected-contract)
 and [cartridge tuning](../system/cartridge.md#b7-water-and-vessels) for the
-[implementation brief](../briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md).
+[implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md).
 This is planned behavior, not implementation, review approval or release proof.
 
 The real consumer is the Well Lane well and two finite Peg-held waterskins.

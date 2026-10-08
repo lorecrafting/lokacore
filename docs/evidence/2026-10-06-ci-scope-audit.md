@@ -4,7 +4,7 @@ Read-only audit of the checks at `06ca984f`, followed by the scoped selector in 
 
 | Area | Before | Observed time | Change |
 |---|---|---:|---|
-| Local pre-push | Full Elixir, lint and red controls on every push; TypeScript selected by a partial path list | Full passing line: 155.57 s ([B8 evidence](2026-10-05-b8-maud-services/final-integration-checks.json)) | Metadata and Book-only pushes run docs and Beads guards; source pushes run full local line, closing the incomplete TypeScript input list. |
+| Local pre-push | Full Elixir, lint and red controls on every push; TypeScript selected by a partial path list | Full passing line: 155.57 s ([B8 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b8-maud-services/final-integration-checks.json)) | Metadata and Book-only pushes run docs and Beads guards; source pushes run full local line, closing the incomplete TypeScript input list. |
 | Hosted `changes` / `lint` | Every PR/main push | 7–10 s / 16–29 s | Retained. Lint checks docs links, tracker export and skip guards. |
 | Hosted Elixir | Any non-Markdown PR change; every main push | 61–87 s | Skip only metadata or Book-only ranges after a green code ancestor. |
 | Hosted TypeScript | Same | 100–155 s | Same. Authored cartridges and Elixir content compiler inputs keep this job. |

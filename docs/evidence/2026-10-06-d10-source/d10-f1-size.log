@@ -1,9 +1,0 @@
-lib/loka/content/checks.ex:1: info: size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
-lib/loka/content/compiler.ex:1: info: size: allow 326, ancestry and static map source wiring join the existing compiler boundary
-lib/loka/content/dialogues.ex:1: info: size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
-lib/loka/content/scenes.ex:1: info: size: allow 320, action-started scenes validate source and end exports beside modal rules
-lib/loka/core/compose.ex:1: info: size: allow 345, typed knowledge, patrol and final birth admission share portable composition
-lib/loka/core/creation.ex:78: info: size: allow 55, one final birth-group guard; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-lib/loka/core/invariants.ex:1: info: size: allow 340, patrol, water, bleed and character pairing join precondition replay
-lib/loka/core/invariants_creation.ex:62: info: size: allow 55, independent birth oracle; ponytail: split only for another bundle. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-test/loka/core/compose_test.exs:1: info: size: allow 520, patrol and liquid cases share the existing randomized differential pool

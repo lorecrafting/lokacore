@@ -10,7 +10,7 @@ the PM selects the narrow Chapter 1 consequence contract in
 [protocol](../system/protocol.md#d9-reaction-cue-and-study-admission-composition),
 [save](../system/save.md#d9-village-consequence-recovery),
 [Book](../system/book-ui.md#d9-village-reactions-and-bell-cue) and the
-[D9 brief](../briefs/chapter-one/d9-village-reactions-brief-2026-10-05.md).
+[D9 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d9-village-reactions-brief-2026-10-05.md).
 It consumes archived [00a §10](../archive/spec/00a-chapter-one-content.md#10-reactions)
 subject to the owner's [four child states and three endings](owner-decision-chapter-one-content-2026-10-02.md).
 

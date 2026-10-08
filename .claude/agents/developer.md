@@ -19,7 +19,8 @@ decided.
 Work in your own worktree (docs/WORKFLOW.md, Git hygiene). Scope: exactly the brief.
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
-`docs/spec/conformance/*.json` or an expected answer to make a test pass.
+`docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
+spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026-10-07.md) writes or approves it.
 
 Before handing off:
 1. In the [provisional local lane](../../docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md),

@@ -2,7 +2,7 @@
 
 ## Authority and status
 
-Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md), the root PM adopts actual `gpt-6-astra` M4-A planning advice for the first Maud-cellar encounter. Advice inspected composed C1 source `0e49963f893192d193fac65851aa882be0f597b8`, frozen numeric vectors and draft [PR #136](https://github.com/lorecrafting/lokacore/pull/136). This is a **planned contract**, not installed combat, a live LegendMUD formula verification or independent code review. The [first-encounter contract/oracles](../spec/conformance/first-encounter.md) and [M4-A brief](../briefs/m4-a-first-encounter.md) govern the bounded follow-up; [M queue](../NEXT-MECHANICS.md) retains dependencies.
+Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md), the root PM adopts actual `gpt-6-astra` M4-A planning advice for the first Maud-cellar encounter. Advice inspected composed C1 source `0e49963f893192d193fac65851aa882be0f597b8`, frozen numeric vectors and draft [PR #136](https://github.com/lorecrafting/lokacore/pull/136). This is a **planned contract**, not installed combat, a live LegendMUD formula verification or independent code review. The [first-encounter contract/oracles](../spec/conformance/first-encounter.md) and [M4-A brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/m4-a-first-encounter.md) govern the bounded follow-up; [M queue](../NEXT-MECHANICS.md) retains dependencies.
 
 ## Selected consumer and content profile
 

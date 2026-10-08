@@ -28,4 +28,4 @@ The shared schema compiler rejects missing/invalid discriminator declarations; o
 required fields and constraints use literal data fixtures in both validators. No frozen semantic
 conformance answer or unrelated historical fixture is changed.
 
-Developer validation: [headless checks and red controls](../evidence/2026-10-05-q2-a-first-search/README.md).
+Developer validation: [headless checks and red controls](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-q2-a-first-search/README.md).

@@ -1,3 +1,0 @@
-stale pointer docs/system/mechanics.md: commands/actions.ts:253 (past the end of kernel/ts/src/commands/actions.ts)
-597 docs, 0 broken link(s), 0 unreachable
-Final docs.log is the restored green check after updating the actual admission pointer.

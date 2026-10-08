@@ -1,7 +1,0 @@
-{
-  "source_head": "381e1f61adb2776e169e5930d97f7c7acbe73a9c",
-  "fixture": "dbff57ba20305dffa4a0679ab58d480574fbc3fd93fddeb3bf08d48d78e057b9",
-  "seeds": 200,
-  "commands": 6761,
-  "failures": []
-}

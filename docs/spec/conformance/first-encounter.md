@@ -63,4 +63,4 @@ supersedes directional Move/alias escape above: Flee is directionless and random
 among currently legal exits; engaged directional movement is refused. Frozen A/B/C attack
 and death vectors remain unchanged. Random-exit acceptance uses additive literal cases.
 
-Implementation evidence: [M6-A first live cellar fight](../../evidence/2026-10-04-m6-a-first-live-fight/README.md).
+Implementation evidence: [M6-A first live cellar fight](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-04-m6-a-first-live-fight/README.md).

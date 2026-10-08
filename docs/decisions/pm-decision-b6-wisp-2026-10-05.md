@@ -3,7 +3,7 @@
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts the [S4 contract](../system/mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 and [route/tuning](../system/cartridge.md#b6-marsh-route-and-tuning).
-The [brief](../briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
+The [brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
 assigns later implementation; this is planning, not source or gameplay proof.
 
 Select a reciprocal three-room extension from the already passable Mire Crossing,
@@ -34,4 +34,4 @@ and successor release pins remain null. B6 depends on those approved slices and
 installed reviewed Q2 riddle; re-pin their actual source heads before assignment.
 B6 release/API/hash/IDs/source/review/PR/proof are null. PM adoption tier is Codex
 Sol medium; source needs Sol high and independent protocol/save opinions under
-[the routing](pm-decision-codex-model-routing-2026-10-05.md).
+[the routing](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md).

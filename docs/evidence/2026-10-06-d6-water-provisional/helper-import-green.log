@@ -1,8 +1,0 @@
-[warn] postinstall script did not run; falling back to runtime binary resolution.
-Enable postinstall to avoid the per-invocation overhead.
-Running 1 tests
-
------------ Case Details -----------
-PASS ts-rule-module-imports  ........................
-
-test result: ok. 1 passed; 0 failed;

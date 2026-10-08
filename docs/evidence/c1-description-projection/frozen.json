@@ -1,9 +1,0 @@
-{
-  "base": "48405cd9fb5f743470125aaa65b23b374536dc51",
-  "cartridge_source_and_fixture_files_byte_unchanged": 234,
-  "cartridge_hash_fixtures_byte_unchanged": 20,
-  "sampler_content_hash": "813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa",
-  "existing_schema_examples_and_invalid_rows_preserved": true,
-  "snapshot_format": "loka-gameview-v1",
-  "state_save_sim_generator_seed_changes": false
-}

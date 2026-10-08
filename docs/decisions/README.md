@@ -4,23 +4,23 @@
 Accepted ADRs live in [document 16](../archive/spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
 text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
-Records before 2026-10-02 live in [docs/archive/decisions/](../archive/decisions/), linked from
-this index; the rules still in force are listed in [owner-rules.md](../system/owner-rules.md).
+Records before 2026-10-02 still in force live in [docs/archive/decisions/](../archive/decisions/); records of
+closed or superseded work are permalinks ([move forward](owner-decision-move-forward-2026-10-07.md)). Rules in force: [owner-rules.md](../system/owner-rules.md).
 
 ## R0/R1
 
 - [ADR-071 and ADR-072](../archive/decisions/adr-071-072-proposal.md): candidate C selected; persistence
   shape. ADR-070 (Pixel 3a substitution): its text is in the legacy A2 plan linked from
-  [the A2 owner decision](../archive/decisions/owner-decision-a2-2026-09-23.md).
-- Owner decisions: [A2](../archive/decisions/owner-decision-a2-2026-09-23.md), [quick A3](../archive/decisions/owner-decision-a3-2026-09-24.md),
+  [the A2 owner decision](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a2-2026-09-23.md).
+- Owner decisions: [A2](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a2-2026-09-23.md), [quick A3](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-a3-2026-09-24.md),
   [PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md).
 
 ## R2
 
-- [ADR-073](../archive/decisions/adr-073-single-app.md): one Mix application with strict boundaries,
+- [ADR-073](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/adr-073-single-app.md): one Mix application with strict boundaries,
   not an umbrella.
-- Owner decisions: [R2](../archive/decisions/owner-decision-r2-2026-09-24.md), [reviewers](../archive/decisions/owner-decision-reviewers-2026-09-24.md),
-  [other 2026-09-24 quotes](../archive/decisions/owner-decisions-2026-09-24.md).
+- Owner decisions: [R2](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-r2-2026-09-24.md), [reviewers](../archive/decisions/owner-decision-reviewers-2026-09-24.md),
+  [other 2026-09-24 quotes](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-2026-09-24.md).
 
 ## R3
 
@@ -33,6 +33,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 ## Post-R3
 
 - [E1 controlled refusal dispositions](pm-decision-e1-controlled-refusals-2026-10-07.md): a negated guard that can fire closes by a reviewed row citing a controlled refusal case, machine-bound to path, case and code; no witness credit.
+- [Chapter 1 polish phase and release-candidate certification order](owner-decision-chapter-one-polish-order-2026-10-07.md): E1 closes at coverage complete; E2, then an open-ended UI polish phase, then one frozen release-candidate certification, then E3 and release.
+- [Move forward](owner-decision-move-forward-2026-10-07.md): lessons first, then delete records of closed or superseded work; protocol fixtures, in-force decisions and open work stay.
+- [Claude Code only, Beads permanent, auto-merge](owner-decision-claude-only-auto-merge-2026-10-07.md): Opus reviews (Fable for E1–E3 gates), Codex retired, Beads permanent, background merge after green CI.
+- [Designer role](owner-decision-designer-role-2026-10-07.md): an Opus `designer` subagent owns the Book UI design system and spec text, shapes UI briefs, flags one-offs and gives independent design reviews.
 - [D11 trusted elapsed before character choice](owner-decision-d11-prechoice-elapsed-2026-10-06.md): the owner allows clock and due-job advancement before selection while player commands stay blocked.
 - [C5 bounded third fix round](owner-decision-c5-third-fix-round-2026-10-06.md): owner-approved exception for PR #255 SO7/SO8 correction, scoped re-reviews and exact-head CI; the general two-round cap remains.
 - [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
@@ -46,7 +50,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [D7 bounded deer PM proposal](pm-decision-d7-deer-2026-10-06.md): three one-slot local populations, delayed sight job and conserved hides; independent plan review and source pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
-- [Beads import hook retention](pm-decision-beads-hooks-retain-2026-10-06.md): retain the opt-in Chapter 1 integration hook after two observed source merges; no measured speed claim.
+- [Beads import hook retention](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-beads-hooks-retain-2026-10-06.md): retain the opt-in Chapter 1 integration hook after two observed source merges; no measured speed claim.
 - [Beads Rust Chapter 1 pilot](owner-decision-beads-rust-pilot-2026-10-06.md): a small, reversible PM-owned task/dependency mirror alongside the roadmap and review records.
 - [Beads audit follow-ups](owner-decision-beads-audit-followups-2026-10-06.md): allow concrete, evidence-linked audit follow-up tasks alongside the required 33 Chapter 1 slices.
 - [D1 ferry and Sedge PM decision](pm-decision-d1-ferry-isle-2026-10-05.md): paid outbound and safe free return, all-hours free swim teaching, and a bounded transport seam over published payment/escort primitives.
@@ -81,7 +85,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner direction (paraphrased): [actual Missing Child cutover](owner-decision-actual-chapter-cutover-2026-10-05.md), incremental chapter identity/save and retired temporary errand; its Bram question is superseded by the [real chapter cast decision](owner-decision-real-chapter-cast-2026-10-05.md).
 
 - [ADR-074](../archive/decisions/adr-074-ts-first-proposal.md): TypeScript-only story rules until a server first
-  consumes them ([accepted by the owner](../archive/decisions/owner-decision-adr-074-2026-09-24.md)).
+  consumes them ([accepted by the owner](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-adr-074-2026-09-24.md)).
 - Owner decisions: [R5 setup: rule lint lockdown, `loka play` CLI, feature map](../archive/decisions/owner-decision-r5-setup-2026-09-25.md).
 - Owner decision: [failed lookups visible to the Lab (`target.unresolved`)](../archive/decisions/owner-decision-lab-failed-lookups-2026-09-25.md).
 - [Type-check the TypeScript tests](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md): owner
@@ -90,39 +94,39 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 ## R4
 
 - Owner decisions: [R4 minimal: JSON source, 4 MiB artifact cap, hello fixture's frozen subset](../archive/decisions/owner-decisions-r4-2026-09-25.md).
-- [Observability design slice before R5; Astra scope delegated to the PM](../archive/decisions/owner-decisions-observability-astra-2026-09-25.md).
+- [Observability design slice before R5; Astra scope delegated to the PM](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-observability-astra-2026-09-25.md).
 - [Native mobile builds only when native inputs change; fast Hermes bundle check otherwise](../archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md).
 
 ## Observability design
 
 - [ADR-075](../archive/decisions/adr-075-observability-proposal.md): one observation record format, four stores
   joined by ids, a registered event-name list, the game-trace entry
-  ([accepted by the owner](../archive/decisions/owner-decision-adr-075-2026-09-25.md)).
+  ([accepted by the owner](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-adr-075-2026-09-25.md)).
 - Owner decisions: [ADR-075 kernel version and dev-evidence ledger](../archive/decisions/owner-decisions-adr-075-2026-09-25.md).
 
 ## R5
 
-- Owner decisions: [R5 slice plan; MUD-style `loka play`, networked terminal later (R14)](../archive/decisions/owner-decisions-r5-plan-2026-09-25.md).
+- Owner decisions: [R5 slice plan; MUD-style `loka play`, networked terminal later (R14)](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decisions-r5-plan-2026-09-25.md).
 - Owner decision: [puppeting later; rules read the actor from the command](../archive/decisions/owner-decision-puppeting-2026-09-25.md).
 - Owner decision: [short references in cartridge source (S2b)](../archive/decisions/owner-decision-short-refs-2026-09-25.md).
-- Owner decision: [review lever: Opus by default, Fable/Astra for foundational freezes](../archive/decisions/owner-decision-review-lever-2026-09-25.md).
+- Owner decision: [review lever: Opus by default, Fable/Astra for foundational freezes](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-review-lever-2026-09-25.md).
 - Owner decision: [composability and emergence principles; composes-with check](../archive/decisions/owner-decision-emergence-2026-09-25.md).
 - Owner decisions: [S4 item text (four tiers), brief mode in S7, player text online; inline touch links; host-synthesized `fact_changed`](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md).
-- Owner decision: [all reviews on Opus while Fable is near its limit](../archive/decisions/owner-decision-opus-reviews-2026-09-25.md).
+- Owner decision: [all reviews on Opus while Fable is near its limit](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-opus-reviews-2026-09-25.md).
 - Owner decision: [default HP, MA and MV pools, 1 MV per move, regeneration (S6b)](../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md).
 - Owner decision: [a playtest-and-tune stage after R6P: numbers, UI, changed and new mechanics](../archive/decisions/owner-decision-playtest-2026-09-25.md).
 - Owner decision: [defer `knock` and map discovery/`where` from R5 to chapter one](../archive/decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md).
 - Owner decisions: [codex runs cross-vendor reviews; Fable back for rare, very complex work](../archive/decisions/owner-decisions-review-flow-2026-09-30.md).
 - Owner decision: [developers default to Sonnet, Opus for kernel and contract slices](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md).
 - Owner decision: [autonomous PM with an escalation ladder](../archive/decisions/owner-decision-autonomy-2026-09-30.md).
-- Owner decision: [R6 slice plan approved](../archive/decisions/owner-decision-r6-plan-2026-09-30.md).
+- Owner decision: [R6 slice plan approved](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-r6-plan-2026-09-30.md).
 - Owner decision: [one phone (iPhone 11) until release; Android evidence deferred to the first free product gate](../archive/decisions/owner-decision-android-descope-2026-09-30.md).
-- Owner decision: [P1 merges on its Node proof; the iPhone 11 Hermes run is batched before S3](../archive/decisions/owner-decision-p1-hermes-batching-2026-09-30.md).
-- Owner decision: [a parallel phone smoke screen before R6P (wiring proof for the UI slice)](../archive/decisions/owner-decision-r6-smoke-2026-09-30.md).
+- Owner decision: [P1 merges on its Node proof; the iPhone 11 Hermes run is batched before S3](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-p1-hermes-batching-2026-09-30.md).
+- Owner decision: [a parallel phone smoke screen before R6P (wiring proof for the UI slice)](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-r6-smoke-2026-09-30.md).
 - Owner decision: [one save per story, no bookmarks; a new game replaces it after confirmation](../archive/decisions/owner-decision-one-save-2026-09-30.md).
 - Owner decision: [S4 scope: job drain waits for the first real job (Bram's schedule); `real_elapsed` and OFF-08/09/13 carried](../archive/decisions/owner-decision-s4-scope-2026-09-30.md).
-- Owner decision: [Gate R6 "finish": a fixed tap script to a declared end state, the save equal to a headless run; a real story is R6P's gate](../archive/decisions/owner-decision-gate-r6-finish-2026-09-30.md).
-- Owner decision: [Gate R6 carries to R6P: device mid-commit kill evidence, the `evaluation.budget_exceeded` producer, the Hermes `kernel.decision_latency` producer](../archive/decisions/owner-decision-gate-r6-carries-2026-09-30.md).
+- Owner decision: [Gate R6 "finish": a fixed tap script to a declared end state, the save equal to a headless run; a real story is R6P's gate](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-gate-r6-finish-2026-09-30.md).
+- Owner decision: [Gate R6 carries to R6P: device mid-commit kill evidence, the `evaluation.budget_exceeded` producer, the Hermes `kernel.decision_latency` producer](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-decision-gate-r6-carries-2026-09-30.md).
 - Owner decision: [S3b scope: bundled releases reopen saves on their pin, typed refusals; GC, migration staging and downloads carried](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md).
 - Owner decision: [SM2 scope: the book-style UI over the smoke controller in three slices, real GameView data only, fonts and a simple page turn](../archive/decisions/owner-decision-sm2-scope-2026-10-01.md).
 - Owner decision: [Early R7/R8 plan: slices Q, S, R, N, D in order, R5 deferrals moved to R7/R8 for chapter one, GameView slice G for resources only](../archive/decisions/owner-decision-early-r7r8-plan-2026-10-01.md).
@@ -147,13 +151,13 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner decision (paraphrased): [process speed-up: parallel independent slices, union-merged index lists, ROADMAP status lines on `main`, Sol re-check beside the Opus one, a parallel `sim` CI job, code jobs skipped on Markdown-only pushes](owner-decision-process-speedup-2026-10-03.md).
 - Owner decision (paraphrased): [chapter-one stage plan: 12 slices and Gate C1; a sampler story replaces the Lantern on the phone; sight lines in Look; chapter markers and modal cutscenes; breakable keys descoped; review exceptions after codex](owner-decision-chapter-one-plan-2026-10-02.md).
 - PM decision, auto-approved under owner overnight authority: [Lantern proof content: a locked west gate, dialogue change as Bram's talk ending, 23:00 as a claim limit, talk policy quest-active](../archive/decisions/pm-decision-lantern-proof-content-2026-10-01.md). Ruling 3 superseded 2026-10-02 by the [untimed Lantern](owner-decision-untimed-lantern-2026-10-02.md).
-- Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md).
+- Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/decisions/owner-leaning-realm-separation-2026-10-01.md).
 - [LegendMUD mechanical baseline and research](owner-decision-legendmud-baseline-2026-10-03.md): future character/resource/skill/magic/combat planning, with explicit reconciliation before implementation.
 - [One shared game difficulty](owner-decision-single-difficulty-2026-10-03.md): supersedes selectable normal/hard/ironman modes and their separate death policies.
 - [Fixed time; no player-driven time skips](owner-decision-fixed-time-2026-10-03.md): rest and retrieval do not jump the clock; the later authority drives elapsed time.
 - [Backgrounding does not pause the world](owner-decision-background-time-2026-10-03.md): elapsed time applies to combat, recovery and world events; preparing players for online play.
 - Owner decision: [fresh independent Codex primary review for c1-position PR #137 only](owner-decision-c1-position-codex-review-2026-10-03.md).
-- Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](owner-decision-touch-priority-2026-10-03.md).
+- Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/owner-decision-touch-priority-2026-10-03.md).
 
 - [C1 mechanics continuation](owner-decision-c1-mechanics-continuation-2026-10-03.md): PM selects bounded independent Codex reviews under the owner's delegated workflow.
 
@@ -176,7 +180,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
 
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
-- [Codex model routing during local chapter work](pm-decision-codex-model-routing-2026-10-05.md): PM execution choice after the owner's model/role audit request; explicit lower-cost implementation tiers, stronger review at trust boundaries, Astra for highest-risk audits.
+- [Codex model routing during local chapter work](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md): retired with Codex 2026-10-07.
 - [Fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md): owner prioritizes speed; complete source slices may merge into local `main` after checks and self-review while independent review runs in parallel, with remote publication still gated.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
@@ -262,10 +266,11 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [D12 practical herbalism and haggle](pm-decision-d12-practical-skills-2026-10-06.md): optional paid acquisition, current qualification, conserved two-herb Harvest and exact discounted Peg Buy quote; policy adopted, source pending.
 
 - [Pre-production CI scope, 2026-10-06](owner-decision-preproduction-ci-scope-2026-10-06.md): metadata and Book-only changes use narrower local and hosted check lanes, with conservative full fallback.
+- [Skip hosted CI on draft PRs, 2026-10-07](owner-decision-skip-ci-on-drafts-2026-10-07.md): drafts run no hosted CI until marked ready; manual runs stay possible; the merge gate is unchanged.
 - [Post-Chapter-1 tiered checks](owner-decision-tiered-ci-after-chapter-one-2026-10-06.md): after E3, use fast iteration, full PR and milestone sweeps while retaining save and release safety gates; current checks remain in force until a reviewed implementation.
 
 - [C5 real bleeding and bandage](pm-decision-c5-bleeding-bandage-2026-10-06.md): one hound-produced timed bleed, Wick's skill lesson and exact held-bandage treatment during combat.
-- [D10 Finding the Way](pm-decision-d10-finding-way-2026-10-06.md): character-owned visited map, truthful last-observed Where and a local Chapel-door Knock; planning draft pending independent review.
+- [D10 Finding the Way](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-d10-finding-way-2026-10-06.md): character-owned visited map, truthful last-observed Where and a local Chapel-door Knock; planning draft pending independent review.
 - [C6 Night in the Marsh](pm-decision-c6-night-marsh-2026-10-06.md): immediate five-entry survival attempt, optional shelter, bounded hound danger and one completion reward; source waits for C5.
 
 - [D9 real cast clarification](pm-decision-d9-real-cast-2026-10-06.md): retain October 5 no-Bram ruling after owner delegation.
@@ -273,3 +278,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Orphan provisional fixture cleanup](pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
 
 - [E1 branch evidence](owner-decision-e1-branch-evidence-2026-10-07.md): `any` children credit only when true at the accepted action; negative-polarity guards need a reviewed disposition, reported separately from witnessed paths.
+- [Orphan provisional fixture cleanup](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.

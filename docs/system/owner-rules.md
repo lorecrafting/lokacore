@@ -1,12 +1,14 @@
 # Owner rules in force
 
-One line per active rule, with its record. Superseded rules are not listed; their records stay in
-`docs/decisions/` or `docs/archive/decisions/` ([index](../decisions/README.md)). The architecture decisions every agent must
+One line per active rule, with its record. Superseded rules are not listed; their records are deleted
+and linked by permalink from the [index](../decisions/README.md), or kept only where code or `protocol/` cites them ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
 and not repeated here.
 
 ## Product and scope
+
+- Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
 
@@ -127,7 +129,7 @@ and not repeated here.
 
 - C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
 
-- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](../reviews/2026-10-06-c3-publication-status-review.md).
+- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md).
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
@@ -200,9 +202,11 @@ and not repeated here.
 ## Process
 
 - During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+- During pre-production, draft PRs run no hosted CI until marked ready for review ([owner decision](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+- Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
-- Keep review findings and dispositions as cross-referenceable history; promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+- Keep review findings and dispositions as cross-referenceable history while their work is open ([closed work](../decisions/owner-decision-move-forward-2026-10-07.md)); promote lasting behavior to its active spec, recurring hazards to area lessons, enforceable invariants to checks and unfinished work to linked tasks ([record](../decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
 
 - E1 credits an `any` child only when it evaluates true at the accepted action and never credits a negated guard for staying false; an unfireable guard closes only by a reviewed disposition reported apart from witnessed paths ([owner decision](../decisions/owner-decision-e1-branch-evidence-2026-10-07.md)).
 
@@ -210,22 +214,14 @@ and not repeated here.
 
 - Update canonical Book interaction rules in the same mechanic slice that changes them, reuse the component language, and fix obvious navigation/UI correctness defects before that slice completes; use E3 for the larger visual consistency pass ([owner decision](../decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 
-- Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
-- Before the Chapter 1 E3 closure gate, run one Astra high audit of end-to-end architecture and layer seams after A–D source integration; fix correctness and player-blocking findings through reviewed work and track nonblocking debt ([owner decision](../decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)).
+- Before the Chapter 1 E3 closure gate, run one Fable audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
+- Before the Chapter 1 E3 closure gate, run one Fable audit of end-to-end architecture and layer seams after A–D source integration; fix correctness and player-blocking findings through reviewed work and track nonblocking debt ([owner decision](../decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)).
 
 - After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
 
-- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Astra and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
-
-- PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains
-  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation)).
-
-- For remaining C1 mechanics (journal, chapters, scenes-modal, sampler), the PM selects a fresh
-  independent Codex primary plus separate Sol while Claude quota prevents Opus, under the
-  owner's delegated workflow; default policy otherwise remains in force
-  ([record](../decisions/owner-decision-c1-mechanics-continuation-2026-10-03.md)).
+- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Fable for gate-level audits and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
@@ -237,23 +233,20 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Mechanics PRs use one fresh independent reviewer by default; a second opinion
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
-- For c1-position PR #137 only, a fresh independent Codex agent replaces the primary Opus
-  reviewer; all other review and merge requirements remain in force
-  ([record](../decisions/owner-decision-c1-position-codex-review-2026-10-03.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
-  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM runs a slice to its
+  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM may merge PRs and
+  queues each merge in the background behind `gh pr checks --watch` ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
-- Gates are slim: the owner's play when there is something touchable, one codex Astra audit of the
-  riskiest code, and a short checklist with one reviewer; no Opus-plus-Astra double review of a
+- Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the
+  riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Reviews: codex Astra only on the gate audit and `runtime/proposal.ts` changes; Sol on other core and
-  contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
-  the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
-  ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md),
-  [compaction](../decisions/owner-decision-docs-compaction-2026-10-02.md)). The older everyday
-  Codex second-opinion default is narrowed by the one-reviewer decision above;
-  a second opinion never replaces the independent reviewer.
+- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E2 and E3 gate closures and audits and the release-candidate certification audit
+  (E1 closure: two fresh Opus reviewers, [record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)); Codex and cross-vendor review are retired; Beads Rust is the
+  permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
+- An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
+- Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
+  ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
 - Developers default to Sonnet; Opus for kernel and contract-freeze slices
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
@@ -265,7 +258,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
   for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
 - Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
-  `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
+  `docs/system` first, then the code. `docs/archive/` holds only cited older records; new
   decision records go in `docs/decisions/` and add a line here
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
 - C5 PR #255 alone has one owner-approved third fix round for SO7/SO8, with scoped independent

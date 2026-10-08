@@ -1,5 +1,0 @@
-
-> loka-kernel@0.0.0 typecheck
-> tsc && tsc -p test && tsc -p play
-
-src/mechanics/containment/rule.ts(33,7): error TS2367: This comparison appears to be unintentional because the types '"take" | "drop" | "give" | "put" | "harvest"' and '"recover_corpse"' have no overlap.

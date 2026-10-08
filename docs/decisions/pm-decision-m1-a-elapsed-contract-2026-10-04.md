@@ -12,4 +12,4 @@ M1-A establishes the checked profile and authority receipt seam. M1-B supplies c
 
 M1-A proves persisted elapsed replay directly through the trusted authority/pure entry. The paused `loka play --replay` reader still uses default player admission; its authority-command dispatch and trace run-namespace verification are an explicit M1-B first elapsed trace-consumer carry, before full driver/trace conformance is claimed. No CLI gameplay/alias work is resumed here.
 
-Developer validation and restored red controls: [M1-A evidence](../evidence/2026-10-04-m1-a-elapsed/README.md). Independent review and merge status remain separate.
+Developer validation and restored red controls: [M1-A evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-04-m1-a-elapsed/README.md). Independent review and merge status remain separate.

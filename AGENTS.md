@@ -14,8 +14,8 @@ commit `997a7a8` (`docs/rewrite-v3/`, `r1-spike/`).
   If they disagree, stop and ask ([known differences](docs/system/DIFFERENCES.md)).
 - [Owner rules in force](docs/system/owner-rules.md): a new decision adds its record to
   [docs/decisions/](docs/decisions/README.md) and a line there.
-- [docs/archive/](docs/archive/README.md): old specs, decisions, reviews and roadmap rows.
-  History, read only when a task needs it.
+- [docs/archive/](docs/archive/README.md): cited spec packet, in-force older decisions.
+  Closed work keeps only lessons and permalinks ([move forward](docs/decisions/owner-decision-move-forward-2026-10-07.md)).
 
 ## Architecture decisions already made (do not reopen silently)
 
@@ -54,6 +54,7 @@ Keep lessons in area files; link here only when relevant to all work.
 - Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 - Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
+- For CI, hooks, skip rules or randomized tests, read [check lessons](docs/lessons/checks.md).
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
@@ -144,8 +145,8 @@ Checks: [current gates](docs/CHECKS.md), focused [provisional lane](docs/decisio
 ## Working rules
 
 - Follow [the delivery workflow](docs/WORKFLOW.md) for slice reviews and the
-  [Beads Rust pilot](docs/WORKFLOW.md#beads-rust-pilot) for PM task status.
-- Update [Book UI](docs/system/book-ui.md) per mechanic; fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
+  [Beads Rust](docs/WORKFLOW.md#beads-rust) for PM task status.
+- Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Merge record-bearing PRs with merge commits, never squash.

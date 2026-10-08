@@ -16,19 +16,19 @@ legally share a group across intervening population jobs. An unchanged v042
 chapter played through real invocations and temporary SQLite reopened at 68300,
 committed 68400, then returned `save_corrupt` on cold reopen. The literal witness
 and retained failed/passing output live in the
-[repair evidence](2026-10-06-deer-bleed-recovery/README.md).
+[repair evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-deer-bleed-recovery/README.md).
 
 Resolved by [PR #265](https://github.com/lorecrafting/lokacore/pull/265), merge
 `d0c3797b`: delete the duplicate global order inference, retain deer producer
 checks, and use existing exact receipt replay. The
-[independent review](../reviews/2026-10-06-deer-bleed-recovery-review.md)
+[independent review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-deer-bleed-recovery-review.md)
 verified 14 SQLite checks and four forged-group controls, including mixed
 bleed/sight cancellation; refusal preserves file bytes. The
 [committed regression](../../mobile/authority/local-story/deer_bleed_recovery.test.ts)
 replaces the disposable audit script. No new red control is needed for this
 closed finding. [PR #269](https://github.com/lorecrafting/lokacore/pull/269)
 separately corrected the paired-job completion invariant;
-[its review](../reviews/2026-10-06-job-complete-owned-run-second-opinion.md)
+[its review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-job-complete-owned-run-second-opinion.md)
 records that distinct repair and reuses the recovery checks.
 
 ## Post-E3 maintenance candidates
@@ -102,7 +102,7 @@ validation; do not build a shared interpreter solely to unify their structure.
 ## Limits and preserved boundaries
 
 The earlier simulator input-mutation gap is separately closed by the
-[reviewed input-purity change](../reviews/2026-10-06-sim-input-purity-review.md).
+[reviewed input-purity change](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-sim-input-purity-review.md).
 This audit reproduced no further deer/sight/fatal/knowledge runtime defect. It
 does not prove their absence or replace current E2/E3 acceptance. Recommendations
 preserve canonical job order, strict unrelated-writer conflicts, atomic proposals,

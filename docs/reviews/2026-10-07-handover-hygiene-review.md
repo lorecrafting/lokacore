@@ -1,0 +1,121 @@
+# Handover hygiene review — PR #292
+
+- PR: [#292](https://github.com/lorecrafting/lokacore/pull/292), branch `chore/handover-hygiene`
+- Reviewed: `983d3292` (paraphrase commit on top of `74126853`); independent Opus reviewer
+- Governing: [owner decision](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md),
+  [WORKFLOW merge step and review count](../WORKFLOW.md#loop), [owner rules](../system/owner-rules.md),
+  [decisions README](../decisions/README.md) (verbatim or marked paraphrased)
+- **Verdict: CHANGES REQUIRED** (two small should-fix items; merge needs nothing open)
+
+## Must hold
+
+1. Records keep every meaning of the owner's messages and add no owner decision.
+2. No live Codex/Astra/Sol instruction; one-reviewer default, second-opinion triggers,
+   owner-reserved and exact-head CI gates unchanged.
+3. `--auto` merges only after every CI job is green on the reviewed head.
+4. The pre-push skip fires only for a tree a full `check_all.sh` pass saw clean.
+5. The export check still refuses drive and machine paths and accepts URLs.
+6. `session_status.sh` is read-only and cannot fail a session.
+
+## Findings
+
+**S1 should-fix** `docs/WORKFLOW.md:118`, `docs/decisions/owner-decision-claude-only-auto-merge-2026-10-07.md:21`,
+`docs/system/owner-rules.md:233`: they say `main` requires the CI jobs. It does not:
+`gh api .../branches/main/protection` returns 404 and `allow_auto_merge` is false. `gh pr merge --help`:
+"If required checks have not yet passed, auto-merge will be enabled". If nothing is required,
+`--auto` either merges without waiting for CI or fails to queue (with repo auto-merge off). Failure: the first
+slice merged under this text lands before CI finishes, or the merge step fails, which breaks step 7 ("every job started
+on that head has completed successfully"). The order is in the PR body only. Fix: make the
+docs conditional (`--auto` only once `main` requires every CI job, i.e. `changes`, `elixir`, `lint`,
+`sim`, `typescript`, `browser`; until then wait for green and merge without `--auto`). If only
+some jobs are required, `--auto` fires while an unrequired job is still running.
+
+**S2 should-fix** `docs/system/owner-rules.md:239`: the rewritten Reviews bullet also deleted two
+rules that have nothing to do with Codex: "Opus drafts briefs" and "the PM keeps one persistent worktree"
+([source](../archive/decisions/owner-decision-review-rules-2026-10-01.md), §PM's persistent
+worktree). `WORKFLOW.md:99` still relies on `../lokacore-pm`. Failure: the index of owner rules
+no longer lists an in-force owner rule. The owner gave no direction to remove it. Fix: keep a
+short clause with its record link.
+
+**Q1 question (does not change the verdict; the S1 edit resolves it)** `docs/WORKFLOW.md:117-121`:
+the merge is queued with `--match-head-commit <verdict sha>`, yet the same paragraph still allows the PM's own
+commits after the verdict. If GitHub checks the match-head at merge time, those commits stall the queued merge. If it
+does not, any later push goes through with it unreviewed. Not verified here. Either way the text should say: re-queue
+on the new head, or run `gh pr merge --disable-auto` before any push after the verdict.
+
+**N1 nit** `docs/ROADMAP.md:24`: the link text still says "Beads Rust pilot".
+
+**N2 nit** `bin/check_all.sh:13`, `.githooks/pre-push:23`: `git status --porcelain` follows
+`status.showUntrackedFiles=no` and `assume-unchanged`. With either, the push skips the checks
+although the working tree differs (demonstrated below). The hook had the same blind spot before
+(it always checked the working tree). `--untracked-files=all` would close the config case.
+
+## Evidence
+
+- Item 1: the paraphrase keeps yes-to-all-three, the merge permission, adapt-useful-Codex-workflow,
+  board→Beads Rust plus removal of `loka-board`, and delete Codex sessions/packages plus turn off the app.
+  Move-forward: the branch purge, the lean-to-discard rule, lessons first and the delegated
+  fixture choice are all kept. Dropped: "do you understand", "10gb", "for repo cleanup". None adds a decision.
+- Item 2: no Codex/Astra/Sol/Luna text remains in WORKFLOW, owner-rules, CHECKS, AGENTS or the
+  agent prompts, apart from the retirement sentences. The review count and second-opinion triggers are intact
+  ("another fresh reviewer"). CI jobs skip via `if:` (a skipped job counts as passing a required check), with no workflow path filter.
+- Pre-push stub (the real hook, plus the PR's marker lines in a stub `check_all.sh`, run in a throwaway repo). Skip on
+  a clean tree that passed; full run after a new commit, an edited tracked file or an untracked file; no marker after
+  `--metadata`, `--no-ts` or a failing run; an amended commit with the same tree skips (correct, same content);
+  a linked worktree has its own marker (`.git/worktrees/<n>/`) and reran. Hidden untracked file and assume-unchanged edit: skip (N2).
+  Pushing a ref other than HEAD skips, the same class as before.
+- Export regex probes: refused `C:\Users\x`, `D:/work`, quoted, after a space, `(`, `,`, `=`, `1`, `_`, `\\?\C:\`,
+  `file:///C:/x` and the machine paths; accepted https, http, ftp and `regex:/a/`. Only `pathC:\y` (glued to a word) passes.
+  Red: the old regex fails the https control; removing the drive pattern fails the drive control.
+- `session_status.sh` in an isolated repo with a copy of `.beads`: exit 0. The tracked JSONL stayed unchanged on a fresh import, after a
+  committed `+00:00` drift row with an existing DB, and with a DB holding an unflushed `br update --no-auto-flush` (only
+  ignored DB files appear); "gh unavailable" fallback prints. `.claude/settings.json` parses as JSON.
+- `mise exec -- bin/check_all.sh` exit 0 (2m21s) and wrote a marker matching `HEAD^{tree}`;
+  `elixir bin/check_docs.exs`: 269 docs, 0 broken, 0 unreachable.
+
+## Fix re-check — `b46805ef`
+
+**Verdict: CHANGES REQUIRED** (only R1, a one-line guard in the merge command). All earlier
+dispositions are verified; WORKFLOW step 7 needs nothing open.
+
+- **S1 + Q1 fixed.** `--auto` is gone from WORKFLOW (`:117-122`), the decision record (`:21-24`),
+  owner-rules (`:231-233`) and the decisions index (`:36`); no `--auto` merge instruction remains.
+  `gh pr checks` without `--required` watches every check run on the PR head, `--fail-fast` stops
+  on the first failure, and a `skipping` `if:` job does not fail it. The PM's commits after the verdict now re-queue.
+- **S2 fixed.** `owner-rules.md:242-243` restores "Opus drafts briefs" and one persistent PM worktree,
+  linking the source. Renaming `../lokacore-pm` to "the integration checkout" (also `WORKFLOW.md:99`) matches
+  the live checkouts (`git worktree list` has no `lokacore-pm`) and keeps the rule's substance.
+- **N1 fixed.** `ROADMAP.md:24`.
+- **N2 fixed** for the config case. Stub repo with `status.showUntrackedFiles=no` and a hidden untracked
+  file: the fixed hook reran the checks. Red control: the same hook without `--untracked-files=all`, run from an
+  outside `core.hooksPath`, skipped. With the file removed, it skipped again. assume-unchanged remains a stated limit.
+- `elixir bin/check_docs.exs`: 270 docs, 0 broken, 0 unreachable.
+
+**R1 should-fix** `docs/WORKFLOW.md:118-120`: `gh pr checks <N>` reads the checks of whatever head the
+PR shows at that moment, not `<sha>`. Failure: the PM pushes an index-line commit and queues
+`gh pr checks <N> --watch --fail-fast && gh pr merge <N> --merge --match-head-commit <new>` at once.
+GitHub has not yet moved the PR to `<new>`, so the watch sees the old head's green checks and exits 0.
+By the time `gh pr merge` runs, the head is `<new>`, the match passes, and an unchecked head merges. Fix: wait first
+until `gh pr view <N> --json headRefOid -q .headRefOid` equals `<sha>`. Not reproduced: that needs a live throwaway PR.
+
+**Note (no action):** jobs that depend on another job are created only when it finishes. Evidence: ci.yml run
+37674520584 created `elixir`/`sim`/`typescript` at 19:26:50, the same second `changes` completed; book-e2e
+created `browser` at 19:13:55, also the second `changes` completed. During that gap `lint` (independent) or the other workflow's
+jobs are normally still pending, so the watch does not exit early. A sub-second window remains only if every
+other check is already done. On the PR's own head, `gh pr checks 292` listed `browser` as pending, so the watch covers it when it runs.
+
+## R1 re-check — `30ab9d50`
+
+**Verdict: APPROVE.** Nothing open. Q1 is settled by the S1 fix, and N2's assume-unchanged gap is a stated, pre-existing limit.
+
+- **R1 fixed** at `docs/WORKFLOW.md:118-121`. The `until … headRefOid = <sha>` loop runs before the watch, so the first
+  read cannot see the previous head's checks. Source for installed gh 2.101.0
+  ([checks.go](https://github.com/cli/cli/blob/v2.101.0/pkg/cmd/pr/checks/checks.go)):
+  - every poll re-reads `statusCheckRollup: commits(last: 1)` of the PR (`api/query_builder.go:280`);
+  - zero contexts return the error "no checks reported on the '<branch>' branch" (`checks.go:302-303`). That error,
+    on the first read or on any watch poll, makes the command exit non-zero, so the `&&` never reaches `gh pr merge`.
+    The claim "fails, not merge" holds.
+  - `SKIPPED`/`NEUTRAL` count as skipping, not pending or failed (`aggregate.go:76-78`).
+- **Head moves later:** if another push lands after the loop exits, the watch reads the newer head, but
+  `--match-head-commit <sha>` then refuses the merge. If the head never reaches `<sha>`, the loop just keeps
+  waiting in the background and nothing merges.

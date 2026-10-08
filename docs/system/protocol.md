@@ -1069,7 +1069,7 @@ selected branch and exact Continue/choice offers. These controls preserve action
 keys and captured inputs; scene-owned choices never enter ordinary dialogue
 pending selection. The original B9 subset required API1.25; it is installed in the
 [current bundled chapter](cartridge.md#current-bundled-chapter). Original integrated
-answers remain in the [B9 evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).
+answers remain in the [B9 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b9-lantern-dream/README.md).
 ## D4 held-food composition
 
 **D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
@@ -1197,7 +1197,7 @@ changed. D6's `recover_corpse` remains restricted to its two underwater rooms.
 Shared keyed target/input admission and the method-aware pure Harvest query drive projection and execution. A loaded alias whose key differs from `harvest` must independently produce the literal invocation and resolved payload above before its successful result. The careful accepted proposal contains the selected distinct custody transfers and matching acquisition events in one writer group, one accepted receipt and the authored careful narration. The budget is shared across action policy, skill policy, selection and combined carrying; fatal exhaustion faults atomically. There is no new foundation op or command capability.
 
 The existing `buy {actor_id, provider_id, item_id, quoted_price}` and ordered provider/item targets stay unchanged. Project and resolve the current effective Buy price through the shared commerce query and `ActionInput.quoted_price`, then compare that bound number again after authority elapsed preflight before any transfer. Qualification is an input to the quote, not a saved quote or acquisition condition. No stale offer may silently charge a newly computed price. The [chapter's optional shop declaration](cartridge.md#d12-practical-skill-declarations) owns the ratio/floor; Buy/Sell custody and checked payment compose exactly as B3. These protocol/schema/generated-contract changes are installed; the
-[D12 save/protocol review](../reviews/2026-10-06-d12-final-save-review.md) records their independent acceptance.
+[D12 save/protocol review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d12-final-save-review.md) records their independent acceptance.
 
 <a id="d7-sight-flight-composition-planning-contract"></a>
 
@@ -1269,7 +1269,7 @@ to the accepted command receipt, and retry does not produce a second response.
 ## C6 expedition composition
 
 C6 is installed in the [current bundled chapter](cartridge.md#current-bundled-chapter);
-its [final save opinion](../reviews/2026-10-06-c6-final-save-second-opinion.md) records source acceptance.
+its [final save opinion](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c6-final-save-second-opinion.md) records source acceptance.
 
 An actor/quest-instance-keyed `ExpeditionAttempt` retains the bound living player body, original S27 quest occurrence, exact Start or Restart command ID as attempt ID, route cursor `0..5`, optional sheltered flag and status `active/failed/completed`. A checked complete-prior-row transition changes only this one attempt. The quest remains active through failed attempts; failure sets cursor0 and clears shelter; Restart replaces the attempt ID and retains cursor0 in the same row. Do not reuse C2's leader-bound patrol row or create a universal route interpreter. The fixed authored route and footprint are pinned definitions, not saved room tags or duplicated visit facts.
 

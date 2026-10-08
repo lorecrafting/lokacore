@@ -1,6 +1,0 @@
-command: mise exec -- elixir bin/check_docs.exs && git diff --check && mise exec -- node_modules/.bin/prettier --check mobile/app/tests/western_ashmere.e2e.ts
-686 docs, 0 broken link(s), 0 unreachable
-Checking formatting...
-All matched files use Prettier code style!
-
-exit: 0

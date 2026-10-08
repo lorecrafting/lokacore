@@ -1,9 +1,0 @@
-{
-  "prior_fixtures_byte_exact": 19,
-  "all_frozen_source_trace_files_compared": 210,
-  "other_sampler_files_byte_exact": 22,
-  "artifact_sha256": "813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa",
-  "artifact_bytes": 16635,
-  "artifact_semantic_delta": "version/ref identity and manifest/lock description_variant@1 only",
-  "seeds": "generator14 only; seeds and pool file inventory/order unchanged"
-}

@@ -18,4 +18,4 @@ otherwise. The PM verifies green checks before independent review and merges onl
 approved head as requested; this record implies no review approval.
 
 The [chapter-one plan](owner-decision-chapter-one-plan-2026-10-02.md) governs scope; the
-[priority record](owner-decision-touch-priority-2026-10-03.md) carries the UI deferral.
+[priority record](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/owner-decision-touch-priority-2026-10-03.md) carries the UI deferral.

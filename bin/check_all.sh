@@ -9,6 +9,9 @@ export MIX_ENV=test
 # The dot reporter keeps the node test output to a line; failures still print in full.
 export TEST_REPORTER=dot
 m() { mise exec -- "$@"; }
+# A full pass on a clean tree is recorded so pre-push can skip rerunning it unchanged.
+tree() { [ -z "$(git status --porcelain --untracked-files=all)" ] && git rev-parse HEAD^{tree}; }
+start=$(tree || true)
 if [ "${1-}" = --metadata ]; then
   m elixir bin/check_docs.exs
   m bin/docs_red_controls.sh
@@ -31,6 +34,7 @@ m ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
 m ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
 m bin/lint_red_controls.sh --core-only
 m bin/docs_only_red_controls.sh
+m bin/integration_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 python3 bin/check_beads_export.py
@@ -44,3 +48,5 @@ m bin/kernel_red_controls.sh
 git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 mise exec -- node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh --core-only
 git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
+[ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
+true

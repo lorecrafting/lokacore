@@ -1,6 +1,6 @@
 # Mechanics continuation
 
-The [M1–M23 queue](archive/NEXT-MECHANICS-2026-10-06.md) is dated planning history;
+The [M1–M23 queue](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md) is dated planning history;
 its Planned labels and assignment order describe the original proposal.
 Current installed subsets are in the [system specification](system/README.md)
 and [feature map](features.gen.md). The [roadmap](ROADMAP.md#chapter-one-completion)

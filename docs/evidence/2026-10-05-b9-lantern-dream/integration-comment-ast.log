@@ -1,4 +1,0 @@
-command: compiler AST comparison
-source_checkpoint: e3517e7efbb3e21a4cb5bd363980ef8f7f2db479
-exit: 0
-Executable compiler AST matches integrated approved source; only commentary changed.

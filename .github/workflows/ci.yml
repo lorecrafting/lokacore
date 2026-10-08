@@ -2,8 +2,10 @@ name: ci
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -14,6 +16,8 @@ permissions:
 
 jobs:
   changes:
+    # Draft PRs run no hosted CI; downstream jobs skip with this one (CHECKS.md).
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -26,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # A missing green code ancestor or API error runs everything; lint always runs.
+      # A missing green code ancestor or API error runs everything; lint runs unless the PR is a draft.
       - id: docs
         run: |
           base=$(bin/ci_base.sh "$HEAD" code)
@@ -70,6 +74,7 @@ jobs:
       - run: elixir bin/red_controls.exs
 
   lint:
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -84,6 +89,7 @@ jobs:
       - run: ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
       - run: bin/lint_red_controls.sh --core-only
       - run: bin/docs_only_red_controls.sh
+      - run: bin/integration_red_controls.sh
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
           otp-version: '28.4'
