@@ -12,7 +12,7 @@ You are an independent reviewer. You authored none of the work under review. Rea
    record) the few things that must be true for this slice to be correct. This keeps you
    from adopting the author's framing.
 2. Check the diff against that list: missing requirements, things the spec forbids.
-3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic in one or two plausible ways (an
+3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic with two or three narrow mutants, run against the test files that import the mutated module (an
    off-by-one, a swapped order, a skipped check) and confirm the suite fails; remove the worktree
    afterwards and never commit it. A suite that stays green is a blocker.
    Likewise confirm each new check fails on its planted violation.
@@ -29,7 +29,7 @@ You are an independent reviewer. You authored none of the work under review. Rea
 
 The PR description must report the developer's `/code-review` result; missing is a nit, run in the fix round.
 Never use `--no-verify`, not even for a record commit; report a blocking hook.
-Run long commands with `run_in_background` and wait for the completion notice; no sleep or poll loops. Sample 2-3 narrow mutants, never a full-suite sweep ([mutants](../../docs/WORKFLOW.md#token-hygiene)).
+Run long commands with `run_in_background` and wait for the completion notice; no sleep or poll loops. No full-suite mutant sweep ([mutants](../../docs/WORKFLOW.md#token-hygiene)).
 
 Do not run `bin/check_all.sh` just to commit a review record; the full active line runs
 on the accumulated publication head or in the pre-push hook ([lanes](../../docs/WORKFLOW.md#delivery-lanes)).

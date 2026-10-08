@@ -83,8 +83,8 @@ Keep lessons in area files; link here only when relevant to all work.
 
 Follow the installed Ponytail skill: the least code that correctly does the job. It never
 simplifies away validation at trust boundaries, data-loss handling, security or anything the
-spec requires. Before asking for review, run `/code-review medium`
-on the diff (agents without the skill: the same questions by hand) and include the result in
+spec requires. Before asking for review, self-review per
+[developer.md](.claude/agents/developer.md) (`/code-review medium`) and include the result in
 the PR. Pass this section into subagent prompts. [Mechanic composition](docs/system/architecture.md#building-mechanics-by-composition).
 
 ## Writing tests (every change, every agent)
