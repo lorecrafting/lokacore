@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
 import { gameView, newWorld, stepElapsed, type World } from '../src/index.ts';
-import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, DefinitionRef, Key } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { checked, KERNEL } from './sim.ts';
 import { target } from '../src/foundation/compose.ts';
@@ -17,10 +17,11 @@ import { witnessedObligations } from './e1_obligations.ts';
 
 export const AUTHORITY_KERNEL = {
   ...KERNEL,
-  step: (world: World, command: Command, revision: number) =>
+  // `action` is the invoked action key production decides with (local-story/invocation.ts).
+  step: (world: World, command: Command, revision: number, action?: string) =>
     command.payload.type === 'elapsed'
       ? stepElapsed(world, command, revision)
-      : KERNEL.step(world, command, revision),
+      : KERNEL.step(world, command, revision, action as Key | undefined),
 };
 
 export type LoadedCandidate = ReturnType<typeof admitCandidate>;
@@ -74,7 +75,7 @@ export function caseHost(
   let watched: Observer | undefined;
   const seen = coverage(),
     commands: Command[] = [],
-    invocations: unknown[] = [];
+    invocations: { invocation_id: string; action_key: string }[] = [];
   const digest = createHash('sha256');
   const record = (data: object) => {
     if (log) appendFileSync(log, `${JSON.stringify(data)}\n`);
@@ -119,12 +120,20 @@ export function caseHost(
       after = story.world();
     if (command) {
       commands.push(command);
-      const observation = checked(AUTHORITY_KERNEL, previous, command, Number(r.revision));
+      const action_key = invocations.find((i) => i.invocation_id === r.invocation_id)?.action_key;
+      const observation = checked(
+        AUTHORITY_KERNEL,
+        previous,
+        command,
+        Number(r.revision),
+        action_key,
+      );
       digest.update(observation.bytes);
       record({
         kind: 'step',
         obligations: witnessedObligations(previous, after, command, decision),
         command,
+        action_key: action_key ?? null,
         revision: r.revision,
         decision,
         state_hash: hash(after.state as never),

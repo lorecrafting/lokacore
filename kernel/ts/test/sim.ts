@@ -13,7 +13,7 @@ import { createHash } from 'node:crypto';
 import { globSync, mkdirSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
 import { compose, key, same } from '../src/foundation/compose.ts';
-import type { Command, DecisionResult } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, Key } from '../src/contracts.gen.ts';
 import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -193,11 +193,12 @@ export function checked(
   before: World,
   command: Command,
   revision: number,
+  action?: string,
 ): Checked {
   try {
     const input = JSON.stringify(before);
     const view = kernel.gameView(before);
-    const { decision, world } = kernel.step(before, command, revision);
+    const { decision, world } = kernel.step(before, command, revision, action as Key | undefined);
     const bad =
       (JSON.stringify(before) !== input ? 'input_mutated' : undefined) ??
       violated(before, command, view, decision, world) ??

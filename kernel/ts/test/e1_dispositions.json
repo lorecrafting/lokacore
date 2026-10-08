@@ -1,1 +1,152 @@
-[]
+[
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item",
+    "reason": "negated guard fires: talk refused while only chandlers_debt active holds",
+    "evidence": "controlled refusal case refuse-peg-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-peg-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/0",
+    "reason": "negated guard fires: talk refused while only chandlers_debt active holds",
+    "evidence": "controlled refusal case refuse-peg-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-peg-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/2",
+    "reason": "negated guard fires: talk refused while only chandlers_debt resolved holds",
+    "evidence": "controlled refusal case refuse-peg-resolved (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-peg-resolved",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_peg_debt/policy/root/item/items/3",
+    "reason": "negated guard fires: talk refused while only chandlers_debt failed holds",
+    "evidence": "controlled refusal case refuse-peg-failed (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-peg-failed",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item",
+    "reason": "negated guard fires: talk refused while only wisp_ward active holds",
+    "evidence": "controlled refusal case refuse-wisp-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-wisp-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/0",
+    "reason": "negated guard fires: talk refused while only wisp_ward active holds",
+    "evidence": "controlled refusal case refuse-wisp-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-wisp-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wisp_offer/policy/root/items/2/item/items/2",
+    "reason": "negated guard fires: talk refused while only wisp_ward resolved holds",
+    "evidence": "controlled refusal case refuse-wisp-resolved (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-wisp-resolved",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item",
+    "reason": "negated guard fires: talk refused while only mauds_cellar active holds",
+    "evidence": "controlled refusal case refuse-maud-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-maud-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/0",
+    "reason": "negated guard fires: talk refused while only mauds_cellar active holds",
+    "evidence": "controlled refusal case refuse-maud-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-maud-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/maud_offer/policy/root/item/items/2",
+    "reason": "negated guard fires: talk refused while only mauds_cellar resolved holds",
+    "evidence": "controlled refusal case refuse-maud-resolved (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-maud-resolved",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root/item",
+    "reason": "negated guard fires: talk refused while only infirmary_herbs active holds",
+    "evidence": "controlled refusal case refuse-wick-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-wick-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_wick_offer/policy/root/item/items/0",
+    "reason": "negated guard fires: talk refused while only infirmary_herbs active holds",
+    "evidence": "controlled refusal case refuse-wick-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-wick-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item",
+    "reason": "negated guard fires: talk refused while only bell_of_ashmere active holds",
+    "evidence": "controlled refusal case refuse-aldric-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-aldric-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/0",
+    "reason": "negated guard fires: talk refused while only bell_of_ashmere active holds",
+    "evidence": "controlled refusal case refuse-aldric-active (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-aldric-active",
+      "code": "invalid_state"
+    }
+  },
+  {
+    "path": "/dialogues/ashmere_missing_child@0.0.42:dialogue/a_aldric_offer/policy/root/items/1/item/items/2",
+    "reason": "negated guard fires: talk refused while only bell_of_ashmere resolved holds",
+    "evidence": "controlled refusal case refuse-aldric-resolved (kernel/ts/test/e1_refusals.ts)",
+    "review": "docs/reviews/2026-10-07-e1-guard-refusals-review.md",
+    "refusal": {
+      "case": "refuse-aldric-resolved",
+      "code": "invalid_state"
+    }
+  }
+]
