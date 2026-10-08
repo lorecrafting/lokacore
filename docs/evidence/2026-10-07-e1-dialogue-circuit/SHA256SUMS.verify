@@ -1,9 +1,0 @@
-capture.log: OK
-case.jsonl: OK
-docs.log: OK
-focused.log: OK
-mutant-new.log: OK
-mutant-old.log: OK
-mutant.diff: OK
-summary.json: OK
-typecheck.log: OK

@@ -1,7 +1,0 @@
-cli.log: OK
-report.json: OK
-mauds-cellar.jsonl: OK
-dream-follow_fox.jsonl: OK
-focused.log: OK
-old-suite-mutant.log: OK
-new-test-mutant.log: OK

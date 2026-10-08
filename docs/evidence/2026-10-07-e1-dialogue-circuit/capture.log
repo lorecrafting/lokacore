@@ -1,7 +1,0 @@
-(node:52868) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
-Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to [local-path]
-(Use `node --trace-warnings ...` to show where the warning was created)
-{"source":"bc22d4335b614cb13d09f22ca1725d3f1ad9d5e0","steps":75,"selected_choices":18,"newly_witnessed":46,"remaining_authored_if_integrated":195}
-
-exit_status=0

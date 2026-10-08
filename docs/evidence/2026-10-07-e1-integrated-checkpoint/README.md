@@ -1,9 +1,0 @@
-# E1 integrated provisional checkpoint
-
-Clean source `a10a455edb4d0baab56aea97df93b4a9baeab131` combines the independently reviewed modal, dream, dialogue, recipe, quest, visible entity, route, and exact ferry room witnesses. Its candidate and check digest `7708f5f3ec2fa25f1599d74b407b0dd6d29cd89b365a9e1e16b3829791c44308` are in the [report](report.json).
-
-The recorder exited **2, pending**. All 18 isolated real SQLite cases and semantic replays passed: five endings, the thirty-day 720-hourly-commit run, Night, Maud, both ferries and three real storage faults. Rooms, quests and scenes have no family gaps. Eighteen dialogue families, 31 choice families and **241 authored paths** remain open. The exact gap inventory is in the report. This does not certify E1.
-
-The accumulated focused E1 selection passed 14/14, TypeScript typecheck passed, and docs found 842 documents with zero broken or unreachable links. Each new effect witness has a separate red control and bounded independent review in its own checkpoint. The combined source still requires the full repository gate and publication as a draft checkpoint. Ponytail Review found no new dependency, speculative configuration, or generic credit of unexecuted content.
-
-The [report](report.json), selected [ending](rescued-prior.jsonl), [topology](topology.jsonl) and [Maud](mauds-cellar.jsonl) traces, [redacted CLI log](cli.log), and [focused test log](focused-tests.log) are hashed in [SHA256SUMS](SHA256SUMS), with [verification](SHA256SUMS.verify). The full isolated output, including 18 databases and traces, was hashed at capture in [case-SHA256SUMS](case-SHA256SUMS); all 38 checks are retained in [verification](case-SHA256SUMS.verify). Final path coverage, final candidate pin, independent final risk review, the certified 10,000-sequence headless simulation, and exact-head CI remain pending.

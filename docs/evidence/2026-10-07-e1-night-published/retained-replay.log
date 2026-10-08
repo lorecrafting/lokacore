@@ -1,9 +1,0 @@
-{"case_id":"night-marsh","commands":15,"replay":"pass-after-published-fix","original_source":"b47d3852198e1949de7c51b02f10576aa9dd7122","certification":false}
-{"case_id":"watch-rounds","commands":31,"replay":"pass-after-published-fix","original_source":"b47d3852198e1949de7c51b02f10576aa9dd7122","certification":false}
-{"case_id":"original-night-start","commands":5,"replay":"pass-after-published-fix","original_source":"a1322ea00941c7ff0e61f5901fc93cca058530b7","certification":false}
-(node:63589) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
-Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to [local-path]
-(Use `node --trace-warnings ...` to show where the warning was created)
-
-exit_status=0

@@ -33,7 +33,7 @@ Ponytail Review: lean already; one bounded helper reuses production policy and
 projection queries and the existing path traversal. No new dependency or host
 framework. No correctness or scope findings remain.
 
-The [author checkpoint](../evidence/2026-10-07-e1-journal-variants/README.md)
+The [author checkpoint](https://github.com/lorecrafting/lokacore/blob/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-journal-variants/README.md)
 correctly keeps the three separated-escort variant0 paths pending. This review
 approves only this witness binding; it does not certify the integrated E1
 candidate, final 10,000-sequence proof, SQLite fault matrix or E2/E3/native work.

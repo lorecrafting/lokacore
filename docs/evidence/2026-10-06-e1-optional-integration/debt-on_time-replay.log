@@ -1,7 +1,0 @@
-{"case_id":"debt-on_time","steps":13,"obligations":[],"state_hash":"dbb6b4808752d76199e02a84e60f0f2fdf5145329ce9b10c2b1f5968acb3b1ef","fault_schedule":[]}
-(node:16956) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
-Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to [local-path]
-(Use `node --trace-warnings ...` to show where the warning was created)
-
-exit_status=0

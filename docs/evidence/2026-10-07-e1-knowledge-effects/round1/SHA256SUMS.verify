@@ -1,9 +1,0 @@
-README.md: OK
-missing-membership-new.log: OK
-missing-membership-old.log: OK
-missing-membership.diff: OK
-restored.log: OK
-size.log: OK
-typecheck.log: OK
-
-exit_status=0

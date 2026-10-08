@@ -1,7 +1,0 @@
-{"case_id":"topology","steps":114,"obligations":[],"state_hash":"cbfb9d410a6394a7c0407f22eb0b2fa4f5ca537c0eb67a3cf969da5105167212","fault_schedule":[]}
-(node:13292) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
-Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
-To eliminate this warning, add "type": "module" to [local-path]
-(Use `node --trace-warnings ...` to show where the warning was created)
-
-exit_status=0

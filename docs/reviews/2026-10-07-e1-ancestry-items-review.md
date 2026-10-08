@@ -7,7 +7,7 @@ Reviewed local branch `work/e1-ancestry-items`: source
 `8ab9880c3dd292af4069b84dfd471f9c1bc4c055`. This reviewer authored none of
 that work. Governing sources: [E1 proof policy](../system/architecture.md#e1-exact-candidate-proof-policy),
 [E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md),
-[workflow](../WORKFLOW.md) and [evidence](../evidence/2026-10-07-e1-ancestry-items/README.md).
+[workflow](../WORKFLOW.md) and [evidence](https://github.com/lorecrafting/lokacore/blob/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-ancestry-items/README.md).
 
 Requirements derived before the code review: credit only an accepted new ancestry
 selection matching its committed row; bind a static item transfer to the exact

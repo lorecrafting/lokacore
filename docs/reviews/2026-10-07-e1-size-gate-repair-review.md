@@ -2,7 +2,7 @@
 
 **APPROVE** exact source `e63195003b00e75cfabeacde96acef71bc2b3747` against `3c5d61dbc0375c745f0b1642f0a7da59d408840d`, on `slice/chapter-one-e1-r9-certification`. No findings. The reviewer authored none of the source and used a separate checkout. **E1 remains pending.** This approves the extraction/size repair, not final certification or a full repository gate.
 
-Requirements derive from AGENTS.md, the [E1 proof policy](../system/architecture.md#e1-exact-candidate-proof-policy), [size rules](../CHECKS.md), the prior [combined checkpoint](../evidence/2026-10-07-e1-integrated-checkpoint/README.md) and evidence lessons: preserve witness behavior and test coverage, include the new source module in the check identity, and satisfy the existing size limit without adding an allowance or weakening its guard.
+Requirements derive from AGENTS.md, the [E1 proof policy](../system/architecture.md#e1-exact-candidate-proof-policy), [size rules](../CHECKS.md), the prior [combined checkpoint](https://github.com/lorecrafting/lokacore/blob/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-integrated-checkpoint/README.md) and evidence lessons: preserve witness behavior and test coverage, include the new source module in the check identity, and satisfy the existing size limit without adding an allowance or weakening its guard.
 
 ## Independent verification
 

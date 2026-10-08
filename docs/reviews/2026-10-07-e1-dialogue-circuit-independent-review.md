@@ -11,7 +11,7 @@ Independent checks in an isolated review worktree:
 - `mise exec -- node --test kernel/ts/test/e1_dialogue_circuit.test.ts`: exit 0, 1/1.
 - Temporarily omitted Gareth's ordinary conversation from the route: the same test exited 1 on missing literal `gareth/leave`. The mutation was restored before further checks or commit.
 - `mise exec -- node --test kernel/ts/test/e1_dialogue_circuit.test.ts kernel/ts/test/e1_cases.test.ts`: restored exit 0, 9/9.
-- Inspected [author evidence](../evidence/2026-10-07-e1-dialogue-circuit/README.md): the omitted-Ash mutant passes 27 existing E1 tests and fails the new test, establishing its distinct break. Independently verified all nine retained SHA256SUMS entries at the evidence commit.
+- Inspected [author evidence](https://github.com/lorecrafting/lokacore/blob/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-dialogue-circuit/README.md): the omitted-Ash mutant passes 27 existing E1 tests and fails the new test, establishing its distinct break. Independently verified all nine retained SHA256SUMS entries at the evidence commit.
 
 Ponytail Review: lean already; existing authority, replay and witness helpers supply the machinery. Correctness review found no false coverage or hidden state writer. The evidence correctly labels its remaining-count comparison as conditional on integration, not an integrated recorder run.
 

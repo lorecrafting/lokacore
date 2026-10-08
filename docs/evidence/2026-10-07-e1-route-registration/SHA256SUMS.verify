@@ -1,8 +1,0 @@
-cli.log: OK
-report.json: OK
-watch-rounds.jsonl: OK
-wisp-ward.jsonl: OK
-infirmary-herbs.jsonl: OK
-focused.log: OK
-typecheck.log: OK
-docs.log: OK
