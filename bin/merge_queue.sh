@@ -4,6 +4,8 @@
 set -u
 [ $# -eq 2 ] || { echo "usage: $0 <PR> <sha>" >&2; exit 2; }
 pr=$1 sha=$2 poll=${MERGE_QUEUE_POLL:-5}
+# gh reports the full head SHA; a short one would wait forever.
+echo "$sha" | grep -qxE '[0-9a-f]{40}' || { echo "merge_queue: <sha> must be the full 40-hex SHA" >&2; exit 2; }
 until [ "$(gh pr view "$pr" --json headRefOid -q .headRefOid)" = "$sha" ]; do sleep "$poll"; done
 until s=$(gh pr checks "$pr" --json name,bucket -q '[.[]|select(.name=="changes").bucket]|join(",")')
   case "$s" in pass,pass | *fail* | *skipping* | *cancel*) true ;; *) false ;; esac
