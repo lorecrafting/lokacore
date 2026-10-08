@@ -8,8 +8,8 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 | Role | Who | Model | Owns |
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
-| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: `sonnet`; `opus` for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). | code, checks, self-review, opening the PR, fixes |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
 | Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
@@ -190,9 +190,7 @@ additional tasks need a concrete audit finding and evidence link.
 Keep one PM writer across worktrees/clones and update statuses at reviewed merges.
 `br` run from any worktree reads and writes the integration checkout's database and
 JSONL (`br where` shows it), so commit tracker changes from that checkout, not a slice
-branch. A Claude Code session starts with `bin/session_status.sh` (in-progress, ready
-and blocked issues, open PRs, and report-only drift from each issue's `external_ref` PR URL:
-in-progress with the PR merged or closed, open PR with no issue, closed with the PR open), so Beads, not a memory file, holds current status.
+branch. A Claude Code session starts with `bin/session_status.sh` (in-progress, ready and blocked issues, open PRs, and report-only drift: in progress with the PR merged or closed; an open PR with no issue; closed with the PR open), so Beads, not a memory file, holds current status.
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to

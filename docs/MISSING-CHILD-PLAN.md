@@ -87,14 +87,7 @@ neither a sealed room nor an unimplemented quest option earns completion credit.
 | **E2 R9C interaction proof:** exercise cross-mechanic cases in a compact synthetic cartridge. | E1, final changed contracts | 0.6–0.9 |
 | **E3 R10 browser content gate:** prove reachable rooms, quests, all five ending variants, bounded long runs and a human Book walkthrough on one candidate. | A–D, E1, E2 | 0.7–1.0 |
 
-After A–D source and reviews settle, run the [one-time Astra documentation
-audit](decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) and close
-its reviewed findings before E3 closes. This is a Chapter 1 closure obligation,
-not another implementation slice or a per-slice check.
-Run the [one-time Astra architecture audit](decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)
-at the same checkpoint: trace real actions across layers, resolve correctness and
-player-blocking seam findings before E3 closes, and track nonblocking debt. It is
-also a closure obligation, not a 34th story slice.
+The one-time [documentation audit](evidence/2026-10-06-chapter-one-docs-audit.md) and [architecture audit](evidence/2026-10-06-post-d10-architecture-audit.md) are done; the docs repairs are closed (see [ROADMAP](ROADMAP.md)). The architecture follow-ups ARCH-D10-02 to 05 stay open Beads issues. Neither is an implementation slice.
 
 The shared TypeScript engine simulation, real SQLite transaction/fault checks and
 contract checks remain part of development proof. Browser play uses the [shared Book client and web host](web-preview.md), but browser storage evidence does not certify native

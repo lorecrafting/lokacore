@@ -181,7 +181,7 @@ defmodule Loka.Core.RegistriesTest do
              ]
   end
 
-  # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
+  # Invariants are checked by id (docs/archive/ROADMAP.md#verification-harness-adopted-2026-09-24), so an id must name one invariant, and a
   # citation must point at a real docs/archive/spec heading.
   defp invariant_problems(entries) do
     dupes = for {id, n} <- Enum.frequencies_by(entries, & &1["id"]), n > 1, do: {:duplicate, id}
