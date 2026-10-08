@@ -52,3 +52,36 @@
 - A commit message where `; gh pr merge` or a line-start `gh pr merge` sits inside a quoted message or heredoc is blocked (exit 2). This is acceptable: it fails safe, and the error message tells the agent what to do.
 - Malformed payloads that do not contain the phrase pass. This is acceptable: they cannot be a merge.
 - (c) satisfies its rule. The guard cases and queue cases each catch a different break; none overlap.
+
+## Fix round 1: `25388ee2`
+
+- Scope: commit `25388ee2` only (on record `484e7f1d`), plus the code it touched and its direct callers.
+- Verdict: **APPROVE WITH NOTES**
+
+### Dispositions
+
+1. **Blocker: verified.**
+   - `bin/integration_red_controls.sh` adds the cases fail-cancel-gate and fail-cancel-watch.
+   - Mutant M6 now fails the suite: "fail-cancel-gate: exit 142, want 1" and "reran".
+   - Mutant M3 now fails it the same way for fail-cancel-watch.
+   - `bin/merge_queue.sh` is unchanged; the suite at this head exits 0.
+2. **Guard pattern: verified.**
+   - All seven forms are now blocked (exit 2), and so are `env gh …` and `bash -c "gh …"`.
+   - Mutants that never block or fail open turn the guard cases red.
+   - The hook still runs in 0.01 s.
+3. **Owner rules: verified.**
+   - `owner-rules.md:199-200` and `WORKFLOW.md:25` now cite [owner-decision-e1-closure-reviewers-2026-10-07.md](../decisions/owner-decision-e1-closure-reviewers-2026-10-07.md). That record is marked (paraphrased) and amends polish-order step 1 by name.
+   - The "Fable only" sentence no longer contradicts itself.
+   - The PM record no longer states the rule.
+   - The owner's wording reached me only through the PM, and I did not verify it.
+4. **Nits 4 and 5: verified.** The local path is removed; the AGENTS.md wording is fixed.
+
+### New finding
+
+- **Nit:** `bin/guard_merge.sh:4-5` and `docs/CHECKS.md:93-95`.
+  - The new match spans the whole command, so it also blocks commands that never name `gh pr merge`:
+    - `gh pr checkout 5 && git merge origin/main`
+    - `gh pr create --body "… main merge …"`
+    - `gh pr view 311 --json body | grep -i merge`
+  - The comment and CHECKS say only that "a message that names the command" is blocked.
+  - Ruling: acceptable. It fails safe, and the workaround is cheap (`--body-file`, or split the command). The comment should say any later `pr` and `merge` words count.
