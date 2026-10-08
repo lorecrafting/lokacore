@@ -90,7 +90,8 @@ their rules and red controls remain available for resumption.
   It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
   It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
-  leaves a diff or a skipped narrow command fails) and `bin/session_status.sh` with stub `br` (the
+  leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
+  narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.

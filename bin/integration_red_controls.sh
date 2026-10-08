@@ -147,6 +147,16 @@ mt
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
 [ "$rc" = 0 ] || bad "mutate survivor-only: exit $rc, want 0"
+# Break: a two-field line (no new text) runs as a silent deletion instead of being refused.
+mt
+printf 'a.txt\tx=1\n' > m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q '^FAIL' out && ! grep -q 'red-' out || { bad "mutate two-field: exit $rc, want 1 and a FAIL line"; cat out; }
+# Break: the restore check compares only the mutated file, so a test that edits another tracked file passes.
+mt; git init -q; git add a.txt a.orig; git commit -qm a
+printf 'a.txt\ty=1\ty=2\n' > m.tsv
+rc=0; capped sh "$bin/mutate.sh" m.tsv "echo z >> a.orig" > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q 'RESTORE-FAIL' out || { bad "mutate tracked-diff: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
