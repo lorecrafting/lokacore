@@ -1,0 +1,29 @@
+# E1 watch route and blocked Night independent review
+
+**APPROVE the bounded watch checkpoint and retention of the Night blocker diagnosis** at exact source `e64a6ba4b7bf9a2ab5f4399a1b612e414b71c3ea`, branch `proof/e1-night-watch-paths`, against recorder base `a1322ea00941c7ff0e61f5901fc93cca058530b7`. The reviewer authored none of this source or evidence. No open findings within that scope. **Night path approval and E1 certification remain pending.**
+
+Requirements derived from AGENTS.md, the [E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md), [exact candidate policy](../system/architecture.md#e1-exact-candidate-proof-policy), [S3 mechanics](../system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract), [C2 literals](../system/cartridge.md#c2-watch-route-and-trust), [C6 Start contract](../system/mechanics.md#c6-s27-night-in-the-marsh-selected-contract), and storage/evidence lessons. This checkpoint must preserve legal production-authority inputs, real cold SQLite recovery, literal checkpoint/trust outcomes and invariant-sensitive replay; blocked Night evidence must not become a passing path.
+
+## Independent verification
+
+- Pinned Node `v24.21.0`: `mise exec -- node --test kernel/ts/test/e1_cases.test.ts kernel/ts/test/e1_watch_rounds.test.ts`, exit 0, three cases. The new watch case runs twice from separate fresh databases and compares deterministic digests. The same command passed again after both red controls were restored.
+- Final-join red control: omit only the final Watch Post player Move. Old `e1_cases.test.ts` passes (two cases, exit 0); new watch test fails (exit 1), observing North Gate rather than the literal Watch Post destination.
+- Missing-Rejoin red control: omit the explicit Rejoin choice. Old suite passes (two cases, exit 0); new watch test fails (exit 1), observing `paused` instead of literal `together`. Both mutations were confined to the review checkout and restored byte-for-byte.
+- All eleven retained hashes verify with `shasum -a 256 -c SHA256SUMS`. JSONL parses fully: watch has 31 commands and 24 cold reopens, Night has five commands and one reopen. Retained recipe/test byte digests match both the reviewed files and author source `513d21504cadba7b73712b612893b0040c6f3147`. Check digests recomputed from both recorded source commits match their receipts; policy hash matches the installed policy. The author source to review head changes only evidence and the brief link.
+- Independent retained-input replay reconstructs the admitted fresh world using the retained context/RNG and verifies its initial-state hash and deterministic character/body identity. All 31 watch commands replay without a failed invariant. The five Night commands reproduce exactly `{id: "delta_preconditions_hold", detail: "accepted", at: 4}`. The replay/diagnostic probe exits 0 because both expected results were observed; it does not report Night passing.
+- Independent Night diagnostic on the hydrated production state: Start is accepted, production `compose` returns changes, and `gate` passes. `deltaPreconditions` returns false; checking the same result without only the expedition operation returns true. The installed generic checker lacks expedition handling in both initial-row lookup and prior/next linkage. This supports the retained checker-coverage diagnosis; it does not approve the expedition path or validate a future checker fix.
+- `git diff --check` passes. Source diff contains no production, checker, authority, loader, recorder-registration or replay-dispatcher changes.
+
+## Correctness, evidence and simplicity
+
+The recipe uses the existing production `openStory` authority over actual Node SQLite. Reopen closes the database, constructs a new host and loads committed rows before the next consumer; the shared host checks every receipt against independent decision/state and invariant observations. No adjusted start, hidden state writer, Wait, wall-clock sleep or C6 workaround supplies this result.
+
+The watch oracle follows selected S3/C2 behavior: starting co-presence earns zero; detour pauses; walking beside Tobin while paused earns zero; explicit Rejoin preserves attempt identity and earns zero. Later joins yield literal counts 1/2/2/3/4 and precisely the four named checkpoints. Trust remains false until the fourth distinct qualifying join, then the same quest resolves as `completed`, trust becomes true, and a new Continue is unavailable and refused with `invalid_state`. Cold reopen preserves the final credit/trust result. Values are selected literals, not answers derived from the implementation.
+
+Retained evidence distinguishes fresh construction, candidate artifact/content hashes, actual source identity, registered-recorder check digest and separate unregistered recipe/test digests. `certification: false` is explicit. Unit-host zero revisions remain test placeholders; the retained watch trace uses its actual source SHA. No private home/scratch/worktree paths or device identifiers were found in the retained files or diff; UUIDs are deterministic proof/world identities. README keeps the original Night blocker and source, and makes no passing Night claim.
+
+Ponytail Review: Lean already. Ship the bounded checkpoint. Two short recipes/tests reuse existing host, invariant and replay tools; no dependency, runtime abstraction or duplicate mechanic was introduced. Correctness review found no in-scope failure.
+
+## Limits
+
+This record does not approve Night route execution before the checker fix is published and independently rechecked. Watch death/Restart, transaction faults, exact authored-obligation binding, recorder registration, final source/check/policy pins and selected 10,000 candidate sequences remain separate. Native/browser lifecycle, owner saves and UI blur are untouched. E1 certification remains pending; no push or PR was performed.

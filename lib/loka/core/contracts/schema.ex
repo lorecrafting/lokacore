@@ -49,6 +49,14 @@ defmodule Loka.Core.Contracts.Schema do
   @token "(?:" <> @atom <> ~S"(?:(?:[?*+]|\{[0-9]+(?:,[0-9]+)?\})\??)?|\((?:\?=|(?!\?))|\)|\|)"
   @portable "^\\^" <> @token <> "*\\$$"
 
+  @doc """
+  Whether a flat contract is a nominal id: a string that is not an enum or const. The one
+  brand rule: TypeScript brands it (bin/contracts.exs), `Loka.Core.Contracts` tags it.
+  """
+  @spec nominal?(map()) :: boolean()
+  def nominal?(s),
+    do: s["type"] == "string" and not is_map_key(s, "enum") and not is_map_key(s, "const")
+
   @doc "Checks decoded schema documents (file name => document) and returns the flat contracts."
   @spec flatten!(%{String.t() => term()}) :: %{String.t() => map()}
   def flatten!(docs) do

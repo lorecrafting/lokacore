@@ -14,6 +14,14 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
   - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
   - Swiping up on the footer (away from the map), or tapping the small handle, opens the text drawer. Every tap shows up there as its command.
 
+## Owner taste rulings (2026-09-25, paraphrased)
+
+From the later exploration rounds; the [design foundation](../../decisions/owner-decision-design-foundation-2026-10-07.md) governs where it differs.
+- Ruled out: gamebook "turn to §" choices, the ribbon, the tide band, always-visible side tabs,
+  page tilt and an on-page sun.
+- The chapter card is kept for major story-arc markers (a main questline resolved), not routine events.
+- The pickup sound is a paper flick; a tonal pluck read as cartoony.
+
 ## Departures from 00 §4.10
 
 The map joystick with stair nodes replaces the six-way compass ring. Full pages replace the action sheets. The position and current/max resources in the status line are new. Adopting any of these would need a spec amendment.

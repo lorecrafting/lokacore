@@ -1,0 +1,349 @@
+// Fixed E1 proof host. The production authority remains the only writer.
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { appendFileSync, existsSync, writeFileSync } from 'node:fs';
+import { encode, hash } from '../src/foundation/canonical.ts';
+import { gameView, newWorld, stepElapsed, type World } from '../src/index.ts';
+import type { Command, DecisionResult, DefinitionRef, Key } from '../src/contracts.gen.ts';
+import { value } from '../src/mechanics/fact.ts';
+import { checked, KERNEL } from './sim.ts';
+import { target } from '../src/foundation/compose.ts';
+import { row } from '../src/runtime/rows.ts';
+import { sha256, type admitCandidate } from './e1_policy.ts';
+import { openStory } from '../../../mobile/authority/local-story/authority.ts';
+import { sqliteHost } from '../../../mobile/authority/local-story/__tests__/elapsed-host.test.ts';
+import { buttonsOf } from '../../../mobile/app/book/model.ts';
+import { witnessedObligations as obligations } from './e1_obligations.ts';
+import { worldWitnesses } from './e1_world_witness.ts';
+
+export const AUTHORITY_KERNEL = {
+  ...KERNEL,
+  // `action` is the invoked action key production decides with (local-story/invocation.ts).
+  step: (world: World, command: Command, revision: number, action?: Key) =>
+    command.payload.type === 'elapsed'
+      ? stepElapsed(world, command, revision)
+      : KERNEL.step(world, command, revision, action),
+};
+
+export type LoadedCandidate = ReturnType<typeof admitCandidate>;
+export const CASE_GENERATOR = 'e1-v042-authority-cases-v1';
+export type Coverage = {
+  rooms: Set<string>;
+  quests: Set<string>;
+  dialogues: Set<string>;
+  choices: Set<string>;
+  scenes: Set<string>;
+  commands: Set<string>;
+};
+type Observer = (before: World, after: World, command: Command, decision: DecisionResult) => void;
+export const coverage = (): Coverage =>
+  Object.fromEntries(
+    ['rooms', 'quests', 'dialogues', 'choices', 'scenes', 'commands'].map((key) => [
+      key,
+      new Set<string>(),
+    ]),
+  ) as Coverage;
+
+export function witnessedObligations(
+  before: World,
+  after: World,
+  command: Command,
+  decision: DecisionResult,
+  carry: { full?: boolean } = {},
+) {
+  const paths = obligations(before, after, command, decision);
+  return [...paths, ...worldWitnesses(before, after, command, decision, paths, carry)];
+}
+
+export function caseHost(
+  loaded: LoadedCandidate,
+  path: string,
+  log?: string,
+  kernelVersion = `loka-kernel@${'0'.repeat(40)}`,
+  proof: object = {},
+) {
+  assert.equal(existsSync(path), false, 'E1 case requires a new isolated database');
+  if (log) writeFileSync(log, '', { flag: 'wx' });
+  const initial = newWorld(
+    loaded.cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const clock = { wall: 10000, mono: 0 };
+  let p = sqliteHost(path, clock, kernelVersion),
+    n = 0,
+    lastRow = 0,
+    previous = initial;
+  const carry = {};
+  const releases = [{ fresh: initial, content_hash: loaded.hash }] as const;
+  const open = () => {
+    const opened = openStory(p.db, releases, p.host);
+    assert.equal(opened.kind, 'open');
+    if (opened.kind !== 'open') throw new Error('E1 save did not open');
+    return opened;
+  };
+  let story = open();
+  let watched: Observer | undefined;
+  const seen = coverage(),
+    commands: Command[] = [],
+    invocations: { invocation_id: string; action_key: string }[] = [];
+  const digest = createHash('sha256');
+  const record = (data: object) => {
+    if (log) appendFileSync(log, `${JSON.stringify(data)}\n`);
+  };
+  record({
+    kind: 'start',
+    generator: CASE_GENERATOR,
+    content_hash: loaded.hash,
+    artifact_sha256: sha256(loaded.artifact),
+    construction: 'fresh',
+    initial_state: initial.state,
+    initial_state_hash: hash(initial.state as never),
+    identity: {
+      context: initial.context,
+      character: initial.character,
+      body: initial.body,
+      algorithm: 'loka-id-v1',
+    },
+    rng: { algorithm: 'xoshiro128**', state: initial.state.rng },
+    logical_clock: initial.state.clock,
+    host_clock: { ...clock },
+    ...proof,
+    run_id: story.runId(),
+    kernel_version: kernelVersion,
+  });
+  const visit = (world: World) =>
+    seen.rooms.add(
+      gameView(world)
+        .place.title.key.replace(/^room\./, '')
+        .replace(/\.title$/, ''),
+    );
+  visit(initial);
+  const observe = () => {
+    const rows = p.sql
+      .prepare('SELECT rowid,* FROM receipt WHERE rowid > ? ORDER BY rowid')
+      .all(lastRow);
+    if (!rows.length) return;
+    assert.equal(rows.length, 1, 'E1 must observe every commit boundary');
+    const r = rows[0]!,
+      command = JSON.parse(String(r.command)) as Command | null;
+    const decision = JSON.parse(String(r.response)) as DecisionResult,
+      after = story.world();
+    if (command) {
+      commands.push(command);
+      const action_key = invocations.find((i) => i.invocation_id === r.invocation_id)
+        ?.action_key as Key | undefined;
+      const observation = checked(
+        AUTHORITY_KERNEL,
+        previous,
+        command,
+        Number(r.revision),
+        action_key,
+      );
+      digest.update(observation.bytes);
+      record({
+        kind: 'step',
+        obligations: witnessedObligations(previous, after, command, decision, carry),
+        command,
+        action_key: action_key ?? null,
+        revision: r.revision,
+        decision,
+        state_hash: hash(after.state as never),
+        rng: after.state.rng,
+        clock: after.state.clock,
+        invariant_failure: observation.failure ?? null,
+        receipt_sha256: sha256(JSON.stringify(r)),
+        changed_rows: changedRows(p.sql, decision),
+      });
+      assert.equal(observation.failure, undefined, JSON.stringify(observation.failure));
+      assert.equal(
+        observation.bytes,
+        `${encode(decision as never)}\n${hash(after.state as never)}\n`,
+      );
+      capture(seen, previous, after, command, decision);
+      watched?.(previous, after, command, decision);
+    } else {
+      assert.equal(hash(after.state as never), hash(previous.state as never));
+      record({
+        kind: 'admission',
+        revision: r.revision,
+        decision,
+        state_hash: hash(after.state as never),
+      });
+    }
+    lastRow = Number(r.rowid);
+    previous = after;
+    visit(after);
+  };
+  story.onAdvance(observe);
+  const attempt = (action_key: string, target_ids: string[] = [], input: object = {}) => ({
+    invocation_id: `eeeeeeee-1111-4111-8111-${String(++n).padStart(12, '0')}`,
+    actor_id: initial.character,
+    action_key,
+    target_ids,
+    input,
+  });
+  const send = (invocation: ReturnType<typeof attempt>) => {
+    invocations.push(invocation);
+    let reply;
+    try {
+      reply = story.invoke(invocation);
+    } catch (e) {
+      record({
+        kind: 'invocation',
+        invocation,
+        thrown: { code: (e as { errcode?: number }).errcode ?? null },
+      });
+      throw e;
+    }
+    if (reply.kind === 'saved') observe();
+    record({ kind: 'invocation', invocation, reply });
+    return reply;
+  };
+  const invoke = (
+    action_key: string,
+    target_ids: string[] = [],
+    input: object = {},
+    expected = 'accepted',
+  ) => {
+    const invocation = attempt(action_key, target_ids, input),
+      reply = send(invocation);
+    assert.equal(reply.kind, 'saved', JSON.stringify(reply));
+    if (reply.kind === 'saved') {
+      const d = reply.decision as unknown as DecisionResult;
+      assert.equal(d.kind === 'rejected' ? d.error.code : d.kind, expected, JSON.stringify(d));
+    }
+    return { invocation, reply };
+  };
+  const ref = (kind: string, key: string) =>
+    ({
+      cartridge_id: 'ashmere_missing_child',
+      cartridge_version: '0.0.42',
+      kind,
+      key,
+    }) as DefinitionRef;
+  return {
+    initial,
+    seen,
+    commands,
+    invocations,
+    clock,
+    digest: () => digest.copy().digest('hex'),
+    record,
+    invoke,
+    attempt,
+    send,
+    watch: (observer: Observer) => {
+      watched = observer;
+    },
+    get story() {
+      return story;
+    },
+    get sql() {
+      return p.sql;
+    },
+    get fault() {
+      return p.fault;
+    },
+    view: () => gameView(story.world()),
+    flag: (name: string) => value(story.world(), initial.character, ref('fact', name)),
+    entity: (kind: string, key: string) => {
+      const id = initial.entityIds[`ashmere_missing_child@0.0.42:${kind}/${key}`];
+      assert.ok(id, `E1 case names unplaced ${kind} ${key}`);
+      return id;
+    },
+    detail: (room: string, key: string) =>
+      Object.entries(initial.details).find(
+        ([, d]) => initial.rooms[d.room]?.key === room && d.key === key,
+      )![0],
+    move: (...directions: string[]) =>
+      directions.forEach((direction) => invoke('move', [], { direction })),
+    choose: (choice_id: string, answer?: string) =>
+      invoke('choose', [], {
+        continuation_id: gameView(story.world()).choice!.continuation_id,
+        choice_id,
+        ...(answer && { answer }),
+      }),
+    next: () => {
+      const view = gameView(story.world()),
+        text = (key: string) => loaded.cartridge.text![key] ?? key;
+      const button = buttonsOf(view, text, text).find((b) => b.action_key === 'continue')!;
+      assert.ok(button, 'Book must offer the shown scene Continue');
+      return invoke(button.action_key, button.target_ids, button.input);
+    },
+    elapsed: (milliseconds: number) => {
+      record({ kind: 'elapsed_request', milliseconds });
+      clock.wall += milliseconds;
+      clock.mono += milliseconds;
+      let status = story.pulse('active', story.runId());
+      while (status.kind === 'catching_up') {
+        const before = story.world().state.clock;
+        status = story.pulse('drain', story.runId());
+        assert.ok(story.world().state.clock > before, 'E1 elapsed drain made no progress');
+      }
+      assert.equal(status.kind, 'ready', JSON.stringify(status));
+      observe();
+    },
+    reopen: () => {
+      const before = hash(story.world().state as never);
+      const newId = p.host.newId;
+      p.sql.close();
+      p = sqliteHost(path, clock, kernelVersion);
+      p.host.newId = newId;
+      story = open();
+      story.onAdvance(observe);
+      assert.equal(
+        hash(story.world().state as never),
+        before,
+        'cold reopen changes the committed state',
+      );
+      record({ kind: 'reopen', state_hash: before });
+    },
+    close: () => p.sql.close(),
+  };
+}
+export type CaseHost = ReturnType<typeof caseHost>;
+
+function changedRows(sql: ReturnType<typeof sqliteHost>['sql'], decision: DecisionResult) {
+  if (decision.kind !== 'accepted') return [];
+  const keys = new Map<string, readonly [string, string]>();
+  for (const op of decision.delta.ops) {
+    const address = row(target(op));
+    if (address) keys.set(JSON.stringify(address), address);
+  }
+  return [...keys.values()].map(([section, key]) => ({
+    section,
+    key,
+    value:
+      sql.prepare('SELECT value FROM state_row WHERE section=? AND key=?').get(section, key)
+        ?.value ?? null,
+  }));
+}
+
+function capture(
+  seen: Coverage,
+  before: World,
+  after: World,
+  command: Command,
+  decision: DecisionResult,
+) {
+  seen.commands.add(command.payload.type);
+  if (decision.kind !== 'accepted') return;
+  for (const q of Object.values(after.state.quests ?? {}))
+    seen.quests.add(`${q.quest.key}/${q.state}${q.outcome ? `/${q.outcome}` : ''}`);
+  const p = command.payload;
+  if (p.type === 'choose') {
+    const choice = before.state.choices?.[p.continuation_id];
+    if (choice?.source.kind === 'dialogue') seen.choices.add(`${choice.source.key}/${p.choice_id}`);
+  }
+  if (p.type === 'talk') {
+    for (const c of Object.values(after.state.choices ?? {}))
+      if (c.status === 'pending' && c.source.kind === 'dialogue') seen.dialogues.add(c.source.key);
+  }
+  const view = gameView(before);
+  if (p.type === 'continue' && view.scene)
+    seen.scenes.add(`${view.scene.scene.key}/${view.scene.index}`);
+  for (const notice of view.notices ?? [])
+    if (notice.dream && (p.type === 'continue' || p.type === 'choose'))
+      seen.scenes.add(`${notice.dream.scene.key}/${notice.dream.index}`);
+}

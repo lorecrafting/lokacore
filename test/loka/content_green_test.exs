@@ -5,28 +5,11 @@ defmodule Loka.ContentGreenTest do
   # protocol/fixtures/cartridge_green_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_green")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_green_hash.json"))
   @src "cartridges/ashmere_green"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-
-  # ashmere_green's source without the files `drop` names, with `files` merged over it.
-  defp compile(dir, files, drop \\ fn _ -> false end) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          rel = Path.relative_to(rel, @src),
-          not drop.(rel),
-          into: %{},
-          do: {rel, JSON.decode!(File.read!(Path.join(@src, rel)))}
-
-    for {rel, v} <- Map.merge(base, files) do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
@@ -58,7 +41,7 @@ defmodule Loka.ContentGreenTest do
   end
 
   # Breaks: a trigger's short fact or room left short (Checks.expand; the loader would reject it).
-  test "full trigger references compile to the same artifact", %{tmp_dir: dir} do
+  test "full trigger references compile to the same artifact", %{dir: dir} do
     files =
       Map.merge(
         rule("gossip", &put_in(&1, ["on", "fact"], ref("fact", "green_busy"))),
@@ -70,7 +53,7 @@ defmodule Loka.ContentGreenTest do
 
   # Breaks: a trigger of an unregistered event type, a trigger, `when` or fact.assign naming a
   # fact or room the cartridge lacks, or a value not of its fact's type compiling.
-  test "reaction triggers and consequences are checked", %{tmp_dir: dir} do
+  test "reaction triggers and consequences are checked", %{dir: dir} do
     cases = [
       {rule("ring", &put_in(&1, ["on", "event"], "bell_rung")),
        d("SCHEMA_VIOLATION", "reactions/ring.on.event", %{"error" => "unknown_variant"})},
@@ -99,14 +82,14 @@ defmodule Loka.ContentGreenTest do
        ), d("FACT_TYPE_MISMATCH", "reactions/ring.apply[0].value", %{})}
     ]
 
-    for {{files, diag}, i} <- Enum.with_index(cases),
-        do: assert(compile(Path.join(dir, "#{i}"), files) == {:error, [diag]})
+    for {files, diag} <- cases,
+        do: assert(compile(dir, files) == {:error, [diag]})
   end
 
   # Breaks: a reaction, its trigger's event or its fact.assign's fact_changed compiling without
   # its owner (reaction@1, fact@1) in the manifest.
   test "a reaction needs reaction@1, and fact@1 for a fact trigger or a fact.assign", %{
-    tmp_dir: dir
+    dir: dir
   } do
     m = src("cartridge.json")
 
@@ -116,11 +99,16 @@ defmodule Loka.ContentGreenTest do
           update_in(m, ["requires", "capabilities"], fn c -> Map.delete(c, &1) end)
       }
 
+    # Every reaction file but `key`'s removed.
     others = fn key ->
-      &(String.starts_with?(&1, "reactions/") and &1 != "reactions/#{key}.json")
+      for path <- Path.wildcard(Path.join(dir, "reactions/*.json")),
+          rel = Path.relative_to(path, dir),
+          rel != "reactions/#{key}.json",
+          into: %{},
+          do: {rel, nil}
     end
 
-    assert compile(Path.join(dir, "a"), without.("reaction"), others.("ring")) ==
+    assert compile(dir, Map.merge(others.("ring"), without.("reaction"))) ==
              {:error,
               [
                 d("UNDECLARED_CAPABILITY", "reactions/ring", %{"capability" => "reaction"}, [
@@ -131,12 +119,10 @@ defmodule Loka.ContentGreenTest do
     fact = ["fact@1"]
 
     assert compile(
-             Path.join(dir, "b"),
-             Map.merge(
-               without.("fact"),
-               rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"apply" => []}))
-             ),
+             dir,
              others.("gossip")
+             |> Map.merge(without.("fact"))
+             |> Map.merge(rule("gossip", &Map.merge(Map.delete(&1, "when"), %{"apply" => []})))
            ) ==
              {:error,
               [
@@ -148,7 +134,7 @@ defmodule Loka.ContentGreenTest do
                 )
               ]}
 
-    assert compile(Path.join(dir, "c"), without.("fact"), others.("ring")) ==
+    assert compile(dir, Map.merge(others.("ring"), without.("fact"))) ==
              {:error,
               [
                 d(

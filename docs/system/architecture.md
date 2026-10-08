@@ -159,6 +159,14 @@ Simulator composition consumes the runtime's complete immutable world input proj
 Its independent adoption check applies composed row changes, including removal of a
 retired quest's [null change](protocol.md#b5-harvest-and-exchange-composition).
 
+## E1 exact candidate proof policy
+
+<a id="e1-policy-branch-evidence"></a>
+E1 proves the bundled candidate headlessly: a private runner admits the frozen artifact bytes,
+and a fixed scenario recorder replays real SQLite cases, witnessing each authored path or
+closing it by a reviewed disposition. The policy, its witness rules and the recorder's pass
+result are in [E1 certification](e1-certification.md).
+
 ## Mobile import rules
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared

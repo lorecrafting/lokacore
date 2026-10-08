@@ -361,4 +361,4 @@ re-checks refined the journal selection (persisted `objectives_complete` and ter
 the last fixed by the PM at the two-round limit) and split runtime custody refusals from loader
 reachability.
 
-Effect: [ROADMAP](../ROADMAP.md#c1-slices) chapter-one row and C1 slices.
+Effect: [ROADMAP](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/ROADMAP.md#c1-slices) chapter-one row and C1 slices.

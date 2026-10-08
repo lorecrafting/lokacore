@@ -5,26 +5,11 @@ defmodule Loka.ContentErrandTest do
   # is protocol/fixtures/cartridge_errand_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_errand")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_errand_hash.json"))
   @src "cartridges/ashmere_errand"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-
-  # ashmere_errand's source with `files` merged over it (nil removes a file).
-  defp compile(dir, files) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          into: %{},
-          do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
-
-    for {rel, v} <- Map.merge(base, files), v != nil do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp edit(rel, path, v), do: %{rel => put_in(src(rel), path, v)}
@@ -58,7 +43,7 @@ defmodule Loka.ContentErrandTest do
 
   # Breaks: a short quest, objective item or item_acquired reference left short (the loader
   # would reject it).
-  test "full quest and item references compile to the same artifact", %{tmp_dir: dir} do
+  test "full quest and item references compile to the same artifact", %{dir: dir} do
     objective = ["objective", "policy", "root", "item"]
 
     files = %{
@@ -68,24 +53,24 @@ defmodule Loka.ContentErrandTest do
         put_in(src("quests/lantern.json"), objective, ref("item", "lantern"))
     }
 
-    assert compile(Path.join(dir, "a"), files) == {:ok, @expected, []}
+    assert compile(dir, files) == {:ok, @expected, []}
 
     strict = fn item ->
       edit("quests/lantern.json", ["objective"], %{@strict | "item_acquired" => item})
     end
 
-    {:ok, short, []} = compile(Path.join(dir, "b"), strict.("lantern"))
-    assert compile(Path.join(dir, "c"), strict.(ref("item", "lantern"))) == {:ok, short, []}
+    {:ok, short, []} = compile(dir, strict.("lantern"))
+    assert compile(dir, strict.(ref("item", "lantern"))) == {:ok, short, []}
     quest = JSON.decode!(short)["cartridge"]["quests"]["ashmere_errand@0.0.1:quest/lantern"]
     assert quest["objective"]["item_acquired"] == ref("item", "lantern")
   end
 
   # Breaks: a quest_state, objective item or quest text naming what the cartridge lacks compiles
   # (the loader rejects it).
-  test "an unknown quest, item or text is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+  test "an unknown quest, item or text is UNRESOLVED_REFERENCE", %{dir: dir} do
     oil = %{"target" => "ashmere_errand@0.0.1:item/oil"}
 
-    assert compile(Path.join(dir, "a"), edit("rooms/ferry_landing.json", variant(), "missing")) ==
+    assert compile(dir, edit("rooms/ferry_landing.json", variant(), "missing")) ==
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.variants[0].when.root.quest", %{
@@ -94,13 +79,13 @@ defmodule Loka.ContentErrandTest do
               ]}
 
     assert compile(
-             Path.join(dir, "b"),
+             dir,
              edit("quests/lantern.json", ["objective"], %{@strict | "item_acquired" => "oil"})
            ) ==
              {:error, [d("UNRESOLVED_REFERENCE", "quests/lantern.objective.item_acquired", oil)]}
 
     assert compile(
-             Path.join(dir, "c"),
+             dir,
              edit("quests/lantern.json", ["objective", "policy", "root", "item"], "oil")
            ) ==
              {:error,
@@ -108,7 +93,7 @@ defmodule Loka.ContentErrandTest do
 
     text = Map.drop(src("text.json"), ["quest.lantern.title", "quest.lantern.accept"])
 
-    assert compile(Path.join(dir, "d"), %{"text.json" => text}) ==
+    assert compile(dir, %{"text.json" => text}) ==
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "quests/lantern.offer.label", %{
@@ -122,13 +107,13 @@ defmodule Loka.ContentErrandTest do
 
   # Breaks: a quest or quest_state compiling without quest@1 in the manifest, or a quest whose
   # offer takes a registered command's, an action's or a recipe's key (the offer would replace it).
-  test "a quest needs quest@1 and a key of its own", %{tmp_dir: dir} do
+  test "a quest needs quest@1 and a key of its own", %{dir: dir} do
     m = src("cartridge.json")
     caps = ["requires", "capabilities"]
     files = %{"cartridge.json" => update_in(m, caps, &Map.delete(&1, "quest"))}
     undeclared = &d("UNDECLARED_CAPABILITY", &1, %{"capability" => "quest"}, ["quest@1"])
 
-    assert compile(Path.join(dir, "a"), files) ==
+    assert compile(dir, files) ==
              {:error,
               [
                 undeclared.("quests/lantern"),
@@ -141,7 +126,7 @@ defmodule Loka.ContentErrandTest do
       "rooms/ferry_landing.json" => put_in(src("rooms/ferry_landing.json"), variant(), "take")
     }
 
-    assert compile(Path.join(dir, "b"), take) ==
+    assert compile(dir, take) ==
              {:error, [d("DUPLICATE_DEFINITION", "quests/take")]}
 
     action = %{
@@ -154,7 +139,7 @@ defmodule Loka.ContentErrandTest do
       "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
     }
 
-    assert compile(Path.join(dir, "c"), %{"actions/lantern.json" => action}) ==
+    assert compile(dir, %{"actions/lantern.json" => action}) ==
              {:error, [d("DUPLICATE_DEFINITION", "quests/lantern")]}
 
     caps = ["requires", "capabilities"]
@@ -184,12 +169,12 @@ defmodule Loka.ContentErrandTest do
       }
     }
 
-    assert compile(Path.join(dir, "e"), recipe) ==
+    assert compile(dir, recipe) ==
              {:error, [d("DUPLICATE_DEFINITION", "quests/lantern")]}
   end
 
   # Breaks: a room's action contribution naming a quest's offer rejected as unresolved.
-  test "a room may contribute a quest's offer", %{tmp_dir: dir} do
+  test "a room may contribute a quest's offer", %{dir: dir} do
     landing = src("rooms/ferry_landing.json")
 
     contribute = fn k ->
@@ -199,9 +184,9 @@ defmodule Loka.ContentErrandTest do
       }
     end
 
-    assert {:ok, _, []} = compile(Path.join(dir, "a"), contribute.("lantern"))
+    assert {:ok, _, []} = compile(dir, contribute.("lantern"))
 
-    assert compile(Path.join(dir, "b"), contribute.("shed")) ==
+    assert compile(dir, contribute.("shed")) ==
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.actions[0].actions[0]", %{

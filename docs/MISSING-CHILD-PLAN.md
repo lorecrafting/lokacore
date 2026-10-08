@@ -1,7 +1,7 @@
 # Missing Child Chapter 1 completion plan
 
 This is the current delivery plan, not a claim that the chapter is complete. The
-[roadmap](ROADMAP.md) records merged status; the [33 provisional implementation and proof briefs](briefs/chapter-one/README.md) give candidate slice detail; [the mechanics queue](NEXT-MECHANICS.md)
+[roadmap](ROADMAP.md) records merged status; the [33 provisional implementation and proof briefs](briefs/chapter-one/README.md) give candidate slice detail; [the mechanics queue](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md)
 records the reusable capabilities. Each row below is one proposed player-visible PR
 after **Q2-C-rescue (Wren's escorted return to Elspeth)**. A row starts only after its
 dependencies are merged and its brief is re-pinned to the actual source head. The
@@ -87,13 +87,10 @@ neither a sealed room nor an unimplemented quest option earns completion credit.
 | **E2 R9C interaction proof:** exercise cross-mechanic cases in a compact synthetic cartridge. | E1, final changed contracts | 0.6–0.9 |
 | **E3 R10 browser content gate:** prove reachable rooms, quests, all five ending variants, bounded long runs and a human Book walkthrough on one candidate. | A–D, E1, E2 | 0.7–1.0 |
 
-The one-time [documentation audit](evidence/2026-10-06-chapter-one-docs-audit.md) and [architecture audit](evidence/2026-10-06-post-d10-architecture-audit.md) are done; the docs repairs are closed (see [ROADMAP](ROADMAP.md)). The architecture follow-ups ARCH-D10-02 to 05 stay open Beads issues. Neither is an implementation slice.
-
-The shared TypeScript engine simulation, real SQLite transaction/fault checks and
-contract checks remain part of development proof. Browser play uses the [shared Book client and web host](web-preview.md), but browser storage evidence does not certify native
-SQLite, backgrounding, touch or Hermes. Native build/device evidence is deferred
-under the [owner's current development pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md); public release
-readiness requires that separate prelaunch work after the pause is lifted.
+The shared TypeScript engine simulation, real SQLite transaction/fault checks and contract checks
+remain part of development proof. Browser storage evidence does not certify native SQLite,
+backgrounding, touch or Hermes; public release readiness requires that separate prelaunch work
+after the [mobile pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md) is lifted.
 
 ## Rules for each brief
 

@@ -9,7 +9,7 @@ import {
   type EntityId,
   type TargetResolution,
 } from '../src/contracts.gen.ts';
-import { step, stepElapsed, type World } from '../src/index.ts';
+import { newWorld, step, stepElapsed, type Cartridge, type World } from '../src/index.ts';
 import { resolve } from '../src/commands/target.ts';
 import { append, line, lookupWords } from './obs.ts';
 import { which } from './text.ts';
@@ -21,6 +21,35 @@ export type Run = {
   ordinal: number;
   revision: number;
 };
+
+/** A fresh run of `cartridge`; `version` is the kernel that records (or recorded) it. */
+export const start = (
+  cartridge: Cartridge,
+  content_hash: string,
+  run_id: string,
+  context: string,
+  seed: number[],
+  version: string,
+): Run => ({
+  ids: { content_hash, kernel_version: version, seed, run_id },
+  world: newWorld(cartridge, context as World['context'], seed),
+  ordinal: 0,
+  revision: 0,
+});
+
+/** The trace.run line that opens a run's game_trace. */
+export const header = (r: Run) =>
+  line({
+    format: 'loka-obs-v1',
+    event: 'trace.run',
+    store: 'game_trace',
+    ids: r.ids,
+    data: {
+      world_context_id: r.world.context,
+      initial_state: { state: 'fresh' },
+      fault_schedule: { state: 'unavailable', reason: 'not_applicable' },
+    },
+  });
 
 /**
  * Decides `command` against the run and advances it. Accepted: committed at the next revision

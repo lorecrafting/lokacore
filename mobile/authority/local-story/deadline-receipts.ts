@@ -10,14 +10,13 @@ import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { elapsedCommandId, jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { scopeOf, value } from '../../../kernel/ts/src/mechanics/fact.ts';
-import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db } from './store.ts';
 
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent bound deadline');
 };
 type ReceiptRow = { command_id: string; actor_id: string; command: string; response: string };
-type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 
 export function terminalAxis(
   world: World,

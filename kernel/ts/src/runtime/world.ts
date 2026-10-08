@@ -116,8 +116,10 @@ export function step(
   world: World,
   command: Command,
   revision: number,
-  // ponytail: a host trace stores the Command, not this key, so a replay re-decides unkeyed and
-  // a keyed refusal (stricter) can differ there; none does while no two actions match one Command.
+  // Reopen re-decides only accepted receipts, unkeyed: the key only narrows admission's matches
+  // (every earlier refusal ignores it) and the rule and mint never see it, so the decision holds.
+  // ponytail: unkeyed admission spends other query_steps, so near LIMITS.query_steps a reopen may
+  // fault or throw and refuse a valid save (fails closed); upgrade: action_key in the receipt row.
   action?: Key,
 ): Stepped {
   if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };

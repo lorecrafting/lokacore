@@ -33,4 +33,4 @@ PM presentation ordering: an active modal scene owns the visible controls; queue
 chapter title until that scene ends. This is a presenter sequence, not a change to scene admission
 or world time. The UI slice documents and verifies the sequence before handoff.
 
-Effect: [owner rules](../system/owner-rules.md#product-and-scope) and [ROADMAP](../ROADMAP.md#c1-slices).
+Effect: [owner rules](../system/owner-rules.md#product-and-scope) and [ROADMAP](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/ROADMAP.md#c1-slices).

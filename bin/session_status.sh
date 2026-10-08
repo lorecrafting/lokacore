@@ -8,7 +8,7 @@ if command -v br >/dev/null 2>&1; then
   br ready 2>/dev/null | head -15
   br blocked 2>/dev/null | head -15
 else
-  echo "br not installed: see docs/WORKFLOW.md#beads-rust"
+  echo "br not installed: see docs/BEADS.md"
 fi
 echo "## Open PRs"
 gh pr list --limit 10 2>/dev/null || echo "gh unavailable"

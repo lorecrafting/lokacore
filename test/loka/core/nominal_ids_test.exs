@@ -76,17 +76,40 @@ defmodule Loka.Core.NominalIdsTest do
     assert Contracts.party_id("A7B8") == {:error, [%{path: "", code: :pattern_mismatch}]}
   end
 
-  # Breaks if the brand rule in bin/contracts.exs and the tag rule in contracts.ex drift apart.
-  test "every TypeScript-branded contract has an Elixir tag constructor, and no other does" do
-    branded =
-      for [_, name] <-
-            Regex.scan(
-              ~r/^export type (\w+) = string & \{ readonly __brand/m,
-              File.read!("kernel/ts/src/contracts.gen.ts")
-            ),
-          do: {name |> Macro.underscore() |> String.to_atom(), 1}
+  # Breaks if the one brand rule (TypeScript brands and Elixir tag constructors both use it)
+  # takes in an enum, a const or a non-string contract, or leaves out a plain string.
+  test "a plain string contract is a nominal id; an enum, a const or another type is not" do
+    assert Contracts.Schema.nominal?(%{"type" => "string", "pattern" => "^a$"})
+    refute Contracts.Schema.nominal?(%{"type" => "string", "enum" => ["a"]})
+    refute Contracts.Schema.nominal?(%{"type" => "string", "const" => "a"})
+    refute Contracts.Schema.nominal?(%{"type" => "integer"})
+  end
 
-    constructors = Contracts.__info__(:functions) -- [defs: 0, validate: 2, validate: 3]
-    assert Enum.sort(constructors) == Enum.sort(branded)
+  @nominal ~w(AccountId Alias AuthorityDomainId CampaignId CapabilityKey CartridgeId CausationId
+              CharacterId ClientFeature CommandId ContentHash ContinuationId CorrelationId
+              DefinitionRefString EffectId EncounterId EntityId EventId EventName InvocationId
+              JobId KernelApiVersion KernelVersion Key LocalProfileId PartyId QuestInstanceId
+              RealmId ReleaseVersion RequirementId StoryPointReportId StoryRunId TextKey
+              WorldContextId ZoneShardId)
+
+  # Breaks if the Elixir tag constructors (contracts.ex) or the TypeScript brands
+  # (bin/contracts.exs decl, regenerated into contracts.gen.ts) stop using the one rule:
+  # each side must equal this hand-written list of nominal contracts.
+  test "Elixir tag constructors and TypeScript brands are the same nominal contracts" do
+    tags = for n <- @nominal, do: n |> Macro.underscore() |> String.to_atom()
+
+    exported =
+      for {f, 1} <- Contracts.__info__(:functions),
+          Contracts.defs()[Macro.camelize(Atom.to_string(f))],
+          do: f
+
+    assert Enum.sort(exported) == Enum.sort(tags)
+
+    brands =
+      Regex.scan(~r/__brand: '(\w+)'/, File.read!("kernel/ts/src/contracts.gen.ts"),
+        capture: :all_but_first
+      )
+
+    assert brands |> List.flatten() |> Enum.sort() == Enum.sort(@nominal)
   end
 end

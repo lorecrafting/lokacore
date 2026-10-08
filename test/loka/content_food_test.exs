@@ -1,8 +1,9 @@
 defmodule Loka.ContentFoodTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
+
   # Breaks: source allows non-recovery food, holder/equipment conflicts or a missing food API/capability.
-  test "held-food source rejects unsafe or unbound consequences", %{tmp_dir: dir} do
+  test "held-food source rejects unsafe or unbound consequences", %{dir: dir} do
     file = "items/apple_01.json"
 
     cases = [
@@ -18,25 +19,18 @@ defmodule Loka.ContentFoodTest do
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "food") end)}
     ]
 
-    Enum.with_index(cases, fn {file, change}, i ->
-      source = Path.join(dir, Integer.to_string(i))
-      File.cp_r!("cartridges/ashmere_missing_child", source)
-      path = Path.join(source, file)
-      changed = change.(JSON.decode!(File.read!(path)))
-      File.write!(path, JSON.encode!(changed))
+    for {file, change} <- cases do
+      changed = change.(JSON.decode!(File.read!(Path.join(dir, file))))
 
-      if get_in(changed, ["edible", "resource"]) == "hp" do
-        resource_path = Path.join(source, "resources.json")
-        resources = JSON.decode!(File.read!(resource_path))
-        regen = resources["resources"]["mv"]["regen"]
+      regen =
+        if get_in(changed, ["edible", "resource"]) == "hp",
+          do: [
+            {"resources.json",
+             &put_in(&1, ["resources", "hp", "regen"], &1["resources"]["mv"]["regen"])}
+          ],
+          else: []
 
-        File.write!(
-          resource_path,
-          JSON.encode!(put_in(resources, ["resources", "hp", "regen"], regen))
-        )
-      end
-
-      assert {:error, _} = Loka.Content.compile(source), file
-    end)
+      assert {:error, _} = Loka.ContentSource.compile(dir, [{file, changed} | regen]), file
+    end
   end
 end

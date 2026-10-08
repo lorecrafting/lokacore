@@ -48,7 +48,9 @@ step e1-tests sh -c 'cd kernel/ts && node --test test/e1*.test.ts'
 out=$logs/recorder
 node kernel/ts/test/e1_cases.ts "$artifact" "$out" > "$logs/recorder.log" 2>&1; rc=$?
 echo "recorder: exit $rc"
-[ "$rc" -eq 2 ] || { tail -n 20 "$logs/recorder.log"; die "recorder exit $rc, want 2 (pending)"; }
+# Recorder exit: 0 pass (nothing pending), 2 pending, 1 failure (docs/system/e1-certification.md).
+want_rc=2; [ "$want" = 0 ] && want_rc=0
+[ "$rc" -eq "$want_rc" ] || { tail -n 20 "$logs/recorder.log"; die "recorder exit $rc, want $want_rc"; }
 counts=$(node -p 'const r = require(process.argv[1]); [r.receipts.length, r.gaps.authored_obligations.length,
   r.dispositioned_obligations.length, r.witnessed_obligations.length].join(" ")' "$out/report.json") ||
   die "cannot read $out/report.json"

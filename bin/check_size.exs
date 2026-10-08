@@ -1,7 +1,7 @@
 # Size limits for Elixir, no deps. Source files at most 300 lines, test files 500, each
 # function clause and `fn` in a source file 40 (first to last line). Tests: under the top
 # `test/`, under `__tests__/`, or named *_test.exs.
-# Scans every git-listed .ex/.exs (or only the given paths), except *.gen.* files. A
+# Scans every tracked .ex/.exs (or only the given paths), except *.gen.* files. A
 # comment line starting `# size: allow N, reason` raises a limit to N (at most 1.5x, only
 # when needed): in lines 1-5 for the file, on the line right above a function (after line
 # 5) for that function; anywhere else it fails. TypeScript: bin/check_ts_size.mjs.
@@ -13,7 +13,7 @@ test_file = ~r{^test/|(^|/)__tests__/|_test\.exs$}
 
 candidates =
   with [] <- System.argv() do
-    {out, 0} = System.cmd("git", ~w(ls-files -z --cached --others --exclude-standard), cd: root)
+    {out, 0} = System.cmd("git", ~w(ls-files -z), cd: root)
     String.split(out, <<0>>, trim: true)
   end
 

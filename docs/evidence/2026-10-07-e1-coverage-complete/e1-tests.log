@@ -1,0 +1,148 @@
+✔ E1 inventory retains slash-bearing v042 definition roots (216.800542ms)
+✔ E1 world settings retain semantic gates and refuse unknown keys (19.518375ms)
+✔ E1 command refuses a different admitted candidate (708.061458ms)
+✔ E1 command fails an unknown applicability obligation (682.964083ms)
+✔ retained repro rechecks the invariant and refuses incomplete or changed inputs (815.294416ms)
+✔ check_hash covers every local module e1_cases.ts imports (16.507125ms)
+(node:76256) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 SQLite case requires complete fault schedule and committed commands (1130.59325ms)
+✔ E1 binds only the witnessed study_tracks consequence after semantic replay (3370.268458ms)
+✔ E1 binds the exact study_tracks recipe and required policy from committed performance (1593.6525ms)
+✔ E1 binds the two bell assignments and the epilogue event to accepted receipts (5124.879333ms)
+✔ E1 witnesses an opened dialogue and only its accepted choice (677.292417ms)
+✔ E1 binds each required predicate of the selected Elspeth report dialogue (2085.033ms)
+✔ E1 binds modal scene steps only to accepted acknowledgements (7809.798708ms)
+✔ E1 binds both selected dream branches and acknowledged scene steps (4362.898458ms)
+✔ E1 recorder passes only with nothing pending and no failure (0.918167ms)
+(node:76257) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 creature deaths witness only exact corpse, loot, population and bleed evidence (10143.539167ms)
+✔ E1 reactions need every exact apply effect and a when holding in their read state (13771.483416ms)
+✔ E1 authored rat corpse needs its exact committed effects (6848.277417ms)
+(node:76258) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 witnesses late debt choices and their sequence steps only from committed effects (6619.120417ms)
+(node:76259) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 training/social circuit pays for lessons and replays every selected conversation (13582.726542ms)
+(node:76261) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 reaches and resolves five post-epilogue conversations in each ending (51900.605083ms)
+(node:76262) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 ancestry witness requires the exact new committed selection (1915.760375ms)
+✔ E1 item witnesses bind the exact original transfer and receipt holders (20871.396333ms)
+✔ E1 NPC witness requires the accepted target in a newly opened dialogue (1317.715167ms)
+(node:76269) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 item round witnesses each static item only by its own committed transfer (3967.331125ms)
+(node:76485) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 witnesses only the selected active journal at each SQLite commit (12822.864834ms)
+(node:76488) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 binds sedge_swim/learn membership only to its resolved committed effect (1762.988083ms)
+✔ E1 binds b_wisp_riddle/answer membership only to its resolved committed effect (4789.856625ms)
+(node:76591) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 Maud cellar earns all five separate deaths and the original reward durably (14582.950167ms)
+(node:76603) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 legal Night in the Marsh route cold reopens and replays completion once (6431.112042ms)
+(node:76668) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 binds Maud objective only on its committed resolved transition (8242.907959ms)
+✔ E1 binds selected dialogue fact adjustment and assignment from committed receipt (6887.0115ms)
+✔ E1 binds only visible entity definitions after committed room entry (927.297042ms)
+✔ E1 binds only the used ferry route on committed arrival (782.637458ms)
+✔ E1 credits a dialogue-resolved objective on the state before the turn-in (1078.535917ms)
+✔ E1 credits only the true child of an any objective (275.094833ms)
+✔ E1 credits an objective holding at both boundaries only where both agree (271.153292ms)
+✔ E1 never credits a negated guard for staying false (121.125708ms)
+✔ E1 double not credits its true positive leaf only (131.557875ms)
+✔ E1 not(all) credits only a polarity-restored true leaf (126.792583ms)
+✔ E1 reports a disposition apart from witnessed and pending paths (161.995667ms)
+✔ E1 a dispositioned dialogue or choice path closes its family gap (114.970541ms)
+✔ E1 binds a refusal row to its case final replayed refusal (1637.760166ms)
+(node:76673) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 optional quest debt-on_time survives SQLite reopen and deterministic repetition (4029.05775ms)
+✔ E1 optional quest dream-follow_fox survives SQLite reopen and deterministic repetition (3422.706125ms)
+✔ E1 optional quest dream-wake survives SQLite reopen and deterministic repetition (3409.714084ms)
+(node:76720) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 escort death, rejoin and pre-bell Elspeth talks witness their exact paths (10169.134ms)
+(node:76744) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 fresh authority route visits 57 literal rooms and reopens before each joined consumer (14948.793ms)
+(node:76771) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 witnesses each Maud service only with its own payment and committed benefit (2038.525ms)
+(node:76801) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 watch rounds cold reopen and replay the four literal post-start checkpoints (12663.740833ms)
+(node:76803) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ E1 wisp-ward cold reopens and replays its literal consequences (4623.628792ms)
+✔ E1 infirmary-herbs cold reopens and replays its literal consequences (11808.086792ms)
+(node:76806) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[local-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [local-path]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ movement is witnessed by a move debiting exactly cost 1 mv (7099.704375ms)
+✔ water is witnessed by entering a route bottom for exactly entry cost 10 (21.994542ms)
+✔ death is witnessed by the player respawning at chapel_nave with hp 10 and mv 100 (19.422667ms)
+✔ death_credit is witnessed by each cellar rat death turning its own fact true (3771.031ms)
+✔ combat is witnessed by a player attack round scheduling the next round 150 later (51.986542ms)
+✔ bands is witnessed by the authored hp band shown after an hp change (79.196208ms)
+✔ hp is witnessed by elapsed recovery of +5 per 3600 s up to 10 (52.196833ms)
+✔ mv is witnessed by rest setting the authored resting rate 36 (658.357333ms)
+✔ bell_cue is witnessed by ringing the bell in the belfry (2491.287458ms)
+✔ carry is witnessed by a take landing on 12000 g and a later too_heavy refusal (48.783709ms)
+✔ pennies, lantern_meals and the cask are witnessed by their committed services (634.342375ms)
+ℹ tests 63
+ℹ suites 0
+ℹ pass 63
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52795.282708
+e1 tests exit 0
