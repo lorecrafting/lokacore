@@ -3,7 +3,7 @@ defmodule Loka.Core.ExpeditionTest do
   alias Loka.Core.{Compose, Contracts}
   @fixture JSON.decode!(File.read!("protocol/fixtures/expedition.json"))
 
-  # Breaks: the independent checker accepts a stale expected row, a rebound instance, a cursor
+  # Breaks: the Elixir composer accepts a stale expected row, a rebound instance, a cursor
   # jump, a reused attempt, a second shelter or a restart after completion.
   test "expedition composition matches literal lifecycle and refusal rows" do
     for c <- @fixture["cases"] do
