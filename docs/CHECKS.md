@@ -79,7 +79,11 @@ their rules and red controls remain available for resumption.
   changes confined to `mobile/` outside `mobile/authority/local-story/`, plus metadata;
   local-story authority/save changes run the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
-  changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`.
+  changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
+  lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
+  changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
+  stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
+  tests run its peers.
   `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
   force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
@@ -89,7 +93,8 @@ their rules and red controls remain available for resumption.
   recorder, a conflict or an oversized untouched file.
   It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
-  It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
+  It also pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
+  a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0).

@@ -1,6 +1,6 @@
 #!/bin/sh
-# Metadata and mobile app changes outside local-story authority use the short lane;
-# local-story authority/save and other code changes run the full line.
+# Metadata and mobile app changes outside local-story authority use the short lane; a push whose
+# other changes are only *.test.ts files skips mix test and credo; everything else runs the full line.
 # ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
 scope=metadata
 seen=0
@@ -15,7 +15,8 @@ while read -r _ local _ remote; do
        advertised=$(git ls-remote "$2" refs/heads/main 2>/dev/null | cut -f1)
        [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { scope=full; continue; } ;;
   esac
-  [ "$(bin/ci_scope.sh "$remote" "$local" code)" = skip ] || scope=full
+  [ "$(bin/ci_scope.sh "$remote" "$local" code)" = skip ] && continue
+  [ "$(bin/ci_scope.sh "$remote" "$local" elixir)" = skip ] && [ "$scope" != full ] && scope=tests || scope=full
 done
 [ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
 [ "$seen" = 1 ] || scope=full
@@ -24,4 +25,5 @@ if [ -n "$passed" ] && [ -z "$(git status --porcelain --untracked-files=all)" ] 
   echo "pre-push: bin/check_all.sh already passed on this clean tree"; exit 0
 fi
 [ "$scope" = metadata ] && exec bin/check_all.sh --metadata
+[ "$scope" = tests ] && exec bin/check_all.sh --no-mix-test
 exec bin/check_all.sh

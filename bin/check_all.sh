@@ -3,6 +3,7 @@
 # which needs the network. Toolchain from mise.toml.
 # --metadata runs docs and tracker guards for a verified metadata or Book-only push.
 # --no-ts remains available for a focused local Elixir run.
+# --no-mix-test skips mix test and credo for a push whose code changes are only *.test.ts files.
 set -e
 cd "$(dirname "$0")/.."
 export MIX_ENV=test
@@ -26,8 +27,8 @@ m elixir bin/contracts.exs --check
 m elixir bin/features.exs --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
-m mix test
-m mix credo --strict
+[ "${1-}" = --no-mix-test ] || m mix test
+[ "${1-}" = --no-mix-test ] || m mix credo --strict
 m elixir bin/check_size.exs
 m elixir bin/red_controls.exs
 m ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
@@ -48,5 +49,5 @@ m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
 git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
-[ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
+[ -z "${1-}" ] && [ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
 true
