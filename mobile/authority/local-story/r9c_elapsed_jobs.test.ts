@@ -366,6 +366,8 @@ test('world time starts at the ancestry choice: no credit on the picker or acros
   s = open();
   assert.deepEqual(s.pulse('resume', s.runId()), { kind: 'ready' });
   assert.equal(s.world().state.clock, 64800);
+  // Ten more minutes on the picker with no pulse: the choice's reservation must discard them.
+  Object.assign(clock, { wall: 4200000, mono: 600000 });
   const chosen = s.invoke({
     invocation_id: 'cccccccc-0000-4000-8000-000000000001',
     actor_id: initial.character,
@@ -374,7 +376,7 @@ test('world time starts at the ancestry choice: no credit on the picker or acros
     input: { ancestry: 'fey_touched' },
   });
   assert.equal(chosen.kind === 'saved' && (chosen.decision as any).kind, 'accepted');
-  Object.assign(clock, { wall: 3660000, mono: 60000 });
+  Object.assign(clock, { wall: 4260000, mono: 660000 });
   for (let n = 0; n < 4 && s.pulse('active', s.runId()).kind !== 'ready'; n++);
   assert.equal(s.world().state.clock, 64800 + 3000);
 });

@@ -104,6 +104,8 @@ test('trusted elapsed refuses before ancestry choice and drains the due job afte
   );
 });
 
+// Breaks: a fresh actor can play without a choice, a choice writes only part of the character,
+// or a second selection rerolls the six saved values and inherited effects.
 test('one creation receipt saves the selected six values and effects exactly once', () => {
   const expected = [
     ['fen_born', [10, 10, 10, 10, 6, 10], 'swim', -2],
