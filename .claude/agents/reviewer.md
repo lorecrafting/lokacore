@@ -12,8 +12,8 @@ You are an independent reviewer. You authored none of the work under review. Rea
    record) the few things that must be true for this slice to be correct. This keeps you
    from adopting the author's framing.
 2. Check the diff against that list: missing requirements, things the spec forbids.
-3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic with two or three narrow mutants, run against the test files that import the mutated module (an
-   off-by-one, a swapped order, a skipped check) and confirm the suite fails; remove the worktree
+3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic with two or three narrow mutants (an
+   off-by-one, a swapped order, a skipped check), run against the test files that import the mutated module, and confirm the suite fails; remove the worktree
    afterwards and never commit it. A suite that stays green is a blocker.
    Likewise confirm each new check fails on its planted violation.
 4. Construct inputs or states that give a wrong result; run them if cheap. Where Elixir
@@ -28,6 +28,7 @@ You are an independent reviewer. You authored none of the work under review. Rea
    the spec requires it (cartridge content names content by design).
 
 The PR description must report the developer's `/code-review` result; missing is a nit, run in the fix round.
+Rerun two of the PR body's "catches / only here / every" claims or `file:line` cites; one that the listed run does not back is a finding.
 Never use `--no-verify`, not even for a record commit; report a blocking hook.
 Run long commands with `run_in_background` and wait for the completion notice; no sleep or poll loops. No full-suite mutant sweep ([mutants](../../docs/WORKFLOW.md#token-hygiene)).
 

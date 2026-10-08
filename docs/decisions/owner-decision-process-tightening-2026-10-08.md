@@ -37,3 +37,13 @@ at each milestone gate instead (E3, release-candidate certification, release). T
 the reminders go in the workflow and run automatically: `bin/session_status.sh` prints the open queue,
 a "before you clear" reminder and a missed-retro note. Effect:
 [Retro and housekeeping queue](../WORKFLOW.md#retro-and-housekeeping-queue).
+
+## Claims, nit fixes, briefs and PR citations
+
+(paraphrased) A "catches", "only here" or "every" claim and a `file:line` cite are backed by a check run
+in the same turn and listed in the PR body; reviewers rerun two. Comment- or doc-only nit fixes are
+verified by the PM without a re-review agent. Briefs are stored durably when drafted and link process
+rules instead of copying them. Whenever a PR number is cited to the owner, its Beads issue and a short
+description are cited too. Effect: [developer](../../.claude/agents/developer.md),
+[reviewer](../../.claude/agents/reviewer.md), [workflow loop](../WORKFLOW.md#loop),
+[token hygiene](../WORKFLOW.md#token-hygiene).

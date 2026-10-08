@@ -63,6 +63,9 @@ Report at the end of the slice, not at every step.
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
    protocol change with new behavior). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
+   Store the brief durably when it is drafted (the issue's Beads notes, `br update <id> --append-notes`,
+   or `docs/briefs/`); a scratchpad copy is only a working file. Link process rules (AGENTS.md,
+   WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
    Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
    Mechanic briefs include the [composition record](system/architecture.md#building-mechanics-by-composition).
@@ -105,7 +108,9 @@ Report at the end of the slice, not at every step.
    the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
-   rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
+   rewrote a core piece or the slice freezes a contract or closes a gate. A comment- or doc-only nit
+   fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
+   diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
    NOTES with nothing open, every required hosted CI check is present and green on the
@@ -138,7 +143,7 @@ Report at the end of the slice, not at every step.
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
-   PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
+   PR link, verdict, notes; cite every PR as #N (Beads id, short description). Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
@@ -250,7 +255,7 @@ A slice that changes what the player sees consults the [designer](decisions/owne
   an open review merely to shorten context.
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
-- PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
+- PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
 - Start a new slice agent with a self-contained brief and no inherited chat
   history; keep a visited path/revision list while following doc links. Reuse
