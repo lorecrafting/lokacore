@@ -33,3 +33,11 @@
 Checked and dropped: `reduced` in the effect deps (`PageTurn.tsx:113`) cannot dispose a drawn image mid-curl, because `useReducedMotion` returns a value read once at module load.
 
 Over-engineering: none found; `sksl-transformer.cjs` is the smallest way to share one shader file.
+
+## Fix round 1 (head `2c8cdd7b`)
+
+- Scope: commit `2c8cdd7b` only (one line, `mobile/app/tests/page_turn.e2e.ts:70`).
+- Finding 1: **closed**. Bound is now `>= 80`. Normal runs measured 166.7 to 200 ms (24 runs), so the margin is now about five frames. The `ReduceMotion.System` red control measured 0 ms in 8 of 8 runs on the identical component code, and the developer saw it fail at the new bound. I did not re-run it, because the fix touches only the bound.
+- Finding 2: moved to Beads loka-78r (wiring slice) by the PM; accepted.
+- Nit 3: no action; accepted.
+- Verdict: **APPROVE**.
