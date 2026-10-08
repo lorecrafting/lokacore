@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "str": {
+      "start": 10
+    },
+    "dex": {
+      "start": 10
+    },
+    "con": {
+      "start": 10
+    },
+    "per": {
+      "start": 5
+    },
+    "int": {
+      "start": 10
+    },
+    "spi": {
+      "start": 10
+    }
+  }
+}

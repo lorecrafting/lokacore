@@ -1,0 +1,21 @@
+{
+  "title": "quest.lantern.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "dream_seen",
+        "equals": true
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.lantern.active",
+    "objectives_met": "quest.lantern.resolved",
+    "resolved": "quest.lantern.resolved",
+    "failed": "quest.lantern.active",
+    "abandoned": "quest.lantern.active"
+  }
+}

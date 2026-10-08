@@ -1,0 +1,31 @@
+{
+  "npc": "wick",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "wick"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_bandage",
+      "equals": false
+    }
+  },
+  "prompt": "wick.bandage.prompt",
+  "choices": {
+    "learn": {
+      "label": "wick.bandage.choice",
+      "narration": "wick.bandage.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "bandage"
+        }
+      ]
+    }
+  },
+  "label": "wick.bandage.choice"
+}

@@ -1,0 +1,29 @@
+{
+  "title": "room.ferry_landing.title",
+  "description": "room.ferry_landing.description",
+  "exits": {
+    "north": {
+      "to": "well_lane"
+    },
+    "south": {
+      "to": "reed_path"
+    },
+    "west": {
+      "to": "boathouse"
+    }
+  },
+  "details": {
+    "notice": {
+      "aliases": [
+        "notice",
+        "landing_notice"
+      ],
+      "description": "detail.notice.description",
+      "readable": {
+        "label": "actions.read_notice",
+        "text": "readable.notice",
+        "title": "detail.notice.title"
+      }
+    }
+  }
+}

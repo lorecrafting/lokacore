@@ -1,0 +1,37 @@
+{
+  "npc": "elspeth",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "rescued"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.elspeth_rescued.prompt",
+  "roles": {
+    "elspeth": {
+      "role": "npc",
+      "npc": "elspeth"
+    }
+  },
+  "choices": {
+    "acknowledge": {
+      "label": "dialogue.elspeth_rescued.acknowledge",
+      "narration": "narration.elspeth_rescued"
+    },
+    "directions": {
+      "label": "dialogue.elspeth.directions",
+      "narration": "narration.elspeth.directions"
+    },
+    "inn": {
+      "label": "dialogue.elspeth.inn",
+      "narration": "narration.elspeth.inn"
+    }
+  }
+}

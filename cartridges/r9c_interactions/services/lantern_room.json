@@ -1,0 +1,12 @@
+{
+  "provider": "maud",
+  "currency": "pennies",
+  "action": "rent_lantern_room",
+  "label": "service.room",
+  "narration": "service.room.used",
+  "price": 4,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "lantern_bed_paid"
+  }
+}

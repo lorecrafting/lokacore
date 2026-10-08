@@ -1,0 +1,47 @@
+{
+  "on": {
+    "action": "begin_epilogue_lost_prior",
+    "room": "village_green",
+    "detail": "market_cross",
+    "outcome": "success"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_lost_prior.1"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_lost_prior.2"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.epilogue_lost_prior.3"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "on_end": {
+    "assign": [
+      {
+        "fact": "memory_village_ending",
+        "value": "lost"
+      },
+      {
+        "fact": "memory_fox_fate",
+        "value": "stilled"
+      },
+      {
+        "fact": "memory_chapter_1_guild_tilt",
+        "value": "prior"
+      }
+    ],
+    "story_point": "prologue_completed",
+    "outcome": "lost_prior"
+  }
+}

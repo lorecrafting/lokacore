@@ -1,0 +1,36 @@
+{
+  "npc": "elspeth",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.elspeth.prompt",
+  "roles": {
+    "elspeth": {
+      "role": "npc",
+      "npc": "elspeth"
+    }
+  },
+  "choices": {
+    "directions": {
+      "label": "dialogue.elspeth.directions",
+      "narration": "narration.elspeth.directions"
+    },
+    "inn": {
+      "label": "dialogue.elspeth.inn",
+      "narration": "narration.elspeth.inn"
+    },
+    "wren": {
+      "label": "dialogue.elspeth.wren",
+      "narration": "narration.elspeth.wren"
+    },
+    "accept": {
+      "label": "dialogue.elspeth.accept",
+      "narration": "narration.elspeth.accept",
+      "accept": "first_lead"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "npc": "vesper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_wren_met",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_vesper_riddle_answered",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.b_vesper_riddle.prompt",
+  "roles": {
+    "vesper": {
+      "role": "npc",
+      "npc": "vesper"
+    },
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "answer": {
+      "label": "dialogue.b_vesper_riddle.answer",
+      "narration": "narration.b_vesper_riddle",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fen_vesper_riddle_answered",
+          "value": true
+        }
+      ]
+    }
+  },
+  "riddle": {
+    "choice_id": "answer",
+    "answer": "lantern",
+    "bank": [
+      "R",
+      "N",
+      "A",
+      "O",
+      "L",
+      "T",
+      "E",
+      "N",
+      "S"
+    ],
+    "wrong": "narration.vesper_wrong"
+  }
+}

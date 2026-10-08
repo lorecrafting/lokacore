@@ -1,0 +1,27 @@
+{
+  "npc": "vesper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.vesper.prompt",
+  "roles": {
+    "vesper": {
+      "role": "npc",
+      "npc": "vesper"
+    },
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "greet": {
+      "label": "dialogue.vesper.greet",
+      "narration": "narration.vesper"
+    }
+  }
+}

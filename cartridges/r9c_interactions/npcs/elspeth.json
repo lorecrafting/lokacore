@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "elspeth",
+    "mother"
+  ],
+  "short": "npc.elspeth.short",
+  "room_line": "npc.elspeth.room",
+  "description": "npc.elspeth.description",
+  "room": "ferry_landing"
+}

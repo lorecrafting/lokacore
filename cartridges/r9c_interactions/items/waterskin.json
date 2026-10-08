@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "waterskin",
+    "waterskin"
+  ],
+  "short": "item.waterskin.short",
+  "room_line": "item.waterskin.room",
+  "description": "item.waterskin.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": null,
+      "quantity": 0
+    }
+  }
+}

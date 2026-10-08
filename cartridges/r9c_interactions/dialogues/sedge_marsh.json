@@ -1,0 +1,25 @@
+{
+  "npc": "sedge",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "sedge"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "fen_night_survived",
+      "equals": true
+    }
+  },
+  "prompt": "marsh.sedge.prompt",
+  "choices": {
+    "acknowledge": {
+      "label": "marsh.sedge.choice",
+      "narration": "marsh.sedge.acknowledged"
+    }
+  },
+  "label": "marsh.sedge.action"
+}

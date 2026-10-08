@@ -1,0 +1,19 @@
+{
+  "title": "room.chapel_steps.title",
+  "description": "room.chapel_steps.description",
+  "exits": {
+    "south": {
+      "to": "north_gate"
+    },
+    "north": {
+      "to": "chapel_nave",
+      "barrier": "chapel_door",
+      "knock": {
+        "npc": "aldric",
+        "room": "chapel_nave",
+        "answered": "knock.chapel.answered",
+        "unanswered": "knock.chapel.unanswered"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "npc": "aldric",
+  "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } },
+  "prompt": "dialogue.aldric.prompt",
+  "roles": { "aldric": { "role": "npc", "npc": "aldric" } },
+  "choices": {
+    "bell": { "label": "dialogue.aldric.bell", "narration": "narration.aldric.bell" },
+    "leave": { "label": "dialogue.aldric.leave", "narration": "narration.aldric.leave" }
+  }
+}

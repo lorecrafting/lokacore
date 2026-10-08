@@ -1,0 +1,306 @@
+{
+  "api_version": "loka/v3",
+  "id": "r9c_interactions",
+  "version": "0.0.1",
+  "title": "R9C interactions (synthetic)",
+  "ancestries": {
+    "fen_born": {
+      "label": "ancestry.fen_born.label",
+      "description": "ancestry.fen_born.description",
+      "attribute": "per",
+      "modifier": 1,
+      "skill": "swim",
+      "faction": {
+        "fact": "priory_fen_axis",
+        "value": -2
+      }
+    },
+    "road_born": {
+      "label": "ancestry.road_born.label",
+      "description": "ancestry.road_born.description",
+      "attribute": "dex",
+      "modifier": 1,
+      "skill": "haggle"
+    },
+    "hill_folk": {
+      "label": "ancestry.hill_folk.label",
+      "description": "ancestry.hill_folk.description",
+      "attribute": "con",
+      "modifier": 1,
+      "dark_sight": true
+    },
+    "fey_touched": {
+      "label": "ancestry.fey_touched.label",
+      "description": "ancestry.fey_touched.description",
+      "attribute": "spi",
+      "modifier": 1,
+      "faction": {
+        "fact": "priory_fen_axis",
+        "value": -2
+      }
+    }
+  },
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.37",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "barrier": 1,
+      "equipment": 1,
+      "position": 1,
+      "policy": 1,
+      "fact": 1,
+      "quest": 1,
+      "dialogue": 1,
+      "description_variant": 1,
+      "calendar": 1,
+      "schedule": 1,
+      "death": 1,
+      "combat": 1,
+      "inspectable_detail": 1,
+      "readable": 1,
+      "reaction": 1,
+      "action_recipe": 1,
+      "escort": 1,
+      "scene": 1,
+      "commerce": 1,
+      "light": 1,
+      "skills": 1,
+      "attributes": 1,
+      "patrol": 1,
+      "liquid": 1,
+      "service": 1,
+      "transport": 1,
+      "behavior": 1,
+      "population": 1,
+      "resource": 1,
+      "food": 1,
+      "bleed": 1,
+      "water": 1,
+      "expedition": 1,
+      "knowledge": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "ferry_landing",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "calendar": {
+    "start": 64800,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 60,
+    "solar": [
+      {
+        "at": 18000,
+        "phase": "dawn"
+      },
+      {
+        "at": 25200,
+        "phase": "day"
+      },
+      {
+        "at": 64800,
+        "phase": "dusk"
+      },
+      {
+        "at": 72000,
+        "phase": "night"
+      }
+    ],
+    "lunar": {
+      "period": 2419200,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "new"
+        },
+        {
+          "at": 302400,
+          "phase": "waxing_crescent"
+        },
+        {
+          "at": 604800,
+          "phase": "first_quarter"
+        },
+        {
+          "at": 907200,
+          "phase": "waxing_gibbous"
+        },
+        {
+          "at": 1209600,
+          "phase": "full"
+        },
+        {
+          "at": 1512000,
+          "phase": "waning_gibbous"
+        },
+        {
+          "at": 1814400,
+          "phase": "last_quarter"
+        },
+        {
+          "at": 2116800,
+          "phase": "waning_crescent"
+        }
+      ]
+    }
+  },
+  "chapters": [
+    {
+      "title": "chapter.missing_child"
+    },
+    {
+      "title": "chapter.prologue_complete",
+      "story_point": "prologue_completed"
+    }
+  ],
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 90,
+        "key": "slightly_scratched",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 80,
+        "key": "few_bruises",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 70,
+        "key": "some_cuts",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 60,
+        "key": "several_wounds",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 50,
+        "key": "many_nasty_wounds",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 40,
+        "key": "bleeding_freely",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 30,
+        "key": "covered_in_blood",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 20,
+        "key": "leaking_guts",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 10,
+        "key": "almost_dead",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "movement": {
+      "cost": {
+        "resource": "mv",
+        "amount": 1
+      }
+    },
+    "carry": {
+      "max_grams": 12000
+    },
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "rat_corpse",
+      "shrine": "chapel_nave",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died",
+        "dodge": "combat.dodge",
+        "block": "combat.block"
+      },
+      "dodge": {
+        "skill": "dodge",
+        "chance": 50
+      }
+    },
+    "water": {
+      "skill": "swim",
+      "maximum_grams": 6000,
+      "entry_cost": 10,
+      "duration": 6000,
+      "warning": "water.warning",
+      "drowned": "water.drowned",
+      "routes": [
+        {
+          "surface": "well_shaft",
+          "bottom": "well_bottom"
+        }
+      ]
+    },
+    "bell_cue": {
+      "fact": "chapel_bell_rung",
+      "rooms": [
+        "boathouse",
+        "chandler",
+        "drowned_lantern",
+        "east_gate",
+        "ferry_landing",
+        "inn_rooms",
+        "north_gate",
+        "village_green",
+        "watch_post",
+        "well_bottom",
+        "well_lane",
+        "well_shaft",
+        "chapel_steps",
+        "chapel_nave",
+        "bell_tower",
+        "belfry"
+      ],
+      "text": "narration.bell_cue"
+    }
+  }
+}

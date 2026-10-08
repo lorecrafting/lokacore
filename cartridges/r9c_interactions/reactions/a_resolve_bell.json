@@ -1,0 +1,8 @@
+{
+  "on": { "event": "fact_changed", "fact": "chapel_bell_rung" },
+  "when": { "policy_version": 1, "root": { "op": "all", "items": [
+    { "op": "fact_compare", "fact": "chapel_bell_rung", "equals": true },
+    { "op": "quest_state", "quest": "bell_of_ashmere", "state": "active" }
+  ] } },
+  "apply": [ { "op": "quest.resolve", "quest": "bell_of_ashmere", "outcome": "prior" } ]
+}
