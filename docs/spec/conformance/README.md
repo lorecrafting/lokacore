@@ -3,15 +3,8 @@
 **Status:** executable specification examples, pending normal packet acceptance. Not a production v3 engine, R1 candidate, full cartridge compiler, mobile build, or release certificate.
 
 Continuing readiness/numeric tooling uses [isolated Mix/ExUnit](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/spec_tools/README.md).
-The Python commands below remain the temporary comparison and abstract-model suite,
-not a production runtime. Coverage mapping and retirement boundaries are explicit.
-
-Run from the repository root:
-
-```sh
-python3 -m unittest discover -s docs/rewrite-v3/checks -p 'test_*.py' -v
-python3 docs/rewrite-v3/checks/release_scope.py --check
-```
+The Python suite (`checks/`, `python3 -m unittest`) lives in the legacy repository, linked above; it is not in this tree.
+It was the temporary comparison and abstract-model suite, not a production runtime. The fixtures here are consumed by both kernels' tests.
 
 The checked-in JSON cases contain explicit inputs and expected projected state/results. `checks/contract_model.py` is a deliberately small standard-library Python model of receipt admission, one offered quest, a check, and a transaction boundary. It does not implement the entire YAML cartridge grammar. It models failure injection; it does not prove SQLite, PostgreSQL, BEAM, Hermes or a native FFI. Known-bad mutations in the tests establish sensitivity only to the listed defects. Passing examples are not a proof over all possible game traces.
 

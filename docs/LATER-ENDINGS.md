@@ -1,6 +1,6 @@
 # Later-story ending table and planning proof note
 
-2026-10-04. Canonical selectors/text for the [PM-selected future policy](decisions/pm-decision-later-story-reconciliation-2026-10-04.md); source-only draft awaiting independent docs review. Astra supplied the supporting design at merged main `6d9712ef`. Narrative text fixes semantic distinctions for review; final literary copy still needs normal prose approval.
+2026-10-04. Canonical selectors/text for the [PM-selected future policy](decisions/pm-decision-later-story-reconciliation-2026-10-04.md); source-only draft awaiting independent docs review. A planning agent supplied the supporting design at merged main `6d9712ef`. Narrative text fixes semantic distinctions for review; final literary copy still needs normal prose approval.
 
 This is future content policy, not frozen runtime schema or certification. The factored tables below define the complete disjoint selectors and literal semantic review text. The five base rows below preserve the current three child outcomes. The legal and reputation tables are independent selectors: concatenate exactly one paragraph from each table in **base → legal → Priory/Fen reputation → Crown reputation** order. They never assign child/allegiance/king history. This gives 135 disjoint presentation rows. Their predicates cover a conservative envelope of 6,615 well-typed inputs (5 pairs × 3 legal contexts × 21 × 21 reputation values). The coverage check is not a claim that every precise numeric reputation value is an authored reachable fixture.
 

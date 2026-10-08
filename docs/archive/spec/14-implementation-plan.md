@@ -1,7 +1,7 @@
 # 14 — Implementation Plan and Dependency Graph
 
 <!-- packet-navigation:start -->
-[Review guide](REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
+[Review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
 
 **Reader context:** Governing milestone tasks and gates.
 
@@ -50,7 +50,7 @@ Use the plain-English R guide first. Numbers are stable labels; R6P pulls select
 
 The full first release remains chapter one: **57 rooms, 10 quests, two endings**. LLM-assisted authoring and reasoning are part of the plan. A separate small **R6P playable proof** tests the from-scratch engine before that release; it is not a reduced chapter or a legacy-engine migration.
 
-[Plain-English milestone guide](R-MILESTONES.md) · [Human/LLM review guide](REVIEW-GUIDE.md). Phase numbers are stable identifiers, not a completion checklist or a strict sequence. R3A/R3B are parts of R3; R12A is part of R12; R6P/R9C are additional named milestones.
+[Plain-English milestone guide](R-MILESTONES.md) · [Human/LLM review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md). Phase numbers are stable identifiers, not a completion checklist or a strict sequence. R3A/R3B are parts of R3; R12A is part of R12; R6P/R9C are additional named milestones.
 
 [release-scope.md](../../spec/release-scope.md), generated from the reviewed [release-scope.json](../../spec/release-scope.json), makes the chapter/proof capability and gate applicability explicit. Detailed catalogs remain design material; a later feature in a phase's catalog is NOT a prerequisite for an earlier release. Applicable safety gates cannot be waived. R0/R1 acceptance and R2 specification cutover remain required before production engine work.
 

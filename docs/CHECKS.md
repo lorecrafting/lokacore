@@ -68,7 +68,7 @@ records its focused baseline, corrected tests and six independent red controls.
   out-of-subset schema, an Elixir adapter without a differential, a stale feature map, an
   implemented capability without its map cells, and a PartyId passed where a CharacterId is
   matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
-- `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
+- `elixir bin/check_docs.exs`: relative links and `#anchor`s resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session); each `path:line` code
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,

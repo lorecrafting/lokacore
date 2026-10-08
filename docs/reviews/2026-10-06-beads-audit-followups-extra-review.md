@@ -6,7 +6,7 @@ Source branch: `docs/beads-audit-followups`. Exact source reviewed:
 `18d0c847defdba38a7dbbf29852240d06b17eb56`; base:
 `06f6df8077eabba9573e4ae2d2186e5443826e3c`. Fresh reviewer authored none of this source change.
 
-Governing requirements: [Beads pilot](../WORKFLOW.md#beads-rust-pilot),
+Governing requirements: [Beads pilot](../WORKFLOW.md#beads-rust),
 [owner extension](../decisions/owner-decision-beads-audit-followups-2026-10-06.md),
 [export contract](../CHECKS.md), and [test discipline](../../AGENTS.md#writing-tests-every-change-every-agent).
 All 33 planned slices must remain exactly once; supplemental rows must preserve
