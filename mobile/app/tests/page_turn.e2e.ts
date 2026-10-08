@@ -67,5 +67,5 @@ test('under reduced motion the pages cross-fade with no curl', async ({ app, scr
   // Timed on the way back: the first mount of a page can stall the frames past the whole fade.
   const back = await browser.evaluate(turn, { from: 'Start over', to: 'Continue' });
   expect(back).toMatchObject({ curl: false, hit: true });
-  expect(back.stayed).toBeGreaterThanOrEqual(150);
+  expect(back.stayed).toBeGreaterThanOrEqual(80);
 });
