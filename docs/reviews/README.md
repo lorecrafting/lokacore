@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [Skip CI on drafts](2026-10-07-skip-ci-on-drafts-review.md): PR #300 at `fb20785a`, independent CI-gate **APPROVE WITH NOTES**; every pull_request job skips on a draft (live runs on `fb20785a` all skipped, ready run green on all 7 jobs), job set equals main, dispatch runs by `null != true`, stubbed queue never merges a draft, failing or mismatched head; 1 should-fix (queue merges an all-skipped head if marked ready with no later push and queued before the ready run registers; no branch protection backstop), 1 nit (stale `lint always runs` comment at ci.yml:33).
+
 - [E1 re-split issues](2026-10-07-e1-resplit-issues-review.md): PR #299 at `013f0a66`, independent tracker-only **APPROVE WITH NOTES**; 5 new E1 rows parent-linked with recorder/PR #288/`cad4e3a3` evidence, 21+23+19+18+14=95 matching the pending list, .2–.4 closed as superseded, `--complete` passes; 1 should-fix (.6 still open, but .11 now owns its 14 paths), 1 nit (.6 note counts 15). Fix `5e370a70`: **APPROVE**, nothing open; .6 is in_progress and its notes point to .11.
 
 - [Designer role](2026-10-07-designer-role-review.md): PR #298 at `e6d7a078`, independent docs-only **APPROVE WITH NOTES**; fix round 1 at `07edea35` **APPROVE**: routing row now always adds a fresh reviewer for designer text.
