@@ -273,3 +273,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Orphan provisional fixture cleanup](pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
 
 - [E1 branch evidence](owner-decision-e1-branch-evidence-2026-10-07.md): `any` children credit only when true at the accepted action; negative-polarity guards need a reviewed disposition, reported separately from witnessed paths.
+
+- [E1 batch F world witnesses](pm-decision-e1-batch-f-world-witness-2026-10-07.md): one exact exercise of each world setting's primary literal; `ma` left to batch E; carry witnessed by an accepted load at exactly `max_grams` plus a `too_heavy` refusal.
