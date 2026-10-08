@@ -204,7 +204,8 @@ test('room is focused while Map retains directions and every detail returns to t
   h.sql.close();
 });
 
-// Breaks: a recovery read after commit escapes the press, hiding the result and retaining retry context.
+// Breaks: a recovery read after commit escapes the press, hiding the result and retaining retry
+// context, or its reason sits inside the Start over button where its label hides it.
 test('a postcommit narration read fault preserves the saved result and clears retry context', () => {
   const h = book();
   h.tap('Old Bram, open');
@@ -219,11 +220,11 @@ test('a postcommit narration read fault preserves the saved result and clears re
     result,
     { text: 'Journal updated', event: true },
   ]);
-  assert.ok(
-    h
-      .text()
-      .includes('Saved result; narration recovery unavailable: no such table: missing_narration'),
-  );
+  const fault = 'Saved result; narration recovery unavailable: no such table: missing_narration';
+  assert.ok(h.text().includes(fault));
+  // A screen reader hears the reason too, not only the Start over button's label.
+  const startOver = h.draw().find((n) => n.props?.accessibilityLabel === 'Start over');
+  assert.ok(startOver && !words(startOver).includes(fault));
   h.tap('Leave');
   h.map();
   h.tap('Go north'); // a fresh move, not a replay of the committed choice

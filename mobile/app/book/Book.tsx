@@ -226,17 +226,20 @@ type Screen = ReturnType<Presenter['screen']>;
 
 // A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
 // that any press still sends (03 §14).
+// The message sits outside the button: its accessibilityLabel replaces the children it reads.
 function Fault(p: { fault: string; startOver: () => void }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Start over"
-      onPress={p.startOver}
-      style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
-    >
+    <View style={{ alignItems: 'center' }}>
       <Text style={{ ...small, color: paper.dim }}>{p.fault}</Text>
-      <Text style={{ ...small, color: paper.accent }}>start over</Text>
-    </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Start over"
+        onPress={p.startOver}
+        style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Text style={{ ...small, color: paper.accent }}>start over</Text>
+      </Pressable>
+    </View>
   );
 }
 
