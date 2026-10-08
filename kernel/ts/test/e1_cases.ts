@@ -15,6 +15,7 @@ import {
   caseHost,
   coverage,
   witnessedObligations,
+  type CaseHost,
   type LoadedCandidate,
   type Coverage,
 } from './e1_case_host.ts';
@@ -50,6 +51,47 @@ type Disposition = {
 };
 const DISPOSITIONS: Disposition[] = read('kernel/ts/test/e1_dispositions.json');
 
+// Every recorded case in run order: [case id, recipe, fault schedule]; replay admits only these ids.
+const CASES: (readonly [string, (a: CaseHost, path: string) => object | void, object[]?])[] = [
+  ...ENDINGS.map(
+    ([child, allegiance, fox]) =>
+      [
+        `${child}-${allegiance}`,
+        (a: CaseHost) => epilogueTalks(a, child, allegiance, fox),
+      ] as const,
+  ),
+  ['topology', topology],
+  ['dialogue-circuit', dialogueCircuit],
+  ['ancestry-fey', feyAncestry],
+  ['watch-rounds', watchRounds],
+  ['wisp-ward', wispWard],
+  ['infirmary-herbs', infirmaryHerbs],
+  ['mauds-cellar', maudsCellar],
+  ['lantern-services', lanternServices],
+  ['creatures', creatures],
+  ['item-round', itemRound],
+  ['night-marsh', nightMarsh],
+  ['rejoin', rejoin],
+  ['elspeth-stays', elspethStays],
+  ['carry-limit', carryLimit],
+  ['debt-on_time', chandlersDebt],
+  ['debt-late', debtLate],
+  ['debt-elapsed', debtElapsed],
+  ...(['follow_fox', 'wake'] as const).map(
+    (branch) => [`dream-${branch}`, (a: CaseHost) => lanternDream(a, branch)] as const,
+  ),
+  ...REFUSALS,
+  ['thirty-days', thirtyDays],
+  ...FAULTS.map(
+    (fault) =>
+      [
+        `sqlite-${fault}`,
+        (a: CaseHost, path: string) => storageFault(a, path, fault),
+        faultSchedule(fault),
+      ] as const,
+  ),
+];
+
 export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType<typeof source>) {
   const loaded = admitCandidate(bytes),
     events = text
@@ -68,38 +110,9 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   assert.deepEqual(start.host_clock, { wall: 10000, mono: 0 });
   assert.equal(start.rng.algorithm, 'xoshiro128**');
   assert.equal(start.identity.algorithm, 'loka-id-v1');
-  const fault = FAULTS.find((f) => start.case_id === `sqlite-${f}`);
-  assert.ok(
-    fault ||
-      start.case_id === 'thirty-days' ||
-      start.case_id === 'topology' ||
-      [
-        'ancestry-fey',
-        'watch-rounds',
-        'wisp-ward',
-        'infirmary-herbs',
-        'mauds-cellar',
-        'night-marsh',
-        'dialogue-circuit',
-        'lantern-services',
-        'creatures',
-        'item-round',
-        'rejoin',
-        'elspeth-stays',
-        'carry-limit',
-      ].includes(start.case_id) ||
-      REFUSALS.some(([name]) => start.case_id === name) ||
-      ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
-        start.case_id,
-      ) ||
-      ENDINGS.some(([child, allegiance]) => start.case_id === `${child}-${allegiance}`),
-    'unknown E1 case',
-  );
-  assert.deepEqual(
-    start.fault_schedule,
-    fault ? faultSchedule(fault) : [],
-    'incomplete fault schedule',
-  );
+  const known = CASES.find(([name]) => name === start.case_id);
+  assert.ok(known, 'unknown E1 case');
+  assert.deepEqual(start.fault_schedule, known[2] ?? [], 'incomplete fault schedule');
   assert.deepEqual(
     start.fault_schedule,
     events.filter((e) => e.kind === 'fault').map(({ kind: _, ...e }) => e),
@@ -252,8 +265,11 @@ export const recorderExit = (failure: string | null, open: Record<string, string
   failure ? 1 : Object.values(open).some((x) => x.length) ? 2 : 0;
 
 function recordCases(bytes: Uint8Array, out: string) {
-  const loaded = admitCandidate(bytes),
-    identity = source(),
+  const loaded = admitCandidate(bytes);
+  // Dispositions and cases are v042's; refuse any other admitted candidate before writing.
+  if (loaded.row.id !== 'ashmere_missing_child')
+    throw new Error(`E1 recorder records ashmere_missing_child v042 only, not ${loaded.row.id}`);
+  const identity = source(),
     machine = host(),
     seen = coverage(),
     witnessed = new Set<string>();
@@ -263,11 +279,7 @@ function recordCases(bytes: Uint8Array, out: string) {
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
   const receipts: object[] = [],
     finals = new Map<string, Final>();
-  const run = (
-    name: string,
-    recipe: (a: ReturnType<typeof caseHost>, path: string) => object | void,
-    fault_schedule: object[] = [],
-  ) => {
+  const run = (name: string, recipe: (typeof CASES)[number][1], fault_schedule: object[] = []) => {
     const path = join(out, `${name}.db`),
       log = join(out, `${name}.jsonl`);
     const a = caseHost(loaded, path, log, `loka-kernel@${identity.source_sha}`, {
@@ -312,32 +324,10 @@ function recordCases(bytes: Uint8Array, out: string) {
   };
   let failure: string | null = null;
   try {
-    for (const [child, allegiance, fox] of ENDINGS)
-      run(`${child}-${allegiance}`, (a) => epilogueTalks(a, child, allegiance, fox));
-    run('topology', topology);
-    run('dialogue-circuit', dialogueCircuit);
-    run('ancestry-fey', feyAncestry);
-    run('watch-rounds', watchRounds);
-    run('wisp-ward', wispWard);
-    run('infirmary-herbs', infirmaryHerbs);
-    run('mauds-cellar', maudsCellar);
-    run('lantern-services', lanternServices);
-    run('creatures', creatures);
-    run('item-round', itemRound);
-    run('night-marsh', nightMarsh);
-    run('rejoin', rejoin);
-    run('elspeth-stays', elspethStays);
-    run('carry-limit', carryLimit);
-    run('debt-on_time', chandlersDebt);
-    run('debt-late', debtLate);
-    run('debt-elapsed', debtElapsed);
-    for (const branch of ['follow_fox', 'wake'] as const)
-      run(`dream-${branch}`, (a) => lanternDream(a, branch));
-    for (const [name, recipe] of REFUSALS) run(name, recipe);
-    checkRefusals(finals);
-    run('thirty-days', thirtyDays);
-    for (const fault of FAULTS)
-      run(`sqlite-${fault}`, (a, path) => storageFault(a, path, fault), faultSchedule(fault));
+    for (const [name, recipe, schedule] of CASES) {
+      run(name, recipe, schedule);
+      if (name === REFUSALS.at(-1)?.[0]) checkRefusals(finals); // before the cases after them
+    }
     assert.deepEqual(source(), identity, 'source changed while recording');
   } catch (e) {
     failure = redact(String(e));
@@ -374,7 +364,13 @@ function recordCases(bytes: Uint8Array, out: string) {
     files.map((f) => `${sha256(readFileSync(join(out, f)))}  ${f}\n`).join(''),
     { flag: 'wx' },
   );
-  process.stdout.write(`${status}: ${receipts.length} real SQLite cases passed\n`);
+  process.stdout.write(
+    `${status}: ${receipts.length} of ${CASES.length} real SQLite cases passed\n`,
+  );
+  // Name what failed or is still open, so the log alone shows it.
+  if (failure) process.stdout.write(`failure: ${failure}\n`);
+  for (const [family, open] of Object.entries(obligations.gaps))
+    if (open.length) process.stdout.write(`gap ${family}: ${open.join(' ')}\n`);
   return exit;
 }
 

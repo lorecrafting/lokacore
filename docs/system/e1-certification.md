@@ -67,8 +67,8 @@ through trusted elapsed input. Reuse existing clock segmentation and invariant c
 player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
 implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
 labeled when needed for a controlled admission or fault boundary.
-The recorder (`e1_cases.ts`) records the v042 chapter only; on r9c bytes it refuses (exit 1)
-before recording any case, because its v042 dispositions do not resolve, so r9c never yields a pass.
+The recorder (`e1_cases.ts`) records the v042 chapter only: a recording run refuses any other
+admitted candidate, r9c included, by name (exit 1) before writing anything, so r9c never yields a pass.
 Independently checked chapter routes enter the recorder as named fresh cases only with
 their literal result assertions intact; their committed steps must pass the same semantic
 replay, SQLite observation and candidate/source checks as the ending cases.

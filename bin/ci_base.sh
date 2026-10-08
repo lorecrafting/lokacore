@@ -5,7 +5,7 @@
 # No `set -e`: it is off inside a function called after `||`, so each call is checked.
 GH=${GH:-gh}
 case ${2-code} in
-  code) jobs='[.jobs[] | select(.conclusion == "success" and (.name | IN("elixir", "typescript", "sim")))] | length'; count=3 ;;
+  code) jobs='[.jobs[] | select(.conclusion == "success" and (.name | IN("elixir", "typescript", "sim", "e1-recorder")))] | length'; count=4 ;;
   browser) jobs='[.jobs[] | select(.conclusion == "success" and .name == "browser")] | length'; count=1 ;;
   *) exit 1 ;;
 esac
