@@ -23,3 +23,12 @@
 
 1. **should-fix** `mobile/authority/local-story/r9c_elapsed_jobs.test.ts:381`: the test never reopens after the choice before a post-choice pulse, so it does not check the save.md clause "re-anchors wall ... evidence". Failure: a change that skips checkpoint writes on the picker (a plausible optimization; today each 250 ms pulse writes a row) credits all picker time after a post-choice reopen (`97800` vs `67800`), and the suite stays green. Fix: close and reopen once after `chosen`, before the final pulse, and assert `67800`.
 2. **nit** `mobile/authority/local-story/invocation.ts:91-95`: when a choice transaction fails, the retry keeps the held reservation and drains without capturing again. If no pulse runs between the attempts, picker time since the first reservation is credited (100 s gap: `72800` vs `67800`). The 250 ms active pulse and pause/resume re-anchor this in the app (`67800` with one pulse between), and it matches the spec text "starts at the selection invocation's reservation". Record only.
+
+## Fix round 1 re-check (`b924d1f2`)
+
+Scope: fix commit `b924d1f2` only (finding dispositions).
+
+- Finding 1 (should-fix) **resolved**: `r9c_elapsed_jobs.test.ts:379-382` closes and reopens after `chosen`, before the first post-choice pulse, and asserts `67800`. Green at head. My mutant from the first round (keep the old wall anchor before the choice) is now red: `actual: 274800, expected: 67800`.
+- Finding 2 (nit) **accepted as record only**: no code change; the app pulse and pause/resume reset the anchor, and this matches the spec text.
+- Kernel forged-id assertion (`character_choice.test.ts:86-90`): outside the save lens, not reviewed.
+- **Verdict: APPROVE.**
