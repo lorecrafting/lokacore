@@ -12,7 +12,7 @@ defmodule Loka.Core.InvariantsPopulation do
     end
   end
 
-  def crows_hold?(state, ops, result) do
+  defp crows_hold?(state, ops, result) do
     case Enum.reduce_while(ops, %{}, &crow_step(&1, &2, state)) do
       false -> false
       rows -> Enum.all?(rows, fn {at, row} -> written?(result, at, row) end)
