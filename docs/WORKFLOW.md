@@ -22,7 +22,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Lookup or broad search | `Explore` agent | never for judgment |
 | Bounded copy, content or docs edit from a fixed brief | `developer`, Sonnet | spec conflict or cross-layer behavior: Opus |
 | Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
-| Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: two fresh Opus reviewers, Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
+| Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/pm-decision-e2-fixtures-e1-closure-2026-10-08.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Opus, plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text) | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
 
 An authored brief narrows exploration but never makes save, receipt or protocol work
@@ -119,7 +119,7 @@ Report at the end of the slice, not at every step.
    equal `<sha>`, which keeps the watch from reading the previous head's checks;
    `changes` skips only on a draft, so the queue waits for both `changes` checks on `<sha>`, one
    each from `ci` and `book-e2e`, and merges only if both pass; this covers a ready run or a
-   workflow that has not registered yet, and a new PR workflow raises the count in the script). It merges only after every started job on `<sha>` passes; a
+   workflow that has not registered yet, and a new PR workflow raises the count in the script; a cancelled run on `<sha>` is rerun once, a second cancel refuses). It merges only after every started job on `<sha>` passes; a
    later push makes the merge fail instead of landing unchecked, so any PM commit after the
    verdict re-queues on the new head. (`main` has no required checks and the `browser` job
    does not run on every PR, so GitHub's `--auto` would not wait.) The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
@@ -276,7 +276,7 @@ turning into a catch-all. Findings are fixed in the gate PR.
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
-  check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
+  check may still report a conflict, so the PM still merges `main` locally and checks the merged index for order (`bin/check_docs.exs` fails a duplicate, twice-edited or missing line).
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree

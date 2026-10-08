@@ -25,13 +25,13 @@ q=; prev=; for a; do [ "$prev" = -q ] && q=$a; prev=$a; done
 next() { n=$(($(cat "$Q/$1.n" 2>/dev/null || echo 0) + 1)); echo $n > "$Q/$1.n"; sed -n "${n}p;\$p" "$Q/$1" | head -n 1; }
 case "$1 $2 $*" in
   'pr view'*) h=$(next heads); echo "$h" > "$Q/head"; echo "{\"headRefOid\":\"$h\"}" | jq -r "$q" ;;
-  *--watch*) exit "$(cat "$Q/watch_rc")" ;;
+  *--watch*) exit "$(next watch_rc)" ;;
   'pr checks'*)
     # Until the head reaches the target, gh reports the previous head's failed run.
     if [ "$(cat "$Q/head" 2>/dev/null)" = 0123456789abcdef0123456789abcdef01234567 ]; then rows=$(next checks); else rows='[{"name":"changes","bucket":"fail"}]'; fi
     echo "$rows" | jq -r "$q"
     case "$rows" in *pending*) exit 8 ;; esac ;;
-  'pr merge'*) ;;
+  'pr merge'* | 'run rerun'*) ;;
   *) exit 1 ;;
 esac
 EOF
@@ -39,11 +39,13 @@ chmod +x "$tmp/stub/gh"
 P='{"name":"changes","bucket":"pass"}' W='{"name":"changes","bucket":"pending"}'
 S='{"name":"changes","bucket":"skipping"}' F='{"name":"changes","bucket":"fail"}'
 L='{"name":"lint","bucket":"skipping"}'
-# mq <case> <want-rc> <watch-rc> <heads> <checks rows...>
+C='{"name":"changes","bucket":"cancel","link":"https://github.com/o/r/actions/runs/42/job/1"}'
+E='{"name":"e2e","bucket":"cancel","link":"https://github.com/o/r/actions/runs/43/job/2"}'
+# mq <case> <want-rc> <watch-rcs> <heads> <checks rows...>
 mq() {
   name=$1 want=$2 watch=$3 heads=$4; shift 4
   Q=$(mktemp -d); export Q
-  printf '%s\n' $heads > "$Q/heads"; printf '%s\n' "$@" > "$Q/checks"; echo "$watch" > "$Q/watch_rc"
+  printf '%s\n' $heads > "$Q/heads"; printf '%s\n' "$@" > "$Q/checks"; printf '%s\n' $watch > "$Q/watch_rc"
   rc=0; PATH="$tmp/stub:$PATH" MERGE_QUEUE_POLL=0 capped sh "$bin/merge_queue.sh" 7 "$A" > /dev/null 2>&1 || rc=$?
   [ "$rc" = "$want" ] || bad "merge_queue $name: exit $rc, want $want"
   merged=$(grep -c '^pr merge' "$Q/calls" || true)
@@ -63,9 +65,28 @@ mq head-late 0 0 "old old $A" "[$P,$P]"
 [ "$(grep -c '^pr view' "$Q/calls")" = 3 ] || bad 'merge_queue head-late: did not wait for the head'
 # Break: the merge ignores the watch result.
 mq watch-fails 1 1 "$A" "[$P,$P]"
+# Break: a cancelled run (push-then-ready race) refuses instead of one rerun, or the stale
+# cancelled row read right after the rerun counts as a second cancel. Rows: gate, rerun ids,
+# stale, pending, pass.
+mq cancel-once 0 0 "$A" "[$C,$P]" "[$C,$P]" "[$C,$P]" "[$W,$P]" "[$P,$P]"
+[ "$(grep -c '^run rerun 42$' "$Q/calls")" = 1 ] || bad 'merge_queue cancel-once: did not rerun run 42 once'
+# Break: the watch failing on a cancelled job is final, or the rerun picks the wrong run.
+mq watch-cancel 0 "1 0" "$A" "[$P,$P]" "[$P,$P,$E]" "[$P,$P,$E]" "[$P,$P]"
+grep -qx 'run rerun 43' "$Q/calls" || bad 'merge_queue watch-cancel: did not rerun run 43'
+# Break: reruns repeat forever instead of refusing a second cancel.
+mq cancel-twice 1 0 "$A" "[$C,$P]" "[$C,$P]" "[$W,$P]" "[$C,$P]"
 # Break: a short SHA never equals gh's full head, so the queue waits forever.
 rc=0; PATH="$tmp/stub:$PATH" capped sh "$bin/merge_queue.sh" 7 01234567 > /dev/null 2>&1 || rc=$?
 [ "$rc" = 2 ] || bad "merge_queue short-sha: exit $rc, want 2"
+
+# --- guard_merge.sh (Claude PreToolUse hook) -------------------------------------------------
+# Break: a direct or --auto merge passes, malformed input fails open, or the queue or a
+# command that only mentions the words is blocked. guard <want-rc> <payload>
+guard() { rc=0; printf '%s' "$2" | sh "$bin/guard_merge.sh" 2> /dev/null || rc=$?; [ "$rc" = "$1" ] || bad "guard_merge: exit $rc, want $1: $2"; }
+guard 2 '{"tool_input":{"command":"cd x && gh pr merge 1 --auto"}}'
+guard 2 '{"tool_input":{"command":"gh pr merge 1'
+guard 0 "{\"tool_input\":{\"command\":\"bin/merge_queue.sh 1 $A\"}}"
+guard 0 '{"tool_input":{"command":"grep -n \"gh pr merge\" docs/WORKFLOW.md"}}'
 
 # --- integrate_batch.sh ---------------------------------------------------------------------
 # A repo on branch int with stub checks at the paths the script calls; batch adds g.txt and

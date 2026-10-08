@@ -2,7 +2,7 @@
 
 > **Publication note:** Re-pinned read-only on 2026-10-06 against published main `005df47c` after A–D merged. E1 runner/policy acceptance remains open. Check the [current roadmap](../../ROADMAP.md) and re-pin E1 before assignment; this brief does not authorize implementation or certify proof.
 
-Provisional PM brief, 2026-10-05; source re-pin 2026-10-06. **A–D source is installed; E1 remains a dependency. Not source GO, an implemented cartridge, a gate pass or native proof.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Runner/policy dependency: [E1 repeatable certification](chapter-one-e1-r9-certification-brief-2026-10-05.md).
+Provisional PM brief, 2026-10-05; source re-pin 2026-10-06. **A–D source is installed; E1 remains a dependency. Not source GO, an implemented cartridge, a gate pass or native proof.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Runner/policy dependency: [E1 repeatable certification](chapter-one-e1-r9-certification-brief-2026-10-05.md). Owner-approved slice plan: [E2 slice plan](chapter-one-e2-slice-plan-2026-10-07.md).
 
 ## Outcome, branch and dependency pin
 

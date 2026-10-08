@@ -197,12 +197,12 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
 - Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for E2 and E3 gate closures and audits and the release-candidate certification audit
-  (E1 closure: two fresh Opus reviewers, [record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)); Codex and cross-vendor review are retired; Beads Rust is the
+  (E1 closure: a fresh Opus reviewer and a Fable second opinion, [record](../decisions/pm-decision-e2-fixtures-e1-closure-2026-10-08.md)); Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
 - An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-- Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md) says
+- Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md#work-routing) says
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).

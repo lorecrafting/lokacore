@@ -61,7 +61,9 @@ their rules and red controls remain available for resumption.
   within its word budget (it is loaded by every agent, every session); each `path:line` code
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
   world-parameters) names exactly one tracked file and a line inside it
-  (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
+  (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name);
+  `docs/reviews/README.md` and `docs/decisions/README.md` have exactly one index line per record
+  file in their directory (catches a union merge that duplicated a twice-edited line, or a missing line).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental
@@ -83,8 +85,14 @@ their rules and red controls remain available for resumption.
   and unsafe-skip cases, including a local-story save edit and API errors.
 - `bin/integration_red_controls.sh` runs the PM's merge queue (`bin/merge_queue.sh`) against a
   stub `gh` and E1 batch integration (`bin/integrate_batch.sh`) in throwaway repositories:
-  no merge on draft, failing, half-registered or watch-failing checks, and no integration on a
-  pending-count mismatch, a failed recorder, a conflict or an oversized untouched file.
+  no merge on draft, failing, half-registered or watch-failing checks, one rerun of a cancelled
+  run and no merge on a second cancel, and no integration on a
+  pending-count mismatch, a failed recorder, a conflict or an oversized untouched file. It also
+  feeds the merge guard hook its payloads (below).
+- Claude hooks (`.claude/settings.json`): `bin/guard_merge.sh` (PreToolUse, Bash) blocks a
+  command that runs `gh pr merge`, `--auto` included, so merges go through `bin/merge_queue.sh`;
+  unparseable input that mentions it is blocked too. `bin/worktree_warn.sh` (Stop) only warns,
+  listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
   ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
