@@ -55,7 +55,7 @@ dots = 474 focused authority tests (`focused-green.log`, 473 pass + 1 skipped) +
 **Criterion 6 (real SQLite faults).** `mobile/authority/local-story/r9c_faults.test.ts`; one generic
 `row()` checks every fault. Only the unreadable-store and lost-acknowledgement rows fence and answer
 `pending` (`:168-172`); SQLITE_FULL rows fail outright and never fence (save.md "Commit, fence, reconcile"),
-and failed-COMMIT rows settle inside the call (`:162`), so F2 and F4 never show `pending`. Every row: the store settles on the literal prior or next
+and failed-COMMIT rows settle inside the call (`:162`), so F2 never shows `pending`. Every row: the store settles on the literal prior or next
 revision ("next" is the fault-free run of the same invocation on a byte copy); memory equals the store;
 a cold reopen serves the same head, rows, receipts and reports; the same invocation applies once and
 then replays with no row change.
