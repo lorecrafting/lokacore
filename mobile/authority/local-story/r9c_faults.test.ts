@@ -2,10 +2,10 @@
 // through the real local authority (save.md "Commit, fence, reconcile"). Faults are the corpus's
 // own (faults.test.ts): SQLITE_FULL from a clamped max_page_count, a COMMIT a deferred foreign key
 // fails, the elapsed host's lost acknowledgement and unreadable store (elapsed-host.test.ts), and
-// a child process SIGKILLed just before or after COMMIT. Every row: fenced calls answer pending;
-// the settled save is exactly the prior or the next revision (a literal per row; "next" is the
-// fault-free run of the same invocation on a byte copy, as in faults.test.ts); memory equals the
-// store; a cold reopen serves the same; a duplicate of the same invocation applies once.
+// a child process SIGKILLed before or after COMMIT. Only the unreadable-store and lost-ack rows fence
+// and answer pending; SQLITE_FULL fails outright, a failed COMMIT settles in the call. Every row: the
+// settled save is the prior or next revision (a literal per row; next = the fault-free run of the same
+// invocation on a byte copy); memory equals the store; a cold reopen serves it; a duplicate applies once.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';

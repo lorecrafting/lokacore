@@ -53,7 +53,9 @@ dots = 474 focused authority tests (`focused-green.log`, 473 pass + 1 skipped) +
 (4 of them in `r9c_faults.test.ts`); `kernel.log` has 915 = 906 + 9 kernel `r9c_*` tests.
 
 **Criterion 6 (real SQLite faults).** `mobile/authority/local-story/r9c_faults.test.ts`; one generic
-`row()` checks every fault: fenced calls answer `pending`; the store settles on the literal prior or next
+`row()` checks every fault. Only the unreadable-store and lost-acknowledgement rows fence and answer
+`pending` (`:168-172`); SQLITE_FULL rows fail outright and never fence (save.md "Commit, fence, reconcile"),
+and failed-COMMIT rows settle inside the call (`:162`), so F2 and F4 never show `pending`. Every row: the store settles on the literal prior or next
 revision ("next" is the fault-free run of the same invocation on a byte copy); memory equals the store;
 a cold reopen serves the same head, rows, receipts and reports; the same invocation applies once and
 then replays with no row change.
@@ -114,7 +116,7 @@ the PATH_COVERAGE gate, which stays pending.
 | skills | K `r9c_custody_terminal.test.ts:110` (haggle); K `r9c_creatures_transport.test.ts:119` (DEX-9 Bandage) |
 | attributes | K `r9c_creatures_transport.test.ts:119` (DEX 9 then 10) |
 | combat | K `r9c_creatures_transport.test.ts:91`; A `r9c_creatures_transport.test.ts:178` |
-| bleed, death, transport | A `r9c_creatures_transport.test.ts:178` (D1); F4 `r9c_faults.test.ts:315` (transport) |
+| bleed, death, transport | A `r9c_creatures_transport.test.ts:178` (D1); F4 `r9c_faults.test.ts:324-335` (transport) |
 | escort, expedition | A `r9c_creatures_transport.test.ts:262` |
 | food, water | A `r9c_creatures_transport.test.ts:348` |
 | liquid, light, equipment, service, position, description_variant, calendar | K `r9c_elapsed_jobs.test.ts:172`; A `r9c_elapsed_jobs.test.ts:190` |
@@ -129,12 +131,18 @@ ignite, douse, refuel, rest, stand, use_service, elapsed, run_job (jobs settled 
 recover_corpse, shoo (A creatures `:178`, `:262`, `:348`). **Pending, no r9c scenario invokes them:** look,
 scan, sell, give, lock, unlock, remove, sit, sleep, close_choice, accept_quest.
 
+**Paired-job completion invariant (S3 acceptance).** Not an E2 row: held by focused tests, which are red
+for the `proposal.ts:278-279`, `:260` and `:253` breaks that stay green in every `r9c_*` file
+([audit](../../reviews/2026-10-08-e2-gate-fable-audit.md)): `kernel/ts/test/bleed_composition.test.ts`,
+`c5_bleed_early_expiry.test.ts`, `job_completion_invariant.test.ts`, `deer.test.ts`, `deer_contracts.test.ts`,
+`schedule.test.ts`.
+
 **Class rows.** definition.* (room 26, item 50, npc 15, detail 19, dialogue 26, variant 11, readable 9 and
 the rest), policy.* (fact_compare 105, all 61, quest_state 37, others), event.* (fact_changed 18 and four
 others) and authored.* (dialogue 157, action_recipe 94, containment 66, scene 51, quest 33, reaction 24 and
 the rest): exercised by families 1-7, per-path disposition **pending (PATH_COVERAGE)**.
 
-**Feature gates (9).** STATIC: compile receipt, `source_artifact` pass, K `r9c_interactions.test.ts:19`,
+**Feature gates (9), evidence touching each gate; disposition pending.** STATIC: compile receipt, `source_artifact` pass, K `r9c_interactions.test.ts:19`,
 `:54`. TRANSACTION and AUTHORITY: the sqlite receipt, the A `r9c_*` files and criterion 6. DETERMINISM: the
 100-sequence simulation (status pending; the 10,000 run is release-candidate work) and the replay checks in
 every A file. QUEST, RULES, SCENE, TOPOLOGY, WORLD: the capability rows above.
