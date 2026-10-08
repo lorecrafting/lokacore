@@ -325,13 +325,9 @@ test('carry is witnessed by a take landing on 12000 g and a later too_heavy refu
     carryCredits(steps),
     steps.map((_, i) => i === last),
   );
+  assert.deepEqual(carryCredits([steps[last]!]), [false], 'refusal alone');
   const at = (i: number, edit: (s: Step) => Step) =>
     carryCredits(steps.map((s, j) => (j === i ? edit(s) : s)))[last];
-  const max = (max_grams: number) => (s: Step) => authored(s, { carry: { max_grams } });
-  assert.deepEqual(
-    [at(last, max(11999)), at(last, max(12001)), at(full, max(11995))],
-    [false, false, false],
-  );
   const forced = (s: Step): Step => ({
     ...s,
     command: {
@@ -343,8 +339,11 @@ test('carry is witnessed by a take landing on 12000 g and a later too_heavy refu
       },
     } as never,
   });
-  assert.equal(at(full, forced), false);
-  assert.deepEqual(carryCredits([steps[last]!]), [false]);
+  assert.equal(at(full, forced), false, 'load reached by a forced transfer');
+  const max = (max_grams: number) => (s: Step) => authored(s, { carry: { max_grams } });
+  assert.equal(at(last, max(11999)), false, 'refusal load above max_grams');
+  assert.equal(at(last, max(12001)), false, 'refusal load below max_grams');
+  assert.equal(at(full, max(11995)), false, 'take load above max_grams');
   const other = { kind: 'rejected', error: { code: 'invalid_state' } } as DecisionResult;
   assert.equal(
     at(last, (s) => ({ ...s, decision: other })),

@@ -359,9 +359,9 @@ refusals credit nothing.
   `rooms`, whose caused `fact_changed` event projects the cue `text` into that room.
 - `carry`: both, in one case and in this order: an accepted player `take` whose committed
   after load is exactly `max_grams`; then a player `take` of an item with positive mass,
-  refused with `too_heavy`, state unchanged, from a before load of exactly `max_grams`. A load
-  reached by a forced transfer (which bypasses the carry check, as corpse recovery does) does
-  not count, and the refusal alone credits nothing.
+  refused with `too_heavy`, state unchanged, from a before load of exactly `max_grams`. The
+  first half must be a take: a forced transfer (which bypasses the carry check, as corpse
+  recovery does) cannot stand in for it, and the refusal alone credits nothing.
 - A pool with positive `gain` and no `regen`: a step whose receipt advances time and has no
   adjust of that pool on the body, while its level rises to
   min(before + `gain` × `gain_every` boundaries crossed, `maximum`).
