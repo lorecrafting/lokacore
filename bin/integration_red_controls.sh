@@ -227,4 +227,12 @@ ss none "[]" 'ended without a retro' 'NEVER'
 printf 'x' > hk.json; rc=0; HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -q 'queue unavailable' out || bad 'session_status bad-json: failed or no note'
 grep -q 'Before you clear: ask the PM for handoff + retro' out || bad 'session_status: no clear reminder'
+# Break: a stray worktree, a stash or a merged review ref goes unlisted, the session's own checkout
+# or an unmerged review ref is listed.
+git branch review-1 x; git checkout -qb y; echo c > a; git commit -qam y; git branch review-2; git checkout -q main
+git worktree add -q "$R.wt" y 2>/dev/null; echo d > a; git stash -q
+HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || bad 'session_status leftovers: exit non-zero'
+wt=$(cd "$R.wt" && pwd -P)
+grep -qxF "worktree $wt" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
+  && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
 exit $fail

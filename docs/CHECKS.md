@@ -100,7 +100,8 @@ their rules and red controls remain available for resumption.
   a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
-  housekeeping list, the missed-retro note, a failing `br` still exits 0).
+  housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
+  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs

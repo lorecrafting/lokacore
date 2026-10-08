@@ -37,6 +37,11 @@ else
   fi
 fi
 echo "Before you clear: ask the PM for handoff + retro"
+echo "## Local leftovers"
+# Other worktrees, stashes and review-<N> refs already in origin/main (local git only, no network).
+git worktree list --porcelain 2>/dev/null | sed -n 's/^worktree //p' | grep -vxF "$(pwd -P)" | sed "s|^$HOME|~|; s/^/worktree /"
+echo "stashes: $(git stash list 2>/dev/null | wc -l | tr -d ' ')"
+git branch --list 'review-*' --merged origin/main 2>/dev/null | sed 's/^[* +]*/merged review ref (delete): /'
 echo "## Beads/PR drift"
 tmp=$(mktemp -d) && trap 'rm -rf "$tmp"' EXIT
 if command -v br >/dev/null 2>&1 && br list --status all --json > "$tmp/issues" 2>/dev/null \
