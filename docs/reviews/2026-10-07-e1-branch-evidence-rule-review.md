@@ -49,3 +49,26 @@ Survivors: talk judged on the after state, and perform without a target. Both le
 3. **nit**, `kernel/ts/test/e1_cases.ts:259`: the row checks run only after all 23 cases. The unknown-path, field and duplicate checks could run before any case.
 
 No over-engineering: one walker replaces `requiredPolicyPaths`, and the table is a JSON file bound into the `check_hash` source identity (`e1.ts:48`).
+
+## Fix round 1: head `47dd57c3` (fix `5c5370ff`, then merge of #288 head `d640c318`)
+
+**Verdict: APPROVE.** Every disposition below is verified.
+
+- **Finding 1 closed.** `objectivePaths` (`e1_obligations.ts:369-379`) credits only the paths credited in both states when the root holds in both, and uses the single state where the root holds otherwise. The spec sentence in `architecture.md` now says the same.
+  - The plant `before = prior`, `after = fox` over the bell root expects `['r']`.
+  - These mutants fail that test: prefer-before (equivalent to the old code), prefer-after, and union.
+- **Finding 2 closed.** The report is now built by `obligationReport` (`e1_cases.ts:151`). These mutants each fail "E1 reports a disposition apart…":
+  - dispositions merged into `witnessed_obligations`;
+  - dispositions left in pending;
+  - the witnessed-row check removed;
+  - the known-path check removed.
+- **Finding 3 closed.** `checkDispositions` runs before the output directory is created (`e1_cases.ts:206`). With an invalid row the recorder exits 1 in under 1 s and creates no output directory.
+- **Merge, `e1.ts` `CHECK_FILES`.** Keeping `e1_dispositions.json` in it is correct: the table changes the report, so it must change `check_hash`. The import-walk test only requires imported modules to be a subset of `CHECK_FILES`, so a JSON entry passes, and it does pass.
+- **Merge, creatures reaction paragraph.** It is kept, with one added sentence linking to the rule. `e1_creatures.ts:200` credits only `/when/root`. Per the PM decision, extending the rule below reaction roots is not a finding.
+- **Reruns.**
+  - `node --test kernel/ts/test/e1*.test.ts`: 47/47 pass. Typecheck: exit 0.
+  - `e1_cases.ts`: exit 2, 25 cases pass, 95 pending, 553 witnessed, 0 dispositioned.
+  - Polarity audit: 0 of 219 credited policy paths sit at negative polarity.
+- **Question (residual, not reachable in v042).** When the root holds only before the command, the before state is used. Suppose a reaction resolves mid-command and a later step in the same command then makes the root false. A branch false at resolution could then be credited. The retained step receipt has no mid-command state, so this is the closest replay-derivable rule.
+
+The mutant worktree was removed, and its runs are not evidence.
