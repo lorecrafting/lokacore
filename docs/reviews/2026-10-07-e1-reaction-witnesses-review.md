@@ -158,3 +158,19 @@ in the dup state that `b_lost_before_meeting` is also uncredited; that kills R3 
 - Mutants against `e1_creatures.test.ts`: R0 old obligations red (e_dup credited), R1 no
   group-order guard red, R2 threshold `> 2` red, R5 quest.fail-only allowed red, R6 scope
   unchecked red, R7 prefix includes G red; R3 and R4 green (B1).
+
+## Re-check, fix round 2 (commit `c5dc36c9`)
+
+Scope: the B1 fix only (`kernel/ts/test/e1_creatures.test.ts:289-308`); fresh detached worktree.
+
+**Verdict: APPROVE WITH NOTES.** B1 closed.
+
+- **B1 closed.** The dup assertion now filters `e_dup` and `b_lost_before_meeting` paths and
+  expects none, matching architecture.md:330-335 ("credits none of them"). Mutants applied to
+  `e1_obligations.ts:437-451`, each red at `e1_creatures.test.ts:304` with b's paths credited:
+  R3 (owner map, first claimant keeps credit) and R4 (`matched[0]` only). File restored after.
+- **N3 nit:** `e1_creatures.test.ts:291` the `for (const first of [false, true])` key-order
+  loop is not needed for B1. With both rules asserted, a single order kills any "one claimant
+  keeps credit" mutant (first or last), because one of the two rules gets credited. It costs one
+  extra state build; it can stay.
+- Evidence: `npm ci` 0; `npm run typecheck` 0; `node --test test/e1*.test.ts` 0 (49 pass, 0 fail).
