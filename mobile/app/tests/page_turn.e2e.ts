@@ -4,7 +4,8 @@ import { expect } from 'e2e';
 // In the page: press `from` and watch until the leaving page has gone (its picture curling, or faded
 // out); report whether the curl canvas drew and whether `to`, on the arriving page, received the
 // pointer at its centre all the while, and how long (ms) the leaving page stayed over it.
-const turn = async ({ from, to, frames }: { from: string; to: string; frames: number }) => {
+const turn = async ({ from, to }: { from: string; to: string }) => {
+  const frames = 600; // about 10 s at 60 fps
   for (let i = 0; i < frames && document.querySelector('canvas'); i++)
     await new Promise(requestAnimationFrame); // the previous turn's curl has gone
   (document.querySelector(`[aria-label="${from}"]`) as HTMLElement).click();
@@ -39,10 +40,10 @@ test('the page curl draws over a live arriving page, both ways', async ({
 }) => {
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible();
-  const args = { from: 'Continue', to: 'Start over', frames: 600 };
+  const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true });
   await app.screenshot('page-curl-forward');
-  const back = { from: 'Start over', to: 'Continue', frames: 600 };
+  const back = { from: 'Start over', to: 'Continue' };
   expect(await browser.evaluate(turn, back)).toMatchObject({ curl: true, hit: true });
 });
 
@@ -58,10 +59,10 @@ test('under reduced motion the pages cross-fade with no curl', async ({ app, scr
   });
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible();
-  const args = { from: 'Continue', to: 'Start over', frames: 600 };
+  const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: false, hit: true });
   // Timed on the way back: the first mount of a page can stall the frames past the whole fade.
-  const back = await browser.evaluate(turn, { from: 'Start over', to: 'Continue', frames: 600 });
+  const back = await browser.evaluate(turn, { from: 'Start over', to: 'Continue' });
   expect(back).toMatchObject({ curl: false, hit: true });
   expect(back.stayed).toBeGreaterThanOrEqual(150);
 });
