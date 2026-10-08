@@ -281,3 +281,5 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - [Orphan provisional fixture cleanup](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
 
 - [E1 batch E dispositions](pm-decision-e1-batch-e-dispositions-2026-10-07.md): a dispositioned dialogue or choice path closes its family gap; reviewed static citations close unreachable guards.
+
+- [E1 batch F world witnesses](pm-decision-e1-batch-f-world-witness-2026-10-07.md): one exact exercise of each world setting's primary literal; `ma` left to batch E; carry witnessed only by an accepted take landing on exactly `max_grams` and a later `too_heavy` refusal at that load in the same case.

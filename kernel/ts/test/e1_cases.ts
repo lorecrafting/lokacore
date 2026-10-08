@@ -35,6 +35,7 @@ import { read } from './read.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { itemRound } from './e1_items.ts';
+import { carryLimit } from './e1_world_witness.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 import { REFUSALS } from './e1_refusals.ts';
 
@@ -85,6 +86,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'item-round',
         'rejoin',
         'elspeth-stays',
+        'carry-limit',
       ].includes(start.case_id) ||
       REFUSALS.some(([name]) => start.case_id === name) ||
       ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
@@ -115,7 +117,8 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   const digest = createHash('sha256');
   let steps = 0,
     final: { code: string; action: string | null } | null = null;
-  const obligations = new Set<string>();
+  const obligations = new Set<string>(),
+    carry = {};
   for (const e of events) {
     if (e.kind !== 'step') continue;
     const observed = checked(
@@ -128,7 +131,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
     assert.equal(observed.failure, undefined, JSON.stringify(observed.failure));
     assert.equal(e.invariant_failure, null, 'case recorded an invariant failure');
     assert.equal(observed.bytes, `${encode(e.decision)}\n${e.state_hash}\n`);
-    for (const path of witnessedObligations(world, observed.world, e.command, e.decision))
+    for (const path of witnessedObligations(world, observed.world, e.command, e.decision, carry))
       if (Array.isArray(e.obligations) && e.obligations.includes(path)) obligations.add(path);
     world = observed.world;
     final =
@@ -320,6 +323,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('night-marsh', nightMarsh);
     run('rejoin', rejoin);
     run('elspeth-stays', elspethStays);
+    run('carry-limit', carryLimit);
     run('debt-on_time', chandlersDebt);
     run('debt-late', debtLate);
     run('debt-elapsed', debtElapsed);

@@ -334,6 +334,45 @@ and authored value) credits none of them, and a reaction whose apply steps are a
 `quest.fail` (no event to name the trigger) is not witnessed. A `fact.assign` op must also be
 at the scope the fact resolves to for the player.
 Sightings, wander ticks and bleed refreshes witness none of these paths.
+World settings, resource pools and the ale cask are witnessed only by one exact exercise of
+the primary literal named below ([PM decision](../decisions/pm-decision-e1-batch-f-world-witness-2026-10-07.md)).
+Each clause judges an accepted step (carry: two steps of one case) against its before state, its
+committed after state and its receipt ops; a band or bell cue clause judges the projection of
+the committed after state. Each credits only its own path: never the setting's other fields
+or the owner's capability family ([world-key owners](#e1-exact-candidate-proof-policy)). Definitions, fresh pools, offers and other
+refusals credit nothing.
+- `movement`: a `move` whose receipt adjusts the body's `cost.resource` by exactly
+  −`cost.amount`, from its before level to its after level.
+- `water`: a `move` from a route's `surface` into its `bottom` whose receipt adjusts the body's
+  mv by exactly −`entry_cost` and opens a water row in that bottom room with deadline equal to
+  entry time plus `duration`.
+- `death`: a step whose `entity_died` event names the player body in the room it occupied
+  before, after which the body lies in `shrine` and the receipt sets its hp to `restore.hp`.
+- `death_credit`: a step whose `entity_died` event names an entry's static `npc` in that entry's
+  `room`, credited to the player, while the entry's `fact` changes from false to true for the
+  player with a matching receipt `fact.assign`.
+- `combat`: a step completing an encounter's pending round in which the player body attacks,
+  whose receipt schedules that encounter's next round exactly `interval` after the attack's time.
+- `bands`: a step that changes the level of a body pool without its own bands, after which the
+  GameView shows the world band whose `at_percent` equals the pool's exact percent.
+- `bell_cue`: a step that changes `bell_cue.fact` from false to true for the player in one of
+  `rooms`, whose caused `fact_changed` event projects the cue `text` into that room.
+- `carry`: both, in one case and in this order: an accepted player `take` whose committed
+  after load is exactly `max_grams`; then a player `take` of an item with positive mass,
+  refused with `too_heavy`, state unchanged, from a before load of exactly `max_grams`. The
+  first half must be a take: a forced transfer (which bypasses the carry check, as corpse
+  recovery does) cannot stand in for it, and the refusal alone credits nothing.
+- A pool with positive `gain` and no `regen`: a step whose receipt advances time and has no
+  adjust of that pool on the body, while its level rises to
+  min(before + `gain` × `gain_every` boundaries crossed, `maximum`).
+- A pool with `regen`: a step whose receipt adjusts it on the body, from and to equal to the
+  before and after levels, with `next_rate` equal to `regen.by_position` of the committed
+  position, and the committed rate changes to it.
+- `pennies`, `lantern_meals` and the ale cask: a step whose [service witness](#e1-exact-candidate-proof-policy)
+  holds for a service whose `currency` is that pool (payer debit of `price`), whose meal
+  `stock` is that pool (provider debit), or whose drink `vessel` is the cask (its `liquid.set`).
+Replay re-derives each clause from the committed command, decision and states, the case's
+steps in order (carry), and credits a path only when the retained step receipt lists it.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
 The initial bounded binding covers only `study_tracks`' success `fact.assign` step:
