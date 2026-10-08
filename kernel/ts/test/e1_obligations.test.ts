@@ -349,6 +349,7 @@ test('E1 reports a disposition apart from witnessed and pending paths', () => {
     { ...row, path: `${path}/x` },
     { ...row, refusal: { case: 'refuse-peg-active', code: '' } },
     { ...row, refusal: null as never },
+    { ...row, refusal: { case: 'debt-on_time', code: 'invalid_state' } },
   ])
     assert.throws(() => checkDispositions(loaded, [bad]), /invalid disposition/);
 });
