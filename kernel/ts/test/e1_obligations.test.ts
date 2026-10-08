@@ -355,10 +355,15 @@ test('E1 reports a disposition apart from witnessed and pending paths', () => {
 });
 
 // Breaks: a dispositioned dialogue or choice path still shows as a family gap, or one row closes
-// a sibling choice it does not name.
+// a sibling choice it does not name, or a row below a dialogue or choice closes it.
 test('E1 a dispositioned dialogue or choice path closes its family gap', () => {
   const root = `/dialogues/${k}dialogue/a_elspeth_lost`;
-  const rows = [root, `${root}/choices/acknowledge`].map((path) => ({
+  const rows = [
+    root,
+    `${root}/choices/acknowledge`,
+    `/dialogues/${k}dialogue/maud_offer/policy/root/item/items/1`,
+    `/dialogues/${k}dialogue/a_aldric_debt/choices/late/sequence/0`,
+  ].map((path) => ({
     path,
     reason: 'r',
     evidence: 'e',
@@ -368,6 +373,8 @@ test('E1 a dispositioned dialogue or choice path closes its family gap', () => {
   assert.equal(gaps.dialogues.includes('a_elspeth_lost'), false);
   assert.equal(gaps.choices.includes('a_elspeth_lost/acknowledge'), false);
   assert.equal(gaps.choices.includes('a_elspeth_lost/directions'), true);
+  assert.equal(gaps.dialogues.includes('maud_offer'), true);
+  assert.equal(gaps.choices.includes('a_aldric_debt/late'), true);
 });
 
 // Breaks: a refusal row passes although its case is missing, its guarded talk was accepted, it was
