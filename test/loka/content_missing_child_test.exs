@@ -121,7 +121,8 @@ defmodule Loka.ContentMissingChildTest do
   test "hound wander is no slower than replacement and the night window wraps", %{dir: dir} do
     for change <- [
           %{"wander_interval" => 7200, "replacement_delay" => 3600},
-          %{"night_start" => 1, "night_end" => 5}
+          %{"night_start" => 1, "night_end" => 5},
+          %{"night_start" => 5, "night_end" => 5}
         ] do
       assert {:error, diagnostics} =
                Loka.ContentSource.compile(dir, [

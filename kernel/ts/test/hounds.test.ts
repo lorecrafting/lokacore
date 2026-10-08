@@ -53,6 +53,7 @@ test('loader refuses a one-way hound area with a valid hash', () => {
 for (const [name, change] of [
   ['a slower wander than replacement', { wander_interval: 7200, replacement_delay: 3600 }],
   ['a night window that does not wrap midnight', { night_start: 1, night_end: 5 }],
+  ['an empty night window', { night_start: 5, night_end: 5 }],
 ] as const)
   test(`loader refuses ${name} with a valid hash`, () => {
     const c = structuredClone(pin.value);
