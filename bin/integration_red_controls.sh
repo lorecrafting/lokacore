@@ -113,7 +113,7 @@ sy() { # <case> <want-rc> [docs-rc]
 }
 # Break: the index keeps the union-merge order (own line first), or the merge is not pushed.
 sp base; sy success 0
-[ "$(tail -n 3 docs/reviews/README.md | tr '\n' ' ')" = '- m1 - m2 - own ' ] || bad 'sync_pr success: index not main list + own line'
+[ "$(cat docs/reviews/README.md)" = "$(printf '# i\n- m1\n- m2\n- own')" ] || bad 'sync_pr success: index not exactly main list + own line'
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] && [ "$(git rev-list --parents -1 HEAD | wc -w)" -eq 3 ] || bad "sync_pr success: not a pushed merge commit"
 # Break: a code conflict is auto-resolved (-X) or left half-merged instead of refused.
 sp other; tip=$(git rev-parse HEAD); sy conflict 1
@@ -121,4 +121,6 @@ sp other; tip=$(git rev-parse HEAD); sy conflict 1
 # Break: a failing docs check still pushes.
 sp base; pushed=$(git rev-parse origin/pr); sy docs-fail 1 1
 [ "$(git rev-parse origin/pr)" = "$pushed" ] || bad 'sync_pr docs-fail: pushed'
+# Break: the rerun sees the local merge, says "already has main" and exits 0 without pushing.
+sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] || bad 'sync_pr rerun: not pushed'
 exit $fail

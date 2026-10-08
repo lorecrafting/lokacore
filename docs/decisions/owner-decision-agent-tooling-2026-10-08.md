@@ -13,7 +13,7 @@ changes mid-session.
   prompt-cache rebuild.
 - Haiku where it fits: [`.claude/agents/Explore.md`](../../.claude/agents/Explore.md) overrides the
   built-in read-only Explore agent with `model: haiku` and no Edit or Write; the built-in otherwise
-  inherits the main model ([sub-agents docs](https://docs.claude.com/en/docs/claude-code/sub-agents)).
+  inherits the main model ([sub-agents docs](https://code.claude.com/docs/en/sub-agents)).
   Brief drafters send search, citation re-anchoring and consumer inventories to it and keep only
   decisions. `CLAUDE_CODE_SUBAGENT_MODEL` is not set globally.
 - After each merge to `main` the PM runs `bin/sync_pr.sh <branch>` for every open PR: a PR that

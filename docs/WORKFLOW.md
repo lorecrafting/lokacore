@@ -115,7 +115,7 @@ Report at the end of the slice, not at every step.
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after each merge, run
-   `bin/sync_pr.sh <branch>` for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push).
+   `bin/sync_pr.sh <branch>` for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
    `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
    required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on

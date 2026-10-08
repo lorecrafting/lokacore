@@ -6,5 +6,5 @@ model: haiku
 ---
 
 Project override of the built-in read-only Explore agent, which otherwise inherits the main model
-([sub-agents docs](https://docs.claude.com/en/docs/claude-code/sub-agents)). Find, list and quote; the caller decides.
+([sub-agents docs](https://code.claude.com/docs/en/sub-agents)). Find, list and quote; the caller decides.
 Return `path:line` hits with one-line quotes, counts, and what you could not find. Do not edit files or run commands.
