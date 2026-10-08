@@ -114,15 +114,16 @@ Report at the end of the slice, not at every step.
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
-   As soon as the verdict lands on head `<sha>`, queue the merge in a background shell so
-   nobody waits on hosted CI: `bin/merge_queue.sh <N> <sha>` (it first waits for the PR head to
-   equal `<sha>`, which keeps the watch from reading the previous head's checks;
-   `changes` skips only on a draft, so the queue waits for both `changes` checks on `<sha>`, one
-   each from `ci` and `book-e2e`, and merges only if both pass; this covers a ready run or a
-   workflow that has not registered yet, and a new PR workflow raises the count in the script; a cancelled run on `<sha>` is rerun once, a second cancel refuses). It merges only after every started job on `<sha>` passes; a
-   later push makes the merge fail instead of landing unchecked, so any PM commit after the
-   verdict re-queues on the new head. (`main` has no required checks and the `browser` job
-   does not run on every PR, so GitHub's `--auto` would not wait.) The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push; any
+   As soon as the verdict lands on head `<sha>`, run `gh pr merge <N> --auto --merge --match-head-commit <sha>`:
+   GitHub merges when the required checks `ci-green` and `book-e2e-green` pass on that head, so
+   nobody waits on hosted CI, and a later push invalidates it. Each gate fails unless its
+   workflow's `changes` job succeeded (so a draft run never passes) and no job failed or was
+   cancelled. A cancelled run fails the gate: rerun it (`gh run rerun <id>`) and auto-merge proceeds
+   ([owner decision](decisions/owner-decision-required-checks-merge-2026-10-08.md)).
+   Branch protection does not bind admins: the owner, or the PM when the owner asks or for
+   status-only commits (ROADMAP status lines, Beads export, review index lines), may push to
+   `main` directly or merge with `--admin`; never for unreviewed code or to bypass a red check.
+   The PM's own commits after the verdict (a `main` merge, an index line) need only green CI on the new head, and the PM puts them in one push and re-arms auto-merge on that head; any
    other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
