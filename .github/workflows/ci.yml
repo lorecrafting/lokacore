@@ -146,7 +146,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15 # 3 min before the mobile suite (67 s wall, 327 s CPU locally)
     env:
       MIX_ENV: test
     steps:
