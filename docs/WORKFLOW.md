@@ -299,8 +299,8 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   the retro. At each milestone gate (E3, release-candidate certification, release) a pattern retro: a
   Sonnet subagent reads the housekeeping issues, review records and `gh` CI timings since the last gate
   and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
-- **Beads:** `br create -l housekeeping --description-file <file>`, then clear `source_repo_path`
-  ([BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
+- **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>` (it clears
+  `source_repo_path`, [BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
   to the next housekeeping PR, rejected ones to `br close` with the reason.
 - **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
   PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last

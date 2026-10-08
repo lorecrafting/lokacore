@@ -161,6 +161,13 @@ grep -q "waiting for $holder" out && [ ! -s "$R.log" ] || { bad 'check_all lock:
 [ -s "$R.log" ] && [ ! -d "$lk" ] || bad 'check_all lock: no run after the holder ended, or lock left behind'
 sh -c 'exit 0' & dead=$!; wait $dead; mkdir "$lk"; echo $dead > "$lk/pid"; : > "$R.log"
 ca > out 2>&1 && [ -s "$R.log" ] || { bad 'check_all lock: a dead holder blocked the run'; cat out; }
+# --- br_create.sh -----------------------------------------------------------------------
+# Stub br logs each call; create prints a new id. Break: the path is not cleared, or on the wrong id.
+printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; esac\n' > "$tmp/br-create"
+mkdir "$tmp/brstub"; mv "$tmp/br-create" "$tmp/brstub/br"; chmod +x "$tmp/brstub/br"
+got=$(BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title') || bad 'br_create: failed'
+[ "$got" = loka-n1 ] && [ "$(tail -1 "$tmp/br.log")" = 'update loka-n1 --source-repo lokacore --source-repo-path ' ] \
+  || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor
