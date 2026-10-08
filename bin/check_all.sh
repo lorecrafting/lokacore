@@ -1,6 +1,6 @@
 #!/bin/sh
-# The full local check line (docs/CHECKS.md): everything CI runs except `mix hex.audit`,
-# which needs the network. Toolchain from mise.toml.
+# The full local check line (docs/CHECKS.md): everything CI runs except `mix hex.audit`
+# (needs the network) and the e1-recorder job (about 6 minutes; CHECKS.md). Toolchain from mise.toml.
 # --metadata runs docs and tracker guards for a verified metadata or Book-only push.
 # --no-ts remains available for a focused local Elixir run.
 # --no-mix-test skips mix test and credo for a push whose code changes are only *.test.ts files.

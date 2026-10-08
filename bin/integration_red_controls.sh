@@ -1,5 +1,6 @@
 #!/bin/sh
-# Run bin/integrate_batch.sh in throwaway repos with stub checks; each case names the break it catches.
+# Run the PM scripts (sync_pr, after_merge, br_create, check_all lock, pre-push lanes, mutate,
+# session_status) in throwaway repos with stubs; each case names the break it catches.
 set -eu
 # A git hook exports GIT_DIR and friends: without this the fixtures would land in the real repository.
 unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
@@ -13,85 +14,6 @@ bad() { echo "FAIL $*"; fail=1; }
 # A hang is killed by the alarm (exit 142) instead of passing as "no merge".
 capped() { perl -e 'alarm shift; exec @ARGV' 20 "$@"; }
 
-# --- integrate_batch.sh ---------------------------------------------------------------------
-# A repo on branch int with stub checks at the paths the script calls; batch adds g.txt and
-# the review commit (on rv) adds a review record on top of batch.
-python3 -c "import json,sys;f=json.load(open('$bin/../protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\"cartridge\":'+f['canonical']+',\"content_hash\":\"'+f['sha256']+'\"}')" > "$tmp/v042.json"
-mk() {
-  R=$(mktemp -d); cd "$R"
-  git init -q -b int
-  mkdir -p kernel/ts/test bin tmp docs/reviews
-  echo /tmp/ > .gitignore
-  cp "$tmp/v042.json" tmp/e1-selected-v042.json
-  echo '{"scripts":{"typecheck":"node -e 0"}}' > kernel/ts/package.json
-  echo "import test from 'node:test'; test('e1', () => {});" > kernel/ts/test/e1.test.ts
-  cat > bin/check_ts_size.mjs <<'EOF'
-// Stub size gate: with no paths it checks every tracked file; a marked file is too long.
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-const args = process.argv.slice(2);
-const files = args.length ? args : execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n').filter(Boolean);
-const big = files.filter((f) => readFileSync(f, 'utf8').includes('OVER' + 'SIZE'));
-for (const f of big) console.log(`${f}:1: file, 999 lines, limit 300`);
-process.exit(big.length ? 1 : 0);
-EOF
-  cat > kernel/ts/test/e1_cases.ts <<'EOF'
-// Stub recorder: needs a new outdir; reports STUB_PENDING open obligations.
-import { mkdirSync, writeFileSync } from 'node:fs';
-const out = process.argv[3];
-mkdirSync(out);
-const gaps = { authored_obligations: Array(Number(process.env.STUB_PENDING)).fill('p') };
-const report = { receipts: [1, 2], gaps, dispositioned_obligations: [1], witnessed_obligations: [1, 2, 3] };
-writeFileSync(`${out}/report.json`, JSON.stringify(report));
-console.log('pending: stub');
-process.exit(Number(process.env.STUB_RC));
-EOF
-  echo base > f.txt
-  git add . && git commit -qm base
-  git checkout -qb batch && echo batch > g.txt && git add g.txt && git commit -qm 'batch work'
-  git checkout -qb rv && echo ok > docs/reviews/r.md && git add docs && git commit -qm 'Review batch: APPROVE'
-  review=$(git rev-parse HEAD)
-  git checkout -q int
-  # A pushed batch branch tracks its remote, which lacks the cherry-picked record.
-  git remote add origin "$R.none" && git update-ref refs/remotes/origin/batch batch && git branch -qu origin/batch batch
-}
-# ib <case> <want-rc> <pending> <recorder-rc> [expected-pending, default 3]
-ib() {
-  rc=0; STUB_PENDING=$3 STUB_RC=$4 capped sh "$bin/integrate_batch.sh" batch "$review" "${5:-3}" > "$R.out" 2>&1 || rc=$?
-  [ "$rc" = "$2" ] || { bad "integrate_batch $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
-}
-# Break: no --no-ff (fast-forward), a lost review record, or a kept source branch.
-mk; base=$(git rev-parse HEAD)
-ib success 0 3 2
-[ "$(git rev-parse HEAD^1)" = "$base" ] && [ "$(git log -1 --format=%s HEAD^2)" = 'Review batch: APPROVE' ] &&
-  [ "$(git rev-parse HEAD^2^)" = "$(git rev-parse rv^)" ] || bad 'integrate_batch success: not a --no-ff merge of batch plus the record'
-git rev-parse -q --verify batch > /dev/null && bad 'integrate_batch success: batch branch kept'
-# Break: a developer worktree with uncommitted edits is integrated without them (cleanup fails late).
-mk; tip=$(git rev-parse HEAD); git worktree add -q "$R.wt" batch && echo edit > "$R.wt/g.txt"
-ib dirty-worktree 1 3 2
-[ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch dirty-worktree: merged'
-# Break: a dirty integration tree is merged and checked as if committed.
-mk; tip=$(git rev-parse HEAD); echo dirty > f.txt
-ib dirty-tree 1 3 2
-[ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch dirty-tree: merged'
-# Break: the recorder runs on another candidate than v042.
-mk; echo '{}' > tmp/e1-selected-v042.json
-ib wrong-artifact 1 3 2
-# Break: the pending count is printed but not compared.
-mk; ib count-mismatch 1 4 2
-# Break: recorder exit 1 (a failed case) is accepted; only exit 2 means pending.
-mk; ib recorder-fails 1 3 1
-# Break: at zero expected pending, exit 2 (an open family gap) is accepted, or pass (0) refused.
-mk; ib zero-pass 0 0 0 0
-mk; ib zero-gap 1 0 2 0
-# Break: the merge auto-resolves a conflict (-X ours/theirs) instead of stopping.
-mk; echo other > g.txt && git add g.txt && git commit -qm 'int g'; tip=$(git rev-parse HEAD)
-ib conflict 1 3 2
-[ "$(git rev-parse HEAD)" = "$tip" ] || bad 'integrate_batch conflict: HEAD moved'
-git rev-parse -q --verify MERGE_HEAD > /dev/null || bad 'integrate_batch conflict: merge state not left for the PM'
-# Break: the size gate checks only changed files, missing an oversized file the batch did not touch.
-mk; echo '// OVERSIZE' > old.ts && git add old.ts && git commit -qm 'int old.ts'
-ib size-gate 1 3 2
 # --- sync_pr.sh -----------------------------------------------------------------------------
 # A bare origin; main adds m2 to the review index (and code in c.txt); branch pr adds its own
 # line at the top of the index. Stub `elixir` stands in for the docs checker.

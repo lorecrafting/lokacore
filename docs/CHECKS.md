@@ -37,7 +37,7 @@ their rules and red controls remain available for resumption.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
   40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt), `mobile/` included:
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs`. With no paths the TypeScript check
-  selects the tracked files itself; CI, `bin/check_all.sh` and `bin/integrate_batch.sh` all call it
+  selects the tracked files itself; CI and `bin/check_all.sh` both call it
   that way (red control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse. Source files: a file at its limit (300 lines, or its existing
@@ -91,10 +91,8 @@ their rules and red controls remain available for resumption.
   force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
-- `bin/integration_red_controls.sh` runs E1 batch integration (`bin/integrate_batch.sh`) in
-  throwaway repositories with stub checks: no integration on a pending-count mismatch, a failed
-  recorder, a conflict or an oversized untouched file.
-  It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
+- `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
+  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
   index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR or a stray
   file is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
@@ -123,7 +121,7 @@ their rules and red controls remain available for resumption.
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
   The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
-  on the selected v042 artifact, rebuilt and sha-checked as `bin/integrate_batch.sh` does, and
+  on the selected v042 artifact, rebuilt from `protocol/fixtures/missing_child_v042_hash.json` and sha-checked, and
   fails on a pending obligation, a gap or a failed case (about 6 minutes). It is not in
   `bin/check_all.sh`: that line has no area lanes, so it would add those minutes to every run.
   The code lane's green baseline (`bin/ci_base.sh`) includes it.

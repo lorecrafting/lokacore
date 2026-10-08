@@ -123,7 +123,7 @@ jobs:
 
   # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout. Artifact as in bin/integrate_batch.sh.
+  # tree, so its artifact and output stay outside the checkout.
   e1-recorder:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
