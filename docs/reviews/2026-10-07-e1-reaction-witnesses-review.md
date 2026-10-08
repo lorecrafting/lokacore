@@ -113,3 +113,48 @@ commits or the developer worktree. I classified the ponytail clauses instead:
 - Tests follow AGENTS.md "Writing tests". The expected paths are literals from
   `cartridges/ashmere_missing_child/reactions/*.json`. No frozen fixture was touched.
 - Over-engineering: none beyond N2. Folding d9 into the general witness removed 25 lines.
+
+## Re-check: fix round 1 (`ad4710af..d402e379`)
+
+- Subject: local `e1/reaction-witnesses`, spec `893a299d`, code `d402e379`. Fresh reviewer (Opus);
+  scoped to the fix commits and the direct callers (`e1_cases.ts` replay, `e1_creatures.test.ts`).
+- PM dispositions: S1 own-delivery binding (architecture.md:330-335), S2 group-order withhold
+  (architecture.md:372-377), N1 scope, N2 waiver text.
+
+**Verdict: CHANGES REQUIRED** (one blocker, a one-assertion test fix).
+
+### Dispositions
+
+- **S1 closed in code and spec.** `e1_obligations.ts:437-451` counts each fired rule's matched
+  ops (deduplicated per rule) and withholds every rule that touches an op claimed twice;
+  `:493` withholds quest.fail-only rules. Matches architecture.md:330-335 word for word. The
+  e_dup plant fails on the old code (R0 below).
+- **S2 closed.** `:496-498` reads the prefix before the first op of group >= G and withholds
+  when a lower group appears at or after it; the "lower group after G" plant gives no credit
+  (R1). `react()` allocates G as `p.group + 1` and only reused groups are lower, so "first op
+  of group >= G" equals "G's first op" in every reachable receipt.
+- **N1 closed** (`:420`, `scopeOf`); plant "assign scope" red (R6). **N2 closed**: the reason
+  is accurate; the file grew 529 to 535 lines, inside `allow 540`; `check_ts_size` exits 0.
+- Extras accepted: the deleted suppress/resolve guards are implied by the shape match
+  (`expected`/`value` equal the before/after rows; instance bound via `questOf`). The
+  strengthened "transition instance"/"transition to" plants now change one fact each.
+
+### Finding
+
+**B1 blocker: the e_dup plant does not pin "credits none of them".**
+`kernel/ts/test/e1_creatures.test.ts:299-302` asserts only that `e_dup` is absent. Mutant R3
+("first claimant keeps credit": withhold a rule only when another rule claimed the op first)
+passes the whole file, because e_dup is inserted after b. With e_dup authored before b, the same
+mutant credits `e_dup`, `/when/root` and `/apply/0` (verified: the reordered test fails with
+those three paths). R4 (uniqueness checked on the first step only) also survives. Fix: assert
+in the dup state that `b_lost_before_meeting` is also uncredited; that kills R3 and R4.
+
+### Evidence
+
+- `npm run typecheck` 0; `node --test test/e1*.test.ts` 0 (49 pass).
+- `e1_cases.ts` on v042 (`1c53bcd8…`): exit 2, 27 cases, pending 51, dispositioned 0, witnessed
+  597; pending identical to the first review's list; vs base `f7c616af` exactly 21 reaction
+  paths leave pending, none added, none lost; d9's 3 paths witnessed.
+- Mutants against `e1_creatures.test.ts`: R0 old obligations red (e_dup credited), R1 no
+  group-order guard red, R2 threshold `> 2` red, R5 quest.fail-only allowed red, R6 scope
+  unchecked red, R7 prefix includes G red; R3 and R4 green (B1).
