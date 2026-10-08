@@ -164,7 +164,7 @@ the file, or the report table or its index, corrupt, `replace` throws (`store.ts
 host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:279`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
-to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
+to [R12](future.md#production-story-app)). Memory adopts only after the commit; an
 unknown COMMIT fences like an invocation's. The host confirms with the player first.
 
 ## Narration on reopen
