@@ -275,7 +275,6 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 
 - [D9 real cast clarification](pm-decision-d9-real-cast-2026-10-06.md): retain October 5 no-Bram ruling after owner delegation.
 
-- [Orphan provisional fixture cleanup](pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
 
 - [E1 branch evidence](owner-decision-e1-branch-evidence-2026-10-07.md): `any` children credit only when true at the accepted action; negative-polarity guards need a reviewed disposition, reported separately from witnessed paths.
 - [Orphan provisional fixture cleanup](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/decisions/pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
