@@ -30,3 +30,13 @@
 Over-engineering: none; `tokens.ts` unused by design (ponytail note present).
 
 CI at review: `changes`, `lint` pass; `browser`, `elixir`, `sim`, `typescript` pending.
+
+## Fix round 1 (`644065b6`)
+
+Verdict: **APPROVE**. Checked only the dispositions and the lines they touched.
+
+1. Finding 1, resolved: `BOOK-UI-COMPONENTS.md:107` now "available only; an unavailable action is a non-action note with its real reason ... not a disabled card", linking `book-ui.md#notice-board-details` (anchor exists; :185, :205-206 match). Specimen row is now a `<p class="note">` with a tag, no `role="button"`/`aria-disabled`.
+2. Finding 2, resolved by PM ruling: the decision record and README:128 now say "PM addition for accessibility; spec only until the polish phase"; no "owner-required" left.
+3. Nit 3: no change, per PM.
+4. Nit 4, resolved: `BOOK-UI-COMPONENTS.md:135-136` sound plays on every turn including the reduced-motion fade; the specimen plays it before the fade branch, which now matches.
+5. Nit 5, resolved: `page-curl.sksl` scales both shades by `e = sin(PI*progress)`. Specimen inlines the file verbatim; CanvasKit 0.42.0 compiles it; renders at progress 0 are pure `leaving` (255,0,0) and at 1 pure `arriving` (0,0,255) across samples, mid-turn and mirror unchanged.
