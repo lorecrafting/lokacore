@@ -213,3 +213,63 @@ test('expiry receipt trust scope must name its bound actor', () => {
     'save_corrupt',
   );
 });
+
+// Breaks: reopen skips checking that the accept receipt schedules the bound due job (M8).
+test('reopen refuses an accept receipt that schedules its due job at another time', () => {
+  const a = setup();
+  a.move('north', 'west');
+  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+  a.answer('accept_on_time');
+  const row = a.sql
+    .prepare(
+      "SELECT rowid,response FROM receipt WHERE json_extract(command,'$.payload.choice_id')='accept_on_time'",
+    )
+    .get() as { rowid: number; response: string };
+  const response = JSON.parse(row.response);
+  const scheduled = response.delta.ops.filter((o: { op: string }) => o.op === 'job.schedule');
+  assert.equal(scheduled.length, 1);
+  scheduled[0].due_time += 1;
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE rowid=?')
+    .run(JSON.stringify(response), row.rowid);
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
+  );
+});
+
+// Breaks: reopen accepts an expiry receipt whose trust fact_changed event disagrees with its delta (M5).
+test('reopen refuses an expiry receipt with a forged trust event', () => {
+  const a = setup();
+  a.move('north', 'west');
+  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+  a.answer('accept_on_time');
+  const story = a.story();
+  const from = story.world().state.clock;
+  assert.equal(
+    story.elapsed({ expected_run_id: story.runId(), from, until: 237601 }).kind,
+    'saved',
+  );
+  const rows = a.sql.prepare('SELECT rowid,response FROM receipt').all() as {
+    rowid: number;
+    response: string;
+  }[];
+  const forged = rows.flatMap(({ rowid, response }) => {
+    const parsed = JSON.parse(response);
+    const event = parsed.events?.find(
+      (e: { payload: { type: string; fact?: { key: string } } }) =>
+        e.payload.type === 'fact_changed' && e.payload.fact?.key === 'peg_trust',
+    );
+    if (!event) return [];
+    event.payload.new += 1;
+    return [{ rowid, response: JSON.stringify(parsed) }];
+  });
+  assert.equal(forged.length, 1);
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE rowid=?')
+    .run(forged[0].response, forged[0].rowid);
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
+  );
+});
