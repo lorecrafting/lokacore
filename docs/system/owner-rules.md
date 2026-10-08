@@ -1,6 +1,6 @@
 # Owner rules in force
 
-One line per active rule, with its record. Superseded rules are not listed; their records are deleted
+One line per active rule, with its record. PM adoptions whose contract is installed in `docs/system` are not listed here: the [index](../decisions/README.md) lists every record. Superseded rules are not listed; their records are deleted
 and linked by permalink from the [index](../decisions/README.md), or kept only where code or `protocol/` cites them ([move forward](../decisions/owner-decision-move-forward-2026-10-07.md)). The architecture decisions every agent must
 know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
 offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
@@ -14,52 +14,16 @@ and not repeated here.
 
 - Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
 
-- D9 retains the real chapter cast without Old Bram; the unattended ferry and existing cast/service roles remain ([PM clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md)).
-
-- D12 adopts optional paid herbalism/haggle lessons, separate current qualification, existing finite-patch careful Harvest and Peg's bound discounted Buy quote ([PM adoption](../decisions/pm-decision-d12-practical-skills-2026-10-06.md)).
-
-- D4 connects homes/smithy/orchard, keeps Elspeth at Ferry Landing and exact child-state prose, and selects finite conserved apples plus the first held-food Eat consumer ([PM adoption](../decisions/pm-decision-d4-homes-orchard-2026-10-05.md)).
-
 - D1 uses a conserved paid outbound ferry, a free return and owned-corpse fare
   waiver; Sedge teaches swim immediately for free while the Chapel remains the
   death destination ([PM adoption](../decisions/pm-decision-d1-ferry-isle-2026-10-05.md)).
 
-- B9 credits only the first accepted paid Inn Rooms Rest, preserves a closable anchored dream/branch, and commits S10 plus its once-only local memory only on final acknowledgement ([PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)).
-
-- B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).
-
-- D5 adds five dry reciprocal Deep Fen rooms, a naturally lit den for gear-free original-Wren Rejoin and fixed ward-stone Read without topic/Q2 credit; preserve the sole message and defer bottom access to D6 ([PM adoption](../decisions/pm-decision-d5-deep-fen-2026-10-05.md)).
-- D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
-
-- B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
-
-- C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).
-
-- B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).
 - B7 uses the public well and two finite Peg waterskins for mass-accounted Fill/Pour/Drink, without a passive need or resource benefit ([PM adoption](../decisions/pm-decision-b7-well-waterskin-2026-10-05.md)).
-- C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
-
-- A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
-  bell; the five fixed local memories and completion report commit only on final
-  epilogue acknowledgement ([PM adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md)).
-
-- Q3-F offers an exact Belfry Silence choice only after Q2/rescued or stays,
-  resolves fox once and retains a receipt-evidenced silent scene
-  ([PM adoption](../decisions/pm-decision-q3-fox-silence-2026-10-05.md)).
 
 - B1 uses the delegated [chapter calendar/status selection](../decisions/pm-decision-b1-calendar-status-2026-10-05.md): cartridge time units and sky phases drive confirmed Book/CLI status; deadline effects follow in B2.
 
-- B2 S2 uses the real public Aldric, Peg's always-reachable offer, an inclusive chapter
-  deadline and a conserved funded penny reward; its source is installed in the
-  [current chapter](cartridge.md#current-bundled-chapter) ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
-- B5 S9 uses finite real herb/bandage stock, immediate optional explicit repeats and a separate capped Priory contribution ([PM adoption](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)).
-
 - B3 Peg's shop starts with a finite four-item authored shelf, exact conserved penny exchange,
   same-ID buyback and no restock ([PM adoption](../decisions/pm-decision-b3-pegs-shop-2026-10-05.md)).
-- Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
-  quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).
-
-- Q2-C completes the Vesper message → Elspeth stays path before the complete Wren escort → Elspeth rescue path; no selectable unfinished branch ([stays adoption](../decisions/pm-decision-q2-c-stays-2026-10-05.md), [rescue adoption](../decisions/pm-decision-q2-c-rescue-2026-10-05.md)).
 
 - Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).
 
@@ -81,8 +45,6 @@ and not repeated here.
   and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
 - Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
 
-- NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
-
 - The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
 - NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and ordinary confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
 - Confirmed Take from a corpse's Contents stays on that corpse detail with Back to World and one local pickup line ([record](../decisions/owner-decision-corpse-loot-take-detail-2026-10-06.md)).
@@ -92,8 +54,6 @@ and not repeated here.
 - Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
 
 - World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
-- Resume the approved C1 touch presenter alongside useful parallel mechanics planning and sampler preparation
-  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
@@ -128,10 +88,6 @@ and not repeated here.
 - The owner is the human-proof tester for now ([record](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)).
 
 ## Architecture and engine
-
-- C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
-
-- C3 living hounds follow the [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; their bounded population is installed, with [independent source/save/publication approval](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md).
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
@@ -214,8 +170,7 @@ and not repeated here.
 
 - Update canonical Book interaction rules in the same mechanic slice that changes them, reuse the component language, and fix obvious navigation/UI correctness defects before that slice completes; use E3 for the larger visual consistency pass ([owner decision](../decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 
-- Before the Chapter 1 E3 closure gate, run one Fable audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
-- Before the Chapter 1 E3 closure gate, run one Fable audit of end-to-end architecture and layer seams after A–D source integration; fix correctness and player-blocking findings through reviewed work and track nonblocking debt ([owner decision](../decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)).
+- The one-time Chapter 1 [docs audit](../evidence/2026-10-06-chapter-one-docs-audit.md) and [architecture audit](../evidence/2026-10-06-post-d10-architecture-audit.md) are done and their repairs closed ([docs record](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md), [architecture record](../decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)); the architecture follow-ups stay Beads issues.
 
 - After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 
@@ -225,8 +180,6 @@ and not repeated here.
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
-- Local TypeScript/UI edits use an isolated Debug Simulator and Metro with Fast Refresh; PR gates
-  still run at handoff and merge ([record](../decisions/owner-decision-local-edit-loop-2026-10-04.md)).
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
@@ -247,16 +200,12 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - An Opus `designer` is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-- Developers default to Sonnet; Opus for kernel and contract-freeze slices
+- Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md) says
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).
 - Native mobile builds run only when native inputs change; the merge rule is every CI job that ran
   is green ([record](../archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
-- UI-slice reviews drive the app with agent-device on the iOS Simulator
-  ([record](../archive/decisions/owner-decision-agent-device-2026-10-01.md)).
-- Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
-  for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
 - Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
   `docs/system` first, then the code. `docs/archive/` holds only cited older records; new
   decision records go in `docs/decisions/` and add a line here
@@ -266,23 +215,13 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Latest Book UI polish supersedes the earlier fixed viewport-bottom NPC dock, pending-choice-preserving Leave and position detail page; follow [Book UI](book-ui.md) and the [new record](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md). Description projection is coordinated separately; no invented player presence or description keys.
 
-- PM adoption under autonomous mechanics authority: [M1–M23 queue, clock/safety and chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md); each implementation still amends active specs and follows reviewed delivery.
-
 - PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), installed through M5/M6; new combat equations are not silently inherited from draft PR #136.
-
-- Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
-
-- Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
 
 - PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
 
-- Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
 - The pre-production mobile app CI exception excludes `mobile/authority/local-story/`: authority/save changes run the broad code lane and browser checks; native checks remain paused ([scope clarification](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
 
-- Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. This supersedes current device/Simulator routing above.
-- App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
-
-- Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
+- Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. These resume with native work: [agent-device UI walks](../archive/decisions/owner-decision-agent-device-2026-10-01.md), [iPhone 11 at gates](../decisions/owner-decision-simulator-device-rows-2026-10-02.md), [simulator-first validation](../decisions/owner-decision-simulator-first-validation-2026-10-04.md).
 
 - Carrying admission follows the [M3-A PM selection](../decisions/pm-decision-m3-a-carrying-ceiling-2026-10-04.md) under mechanics delegation.
 - First live fight narration and the corrected brass-key room line use the [owner-approved seven-line copy batch](../decisions/owner-decision-m6-a-combat-copy-2026-10-04.md).
@@ -291,12 +230,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Open encounters apply the [owner-approved focused combat ActionSet](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md) after ordinary contributions, with shared admission/projection and normal restoration on close.
 
-- M20-B1 mechanical scope: [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); controlled consumer only, production S1 copy/publication stays B2.
-
 - Nested chapter notice board: [M12-B owner direction](../decisions/owner-decision-m12-b-notice-board-2026-10-05.md).
 
 - Opening room NPC for conversation and directions: [owner direction and PM selection of Elspeth](../decisions/owner-decision-opening-elspeth-2026-10-05.md).
 
-- Q2-A staged first search lead: [PM adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
-
-- PM selection under mechanics delegation: [D6 water deadline, qualified admission and owned-corpse Chapel recovery](../decisions/pm-decision-d6-water-depths-2026-10-06.md); installed source is in the [current chapter](cartridge.md#current-bundled-chapter).

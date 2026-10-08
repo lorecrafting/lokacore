@@ -10,4 +10,4 @@ Current mechanics use automated/headless checks and actual Simulator checks as a
 
 Physical-device testing is deferred substantially later, before eventual public-release readiness; no exact date or gate is selected here. Historical C1 acceptance and device carries remain their recorded evidence/history. Future physical-proof work is routed later, not declared completed or permanently waived. This instruction supersedes an earlier guideline when it would demand manual native/device testing now; it does not remove relevant functional Simulator checks or authorize changing the owner's installation/save.
 
-Effect: current clock/lifecycle and subsequent mechanics validation follows this routing; the [queue](../NEXT-MECHANICS.md) links it. No source, test, native build or save change is made by this record.
+Effect: current clock/lifecycle and subsequent mechanics validation follows this routing; the [queue](https://github.com/lorecrafting/lokacore/blob/15c7d41be6c54208cd37b03aa87420f9f4b90d8e/docs/NEXT-MECHANICS.md) links it. No source, test, native build or save change is made by this record.

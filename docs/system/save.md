@@ -7,10 +7,10 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 
 ## Opening a story
 
-`openStory(db, releases, host)` (`authority.ts:70`) takes the bundled releases newest first
+`openStory(db, releases, host)` (`authority.ts:76`) takes the bundled releases newest first
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
 call (`newId`), an optional account binding read once when a run starts, an optional clock
-for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
+for latency, and an optional random source shaped like `getRandomValues` (`:57`). It opens the
 save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
 (below), else the release's own fresh world.
@@ -24,7 +24,7 @@ Refusals, nothing written:
 |---|---|---|
 | `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 2 (a newer app's; checked first) | no: the player updates the app |
 | `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
-| `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:157`) | yes, but `newGame` throws: the host deletes the file (below) |
+| `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:178`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
 The session controller adds `save_corrupt` causes with the new game in place after a story
@@ -59,7 +59,7 @@ preview; active-save mismatches still use the refusal and confirmed Start over a
 
 ## Receipts
 
-Scope `story/<lineage_id>/<character>` (`save.ts:121`). A receipt (`store.ts:28`) stores
+Scope `story/<lineage_id>/<character>` (`save.ts:121`). A receipt (`store.ts:36`) stores
 the invocation id, the CommandId, actor, `intent_digest_version` (`loka-intent-v1`) and intent
 digest, the resolved Command (null for a rejection before one existed), the revision (unchanged
 for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
@@ -75,10 +75,10 @@ and `bram` choices, and narration ids follow them; outcome `accept` is the kerne
 
 ## Replies
 
-`Reply` (`authority.ts:25`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
+`Reply` (`authority.ts:31`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
 `pending` (a COMMIT whose outcome is unknown; retry the same invocation), `stale_view` (a NEW
 invocation whose `view_freshness_token` starts with `view:` and is not the current
-`view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. Accepted invocation replies also identify their committed
+`view:<run_id>:<revision>`, `save.ts:120`; any other token is not checked), or `saved {replay, revision, decision}`. Accepted invocation replies also identify their committed
 `command_id` for exact narration recovery, including eventless wrong answers. A failed commit throws with memory and
 storage unchanged.
 
@@ -86,10 +86,10 @@ storage unchanged.
 
 `commit` (`commit.ts:25`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
-then always the receipt. `transaction` (`:265`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
+then always the receipt. `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
 transaction open, returns false: the outcome is unknown. Then the story is **fenced**
-(`save.ts:31`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
+(`save.ts:65`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
 reads the receipt (committed: memory adopts the saved head; not there: the attempt failed).
 Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (every fault
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
@@ -107,7 +107,7 @@ use these same changed containers/facts/quests/choices/head/receipt rows, with n
 
 ## The save file (`loka-save-v1`)
 
-`store.ts:42`, STRICT tables:
+`store.ts:50`, STRICT tables:
 
 | Table | Rows |
 |---|---|
@@ -126,7 +126,7 @@ save from before c1-host has no `world_context_id`; it is never rewritten. The f
 `loka-save-v1`, so a build from before c1-host opens a c1-host save under the release's own
 context and rebuilds wrong ids (dev reinstalls only; no app is released).
 
-Loading (`store.ts:91`) rebuilds the world from the release's cartridge under the pinned
+Loading (`store.ts:99`) rebuilds the world from the release's cartridge under the pinned
 `world_context_id`, or from the release's own fresh world when the pin has none (a save from
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
 so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
@@ -155,12 +155,12 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:220`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:228`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
-the file, or the report table or its index, corrupt, `replace` throws (`store.ts:162`) and the
+the file, or the report table or its index, corrupt, `replace` throws (`store.ts:186`) and the
 host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:279`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
@@ -170,7 +170,7 @@ unknown COMMIT fences like an invocation's. The host confirms with the player fi
 ## Narration on reopen
 
 The latest committed narration is read from the receipts, never memory, so a crash before
-display shows it again; no acknowledgement is stored (`narration.ts:24`;
+display shows it again; no acknowledgement is stored (`narration.ts:23`;
 `start_over.test.ts` "the latest committed narration is read again on reopen, from the
 receipts").
 
@@ -178,7 +178,7 @@ receipts").
 
 An accepted decision's `story_point_reached` events become pending `report` rows committed
 with the decision, each with a host id, the run, lineage, release and the run's binding
-(`delivery.ts:97`); a replay adds none; a malformed report throws before anything is stored.
+(`delivery.ts:116`); a replay adds none; a malformed report throws before anything is stored.
 `deliver(db, submit, limit)` (`progress.ts:22`) sends pending reports with a binding (a
 guest's wait), least tried first; the answer must be a StoryPointAcceptance of this report for
 this account; `accepted` or `rejected` with a matching payload digest is stored as itself, else
@@ -194,13 +194,13 @@ transaction in its own; a write failure is swallowed and caught up later from th
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
 newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
-host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:140`).
+host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:177`).
 
 ## The session controller and the phone
 
 `session.ts` and `mobile/app/book/presenter.ts` are the controller under the book UI: the GameView, its text, the offered actions
 as buttons carrying the view token they were drawn from, and a log of the last 200 lines
-(`presenter.ts:56`); a press that throws is retried unchanged by the next press (`presenter.ts:64`, 03 §14). The host gives
+(`presenter.ts:175`); a press that throws is retried unchanged by the next press (`presenter.ts:132`, 03 §14). The host gives
 `kernel_version` and the random source: the app passes expo-crypto's `getRandomValues` and
 `loka-kernel@<commit>`, the commit stamped by `mobile/app/metro.config.js` when Metro starts, with
 `-dirty` when the tree had changes ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §3, a dirty tree is never the bare commit) and always

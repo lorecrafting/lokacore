@@ -1,49 +1,22 @@
 # Roadmap to the first playable build
 
 Planning, not spec: document 14 (with [pre-release-proof.md](archive/spec/pre-release-proof.md))
-sets the gates; this page is the current slice plan.
-Slices follow [the delivery workflow](WORKFLOW.md). The owner approved six R3 PRs,
-compile-time Elixir contracts and the verification harness
-([record](archive/decisions/owner-decision-roadmap-2026-09-24.md)); the later slice counts and the
-estimate are the PM's planning, not owner decisions.
+sets the gates; this page is the current slice plan, run per [the delivery workflow](WORKFLOW.md).
+Slice counts and estimates are the PM's planning, not owner decisions.
 
-The original [M1–M23 mechanics proposal](NEXT-MECHANICS.md) retains dated slice detail.
-Current Chapter 1 status and remaining proof follow [completion](#chapter-one-completion);
-assignment records are in the [brief index](briefs/README.md).
-The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
-sets the active development source and save. The [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
-excludes Old Bram from the active chapter. Installed Q1/Q2 use the actual Ashmere
-cast; required routes follow the [no-wait rule](decisions/owner-decision-no-wait-opening-2026-10-05.md).
-The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
-[#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
-maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
-lift and proof. Completed rows are recorded below. The
-[33 provisional slice briefs](briefs/chapter-one/README.md), merged in
-[#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
-was fixed and independently rechecked, provide candidate assignment detail.
-[Beads Rust](WORKFLOW.md#beads-rust) mirrors all 33 Chapter 1 slices;
-this roadmap remains the published completion record.
-
-The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
-`test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
-
-The verification harness (registered invariants, the deterministic simulator, fault simulation) is adopted ([record](archive/decisions/owner-decision-roadmap-2026-09-24.md)) and described in [architecture.md](system/architecture.md#hosts) and the [owner rules](system/owner-rules.md#architecture-and-engine); its planning text is [archived](archive/ROADMAP.md#verification-harness-adopted-2026-09-24).
-The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](https://github.com/lorecrafting/lokacore/pull/163)); its seed and coverage contract is unchanged.
+The [Missing Child completion plan](MISSING-CHILD-PLAN.md) ([#192](https://github.com/lorecrafting/lokacore/pull/192))
+maps 33 PRs through the remaining player outcomes; the [slice briefs](briefs/chapter-one/README.md)
+give candidate assignment detail; [Beads Rust](WORKFLOW.md#beads-rust) mirrors the slices, and this
+roadmap remains the published completion record. The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
+sets the active development source and save; the [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
+excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-decision-no-wait-opening-2026-10-05.md).
 
 ## Slices
 
 | Stage | Slices | Content |
 |---|---|---|
-| R3 to R5 | 8 + 3 + 1 + 11 | Done; Gates R3 and R5 passed ([R5 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r5-gate-review.md)); slices and decisions in [the archive](archive/ROADMAP.md). |
-| R6 | 7 + 1 (P1) + 1 (SM) | Done; Gate R6 [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-09-30-r6-gate-review.md), deferred items carried (the one list is the [archived row](archive/ROADMAP.md)). |
-| SM2 | 3 | Done: #77, #78, #79 (the book UI over the smoke controller); P4A-2 carried to R12 ([archived row](archive/ROADMAP.md)). |
-| Early R7/R8 | 6 + 1 (G) | Done: #82 to #96; gate [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-01-early-r7r8-gate-review.md); carries in the R6P, R7/R8 and Playtest rows ([archived row](archive/ROADMAP.md)). |
-| R6P | 11 + gate | Done ([gate review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-02-r6p-gate-review.md)); deferred: touch-to-photon (R7/R8 row), unaided completion (Playtest row). [Rows](archive/ROADMAP.md) |
-| Docs compaction | 2 | Done: #117 (`docs/system/`), #119 (archive, AGENTS.md source of truth; [decision](decisions/owner-decision-docs-compaction-2026-10-02.md)). |
-| Presenter split | 1 | Done: #118 (`GameSession`, the words move to `mobile/app`; [review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/reviews/2026-10-02-presenter-split-review.md)). [Row](archive/ROADMAP.md) |
-| Quest from dialogue | 1 | Done: merged #120 ([review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-02-m1-quest-dialogue-review.md)) (M1, [record](decisions/owner-decision-quest-from-dialogue-2026-10-02.md)): Bram's quest starts from his `bram_offer` dialogue choice, not a place action; spec in [mechanics](system/mechanics.md); Lantern hash `806508c7`; device rerun on the iPhone 11 passes ([evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-02-m1-quest-dialogue-iphone11/README.md)). |
-| R7/R8 for chapter one | 12 + gate | Approved 2026-10-02 ([record](decisions/owner-decision-chapter-one-plan-2026-10-02.md)); all 12 [C1 slices](#c1-slices) done, Gate C1 passed via [#149](https://github.com/lorecrafting/lokacore/pull/149), with [closure checklist](C1-GATE.md). Carries and their triggers live in [C1 carry checkpoints](#c1-carry-checkpoints); content decision details remain in their linked record. |
-| M mechanics continuation | 23 original planning groups | [Adopted queue #150](https://github.com/lorecrafting/lokacore/pull/150); dated proposal in [mechanics history](NEXT-MECHANICS.md). Installed Chapter 1 outcomes and remaining proof follow [current completion](#chapter-one-completion). |
+| R3 to C1 | done | Gates R3, R5, R6, early R7/R8, R6P and C1 ([#149](https://github.com/lorecrafting/lokacore/pull/149), [checklist](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/C1-GATE-2026-10-03.md)) passed; slices, reviews and decisions in [the archive](archive/ROADMAP.md) and the [publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md). Open C1 carries: [C1 carry checkpoints](#c1-carry-checkpoints). |
+| M mechanics continuation | 23 original planning groups | [Adopted queue #150](https://github.com/lorecrafting/lokacore/pull/150); dated proposal in [mechanics history](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md). Installed Chapter 1 outcomes and remaining proof follow [current completion](#chapter-one-completion). |
 | Later chapter mechanics lookahead | provisional; PR count unset | [C2/C3/CC quest-consumer queues](LATER-MECHANICS.md), after current Missing Child work. No installed mechanic, active M renumbering or completed-slice credit. |
 | Playtest and tune | open; owner ends stage | [Owner decision](archive/decisions/owner-decision-playtest-2026-09-25.md); historical iterations in the [publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md). Unaided first-tester completion remains a prelaunch obligation. Native proof is paused; current UI deferrals remain in [carry checkpoints](#c1-carry-checkpoints). |
 
@@ -80,33 +53,11 @@ PRs, reviewed source identities and historical evidence claims. It is not an
 assignment queue. Native verification remains paused under the
 [owner ruling](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
 
-## C1 slices
-
-Original owner-approved order; all rows below are completed. Each slice's scope and acceptance are in [the record](decisions/owner-decision-chapter-one-plan-2026-10-02.md).
-
-| Slice | Branch | Status | PR |
-|---|---|---|---|
-| c1-host | `c1-host` | done | [#129](https://github.com/lorecrafting/lokacore/pull/129) |
-| c1-numbers | `c1-numbers` | done | [#131](https://github.com/lorecrafting/lokacore/pull/131) |
-| c1-attributes | `c1-attributes` | done | [#133](https://github.com/lorecrafting/lokacore/pull/133) |
-| c1-doors | `c1-doors` | done | [#132](https://github.com/lorecrafting/lokacore/pull/132) |
-| c1-equipment | `c1-equipment` | done | [#134](https://github.com/lorecrafting/lokacore/pull/134) |
-| c1-locks | `c1-locks` | done | [#135](https://github.com/lorecrafting/lokacore/pull/135) |
-| c1-position | `c1-position` | done | [#137](https://github.com/lorecrafting/lokacore/pull/137) |
-| c1-journal | `c1-journal` | done | [#138](https://github.com/lorecrafting/lokacore/pull/138) |
-| c1-chapters | `c1-chapters` | done | [#139](https://github.com/lorecrafting/lokacore/pull/139) |
-| c1-scenes-modal | `c1-scenes-modal` | done | [#140](https://github.com/lorecrafting/lokacore/pull/140) |
-| c1-sampler | `c1-sampler` | done | [#142](https://github.com/lorecrafting/lokacore/pull/142), [development Look repair #145](https://github.com/lorecrafting/lokacore/pull/145) |
-| c1-touch | `c1-touch` | done | [#141](https://github.com/lorecrafting/lokacore/pull/141) |
-| Gate C1 | `c1-gate-close` | passed; [checklist](C1-GATE.md) | [#149](https://github.com/lorecrafting/lokacore/pull/149) |
-
 ## C1 scene carries
 
 - Beyond the installed modal subset and [B9 Rest dream](system/mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract): arbitrary overlays, restricted control, role bindings, checkpoints/consequence beats and additional scene-ended quest objectives need a concrete consumer and reviewed contract.
 - scene_started: add when a consumer needs a separate start event; it requires a
   proposal delivery event hook, with the corresponding review depth.
-- SCENE-01 Simulator render/terminate/relaunch is complete: [touch proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-touch/README.md).
-  Headless close/reopen and receipt-retry proof is in the scene review.
 
 ## C1 carry checkpoints
 
@@ -132,8 +83,6 @@ and new review carries; their linked records retain the governing details.
 | First touch recipient selector | Touch Give: supply a projected valid recipient; the current presenter suppresses incomplete item-only Give and preserves complete invocations ([Book UI](system/book-ui.md)). |
 | First typed worn/nested-item consumer / targetless item alias | Equipment: typed targets omit worn items; locks: typed examine omits nested items. Revisit when a typed client needs them. A targetless take/drop/give alias is listed but never accepted; revisit before first such authored alias. |
 | Next necessary dialogue boundary change | c1-journal: inline continuationId when a typed replacement satisfies rule purity. Older-development Lantern migration is not required under the [preproduction policy](decisions/owner-decision-forward-development-2026-10-05.md); retain saved bytes and exact mismatch refusal. |
-
-M20-B1 — atomic Maud reward and usable storage mechanics — merged [#171](https://github.com/lorecrafting/lokacore/pull/171) under [PM adoption](decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md). M20-B2 — playable Maud quest and chest content — merged [#172](https://github.com/lorecrafting/lokacore/pull/172) with [independent review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-m20-b2-mauds-cellar-review.md).
 
 Closed C1 carries: bound Continue ([A3 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-a3-green-primary-review.md));
 implicit position/scene fact dependency ([loader review](reviews/2026-10-06-e1-loader-integrated-review.md));
