@@ -5,7 +5,12 @@ import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
-import { refString, type ChoiceRow, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import {
+  refString,
+  type ChoiceRow,
+  type QuestRow,
+  type World,
+} from '../../../kernel/ts/src/runtime/decision.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
 import { escortSave } from './escort-save.ts';
 import { bellSave } from './bell-save.ts';
@@ -118,16 +123,41 @@ export function checkRow(world: World, id: string, row: ChoiceRow) {
     invalid();
 }
 
+type Dialogue = NonNullable<World['cartridge']['dialogues']>[string];
+type DialogueChoice = Dialogue['choices'][string];
+type Expected = Map<
+  string,
+  { fact: Parameters<typeof value>[2]; value: unknown; selected: boolean }
+>;
+
+// A selected choice's assignments must agree; an unselected one leaves the authored default.
+function expect(
+  world: World,
+  expected: Expected,
+  sequence: NonNullable<DialogueChoice['sequence']>,
+  selected: boolean,
+) {
+  for (const step of sequence) {
+    if (step.op !== 'fact.assign') continue;
+    const key = refString(step.fact);
+    const prior = expected.get(key);
+    if (selected && prior?.selected && !same(prior.value, step.value)) invalid();
+    if (selected || !prior)
+      expected.set(key, {
+        fact: step.fact,
+        selected,
+        value: selected ? step.value : world.cartridge.facts[key].value_type.default,
+      });
+  }
+}
+
 function checkAssignments(
   world: World,
   rows: [string, ChoiceRow][],
   items: EntityId[],
   lost: boolean,
 ) {
-  const expected = new Map<
-    string,
-    { fact: Parameters<typeof value>[2]; value: unknown; selected: boolean }
-  >();
+  const expected: Expected = new Map();
   for (const [key, d] of Object.entries(world.cartridge.dialogues ?? {})) {
     for (const [choice, option] of Object.entries(d.choices)) {
       const transfer = option.receive ?? option.hand_over;
@@ -140,18 +170,7 @@ function checkAssignments(
       const selected = rows.some(
         ([, r]) => refString(r.source) === key && r.status === 'resolved' && r.choice_id === choice,
       );
-      for (const step of option.sequence ?? []) {
-        if (step.op !== 'fact.assign') continue;
-        const key = refString(step.fact);
-        const prior = expected.get(key);
-        if (selected && prior?.selected && !same(prior.value, step.value)) invalid();
-        if (selected || !prior)
-          expected.set(key, {
-            fact: step.fact,
-            selected,
-            value: selected ? step.value : world.cartridge.facts[key].value_type.default,
-          });
-      }
+      expect(world, expected, option.sequence ?? [], selected);
     }
   }
   for (const e of expected.values())
@@ -162,7 +181,6 @@ function checkAssignments(
       invalid();
 }
 
-// size: allow 46, terminal receipt, quest, status and original custody must agree at one load boundary
 function handoff(
   world: World,
   db: Db,
@@ -185,20 +203,9 @@ function handoff(
       );
       const done = matches.length === 1;
       if (matches.length > 1 || (done && (!received || completed))) invalid();
-      const q = Object.values(world.state.quests ?? {}).find(
-        (q) =>
-          q &&
-          same(q.quest, d.quest) &&
-          same(q.scope, { kind: 'player', character_id: world.character }),
-      );
+      const q = playerQuest(world, d.quest);
       if (done) {
-        const destination = bind(world, d).find((r) => r.role === option.hand_over!.to)!.entity_id;
-        if (
-          world.state.containers[item] !== destination ||
-          q?.state !== 'resolved' ||
-          q.outcome !== choice
-        )
-          invalid();
+        handedOver(world, d, option, item, choice, q);
         committedDialogue(world, db, scope, matches[0][0]);
         completed = true;
       } else if (
@@ -210,4 +217,27 @@ function handoff(
     }
   }
   return completed;
+}
+
+const playerQuest = (world: World, quest: Dialogue['quest']) =>
+  Object.values(world.state.quests ?? {}).find(
+    (q) =>
+      q && same(q.quest, quest) && same(q.scope, { kind: 'player', character_id: world.character }),
+  );
+
+function handedOver(
+  world: World,
+  d: Dialogue,
+  option: DialogueChoice,
+  item: EntityId,
+  choice: string,
+  q: QuestRow | undefined,
+) {
+  const destination = bind(world, d).find((r) => r.role === option.hand_over!.to)!.entity_id;
+  if (
+    world.state.containers[item] !== destination ||
+    q?.state !== 'resolved' ||
+    q.outcome !== choice
+  )
+    invalid();
 }

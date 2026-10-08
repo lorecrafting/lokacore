@@ -3,7 +3,6 @@
 import type {
   Command,
   DecisionResult,
-  DefinitionRef,
   StoryPointReport,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
@@ -11,6 +10,16 @@ import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import {
+  checkBegin,
+  checkBell,
+  checkScene,
+  invalid,
+  ref,
+  type Ctx,
+  type Receipt,
+  type Row,
+} from './finale-receipts.ts';
 import type { Db, Meta } from './store.ts';
 
 const rows = [
@@ -20,30 +29,8 @@ const rows = [
   ['stays', 'fox', 'free'],
   ['lost', 'prior', 'stilled'],
 ] as const;
-const invalid = (): never => {
-  throw new SyntaxError('malformed JSON: inconsistent Green finale');
-};
-const ref = (world: World, kind: string, key: string) =>
-  ({
-    cartridge_id: world.cartridge.manifest.id,
-    cartridge_version: world.cartridge.manifest.version,
-    kind,
-    key,
-  }) as DefinitionRef;
 
-export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
-  if (
-    !Object.values(world.cartridge.story_points ?? {}).some((p) => p.key === 'prologue_completed')
-  )
-    return;
-  const actor = world.character;
-  const fact = (name: string) => value(world, actor, ref(world, 'fact', name));
-  const marker = fact('story_point_prologue_completed');
-  const memories = [
-    fact('memory_village_ending'),
-    fact('memory_fox_fate'),
-    fact('memory_chapter_1_guild_tilt'),
-  ];
+const activeRows = ({ fact }: Ctx) => {
   const active = rows.flatMap(([child, bell, fox]) => {
     const name = `epilogue_${child}_${bell}`;
     const line = fact(`scene_${name}`);
@@ -56,7 +43,10 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
     return line === 0 ? [] : [{ child, bell, fox, name, line: line as number }];
   });
   if (active.length > 1) invalid();
-  const scope = `story/${meta.lineage_id}/${actor}`;
+  return active;
+};
+
+const completions = (db: Db, meta: Meta) => {
   const reports = db.getAllSync<{
     report_id: string;
     lineage_id: string;
@@ -67,13 +57,16 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
     'SELECT report_id,lineage_id,binding,report,disposition FROM report WHERE lineage_id=?',
     meta.lineage_id,
   );
-  const completion = reports.flatMap((r) => {
+  return reports.flatMap((r) => {
     const report = JSON.parse(r.report) as StoryPointReport;
     if (validate('StoryPointReport', report).length) invalid();
     return report.run_id === meta.run_id && report.story_point === 'prologue_completed'
       ? [{ ...r, report }]
       : [];
   });
+};
+
+const acceptedReceipts = (db: Db, scope: string, actor: string): Receipt[] => {
   const receiptRows = db.getAllSync<{
     command_id: string;
     actor_id: string;
@@ -84,7 +77,7 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
     'SELECT command_id,actor_id,revision,command,response FROM receipt WHERE scope=? ORDER BY revision',
     scope,
   );
-  const receipts = receiptRows.flatMap((r) => {
+  return receiptRows.flatMap((r) => {
     if (r.command === 'null') return [];
     const command = JSON.parse(r.command) as Command;
     const decision = JSON.parse(r.response) as DecisionResult;
@@ -97,22 +90,9 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
       invalid();
     return decision.kind === 'accepted' ? [{ command, decision, revision: r.revision }] : [];
   });
-  const finaleBegins = receipts.filter(
-    ({ command: c }) =>
-      c.payload.type === 'perform' && c.payload.action?.startsWith('begin_epilogue_'),
-  );
-  if (!active.length) {
-    if (
-      marker !== 'unreached' ||
-      memories.some((m) => m !== 'unreached') ||
-      completion.length ||
-      finaleBegins.length
-    )
-      invalid();
-    return;
-  }
-  const selected = active[0]!;
-  const outcome = `${selected.child}_${selected.bell}`;
+};
+
+const checkQuests = ({ world, actor, fact }: Ctx, selected: Row) => {
   const q2 = questOf(world, actor, ref(world, 'quest', 'missing_child'))?.[1];
   const q3 = questOf(world, actor, ref(world, 'quest', 'bell_of_ashmere'))?.[1];
   if (
@@ -136,138 +116,9 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
       Object.values(world.state.encounters ?? {}).some((e) => e.status === 'open'))
   )
     invalid();
-  const named = (name: string) => ref(world, 'fact', name);
-  const assignment = (
-    d: DecisionResult & { kind: 'accepted' },
-    name: string,
-    old: unknown,
-    next: unknown,
-  ) =>
-    d.delta.ops.filter(
-      (o) =>
-        o.op === 'fact.assign' &&
-        same(o.fact, named(name)) &&
-        same(o.scope, { kind: 'player', character_id: actor }) &&
-        same(o.expected, old) &&
-        same(o.value, next),
-    ).length === 1;
-  const noExport = (d: DecisionResult & { kind: 'accepted' }) =>
-    !d.delta.ops.some(
-      (o) =>
-        o.op === 'fact.assign' &&
-        [
-          'memory_village_ending',
-          'memory_fox_fate',
-          'memory_chapter_1_guild_tilt',
-          'story_point_prologue_completed',
-        ].includes(o.fact.key),
-    ) && !d.events.some((e) => e.payload.type === 'story_point_reached');
-  const action = `begin_${selected.name}`;
-  if (
-    finaleBegins.length !== 1 ||
-    finaleBegins[0]!.command.payload.type !== 'perform' ||
-    finaleBegins[0]!.command.payload.action !== action
-  )
-    invalid();
-  const begin = finaleBegins[0]!;
-  const detail = Object.keys(world.details).find(
-    (id) =>
-      world.details[id].key === 'market_cross' &&
-      world.details[id].room === world.roomIds[refString(ref(world, 'room', 'village_green'))],
-  );
-  if (
-    !detail ||
-    begin.command.world_context_id !== world.context ||
-    begin.command.payload.type !== 'perform' ||
-    begin.command.payload.actor_id !== actor ||
-    (begin.command.payload.target_id !== undefined && begin.command.payload.target_id !== detail) ||
-    !assignment(begin.decision, `scene_${selected.name}`, 0, 1) ||
-    !noExport(begin.decision) ||
-    !begin.decision.events.some(
-      (e) =>
-        e.payload.type === 'action_completed' &&
-        e.payload.action === action &&
-        e.payload.subject_id === detail &&
-        e.actor_id === actor &&
-        (e.correlation_id as string) === begin.command.id,
-    )
-  )
-    invalid();
-  const bellName = selected.bell === 'prior' ? 'bell_rung' : 'bell_silenced';
-  const bellScene = ref(world, 'scene', bellName);
-  const bellAction = selected.bell === 'prior' ? 'ring_bell' : 'silence_bell';
-  const bellStarts = receipts.filter(
-    ({ command: c }) => c.payload.type === 'perform' && c.payload.action === bellAction,
-  );
-  const bellContinues = receipts.filter(
-    ({ command: c }) => c.payload.type === 'continue' && same(c.payload.scene, bellScene),
-  );
-  const bellLines = selected.bell === 'prior' ? 3 : 2;
-  if (
-    bellStarts.length !== 1 ||
-    !assignment(bellStarts[0]!.decision, `scene_${bellName}`, 0, 1) ||
-    bellContinues.length !== bellLines
-  )
-    invalid();
-  for (let i = 0; i < bellLines; i++) {
-    const { command, decision } = bellContinues[i]!;
-    if (
-      command.payload.type !== 'continue' ||
-      command.payload.actor_id !== actor ||
-      command.world_context_id !== world.context ||
-      command.payload.line !== i + 1 ||
-      !assignment(decision, `scene_${bellName}`, i + 1, i === bellLines - 1 ? -1 : i + 2)
-    )
-      invalid();
-  }
-  if (
-    bellContinues[bellLines - 1]!.decision.events.filter(
-      (e) =>
-        e.payload.type === 'scene_ended' &&
-        same(e.payload.scene, bellScene) &&
-        e.actor_id === actor &&
-        e.world_context_id === world.context &&
-        e.correlation_id === (bellContinues[bellLines - 1]!.command.id as string),
-    ).length !== 1
-  )
-    invalid();
-  const scene = ref(world, 'scene', selected.name);
-  const continues = receipts.filter(
-    ({ command: c }) => c.payload.type === 'continue' && same(c.payload.scene, scene),
-  );
-  const count = selected.line === -1 ? 3 : selected.line - 1;
-  if (continues.length !== count) invalid();
-  for (let i = 0; i < count; i++) {
-    const { command, decision } = continues[i]!;
-    if (
-      command.payload.type !== 'continue' ||
-      command.payload.actor_id !== actor ||
-      command.world_context_id !== world.context ||
-      command.payload.line !== i + 1 ||
-      !assignment(decision, `scene_${selected.name}`, i + 1, i === 2 ? -1 : i + 2)
-    )
-      invalid();
-    if (i < 2 && !noExport(decision)) invalid();
-    if (i === 2) {
-      if (
-        !assignment(decision, 'memory_village_ending', 'unreached', selected.child) ||
-        !assignment(decision, 'memory_fox_fate', 'unreached', selected.fox) ||
-        !assignment(decision, 'memory_chapter_1_guild_tilt', 'unreached', selected.bell) ||
-        !assignment(decision, 'story_point_prologue_completed', 'unreached', outcome) ||
-        decision.events.filter(
-          (e) => e.payload.type === 'scene_ended' && same(e.payload.scene, scene),
-        ).length !== 1 ||
-        decision.events.filter(
-          (e) =>
-            e.payload.type === 'story_point_reached' &&
-            same(e.payload.story_point, ref(world, 'story_point', 'prologue_completed')) &&
-            e.payload.outcome === outcome,
-        ).length !== 1
-      )
-        invalid();
-    }
-  }
-  const proof = [bellStarts[0]!, ...bellContinues, begin, ...continues];
+};
+
+const checkOrder = (proof: Receipt[], head: number) => {
   if (
     proof.some(
       (receipt, i) =>
@@ -278,6 +129,19 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
     )
   )
     invalid();
+};
+
+type Completion = ReturnType<typeof completions>;
+
+const checkCompletion = (
+  meta: Meta,
+  selected: Row,
+  outcome: string,
+  marker: unknown,
+  memories: unknown[],
+  completion: Completion,
+  last: Receipt,
+) => {
   if (selected.line === -1) {
     if (
       marker !== outcome ||
@@ -287,7 +151,7 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
       completion[0]!.binding !== meta.binding ||
       completion[0]!.report_id !== completion[0]!.report.report_id ||
       completion[0]!.report.run_id !== meta.run_id ||
-      completion[0]!.report.observed_revision !== continues[2]!.revision ||
+      completion[0]!.report.observed_revision !== last.revision ||
       completion[0]!.report.outcome !== outcome ||
       completion[0]!.report.release.cartridge_id !== meta.pin.cartridge_id ||
       completion[0]!.report.release.cartridge_version !== meta.pin.cartridge_version ||
@@ -296,4 +160,45 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
       invalid();
   } else if (marker !== 'unreached' || memories.some((m) => m !== 'unreached') || completion.length)
     invalid();
+};
+
+export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
+  if (
+    !Object.values(world.cartridge.story_points ?? {}).some((p) => p.key === 'prologue_completed')
+  )
+    return;
+  const actor = world.character;
+  const fact = (name: string) => value(world, actor, ref(world, 'fact', name));
+  const ctx: Ctx = { world, actor, fact };
+  const marker = fact('story_point_prologue_completed');
+  const memories = [
+    fact('memory_village_ending'),
+    fact('memory_fox_fate'),
+    fact('memory_chapter_1_guild_tilt'),
+  ];
+  const active = activeRows(ctx);
+  const completion = completions(db, meta);
+  const receipts = acceptedReceipts(db, `story/${meta.lineage_id}/${actor}`, actor);
+  const finaleBegins = receipts.filter(
+    ({ command: c }) =>
+      c.payload.type === 'perform' && c.payload.action?.startsWith('begin_epilogue_'),
+  );
+  if (!active.length) {
+    if (
+      marker !== 'unreached' ||
+      memories.some((m) => m !== 'unreached') ||
+      completion.length ||
+      finaleBegins.length
+    )
+      invalid();
+    return;
+  }
+  const selected = active[0]!;
+  const outcome = `${selected.child}_${selected.bell}`;
+  checkQuests(ctx, selected);
+  const begin = checkBegin(ctx, selected, finaleBegins);
+  const bell = checkBell(ctx, selected, receipts);
+  const continues = checkScene(ctx, selected, receipts, outcome);
+  checkOrder([...bell, begin, ...continues], head);
+  checkCompletion(meta, selected, outcome, marker, memories, completion, continues[2]!);
 }

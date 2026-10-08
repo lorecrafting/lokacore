@@ -2,13 +2,16 @@
 # Plant TypeScript size cases in fresh directories and require bin/check_ts_size.mjs, run on
 # exactly those files, to report exactly the expected lines: one line over each limit fails,
 # exactly at it passes; markers at 1.5x pass, and over it, without a reason, not needed or
-# not attached fail. Only the directories this script created are removed.
+# not attached fail. The no-argument scan must report a tracked file under mobile/ (staged in a
+# throwaway index) and skip an untracked one. Only what this script created is removed.
 set -eu
 cd "$(dirname "$0")/.."
-L= T=
-trap 'rm -rf "$L" "$T"' EXIT
+L= T= M= I=
+trap 'rm -rf "$L" "$T" "$M" "$I"' EXIT
 L=$(mktemp -d kernel/ts/src/red_size.XXXXXX)
 T=$(mktemp -d kernel/ts/test/red_size.XXXXXX)
+M=$(mktemp -d mobile/red_size.XXXXXX)
+I=$(mktemp)
 mkdir "$L/test" "$L/__tests__" "$L/x.gen.d" "$L/ios"
 x() { for i in $(seq "$1"); do echo '//'; done; }
 # file marker line 1, function marker line 6, `function f` of $3 lines at line 7, $4 lines total
@@ -63,15 +66,16 @@ status=0
 out=$(node bin/check_ts_size.mjs $(find "$L" "$T" -type f)) || status=$?
 got=$(printf '%s\n' "$out" | LC_ALL=C sort)
 want=$(printf '%s\n' "$expected" | LC_ALL=C sort)
-# The production scan selection must find a planted file too.
+# The production (no-argument) selection: tracked files, mobile included, untracked skipped.
+x 301 > "$M/tracked.ts"
+x 301 > "$M/untracked.ts"
+cp "$(git rev-parse --git-path index)" "$I"
+GIT_INDEX_FILE=$I git add -f "$M/tracked.ts"
 scan_status=0
-if [ "${1-}" = --core-only ]; then
-  scan=$(git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs) || scan_status=$?
-else
-  scan=$(node bin/check_ts_size.mjs) || scan_status=$?
-fi
+scan=$(GIT_INDEX_FILE=$I node bin/check_ts_size.mjs) || scan_status=$?
 if [ "$status" -ne 0 ] && [ "$got" = "$want" ] && [ "$scan_status" -ne 0 ] &&
-  printf '%s\n' "$scan" | grep -qxF "$L/big.ts:1: file, 301 lines, limit 300"; then
+  printf '%s\n' "$scan" | grep -qxF "$M/tracked.ts:1: file, 301 lines, limit 300" &&
+  ! printf '%s\n' "$scan" | grep -qF "$M/untracked.ts"; then
   echo "ok   ts size: limits and allow markers"
 else
   printf 'FAIL ts size: exit %s, expected\n%s\ngot\n%s\n' "$status" "$want" "$got"
