@@ -273,3 +273,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Orphan provisional fixture cleanup](pm-decision-orphan-fixtures-2026-10-06.md): removes only unused B9/D4 answers and generators; records consumer audit and Git recovery.
 
 - [E1 branch evidence](owner-decision-e1-branch-evidence-2026-10-07.md): `any` children credit only when true at the accepted action; negative-polarity guards need a reviewed disposition, reported separately from witnessed paths.
+
+- [E1 batch E dispositions](pm-decision-e1-batch-e-dispositions-2026-10-07.md): a dispositioned dialogue or choice path closes its family gap; reviewed static citations close unreachable guards.

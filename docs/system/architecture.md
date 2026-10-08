@@ -397,6 +397,8 @@ refusing node.
 The recorder reports dispositioned paths separately from witnessed and pending ones;
 a disposition never adds to the witnessed set, and a row for an unknown or witnessed path
 fails the run.
+A dispositioned dialogue or choice path also closes that dialogue's or choice's coverage gap
+([PM decision](../decisions/pm-decision-e1-batch-e-dispositions-2026-10-07.md)).
 
 ## Mobile import rules
 
