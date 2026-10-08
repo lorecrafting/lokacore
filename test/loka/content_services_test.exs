@@ -1,9 +1,10 @@
 defmodule Loka.ContentServicesTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
+
   # Breaks: source compilation accepts impossible/nonfinite service funding, arbitrary benefits or mismatched provider stock.
   test "service declarations refuse unsafe funding, consequences and provider identity", %{
-    tmp_dir: dir
+    dir: dir
   } do
     mutations = [
       {"npcs/maud.json",
@@ -31,12 +32,8 @@ defmodule Loka.ContentServicesTest do
       {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.22")}
     ]
 
-    Enum.with_index(mutations, fn {file, change}, n ->
-      source = Path.join(dir, Integer.to_string(n))
-      File.cp_r!("cartridges/ashmere_missing_child", source)
-      path = Path.join(source, file)
-      File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
-      assert {:error, _} = Loka.Content.compile(source), file
-    end)
+    for {file, change} <- mutations do
+      assert {:error, _} = Loka.ContentSource.compile(dir, [{file, change}]), file
+    end
   end
 end

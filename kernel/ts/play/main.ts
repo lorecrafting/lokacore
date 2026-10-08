@@ -1,6 +1,5 @@
 import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
-// size: allow 320, one terminal session: its loop, each command's dispatch and the replay
 // `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
 // Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
@@ -9,7 +8,7 @@ import { createInterface } from 'node:readline';
 import { encode, hash, type Json } from '../src/foundation/canonical.ts';
 import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
 import { commandId } from '../src/foundation/id_source.ts';
-import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
+import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { gameView } from '../src/view/view.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
@@ -33,7 +32,7 @@ import {
   scan,
   status,
 } from './text.ts';
-import { decide, decideReplay, found, type Run } from './run.ts';
+import { decide, decideReplay, found, header, start, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
 if (!artifact) fail('usage: loka play <artifact> [script | --replay <transcript>]');
@@ -69,7 +68,7 @@ function seed(): number[] {
 
 async function session(script: string | undefined) {
   const tty = !script && process.stdin.isTTY;
-  const r = start(randomUUID(), randomUUID(), seed(), kernel_version);
+  const r = start(cartridge, content_hash, randomUUID(), randomUUID(), seed(), kernel_version);
   const rel = append('game_trace', r.ids.run_id, header(r));
   shown(r);
   const input = createInterface({
@@ -106,26 +105,6 @@ async function session(script: string | undefined) {
   input.close();
   process.stdout.write(`transcript: ${rel}\n`);
 }
-
-const start = (run_id: string, context: string, s: number[], version: string): Run => ({
-  ids: { content_hash, kernel_version: version, seed: s, run_id },
-  world: newWorld(cartridge, context as World['context'], s),
-  ordinal: 0,
-  revision: 0,
-});
-
-const header = (r: Run) =>
-  line({
-    format: 'loka-obs-v1',
-    event: 'trace.run',
-    store: 'game_trace',
-    ids: r.ids,
-    data: {
-      world_context_id: r.world.context,
-      initial_state: { state: 'fresh' },
-      fault_schedule: { state: 'unavailable', reason: 'not_applicable' },
-    },
-  });
 
 // Brief mode (00 §4.1; owner decision R5 S4 Q1b), on by default: entering a room already
 // visited this session shows its title and contents, not its description; look shows all.
@@ -304,7 +283,7 @@ function replay(path: string | undefined) {
   }
   const { file, head, entries } = parsed;
   const { run_id, seed, kernel_version: recorded } = head.ids;
-  const r = start(run_id, head.data.world_context_id, seed, recorded);
+  const r = start(cartridge, content_hash, run_id, head.data.world_context_id, seed, recorded);
   if (recorded !== kernel_version)
     process.stdout.write(`recorded by ${recorded}\nreplayed on ${kernel_version}\n`);
   shown(r);

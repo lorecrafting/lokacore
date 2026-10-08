@@ -43,4 +43,4 @@ run `mise exec -- npm run test:e2e -- tests/book.e2e.ts --headed --video`.
 The runner also accepts `--video retain-on-failure` to keep recordings only for failed tests
 ([official e2e debugging guide](https://e2e.tester.army/docs/debugging)). The deterministic suite needs no model. Exploratory tests that use agent actions require an already authorized provider or subscription, or a local model. The official e2e overview describes the distinction between exact steps and model-driven agent steps.
 
-The current suite contains one deterministic saved-move-after-reload check. It is setup proof for the browser runner, not chapter route/UI coverage. Chapter closure requires the route walk, exploratory pass, and owner-visible headed run or video described in the [workflow](WORKFLOW.md#local-edit-loop).
+The current suite contains one deterministic saved-move-after-reload check. It is setup proof for the browser runner, not chapter route/UI coverage. Chapter closure follows the [browser E2E loop](decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md).

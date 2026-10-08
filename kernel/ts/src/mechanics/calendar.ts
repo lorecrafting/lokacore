@@ -1,8 +1,8 @@
 import type { Cartridge } from '../runtime/decision.ts';
 
 // Historical cartridges retain their installed clock until their content is advanced.
-export const LEGACY_HOUR = 3600;
-export const LEGACY_DAY_HOURS = 24;
+const LEGACY_HOUR = 3600;
+const LEGACY_DAY_HOURS = 24;
 
 export function units(cartridge: Cartridge) {
   const hour = cartridge.calendar?.units_per_hour ?? LEGACY_HOUR;

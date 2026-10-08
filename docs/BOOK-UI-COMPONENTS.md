@@ -140,11 +140,5 @@ eased progress, direction and the paper colour; there is no second CSS or WebGL 
 
 ## Delivery cadence
 
-The [Book interaction delivery rule](WORKFLOW.md#book-interaction-delivery)
-governs each mechanic brief, same-slice `book-ui.md` changes and immediate
-navigation/correctness fixes. Keep visual implementation notes here. At [E3's Chapter 1 browser
-walk](briefs/chapter-one/chapter-one-e3-r10-browser-gate-brief-2026-10-05.md),
-compare the full journeys for spacing, labels, touch/keyboard access, log placement,
-page return and repeated controls, then make a focused reviewed polish pass. Repeat
-a smaller consistency pass at later chapter gates. Native checks and the known blur
-carry remain deferred under the [mobile pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
+Delivery follows the [Book interaction delivery rule](WORKFLOW.md#book-interaction-delivery); the
+cross-page consistency pass is part of [E3's browser walk](briefs/chapter-one/chapter-one-e3-r10-browser-gate-brief-2026-10-05.md), and a smaller one repeats at later chapter gates.

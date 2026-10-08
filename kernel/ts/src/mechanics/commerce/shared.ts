@@ -12,7 +12,7 @@ import { transfer } from '../resource.ts';
 import { carrying, giveRefused } from '../containment/shared.ts';
 import { status } from '../skills.ts';
 
-export function buyPrice(world: World, actor: CharacterId, shop: Shop, base: number, steps: Steps) {
+function buyPrice(world: World, actor: CharacterId, shop: Shop, base: number, steps: Steps) {
   const d = shop.buy_discount;
   return d && status(world, actor, d.skill, steps).usable
     ? Math.max(d.minimum, Math.floor((base * d.numerator) / d.denominator))

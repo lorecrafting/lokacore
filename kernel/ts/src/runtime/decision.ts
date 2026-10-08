@@ -177,7 +177,7 @@ export type Entity =
 export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =>
   actor === world.character ? world.body : undefined;
 
-type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
+export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 type Event<E> = Omit<DomainEvent, 'payload'> & {
   readonly payload: Extract<EventPayload, { type: E }>;
 };

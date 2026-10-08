@@ -4,25 +4,10 @@ defmodule Loka.ContentItemsTest do
   # DiagnosticCode; the known answer is protocol/fixtures/containers_cartridge_items_hash.json (Python).
   use ExUnit.Case, async: true
 
-  @moduletag :tmp_dir
+  import Loka.ContentSource, only: [compile: 2]
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_items")}
   @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_items_hash.json"))
   @src "cartridges/ashmere_items"
-
-  # ashmere_items' source with `files` merged over it (nil removes a file).
-  defp compile(dir, files) do
-    base =
-      for rel <- Path.wildcard("#{@src}/**/*.json"),
-          not String.contains?(rel, "transcripts"),
-          into: %{},
-          do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
-
-    for {rel, v} <- Map.merge(base, files), v != nil do
-      File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
-      File.write!(Path.join(dir, rel), JSON.encode!(v))
-    end
-
-    Loka.Content.compile(dir)
-  end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp text(changes), do: Map.merge(src("text.json"), changes)
@@ -58,7 +43,7 @@ defmodule Loka.ContentItemsTest do
 
   # Owner decision 2026-09-25 (short references). Breaks: full references rejected or
   # compiled differently from short ones.
-  test "full location and room references compile to the same artifact", %{tmp_dir: dir} do
+  test "full location and room references compile to the same artifact", %{dir: dir} do
     lamp = put_in(src("items/lamp_oil.json"), ["location", "item"], full("item", "satchel"))
     bram = %{src("npcs/bram.json") | "room" => full("room", "ferry_landing")}
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
@@ -68,12 +53,12 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: unmarked items gain custody through children, occupancy limits or lids.
-  test "only authored receptacles hold children and declare limits or lids", %{tmp_dir: dir} do
+  test "only authored receptacles hold children and declare limits or lids", %{dir: dir} do
     for field <- ~w(capacity barrier) do
       value = if field == "capacity", do: 1, else: "lid"
 
       assert {:error, ds} =
-               compile(Path.join(dir, field), %{
+               compile(dir, %{
                  "items/lantern.json" => Map.put(src("items/lantern.json"), field, value)
                })
 
@@ -82,7 +67,7 @@ defmodule Loka.ContentItemsTest do
 
     satchel = Map.drop(src("items/satchel.json"), ["container", "capacity"])
 
-    assert compile(Path.join(dir, "child"), %{"items/satchel.json" => satchel}) ==
+    assert compile(dir, %{"items/satchel.json" => satchel}) ==
              {:error,
               [
                 d("SCHEMA_VIOLATION", "items/lamp_oil.location.item", %{
@@ -91,7 +76,7 @@ defmodule Loka.ContentItemsTest do
               ]}
 
     assert {:ok, _, []} =
-             compile(Path.join(dir, "unlimited"), %{
+             compile(dir, %{
                "items/satchel.json" => Map.delete(src("items/satchel.json"), "capacity")
              })
   end
@@ -108,7 +93,7 @@ defmodule Loka.ContentItemsTest do
 
   # Breaks: a location or NPC room naming nothing, or of the wrong kind, compiles.
   test "a location or NPC room naming no definition of its kind is UNRESOLVED_REFERENCE",
-       %{tmp_dir: dir} do
+       %{dir: dir} do
     lamp = put_in(src("items/lamp_oil.json"), ["location"], %{"in" => "npc", "npc" => "satchel"})
     bram = %{src("npcs/bram.json") | "room" => "river"}
 
@@ -126,7 +111,7 @@ defmodule Loka.ContentItemsTest do
 
   # Breaks: a starting cycle or an overfull holder compiles (invariant containment_acyclic).
   test "a starting cycle is CONTAINMENT_CYCLE and an overfull holder CAPACITY_EXCEEDED",
-       %{tmp_dir: dir} do
+       %{dir: dir} do
     in_item = &%{"in" => "item", "item" => &1}
     satchel = %{src("items/satchel.json") | "location" => in_item.("lamp_oil")}
     lantern = %{src("items/lantern.json") | "location" => %{"in" => "npc", "npc" => "bram"}}
@@ -151,7 +136,7 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: items or NPCs compiling without containment, or their text keys unchecked.
-  test "items and NPCs need containment and catalog entries", %{tmp_dir: dir} do
+  test "items and NPCs need containment and catalog entries", %{dir: dir} do
     m = src("cartridge.json")
     caps = Map.delete(m["requires"]["capabilities"], "containment")
     manifest = put_in(m, ["requires", "capabilities"], caps)
@@ -175,7 +160,7 @@ defmodule Loka.ContentItemsTest do
   # Owner decision Q3. Breaks: a link target that names nothing, a bare link in a room's own
   # text, or a detail linked from an item's text compiles.
   test "a touch link naming no detail, item or NPC it may name is UNRESOLVED_REFERENCE",
-       %{tmp_dir: dir} do
+       %{dir: dir} do
     t =
       text(%{
         "room.ferry_landing.description" =>
@@ -200,7 +185,7 @@ defmodule Loka.ContentItemsTest do
   # Owner decision Q3. Breaks: a room text without a link to one of its details, or a room line
   # without a link to its item or NPC, passes silently or fails the build.
   test "a missing touch link is a TOUCH_LINK_MISSING warning and the build succeeds",
-       %{tmp_dir: dir} do
+       %{dir: dir} do
     variant = %{
       "when" => %{"policy_version" => 1, "root" => %{"op" => "has_item", "item" => "lantern"}},
       "description" => "room.ferry_landing.title"
@@ -221,7 +206,7 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: items in a source without rooms or text compiled to v1 and silently dropped.
-  test "items without rooms still compile as v2 and need an entry", %{tmp_dir: dir} do
+  test "items without rooms still compile as v2 and need an entry", %{dir: dir} do
     assert {:error, diags} =
              compile(dir, %{
                "cartridge.json" => Map.delete(src("cartridge.json"), "entry"),
@@ -246,12 +231,12 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: opting in silently defaults a nested item's omitted mass to zero.
-  test "carrying requires every authored shell mass and preserves explicit zero", %{tmp_dir: dir} do
+  test "carrying requires every authored shell mass and preserves explicit zero", %{dir: dir} do
     files = carry_files()
-    assert {:ok, _, []} = compile(Path.join(dir, "zero"), files)
+    assert {:ok, _, []} = compile(dir, files)
     missing = Map.update!(files, "items/lamp_oil.json", &Map.delete(&1, "mass_grams"))
 
-    assert compile(Path.join(dir, "missing"), missing) ==
+    assert compile(dir, missing) ==
              {:error,
               [
                 d("SCHEMA_VIOLATION", "items/lamp_oil.mass_grams", %{
@@ -261,7 +246,7 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: malformed authored mass/limits reach a world, including unsafe integers in Elixir JSON.
-  test "carrying numeric and closed-field validation rejects malformed source", %{tmp_dir: dir} do
+  test "carrying numeric and closed-field validation rejects malformed source", %{dir: dir} do
     for {field, value, error} <- [
           {"mass_grams", -1, "below_minimum"},
           {"mass_grams", 2_147_483_648, "above_maximum"},
@@ -269,7 +254,7 @@ defmodule Loka.ContentItemsTest do
         ] do
       files = Map.update!(carry_files(), "items/lantern.json", &Map.put(&1, field, value))
 
-      assert compile(Path.join(dir, error), files) ==
+      assert compile(dir, files) ==
                {:error, [d("SCHEMA_VIOLATION", "items/lantern.mass_grams", %{"error" => error})]}
     end
 
@@ -280,7 +265,7 @@ defmodule Loka.ContentItemsTest do
         ] do
       files = put_in(carry_files(), ["cartridge.json", "world", "carry", "max_grams"], value)
 
-      assert compile(Path.join(dir, "cap#{value}"), files) ==
+      assert compile(dir, files) ==
                {:error,
                 [d("SCHEMA_VIOLATION", "cartridge.world.carry.max_grams", %{"error" => error})]}
     end
@@ -307,10 +292,10 @@ defmodule Loka.ContentItemsTest do
   end
 
   # Breaks: an older implementation can load carrying content without enforcing its admission.
-  test "carrying source requires its API and containment owner", %{tmp_dir: dir} do
+  test "carrying source requires its API and containment owner", %{dir: dir} do
     files = put_in(carry_files(), ["cartridge.json", "requires", "kernel_api", "at_least"], "1.2")
 
-    assert compile(Path.join(dir, "old"), files) ==
+    assert compile(dir, files) ==
              {:error, [d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]}
 
     files =
@@ -322,7 +307,7 @@ defmodule Loka.ContentItemsTest do
         end)
       )
 
-    assert {:error, diagnostics} = compile(Path.join(dir, "owner"), files)
+    assert {:error, diagnostics} = compile(dir, files)
 
     assert d("UNDECLARED_CAPABILITY", "cartridge.world.carry", %{"capability" => "containment"}, [
              "containment@1"

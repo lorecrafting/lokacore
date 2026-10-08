@@ -51,11 +51,11 @@ defmodule Gen do
     json
   end
 
-  defp decl(name, %{"type" => "string"} = s)
-       when not is_map_key(s, "enum") and not is_map_key(s, "const"),
-       do: "export type #{name} = string & { readonly __brand: '#{name}' };"
-
-  defp decl(name, s), do: "export type #{name} = #{type(s)};"
+  defp decl(name, s) do
+    if Loka.Core.Contracts.Schema.nominal?(s),
+      do: "export type #{name} = string & { readonly __brand: '#{name}' };",
+      else: "export type #{name} = #{type(s)};"
+  end
 
   defp type(%{"$ref" => name}), do: name
   defp type(%{"oneOf" => bs}), do: Enum.map_join(bs, " | ", &type/1)

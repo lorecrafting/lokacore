@@ -5,21 +5,20 @@
 // capability owns. Breaks: a kernel change that alters a recorded decision, or a transcript
 // filed under a capability it never uses.
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { globSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { basename, join } from 'node:path';
+import { globSync, readFileSync } from 'node:fs';
+import { basename } from 'node:path';
 import { test } from 'node:test';
 import { CAPABILITY_OWNERS } from '../src/contracts.gen.ts';
-import { ROOT } from '../play/obs.ts';
-import { read } from './read.ts';
+import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
+import { ROOT, line } from '../play/obs.ts';
+import { replayRecords } from '../play/replay.ts';
+import { decideReplay, header, start } from '../play/run.ts';
 
-const dir = mkdtempSync(join(tmpdir(), 'r5s2-transcripts-'));
 const kats = [
-  ...globSync('protocol/fixtures/cartridge_*hash.json', { cwd: ROOT }),
-  ...globSync('protocol/fixtures/containers_*hash.json', { cwd: ROOT }),
-  ...globSync('protocol/fixtures/missing_child_*hash.json', { cwd: ROOT }),
-].map(read);
+  'protocol/fixtures/cartridge_*hash.json',
+  'protocol/fixtures/containers_*hash.json',
+  'protocol/fixtures/missing_child_*hash.json',
+].flatMap((p) => globSync(p, { cwd: ROOT }).map((rel) => readFileSync(ROOT + rel, 'utf8')));
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
 test('every example transcript replays and exercises its capability', () => {
@@ -27,18 +26,29 @@ test('every example transcript replays and exercises its capability', () => {
   for (const rel of transcripts) {
     const [, cartridge, , file] = rel.split('/');
     const pin = JSON.parse(readFileSync(ROOT + rel, 'utf8').split('\n')[0]).ids.content_hash;
-    const kat = kats.find((k) => k.value.manifest.id === cartridge && k.sha256 === pin);
+    // Only a fixture whose text names the pin can be its known answer; parse just those.
+    const kat = kats
+      .filter((text) => text.includes(pin))
+      .map((text) => JSON.parse(text))
+      .find((k) => k.value.manifest.id === cartridge && k.sha256 === pin);
     assert.ok(kat, `${rel}: no known answer for ${cartridge}`);
-    const artifact = join(dir, `${cartridge}.json`);
-    writeFileSync(artifact, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
-    const r = spawnSync(
-      'node',
-      [`${ROOT}kernel/ts/play/main.ts`, artifact, '--replay', ROOT + rel],
-      {
-        encoding: 'utf8',
-      },
+    const loaded = loadCartridge(
+      Buffer.from(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
+      INSTALLED,
     );
-    assert.equal(r.status, 0, `${rel}: ${r.stdout}${r.stderr}`);
+    assert.ok(loaded.ok, `${rel}: ${JSON.stringify(loaded)}`);
+    const { file: bytes, head, entries } = replayRecords(ROOT + rel, loaded.hash);
+    const r = start(
+      loaded.cartridge as Cartridge,
+      loaded.hash,
+      head.ids.run_id,
+      head.data.world_context_id,
+      head.ids.seed,
+      head.ids.kernel_version,
+    );
+    const out =
+      header(r) + entries.map((e) => line(decideReplay(r, e.data.command).trace)).join('');
+    assert.equal(out, bytes, `${rel}: replay differs`);
     const capability = basename(file, '.jsonl');
     const owners = readFileSync(ROOT + rel, 'utf8')
       .split('\n')
