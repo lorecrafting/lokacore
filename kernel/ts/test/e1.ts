@@ -46,6 +46,7 @@ export const CHECK_FILES = [
   'e1_world.ts',
   'e1_items.ts',
   'e1_faults.ts',
+  'e1_refusals.ts',
   'e1_cases.ts',
   'e1_dispositions.json',
 ];

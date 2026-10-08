@@ -123,3 +123,21 @@ export function feyAncestry(a: CaseHost) {
   assert.equal(a.flag('priory_fen_axis'), -2);
   return { ancestry: 'fey_touched', spi: 11, faction: -2 };
 }
+
+/** Boathouse ferry legs: `fen_outbound` (fare 2) and `fen_return` (fare 0), transports/*.json. */
+export const ferry = (
+  a: CaseHost,
+  room: string,
+  action: string,
+  key: string,
+  quoted_fare: number,
+) =>
+  a.invoke(action, [a.detail(room, 'ferry')], {
+    route: {
+      cartridge_id: 'ashmere_missing_child',
+      cartridge_version: '0.0.42',
+      kind: 'transport',
+      key,
+    },
+    quoted_fare,
+  });
