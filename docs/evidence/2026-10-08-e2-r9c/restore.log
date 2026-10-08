@@ -1,3 +1,4 @@
+# at 78a77cde, after red.log (filtered: summary lines)
 $ cp <saved copy> kernel/ts/src/mechanics/policy.ts
 exit 0
 $ git status --porcelain

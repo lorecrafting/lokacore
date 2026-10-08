@@ -1,24 +1,16 @@
-# rc2-reconcile-assumes-committed: rc2-reconcile-assumes-committed.diff applied
+# rc2-reconcile-assumes-committed: rc2-reconcile-assumes-committed.diff applied (filtered: failing tests, failure lines and summary)
 $ node --test mobile/authority/local-story/r9c_faults.test.ts
-✖ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (805.832834ms)
-✖ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (858.370875ms)
-✖ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (60.107875ms)
-ℹ tests 4
-ℹ pass 1
+      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:162:14)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:233:3)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:282:3)
+      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:334:3)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+✖ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (489.716708ms)
+✖ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (672.11625ms)
+✖ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (43.782125ms)
 ℹ fail 3
-✖ failing tests:
-✖ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (805.832834ms)
-  AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:154:14)
-      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:225:3)
-✖ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (858.370875ms)
-  AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:154:14)
-      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:274:3)
-✖ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (60.107875ms)
-  AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at row (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:154:14)
-      at TestContext.<anonymous> (file://<mutant>/mobile/authority/local-story/r9c_faults.test.ts:325:3)
+ℹ pass 1
+ℹ tests 4
 exit 1
 $ cp <saved copy> mobile/authority/local-story/save.ts; git status --porcelain
 exit 0

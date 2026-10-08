@@ -1,8 +1,8 @@
 $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 1
-✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (366.92175ms)
-✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (1274.908417ms)
-✔ F3 family 3 paid Rest settlement: full write, lost ack (139.660291ms)
-✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (67.437417ms)
+✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (962.840042ms)
+✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (3021.916792ms)
+✔ F3 family 3 paid Rest settlement: full write, lost ack (274.859084ms)
+✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (146.045167ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 4
@@ -10,13 +10,13 @@ $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2224.187375
+ℹ duration_ms 5032.018875
 exit 0
 $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 2
-✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (396.645791ms)
-✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (1314.757125ms)
-✔ F3 family 3 paid Rest settlement: full write, lost ack (165.606459ms)
-✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (76.555291ms)
+✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (644.827459ms)
+✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (2292.836333ms)
+✔ F3 family 3 paid Rest settlement: full write, lost ack (287.739208ms)
+✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (117.460541ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 4
@@ -24,13 +24,13 @@ $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 2
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2263.675542
+ℹ duration_ms 3923.983417
 exit 0
 $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 3
-✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (387.42625ms)
-✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (1297.695791ms)
-✔ F3 family 3 paid Rest settlement: full write, lost ack (145.182666ms)
-✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (67.023208ms)
+✔ F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack (612.039792ms)
+✔ F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT (1635.799542ms)
+✔ F3 family 3 paid Rest settlement: full write, lost ack (188.935208ms)
+✔ F4 family 4 paid ferry crossing: failed COMMIT, lost ack (90.700791ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 4
@@ -38,5 +38,5 @@ $ node --test mobile/authority/local-story/r9c_faults.test.ts   # run 3
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2194.609666
+ℹ duration_ms 3011.340917
 exit 0

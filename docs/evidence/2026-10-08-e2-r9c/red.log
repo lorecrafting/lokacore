@@ -1,4 +1,4 @@
-# mutant: mutant.diff applied
+# mutant: mutant.diff applied at 78a77cde
 $ node --test kernel/ts/test/r9c_*.test.ts mobile/authority/local-story/r9c_*.test.ts
 ✔ family 4: a refused move draws nothing; a missed round draws once per attack (443.583292ms)
 ✔ family 4: a learned but DEX-9 actor cannot Bandage; at DEX 10 the same item cures (214.890542ms)

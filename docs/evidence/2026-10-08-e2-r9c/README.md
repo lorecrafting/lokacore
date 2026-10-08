@@ -11,7 +11,7 @@ native or product proof.
 
 | Field | Value (from [report.json](report.json)) |
 |---|---|
-| `source_sha` | `78a77cde5327c468c50bbf045bfb6043eeaad3ba` (clean S5 commit with `r9c_faults.test.ts` and the C2 comment) |
+| `source_sha` | `7a734d9230d7d09f15fb4087f509c0769f4f5861` (clean S5 commit with `r9c_faults.test.ts` and the C2 comment; the evidence commit follows it) |
 | `candidate.id` / `version` | `r9c_interactions` / `0.0.1` |
 | `candidate.content_hash` | `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263` |
 | `candidate.artifact_sha256` | `6e484e8453dc285a225a6eb31c19d8a39b2bcac7b140db37856191af4093ea6a` |
@@ -24,12 +24,13 @@ native or product proof.
 | `mix loka.compile cartridges/r9c_interactions` | 0 | [runner.log](runner.log) |
 | `node kernel/ts/test/e1.ts <artifact> <new dir> 100` | **2** (pending) | [runner.log](runner.log) |
 | receipts toolchain, compile, foundation-compiler, kernel, sqlite | 0, 0, 0, 0, 0 | [toolchain](toolchain.log), [compile](compile.log), [foundation-compiler](foundation-compiler.log), [kernel](kernel.log), [sqlite](sqlite.log) |
-| retained-report assertion (carry C1) and no `repro.json` | 0, 0 | [report-check.log](report-check.log) |
+| retained-report assertion (carry C1), no `repro.json`, dot counts | 0, 0, 0 | [report-check.log](report-check.log) |
 | `node --test mobile/authority/local-story/r9c_faults.test.ts`, 3 runs | 0, 0, 0 | [faults-3-runs.log](faults-3-runs.log) |
 | all `r9c_*` kernel and authority tests (21) | 0 | [r9c-all.log](r9c-all.log) |
-| `tsc -p test` (kernel, includes authority tests); `mobile/app` `tsc --noEmit` | 0, 0 | [typecheck.log](typecheck.log) |
-| planted defect: focused kernel, focused authority / r9c / restore | 0, 0 / **1** / 0 | [focused-green](focused-green.log), [red](red.log), [restore](restore.log) |
-| red control 1 / restore; red control 2 / restore | **1** / 0; **1** / 0 | [rc1](rc1-memory-before-commit.log), [rc2](rc2-reconcile-assumes-committed.log) |
+| `tsc -p test` (kernel; includes the authority tests) | 0 | [typecheck.log](typecheck.log) |
+| planted defect at `78a77cde`: focused kernel, focused authority / r9c / restore | 0, 0 / **1** / 0 | [focused-green](focused-green.log), [red](red.log), [restore](restore.log) |
+| fault-row controls rc1, rc2, rc3, rc4, kill-before flip, kill-after flip (each then restore) | **1** each / 0 each | section 3 |
+| chapter tests cited in the fault headers, under rc1 and rc2 | **1**, **1** / 0, 0 | [chapter-cites.log](chapter-cites.log) |
 | redaction grep (no match expected) | 1 | [redaction-grep.log](redaction-grep.log) |
 | `shasum -a 256 -c SHA256SUMS` | 0 | [SHA256SUMS.verify](SHA256SUMS.verify) |
 
@@ -46,7 +47,9 @@ PATH_COVERAGE, INDEPENDENT_REVIEW, BROWSER_HUMAN and NATIVE. The runner marks pa
 design (`kernel/ts/test/e1.ts` `reportOf`), and the recorder is v042-only and refuses r9c bytes
 ([e1-certification.md](../../system/e1-certification.md)), so the coverage table in section 4 is built by
 hand. The `sqlite` receipt runs `mobile/authority/local-story/*.test.ts` at `source_sha`, which contains
-`r9c_faults.test.ts`; its dot reporter does not name files, so the log itself does not show the file name.
+`r9c_faults.test.ts`. Its dot reporter does not name files, but the count reconciles: `sqlite.log` has 486
+dots = 474 focused authority tests (`focused-green.log`, 473 pass + 1 skipped) + 12 authority `r9c_*` tests
+(4 of them in `r9c_faults.test.ts`); `kernel.log` has 915 = 906 + 9 kernel `r9c_*` tests.
 
 **Criterion 6 (real SQLite faults).** `mobile/authority/local-story/r9c_faults.test.ts`; one generic
 `row()` checks every fault: fenced calls answer `pending`; the store settles on the literal prior or next
@@ -56,26 +59,40 @@ then replays with no row change.
 
 | Row | Commit (domains) | Faults, expected settlement | Result |
 |---|---|---|---|
-| F1 `:205` | Wick's exchange: 3 herbs and 3 bandages change holder, 2 facts, quest resolved | SQLITE_FULL write: prior; failed COMMIT (deferred FK, reconciled in the call): prior; failed COMMIT with an unreadable store (fenced): prior; lost acknowledgement: next | green ×3 |
-| F2 `:234` | final epilogue Continue: memory facts, story point, report, head | failed COMMIT: prior; SIGKILL before COMMIT: prior; SIGKILL after COMMIT: next | green ×3 |
-| F3 `:283` | paid Rest elapsed settlement: clock, torch fuel, due population jobs | SQLITE_FULL write: prior; lost acknowledgement: next | green ×3 |
-| F4 `:315` | paid ferry `board_ferry`: body holder, fare player to Sedge, transport | failed COMMIT: prior; lost acknowledgement: next | green ×3 |
+| F1 `:232-235` | Wick's exchange: 3 herbs and 3 bandages change holder, 2 facts, quest resolved | SQLITE_FULL write: prior; failed COMMIT (deferred FK, reconciled in the call): prior; failed COMMIT with an unreadable store (fenced): prior; lost acknowledgement: next | green ×3 |
+| F2 `:282-284` | final epilogue Continue: memory facts, story point, report, head | failed COMMIT: prior; SIGKILL before COMMIT: prior; SIGKILL after COMMIT: next | green ×3 |
+| F3 `:316-317` | paid Rest elapsed settlement: clock, torch fuel, due population jobs | SQLITE_FULL write: prior; lost acknowledgement: next | green ×3 |
+| F4 `:334-335` | paid ferry `board_ferry`: body holder, fare player to Sedge, transport | failed COMMIT: prior; lost acknowledgement: next | green ×3 |
 
-Red controls (same file, throwaway worktree, restored by copy):
-- [rc1](rc1-memory-before-commit.diff), memory adopted before `commit(...)` in `save.ts`: F1, F2, F3 and F4
-  red (`:179`, memory differs from the store after a definite failure); restore exit 0.
-- [rc2](rc2-reconcile-assumes-committed.diff), `reconciled` returns `got ?? r` (committed without a receipt):
-  F1, F2 and F4 red (`:154`, the failed COMMIT replies instead of throwing "nothing was saved"); restore exit 0.
+Controls (at `7a734d92`, throwaway worktree, each restored by copy and rerun green). A test stops at its
+first failing row, so each row is shown red by at least one control:
+
+| Control | Red rows (call site) | Failing assertion |
+|---|---|---|
+| [rc1](rc1-memory-before-commit.diff): memory adopted before `commit(...)` in `save.ts` | F1 `:232`, F2 `:282`, F3 `:316`, F4 `:334` | `:187` memory differs from the store after a definite failure |
+| [rc2](rc2-reconcile-assumes-committed.diff): `reconciled` returns `got ?? r` (committed without a receipt) | F1 `:233`, F2 `:282`, F4 `:334` | `:162` the failed COMMIT replies instead of throwing "nothing was saved" |
+| [rc3](rc3-reconcile-never-committed.diff): `reconciled` never finds the receipt | F1 `:235`, F3 `:317`, F4 `:335` (lost ack) | `:187` memory stays prior while the store holds next |
+| [rc4](rc4-fence-not-pending.diff): `fenced()` answers not fenced while the outcome is unknown (`delivery.ts`) | F1 `:234`, F3 `:317`, F4 `:335` | `:170` the fenced call throws instead of answering `pending` |
+| [kill-before flip](flip-kill-before.diff): expect next | F2 `:283` | `:192` the reopened save is the prior |
+| [kill-after flip](flip-kill-after.diff): expect prior | F2 `:284` | `:192` the reopened save is the next |
+
+The chapter tests named in the fault headers were measured under rc1 and rc2
+([chapter-cites.log](chapter-cites.log)): `faults.test.ts:213` (both), `:357` and `:387` (rc1),
+`bell_receipts.test.ts:10` and `:305` (rc1), `transport.test.ts:210` (both). `finale.test.ts:13` stays green
+and is not cited.
 
 **Criterion 4 (planted defect): found.** [mutant.diff](mutant.diff), `kernel/ts/src/mechanics/policy.ts:44-48`,
 `escort_state`: a separated escort satisfies `following`. Reachable from legal play: the hound death in
 family 4 separates Wren. Focused suites (every kernel and authority test except `r9c_*`, file lists
-built with `find`, mirroring the runner globs): kernel 906/906 and authority 473 pass plus 1 skipped, both
+built with `find`, mirroring the runner globs: [focused-kernel.txt](focused-kernel.txt),
+[focused-authority.txt](focused-authority.txt)): kernel 906/906 and authority 473 pass plus 1 skipped, both
 exit 0. r9c: exit 1, exactly one failure: `mobile/authority/local-story/r9c_creatures_transport.test.ts:306`
 in "family 4: a pack death separates Wren and fails the watch" (`:262`). Wrong result: the
 `a_elspeth_rescue` offer is `available: true` while Wren is separated; expected `false`. Invariant: no
 `missing_child` rescue credit while the escort is separated. The kernel family 4 tests stay green. Restore
-(copy of the saved file, empty `git status --porcelain`, r9c rerun) exit 0.
+(copy of the saved file, empty `git status --porcelain`, r9c rerun) exit 0. Measured at `78a77cde`;
+`7a734d92` differs from it only in `r9c_faults.test.ts`, which is not in the focused suite and is not the
+failing scenario.
 
 **Criterion 7 (browser rows).** Named pending; see section 6. Nothing was added to the browser harness.
 
@@ -104,7 +121,7 @@ the PATH_COVERAGE gate, which stays pending.
 | population, behavior | K `r9c_elapsed_jobs.test.ts:405` (both deer orders); A `r9c_elapsed_jobs.test.ts:297` (Oak order only; see section 5) |
 | movement, policy | every family |
 
-**Commands (55).** Executed: move, take, put, buy, read, where, knock, open, close, choose_ancestry, choose,
+**Commands (47).** 36 executed, 11 pending. Executed: move, take, put, buy, read, where, knock, open, close, choose_ancestry, choose,
 continue, talk (dialogue keys), perform (recipe keys) (K custody `:110`, `:254`); fill, drink, pour, wear,
 ignite, douse, refuel, rest, stand, use_service, elapsed, run_job (jobs settled inside elapsed) (K elapsed
 `:172`, `:337`, `:405`); attack, flee, bandage, use_transport, expedition, harvest, eat, drop,
@@ -159,5 +176,6 @@ Setup note: the first focused run in the throwaway worktree had no Elixir `deps/
 out to `mix loka.compile` failed with "Can't continue due to errors on dependencies". After copying `deps/`
 and `mix compile`, the retained run is green. That first log was overwritten and is not retained.
 
-Retained files are hashed in [SHA256SUMS](SHA256SUMS) with [verification](SHA256SUMS.verify). Paths are
-redacted to `<mutant>`, `<scratch>`, `<worktree>` and `<tmp>`.
+Logs marked "filtered" kept only the summary and failure lines of `node --test`. Retained files are hashed
+in [SHA256SUMS](SHA256SUMS) with [verification](SHA256SUMS.verify). Paths are redacted to `<mutant>`,
+`<scratch>`, `<worktree>` and `<tmp>`.

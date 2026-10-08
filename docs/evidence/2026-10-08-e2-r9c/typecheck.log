@@ -1,4 +1,2 @@
 $ (cd kernel/ts && npx tsc -p test)   # includes mobile/authority/**/*.test.ts
 exit 0
-$ (cd mobile/app && npx tsc --noEmit)
-exit 0

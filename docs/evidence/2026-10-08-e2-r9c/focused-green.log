@@ -1,4 +1,4 @@
-# mutant: mutant.diff (kernel/ts/src/mechanics/policy.ts:44-48), worktree at 78a77cde
+# mutant: mutant.diff applied at 78a77cde (filtered: summary and failure lines)
 $ node --test $(cat focused-kernel.txt)   # kernel/ts/test/**/*.test.ts minus r9c_* (169 files)
 ℹ tests 906
 ℹ pass 906
