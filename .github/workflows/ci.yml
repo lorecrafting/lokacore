@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # A missing green code ancestor or API error runs everything; lint always runs.
+      # A missing green code ancestor or API error runs everything; lint runs unless the PR is a draft.
       - id: docs
         run: |
           base=$(bin/ci_base.sh "$HEAD" code)
