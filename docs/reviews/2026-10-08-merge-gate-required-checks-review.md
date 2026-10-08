@@ -27,3 +27,12 @@
 - Backdoor (`WORKFLOW.md:123-125`, `owner-rules.md:192-196`): bounded by "never for unreviewed code or to bypass a red check".
 - No `merge_queue`/`guard_merge` references outside the archive, reviews and Beads. `bin/integration_red_controls.sh` at the head exits 0 and still holds the integrate_batch cases. It still runs from `ci.yml:92` and `check_all.sh:37`.
 - Open item for the PM, not a repository finding: the memory index still says "never `--auto`".
+
+## Fix round 1 at `e99ee343`: APPROVE WITH NOTES
+
+Scope: only the dispositions and the text they touched (`docs/WORKFLOW.md:117-136`, the decision record "Effect", the claude-only record `:26`).
+
+- Blocker 1 **fixed**. The invalidation claim is gone. `WORKFLOW.md:117-128` now states that GitHub keeps auto-merge armed after a later push. It allows only the PM to arm, and only after the final APPROVE or APPROVE WITH NOTES on the exact head. Once armed, only the PM's post-verdict commits may land; any other push first runs `--disable-auto`, goes back to the reviewer and is re-armed after the new verdict. The decision record says the same. This is a prose rule nothing enforces, which the owner chose by deleting the guard.
+- Should-fix 2 **fixed**. `WORKFLOW.md:130-136` and the record now have the one-time setup: protection on `main` requiring `ci-green` and `book-e2e-green`, `enforce_admins` off and auto-merge allowed, applied right after this PR and before the next merge. The backdoor is tied to `enforce_admins` off.
+- Nit 3 **fixed**. The superseded pointer is at `owner-decision-claude-only-auto-merge-2026-10-07.md:26`.
+- New nit, `WORKFLOW.md:121-123`: the step no longer says what happens to an armed auto-merge after a PM post-verdict commit moves the head away from `--match-head-commit <sha>`. GitHub then either merges the new head or leaves auto-merge stuck. Neither is unsafe, but a stuck PR would wait silently. One clause would cover it: re-arm on the new head if it does not merge.
