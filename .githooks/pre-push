@@ -1,5 +1,5 @@
 #!/bin/sh
-# Metadata and mobile Book views/assets (bin/ci_scope.sh code lane) use the short lane; a push whose
+# Metadata and mobile app views/assets outside the Book (bin/ci_scope.sh code lane) use the short lane; a push whose
 # other changes are only *.test.ts files skips mix test and credo; everything else runs the full line.
 # ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
 scope=metadata

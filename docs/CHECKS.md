@@ -77,10 +77,10 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
-  mobile Book views and assets (`*.tsx`, fonts, `.sksl`, `mobile/app/tests/` e2e specs,
-  `mobile/app/plugins/`, `app.json`), plus metadata; every other mobile file, including Book
-  `model.ts`/`presenter.ts` (kernel tests import them) and local-story authority/save code, runs
-  the broad code lane. The browser lane runs
+  mobile app views and assets outside `mobile/app/book/` (`*.tsx`, `.sksl`, fonts, `mobile/app/tests/`
+  e2e specs, `mobile/app/plugins/`, `app.json`), plus metadata; `mobile/app/book/` (kernel tests
+  import its `model.ts` and `presenter.ts`), every other mobile `.ts` and local-story
+  authority/save code run the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
   lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code

@@ -15,7 +15,9 @@ Implementation clarification (2026-10-06): the mobile exception covers app work;
 the broad code lane under the save rule above. Browser checks still run for both
 mobile app and authority changes. This does not resume paused native checks.
 
-Amendment (owner, 2026-10-08, paraphrased): the mobile exception narrows to Book views and
-assets (`*.tsx`, fonts, `.sksl`, e2e specs, plugins, `app.json`); mobile `.ts` and package files,
-including Book `model.ts` and `presenter.ts` that kernel tests import, run the code lane. Local
-pre-push only: a push whose code changes are only `*.test.ts` files skips `mix test` and credo.
+Amendment (owner, 2026-10-08, paraphrased): `mobile/app/book/` and the mobile `.ts` files kernel
+tests import (Book `model.ts`, `presenter.ts`) are code, so the TypeScript and E1 recorder jobs run.
+Implementation clarification (2026-10-08): every mobile `.ts` and package file runs the code lane
+(the TypeScript job now runs the mobile app tests); the mobile skip keeps only app views and assets
+outside the Book. Local pre-push only (owner-approved retro item): a push whose code changes are
+only `*.test.ts` files skips `mix test` and credo.

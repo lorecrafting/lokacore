@@ -11,16 +11,17 @@ git init -q
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
 mkdir -p docs mobile/authority/local-story mobile/app/book .beads
 mkdir -p kernel/ts/src kernel/ts/test
-touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts
+touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts
 seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
 base=$(git rev-parse HEAD)
 echo 1 >> a.md && echo 1 >> docs/x.md; md=$(c md)
 echo 1 >> .beads/issues.jsonl; beads=$(c beads)
-echo 1 >> mobile/app/book/Page.tsx; book=$(c book)
+echo 1 >> mobile/app/App.tsx; book=$(c book)
 echo 1 >> mobile/authority/local-story/store.ts; authority=$(c authority)
 echo 1 >> mobile/app/book/model.ts; model=$(c model)
+echo 1 >> mobile/app/book/Page.tsx; page=$(c page)
 echo 1 >> a.md && echo 1 >> docs/features.json; json=$(c json)
 echo 1 >> docs/features.gen.md; git add -A; gen=$(c gen)
 git mv code.ts code.md; ren=$(c rename)
@@ -34,14 +35,15 @@ fail=0
 t() { got=$("$script" "$2" "$3" "$4"); [ "$got" = "$1" ] || { echo "FAIL ci_scope $5: want $1, got $got"; fail=1; }; }
 t skip "$base" "$md" code "only .md changed"
 t skip "$md" "$beads" code "Beads export changed"
-t skip "$beads" "$book" code "Book-only change skips kernel jobs"
-t run "$beads" "$book" browser "Book-only change runs browser"
+t skip "$beads" "$book" code "app view-only change skips kernel jobs"
+t run "$beads" "$book" browser "app view-only change runs browser"
 t skip "$base" "$beads" browser "metadata skips browser"
 # Break: treating local-story save changes as app-only skips broad code checks.
 t run "$book" "$authority" code "local-story save change runs code"
 t run "$book" "$authority" browser "local-story save change runs browser"
 # Break: Book model/presenter (imported by kernel tests) classified as app-only skips typescript.
 t run "$authority" "$model" code "Book model.ts change runs code"
+t run "$model" "$page" code "Book .tsx change runs code"
 t run "$authority" "$json" code "a .json under docs/ changed"
 t run "$base" "$json" code "mixed source and metadata in range"
 t run "$json" "$gen" code "a .gen.md changed"

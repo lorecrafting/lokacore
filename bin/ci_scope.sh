@@ -11,8 +11,8 @@ if [ -n "$base" ] && git merge-base --is-ancestor "$base" "$after" 2>/dev/null; 
     /\.md$/ && !/\.gen\.md$/ { next }
     $0 == ".beads/issues.jsonl" { next }
     lane == "elixir" && /\.test\.ts$/ { next }
-    # Mobile .ts is code (kernel tests import Book model/presenter; the typescript job runs mobile tests).
-    lane == "code" && /^mobile\// && (/\.(tsx|ttf|txt|sksl)$/ || /^mobile\/app\/(tests|plugins)\// || $0 == "mobile/app/app.json") { next }
+    # Book and mobile .ts are code (kernel tests import Book model/presenter; typescript runs mobile tests).
+    lane == "code" && /^mobile\// && !/^mobile\/app\/book\// && (/\.(tsx|ttf|txt|sksl)$/ || /^mobile\/app\/(tests|plugins)\// || $0 == "mobile/app/app.json") { next }
     { bad = 1 }
     END { exit !bad }
   ' && { echo run; exit 0; }
