@@ -97,9 +97,11 @@ test('encode escapes and key order', () => {
   );
 });
 
-// Catches an encoder that silently emits floats, unsafe integers, lone surrogates or bad keys.
+// Catches an encoder that silently emits floats, unsafe integers, lone surrogates, bad keys, or
+// a Map/Set/Date/typed array as an object.
 test('encode rejects values outside the profile', () => {
-  for (const v of [1.5, NaN, 9007199254740992, '\ud800', { é: 1 }, undefined]) {
+  const typed = [new Map(), new Set(), new Date(0), new Uint8Array(1)];
+  for (const v of [1.5, NaN, 9007199254740992, '\ud800', { é: 1 }, undefined, ...typed]) {
     assert.throws(() => encode(v as never), code('invalid_canonical'), String(v));
   }
 });
