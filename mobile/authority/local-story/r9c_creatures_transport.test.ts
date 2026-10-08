@@ -148,7 +148,7 @@ function story(t: TestContext, seed: number[], ancestry: string) {
       const disk = rows();
       s.elapsed({ ...evidence, expected_run_id: s.runId() });
       assert.deepEqual(rows(), disk);
-      return until;
+      return (reply as any).decision;
     },
     resource: (holder: string, name: string) =>
       s.world().state.resources![
@@ -190,13 +190,13 @@ test('D1: bleed, Flee west, board while bleeding, die on the isle, cross free fo
   assert.equal(a.w.state.clock, 64950);
   assert.equal(a.hp(), 9);
   assert.deepEqual(
-    [a.w.state.bleeds![body]!.active, a.w.state.bleeds![body]!.next_tick_at],
+    [a.w.state.bleeds![body]!.active, (a.w.state.bleeds![body] as any).next_tick_at],
     [true, 65050],
   );
   while (a.hp()! > 2) a.tick();
   // Regression pin: the 65400 round hits for the last 1 HP and refreshes the end to 65700.
   assert.deepEqual([a.w.state.clock, a.hp()], [65400, 2]);
-  const bleed = a.w.state.bleeds![body]!;
+  const bleed = a.w.state.bleeds![body] as any;
   assert.deepEqual([bleed.active, bleed.ends_at, bleed.next_tick_at], [true, 65700, 65450]);
   a.press('flee');
   assert.equal(a.holder(body), ID['room/reed_bank']); // regression pin: the west draw
@@ -334,4 +334,169 @@ test('family 4: a pack death separates Wren and fails the watch; Rejoin and retr
   a.move('north', 'north');
   assert.equal(a.holder(wren), ID['room/ferry_landing']);
   assert.equal(a.offer('a_elspeth_rescue', [npc('elspeth')])?.available, true);
+});
+
+// Breaks (shared; single mechanics linked in the PR coverage table): a finite custody hop mints,
+// reuses or renames an ID (careful harvest, exchange, Bandage, Eat, drowning corpse, Chapel
+// recovery, crow carry); a consumed item leaves the consumed holder; the drowning corpse holds
+// other than the body's actual roots; the crow acquisition credits the player (its item_acquired
+// names the body, not the crow); or a crow plan exceeds its one living member.
+test('families 6-7: lessons, finite herbs, Bandage, dive, drowning, recovery and the crow keep IDs', (t) => {
+  // hill_folk: dark_sight (cartridge.json) to Take in the dark well_bottom, DEX 10, INT 10.
+  // Regression pin: seed [19, 2, 3, 4] lands one bleeding hound hit at 64950, then Flees east.
+  const a = story(t, [19, 2, 3, 4], 'hill_folk');
+  const npc = (k: string) => ID[`npc/${k}`]!;
+  const item = (k: string) => ID[`item/${k}`]!;
+  const body = a.w.body,
+    consumed = a.w.consumed!,
+    coin = item('old_coin');
+  const pennies = () => [a.resource(body, 'pennies'), a.resource(npc('sedge'), 'pennies')];
+  const held = () =>
+    Object.entries(a.w.state.containers)
+      .filter(([id, at]) => at === body && a.w.entities[id as never]?.kind === 'item')
+      .map(([id]) => id)
+      .sort();
+  const start = new Set(Object.keys(a.w.entities));
+  // New entities other than population births (night_target growth is C3, not loot).
+  const minted = () =>
+    Object.keys(a.w.entities).filter(
+      (id) => !start.has(id) && a.w.state.created?.[id as never]?.origin.kind !== 'spawned',
+    );
+  // Board 5p to Sedge (transports/fen_outbound.json); swim is free, herbalism 2p; return 0p.
+  a.move('west');
+  a.press('board_ferry', [ID['detail/boathouse/ferry']], {
+    route: ref('transport', 'fen_outbound'),
+    quoted_fare: 5,
+  });
+  assert.deepEqual(pennies(), [15, 5]);
+  a.press('sedge_swim', [npc('sedge')]);
+  a.choose('learn');
+  assert.deepEqual(pennies(), [15, 5]);
+  a.press('sedge_herbalism', [npc('sedge')]);
+  a.choose('learn');
+  assert.deepEqual(pennies(), [13, 7]);
+  assert.deepEqual(
+    a
+      .view()
+      .skills!.filter((s) => s.acquired)
+      .map((s) => s.skill.key),
+    ['herbalism', 'swim'],
+  );
+  a.press('return_ferry', [ID['detail/fen_isle_landing/ferry']], {
+    route: ref('transport', 'fen_return'),
+    quoted_fare: 0,
+  });
+  assert.deepEqual(pennies(), [13, 7]);
+  // Eat apple_01 (items/apple_01.json edible): terminal custody, never offered again.
+  a.move('east', 'north', 'north');
+  a.press('take', [item('apple_01')]);
+  a.press('eat', [item('apple_01')]);
+  assert.equal(a.holder(item('apple_01')), consumed);
+  assert.equal(a.offer('eat', [item('apple_01')]), undefined);
+  // Careful harvest takes the two lowest fenwort IDs, ordinary the next (code-point order of
+  // the ids oracle: fenwort_07 0dae < _05 18b2 < _12 1d7c).
+  a.move('south', 'south', 'south', 'south', 'west');
+  const patch = ID['detail/willow_shade/fenwort_patch']!;
+  a.press('gather_carefully', [patch], { method: 'careful' });
+  assert.deepEqual(held(), [item('fenwort_07'), item('fenwort_05')].sort());
+  a.press('harvest', [patch]);
+  // Wick's exchange: these three herbs for his three lowest bandages (bandage_10 192a < _01
+  // 1d97 < _09 2de1; quests/infirmary_herbs.json).
+  a.move('east', 'north', 'north', 'north', 'north', 'north', 'north', 'north');
+  a.press('a_wick_offer', [npc('wick')]);
+  a.choose('accept');
+  a.press('b_wick_turn_in', [npc('wick')]);
+  a.choose('exchange');
+  for (const k of ['fenwort_07', 'fenwort_05', 'fenwort_12'])
+    assert.equal(a.holder(item(k)), npc('wick'));
+  assert.deepEqual(held(), [item('bandage_10'), item('bandage_01'), item('bandage_09')].sort());
+  // One bleeding hound hit at 64950 (HP 9), then unlearned Bandage refuses with nothing spent.
+  a.move('south', 'south', 'south', 'south', 'south', 'south', 'south', 'east');
+  a.press('attack', [ID['population/fen_hounds/slot1/member']]);
+  a.tick();
+  assert.deepEqual([a.w.state.clock, a.hp(), a.w.state.bleeds![body]!.active], [64950, 9, true]);
+  const generation = a.w.state.bleeds![body]!.generation;
+  const before = encode(a.w.state as never);
+  const refused = a.send('bandage', [item('bandage_10')], { effect_generation: generation });
+  assert.equal(refused.kind, 'rejected');
+  assert.equal(encode(a.w.state as never), before);
+  a.press('flee');
+  assert.equal(a.holder(body), ID['room/adder_nest']); // regression pin: the east draw
+  // Wick teaches Bandage (DEX 10 qualifies); one tick at 65050 (HP 8), then the cure keeps HP.
+  a.move('west', 'west', 'north', 'north', 'north', 'north', 'north', 'north', 'north');
+  a.press('wick_bandage', [npc('wick')]);
+  a.choose('learn');
+  a.tick();
+  assert.deepEqual([a.w.state.clock, a.hp()], [65050, 8]);
+  a.press('bandage', [item('bandage_10')], { effect_generation: generation });
+  assert.deepEqual(
+    [a.holder(item('bandage_10')), a.w.state.bleeds![body]!.active],
+    [consumed, false],
+  );
+  // Dive from well_shaft (world.water entry_cost 10) and Take the coin from well_bottom.
+  a.move('south', 'south', 'south', 'south', 'down');
+  const mv = a.resource(body, 'mv')!;
+  a.move('down');
+  assert.equal(a.resource(body, 'mv'), mv - 10);
+  a.press('take', [coin]);
+  const roots = held();
+  assert.deepEqual(roots, [item('bandage_01'), item('bandage_09'), coin].sort());
+  // One drowning at entry + 6000 (world.water duration): Chapel at HP 10, a corpse below holding
+  // exactly the body's roots.
+  while (a.holder(body) === ID['room/well_bottom']) a.tick();
+  assert.deepEqual([a.w.state.clock, a.holder(body), a.hp()], [71050, ID['room/chapel_nave'], 10]);
+  const corpse = a.holder(coin)!;
+  assert.equal(a.holder(corpse), ID['room/well_bottom']);
+  assert.deepEqual(minted(), [corpse]); // only the corpse is new
+  const recovery = a.view().corpse_recovery!;
+  assert.deepEqual(
+    recovery.map((r) => [r.corpse_id, r.room_id, r.roots.map((x) => x.id).sort()]),
+    [[corpse, ID['room/well_bottom'], roots]],
+  );
+  // The view offers recovery by corpse row, not by action entry; the invocation takes its ID.
+  assert.equal(a.send('recover_corpse', [corpse], {}).kind, 'accepted');
+  assert.deepEqual(held(), roots);
+  // Crows: wait on the Green until crow_green_1 is home (hourly wander), Drop, Take: no carry.
+  a.move('south', 'south', 'south');
+  const crow = ID['population/crow_green_1/slot1/member']!;
+  const living = () =>
+    Object.entries(a.w.state.created ?? {}).filter(
+      ([id, c]: [string, any]) =>
+        c.origin?.kind === 'spawned' &&
+        c.origin.by.key.startsWith('crow_') &&
+        a.holder(id) &&
+        (a.resource(id, 'hp') ?? 0) > 0,
+    ).length;
+  while (a.holder(crow) !== ID['room/village_green']) a.tick();
+  assert.equal(a.w.state.clock, 72000);
+  a.press('drop', [coin]);
+  a.press('take', [coin]);
+  a.tick();
+  assert.deepEqual([a.w.state.clock, a.holder(coin)], [72150, body]);
+  // Drop again: the crow acquires the same coin at +150 (scavenge interval), credited to the crow.
+  a.press('drop', [coin]);
+  const acquired = a.tick();
+  assert.deepEqual([a.w.state.clock, a.holder(coin)], [72300, crow]);
+  assert.deepEqual(
+    acquired.events
+      .filter((e: any) => e.payload.type === 'item_acquired')
+      .map((e: any) => e.payload),
+    [{ type: 'item_acquired', item_id: coin, holder_id: crow }],
+  );
+  // Shoo on the Green releases the coin here; no second Shoo is offered.
+  a.press('shoo', [crow]);
+  assert.equal(a.holder(coin), ID['room/village_green']);
+  assert.equal(a.offer('shoo', [crow]), undefined);
+  // Take and Drop once more: the original coin rides the corridor into the open nest.
+  a.press('take', [coin]);
+  a.press('drop', [coin]);
+  const nest = item('crow_nest');
+  while (a.holder(coin) !== nest) {
+    a.tick();
+    assert.ok(living() <= 4);
+    assert.ok(a.w.state.clock < 76000, 'the coin never reached the nest');
+  }
+  assert.equal(a.holder(nest), ID['room/oak_branches']);
+  assert.deepEqual(minted(), [corpse]);
+  for (const k of ['apple_01', 'bandage_10']) assert.equal(a.holder(item(k)), consumed);
 });

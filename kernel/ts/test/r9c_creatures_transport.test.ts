@@ -21,7 +21,7 @@ const ref = (kind: string, name: string) =>
     kind,
     key: name,
   }) as unknown as DefinitionRef;
-const run_id = 'bbbbbbbb-0000-4000-8000-000000000004';
+const run_id = 'bbbbbbbb-0000-4000-8000-000000000004' as never;
 
 // A fey_touched character (DEX 10, attributes.json) engaged with the first hound in hound_run.
 function engaged(seed: number[]) {
