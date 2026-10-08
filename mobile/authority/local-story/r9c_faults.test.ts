@@ -52,16 +52,23 @@ const attempt = (action_key: string, target_ids: string[] = [], input: object = 
 });
 
 // The kill child: `kill <save> before|after <invocation json>` opens the save and SIGKILLs itself
-// at the invocation's COMMIT, just before it runs or just after it commits.
+// at the COMMIT of the transaction that wrote the invocation's receipt, just before it runs or just
+// after it commits (or fails).
 if (process.argv[2] === 'kill') {
   const [path, when, invocation] = process.argv.slice(3) as [string, string, string];
   const p = sqliteHost(path);
   const s = open(p);
-  const exec = p.db.execSync;
+  const { execSync, runSync } = p.db;
+  let receipt = false;
+  p.db.runSync = (q, ...v) => ((receipt ||= q.startsWith('INSERT INTO receipt')), runSync(q, ...v));
   p.db.execSync = (q) => {
-    if (q === 'COMMIT' && when === 'before') process.kill(process.pid, 'SIGKILL');
-    exec(q);
-    if (q === 'COMMIT') process.kill(process.pid, 'SIGKILL');
+    const die = receipt && q === 'COMMIT';
+    if (die && when === 'before') process.kill(process.pid, 'SIGKILL');
+    try {
+      execSync(q);
+    } finally {
+      if (die) process.kill(process.pid, 'SIGKILL');
+    }
   };
   s.invoke(JSON.parse(invocation));
   process.exit(1); // not killed: the parent sees no SIGKILL
@@ -103,12 +110,13 @@ function driver(s: Open) {
   };
 }
 
-const TABLES = ['head', 'state_row', 'receipt', 'report'];
-/** Memory and storage: the head (revision, clock, RNG), rows, receipts and reports. */
+const TABLES = ['head', 'state_row', 'receipt', 'report', 'elapsed'];
+/** Memory and storage: the head (revision, clock, RNG), rows, receipts, reports and elapsed checkpoint. */
 const snap = (p: ReturnType<typeof sqliteHost>, s: Open) => ({
   memory: encode(s.world().state as never),
   stored: TABLES.map((t) => p.sql.prepare(`SELECT * FROM ${t} ORDER BY 1, 2`).all()),
 });
+// The elapsed host's `failed` fault inserts into `child`; ORPHAN fails COMMIT on the receipt.
 const FK =
   'PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY); ' +
   'CREATE TABLE child (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED)';
@@ -196,12 +204,12 @@ function row(
   }
 }
 
-// Breaks: memory adopted before a failed COMMIT or a SQLITE_FULL write (save.ts:53-60; also
-// killed by faults.test.ts:207 on the chapter), a failed COMMIT reconciled as committed without
-// its receipt (transaction.ts:10, save.ts:83), a lost acknowledgement served as the prior state
-// or applied twice on retry, or a fenced call answered from unconfirmed memory. Cross-domain
-// receipt: Wick's exchange moves three herbs and three bandages, sets two facts and resolves
-// his quest in one commit (r9c_custody_terminal.test.ts family 1).
+// Breaks: memory adopted before a failed COMMIT or a SQLITE_FULL write (save.ts:53-60), a failed
+// COMMIT reconciled as committed without its receipt (save.ts:83), a lost acknowledgement served
+// as the prior state or applied twice on retry, or a fenced call answered from unconfirmed memory.
+// The first two are also killed on the chapter by faults.test.ts:213 (both measured). This row is
+// the cross-domain receipt: Wick's exchange moves three herbs and three bandages, sets two facts
+// and turns in his quest in one commit (r9c_custody_terminal.test.ts family 1).
 test('F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT, lost ack', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s5-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -228,9 +236,9 @@ test('F1 family 1 exchange: full write, failed COMMIT, unreadable failed COMMIT,
 });
 
 // Breaks: a kill before the final COMMIT that keeps the memory, story point or report rows, one
-// after it that loses them, a failed final COMMIT that keeps any of them (also killed on the
-// chapter by faults.test.ts:207 and finale.test.ts:13), or the retried final Continue writing a
-// second report. The commit spans memory facts, the story point, its report and the head.
+// after it that loses them, a failed final COMMIT that keeps any of them (memory first: also
+// killed on the chapter by faults.test.ts:213 and bell_receipts.test.ts:10/:305), or the retried
+// final Continue writing a second report. The commit spans memory facts, the story point, its report and the head.
 test('F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s5-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -277,8 +285,8 @@ test('F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT', 
 });
 
 // Breaks: an elapsed settlement whose SQLITE_FULL write or lost acknowledgement leaves the clock,
-// burned torch fuel or completed population jobs in memory without the store (also killed on the
-// ferry fixture by faults.test.ts:357/:387), or a resent window settling twice. The commit is the
+// burned torch fuel or completed population jobs in memory without the store (memory first: also
+// killed on the ferry fixture by faults.test.ts:357/:387), or a resent window settling twice. The commit is the
 // paid Rest's elapsed settlement: clock, light fuel and every due job in one revision.
 test('F3 family 3 paid Rest settlement: full write, lost ack', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s5-'));
@@ -311,7 +319,8 @@ test('F3 family 3 paid Rest settlement: full write, lost ack', (t) => {
 
 // Breaks: a paid ferry crossing whose failed COMMIT moves the body or the fare without the store,
 // or whose lost acknowledgement is decided again on retry (a second fare). The commit moves the
-// body across the fen and the fare from player to Sedge (transport.test.ts on the chapter).
+// body across the fen and the fare from player to Sedge. Both save.ts mutants are also killed on
+// the chapter by transport.test.ts:210.
 test('F4 family 4 paid ferry crossing: failed COMMIT, lost ack', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-r9c-s5-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
