@@ -70,3 +70,21 @@
 Transcripts: the `text.includes(pin)` filter cannot skip silently: no match leaves `kat` undefined and
 `assert.ok` fails (mutant 1). CLI replay stays covered by `kernel/ts/test/play.test.ts:119`.
 Over-engineering: none; `ContentSource` replaces 10 private helpers with one 40-line module.
+
+## Fix round 1 at `698038d1` (record `fb2cdd3d`)
+
+Verdict: **APPROVE**. Nothing open.
+
+- Finding 1 closed. `test/loka/core/nominal_ids_test.exs:98` compares a hand-written list of 35 nominal
+  contracts with the Elixir tag constructors and with the brands in `contracts.gen.ts`. Both red controls
+  fail when run with `mix test --force`: the `contracts.ex:47` filter set to `s["type"] == "string"` (3/4
+  pass), and `bin/contracts.exs` `decl` changed to skip `TextKey`, then regenerated (3/4 pass). The test
+  passes on the clean head. It scans the generated `contracts.gen.ts`, which is a checked-in artifact
+  pinned by `contracts.exs --check`, not hand-written source. That is accepted.
+- Nit 2 is closed (`content_locks_test.exs:13` now describes `src/1`). Nit 3 is closed: both generators no
+  longer write the deleted ids files, and no other code changed.
+- Question 5 is answered in the PR's "Disputed /code-review findings" section. Verdict on each:
+  (a) agree: `contracts.exs --check` pins the generated file, and the new test covers drift;
+  (b) agree: the brief asked for this, and all 12 re-pointed capabilities are in v042's `requires`;
+  (c) agree: deleting `v003_hash` failed with "no known answer";
+  (d) agree: the content modules still not converted are out of scope.
