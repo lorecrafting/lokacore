@@ -1,5 +1,8 @@
 # Owner decision: D11 trusted elapsed before character choice — 2026-10-06
 
+Superseded 2026-10-08 by [world time starts at
+entry](owner-decision-world-time-starts-at-entry-2026-10-08.md).
+
 Question presented to the owner:
 
 > D11 character choice: before the player chooses a character, should trusted elapsed-time updates advance the world clock and due jobs? The system spec calls them non-player invocations and says backgrounding does not pause the world, while the D11 brief says choice comes before other gameplay. I recommend allowing elapsed updates but keeping all player commands blocked until choice.

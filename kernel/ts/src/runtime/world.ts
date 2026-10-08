@@ -18,11 +18,10 @@ import {
 } from '../contracts.gen.ts';
 import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
 import { invariants as factInvariants } from '../mechanics/fact.ts';
-import { refusal } from '../commands/actions.ts';
+import { needsAncestry, refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
 import * as knowledge from '../mechanics/knowledge/rule.ts';
 import * as attributes from '../mechanics/attributes/rule.ts';
-import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
 import * as bleed from '../mechanics/bleed/rule.ts';
@@ -123,11 +122,7 @@ export function step(
   action?: Key,
 ): Stepped {
   if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };
-  if (
-    world.cartridge.ancestries &&
-    !characterChoice(world, world.character) &&
-    command.payload.type !== 'choose_ancestry'
-  )
+  if (command.payload.type !== 'choose_ancestry' && needsAncestry(world, world.character))
     return { decision: rejected('invalid_state'), world };
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
@@ -173,6 +168,7 @@ export function stepElapsed(world: World, command: Command, revision: number): S
   const p = command.payload;
   if (command.id !== elapsedCommandId(p.run_id, world.context, p.from, p.until))
     return reject('permission_denied');
+  if (needsAncestry(world, world.character)) return reject('invalid_state'); // time starts at D11 selection
   const owner = ownerOf(CAPABILITY_OWNERS.command, p.type);
   if (owner !== 'schedule' || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return reject('unsupported_capability');

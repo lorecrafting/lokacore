@@ -66,17 +66,18 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/runtime/world.ts:79`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
-   refuses ordinary player commands as `invalid_state` before ActionSet matching. Otherwise,
-   the capability owning the command type
+5. **Step** (`kernel/ts/src/runtime/world.ts:114`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
+   refuses ordinary player commands as `invalid_state` before ActionSet matching;
+   `stepElapsed` (`:162`) applies the same gate to trusted elapsed (`invalid_state`). Otherwise,
+   for Step, the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
-   `unsupported_capability`. Admission (`:106`): the nil CommandId is `permission_denied`
-   (`:115`), another world or actor `not_found`, and the ActionSet must offer an action that
+   `unsupported_capability`. Admission (`:146`): the nil CommandId is `permission_denied`
+   (`:179`), another world or actor `not_found`, and the ActionSet must offer an action that
    resolves to this Command and accepts its target and input (`commands/actions.ts:186`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
-   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:101`).
+   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:207`).
    The headless GameView/admission check classifies service invocation identity before
    comparing the observed player's offer: a nil CommandId agrees only with
    `permission_denied`; otherwise a foreign world or actor agrees only with
