@@ -150,7 +150,7 @@ Tokens, the specimen, `BOOK-UI-COMPONENTS.md` and the visual sections of `book-u
 - **Fable audit** of the riskiest code, done before G merges (WORKFLOW:12, :25, :323).
 - **Checklist PR (G)**, checked by one reviewer: every spec proof linked, every carry in a stage row, and the docs tidy pass over docs changed during E2 (WORKFLOW:324-328).
 - **Owner's play or test:** E2 has nothing touchable (no UI), and WORKFLOW:322-323 asks for play or test only "when the stage has something touchable". See question (b).
-- **Exact-head hosted CI** green; merge through `bin/merge_queue.sh` (WORKFLOW:115-131).
+- **Exact-head hosted CI** green; auto-merge on the required `ci-green` and `book-e2e-green` checks (WORKFLOW step 7).
 
 After E2 closes, the polish phase can start (`owner-decision-chapter-one-polish-order-2026-10-07.md`:6-7; ROADMAP:56-58).
 
