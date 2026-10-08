@@ -7,7 +7,7 @@ import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
 import { caseHost, coverage, witnessedObligations } from './e1_case_host.ts';
 import { storageFault, faultSchedule } from './e1_faults.ts';
-import { replayCase, gaps } from './e1_cases.ts';
+import { replayCase, gaps, recorderExit } from './e1_cases.ts';
 import { ending, search } from './e1_paths.ts';
 import { lanternDream } from './e1_optional_quests.ts';
 import { hash } from '../src/foundation/canonical.ts';
@@ -443,4 +443,20 @@ test('E1 binds both selected dream branches and acknowledged scene steps', () =>
       rmSync(dir, { recursive: true });
     }
   }
+});
+
+// Breaks: the recorder exits 0 (pass) with an authored path or a family gap still open.
+test('E1 recorder passes only with nothing pending and no failure', () => {
+  const none = {
+    rooms: [],
+    quests: [],
+    dialogues: [],
+    choices: [],
+    scenes: [],
+    authored_obligations: [],
+  };
+  assert.equal(recorderExit(null, none), 0);
+  assert.equal(recorderExit(null, { ...none, authored_obligations: ['/quests/q/outcomes/0'] }), 2);
+  assert.equal(recorderExit(null, { ...none, rooms: ['shrine'] }), 2);
+  assert.equal(recorderExit('Error: replay', none), 1);
 });

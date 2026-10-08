@@ -202,9 +202,14 @@ refuses. `loka play --replay` alone is playback, not reproduction.
 
 Reports use pass, fail, pending/deferred or not applicable with a reason. Required missing
 evidence and unknown applicability exit nonzero; a complete headless subset is not an
-unqualified `offline_private` certificate. E1 stays open until one final published A–D plus
-review-fix candidate has applicable controlled tests, 10,000 candidate sequences, real SQLite
-receipts and independent review. Browser interaction/content receipts belong to E2/E3.
+unqualified `offline_private` certificate. The scenario recorder exits 0 (pass) only when every
+case passes, no authored path is pending, every coverage family gap (rooms, quests, dialogues,
+choices, scenes) is empty and the disposition and replay checks hold; it exits 2 (pending)
+while anything remains pending and 1 on any failure. A pass is coverage, not a certificate. E1
+closes at coverage complete: that pass plus independent review and exact-head CI; the freeze,
+the 10,000 candidate sequences and the gate audit belong to release-candidate certification
+([owner order](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)). Browser
+interaction/content receipts belong to E2/E3.
 Native ARM/Hermes, app lifecycle and blur remain deferred under the mobile pause; preserve
 owner save bytes and explicit pin refusal. No general Lab service or new protocol schema.
 
