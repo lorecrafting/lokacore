@@ -1,6 +1,5 @@
 import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
-// size: allow 320, one terminal session: its loop, each command's dispatch and the replay
 // `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
 // Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
