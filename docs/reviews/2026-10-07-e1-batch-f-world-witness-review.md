@@ -85,3 +85,33 @@
 4. Load-time recording "matches the other E1 tests": **disagree**, see E1-F3 (a nit).
 
 Over-engineering: none beyond E1-F3. The module reuses the engine helpers (`load`, `level`, `bellCue`, `gameView`).
+
+## Fix round 1 re-check (`73c5a3fb`)
+
+- Scope: `e354baad` and `73c5a3fb` on top of record `91019eee`, plus the direct callers of the touched code
+  (`e1_case_host.ts` host and `witnessedObligations`, `e1_cases.ts` `replayCase`). The PM ruled on
+  E1-F2: carry needs an accepted player take committing exactly `max_grams` and then a `too_heavy`
+  refusal of a positive-mass pickup at that load; a forced-transfer load does not count.
+- Verdict: **APPROVE**.
+- **E1-F1 closed.** Each of the four deletions now turns its named test red on the focused file:
+  - combat attacker (`e1_world_witness.ts`);
+  - death victim;
+  - death_credit to the player;
+  - water route surface.
+
+  The new controls edit a real recorded step's event, or the authored routes.
+- **E1-F2 closed.** The per-case flag `carry.full` is set only on the accepted branch, by a player `take` whose after-load is exactly `max_grams`. The refusal requires the flag. Every carry mutant turns the carry test red:
+  - take `>=`;
+  - refusal `>=`;
+  - forced transfer (the `take` type check dropped);
+  - refusal alone (the flag check dropped).
+
+  The flag is never reset. That is sound: the accepted take proves the limit is at least 12000, and the refusal proves it is below 12000 + m, whatever happens in between. The spec clause (`architecture.md`, carry), decision item 3 and the `docs/decisions/README.md` line agree. The pending developer note on carry is removed.
+- **E1-F3 closed.** The cases are recorded lazily inside the first test that needs each one.
+- **Replay:** `replayCase` and `caseHost` each hold one `carry` object per case, in step order. Callers that pass no state get a fresh `{}`, so a single step never credits carry.
+- **Checks:**
+  - recorder exit 2, `failure: null`, 38 cases, 614 witnessed, 15 dispositioned, 19 pending;
+  - witnessed, dispositioned and gap sets identical to the `abaf4d51` run;
+  - `/world/carry` credited only on carry-limit step 20, the refusal;
+  - in the 37 earlier cases, every step's command, decision, `state_hash`, clock and rng, and every finish record, are identical to the `b9b9326f` run;
+  - E1 tests 61/61 pass and typecheck exits 0.
