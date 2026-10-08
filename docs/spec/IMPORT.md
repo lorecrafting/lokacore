@@ -202,10 +202,10 @@ at `997a7a8` on GitHub. Nothing else changed. `rewrites` counts changed links.
 | [spec/19-quest-sharing-instancing-capacity.md](../archive/spec/19-quest-sharing-instancing-capacity.md) | `docs/rewrite-v3/19-quest-sharing-instancing-capacity.md` | `f6e597fd7ebc1d3410e43cba3b9df1a8d870a42f73b1794ad8d029b105ed5bb5` | 0 |
 | [spec/21-composable-world-primitives.md](../archive/spec/21-composable-world-primitives.md) | `docs/rewrite-v3/21-composable-world-primitives.md` | `959d2b9ba411cb2c03fb6a4c022a1e17ea611471d65c2a3f59582795b1a63164` | 0 |
 | [spec/23-accounts-progress-admission.md](../archive/spec/23-accounts-progress-admission.md) | `docs/rewrite-v3/23-accounts-progress-admission.md` | `a09f4aa32d070718c6718c3cb1680224e3ad120b87c791e16dff0fef1e468a1b` | 0 |
-| [spec/INDEX.md](../archive/spec/INDEX.md) | `docs/rewrite-v3/INDEX.md` | `369c98f77d3e1b383e44ae1e7d3d743298aef6edc8ac8a313beda0f4d75e98b8` | 1 |
+| [spec/INDEX.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/INDEX.md) | `docs/rewrite-v3/INDEX.md` | `369c98f77d3e1b383e44ae1e7d3d743298aef6edc8ac8a313beda0f4d75e98b8` | 1 |
 | [spec/R-MILESTONES.md](../archive/spec/R-MILESTONES.md) | `docs/rewrite-v3/R-MILESTONES.md` | `62f6f8097768ba7c45bc12934aa3987f4bb5bcec92d3a636c08890f21db8112c` | 2 |
 | [spec/README.md](../archive/spec/README.md) | `docs/rewrite-v3/README.md` | `3e89bb5c87edfaaa7434127dbf6dafa83e15d537fdd4d516415b33c1071e9ce1` | 12 |
-| [spec/REVIEW-GUIDE.md](../archive/spec/REVIEW-GUIDE.md) | `docs/rewrite-v3/REVIEW-GUIDE.md` | `2bde70363bca57e150b9419eb443a4642a7cdf19a690d7467a1ba3706fdb42bc` | 12 |
+| [spec/REVIEW-GUIDE.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md) | `docs/rewrite-v3/REVIEW-GUIDE.md` | `2bde70363bca57e150b9419eb443a4642a7cdf19a690d7467a1ba3706fdb42bc` | 12 |
 | [spec/conformance/README.md](conformance/README.md) | `docs/rewrite-v3/conformance/README.md` | `bab701a261173bfd0f116e1bffa9e47863a64959e5b8c78053f72ff38304ca42` | 2 |
 | [spec/conformance/adverse-cases.json](conformance/adverse-cases.json) | `docs/rewrite-v3/conformance/adverse-cases.json` | `1b699cf2ce71181a2b09a596ed2253c06caa435aad4b5eb8a8ea9601fbadf5b1` | 0 |
 | [spec/conformance/cases.json](conformance/cases.json) | `docs/rewrite-v3/conformance/cases.json` | `fa4969066ed86de5c26c10d23c069d7928f90e8b5064ff751597d30c0c787bcb` | 0 |

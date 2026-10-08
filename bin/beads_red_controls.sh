@@ -22,66 +22,41 @@ if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
   echo 'Beads path control failed: drive path was accepted' >&2
   exit 1
 fi
-python3 bin/check_beads_export.py
-python3 - "$case_file" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
-rows.append({'id': 'loka-audit-followup', 'title': 'Audit follow-up: close a reviewed finding', 'dependencies': []})
-Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
-PY
-python3 bin/check_beads_export.py --complete "$case_file"
-python3 - "$case_file" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
-rows = [row for row in rows if not row['title'].startswith('B6 ')]
-Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
-PY
-if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
-  echo 'Beads completeness control failed: a missing slice was accepted' >&2
-  exit 1
-fi
-python3 - "$case_file" <<'PY'
+# Completeness controls run on rows planted from the plan's own slice codes, not on the live tracker.
+mk() { # mk <variant>: base | audit | missing | duplicate | wisp
+python3 - "$1" "$case_file" <<'PY'
 import json
 import re
 import sys
 from pathlib import Path
 
-rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
-slice_row = next(row for row in rows if re.match(r'^[A-E]\d+ — ', row['title']))
-rows.append(dict(slice_row, id='loka-duplicate-slice'))
-Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
+variant, out = sys.argv[1:]
+codes = re.findall(r'^\| \*\*([A-E]\d+) ', Path('docs/MISSING-CHILD-PLAN.md').read_text(), re.MULTILINE)
+rows = [{'id': f'loka-{c.lower()}', 'title': f'{c} \u2014 slice', 'dependencies': []} for c in codes]
+rows[1]['dependencies'] = [{'issue_id': rows[1]['id'], 'depends_on_id': rows[0]['id']}]
+if variant == 'audit':
+    rows.append({'id': 'loka-audit-followup', 'title': 'Audit follow-up: close a reviewed finding', 'dependencies': []})
+elif variant == 'missing':
+    rows.pop()
+elif variant == 'duplicate':
+    rows.append(dict(rows[0], id='loka-duplicate-slice'))
+elif variant == 'wisp':
+    rows[0]['id'] = 'loka-wisp-1'
+    rows[1]['dependencies'][0]['depends_on_id'] = 'loka-wisp-1'
+Path(out).write_text(''.join(json.dumps(row) + '\n' for row in rows))
 PY
-if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
-  echo 'Beads completeness control failed: a duplicate slice was accepted' >&2
-  exit 1
-fi
-python3 - "$case_file" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-rows = [json.loads(line) for line in Path('.beads/issues.jsonl').read_text().splitlines()]
-old = next(row['id'] for row in rows if row['title'].startswith('B6 '))
-new = old.replace('-marsh-riddle-', '-wisp-')
-for row in rows:
-    if row['id'] == old:
-        row['id'] = new
-    for dependency in row.get('dependencies', []):
-        for key in ('issue_id', 'depends_on_id'):
-            if dependency[key] == old:
-                dependency[key] = new
-Path(sys.argv[1]).write_text(''.join(json.dumps(row) + '\n' for row in rows))
-PY
-if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
-  echo 'Beads ID control failed: a reserved wisp ID was accepted' >&2
-  exit 1
-fi
+}
+mk base
+python3 bin/check_beads_export.py --complete "$case_file"
+mk audit
+python3 bin/check_beads_export.py --complete "$case_file"
+for variant in missing duplicate wisp; do
+  mk "$variant"
+  if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
+    echo "Beads completeness control failed: a $variant case was accepted" >&2
+    exit 1
+  fi
+done
 # PR drift: each line is lost if its branch in bin/beads_pr_drift.py breaks; a fragment ref still maps to its PR.
 cat > "$case_file" <<'JSON'
 {"issues":[

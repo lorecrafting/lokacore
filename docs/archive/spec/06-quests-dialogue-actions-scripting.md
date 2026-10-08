@@ -1,7 +1,7 @@
 # 06 — Quests, Dialogue, Actions, and Scripting
 
 <!-- packet-navigation:start -->
-[Review guide](REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
+[Review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
 
 **Reader context:** Design contract: narrative and interaction.
 
@@ -87,7 +87,7 @@ Complexity belongs in objective graphs/outcomes/consequences, not dozens of life
 
 ## 2. Quest definition
 
-*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* a quest may declare one journal text for each lifecycle stage plus optional per-outcome texts. The current selection is defined once in [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts); reveal and hints remain LATER.
+*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* a quest may declare one journal text for each lifecycle stage plus optional per-outcome texts. The current selection is defined once in [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); reveal and hints remain LATER.
 
 Example:
 
@@ -1341,7 +1341,7 @@ Do not hold an entire shared ZoneShard hostage to one player's modal cutscene.
 
 ## 41. Journal, reveal, hints, and story readability
 
-*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* a quest may declare one journal text for each lifecycle stage plus optional per-outcome texts. The current selection is defined once in [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts); reveal and hints remain LATER.
+*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* a quest may declare one journal text for each lifecycle stage plus optional per-outcome texts. The current selection is defined once in [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); reveal and hints remain LATER.
 
 A robust quest system also needs presentation metadata distinct from authoritative progress.
 

@@ -1,6 +1,6 @@
 # R milestones — the rebuild in plain English
 
-**Reading aid, not a new implementation contract.** [Document 14](14-implementation-plan.md) owns the detailed tasks, dependencies, and gates. [Back to the review guide](REVIEW-GUIDE.md).
+**Reading aid, not a new implementation contract.** [Document 14](14-implementation-plan.md) owns the detailed tasks, dependencies, and gates. [Back to the review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md).
 
 “R” labels identify rebuild milestones. They do not identify documents, releases, completed work, or mandatory calendar order. This guide contains all **25 named milestones**: R0–R22 plus R6P and R9C. R3A/R3B are parts of R3; R12A is the launch-account subdivision of R12, explained below.
 
@@ -80,7 +80,7 @@ Follow the foundation to the early proof and full chapter. Then distinguish Stor
 
 **R19 vs. R20 vs. R21:** geographic entry into private adventures, multi-owner world partitioning, and adapting content for shared-world use.
 
-For a full human review, continue with [REVIEW-GUIDE.md](REVIEW-GUIDE.md). For actual implementation, return to the linked phase and its governing contracts rather than implementing from this summary alone.
+For a full human review, continue with [REVIEW-GUIDE.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md). For actual implementation, return to the linked phase and its governing contracts rather than implementing from this summary alone.
 
 ## R12A: accounts exist at public Story launch
 

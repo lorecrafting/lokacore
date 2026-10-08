@@ -1,7 +1,7 @@
 # R1 Acceptance Envelope
 
 <!-- packet-navigation:start -->
-[Review guide](REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
+[Review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
 
 **Reader context:** R1 approved targets; setup and results pending.
 

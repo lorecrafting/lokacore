@@ -3,7 +3,7 @@
 **Lookahead only; no authorization to start ahead of the Missing Child queue.**
 The PM selected separate C2, C3 and CC candidates under the existing
 [mechanics delegation](decisions/owner-decision-autonomous-mechanics-2026-10-03.md),
-informed by read-only Astra planning at merged main `6d53e8a`. The active
+informed by read-only planning at merged main `6d53e8a`. The active
 [M1–M23 queue](NEXT-MECHANICS.md) keeps its identifiers and priority;
 [ROADMAP](ROADMAP.md) owns delivery status. This page proposes future boundaries,
 not installed behavior, frozen contracts or release dates. Five future story policies are

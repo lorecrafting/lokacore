@@ -8,8 +8,8 @@ remain historical evidence at their named heads. Their final approval predates
 published D1 and covers the old logical timer; it does not approve this replacement contract,
 the replacement deadline, new source or publication.
 
-Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation),
-[cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
+Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-contract),
+[cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-contract),
 [protocol](../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
 [Book](../system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
@@ -45,7 +45,7 @@ recovery proof uses a declared controlled hazard.
 
 ## Adopted bounded contract
 
-The [selected mechanic](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation)
+The [selected mechanic](../system/mechanics.md#d6-water-depths-and-owned-corpse-recovery-selected-contract)
 uses existing acquired swim, replaces ordinary entry fare, preserves free living
 Up and refuses following Wren. No attribute floor or extra lesson is needed.
 One deadline replaces periodic drain; MV 0 alone is never fatal. Typed drowning
