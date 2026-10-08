@@ -173,6 +173,14 @@ const cases: [string, () => string][] = [
       }),
   ],
   [
+    'a failed quest whose due job is pending before the deadline',
+    () =>
+      forgeRows('expire', (r, a) => {
+        job(r).status = 'pending';
+        a.sql.prepare('UPDATE head SET clock=?').run(237600);
+      }),
+  ],
+  [
     'a quest still active after the deadline',
     () =>
       forgeRows('expire', (r) => {
