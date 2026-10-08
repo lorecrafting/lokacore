@@ -42,7 +42,7 @@ Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 for work beyond the spec and brief.
 
 Do not edit code. Write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR or local branch, exact commit reviewed,
-verdict APPROVE / APPROVE WITH NOTES / CHANGES REQUIRED, findings; no index line, records are found by listing `docs/reviews`), commit that file only; never push: run `git branch -f review-<N> HEAD` in your detached worktree before removing it and return the sha (the developer's fix push or the PM's merge carries it).
+verdict APPROVE / APPROVE WITH NOTES / CHANGES REQUIRED, findings), run `bin/review_index.sh` to regenerate `docs/reviews/README.md`, commit those two files only; never push: run `git branch -f review-<N> HEAD` in your detached worktree before removing it and return the sha (the developer's fix push or the PM's merge carries it).
 Keep the record short: links to governing clauses, verdict, concrete findings
 and disposition proof. Return the verdict and
 findings, under 300 words, rules-shaped: paths with `file:line`, decisions with a reason, open

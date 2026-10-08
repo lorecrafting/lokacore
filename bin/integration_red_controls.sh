@@ -15,26 +15,26 @@ bad() { echo "FAIL $*"; fail=1; }
 capped() { perl -e 'alarm shift; exec @ARGV' 20 "$@"; }
 
 # --- sync_pr.sh -----------------------------------------------------------------------------
-# A bare origin; main adds m2 (and code in c.txt); branch pr adds own. Stub `elixir` stands in
-# for the docs checker.
+# A bare origin; main adds record m2 (and code in c.txt); branch pr adds record own; each side
+# regenerates the review index, so README.md conflicts. Stub `elixir` stands in for the docs checker.
 mkdir "$tmp/stub"; printf '#!/bin/sh\nexit "${STUB_DOCS:-0}"\n' > "$tmp/stub/elixir"; chmod +x "$tmp/stub/elixir"
 sp() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
   git clone -q "$O" . 2>/dev/null; git checkout -qb main
-  echo base > c.txt
+  mkdir -p bin docs/reviews; cp "$bin/review_index.sh" bin/; sh bin/review_index.sh; echo base > c.txt
   git add . && git commit -qm base && git push -q origin main
-  git checkout -qb pr; echo own > own; echo "$1" > c.txt
+  git checkout -qb pr; echo '# Own' > docs/reviews/2026-01-01-own-review.md; sh bin/review_index.sh; echo "$1" > c.txt
   git add . && git commit -qm pr && git push -q origin pr
-  git checkout -q main; echo m2 > m2; echo main > c.txt
+  git checkout -q main; echo '# M2' > docs/reviews/2026-01-02-m2-review.md; sh bin/review_index.sh; echo main > c.txt
   git add . && git commit -qm main2 && git push -q origin main; git checkout -q pr
 }
 sy() { # <case> <want-rc> [docs-rc]
   rc=0; STUB_DOCS=${3:-0} PATH="$tmp/stub:$PATH" capped sh "$bin/sync_pr.sh" pr > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] || { bad "sync_pr $1: exit $rc, want $2"; sed 's/^/  /' "$R.out"; }
 }
-# Break: the merge is not made or not pushed.
+# Break: the index conflict is refused instead of regenerated, or the merge is not pushed.
 sp base; sy success 0
-[ -f m2 ] && [ -f own ] || bad 'sync_pr success: merge lost a side'
+sh bin/review_index.sh --check && grep -q 'own-review' docs/reviews/README.md && grep -q 'm2-review' docs/reviews/README.md || bad 'sync_pr success: index not regenerated with both records'
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] && [ "$(git rev-list --parents -1 HEAD | wc -w)" -eq 3 ] || bad "sync_pr success: not a pushed merge commit"
 # Break: a code conflict is auto-resolved (-X) or left half-merged instead of refused.
 sp other; tip=$(git rev-parse HEAD); sy conflict 1
@@ -82,6 +82,15 @@ grep -q "waiting for $holder" out && [ ! -s "$R.log" ] || { bad 'check_all lock:
 [ -s "$R.log" ] && [ ! -d "$lk" ] || bad 'check_all lock: no run after the holder ended, or lock left behind'
 sh -c 'exit 0' & dead=$!; wait $dead; mkdir "$lk"; echo $dead > "$lk/pid"; : > "$R.log"
 ca > out 2>&1 && [ -s "$R.log" ] || { bad 'check_all lock: a dead holder blocked the run'; cat out; }
+# Break: a partial (--no-mix-test) pass records the tree as checked, so a later full-lane push of
+# the same tree skips mix test at pre-push. A full pass on the same clean tree must record it.
+R=$(mktemp -d); cd "$R"; git init -q; mkdir -p bin kernel/ts/node_modules mobile/app/node_modules node_modules
+cp "$bin/check_all.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh; git add . && git commit -qm t
+rec=$(git rev-parse --git-path loka-checked-tree)
+MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-mix-test > "$R.out" 2>&1 || bad 'check_all record: --no-mix-test run failed'
+[ ! -f "$rec" ] || bad 'check_all record: a --no-mix-test pass recorded the tree'
+MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh > "$R.out" 2>&1 || bad 'check_all record: full run failed'
+[ "$(cat "$rec" 2>/dev/null)" = "$(git rev-parse HEAD^{tree})" ] || bad 'check_all record: a full pass did not record the tree'
 # --- br_create.sh -----------------------------------------------------------------------
 # Stub br logs each call; create prints a new id. Break: the path is not cleared, or on the wrong id.
 printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; esac\n' > "$tmp/br-create"
@@ -103,7 +112,8 @@ am() { # <case> <want-rc> [subject]
 }
 amk() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-  git checkout -qb main; mkdir -p .beads docs; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
+  git checkout -qb main; mkdir -p .beads docs/reviews bin; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
+  cp "$bin/review_index.sh" bin/; sh bin/review_index.sh
   git add . && git commit -qm base && git push -q origin main
   git checkout -qb pr; echo feature > f; git add f && git commit -qm pr && git push -q origin pr; git branch review-7
   git checkout -q main; git worktree add -q "$R.wt" pr 2>/dev/null
@@ -129,6 +139,10 @@ git fetch -q origin
 grep -qx 'sync --flush-only' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
+# Break: a commit pushed to the PR branch after the merge is deleted with the remote branch.
+amk; head=$(git rev-parse HEAD)
+(cd "$M" && git checkout -q -b pr origin/pr && echo late > late && git add late && git commit -qm late && git push -q origin pr)
+am remote-ahead 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge remote-ahead: changed something'
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor

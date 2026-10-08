@@ -65,8 +65,9 @@ their rules and red controls remain available for resumption.
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name);
   `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
-  duplicated a twice-edited line, or a missing line); each `docs/reviews/` record counts as reachable
-  without an index and is named `<YYYY-MM-DD>-<slug>.md`.
+  duplicated a twice-edited line, or a missing line); `docs/reviews/README.md` equals the output of
+  `bin/review_index.sh` (title and first verdict per record) and each record is named
+  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental
@@ -78,10 +79,9 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
-  mobile assets and config outside `mobile/app/book/` (`.sksl`, fonts, `mobile/app/tests/` e2e specs,
-  `mobile/app/plugins/`, `app.json`), plus metadata; `mobile/app/book/` (kernel tests import its
-  `model.ts` and `presenter.ts`), every mobile `.ts`/`.tsx` (mobile tests run `App.tsx`) and
-  local-story authority/save code run the broad code lane. The browser lane runs
+  `mobile/app/plugins/` and `mobile/app/app.json` (native config), plus metadata; every other mobile
+  file, including the Book (kernel tests import its `model.ts` and `presenter.ts`), every mobile
+  `.ts`/`.tsx` (mobile tests run `App.tsx`) and local-story authority/save code, runs the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
   lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
@@ -93,10 +93,10 @@ their rules and red controls remain available for resumption.
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
-  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a conflict is refused, the merge is
-  pushed, and a failed docs check blocks the push.
+  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
+  index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
-  PR worktree, an unmerged `review-<N>` or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
+  PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared).
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for

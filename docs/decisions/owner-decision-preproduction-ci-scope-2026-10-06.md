@@ -17,7 +17,7 @@ mobile app and authority changes. This does not resume paused native checks.
 
 Amendment (owner, 2026-10-08, paraphrased): `mobile/app/book/` and the mobile `.ts` files kernel
 tests import (Book `model.ts`, `presenter.ts`) are code, so the TypeScript and E1 recorder jobs run.
-Implementation clarification (2026-10-08): every mobile `.ts`, `.tsx` and package file runs the
-code lane (the TypeScript job now runs the mobile app tests, which run `App.tsx`); the mobile skip
-keeps only assets, e2e specs, plugins and `app.json` outside the Book. Local pre-push only (owner-approved retro item): a push whose code changes are
+Implementation clarification (2026-10-08): every mobile file runs the code lane (the TypeScript job
+now runs the mobile app tests, which run `App.tsx`, and the size gate covers every mobile `.ts`)
+except `mobile/app/plugins/` and `mobile/app/app.json`, native config the paused native checks own. Local pre-push only (owner-approved retro item): a push whose code changes are
 only `*.test.ts` files skips `mix test` and credo.

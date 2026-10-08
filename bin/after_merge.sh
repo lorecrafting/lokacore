@@ -26,6 +26,12 @@ done
 wt=$(git worktree list --porcelain | awk -v b="branch refs/heads/$branch" '/^worktree /{w=substr($0, 10)} $0 == b {print w}')
 [ -z "$wt" ] || [ -z "$(git -C "$wt" status --porcelain)" ] || die "the $branch worktree has uncommitted work"
 git fetch -q origin main || die 'fetch failed'
+remote=
+if git ls-remote --exit-code --heads origin "$branch" > /dev/null 2>&1; then
+  remote=1
+  git fetch -q origin "refs/heads/$branch:refs/remotes/origin/$branch" || die "fetch of $branch failed"
+  git merge-base --is-ancestor "origin/$branch" origin/main || die "origin/$branch has commits not in main; nothing changed"
+fi
 for b in "$branch" "review-$pr"; do
   ! git rev-parse -q --verify "refs/heads/$b" > /dev/null || git merge-base --is-ancestor "$b" origin/main || die "$b is not in origin/main; nothing changed"
 done
@@ -45,8 +51,9 @@ br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
 for b in "$branch" "review-$pr"; do
   ! git rev-parse -q --verify "refs/heads/$b" > /dev/null || git branch -q -d "$b" || die "$b is not merged; not deleted"
 done
-! git ls-remote --exit-code --heads origin "$branch" > /dev/null 2>&1 || git push -q origin --delete "$branch" || die 'remote branch not deleted'
-git add $j && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'
+[ -z "$remote" ] || git push -q origin --delete "$branch" || die 'remote branch not deleted'
+sh bin/review_index.sh || die 'review index not regenerated'
+git add $j docs/reviews/README.md && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'
 if ! git diff --cached --quiet; then
   git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
   git push -q origin main || die 'push failed; commit is local'

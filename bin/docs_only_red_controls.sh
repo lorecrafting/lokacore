@@ -9,9 +9,9 @@ trap 'rm -rf "$d"' EXIT
 cd "$d"
 git init -q
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
-mkdir -p docs mobile/authority/local-story mobile/app/book mobile/app/plugins .beads
+mkdir -p docs mobile/authority/local-story mobile/app/book mobile/app/plugins mobile/app/tests .beads
 mkdir -p kernel/ts/src kernel/ts/test
-touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts
+touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/tests/steps.ts mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts
 seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
@@ -23,6 +23,7 @@ echo 1 >> mobile/authority/local-story/store.ts; authority=$(c authority)
 echo 1 >> mobile/app/book/model.ts; model=$(c model)
 echo 1 >> mobile/app/book/Page.tsx; page=$(c page)
 echo 1 >> mobile/app/App.tsx; app=$(c app)
+echo 1 >> mobile/app/tests/steps.ts; steps=$(c steps)
 echo 1 >> a.md && echo 1 >> docs/features.json; json=$(c json)
 echo 1 >> docs/features.gen.md; git add -A; gen=$(c gen)
 git mv code.ts code.md; ren=$(c rename)
@@ -46,6 +47,7 @@ t run "$book" "$authority" browser "local-story save change runs browser"
 t run "$authority" "$model" code "Book model.ts change runs code"
 t run "$model" "$page" code "Book .tsx change runs code"
 t run "$page" "$app" code "App.tsx (run by chapter.test.ts) runs code"
+t run "$app" "$steps" code "e2e helper tests/steps.ts runs code (size gate)"
 t run "$authority" "$json" code "a .json under docs/ changed"
 t run "$base" "$json" code "mixed source and metadata in range"
 t run "$json" "$gen" code "a .gen.md changed"

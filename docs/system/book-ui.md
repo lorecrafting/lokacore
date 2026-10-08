@@ -14,7 +14,7 @@ Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-202
 [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md),
 and [detail-page order](../decisions/owner-decision-detail-page-order-2026-10-05.md).
 Original feedback lives in those records; independent reviews and retained interaction proof
-are indexed in [reviews](../reviews/README.md). Touch acceptance follows
+are listed in the generated [review index](../reviews/README.md). Touch acceptance follows
 [C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
 The owner-directed C1 human acceptance and deferred UI validation are recorded once in
 [the gate UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md);

@@ -12,7 +12,7 @@ if [ -n "$base" ] && git merge-base --is-ancestor "$base" "$after" 2>/dev/null; 
     $0 == ".beads/issues.jsonl" { next }
     lane == "elixir" && /\.test\.ts$/ { next }
     # Mobile code is code: kernel tests import Book model/presenter, mobile tests run App.tsx.
-    lane == "code" && /^mobile\// && !/^mobile\/app\/book\// && (/\.(ttf|txt|sksl)$/ || /^mobile\/app\/(tests|plugins)\// || $0 == "mobile/app/app.json") { next }
+    lane == "code" && (/^mobile\/app\/plugins\// || $0 == "mobile/app/app.json") { next }
     { bad = 1 }
     END { exit bad ? 0 : 1 }
   '

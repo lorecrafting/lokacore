@@ -28,19 +28,24 @@ done
 if [ "$(echo "$out" | grep -c '^broken anchor')" != 4 ]; then echo "FAIL: good anchor reported\n$out"; exit 1; fi
 echo "ok   docs: broken anchors"
 
-# Review records: a throwaway repo whose docs/reviews/README.md links no record. An unlinked
-# well-named record must pass (no index); a badly named one must fail.
+# Review records: a throwaway repo with the real generator. A record the README does not list
+# (stale index) must fail; after bin/review_index.sh it passes; a badly named record fails.
 R=$(mktemp -d "${TMPDIR:-/tmp}/reviews.XXXXXX")
 trap 'rm -rf "$P" "$D" "$R"' EXIT
 mkdir -p "$R/bin" "$R/docs/reviews" "$R/docs/decisions"
-cp bin/check_docs.exs "$R/bin/"
+cp bin/check_docs.exs bin/review_index.sh "$R/bin/"
 printf '[a](AGENTS.md) [r](docs/reviews/README.md) [d](docs/decisions/README.md)\n' > "$R/README.md"
 printf '# A\n' > "$R/AGENTS.md"
-printf '# R\n' > "$R/docs/reviews/README.md"
-printf '# D\n' > "$R/docs/decisions/README.md"
-printf '# Rec\n[a](../../AGENTS.md)\n' > "$R/docs/reviews/2026-01-01-x-review.md"
-(cd "$R" && git init -q && git add . && elixir bin/check_docs.exs > out 2>&1) || { echo "FAIL: unlinked review record refused"; cat "$R/out"; exit 1; }
-printf '# Bad\n' > "$R/docs/reviews/Bad.md"
-if (cd "$R" && git add . && elixir bin/check_docs.exs > out 2>&1); then echo "FAIL: badly named review record passed"; exit 1; fi
-grep -q 'review record docs/reviews/Bad.md' "$R/out" || { echo "FAIL: no naming message"; cat "$R/out"; exit 1; }
-echo "ok   docs: review records found without an index, named by date"
+printf '# D\n' > "$R/docs/decisions/README.md"; printf "# M\n" > "$R/docs/decisions/owner-decision-move-forward-2026-10-07.md"; printf -- "- [m](owner-decision-move-forward-2026-10-07.md)\n" >> "$R/docs/decisions/README.md"
+printf '# Rec\nVerdict **APPROVE**\n' > "$R/docs/reviews/2026-01-01-x-review.md"
+cd "$R"; git init -q; sh bin/review_index.sh
+printf '# Rec 2\n' > docs/reviews/2026-01-02-y-review.md
+if git add . && elixir bin/check_docs.exs > out 2>&1; then echo "FAIL: stale review index passed"; exit 1; fi
+grep -q 'README.md is stale' out || { echo "FAIL: no stale-index message"; cat out; exit 1; }
+sh bin/review_index.sh; git add .
+elixir bin/check_docs.exs > out 2>&1 || { echo "FAIL: generated review index refused"; cat out; exit 1; }
+grep -qxF -- '- [Rec](2026-01-01-x-review.md): **APPROVE**' docs/reviews/README.md || { echo "FAIL: index line"; cat docs/reviews/README.md; exit 1; }
+printf '# Bad\n' > docs/reviews/Bad.md; sh bin/review_index.sh
+if git add . && elixir bin/check_docs.exs > out 2>&1; then echo "FAIL: badly named review record passed"; exit 1; fi
+grep -q 'review record docs/reviews/Bad.md' out || { echo "FAIL: no naming message"; cat out; exit 1; }
+echo "ok   docs: generated review index, record names"
