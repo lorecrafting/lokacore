@@ -1,4 +1,4 @@
-# size: allow 525, patrol, liquid and authored gain share the existing randomized differential pool
+# size: allow 525, patrol, liquid, expedition rows and authored gain share the existing randomized differential pool
 defmodule Loka.Core.ComposeTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}

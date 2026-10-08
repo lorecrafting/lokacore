@@ -426,44 +426,23 @@
       }
     },
     {
-      "id": "value bound to another quest instance",
+      "id": "start bound to another quest instance",
       "state": {
-        "clock": 0,
-        "expeditions": {
-          "00000004-2222-4333-8444-555555555555": {
-            "kind": "expedition",
-            "actor_id": "00000001-2222-4333-8444-555555555555",
-            "body_id": "00000002-2222-4333-8444-555555555555",
-            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
-            "attempt_id": "00000006-2222-4333-8444-555555555555",
-            "cursor": 0,
-            "sheltered": false,
-            "status": "active"
-          }
-        }
+        "clock": 0
       },
       "ops": [
         {
           "op": "expedition.transition",
           "writer_group": 0,
           "quest_instance_id": "00000004-2222-4333-8444-555555555555",
-          "expected": {
-            "kind": "expedition",
-            "actor_id": "00000001-2222-4333-8444-555555555555",
-            "body_id": "00000002-2222-4333-8444-555555555555",
-            "quest_instance_id": "00000004-2222-4333-8444-555555555555",
-            "attempt_id": "00000006-2222-4333-8444-555555555555",
-            "cursor": 0,
-            "sheltered": false,
-            "status": "active"
-          },
+          "expected": null,
           "value": {
             "kind": "expedition",
             "actor_id": "00000001-2222-4333-8444-555555555555",
             "body_id": "00000002-2222-4333-8444-555555555555",
             "quest_instance_id": "00000009-2222-4333-8444-555555555555",
             "attempt_id": "00000006-2222-4333-8444-555555555555",
-            "cursor": 1,
+            "cursor": 0,
             "sheltered": false,
             "status": "active"
           }
