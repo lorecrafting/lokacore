@@ -50,7 +50,7 @@ Never use `--no-verify` or force-push (including `--force-with-lease`) without t
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
 above and follows only the next paragraph.
 
-When review findings arrive on a published PR: `git pull --rebase` (the review record is on the branch; never force-push). In the provisional local lane, keep the original branch and have the PM attach the review-only record before fixes. Then fix each or dispute it with a concrete reason, rerun affected checks once, push only for a published PR, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
+When review findings arrive on a published PR: `git pull --rebase`, then cherry-pick the reviewer's record sha the PM gives you (the record is never pushed on its own; your fix push carries it); never force-push. In the provisional local lane, keep the original branch and have the PM attach the review-only record before fixes. Then fix each or dispute it with a concrete reason, rerun affected checks once, push only for a published PR, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
 If the same issue survives two fix attempts within a round, stop: write down the assumption
 both attempts shared and test that, or escalate to the PM. A finding still open after fix
 round 2 goes to the owner, not a third round.

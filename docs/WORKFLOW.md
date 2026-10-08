@@ -97,7 +97,7 @@ Report at the end of the slice, not at every step.
    resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the two lists) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
-   developer runs `git pull --rebase` first when the branch is published (the review record is on the branch), never
+   PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
    force-pushes, fixes or disputes each finding with a reason, and reruns the checks once.
    A published branch uses the pre-push hook as its final run and pushes; a local draft
    keeps the fixed commits and review record until publication.
@@ -291,7 +291,7 @@ turning into a catch-all. Findings are fixed in the gate PR.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree
-  at `origin/<branch>`, hands back the commit sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
+  at `origin/<branch>`, runs `git branch review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
