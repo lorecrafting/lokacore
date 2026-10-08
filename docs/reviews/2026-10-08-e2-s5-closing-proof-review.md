@@ -76,3 +76,18 @@ Finding:
 1. **nit** `chapter-one-e2-gate-checklist-2026-10-08.md:34`: the cap half of "Omit provenance / cap" says "existing cap tests fail under the cap mutant (S4 review)". That review (`:47`) does not name the test either, so the guard has no test `file:line` anywhere. A reader cannot find which test catches the cap break.
 
 Open: none blocking. Hosted CI on `aa87cd04` is still the merge condition.
+
+## Fix round 2 (head `5e972bbae0dcf4cac0f0100efad7877933ecd4d0`): APPROVE
+
+Scope: `5e972bba` only. I checked the changed checklist row, the changed README line and the hashes.
+
+- Checklist `:34`, the cap row, now cites three places, and each one asserts the six-member bound:
+  - `kernel/ts/test/hounds.test.ts:154-158`: live, pelts and hounds are each 6.
+  - `hounds.test.ts:170-172`: the thirty-day test still holds six.
+  - `c4_pack.test.ts:14-17`: admission has 6 members.
+  - My earlier nit is closed, and the row is honest about what is linked.
+- **Note (optional, unmeasured):** the row says the deer test "has no cap assertion I could find". That overstates it. `deer.test.ts:461-474` bounds the number of deer members (slot length 3 over thirty days, "multiply live members"). Whether that test catches the S4 population cap +1 mutant is unmeasured. Calling it "unmeasured" would be accurate. The deer test is not cited as proof, so this changes nothing in the gate.
+- Evidence `README.md:58` now reads "so F2 never shows `pending`". This is correct: F4's lost-ack row (`r9c_faults.test.ts:335`) does fence and answer `pending`, and only F2 has no fenced row. The earlier wording, which also named F4, was wrong for that row.
+- Hashes: `shasum -a 256 -c SHA256SUMS` exits 0, and the local-path grep finds nothing.
+
+Open: none.
