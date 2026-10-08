@@ -256,7 +256,9 @@ test('D1: bleed, Flee west, board while bleeding, die on the isle, cross free fo
 
 // Breaks: a hound death leaves Wren following or credits missing_child while she is separated
 // (S5 planted-defect item 3), Rejoin is offered away from her, the fatal round leaves the Night
-// Marsh attempt active, or retry keeps the failed attempt's id or route cursor.
+// Marsh attempt active, or retry keeps the failed attempt's id. (A retry keeping the old route
+// cursor is not sensed here: the watch fails at cursor 0; see kernel/ts/test/c6_expedition.test.ts
+// and local-story/c6_expedition.test.ts.)
 test('family 4: a pack death separates Wren and fails the watch; Rejoin and retry restart cleanly', (t) => {
   // Regression pin: seed [19, 2, 3, 4] kills the watcher at 65550 and the retry Flee draws west.
   const a = story(t, [19, 2, 3, 4], 'fey_touched');
@@ -289,6 +291,7 @@ test('family 4: a pack death separates Wren and fails the watch; Rejoin and retr
   a.press('begin_marsh_watch', [bones], { transition: 'start' });
   const watch = () => Object.values(a.w.state.expeditions!)[0]!;
   const failed = watch();
+  // cursor 0 at death: stale-cursor retry is linked to the two c6_expedition tests, not caught here.
   assert.deepEqual([failed.status, failed.cursor], ['active', 0]);
   while (a.holder(body) === ID['room/hound_run']) a.tick();
   assert.deepEqual(
@@ -312,6 +315,7 @@ test('family 4: a pack death separates Wren and fails the watch; Rejoin and retr
     attempt_id: failed.attempt_id,
   });
   const retry = watch();
+  // cursor is 0 either way (failed at 0); a stale-cursor retry is caught by the c6_expedition tests.
   assert.deepEqual([retry.status, retry.cursor], ['active', 0]);
   assert.equal(retry.quest_instance_id, failed.quest_instance_id);
   assert.notEqual(retry.attempt_id, failed.attempt_id);
