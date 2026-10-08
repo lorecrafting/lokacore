@@ -3,7 +3,7 @@
 # exactly those files, to report exactly the expected lines: one line over each limit fails,
 # exactly at it passes; markers at 1.5x pass, and over it, without a reason, not needed or
 # not attached fail. The no-argument scan must report a tracked file under mobile/ (staged in a
-# throwaway index) and skip an untracked one. Only what this script created is removed.
+# throwaway index read from HEAD) and skip an untracked one. Only what this script created is removed.
 set -eu
 cd "$(dirname "$0")/.."
 L= T= M= I=
@@ -69,7 +69,7 @@ want=$(printf '%s\n' "$expected" | LC_ALL=C sort)
 # The production (no-argument) selection: tracked files, mobile included, untracked skipped.
 x 301 > "$M/tracked.ts"
 x 301 > "$M/untracked.ts"
-cp "$(git rev-parse --git-path index)" "$I"
+rm "$I" && GIT_INDEX_FILE=$I git read-tree HEAD
 GIT_INDEX_FILE=$I git add -f "$M/tracked.ts"
 scan_status=0
 scan=$(GIT_INDEX_FILE=$I node bin/check_ts_size.mjs) || scan_status=$?

@@ -131,16 +131,14 @@ const checkOrder = (proof: Receipt[], head: number) => {
     invalid();
 };
 
-type Completion = ReturnType<typeof completions>;
-
 const checkCompletion = (
   meta: Meta,
   selected: Row,
   outcome: string,
   marker: unknown,
   memories: unknown[],
-  completion: Completion,
-  last: Receipt,
+  completion: ReturnType<typeof completions>,
+  continues: Receipt[],
 ) => {
   if (selected.line === -1) {
     if (
@@ -151,7 +149,7 @@ const checkCompletion = (
       completion[0]!.binding !== meta.binding ||
       completion[0]!.report_id !== completion[0]!.report.report_id ||
       completion[0]!.report.run_id !== meta.run_id ||
-      completion[0]!.report.observed_revision !== last.revision ||
+      completion[0]!.report.observed_revision !== continues[2]!.revision ||
       completion[0]!.report.outcome !== outcome ||
       completion[0]!.report.release.cartridge_id !== meta.pin.cartridge_id ||
       completion[0]!.report.release.cartridge_version !== meta.pin.cartridge_version ||
@@ -200,5 +198,5 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
   const bell = checkBell(ctx, selected, receipts);
   const continues = checkScene(ctx, selected, receipts, outcome);
   checkOrder([...bell, begin, ...continues], head);
-  checkCompletion(meta, selected, outcome, marker, memories, completion, continues[2]!);
+  checkCompletion(meta, selected, outcome, marker, memories, completion, continues);
 }
