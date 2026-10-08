@@ -52,7 +52,7 @@ description are cited too. Effect: [developer](../../.claude/agents/developer.md
 
 (paraphrased) Generate `docs/reviews/README.md` from the record files, keeping a one-line verdict
 taken from each record. `bin/review_index.sh` writes a fixed header plus one line per record (its
-first line and first verdict); `bin/check_docs.exs` fails when the file differs from the generated
+first line and final verdict); `bin/check_docs.exs` fails when the file differs from the generated
 text and checks record names. A merge conflict in the index is resolved by rerunning the generator
 (`bin/sync_pr.sh` and `bin/after_merge.sh` do), so the index is no longer a hand-merged append point.
 Effect: [review records](../reviews/README.md), [CHECKS](../CHECKS.md),

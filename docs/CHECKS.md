@@ -66,7 +66,7 @@ their rules and red controls remain available for resumption.
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name);
   `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
   duplicated a twice-edited line, or a missing line); `docs/reviews/README.md` equals the output of
-  `bin/review_index.sh` (title and first verdict per record) and each record is named
+  `bin/review_index.sh` (title and final verdict per record) and each record is named
   `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan

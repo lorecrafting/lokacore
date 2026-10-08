@@ -37,7 +37,7 @@ cp bin/check_docs.exs bin/review_index.sh "$R/bin/"
 printf '[a](AGENTS.md) [r](docs/reviews/README.md) [d](docs/decisions/README.md)\n' > "$R/README.md"
 printf '# A\n' > "$R/AGENTS.md"
 printf '# D\n' > "$R/docs/decisions/README.md"; printf "# M\n" > "$R/docs/decisions/owner-decision-move-forward-2026-10-07.md"; printf -- "- [m](owner-decision-move-forward-2026-10-07.md)\n" >> "$R/docs/decisions/README.md"
-printf '# Rec\nVerdict **APPROVE**\n' > "$R/docs/reviews/2026-01-01-x-review.md"
+printf '# Rec\nVerdict **CHANGES REQUIRED**\nFix round 1: **APPROVE**\n' > "$R/docs/reviews/2026-01-01-x-review.md"
 cd "$R"; git init -q; sh bin/review_index.sh
 printf '# Rec 2\n' > docs/reviews/2026-01-02-y-review.md
 if git add . && elixir bin/check_docs.exs > out 2>&1; then echo "FAIL: stale review index passed"; exit 1; fi
