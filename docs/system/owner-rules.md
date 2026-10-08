@@ -207,6 +207,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
 - Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md#work-routing) says
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
+- Mechanical PM chores and docs-only slices run on Sonnet, searches on Haiku (`Explore` override), briefs paste `ast-grep outline` signatures, plugin changes are allowed mid-session, and `bin/sync_pr.sh` merges `main` into each open PR once after the last of several close merges ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
   ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).
 - Native mobile builds run only when native inputs change; the merge rule is every CI job that ran
