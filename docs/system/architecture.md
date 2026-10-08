@@ -327,8 +327,12 @@ the op's expected value to the authored value, with a matching `fact_changed` ev
 `population.suppress` needs each named plan, unsuppressed before the accepted step, to newly
 gain suppression caused by that event, ending at its time plus the authored duration, matching
 the receipt's `population.control` row. A step of any other kind has no effect witness.
-Each event named above must have the triggering event as its causation, which binds the effect
-to that event's delivery; a `quest.fail` has no event, so it is bound only through G.
+Each event named above must have the triggering event as its causation. Causation alone does
+not identify the rule, since every rule on one trigger shares it; so a receipt op that the
+steps of two or more reactions triggered in the same step would match (same op kind, target
+and authored value) credits none of them, and a reaction whose apply steps are all
+`quest.fail` (no event to name the trigger) is not witnessed. A `fact.assign` op must also be
+at the scope the fact resolves to for the player.
 Sightings, wander ticks and bleed refreshes witness none of these paths.
 An exact authored consequence may be discharged only by a retained step witness whose
 command, accepted decision and literal before/after assertion are checked again in replay.
@@ -370,8 +374,11 @@ in both the before and the committed resulting state: a root holding in both cre
 the paths credited in both, and a root holding in one state uses that state. A reaction's
 `when` root (the step's player, no target) holds at neither boundary in general, so it is
 evaluated in the state that reaction's delivery read: the before state composed with the
-receipt's ops of writer groups before G (the group holding its effects), at its cause event's
-logical time. The same polarity rule applies below that root; a negative-polarity node is
+receipt's ops that precede G's first op, at its cause event's logical time. That prefix is the
+delivery's read state only when every op before G has a lower writer group and no op after it
+has one (the runtime reuses lower groups for due-job pairs and the sight handoff, and stamps
+knowledge ops group 0); when a lower group appears at or after G's first op, the reaction is
+not witnessed. The same polarity rule applies below that root; a negative-polarity node is
 never credited. Replay recomputes these credits from the replayed before/after states and
 the retained receipt ops, and accepts only paths also recorded in the retained step receipt,
 as for journal variants.
