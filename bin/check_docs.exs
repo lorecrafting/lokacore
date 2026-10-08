@@ -41,26 +41,26 @@ broken =
       not File.exists?(Path.join(root, resolved)),
       do: "broken link #{file}: #{target}"
 
-# GitHub heading slug: link text only, lowercase, drop punctuation, spaces to hyphens, repeats get -1, -2.
+# GitHub anchors: explicit <a id>/<a name> targets, and heading slugs: link text only, lowercase, drop punctuation, spaces to hyphens, repeats get -1, -2.
 slugs = fn abs ->
-  for [_, h] <-
-        Regex.scan(
-          ~r/^ {0,3}\#{1,6}[ \t]+(.*?)(?:[ \t]+\#+)?[ \t]*$/m,
-          unfenced.(File.read!(abs))
-        ),
-      reduce: {%{}, []} do
-    {seen, acc} ->
-      base =
-        h
-        |> String.replace(~r/\[([^\]]*)\]\([^)]*\)/, "\\1")
-        |> String.downcase()
-        |> String.replace(~r/[^\p{L}\p{N}\p{M} _-]/u, "")
-        |> String.replace(" ", "-")
+  text = unfenced.(File.read!(abs))
+  aliases = for [_, a] <- Regex.scan(~r/<a\s[^>]*?\b(?:id|name)="([^"]+)"/, text), do: a
 
-      n = Map.get(seen, base, 0)
-      {Map.put(seen, base, n + 1), [if(n == 0, do: base, else: "#{base}-#{n}") | acc]}
-  end
-  |> elem(1)
+  aliases ++
+    (for [_, h] <- Regex.scan(~r/^ {0,3}\#{1,6}[ \t]+(.*?)(?:[ \t]+\#+)?[ \t]*$/m, text),
+         reduce: {%{}, []} do
+       {seen, acc} ->
+         base =
+           h
+           |> String.replace(~r/\[([^\]]*)\]\([^)]*\)/, "\\1")
+           |> String.downcase()
+           |> String.replace(~r/[^\p{L}\p{N}\p{M} _-]/u, "")
+           |> String.replace(" ", "-")
+
+         n = Map.get(seen, base, 0)
+         {Map.put(seen, base, n + 1), [if(n == 0, do: base, else: "#{base}-#{n}") | acc]}
+     end
+     |> elem(1))
 end
 
 # Optional second argument: an extra doc to check (the red control passes a planted one).

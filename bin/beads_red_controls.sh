@@ -23,7 +23,7 @@ if python3 bin/check_beads_export.py "$case_file" >/dev/null 2>&1; then
   exit 1
 fi
 # Completeness controls run on rows planted from the plan's own slice codes, not on the live tracker.
-mk() { # mk <variant>: base | audit | missing | duplicate | wisp
+mk() { # mk <variant>: base | audit | missing | duplicate | swap | wisp
 python3 - "$1" "$case_file" <<'PY'
 import json
 import re
@@ -40,6 +40,8 @@ elif variant == 'missing':
     rows.pop()
 elif variant == 'duplicate':
     rows.append(dict(rows[0], id='loka-duplicate-slice'))
+elif variant == 'swap':  # same count: the last code is replaced by a copy of the first
+    rows[-1]['title'] = rows[0]['title']
 elif variant == 'wisp':
     rows[0]['id'] = 'loka-wisp-1'
     rows[1]['dependencies'][0]['depends_on_id'] = 'loka-wisp-1'
@@ -50,7 +52,7 @@ mk base
 python3 bin/check_beads_export.py --complete "$case_file"
 mk audit
 python3 bin/check_beads_export.py --complete "$case_file"
-for variant in missing duplicate wisp; do
+for variant in missing duplicate swap wisp; do
   mk "$variant"
   if python3 bin/check_beads_export.py --complete "$case_file" >/dev/null 2>&1; then
     echo "Beads completeness control failed: a $variant case was accepted" >&2

@@ -395,7 +395,7 @@ Shared mutable state for a logical door/gate/bridge/barricade:
 
 Bidirectional faces reference one barrier state unless explicitly modeled as independent.
 
-*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6):* a barrier may sit on an item (a container's lid) instead of an exit; it then has one site: no exit and no other item names it. The door commands target the item ([mechanics](../../system/mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets)).
+*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6):* a barrier may sit on an item (a container's lid) instead of an exit; it then has one site: no exit and no other item names it. The door commands target the item ([mechanics](../../system/mechanics.md#barrier1-kerneltssrcrulesbarrierts)).
 
 ### Portal/Transition
 
@@ -598,7 +598,7 @@ Typed stack identity and conservation rules.
 - equip/unequip;
 - granted capabilities/actions/modifiers.
 
-*Amendment 2026-10-03 (chapter-one slice c1-equipment; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 5, triage 8):* `equipment@1` gives an item an optional `slot`; a slot is a holder entity inside the body (capacity 1) that a fresh world makes for each slot some item declares, and equip/unequip (`wear`, `remove`) are containment transfers into and out of it, so conservation, one container and capacity already hold ([mechanics](../../system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets)). Compatibility policy, granted capabilities and modifiers, dual wield, affects and curses are LATER.
+*Amendment 2026-10-03 (chapter-one slice c1-equipment; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 5, triage 8):* `equipment@1` gives an item an optional `slot`; a slot is a holder entity inside the body (capacity 1) that a fresh world makes for each slot some item declares, and equip/unequip (`wear`, `remove`) are containment transfers into and out of it, so conservation, one container and capacity already hold ([mechanics](../../system/mechanics.md#equipment1-kerneltssrcrulesequipmentts)). Compatibility policy, granted capabilities and modifiers, dual wield, affects and curses are LATER.
 
 ### Durability/condition
 
@@ -1632,7 +1632,7 @@ Layer refers to §2. Portability is `portable` unless stated; the first cartridg
 | speech pose | L2 | a pose is a per-character NarrationSpec fragment included in room projection until changed or the character moves | pose survives save; clears on movement |
 | `performance@1` | L3 | an ActionRecipe pattern that applies a room-scoped timed status to eligible listeners; requires an instrument item | two bards in one room compose by the registered rule, not last-writer-wins (ARCH-10) |
 
-*Amendment 2026-10-03 (chapter-one slice c1-position; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 7):* the `position@1` row's first part is built: one position per character, an engine fact only its rule writes, and `move` needs standing ([mechanics](../../system/mechanics.md#position1-kerneltssrcmechanicspositionrulets)); save mid-sleep resumes asleep (the fact persists). LATER, each with its trigger: regen reads it (the time model, 00 §4.2), sleeping characters cannot act, take double damage and wake on damage exactly once (combat), and `meditating` (spell words).
+*Amendment 2026-10-03 (chapter-one slice c1-position; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 7):* the `position@1` row's first part is built: one position per character, an engine fact only its rule writes, and `move` needs standing ([mechanics](../../system/mechanics.md#position1-kerneltssrcrulespositionts)); save mid-sleep resumes asleep (the fact persists). LATER, each with its trigger: regen reads it (the time model, 00 §4.2), sleeping characters cannot act, take double damage and wake on damage exactly once (combat), and `meditating` (spell words).
 
 Two rules apply to every row:
 

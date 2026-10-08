@@ -5,8 +5,8 @@ Published D6 [#247](https://github.com/lorecrafting/lokacore/pull/247)
 merged at `61f4200c`; the current planning base is main `f57f1a8c`,
 chapter v035/API1.30. Under the [mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM selects the narrow Chapter 1 consequence contract in
-[mechanics](../system/mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract),
-[cartridge](../system/cartridge.md#d9-village-reaction-content-selected-contract),
+[mechanics](../system/mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation),
+[cartridge](../system/cartridge.md#d9-village-reaction-content-selected-pending-implementation),
 [protocol](../system/protocol.md#d9-reaction-cue-and-study-admission-composition),
 [save](../system/save.md#d9-village-consequence-recovery),
 [Book](../system/book-ui.md#d9-village-reactions-and-bell-cue) and the

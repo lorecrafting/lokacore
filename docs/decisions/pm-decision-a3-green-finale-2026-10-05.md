@@ -1,7 +1,7 @@
 # PM adoption: A3 voluntary Green finale
 
 2026-10-05. Adopt the five outcome values and explicit Begin rule in the
-[active A3 chapter contract](../system/cartridge.md#a3-green-finale),
+[active A3 chapter contract](../system/cartridge.md#a3-green-finale-planned),
 under the owner's Chapter 1 outcome and in-game copy delegation. This is a PM
 selection for implementation, not a claim that the finale or exports run yet.
 
@@ -17,7 +17,7 @@ acknowledgement of the final shown line commits the selected memories and one
 `prologue_completed` point/report. Lost/fox is impossible. No side quest, clock
 jump, new room or automatic scene queue is required.
 
-The [five-row table](../system/cartridge.md#a3-green-finale) fixes
+The [five-row table](../system/cartridge.md#a3-green-finale-planned) fixes
 `memory.village_ending`, `memory.fox_fate` and
 `memory.chapter_1_guild_tilt` as declared player facts with initially unreached
 values, plus the selected completion outcome. These are durable local continuity

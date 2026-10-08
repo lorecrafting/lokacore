@@ -567,7 +567,7 @@ Internal component state is not dumped wholesale to mobile.
 
 ## 15. Portable game-view projection
 
-*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* quest journal state includes optional selected journal text, computed by [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets), exposed as `QuestView.journal` in [GameView](../../system/protocol.md#gameview).
+*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* quest journal state includes optional selected journal text, computed by [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts), exposed as `QuestView.journal` in [GameView](../../system/protocol.md#gameview).
 
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
