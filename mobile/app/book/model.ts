@@ -1,5 +1,4 @@
-import { dreamPages, dreamButtons, dreamAt } from './dreams.ts';
-// size: allow 350, current shop quotes join the shared button/freshness builder
+import { dreamPages, dreamAt } from './dreams.ts';
 import type {
   ActionInput,
   EntityId,
@@ -8,7 +7,8 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
-import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
+import { commandOf } from './buttons.ts';
+export { buttonsOf } from './buttons.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
@@ -24,8 +24,6 @@ export const expeditionLine = (
       ? `Next: ${e.direction} to ${text(e.next_title)}.`
       : `Next checkpoint: ${text(e.next_title)}.`
     : '';
-type Press = Omit<Button, 'token'>;
-const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -187,165 +185,6 @@ export function hint(store: Store, key: string) {
       } catch {} // ponytail: the next launch shows the hint again
     },
   };
-}
-
-// The pending choice's available answers and its Close (06 §43: never a trap).
-function asked(v: GameView, label: Say): Press[] {
-  const c = v.choice;
-  const answer = (o: {
-    choice_id: string;
-    label: string;
-    patrol?: NonNullable<GameView['choice']>['choices'][number]['patrol'];
-  }) => ({
-    label: label(o.label),
-    action_key: 'choose',
-    target_ids: [],
-    input: {
-      choice_id: o.choice_id,
-      continuation_id: c!.continuation_id,
-      ...(o.patrol && { patrol: o.patrol }),
-    },
-  });
-  return [
-    ...(c?.choices.filter((o) => o.available) ?? []).map(answer),
-    ...(c?.closable
-      ? [{ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }]
-      : []),
-  ];
-}
-
-// Ordinary travel carries a direction; combat uses only the projected directionless Flee.
-function travel(v: GameView): Press[] {
-  return v.combat
-    ? []
-    : v.exits
-        .filter((e) => e.available)
-        .map((e) => ({
-          label: v.water && e.direction === 'up' ? 'Surface (free)' : `Go ${e.direction}`,
-          action_key: 'move',
-          target_ids: [],
-          input: { direction: e.direction },
-        }));
-}
-
-// size: allow 60, D6 corpse and D12 notice offers join the existing button conversion
-export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
-  const button = (
-    a: { action_key: string; label: string; target_ids?: readonly string[]; command?: string },
-    name: string,
-    id?: string,
-  ) => ({
-    label: `${label(a.label)}${name}`,
-    action_key: a.action_key,
-    ...(a.command && { command: a.command }),
-    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
-    target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
-    input: {},
-  });
-  const place = v.actions.filter(
-    (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
-  );
-  const doors = v.exits.flatMap((e) =>
-    (e.door?.actions ?? [])
-      .filter((a) => a.available)
-      .map((a) => ({
-        ...button(a, ` ${text(e.door!.name)} (${e.direction})`),
-        input: { direction: e.direction },
-      })),
-  );
-  const projected = things(v);
-  const names = new Map(projected.map((e) => [e.id, e.name]));
-  const held = projected.flatMap((e) =>
-    e.actions
-      .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
-      .map((a) => {
-        const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        const offered = button(
-          a,
-          ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
-          e.id,
-        );
-        return a.action_key === 'bandage' && v.bleeding
-          ? { ...offered, input: { effect_generation: v.bleeding.generation } }
-          : offered;
-      }),
-  );
-  const placed = place.map((a) => ({
-    ...button(a, ''),
-    ...(a.target.kind === 'entity' && { place: true as const }),
-  }));
-  const scene = v.scene;
-  const next = scene && v.actions.find((a) => a.action_key === 'continue' && a.available);
-  if (scene && next)
-    placed.push({ ...button(next, ''), input: { scene: scene.scene, line: scene.index } });
-  return [
-    ...(v.ancestry_choices ?? []).map((a) => ({
-      label: label(a.label),
-      action_key: 'choose_ancestry',
-      target_ids: [],
-      input: { ancestry: a.key },
-    })),
-    ...placed,
-    ...corpseButtons(v, text),
-    ...noticeButtons(v, button, names, text),
-    ...travel(v),
-    ...doors,
-    ...held,
-    ...(v.known_npcs ?? []).map((n) => ({
-      label: `Where ${text(n.name)}`,
-      action_key: 'where',
-      target_ids: [n.id],
-      input: {},
-    })),
-    ...dreamButtons(v, label),
-    ...shopButtons(v, text),
-    ...serviceButtons(v, text),
-    ...transportButtons(v, text),
-    ...asked(v, label),
-  ];
-}
-
-function noticeButtons(
-  v: GameView,
-  button: (a: GameView['actions'][number], name: string) => Press,
-  names: Map<string, string>,
-  text: Say,
-) {
-  return [...(v.notices ?? []), ...(v.notice_boards ?? []).flatMap((b) => b.notices)].flatMap((n) =>
-    (n.actions ?? [])
-      .filter(
-        (a) =>
-          a.available &&
-          (!a.input.length ||
-            a.command === 'expedition' ||
-            (a.command === 'harvest' && a.input.length === 1 && a.input[0] === 'method')) &&
-          (a.target.kind === 'none' || a.target_ids?.length),
-      )
-      .map((a) => ({
-        ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
-        ...(a.input.includes('method') && { input: { method: 'careful' } }),
-        ...(a.command === 'expedition' && { input: expeditionInput(v, a.input) }),
-        detail_id: n.id,
-      })),
-  );
-}
-
-function expeditionInput(v: GameView, fields: readonly string[]) {
-  if (!fields.includes('attempt_id')) return { transition: 'start' };
-  const row = v.journal.find((q) => q.expedition)?.expedition;
-  if (!row) return {};
-  return fields.includes('cursor')
-    ? {
-        transition: 'shelter',
-        quest_instance_id: row.quest_instance_id,
-        attempt_id: row.attempt_id,
-        cursor: row.cursor,
-      }
-    : {
-        transition: 'restart',
-        quest_instance_id: row.quest_instance_id,
-        attempt_id: row.attempt_id,
-      };
 }
 
 export function actionContext(

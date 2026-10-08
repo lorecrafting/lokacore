@@ -104,3 +104,8 @@ function liquidLine(line: NarrationRecord['lines'][number], text: Say): string {
     ? `${sentence}\n${text(kind)} · ${quantity} ${text(unit_label)}`
     : sentence;
 }
+
+export function detailLines(s: Logs, id: string) {
+  if (!s.details.has(id)) s.details.set(id, []);
+  return s.details.get(id)!;
+}

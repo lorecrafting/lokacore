@@ -1,9 +1,7 @@
 # The current system
 
-These are the active system contracts. Their initial claim-by-claim audit was at `87a1246`;
-unchanged line citations originate there. Later mechanic clauses and their governing
-records describe published changes through D10 at `87ac4cbb`, rather than claiming that
-the initial audit covered those changes. A quoted name cites a test. The
+These are the active system contracts (audited claim by claim at `87a1246`; later mechanic
+clauses cite their governing records). A quoted name cites a test. The
 [current bundled chapter](cartridge.md#current-bundled-chapter) owns the current release
 identity. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
 History (the specification packet, ADRs, decisions and reviews) remains in its dated

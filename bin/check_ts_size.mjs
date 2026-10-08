@@ -5,6 +5,8 @@
 // function after line 5).
 //
 //   node bin/check_ts_size.mjs [path ...]   (after npm ci in kernel/ts)
+// With no paths it checks every tracked file: the one selection CI, bin/check_all.sh and
+// bin/integrate_batch.sh share.
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -18,7 +20,7 @@ const TEST =
 const args = process.argv.slice(2);
 const candidates = args.length
   ? args
-  : execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
+  : execFileSync('git', ['ls-files', '-z'], {
       cwd: root,
       encoding: 'utf8',
     }).split('\0');

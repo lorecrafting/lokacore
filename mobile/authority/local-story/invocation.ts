@@ -88,24 +88,7 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
     return { kind: 'conflict' };
   if (!held && stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
   if (driver) {
-    if (!held) {
-      // Copy only bounded intent data so callers cannot mutate a preflighted reservation.
-      const privateId = { ...id, invocation: copied(i) };
-      const occupancy = s.world.state.water?.[i.actor_id];
-      const surface_generation =
-        i.action_key === 'move' &&
-        i.target_ids.length === 0 &&
-        i.input.direction === 'up' &&
-        occupancy?.room_id
-          ? occupancy.generation
-          : undefined;
-      reservations.set(s, {
-        id: privateId,
-        run_id: s.meta.run_id,
-        target: -1,
-        ...(surface_generation !== undefined && { surface_generation }),
-      });
-    }
+    if (!held) hold(s, id);
     const reserved = reservations.get(s)!;
     const result =
       reserved.target < 0
@@ -130,6 +113,26 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
     return finish(s, reserved.id);
   }
   return finish(s, id);
+}
+
+function hold(s: Story, id: Identified) {
+  const i = id.invocation;
+  // Copy only bounded intent data so callers cannot mutate a preflighted reservation.
+  const privateId = { ...id, invocation: copied(i) };
+  const occupancy = s.world.state.water?.[i.actor_id];
+  const surface_generation =
+    i.action_key === 'move' &&
+    i.target_ids.length === 0 &&
+    i.input.direction === 'up' &&
+    occupancy?.room_id
+      ? occupancy.generation
+      : undefined;
+  reservations.set(s, {
+    id: privateId,
+    run_id: s.meta.run_id,
+    target: -1,
+    ...(surface_generation !== undefined && { surface_generation }),
+  });
 }
 
 function finish(s: Story, id: Identified): Reply {

@@ -3,7 +3,7 @@
 # Read-only; a missing tool or network prints a note instead of failing the session.
 cd "$(dirname "$0")/.." || exit 0
 if command -v br >/dev/null 2>&1; then
-  echo "## Beads ($(br where 2>/dev/null | head -1))"
+  echo "## Beads ($(br where 2>/dev/null | head -1 | sed "s|$HOME|~|"))"
   br list --status in_progress 2>/dev/null
   br ready 2>/dev/null | head -15
   br blocked 2>/dev/null | head -15

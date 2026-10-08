@@ -7,6 +7,7 @@ import type { Button, DetailLine, presenter } from './presenter.ts';
 import {
   Act,
   Leave,
+  logLines,
   note,
   prose,
   Sheet,
@@ -140,30 +141,8 @@ export function NpcPage(p: NpcProps) {
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note}>{p.text(p.npc.carrying)}</Text>
       )}
-      {p.log.map((line, i) => (
-        <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
-          {typeof line === 'string' ? line : line.text}
-        </Text>
-      ))}
-      {p.view.skills
-        ?.filter(
-          (s) =>
-            p.npc &&
-            'lessons' in p.npc &&
-            p.npc.lessons?.some(
-              (r) =>
-                r.cartridge_id === s.skill.cartridge_id &&
-                r.cartridge_version === s.skill.cartridge_version &&
-                r.kind === s.skill.kind &&
-                r.key === s.skill.key,
-            ),
-        )
-        .map((s) => (
-          <Text key={s.skill.key} style={note}>
-            {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
-            {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
-          </Text>
-        ))}
+      {logLines(p.log)}
+      {npcSkills(p)}
       {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
       {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
@@ -177,6 +156,28 @@ export function NpcPage(p: NpcProps) {
     </ScrollView>
   );
 }
+
+// The skills this NPC teaches: learned or not, and whether the player qualifies now.
+const npcSkills = (p: NpcProps) =>
+  p.view.skills
+    ?.filter(
+      (s) =>
+        p.npc &&
+        'lessons' in p.npc &&
+        p.npc.lessons?.some(
+          (r) =>
+            r.cartridge_id === s.skill.cartridge_id &&
+            r.cartridge_version === s.skill.cartridge_version &&
+            r.kind === s.skill.kind &&
+            r.key === s.skill.key,
+        ),
+    )
+    .map((s) => (
+      <Text key={s.skill.key} style={note}>
+        {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
+        {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
+      </Text>
+    ));
 
 export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
 const SECTIONS: [Section, string][] = [

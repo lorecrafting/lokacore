@@ -1,12 +1,10 @@
 import { test } from '@e2e-dev/web';
 import { expect } from 'e2e';
+import { begin, go, reopen, type Screen } from './steps.ts';
 
 // Break: the Book shows a confirmed move, but browser SQLite reopens at the previous room.
 test('Book keeps a confirmed move across reload', async ({ app, screen }) => {
-  await app.clearState();
-  await screen.getByRole('button', 'Fey-touched').tap();
-  await screen.getByRole('button', 'Continue').tap();
-  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
+  await begin({ app, screen }, 'Fey-touched');
 
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go north').tap();
@@ -23,10 +21,7 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   app,
   screen,
 }) => {
-  await app.clearState();
-  await screen.getByRole('button', 'Fey-touched').tap();
-  await screen.getByRole('button', 'Continue').tap();
-  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
+  await begin({ app, screen }, 'Fey-touched');
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go north').tap();
   await expect(screen.getByRole('button', 'Look, Well Lane')).toBeVisible();
@@ -47,8 +42,7 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   await expect(screen.getByRole('button', 'Follow the fox')).toBeVisible();
   await expect(screen.getByRole('button', 'Wake')).toBeVisible();
 
-  await app.restart();
-  await screen.getByRole('button', 'Continue').tap();
+  await reopen({ app, screen });
   await screen.getByRole('button', 'Bed').tap();
   await screen.getByRole('button', 'Resume dream').tap();
   await expect(screen.getByRole('button', 'Follow the fox')).toBeVisible();
@@ -57,8 +51,7 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   await expect(screen.getByText('Dream acknowledged.')).toBeVisible();
   await expect(screen.getByText('Rest: not now')).toBeVisible();
 
-  await app.restart();
-  await screen.getByRole('button', 'Continue').tap();
+  await reopen({ app, screen });
   await screen.getByRole('button', 'Bed').tap();
   await expect(screen.getByText('Dream acknowledged.')).toBeVisible();
   await expect(screen.getByText('Rest: not now')).toBeVisible();
@@ -69,23 +62,15 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   app,
   screen,
 }) => {
-  const go = async (direction: string, room: string) => {
-    await screen.getByRole('button', 'Map').tap();
-    await screen.getByRole('button', `Go ${direction}`).tap();
-    await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
-  };
   const money = () => screen.getByRole('button', /Contents, Character,.*pennies 18 of 1000/);
-  await app.clearState();
-  await screen.getByRole('button', 'Fey-touched').tap();
-  await screen.getByRole('button', 'Continue').tap();
-  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
-  await go('west', 'Boathouse');
+  await begin({ app, screen }, 'Fey-touched');
+  await go(screen, 'west', 'Boathouse');
   await screen.getByRole('button', 'Rope ferry').tap();
   await expect(screen.getByText('Fare: 2p.')).toBeVisible();
   await screen.getByRole('button', 'Board — 2p').doubleTap();
   await expect(screen.getByRole('button', 'Look, Fen Isle Landing')).toBeVisible();
   await expect(money()).toBeVisible();
-  await go('east', 'Isle Hut');
+  await go(screen, 'east', 'Isle Hut');
   await screen.getByRole('button', 'Mother Sedge, open').tap();
   await screen.getByRole('button', 'Learn swim — free Mother Sedge').tap();
   await screen.getByRole('button', 'Learn swim — free').tap();
@@ -93,27 +78,30 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
     screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
   ).toBeVisible();
   await expect(money()).toBeVisible();
-  await app.restart();
-  await screen.getByRole('button', 'Continue').tap();
+  await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Look, Isle Hut')).toBeVisible();
   await screen.getByRole('button', 'Mother Sedge, open').tap();
   await expect(
     screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
   ).toBeVisible();
   await screen.getByRole('button', 'Leave').tap();
-  await go('up', 'Hut Loft');
-  await go('down', 'Isle Hut');
-  await go('east', 'Herb Garden');
-  await go('west', 'Isle Hut');
-  await go('west', 'Fen Isle Landing');
-  await go('south', 'Isle Shrine');
-  await go('north', 'Fen Isle Landing');
+  await isleTour(screen);
   await screen.getByRole('button', 'Rope ferry').tap();
   await screen.getByRole('button', 'Return — free').tap();
   await expect(screen.getByRole('button', 'Look, Boathouse')).toBeVisible();
   await expect(money()).toBeVisible();
-  await app.restart();
-  await screen.getByRole('button', 'Continue').tap();
+  await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Look, Boathouse')).toBeVisible();
   await expect(money()).toBeVisible();
 });
+
+// Every isle room from Isle Hut, ending at the Fen Isle Landing.
+async function isleTour(screen: Screen) {
+  await go(screen, 'up', 'Hut Loft');
+  await go(screen, 'down', 'Isle Hut');
+  await go(screen, 'east', 'Herb Garden');
+  await go(screen, 'west', 'Isle Hut');
+  await go(screen, 'west', 'Fen Isle Landing');
+  await go(screen, 'south', 'Isle Shrine');
+  await go(screen, 'north', 'Fen Isle Landing');
+}

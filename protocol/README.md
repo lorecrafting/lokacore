@@ -47,7 +47,7 @@ lists only what a file adds to that.
 | `account.schema.json` | account/run binding, story point reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
 | `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/archive/decisions/adr-075-observability-proposal.md) | `delta_digest.json`, `input_digest.json` |
 | (no schema) | the invocation-intent digest a receipt stores (`residency.json` receipts; TypeScript only) | 03 §14 | `intent_digest.json` |
-| `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [roadmap](../docs/ROADMAP.md) | `composition.json` |
+| `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [harness](../docs/archive/ROADMAP.md#verification-harness-adopted-2026-09-24) | `composition.json` |
 
 `fixtures/subset.schema.json` is a test-only probe for subset keywords no contract uses yet.
 Registries are checked in `test/loka/core/registries_test.exs`.
