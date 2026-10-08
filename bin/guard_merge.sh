@@ -5,7 +5,7 @@
 # pass; it guards against habit, not evasion.
 in=$(cat)
 if cmd=$(printf '%s' "$in" | jq -er '.tool_input.command' 2>/dev/null); then
-  re='(^|[;&|(`])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*gh[[:space:]]+pr[[:space:]]+merge'
+  re='(^|[;&|(])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*gh[[:space:]]+pr[[:space:]]+merge'
 else
   cmd=$in re='gh[[:space:]]+pr[[:space:]]+merge' # unparseable input fails closed
 fi

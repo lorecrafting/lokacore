@@ -13,9 +13,8 @@
   second opinion ([Opus](../reviews/2026-10-07-e1-closure-opus-review.md),
   [Fable](../reviews/2026-10-07-e1-closure-fable-review.md)), as the
   [Claude-only decision](owner-decision-claude-only-auto-merge-2026-10-07.md) allows for E1–E3
-  closures. This replaces the "two fresh Opus reviewers" of the
-  [polish order](owner-decision-chapter-one-polish-order-2026-10-07.md) step 1. It is not the Fable
-  gate audit, which stays in release-candidate certification (step 4).
+  closures. This Fable second opinion is not the Fable gate audit, which stays in
+  release-candidate certification ([polish order](owner-decision-chapter-one-polish-order-2026-10-07.md) step 4).
 - **E1 closure nits.** Fable N1 (an `all([])` objective root holds vacuously): no "trivially true"
   disposition form; the empty conjunction is authored content and holds by the rule's letter.
   Fable N3 (in-process family gaps): no action; it fails closed for v042. Running the recorder in

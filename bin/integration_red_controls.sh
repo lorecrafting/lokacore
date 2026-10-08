@@ -89,6 +89,7 @@ guard 2 '{"tool_input":{"command":"cd x && gh pr merge 1 --auto"}}'
 guard 2 '{"tool_input":{"command":"gh pr merge 1'
 guard 0 "{\"tool_input\":{\"command\":\"bin/merge_queue.sh 1 $A\"}}"
 guard 0 '{"tool_input":{"command":"grep -n \"gh pr merge\" docs/WORKFLOW.md"}}'
+guard 0 '{"tool_input":{"command":"git commit -m \"merge, never `gh pr merge` by hand\""}}'
 
 # --- integrate_batch.sh ---------------------------------------------------------------------
 # A repo on branch int with stub checks at the paths the script calls; batch adds g.txt and
