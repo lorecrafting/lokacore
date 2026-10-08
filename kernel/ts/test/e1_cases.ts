@@ -30,10 +30,15 @@ import { lanternServices } from './e1_services.ts';
 import { creatures } from './e1_creatures.ts';
 import { nightMarsh } from './e1_night_marsh.ts';
 import { dialogueCircuit } from './e1_dialogue_circuit.ts';
+import { read } from './read.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { itemRound } from './e1_items.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
+
+// Reviewed {path, reason, evidence, review} rows: architecture.md#e1-policy-branch-evidence.
+type Disposition = { path: string; reason: string; evidence: string; review: string };
+const DISPOSITIONS: Disposition[] = read('kernel/ts/test/e1_dispositions.json');
 
 export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType<typeof source>) {
   const loaded = admitCandidate(bytes),
@@ -124,8 +129,48 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
   };
 }
 
-export function gaps(loaded: LoadedCandidate, seen: Coverage, witnessed: Set<string>) {
+// Rows are checked before any case runs; a witnessed row fails when gaps() is computed.
+export function checkDispositions(loaded: LoadedCandidate, dispositions = DISPOSITIONS) {
+  const known = new Set(authoredPaths(loaded));
+  assert.equal(
+    new Set(dispositions.map((d) => d.path)).size,
+    dispositions.length,
+    'duplicate disposition',
+  );
+  for (const d of dispositions)
+    assert.ok(
+      known.has(d.path) &&
+        [d.reason, d.evidence, d.review].every((x) => typeof x === 'string' && x),
+      `invalid disposition ${d.path}`,
+    );
+}
+
+const authoredPaths = (loaded: LoadedCandidate) =>
+  applicability(loaded.cartridge)
+    .uses.filter((u) => u.feature.startsWith('authored.'))
+    .map((u) => u.path);
+
+/** The report's three disjoint obligation lists: witnessed, dispositioned and still open. */
+export function obligationReport(
+  loaded: LoadedCandidate,
+  seen: Coverage,
+  witnessed: Set<string>,
+  dispositions = DISPOSITIONS,
+) {
+  const { dispositioned_obligations, ...open } = gaps(loaded, seen, witnessed, dispositions);
+  return { witnessed_obligations: [...witnessed].sort(), dispositioned_obligations, gaps: open };
+}
+
+export function gaps(
+  loaded: LoadedCandidate,
+  seen: Coverage,
+  witnessed: Set<string>,
+  dispositions = DISPOSITIONS,
+) {
   const c = loaded.cartridge;
+  const authored = authoredPaths(loaded);
+  const disposed = new Set(dispositions.map((d) => d.path));
+  for (const path of disposed) assert.ok(!witnessed.has(path), `witnessed disposition ${path}`);
   const missing = (expected: string[], actual: Set<string>) =>
     expected.filter((key) => !actual.has(key)).sort();
   return {
@@ -151,9 +196,8 @@ export function gaps(loaded: LoadedCandidate, seen: Coverage, witnessed: Set<str
       Object.values(c.scenes ?? {}).map((x) => x.key),
       new Set([...seen.scenes].map((x) => x.split('/')[0]!)),
     ),
-    authored_obligations: applicability(c)
-      .uses.filter((u) => u.feature.startsWith('authored.') && !witnessed.has(u.path))
-      .map((u) => u.path),
+    authored_obligations: authored.filter((path) => !witnessed.has(path) && !disposed.has(path)),
+    dispositioned_obligations: [...disposed].sort(),
   };
 }
 
@@ -163,6 +207,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     machine = host(),
     seen = coverage(),
     witnessed = new Set<string>();
+  checkDispositions(loaded);
   assert.equal(existsSync(out), false, 'output directory must be new');
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, 'candidate.json'), bytes, { flag: 'wx' });
@@ -252,8 +297,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     coverage: Object.fromEntries(
       Object.entries(seen).map(([key, values]) => [key, [...values].sort()]),
     ),
-    witnessed_obligations: [...witnessed].sort(),
-    gaps: gaps(loaded, seen, witnessed),
+    ...obligationReport(loaded, seen, witnessed),
     pending: [
       'selected 10000-sequence proof on final source/check identity',
       'all applicable path/consequence/beat receipts',

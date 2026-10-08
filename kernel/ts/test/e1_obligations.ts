@@ -1,8 +1,16 @@
 import { gameView, type World } from '../src/index.ts';
-import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
+import type {
+  CharacterId,
+  Command,
+  DecisionResult,
+  DefinitionRef,
+  EntityId,
+  Policy,
+} from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { detailOf } from '../src/commands/actions.ts';
 import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 import { identityWitnesses } from './e1_identity.ts';
 import { creatureWitnesses } from './e1_creatures.ts';
@@ -31,10 +39,11 @@ export function witnessedObligations(
       definition.objective.evidence === 'current_state'
         ? definition.objective.policy.root
         : undefined;
+    const actor = quest.scope.kind === 'player' ? quest.scope.character_id : after.character;
     return [
       base,
       `${base}/objective`,
-      ...(root ? requiredPolicyPaths(root, `${base}/objective/policy/root`) : []),
+      ...(root ? objectivePaths(before, after, actor, root, `${base}/objective/policy/root`) : []),
     ];
   });
   questPaths.push(
@@ -176,7 +185,12 @@ export function witnessedObligations(
           const key = `${ref.cartridge_id}@${ref.cartridge_version}:dialogue/${ref.key}`;
           const base = `/dialogues/${key}`;
           const root = after.cartridge.dialogues?.[key]?.policy.root;
-          return [base, ...(root ? requiredPolicyPaths(root, `${base}/policy/root`) : [])];
+          return [
+            base,
+            ...(root
+              ? creditedPolicyPaths(before, p.actor_id, root, `${base}/policy/root`, p.target_id)
+              : []),
+          ];
         }),
     );
   }
@@ -259,7 +273,16 @@ export function witnessedObligations(
   const base = `/recipes/${id}@${version}:recipe/${p.action}`;
   const recipe = before.cartridge.recipes?.[`${id}@${version}:recipe/${p.action}`];
   if (!recipe) return questPaths;
-  const witnessed = [base, ...requiredPolicyPaths(recipe.policy.root, `${base}/policy/root`)];
+  const witnessed = [
+    base,
+    ...creditedPolicyPaths(
+      before,
+      p.actor_id,
+      recipe.policy.root,
+      `${base}/policy/root`,
+      detailOf(before, recipe.target),
+    ),
+  ];
   const branch =
     decision.outcome === 'performed' || decision.outcome === 'success'
       ? 'success'
@@ -309,16 +332,52 @@ export function witnessedObligations(
   ]);
 }
 
-function requiredPolicyPaths(node: unknown, path: string): string[] {
-  const policy = node as { op: string; items?: readonly unknown[] };
-  return [
-    path,
-    ...(policy.op === 'all'
-      ? (policy.items ?? []).flatMap((child, index) =>
-          requiredPolicyPaths(child, `${path}/items/${index}`),
-        )
-      : []),
-  ];
+// docs/system/architecture.md#e1-policy-branch-evidence: credit a node only at positive polarity,
+// when it holds and every ancestor evaluated to its own polarity, starting from a root that holds.
+export function creditedPolicyPaths(
+  world: World,
+  actor: CharacterId,
+  root: Policy,
+  path: string,
+  target?: EntityId,
+): string[] {
+  const walk = (node: Policy, at: string, value: boolean, positive: boolean): string[] => {
+    if (value !== positive) return [];
+    const children =
+      node.op === 'not'
+        ? [[node.item, `${at}/item`] as const]
+        : node.op === 'all' || node.op === 'any'
+          ? node.items.map((child, i) => [child, `${at}/items/${i}`] as const)
+          : [];
+    // A child's value follows from its parent unless an `any` held or an `all` failed.
+    const valueOf = (child: Policy) =>
+      node.op === 'not'
+        ? !value
+        : (node.op === 'all') === value
+          ? value
+          : holds(world, actor, child, { target, steps: { n: 0 } });
+    return [
+      ...(positive ? [at] : []),
+      ...children.flatMap(([child, childAt]) =>
+        walk(child, childAt, valueOf(child), node.op === 'not' ? !positive : positive),
+      ),
+    ];
+  };
+  return walk(root, path, holds(world, actor, root, { target, steps: { n: 0 } }), true);
+}
+
+// Resolution judges an objective before the command (dialogue) or mid-command after effects
+// (reaction, scene); credit what holds at both boundaries, else at the one where the root holds.
+export function objectivePaths(
+  before: World,
+  after: World,
+  actor: CharacterId,
+  root: Policy,
+  path: string,
+): string[] {
+  const early = creditedPolicyPaths(before, actor, root, path);
+  const late = creditedPolicyPaths(after, actor, root, path);
+  return early.length && late.length ? early.filter((p) => late.includes(p)) : [...early, ...late];
 }
 
 function journalVariantPaths(world: World): string[] {
@@ -329,7 +388,9 @@ function journalVariantPaths(world: World): string[] {
     const index = variants?.findIndex((v) => holds(world, world.character, v.when.root)) ?? -1;
     const selected = variants?.[index];
     if (!selected || shown.journal !== selected.text) return [];
-    return requiredPolicyPaths(
+    return creditedPolicyPaths(
+      world,
+      world.character,
       selected.when.root,
       `/quests/${key}/journal/active_variants/${index}/when/root`,
     );

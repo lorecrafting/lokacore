@@ -202,6 +202,12 @@ test('E1 binds the two bell assignments and the epilogue event to accepted recei
       [true, true],
     );
     assert.equal(seen.get('ring_bell')?.includes(`${recipe}ring_bell/outcomes/success`), true);
+    // Bell objective any(prior, fox) is judged after Ring sets prior: only items/0 is credited.
+    const bell = '/quests/ashmere_missing_child@0.0.42:quest/bell_of_ashmere/objective/policy/root';
+    assert.deepEqual(
+      seen.get('ring_bell')?.filter((path) => path.startsWith(bell)),
+      [bell, `${bell}/items/0`],
+    );
     assert.equal(
       seen
         .get('begin_epilogue_rescued_prior')
