@@ -41,41 +41,10 @@ export function Footer(p: Props) {
   const now = useRef(p);
   now.current = p;
   const learn = () => (p.learned.see(), setTip(false)); // a walk, or a map tap
-  const walk = (d: string | null, at: Props) => {
-    const e = at.exits.find((x) => x.direction === d);
-    if (e?.available) (at.go(e.direction), learn());
-    else if (e) {
-      const reason = why(e, at.text); // a screen reader hears it too
-      (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
-      at.refused(refused(e, at.text));
-    }
-  };
+  const walk = walker(learn, setNote);
   useEffect(() => {
     if (!p.keyboardEnabled || typeof document === 'undefined') return;
-    const keydown = (event: KeyboardEvent) => {
-      const direction = keys[event.key];
-      if (
-        !direction ||
-        event.defaultPrevented ||
-        event.isComposing ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.shiftKey
-      )
-        return;
-      const target = event.target;
-      if (
-        target instanceof Element &&
-        target.closest(
-          'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="dialog"], [aria-modal="true"]',
-        )
-      )
-        return;
-      if (!now.current.exits.some((exit) => exit.direction === direction)) return;
-      event.preventDefault();
-      walk(direction, now.current);
-    };
+    const keydown = arrowKeys(now, walk);
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
   }, [p.keyboardEnabled]);
@@ -100,6 +69,46 @@ export function Footer(p: Props) {
       </View>
     </View>
   );
+}
+
+// An open exit walks (and teaches the tip); a closed one shows, announces and logs its reason.
+const walker =
+  (learn: () => void, setNote: (note: string) => void) => (d: string | null, at: Props) => {
+    const e = at.exits.find((x) => x.direction === d);
+    if (e?.available) (at.go(e.direction), learn());
+    else if (e) {
+      const reason = why(e, at.text); // a screen reader hears it too
+      (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
+      at.refused(refused(e, at.text));
+    }
+  };
+
+// Arrow and Page keys walk, unless a modifier is held or focus is in a text field or dialog.
+function arrowKeys(now: { current: Props }, walk: (d: string | null, at: Props) => void) {
+  return (event: KeyboardEvent) => {
+    const direction = keys[event.key];
+    if (
+      !direction ||
+      event.defaultPrevented ||
+      event.isComposing ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey
+    )
+      return;
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target.closest(
+        'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="dialog"], [aria-modal="true"]',
+      )
+    )
+      return;
+    if (!now.current.exits.some((exit) => exit.direction === direction)) return;
+    event.preventDefault();
+    walk(direction, now.current);
+  };
 }
 
 // The drag (joystick.ts `gesture`) over RN's PanResponder and the drawing's Animated values.
@@ -189,27 +198,29 @@ type StatusProps = {
   openPosition?: () => void;
 };
 
+const statusRow = {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  alignItems: 'center',
+  columnGap: 14,
+} as const;
+
+// The calendar as one line: day and hour, then the solar term and the moon when the world has them.
+const calendarLine = (calendar: StatusProps['calendar']) =>
+  calendar &&
+  [
+    `day ${calendar.day}, ${String(calendar.hour).padStart(2, '0')}:${String(calendar.subdivision).padStart(2, '0')}`,
+    calendar.solar?.replaceAll('_', ' '),
+    calendar.lunar && `${calendar.lunar.replaceAll('_', ' ')} moon`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
 export function Status(p: StatusProps) {
-  const calendar = p.calendar;
-  const time =
-    calendar &&
-    [
-      `day ${calendar.day}, ${String(calendar.hour).padStart(2, '0')}:${String(calendar.subdivision).padStart(2, '0')}`,
-      calendar.solar?.replaceAll('_', ' '),
-      calendar.lunar && `${calendar.lunar.replaceAll('_', ' ')} moon`,
-    ]
-      .filter(Boolean)
-      .join(' · ');
+  const time = calendarLine(p.calendar);
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center',
-        columnGap: 14,
-      }}
-    >
+    <View style={statusRow}>
       <Text
         style={{ ...small, color: paper.dim }}
         accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}

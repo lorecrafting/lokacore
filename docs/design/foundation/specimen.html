@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loka Book: design foundation specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+/* Values mirror mobile/app/book/tokens.ts, which wins on any difference. */
+:root, [data-theme=light] {
+  --bg:#ebe6d7; --fg:#241f19; --dim:#645c4f; --line:#d0c7b0; --card:#e4decd;
+  --action:#7b2d20; --danger:#7b2d20; --warning:#845512; color-scheme:light;
+}
+[data-theme=dark] {
+  --bg:#0c0b09; --fg:#ecdfc3; --dim:#a79a83; --line:#2d271f; --card:#17140f;
+  --action:#e6a650; --danger:#eb9676; --warning:#d0712a; color-scheme:dark;
+}
+:root {
+  --head:'IM Fell English',Georgia,serif; --caps:'IM Fell English SC',Georgia,serif; --body:'EB Garamond',Georgia,serif;
+  --hair:2px; --xs:4px; --sm:6px; --md:8px; --lg:12px; --block:14px; --xl:16px; --page:24px;
+  --touch:44px; --cardh:48px; --rule:1px; --speech:2px; --underline:1.5px; --minimap:56px; --footrule:92px;
+  --r-tag:3px; --r-card:10px; --disabled:.45; --quick:160ms; --fade:160ms;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--fg); font:18px/28px var(--body); padding:var(--page) var(--xl) 64px}
+.wrap{max-width:1040px; margin:0 auto}
+h1{font:400 31px/33px var(--head); margin:0 0 var(--md)}
+h2{font:400 14px var(--caps); letter-spacing:1.1px; color:var(--dim); margin:40px 0 var(--lg); border-top:var(--rule) solid var(--line); padding-top:var(--lg)}
+.lede{color:var(--dim); max-width:64ch; margin:0}
+.tools{display:flex; flex-wrap:wrap; gap:var(--sm); margin:var(--xl) 0}
+.tools button{font:14px var(--caps); letter-spacing:1.1px; min-height:var(--touch); padding:0 var(--lg); background:var(--card); color:var(--fg); border:var(--rule) solid var(--line); border-radius:var(--r-card); cursor:pointer}
+.tools button[aria-pressed=true]{background:var(--fg); color:var(--bg)}
+:focus-visible{outline:2px solid var(--action); outline-offset:2px}
+
+/* tokens */
+.pals{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:var(--xl)}
+.pal{background:var(--bg); color:var(--fg); border:var(--rule) solid var(--line); border-radius:var(--r-card); padding:var(--xl)}
+.pal b{font:400 14px var(--caps); letter-spacing:1.1px}
+.sw{display:grid; grid-template-columns:32px 1fr auto; gap:var(--md); align-items:center; font-size:15px; line-height:22px; margin-top:var(--md)}
+.sw i{width:32px; height:32px; border-radius:var(--r-tag); border:var(--rule) solid var(--line)}
+.sw small{color:var(--dim); font-variant-numeric:tabular-nums}
+.types>div{display:grid; grid-template-columns:120px 1fr; gap:var(--lg); align-items:baseline; padding:var(--sm) 0; border-bottom:var(--rule) solid var(--line)}
+.types code,.sp code{font:13px ui-monospace,Menlo,monospace; color:var(--dim)}
+.sp div{display:flex; align-items:center; gap:var(--lg); margin:var(--xs) 0}
+.sp span{display:inline-block; height:12px; background:var(--action)}
+.sp code{width:110px}
+
+/* the phone */
+.stage{display:flex; flex-wrap:wrap; gap:var(--page); align-items:flex-start}
+.phone{width:min(372px,100%); height:720px; border:9px solid #1a1b1a; border-radius:38px; overflow:hidden; background:#1a1b1a; flex-shrink:0}
+.notes{flex:1 1 280px; color:var(--dim); font-size:16px; line-height:24px}
+.notes p{margin:0 0 var(--md)}
+.ph{position:relative; height:100%; background:var(--bg); color:var(--fg); overflow:hidden}
+.layer{position:absolute; inset:0; display:flex; flex-direction:column; background:var(--bg)}
+.layer[hidden]{display:flex!important; visibility:hidden}
+.layer.fade{animation:fade var(--fade) linear}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+#curl{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; display:none; z-index:5}
+.screen{flex:1; overflow-y:auto; padding:0 var(--page) var(--lg)}
+.place{margin:0; padding:var(--xl) var(--page) var(--md); text-align:center; font:400 22px/24px var(--head)}
+.place button{all:unset; cursor:pointer; display:block; width:100%; min-height:var(--touch); line-height:var(--touch)}
+.prose{margin:0 0 var(--lg); font:18px/28px var(--body)}
+.noun{all:unset; cursor:pointer; text-decoration:underline dotted var(--underline); text-underline-offset:3px}
+.ents{list-style:none; margin:0 0 var(--lg); padding:0}
+.ents button{all:unset; cursor:pointer; display:block; width:100%; min-height:var(--touch); font:18px/28px var(--body); padding:var(--md) 0}
+.ents strong{font-weight:500; text-decoration:underline dotted var(--underline); text-underline-offset:3px}
+.ents .verb{font-style:italic; color:var(--action)}
+.log{font:17px/26px var(--body); margin:0 0 var(--lg)}
+.log p{margin:0 0 var(--sm)}
+.log .sys{color:var(--dim); font-style:italic}
+.tag{font:13px var(--caps); letter-spacing:.7px; color:var(--danger); border:var(--rule) solid currentColor; border-radius:var(--r-tag); padding:0 var(--xs); margin-right:var(--sm); white-space:nowrap}
+.pg{flex:1; overflow-y:auto; padding:var(--page); display:flex; flex-direction:column; gap:var(--block)}
+.pg .rh{font:12px var(--caps); letter-spacing:1.7px; color:var(--dim); margin-bottom:calc(-1 * var(--block))}
+.pg h3{margin:0; font:400 31px/33px var(--head)}
+.pg p{margin:0}
+.acts{display:flex; flex-direction:column; gap:var(--sm)}
+.act{all:unset; box-sizing:border-box; cursor:pointer; min-height:var(--cardh); padding:var(--md) var(--lg); background:var(--card); border:var(--rule) solid var(--line); border-radius:var(--r-card); font:18px/26px var(--body); color:var(--fg)}
+.pg .note{color:var(--dim)}
+.control{all:unset; cursor:pointer; align-self:center; min-height:var(--touch); min-width:var(--touch); padding:0 var(--lg); text-align:center; line-height:var(--touch); font:14px/44px var(--caps); letter-spacing:1.1px; color:var(--fg)}
+.foot{flex-shrink:0; padding:var(--hair) var(--page) var(--md); display:flex; flex-direction:column; align-items:center; gap:var(--xs)}
+.mo{display:flex; align-items:center; gap:var(--sm)}
+.rl{width:var(--footrule); height:var(--rule); background:var(--line)}
+.mini{width:var(--minimap); height:var(--minimap)}
+.mini line,.mini circle{stroke:var(--fg); stroke-width:.9; fill:none}
+.mini .you{fill:var(--fg)} .mini .x{stroke:var(--danger)}
+.base{flex-shrink:0; border-top:var(--rule) solid var(--line); padding:var(--xs) var(--xl) var(--md)}
+.st{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:0 var(--sm); font:13px/19px var(--body); color:var(--dim)}
+.st button{all:unset; cursor:pointer; min-height:var(--touch); color:inherit}
+.st .lb{font:11px var(--caps); letter-spacing:.7px; margin-right:2px}
+.st .res{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Book: design foundation</h1>
+  <p class="lede">The Chapter 1 mock's base page with every effect off, plus its page curl and paper sound.
+    Values come from <code>mobile/app/book/tokens.ts</code>; rules live in
+    <code>docs/BOOK-UI-COMPONENTS.md</code>. Text is the Chapter 1 cartridge's; the states shown are a sample.</p>
+
+  <div class="tools" role="group" aria-label="Specimen settings">
+    <button data-clock="6" aria-pressed="true">06:00</button>
+    <button data-clock="22" aria-pressed="false">22:00</button>
+    <button id="t-sound" aria-pressed="true">Sound on</button>
+    <button id="t-motion" aria-pressed="false">Reduce motion</button>
+  </div>
+
+  <div class="stage">
+    <div class="phone"><div class="ph" id="ph" data-theme="light">
+      <section class="layer" id="room" aria-label="World">
+        <header class="place"><button aria-label="Look, Ferry Landing">Ferry Landing</button></header>
+        <main class="screen">
+          <p class="prose">Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea.
+            A mooring post leans into the current with a <button class="noun">notice</button> nailed to it.
+            Tide marks stripe the pilings.</p>
+          <ul class="ents" aria-label="Here">
+            <li><button data-go="talk" aria-label="Elspeth, open"><strong>Elspeth</strong> is here.</button></li>
+            <li><button aria-label="Landing notice, open"><strong>Landing notice</strong></button></li>
+          </ul>
+          <div class="log" role="log"><p><span class="tag">locked</span>west</p></div>
+        </main>
+        <footer class="foot">
+          <div class="mo"><i class="rl"></i>
+            <svg class="mini" viewBox="0 0 44 44" role="img" aria-label="Map">
+              <line x1="22" y1="19.4" x2="22" y2="9.6"/><circle cx="22" cy="8" r="1.6"/>
+              <line x1="24.6" y1="22" x2="30" y2="22"/>
+              <line class="x" x1="19.4" y1="22" x2="15" y2="22"/><line class="x" x1="15" y1="20.4" x2="15" y2="23.6"/>
+              <circle class="you" cx="22" cy="22" r="2.6"/>
+            </svg>
+          <i class="rl"></i></div>
+          <div class="st" role="status">
+            <span class="clock">06:00</span>·<button>standing</button>·
+            <button class="res" aria-label="Contents, hp 20 of 20, ma 100 of 100, mv 82 of 82"><span class="lb">hp</span>20/20&ensp;<span class="lb">ma</span>100/100&ensp;<span class="lb">mv</span>82/82</button>
+          </div>
+        </footer>
+      </section>
+
+      <section class="layer" id="talk" aria-label="Elspeth" hidden>
+        <div class="pg">
+          <div class="rh">Look for a sign of Wren on Village Green.</div>
+          <h3>Elspeth</h3>
+          <p>A woman in a worn shawl keeps turning toward the river. One hand worries the edge of her sleeve; her eyes search every face on the landing.</p>
+          <div class="log" role="log">
+            <p>“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”</p>
+            <p>You agree to look around Village Green for a sign of Wren.</p>
+            <p class="sys">Journal updated</p>
+          </div>
+          <div class="acts">
+            <button class="act">“Which way is the village?”</button>
+            <button class="act">“Is there an inn nearby?”</button>
+            <p class="note">“Who is Wren?” <span class="tag">not now</span></p>
+          </div>
+          <button class="control" data-go="room">Leave</button>
+        </div>
+        <div class="base"><div class="st" role="status">
+          <span class="clock">06:00</span>·<span>standing</span>·
+          <span class="res"><span class="lb">hp</span>20/20&ensp;<span class="lb">ma</span>100/100&ensp;<span class="lb">mv</span>82/82</span>
+        </div></div>
+      </section>
+      <canvas id="curl" aria-hidden="true"></canvas>
+    </div></div>
+
+    <div class="notes">
+      <p>Tap <b>Elspeth</b> to open her page: the leaf curls forward. <b>Leave</b> curls it back.
+        The arriving page takes taps from the first frame; the curl is a picture over it.</p>
+      <p>The curl is <code>page-curl.sksl</code>, inlined verbatim in this page's source and run by
+        CanvasKit 0.42.0, the same file Skia will run on the phone. This sample's page snapshot
+        skips the minimap drawing. The curl takes 500 ms (to be tuned on a device); reduce motion swaps it for a 160 ms cross-fade.
+        Sound plays the mock's synthesised paper turn until a recorded CC0 sample replaces it.
+        The clock sets in-game time: the page is light from dawn (05:00) to dusk (18:00), the
+        Chapter 1 calendar's sample hours, and dark otherwise.</p>
+      <p>Not in the base: grain, ink shadows, weather, glow, burns, flashes, pickup pops,
+        chapter cards and every other mock effect.</p>
+      <p id="ck-status">Loading CanvasKit…</p>
+    </div>
+  </div>
+
+  <h2>Colour</h2>
+  <div class="pals" id="pals"></div>
+
+  <h2>Type</h2>
+  <div class="types">
+    <div><code>pageTitle 31/33</code><span style="font:400 31px/33px var(--head)">Elspeth</span></div>
+    <div><code>roomTitle 22/24</code><span style="font:400 22px/24px var(--head)">Ferry Landing</span></div>
+    <div><code>body 18/28</code><span>Reeds crowd a slick wooden landing.</span></div>
+    <div><code>log 17/26</code><span style="font:17px/26px var(--body)">You agree to look around Village Green.</span></div>
+    <div><code>small 13/19</code><span style="font:13px/19px var(--body); color:var(--dim)">06:00 · standing</span></div>
+    <div><code>runningHead 12</code><span style="font:12px var(--caps); letter-spacing:1.7px; color:var(--dim)">Look for a sign of Wren on Village Green.</span></div>
+    <div><code>control 14</code><span style="font:14px var(--caps); letter-spacing:1.1px">Back to World</span></div>
+    <div><code>tag 13</code><span><span class="tag">locked</span></span></div>
+    <div><code>speaker 17</code><span style="font:17px var(--caps); letter-spacing:.5px">Elspeth</span></div>
+    <div><code>label 11</code><span style="font:11px var(--caps); letter-spacing:.7px; color:var(--dim)">hp ma mv</span></div>
+    <div><code>tile 23</code><span style="font:400 23px var(--head)">w r e n</span></div>
+  </div>
+
+  <h2>Space, size and radius</h2>
+  <div class="sp" id="sp"></div>
+</div>
+
+<script>
+// ---- the specimen's token tables (mirrors of tokens.ts) ----
+const PALETTES={light:{bg:'#ebe6d7',fg:'#241f19',dim:'#645c4f',line:'#d0c7b0',card:'#e4decd',action:'#7b2d20',danger:'#7b2d20',warning:'#845512'},
+  dark:{bg:'#0c0b09',fg:'#ecdfc3',dim:'#a79a83',line:'#2d271f',card:'#17140f',action:'#e6a650',danger:'#eb9676',warning:'#d0712a'}};
+const SPACE={hair:2,xs:4,sm:6,md:8,lg:12,block:14,xl:16,page:24}, SIZE={touch:44,card:48,minimap:56,footerRule:92}, RADIUS={tag:3,card:10};
+const TURN={duration:500}, FADE=160, VOLUME=1;
+
+const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(x=>x<=.03928?x/12.92:((x+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+const ratio=(a,b)=>{const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return ((x+.05)/(y+.05)).toFixed(2);};
+document.getElementById('pals').innerHTML=Object.entries(PALETTES).map(([name,p])=>
+  `<div class="pal" data-theme="${name}"><b>${name}</b>${Object.entries(p).map(([k,v])=>
+    `<div class="sw"><i style="background:${v}"></i><span>${k} <small>${v}</small></span><small>${['bg','line','card'].includes(k)?'':`${ratio(v,p.bg)} bg · ${ratio(v,p.card)} card`}</small></div>`).join('')}</div>`).join('');
+document.getElementById('sp').innerHTML=[...Object.entries(SPACE).map(([k,v])=>[`space.${k} ${v}`,v]),...Object.entries(SIZE).map(([k,v])=>[`size.${k} ${v}`,v])]
+  .map(([k,v])=>`<div><code>${k}</code><span style="width:${v}px"></span></div>`).join('')+
+  Object.entries(RADIUS).map(([k,v])=>`<div><code>radius.${k} ${v}</code><span style="width:${SIZE.card}px;height:${SIZE.card/2}px;border-radius:${v}px;background:var(--card);border:1px solid var(--line)"></span></div>`).join('');
+
+// ---- settings ----
+const ph=document.getElementById('ph'), state={sound:true,still:matchMedia('(prefers-reduced-motion: reduce)').matches};
+const press=(id,on)=>document.getElementById(id).setAttribute('aria-pressed',on);
+// Day and night follow in-game time (book-ui.md#world-and-status-entry). Sample dawn and dusk: the
+// Chapter 1 calendar's solar cuts; on the phone they are cartridge world values, never literals.
+const DAWN=5, DUSK=18;
+const clock=h=>{const t=h>=DAWN&&h<DUSK?'light':'dark'; ph.dataset.theme=t; document.documentElement.dataset.theme=t;
+  document.querySelectorAll('.clock').forEach(s=>s.textContent=String(h).padStart(2,'0')+':00');
+  document.querySelectorAll('[data-clock]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.clock===h));};
+document.querySelectorAll('[data-clock]').forEach(b=>b.onclick=()=>clock(+b.dataset.clock));
+document.getElementById('t-sound').onclick=e=>{state.sound=!state.sound; press('t-sound',state.sound); e.target.textContent=state.sound?'Sound on':'Sound off';};
+document.getElementById('t-motion').onclick=()=>{state.still=!state.still; press('t-motion',state.still);};
+press('t-motion',state.still);
+clock(6);
+
+// ---- the paper page-turn sound: the mock's pageSound, without its damp variant ----
+let actx;
+function pageSound(dir){ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const t=actx.currentTime,sr=actx.sampleRate,len=Math.floor(sr*.62),buf=actx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+  let g=1; for(let i=0;i<len;i++){ if(i%Math.floor(sr*.004)===0) g=.35+Math.random()*.65; d[i]=(Math.random()*2-1)*g; }
+  const out=actx.createGain(); out.gain.value=VOLUME; out.connect(actx.destination);
+  const src=actx.createBufferSource(); src.buffer=buf;
+  const bp=actx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=.9;
+  bp.frequency.setValueAtTime(dir>0?700:900,t); bp.frequency.exponentialRampToValueAtTime(3200,t+.34); bp.frequency.exponentialRampToValueAtTime(1400,t+.5);
+  const env=actx.createGain(); env.gain.setValueAtTime(0,t);
+  env.gain.linearRampToValueAtTime(.22,t+.05); env.gain.linearRampToValueAtTime(.12,t+.24); env.gain.linearRampToValueAtTime(.34,t+.4); env.gain.exponentialRampToValueAtTime(.001,t+.6);
+  src.connect(bp).connect(env).connect(out); src.start(t); src.stop(t+.62);
+  const thud=actx.createBufferSource(); thud.buffer=buf;
+  const lp=actx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=700;
+  const tg=actx.createGain(); tg.gain.setValueAtTime(0,t+.44); tg.gain.linearRampToValueAtTime(.45,t+.455); tg.gain.exponentialRampToValueAtTime(.001,t+.56);
+  thud.connect(lp).connect(tg).connect(out); thud.start(t+.44,.1); thud.stop(t+.6);
+}catch(e){} }
+
+// ---- the curl: page-curl.sksl, verbatim ----
+const SKSL=`// The Book's page turn, the single source for web (CanvasKit) and device (Skia), via
+// @shopify/react-native-skia's RuntimeEffect. Rules: docs/BOOK-UI-COMPONENTS.md#page-turn.
+// Duration, easing and the paper colour come from tokens.ts (motion.turn, color.*.bg);
+// the driver eases progress and redraws each frame. Ported from the Chapter 1 mock's
+// CURL_FS (docs/design/ui-exploration/chapter-one-playable.html).
+//
+// The leaving page rolls over a cylinder whose axis is the fold line. For each pixel, find which
+// point of the leaving page lands there: the back of the roll on top, else its underside, else the
+// leaf still lying flat, else nothing, and the arriving page shows through in the roll's shadow.
+
+uniform shader leaving;  // the page being turned away, in page pixels
+uniform shader arriving; // the page underneath, in page pixels
+uniform float2 size;     // page size in pixels
+uniform float progress;  // 0 at rest, 1 when the leaf has gone; already eased
+uniform float direction; // 1 forward (a page opens), -1 back (a return): the leaf mirrors
+uniform half3 paper;     // the leaf's back: the current theme's paper (tokens color.bg)
+
+const float PI = 3.14159265;
+const float SLOPE = 0.28; // fold-line tilt: the lower corner leads
+const float RADIUS = 36;  // roll radius at rest, px
+const float SWELL = 44;   // extra radius at mid-turn, px
+
+bool inPage(float2 p) {
+  return p.x >= 0 && p.y >= 0 && p.x <= size.x && p.y <= size.y;
+}
+
+// The leaf in mirrored (fold) space, sampled in page space.
+half4 leaf(float2 p) {
+  if (direction < 0) p.x = size.x - p.x;
+  return leaving.eval(p);
+}
+
+half4 main(float2 xy) {
+  float2 n = normalize(float2(1, SLOPE));
+  float e = sin(PI * progress); // 0 at both ends, so the first and last frames are flat pages
+  float c = RADIUS + SWELL * e;
+  float far = size.x * n.x + size.y * n.y;
+  float f = mix(far, -PI * RADIUS / 2 - 8, progress);
+  float2 q = xy;
+  if (direction < 0) q.x = size.x - q.x;
+  float s = dot(q, n) - f;
+  if (s <= c) { // the back of the roll, on top
+    float th = s < 0 ? PI : PI - asin(clamp(s / c, 0, 1));
+    float u = s < 0 ? PI * c - s : c * th;
+    float2 p = q + (u - s) * n;
+    if (inPage(p)) return half4(mix(paper, leaf(p).rgb, 0.13) * half(0.72 - 0.28 * cos(th)), 1);
+  }
+  if (s >= 0 && s <= c) { // the underside of the roll
+    float th = asin(clamp(s / c, 0, 1));
+    float2 p = q + (c * th - s) * n;
+    if (inPage(p)) {
+      half4 t = leaf(p);
+      return half4(t.rgb * half(0.6 + 0.4 * cos(th)), t.a);
+    }
+  }
+  if (s < 0) { // the leaf still flat, shaded towards the fold
+    half4 t = leaf(q);
+    return half4(t.rgb * half(1 - 0.22 * e * exp(s / (0.3 * c))), t.a);
+  }
+  float shade = 0.38 * e * pow(clamp(1 - max(s - c, 0) / (1.4 * c), 0, 1), 2);
+  half4 under = arriving.eval(xy);
+  return half4(under.rgb * half(1 - shade), under.a);
+}
+`;
+
+// A page drawn into a 2D canvas "any simple way": fills, borders and each word at its laid-out place.
+function snapshot(layer,dpr){
+  const box=ph.getBoundingClientRect(), c=document.createElement('canvas');
+  c.width=Math.round(box.width*dpr); c.height=Math.round(box.height*dpr);
+  const g=c.getContext('2d'); g.scale(dpr,dpr); g.translate(-box.left,-box.top);
+  g.fillStyle=getComputedStyle(ph).backgroundColor; g.fillRect(box.left,box.top,box.width,box.height);
+  for(const el of layer.querySelectorAll('*')){
+    const cs=getComputedStyle(el), r=el.getBoundingClientRect();
+    if(cs.backgroundColor!=='rgba(0, 0, 0, 0)'&&el!==layer&&el.tagName!=='svg'){g.fillStyle=cs.backgroundColor; g.beginPath(); g.roundRect(r.left,r.top,r.width,r.height,parseFloat(cs.borderTopLeftRadius)||0); g.fill();}
+    if(parseFloat(cs.borderTopWidth)>0){g.strokeStyle=cs.borderTopColor; g.lineWidth=parseFloat(cs.borderTopWidth); g.beginPath(); g.roundRect(r.left+.5,r.top+.5,r.width-1,r.height-1,parseFloat(cs.borderTopLeftRadius)||0); g.stroke();}
+  }
+  const walk=document.createTreeWalker(layer,NodeFilter.SHOW_TEXT);
+  for(let n;(n=walk.nextNode());){
+    const cs=getComputedStyle(n.parentElement); g.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; g.fillStyle=cs.color; g.textBaseline='bottom';
+    for(const m of n.data.matchAll(/\S+/g)){ const rg=document.createRange(); rg.setStart(n,m.index); rg.setEnd(n,m.index+m[0].length);
+      const rr=rg.getBoundingClientRect(); if(rr.width) g.fillText(m[0],rr.left,rr.bottom-2); }
+  }
+  return c;
+}
+
+let CK=null, effect=null, surface=null, running=0;
+const easeInOutQuad=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+
+function turn(from,to,dir){
+  if(state.sound) pageSound(dir);
+  if(state.still||!effect){ from.hidden=true; to.hidden=false; to.classList.remove('fade'); void to.offsetWidth; if(state.still) to.classList.add('fade'); return; }
+  const dpr=Math.min(2,devicePixelRatio||1), a=snapshot(from,dpr), b=snapshot(to,dpr);
+  from.hidden=true; to.hidden=false;               // the arriving page is live now
+  const canvas=document.getElementById('curl'); canvas.width=a.width; canvas.height=a.height; canvas.style.display='block';
+  if(!surface||surface.width()!==a.width||surface.height()!==a.height){ surface?.delete(); surface=CK.MakeWebGLCanvasSurface(canvas)||CK.MakeSWCanvasSurface(canvas); }
+  const opt=img=>img.makeShaderOptions(CK.TileMode.Decal,CK.TileMode.Decal,CK.FilterMode.Linear,CK.MipmapMode.None);
+  const ia=CK.MakeImageFromCanvasImageSource(a), ib=CK.MakeImageFromCanvasImageSource(b), sa=opt(ia), sb=opt(ib);
+  const paper=rgb(PALETTES[ph.dataset.theme].bg), paint=new CK.Paint(), id=++running, t0=performance.now();
+  const done=()=>{ if(id===running) canvas.style.display='none'; [sa,sb,ia,ib,paint].forEach(o=>o.delete()); };
+  const frame=()=>{
+    if(id!==running) return done();
+    const t=Math.min(1,(performance.now()-t0)/TURN.duration);
+    const sh=effect.makeShaderWithChildren([a.width,a.height,easeInOutQuad(t),dir,...paper],[sa,sb]);
+    paint.setShader(sh); surface.getCanvas().drawRect(CK.LTRBRect(0,0,a.width,a.height),paint); surface.flush(); sh.delete();
+    if(t<1) requestAnimationFrame(frame); else done();
+  };
+  frame();
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
+  const to=document.getElementById(b.dataset.go), from=to.id==='talk'?document.getElementById('room'):document.getElementById('talk');
+  if(from.hidden) return; turn(from,to,to.id==='talk'?1:-1);
+}));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvaskit-wasm@0.42.0/bin/canvaskit.js"></script>
+<script>
+const ckStatus=document.getElementById('ck-status');
+if(typeof CanvasKitInit!=='function') ckStatus.textContent='CanvasKit did not load: pages swap without a curl.';
+else CanvasKitInit({locateFile:f=>'https://cdn.jsdelivr.net/npm/canvaskit-wasm@0.42.0/bin/'+f}).then(ck=>{
+  CK=ck; effect=ck.RuntimeEffect.Make(SKSL,e=>{ckStatus.textContent='Shader error: '+e;});
+  if(effect) ckStatus.textContent='CanvasKit 0.42.0 ready: the curl runs page-curl.sksl.';
+}).catch(()=>{ckStatus.textContent='CanvasKit did not load: pages swap without a curl.';});
+</script>
+</body>
+</html>

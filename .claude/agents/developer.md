@@ -26,7 +26,7 @@ Before handing off:
 1. In the [provisional local lane](../../docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md),
    run touched-layer type/compile checks and focused behavior tests; the PM runs
    the full active line on the accumulated publication head. For a hosted PR,
-   run the full local check line from AGENTS.md once; the pre-push hook is the
+   run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)); the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
 2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
@@ -38,8 +38,7 @@ Before handing off:
    hand the branch and exact head to the PM without pushing; otherwise push the
    branch and open the PR citing the governing `docs/system` sections and
    including the ponytail result. A slice that adds or changes a mechanic
-   includes the composes-with statement
-   ([emergence principles](../../docs/archive/decisions/owner-decision-emergence-2026-09-25.md)).
+   includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
 4. Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
    findings with dispositions, deviations from the brief, open questions. If the brief gave

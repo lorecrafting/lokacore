@@ -9,6 +9,7 @@ import { paper } from './paper.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Notice = NonNullable<GameView['notices']>[number];
+type Offer = NonNullable<Notice['actions']>[number];
 type Props = {
   screen: Screen;
   open: (page: Page) => void;
@@ -113,7 +114,6 @@ export function NoticeEntries(p: Props) {
   );
 }
 
-// size: allow 45, ordered description/history/Notice options share one detail page
 export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; world: () => void }) {
   const board =
     p.page.kind === 'board'
@@ -140,29 +140,34 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
       {!board &&
-        ('actions' in detail ? (detail.actions ?? []) : []).map((offer) => {
-          const button = p.screen.buttons.find(
-            (b) =>
-              b.detail_id === detail.id &&
-              b.action_key === offer.action_key &&
-              JSON.stringify(b.target_ids) === JSON.stringify(offer.target_ids ?? []),
-          );
-          return button ? (
-            <Tap
-              key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
-              label={button.label}
-              onPress={() => p.press(button, detail.id)}
-            >
-              <Text style={{ ...prose, color: paper.accent }}>{button.label}</Text>
-            </Tap>
-          ) : !offer.available ? (
-            <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
-              {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
-            </Text>
-          ) : null;
-        })}
+        ('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
+          offerControl(p, detail.id, offer),
+        )}
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
       {p.screen.view.notices?.some((n) => n.id === detail.id) && <Leave leave={p.world} />}
     </Sheet>
   );
+}
+
+// A notice's offered action: its live button, or why it is unavailable.
+function offerControl(p: Props, id: string, offer: Offer) {
+  const button = p.screen.buttons.find(
+    (b) =>
+      b.detail_id === id &&
+      b.action_key === offer.action_key &&
+      JSON.stringify(b.target_ids) === JSON.stringify(offer.target_ids ?? []),
+  );
+  return button ? (
+    <Tap
+      key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
+      label={button.label}
+      onPress={() => p.press(button, id)}
+    >
+      <Text style={{ ...prose, color: paper.accent }}>{button.label}</Text>
+    </Tap>
+  ) : !offer.available ? (
+    <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
+      {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
+    </Text>
+  ) : null;
 }

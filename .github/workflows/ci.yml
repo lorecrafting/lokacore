@@ -145,8 +145,8 @@ jobs:
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
-      - run: git ls-files -z '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs
-      - run: bin/ts_size_red_controls.sh --core-only
+      - run: node bin/check_ts_size.mjs
+      - run: bin/ts_size_red_controls.sh
       - run: bin/kernel_red_controls.sh
       - if: failure() # a failing run's game trace (ADR-075 §2), fault corpus or simulator
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

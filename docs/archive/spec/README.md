@@ -1,7 +1,7 @@
 # Loka v3 Rebuild Specification Packet
 
 <!-- packet-navigation:start -->
-[Review guide](REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
+[Review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md) · [R milestones](R-MILESTONES.md) · [Packet home](README.md)
 
 **Reader context:** Packet overview and authority map.
 
@@ -239,7 +239,7 @@ Implementation MUST NOT treat either open gate as passed before its evidence exi
 
 ## 7. Packet index
 
-**Start with [the human/LLM review guide](REVIEW-GUIDE.md).** It explains the reading order, the different ID systems, and how to leave review findings. [Every R milestone in plain English](R-MILESTONES.md) is the roadmap companion; [document 14](14-implementation-plan.md) still governs phase tasks and gates.
+**Start with [the human/LLM review guide](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/REVIEW-GUIDE.md).** It explains the reading order, the different ID systems, and how to leave review findings. [Every R milestone in plain English](R-MILESTONES.md) is the roadmap companion; [document 14](14-implementation-plan.md) still governs phase tasks and gates.
 
 | Review area | Documents |
 |---|---|
@@ -250,7 +250,7 @@ Implementation MUST NOT treat either open gate as passed before its evidence exi
 | Decisions, plan and evidence gates | [16 — Decision register](16-decision-register.md), [14 — Implementation plan](14-implementation-plan.md), [15 — Acceptance scenarios](15-acceptance-scenarios.md), [R1 — Approved targets, pending setup/evidence](r1-acceptance-envelope.md) |
 | Reference evidence, not current implementation instructions | [12 — Evennia](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/12-evennia-lessons.md), [20 — Classic MUDs](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/20-classic-mud-lessons.md), [22 — Ink](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/22-ink-runtime-lessons.md), [13 — Legacy inventory](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/13-lokacore-feature-inventory.md), [17 — Research baseline](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/17-research-baseline.md), [18 — Review history](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/18-review-record.md) |
 
-For implementation, use [INDEX.md](INDEX.md) to locate governing contracts, not to replace them. The [planning matrix](../../spec/release-scope.json) generates the release checklist; the [contract corpus](../../spec/conformance/README.md) explains the small executable specification model and the separate future host-evidence obligations. [Index cut candidates](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/INDEX-cut-candidates.md) are review suggestions, not approved deletions or permissions to omit invariants.
+For implementation, use [INDEX.md](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/spec/INDEX.md) to locate governing contracts, not to replace them. The [planning matrix](../../spec/release-scope.json) generates the release checklist; the [contract corpus](../../spec/conformance/README.md) explains the small executable specification model and the separate future host-evidence obligations. [Index cut candidates](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/INDEX-cut-candidates.md) are review suggestions, not approved deletions or permissions to omit invariants.
 
 File numbers, R milestones, and review order are different axes. The thematic grouping above does not rename files or change their authority.
 

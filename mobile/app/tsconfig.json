@@ -5,6 +5,7 @@
   "exclude": [
     "../authority/**/*.test.ts",
     "../authority/**/__tests__/**",
+    "book/__tests__/**",
     "book/*.test.ts",
     "*.test.ts"
   ]

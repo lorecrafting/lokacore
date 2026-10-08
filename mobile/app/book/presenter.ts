@@ -26,103 +26,14 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  detailLines,
   narrationLines,
   pickupLine,
-  restoredLogs,
-  savedNarration,
   resetLogs,
-  combatResult,
+  restoredLogs,
   type Logs,
 } from './logs.ts';
-
-function detailLines(s: Logs, id: string) {
-  if (!s.details.has(id)) s.details.set(id, []);
-  return s.details.get(id)!;
-}
-
-function journalChanged(was: GameView, now: GameView, detail: string) {
-  if (
-    !was.entities.some((e) => e.id === detail && e.kind === 'npc') &&
-    !(was.choice && (was.choice.speaker_id ?? 'conversation') === detail)
-  )
-    return false;
-  return (
-    was.journal.length !== now.journal.length ||
-    now.journal.some((q, i) => {
-      const prior = was.journal[i];
-      return (
-        !prior ||
-        q.state !== prior.state ||
-        q.title !== prior.title ||
-        q.journal !== prior.journal ||
-        q.quest.key !== prior.quest.key ||
-        q.quest.cartridge_id !== prior.quest.cartridge_id ||
-        q.quest.cartridge_version !== prior.quest.cartridge_version
-      );
-    })
-  );
-}
-
-// size: allow 55, receipt-specific Read/recipe routing joins existing item, combat and conversation histories
-function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
-  const attempt = s.retry!;
-  const now = game.view().view;
-  const accepted =
-    reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
-  const itemChanged =
-    !!accepted && ['taken', 'dropped', 'eaten', 'bandaged'].includes(accepted.outcome);
-  const moved = !!accepted && was.place.id !== now.place.id;
-  resetLogs(s, now);
-  const command_id =
-    reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
-  const retained =
-    (accepted?.narration?.length || accepted?.outcome === 'taken') &&
-    (command_id || accepted.outcome !== 'riddle_wrong')
-      ? savedNarration(game, s, command_id)
-      : undefined;
-  const pickup = retained?.pickup_name ? retained.detail_id : undefined;
-  s.returnDetail = pickup;
-  s.returnWorld = (itemChanged && !pickup) || accepted?.outcome === 'choice_closed';
-  const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
-  const detail =
-    pickup ??
-    readableDetail ??
-    (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail);
-  s.confirmedRead = accepted?.outcome === 'read' ? detail : undefined;
-  const lines =
-    (was.combat || now.combat) && !accepted?.narration?.length
-      ? s.combatLog
-      : detail &&
-          (!itemChanged || !!pickup) &&
-          (!moved || accepted?.outcome === 'read' || readableDetail)
-        ? detailLines(s, detail)
-        : s.log;
-  if (s.fault && combatResult(accepted)) return '';
-  const repeated = retained && retained.command_id === s.narrationId;
-  if (retained) s.narrationId = retained.command_id;
-  const fallback =
-    itemChanged && accepted?.outcome !== 'eaten' && attempt.item
-      ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${attempt.item}.`
-      : accepted?.outcome === 'choice_closed'
-        ? ''
-        : undefined;
-  const routed = retained ? narrationLines(retained, now, text) : undefined;
-  const taken = pickupLine(retained, text);
-  // Empty routed combat narration deliberately stays out of World after escape.
-  const line = repeated ? '' : taken || (routed?.[0] ?? replyLine(reply, text, now, fallback));
-  if (line) lines.push(line);
-  if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
-  s.log.push(...comings(s.projection.view, now, text));
-  if (accepted && attempt.detail && journalChanged(was, now, attempt.detail))
-    detailLines(s, attempt.detail).push({ text: 'Journal updated', event: true });
-  if (
-    now.choice &&
-    was.choice?.continuation_id !== now.choice.continuation_id &&
-    !accepted?.narration?.some((line) => line.key === now.choice!.prompt.key)
-  )
-    detailLines(s, now.choice.speaker_id ?? 'conversation').push(text(now.choice.prompt.key));
-  return line;
-}
+import { received } from './received.ts';
 
 function background(
   game: Game,

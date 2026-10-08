@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { narration, type Story } from './save.ts';
+import { narration } from './narration.ts';
+import type { Story } from './save.ts';
 
 // Break: background combat shares an ambient receipt and loses line routing on a cold reopen.
 test('committed combat line indices come from pinned keys and structured receipt events', () => {

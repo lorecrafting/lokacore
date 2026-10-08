@@ -5,7 +5,8 @@
 set -eu
 cd "$(dirname "$0")/.."
 P=$(mktemp "${TMPDIR:-/tmp}/pointers.XXXXXX")
-trap 'rm -f "$P"' EXIT
+D=$(mktemp -d "${TMPDIR:-/tmp}/anchors.XXXXXX")
+trap 'rm -rf "$P" "$D"' EXIT
 n=$(wc -l < AGENTS.md | tr -d ' ')
 echo "\`docs/no_such_file.ts:3\` \`AGENTS.md:$((n + 1))\` \`session.ts:1\` \`AGENTS.md:$n\`" > "$P"
 if out=$(elixir bin/check_docs.exs AGENTS.md "$P" 2>&1); then echo "FAIL: check_docs passed planted pointers"; exit 1; fi
@@ -14,3 +15,15 @@ for want in "no_such_file.ts:3 (no such tracked file)" "AGENTS.md:$((n + 1)) (pa
 done
 case "$out" in *"AGENTS.md:$n "*) echo "FAIL: last line of AGENTS.md reported\n$out"; exit 1;; esac
 echo "ok   docs: stale code pointers"
+
+# Anchors: x.md has a heading, a repeated heading, a heading with link syntax and an <a id> alias.
+# b.md (one level down) links to each; the good ones must pass and the bad ones must be reported.
+mkdir "$D/sub"
+printf '# Ok\n# Dup\n# Dup\n## See [x](y)\n<a id="al"></a>\n' > "$D/x.md"
+printf '[g](../x.md#ok) [g](../x.md#dup-1) [g](../x.md#see-x) [g](../x.md#al) [g](#self)\n# Self\n[b](../x.md#nope) [b](../x.md#dup-2) [b](../x.md#al-missing) [b](#no-self)\n' > "$D/sub/b.md"
+if out=$(elixir bin/check_docs.exs AGENTS.md "$D/sub/b.md" 2>&1); then echo "FAIL: check_docs passed planted bad anchors"; exit 1; fi
+for want in "x.md#nope" "x.md#dup-2" "x.md#al-missing" "b.md: #no-self"; do
+  echo "$out" | grep -q "broken anchor.*$want\$" || { echo "FAIL: missing anchor \"$want\"\n$out"; exit 1; }
+done
+if [ "$(echo "$out" | grep -c '^broken anchor')" != 4 ]; then echo "FAIL: good anchor reported\n$out"; exit 1; fi
+echo "ok   docs: broken anchors"

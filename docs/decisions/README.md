@@ -60,8 +60,8 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 
 - [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
 
-- [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.
-- [Chapter 1 architecture audit](owner-decision-chapter-one-architecture-audit-2026-10-05.md): one Astra high end-to-end seam and ownership pass after A–D source integration, before E3 closes.
+- [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Fable congruence and archive-candidate pass after A–D source integration, before E3 closes.
+- [Chapter 1 architecture audit](owner-decision-chapter-one-architecture-audit-2026-10-05.md): one Fable end-to-end seam and ownership pass after A–D source integration, before E3 closes.
 - [B9 Lantern Rest and dream PM decision](pm-decision-b9-lantern-dream-2026-10-05.md): first paid Rest, anchored resumable choice and final-only local memory.
 
 - [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment; B7 source dependency re-pinned and B6/C2 integration scheduling recorded.
@@ -145,7 +145,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - Owner decision (paraphrased): [chapter-one content: prose base is the prototype text, `stays` child outcome, three endings, "light" word to chapter two, novice fixture at the cloister 19:00](owner-decision-chapter-one-content-2026-10-02.md).
 - Owner decision (paraphrased): [per-slice device rows on the iOS Simulator; the iPhone 11 at gates, releases and native, performance or touch changes](owner-decision-simulator-device-rows-2026-10-02.md).
 - Owner decision (paraphrased): [`/code-review` only on code or bulk docs edits, on a named target; the PM keeps the advisor at decision points](owner-decision-review-tools-2026-10-02.md).
-- Owner decision (paraphrased): [slimmer gates: the owner's play, one Astra audit of the riskiest code, a short checklist with one reviewer](owner-decision-slim-gates-2026-10-02.md).
+- Owner decision (paraphrased): [slimmer gates: the owner's play, one audit of the riskiest code, a short checklist with one reviewer](owner-decision-slim-gates-2026-10-02.md).
 - Owner decision: [short local TypeScript/UI edit cycles on a separate Debug Simulator](owner-decision-local-edit-loop-2026-10-04.md).
 - Owner decision (paraphrased): [test audit: trim the proved dead and duplicate tests, four new Writing-tests rules, 10k fresh simulator sequences only in CI, dot reporter in the check line](owner-decision-test-audit-2026-10-02.md).
 - Owner decision (paraphrased): [process speed-up: parallel independent slices, union-merged index lists, ROADMAP status lines on `main`, Sol re-check beside the Opus one, a parallel `sim` CI job, code jobs skipped on Markdown-only pushes](owner-decision-process-speedup-2026-10-03.md).
@@ -179,7 +179,7 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 
 - [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
 
-- [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
+- [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents.
 - [Codex model routing during local chapter work](https://github.com/lorecrafting/lokacore/blob/d9592588d145e3be131f40152b5bd01aab82ad2e/docs/decisions/pm-decision-codex-model-routing-2026-10-05.md): retired with Codex 2026-10-07.
 - [Fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md): owner prioritizes speed; complete source slices may merge into local `main` after checks and self-review while independent review runs in parallel, with remote publication still gated.
 
@@ -283,3 +283,4 @@ closed or superseded work are permalinks ([move forward](owner-decision-move-for
 - [E1 batch E dispositions](pm-decision-e1-batch-e-dispositions-2026-10-07.md): a dispositioned dialogue or choice path closes its family gap; reviewed static citations close unreachable guards.
 
 - [E1 batch F world witnesses](pm-decision-e1-batch-f-world-witness-2026-10-07.md): one exact exercise of each world setting's primary literal; `ma` left to batch E; carry witnessed only by an accepted take landing on exactly `max_grams` and a later `too_heavy` refusal at that load in the same case.
+- [Book design foundation](owner-decision-design-foundation-2026-10-07.md): mock base look, Skia curl and paper sound, in-game day/night, accepted token choices (2026-10-07).
