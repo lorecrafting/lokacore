@@ -28,14 +28,12 @@ defmodule Loka.ContentSource do
       for {rel, change} <- changes, do: write(Path.join(dir, rel), change)
       Loka.Content.compile(dir)
     after
-      for {rel, old} <- saved do
-        case old do
-          {:ok, bytes} -> File.write!(Path.join(dir, rel), bytes)
-          {:error, :enoent} -> File.rm_rf!(Path.join(dir, rel))
-        end
-      end
+      for {rel, old} <- saved, do: restore(Path.join(dir, rel), old)
     end
   end
+
+  defp restore(path, {:ok, bytes}), do: File.write!(path, bytes)
+  defp restore(path, {:error, :enoent}), do: File.rm_rf!(path)
 
   defp write(path, change) when is_function(change, 1),
     do: write(path, change.(JSON.decode!(File.read!(path))))
