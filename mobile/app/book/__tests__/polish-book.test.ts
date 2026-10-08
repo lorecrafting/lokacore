@@ -157,7 +157,8 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
       .filter((n) => n.type === 'Text')
       .map(words);
   draw();
-  if (game.view().view.chapter) tap('Continue'); // actual chapter route callback
+  // actual chapter route callback; the ancestry picker shows first when the run has none yet
+  if (game.view().view.chapter && !game.view().view.ancestry_choices) tap('Continue');
   return {
     get p() {
       return state[0];

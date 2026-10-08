@@ -382,3 +382,25 @@ test('an NPC choice retried from the world keeps its result in the original deta
   ]);
   h.sql.close();
 });
+
+// Breaks: a lost ancestry COMMIT acknowledgement hides every choice and the pending line, or a
+// later press sends its own choice instead of retrying the original attempt.
+test('pending ancestry keeps its choices pressable and a later press retries the original', () => {
+  const chapter = bundle('missing_child_v042_hash');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
+  const h = book(chapter, a);
+  const choices = ['Fen-born', 'Fey-touched', 'Hill-folk', 'Road-born'];
+  assert.deepEqual(h.labels(), choices);
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  h.tap('Fen-born');
+  assert.equal(h.game.pending(), true);
+  assert.deepEqual(h.labels(), choices);
+  assert.ok(h.text().includes('save not confirmed'));
+  a.fault.reads = false;
+  h.tap('Road-born');
+  assert.equal(h.game.pending(), false);
+  assert.equal(h.game.view().view.ancestry_choices, undefined);
+  assert.equal(h.game.view().view.ancestry, 'fen_born');
+  assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
+});

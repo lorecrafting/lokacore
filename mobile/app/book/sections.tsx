@@ -55,11 +55,11 @@ export function AncestryPage(p: {
         return (
           <View key={choice.key}>
             <Text style={prose}>{p.text(choice.description)}</Text>
-            {!p.pending && button && <Act b={button} press={p.press} />}
+            {button && <Act b={button} press={p.press} />}
           </View>
         );
       })}
-      {p.pending && <Text style={note}>Saving your choice…</Text>}
+      {p.pending && <Text style={note}>save not confirmed</Text>}
     </Sheet>
   );
 }
