@@ -194,6 +194,9 @@ function write(v: Json, out: string[], depth: number): void {
     }
     out.push(']');
   } else {
+    // A Map, Set, Date or typed array is not a JSON object (Elixir rejects a struct likewise).
+    const proto = Object.getPrototypeOf(v);
+    if (proto !== Object.prototype && proto !== null) notCanonical();
     // ASCII keys only, so the default UTF-16 sort is ordinal order.
     const keys = Object.keys(v).sort();
     out.push('{');

@@ -1,4 +1,4 @@
-# size: allow 524, patrol, liquid and authored gain share the existing randomized differential pool
+# size: allow 525, patrol, liquid, expedition rows and authored gain share the existing randomized differential pool
 defmodule Loka.Core.ComposeTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}
@@ -290,8 +290,9 @@ defmodule Loka.Core.ComposeTest do
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     knowledge = JSON.decode!(File.read!("protocol/fixtures/knowledge_composition.json"))["cases"]
+    expedition = JSON.decode!(File.read!("protocol/fixtures/expedition.json"))["cases"]
 
-    for c <- knowledge,
+    for c <- knowledge ++ expedition,
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     :rand.seed(:exsss, {5, 5, 5})
@@ -299,7 +300,7 @@ defmodule Loka.Core.ComposeTest do
 
     pool =
       for(c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op) ++
-        for c <- patrol ++ knowledge, op <- c["ops"], do: op
+        for c <- patrol ++ knowledge ++ expedition, op <- c["ops"], do: op
 
     ours = differential(for _ <- 1..1000, do: random_case(pool))
     faults = Enum.frequencies_by(ours, &get_in(&1, ["result", "fault", "code"]))

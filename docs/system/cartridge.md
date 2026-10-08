@@ -324,13 +324,13 @@ single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics
 ## Artifact and loader
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:48`) returns the decoded
-cartridge and its hash, or the first diagnostic of the first failing stage (`:62`): size
+cartridge and its hash, or the first diagnostic of the first failing stage (`:63`): size
 (`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
-map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:110`), the
-lock (`:160`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/content/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
-compiler's checks), and the installed kernel (`content/cartridge.ts:229`: `CAPABILITY_NOT_INSTALLED`,
+map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:135`), the
+lock (`:196`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
+references (`kernel/ts/src/content/cartridge_refs.ts:167` and the `cartridge_*.ts` twins of the
+compiler's checks), and the installed kernel (`content/cartridge_installed.ts:24`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 The reference stage rejects a fact default outside its declared enum values or integer bounds
@@ -341,7 +341,7 @@ lock lacks it), in both the compiler and the loader. Under position@1 the loader
 reference stage, rejects the same writes and a position FactSpec missing or other than the
 engine's (`RESERVED_FACT`, at `.cartridge.facts["<id>@<version>:fact/position"]`;
 `kernel/ts/src/content/cartridge_position.ts`). Compiled artifacts load in TypeScript with identical bytes, hash and lock
-(`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
+(`test/loka/cartridge_cross_kernel_test.exs:169`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.
 
 A compiled cartridge is a CompiledCartridge ([contracts](../contracts.gen.md#cartridge-artifact-contracts-protocolcartridgeschemajson)):
@@ -965,9 +965,9 @@ Hound/pelt definitions are bundle templates, not additional authored birth spawn
 The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
 allowed rooms, eligible slot targets, time window and periods. Require resolved
 correct-kind short references, distinct allowed rooms connected by legal reciprocal
-edges, positive safe calendar products/periods, wander interval <= replacement
-delay, targets <= cap, and the exact bounded bundle shape. Hound HP/attack obey
-existing profile validation; pelt has ordinary
+edges, positive safe calendar products/periods, a night window that wraps midnight
+(`night_end < night_start`), wander interval <= replacement delay, targets <= cap,
+and the exact bounded bundle shape. Hound HP/attack obey existing profile validation; pelt has ordinary
 item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
 validation. Unknown fields and malformed origin/job/state declarations refuse at
 compile/load; inspect actual slot bounds before traversal or allocation.

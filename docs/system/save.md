@@ -129,7 +129,7 @@ context and rebuilds wrong ids (dev reinstalls only; no app is released).
 Loading (`store.ts:99`) rebuilds the world from the release's cartridge under the pinned
 `world_context_id`, or from the release's own fresh world when the pin has none (a save from
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
-so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
+so a reopen replays the same luck. Reopen refuses a head clock behind the newest committed receipt as `save_corrupt`, bytes unchanged: receipt-history replay (`receipt-history.ts`) must reproduce the head (`head_rollback.test.ts`; loka-b60 tracks cartridges outside today's replay gates). A `world_context_id` that is not a WorldContextId is
 `save_corrupt`. Only sections with rows exist, so the state hash matches a headless run
 (`smoke.test.ts`, the Gate R6 reference). Opted recovery player-body rows are required
 and checked at this load boundary against the saved clock and the player's saved/default
@@ -164,7 +164,7 @@ the file, or the report table or its index, corrupt, `replace` throws (`store.ts
 host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:279`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
-to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
+to [R12](future.md#production-story-app)). Memory adopts only after the commit; an
 unknown COMMIT fences like an invocation's. The host confirms with the player first.
 
 ## Narration on reopen
