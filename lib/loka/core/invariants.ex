@@ -136,7 +136,7 @@ defmodule Loka.Core.Invariants do
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
 
   defp replay_op(%{"op" => kind}, _, _, ctx)
-       when kind in ~w(crow.transition resource.initialize visit.record observation.record),
+       when kind in ~w(crow.transition expedition.transition resource.initialize visit.record observation.record),
        do: {:cont, ctx}
 
   defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
