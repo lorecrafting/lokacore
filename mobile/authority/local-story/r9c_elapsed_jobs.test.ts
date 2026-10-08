@@ -143,10 +143,16 @@ function story(t: TestContext) {
     },
     elapse(until: number) {
       const from = s.world().state.clock;
-      const reply = s.elapsed({ expected_run_id: s.runId(), from, until });
+      const evidence = { expected_run_id: s.runId(), from, until };
+      const reply = s.elapsed(evidence);
       assert.equal(reply.kind, 'saved', JSON.stringify(reply));
+      if (reply.kind === 'saved') assert.equal((reply.decision as any).kind, 'accepted');
       assert.equal(s.world().state.clock, until);
       reopen();
+      // A resent window after reopen settles nothing twice.
+      const disk = rows();
+      s.elapsed({ ...evidence, expected_run_id: s.runId() });
+      assert.deepEqual(rows(), disk);
     },
   };
   a.press('choose_ancestry', [], { ancestry: 'fey_touched' });
@@ -216,12 +222,10 @@ test('family 3 durable: ledger, liquid, fuel and dream reopen and replay at ever
   }
   a.elapse(68400);
   assert.deepEqual(fuel(a), [4200, 6600]); // 14400 - 3600 burned
-  assert.equal(
-    Object.entries(a.w.state.jobs!).filter(
-      ([id, j]) => Object.values(ID).includes(id) && j.status === 'completed',
-    ).length,
-    7, // every genesis population job, due 68400
-  );
+  // Every genesis population job, due 68400, completed while the dream is open.
+  for (const [label, id] of Object.entries(ID))
+    if (/^population\/\w+\/job$/.test(label))
+      assert.equal(a.w.state.jobs![id].status, 'completed', label);
   assert.equal(dream(a).index, 4);
   assert.equal(fact(a.w, 'dream_seen'), false); // facts.json default
   a.press('stand');
@@ -295,6 +299,9 @@ test('family 5 durable: deer flight at the boundary and the fatal hit reopen exa
   for (const d of ['south', 'south', 'south']) a.move(d);
   a.elapse(68100);
   a.move('west');
+  const sight = Object.values(a.w.state.jobs!).find((j) => j.sight)!;
+  assert.equal(sight.sight!.member_id, ID['population/oak_deer/slot1/deer']);
+  assert.equal(sight.due_time, 68400); // the shared population boundary
   a.elapse(68400);
   const oak = ID['population/oak_deer/slot1/deer'];
   assert.equal(a.w.state.containers[oak], ID['room/willow_shade']);

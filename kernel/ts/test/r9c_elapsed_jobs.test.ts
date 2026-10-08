@@ -418,7 +418,7 @@ test('family 5: deer sight at a population boundary in both orders, then a fatal
     assert.equal(sighted === 'willow_deer' ? own < sightId : sightId < own, true);
     const { before, decision } = a.elapse(68400);
     assert.equal(decision.kind, 'accepted');
-    if (decision.kind !== 'accepted') return;
+    if (decision.kind !== 'accepted') throw new Error('68400 refused');
     const completed = decision.delta.ops
       .filter((o) => o.op === 'job.complete')
       .map((o: any) => o.job_id);
