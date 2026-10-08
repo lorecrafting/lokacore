@@ -91,3 +91,19 @@
   - Neither path writes `ma`, so the argument stands. Saying "no kernel op names ma" would be more exact.
 
 Over-engineering: none. The `gaps()` change is +6/-3 lines and reuses `disposed`. The decision record and spec sentence are accurate, minimal and cited. The authoring smells are reported, not changed.
+
+## Fix round 1 (`ae727f3b`, scoped re-check)
+
+- Scope: `git diff 40e2e2d4 ae727f3b`. This covers E1-E1, N1 and N2 and the code they touch: `gaps()` (`e1_cases.ts:227,233`, unchanged) and its test.
+- **Verdict: APPROVE.** All three findings are closed.
+- **E1-E1 closed.**
+  - `e1_obligations.test.ts:362-377` adds rows for `maud_offer/policy/root/item/items/1` and `a_aldric_debt/choices/late/sequence/0`.
+  - It asserts that `maud_offer` and `a_aldric_debt/late` stay in the gap lists. Both expected values are hand literals; the coverage is empty.
+  - Mutants, in a throwaway worktree that was then removed:
+    - d4, dialogue prefix match: the test fails. Caught.
+    - d5, choice prefix match: the test fails. Caught.
+    - d1, dialogue filter removed: the test still fails. Caught.
+  - On clean code, the test passes.
+- **N1 closed.** Rows 1-4 now also cite `kernel/ts/src/commands/action_input.ts:51-52`. Those lines are the keyed-talk `dialogue` match, so the citation is accurate.
+- **N2 closed.** The `ma` row now says "No kernel op names ma". Its cited ranges are unchanged and still correct.
+- **Recorder** at `ae727f3b`, with the artifact sha256 `1c53bcd8…1115`: exit 2, 37 cases, `failure: null`, 13 pending, 34 dispositioned, 601 witnessed, and every family 0.
