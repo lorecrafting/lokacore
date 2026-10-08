@@ -13,7 +13,8 @@ import { sha256, type admitCandidate } from './e1_policy.ts';
 import { openStory } from '../../../mobile/authority/local-story/authority.ts';
 import { sqliteHost } from '../../../mobile/authority/local-story/__tests__/elapsed-host.test.ts';
 import { buttonsOf } from '../../../mobile/app/book/model.ts';
-import { witnessedObligations } from './e1_obligations.ts';
+import { witnessedObligations as obligations } from './e1_obligations.ts';
+import { worldWitnesses } from './e1_world_witness.ts';
 
 export const AUTHORITY_KERNEL = {
   ...KERNEL,
@@ -43,7 +44,15 @@ export const coverage = (): Coverage =>
     ]),
   ) as Coverage;
 
-export { witnessedObligations };
+export function witnessedObligations(
+  before: World,
+  after: World,
+  command: Command,
+  decision: DecisionResult,
+) {
+  const paths = obligations(before, after, command, decision);
+  return [...paths, ...worldWitnesses(before, after, command, decision, paths)];
+}
 
 export function caseHost(
   loaded: LoadedCandidate,

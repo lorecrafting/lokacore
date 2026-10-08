@@ -32,6 +32,7 @@ export const CHECK_FILES = [
   'e1_knowledge_effects.ts',
   'e1_identity.ts',
   'e1_creatures.ts',
+  'e1_world_witness.ts',
   'e1_debt.ts',
   'e1_paths.ts',
   'e1_routes.ts',

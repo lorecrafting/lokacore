@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { read } from './read.ts';
 import { admitCandidate } from './e1_policy.ts';
-import { caseHost, witnessedObligations } from './e1_case_host.ts';
+import { caseHost } from './e1_case_host.ts';
+import { witnessedObligations } from './e1_obligations.ts'; // the service witness alone; e1_world_witness adds its pools
 import { replayCase } from './e1_cases.ts';
 import { lanternServices } from './e1_services.ts';
 import { hash } from '../src/foundation/canonical.ts';

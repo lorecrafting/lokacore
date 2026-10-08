@@ -35,6 +35,7 @@ import { read } from './read.ts';
 import { topology } from './e1_routes.ts';
 import { thirtyDays } from './e1_world.ts';
 import { itemRound } from './e1_items.ts';
+import { carryLimit } from './e1_world_witness.ts';
 import { storageFault, FAULTS, faultSchedule } from './e1_faults.ts';
 import { REFUSALS } from './e1_refusals.ts';
 
@@ -85,6 +86,7 @@ export function replayCase(bytes: Uint8Array, text: string, identity: ReturnType
         'item-round',
         'rejoin',
         'elspeth-stays',
+        'carry-limit',
       ].includes(start.case_id) ||
       REFUSALS.some(([name]) => start.case_id === name) ||
       ['debt-on_time', 'debt-late', 'debt-elapsed', 'dream-follow_fox', 'dream-wake'].includes(
@@ -317,6 +319,7 @@ function recordCases(bytes: Uint8Array, out: string) {
     run('night-marsh', nightMarsh);
     run('rejoin', rejoin);
     run('elspeth-stays', elspethStays);
+    run('carry-limit', carryLimit);
     run('debt-on_time', chandlersDebt);
     run('debt-late', debtLate);
     run('debt-elapsed', debtElapsed);
