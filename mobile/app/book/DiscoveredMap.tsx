@@ -58,7 +58,9 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
         disabled={index <= 0}
         onPress={() => step(levels[index - 1])}
       >
-        <Text style={prose(c)}>←</Text>
+        <Text aria-hidden style={prose(c)}>
+          ←
+        </Text>
       </Pressable>
       <Text style={prose(c)}>Level {level}</Text>
       <Pressable
@@ -68,7 +70,9 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
         disabled={index >= levels.length - 1}
         onPress={() => step(levels[index + 1])}
       >
-        <Text style={prose(c)}>→</Text>
+        <Text aria-hidden style={prose(c)}>
+          →
+        </Text>
       </Pressable>
     </View>
   );
@@ -144,7 +148,7 @@ function roomButton(
       }}
     >
       <Text style={note(c)}>
-        {here ? '● ' : ''}
+        {here && <Text aria-hidden>● </Text>}
         {text(r.title)}
       </Text>
     </Pressable>

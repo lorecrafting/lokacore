@@ -15,6 +15,10 @@ const failed = (
   render: () => <SaveError failed={{ kind, message, startOver: true }} startOver={fn()} />,
 });
 
+export const SaveErrorRelease: StoryObj = {
+  ...failed('pinned_release_missing', 'pinned_release_missing'),
+  name: 'Save error: release missing',
+};
 export const SaveErrorFormat: StoryObj = {
   ...failed('unsupported_save_format', 'unsupported_save_format'),
   name: 'Save error: format',
@@ -25,7 +29,7 @@ export const SaveErrorCorrupt: StoryObj = {
 };
 export const SaveErrorLocked: StoryObj = {
   ...failed(
-    'pinned_release_missing',
+    'save_corrupt',
     'Access Handles cannot be created if there is another open Access Handle',
   ),
   name: 'Save error: lock sentence',
