@@ -19,6 +19,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Pre-polish audit A: kernel (loka-v9q)](2026-10-08-prepolish-audit-kernel.md)
 - [Pre-polish audit, area E: CI, scripts, docs hygiene (loka-v9q)](2026-10-08-prepolish-audit-ci-docs.md)
 - [Pre-polish audit D: Book UI / presenter / app (loka-v9q)](2026-10-08-prepolish-audit-book-ui.md)
+- [Review: polish batch 0, Storybook spike landing + designer on Fable (PR #326)](2026-10-08-polish-storybook-batch0-review.md): **APPROVE WITH NOTES**
 - [Review: polish batch 1 + toolbox foundation (PR #325)](2026-10-08-polish-ch1-batch1-review.md): **APPROVE**
 - [Review: merge gate on GitHub required checks (loka-0a4)](2026-10-08-merge-gate-required-checks-review.md): **APPROVE WITH NOTES**
 - [Review: loka-mkm forged deadline receipt checks on reopen](2026-10-08-loka-mkm-forged-deadline-receipts-review.md): **APPROVE WITH NOTES**
