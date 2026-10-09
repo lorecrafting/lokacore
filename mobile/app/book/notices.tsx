@@ -1,11 +1,11 @@
 import { DreamResume } from './DreamPage.tsx';
 // Local notice routes consume only GameView metadata and its exact current action offers.
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { plain, why, type Page } from './model.ts';
+import { plain, why, type Page as Route } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { Control, Sheet } from './pages.tsx';
+import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 
@@ -14,7 +14,7 @@ type Notice = NonNullable<GameView['notices']>[number];
 type Offer = NonNullable<Notice['actions']>[number];
 type Props = {
   screen: Screen;
-  open: (page: Page) => void;
+  open: (page: Route) => void;
   press: (b: Button, id?: string) => void;
 };
 
@@ -23,7 +23,7 @@ const noticesOf = (view: GameView) => [
   ...(view.notice_boards ?? []).flatMap((board) => board.notices),
 ];
 
-export function restoredNoticePages(screen: Screen): Page[] {
+export function restoredNoticePages(screen: Screen): Route[] {
   if (screen.view.combat || screen.view.scene) return [];
   const board = screen.view.notice_boards?.find((b) =>
     b.notices.some((n) => screen.detail(n.id).length > 0),
@@ -96,23 +96,27 @@ function NoticeLink(p: Props & { notice: Notice }) {
 }
 
 export function NoticeEntries(p: Props) {
+  const { notice_boards: boards = [], notices = [] } = p.screen.view;
+  if (!boards.length && !notices.length) return null;
   return (
-    <>
-      {(p.screen.view.notice_boards ?? []).map((board) => (
+    <View>
+      {boards.map((board) => (
         <EntityLine
           key={board.id}
           name={p.screen.text(board.title)}
           onPress={() => p.open({ kind: 'board', id: board.id })}
         />
       ))}
-      {(p.screen.view.notices ?? []).map((notice) => (
+      {notices.map((notice) => (
         <NoticeLink key={notice.id} {...p} notice={notice} />
       ))}
-    </>
+    </View>
   );
 }
 
-export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; world: () => void }) {
+export function NoticePage(
+  p: Props & { page: Extract<Route, { id: string }>; world: () => void; back: () => void },
+) {
   const c = usePalette();
   const board =
     p.page.kind === 'board'
@@ -122,7 +126,18 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
   if (!detail) return null;
   const description = plain(p.screen.text(detail.description));
   return (
-    <Sheet title={p.screen.text(detail.title)}>
+    <Page
+      title={p.screen.text(detail.title)}
+      foot={
+        board ? (
+          <Control label="Back to World" onPress={p.world} />
+        ) : p.screen.view.notices?.some((n) => n.id === detail.id) ? (
+          <Control label="Leave" onPress={p.world} />
+        ) : (
+          <Control label="Back to board" onPress={p.back} />
+        )
+      }
+    >
       <Text style={prose(c)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
@@ -146,10 +161,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
         )}
       </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
-      {p.screen.view.notices?.some((n) => n.id === detail.id) && (
-        <Control label="Leave" onPress={p.world} />
-      )}
-    </Sheet>
+    </Page>
   );
 }
 

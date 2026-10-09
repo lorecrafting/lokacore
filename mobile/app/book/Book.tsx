@@ -160,7 +160,7 @@ export function BookView(p: ViewProps) {
   );
 }
 
-// The footer (or Back on a page), the status line and a press's fault.
+// The footer (on the world), the status line and a press's fault.
 type BottomProps = {
   screen: Screen;
   g: ReturnType<typeof group>;
@@ -169,8 +169,6 @@ type BottomProps = {
   refused: (line: DetailLine) => void;
   open: (p: Page) => void;
   page?: Page;
-  world: () => void;
-  back: () => void;
   startOver: () => void;
   shell: Shell;
 };
@@ -189,7 +187,7 @@ function Bottom(p: BottomProps) {
         borderTopColor: c.line,
       }}
     >
-      {!view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
+      {!p.page && !view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
       {!view.ancestry_choices && (
         <StatusLine
           time={view.time}
@@ -210,23 +208,10 @@ function Bottom(p: BottomProps) {
   );
 }
 
-// On a page, its Back (detail, dialogue, dream and open notice pages keep their own Leave; the
-// chapter title page has only its Continue); on the world, the footer.
+// On the world, the footer; a page's returns sit in its own foot (PageFoot).
 function navigation(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
-  const notice = p.page?.kind === 'notice' ? p.page.id : undefined;
-  return p.page ? (
-    p.page.kind === 'thing' ||
-    p.page.kind === 'dialogue' ||
-    p.page.kind === 'dream' ||
-    p.page.kind === 'chapter' ||
-    (notice && view.notices?.some((n) => n.id === notice)) ? null : (
-      <Control
-        label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}
-        onPress={p.page.kind === 'notice' || p.page.kind === 'board' ? p.back : p.world}
-      />
-    )
-  ) : (
+  return (
     <Footer
       keyboardEnabled={!pending && !fault && !p.screen.catchingUp}
       exits={view.exits}

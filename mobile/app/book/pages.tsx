@@ -21,8 +21,6 @@ export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
 const titleStyle = (c: Palette) => ({ color: c.fg, paddingBottom: space.md });
-export const pageTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.pageTitle });
-export const sectionTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.sectionTitle });
 // A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
 // on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
 export const titleFocus = {
@@ -114,48 +112,24 @@ export function RoomPage(p: {
   details: ReactNode;
 }) {
   const c = usePalette();
+  const look = p.g.look;
+  const actions = placeActions(p.view, p.g, p.press); // one list, as the room's lines
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <RoomTitle {...p} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: space.page }}>
-        <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
-        {warnings(c, p.view, p.text)}
-        <Here view={p.view} text={p.text} open={p.open} />
-        {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
-          <Control label="Continue conversation" onPress={p.openChoice} />
-        )}
-        {p.details}
-        {placeActions(p.view, p.g, p.press)}
-        {p.log.length > 0 && (
-          <View style={{ marginTop: space.lg }}>
-            <LogLines lines={p.log} />
-          </View>
-        )}
-      </ScrollView>
-    </View>
-  );
-}
-
-// The room's title; a tap looks.
-function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
-  const title = (
-    <Text
-      {...titleFocus}
-      style={{ ...titleStyle(usePalette()), ...type.roomTitle, textAlign: 'center' }}
+    <Page
+      title={p.text(p.view.place.title.key)}
+      fixedTitle
+      onTitlePress={look && (() => p.press(look))}
     >
-      {p.text(p.view.place.title.key)}
-    </Text>
-  );
-  return (
-    <View style={{ paddingHorizontal: space.page, paddingTop: space.page }}>
-      {p.g.look ? (
-        <Tap label={`${p.text(p.view.place.title.key)}, look`} onPress={() => p.press(p.g.look!)}>
-          {title}
-        </Tap>
-      ) : (
-        title
+      <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+      {warnings(c, p.view, p.text)}
+      <Here view={p.view} text={p.text} open={p.open} />
+      {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
+        <Control label="Continue conversation" onPress={p.openChoice} />
       )}
-    </View>
+      {p.details}
+      {actions.length > 0 && <View>{actions}</View>}
+      {p.log.length > 0 && <LogLines lines={p.log} />}
+    </Page>
   );
 }
 
@@ -196,28 +170,90 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   );
   return [npcs, items]
     .filter((group) => group.length > 0)
-    .map((group, i) => (
-      <View
-        key={group[0].kind === 'npc' ? 'npcs' : 'items'}
-        style={i ? { marginTop: space.block } : undefined}
-      >
-        {group.map(line)}
-      </View>
+    .map((group) => (
+      <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
     ));
 }
 
-export function Sheet({ title, children }: { title: string; children: ReactNode }) {
+// One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
+// the scroll), the blocks, and the page foot.
+export function Page(p: {
+  title?: string;
+  fixedTitle?: boolean;
+  onTitlePress?: () => void;
+  scrollToEnd?: boolean;
+  foot?: ReactNode;
+  children: ReactNode;
+}) {
+  const c = usePalette();
+  let scroll: ScrollView | null = null; // this render's view: a ref callback, so no hook
+  const heading = p.title !== undefined && (
+    <Text
+      {...titleFocus}
+      accessibilityRole="header"
+      style={{
+        ...titleStyle(c),
+        ...(p.fixedTitle ? { ...type.roomTitle, textAlign: 'center' } : type.pageTitle),
+      }}
+    >
+      {p.title}
+    </Text>
+  );
+  const title = p.onTitlePress ? (
+    <Tap label={`${p.title}, look`} onPress={p.onTitlePress}>
+      {heading}
+    </Tap>
+  ) : (
+    heading
+  );
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      {p.fixedTitle && (
+        <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
+      )}
+      <ScrollView
+        ref={(view) => {
+          scroll = view;
+        }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: space.page, gap: space.block }}
+        onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
+      >
+        {!p.fixedTitle && title}
+        {p.children}
+      </ScrollView>
+      {p.foot && <PageFoot>{p.foot}</PageFoot>}
+    </View>
+  );
+}
+
+// The page's local returns, nearest first (BOOK-UI-COMPONENTS.md, PageFoot).
+export function PageFoot({ children }: { children: ReactNode }) {
   const c = usePalette();
   return (
-    <ScrollView
-      style={{ backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: space.page, gap: space.md }}
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        columnGap: space.lg,
+        paddingTop: space.md,
+        paddingHorizontal: space.xl,
+        paddingBottom: space.xl,
+        borderTopWidth: size.rule,
+        borderTopColor: c.line,
+      }}
     >
-      <Text {...(title ? titleFocus : {})} style={pageTitleStyle(c)} accessibilityRole="header">
-        {title}
-      </Text>
       {children}
-    </ScrollView>
+    </View>
+  );
+}
+
+// A heading inside a page (Inside, Held, Worn, Where).
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <Text accessibilityRole="header" style={{ ...titleStyle(usePalette()), ...type.sectionTitle }}>
+      {children}
+    </Text>
   );
 }
 
@@ -243,7 +279,15 @@ export function ThingPage(p: {
 }) {
   const c = usePalette();
   return (
-    <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
+    <Page
+      title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
+      foot={
+        <>
+          {p.back && <Control label="Back to container" onPress={p.back} />}
+          <Control label="Leave" onPress={p.leave} />
+        </>
+      }
+    >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
       {tooHeavy(c, p.thing, p.text)}
@@ -253,12 +297,10 @@ export function ThingPage(p: {
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
       </Cards>
-      {p.back && <Control label="Back to container" onPress={p.back} />}
-      <Control label="Leave" onPress={p.leave} />
-      {p.contents.length > 0 && <Text style={sectionTitleStyle(c)}>Inside</Text>}
+      {p.contents.length > 0 && <SectionTitle>Inside</SectionTitle>}
       {p.contents.map((e) => (
         <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
       ))}
-    </Sheet>
+    </Page>
   );
 }

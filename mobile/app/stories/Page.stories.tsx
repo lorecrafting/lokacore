@@ -1,26 +1,53 @@
-// Page with its running head, composed as Body.tsx draws it: RunningHead above the Sheet shell.
-// Journal texts are Chapter 1's own (protocol/fixtures/missing_child_v042_hash.json).
+// Page: one shell for every page (BOOK-UI-COMPONENTS.md, Page); RunningHead above it, as Body.tsx
+// draws it. Journal texts are Chapter 1's own (protocol/fixtures/missing_child_v042_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { View } from 'react-native';
-import { expect } from 'storybook/test';
+import type { ComponentProps } from 'react';
+import { Text, View } from 'react-native';
+import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { Control, RunningHead, Sheet } from '../book/pages.tsx';
+import { ContinueButton } from '../book/actions.tsx';
+import { EntityLine, LogLines } from '../book/lines.tsx';
+import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
+import { prose, usePalette } from '../book/palette.ts';
 
 type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
 const say = (k: string) => k;
 
-function Page({ journal }: { journal: Quest[] }) {
+// A phone-high frame, so the page scrolls inside itself as on a device.
+function Framed(p: ComponentProps<typeof Page> & { journal?: Quest[] }) {
   return (
-    <View style={{ flex: 1 }}>
-      <RunningHead view={{ journal } as unknown as GameView} text={say} />
-      <Sheet title="Settings">
-        <Control label="Start over" onPress={() => {}} />
-      </Sheet>
+    <View style={{ height: '100vh' as never }}>
+      {p.journal && <RunningHead view={{ journal: p.journal } as unknown as GameView} text={say} />}
+      <Page {...p} />
     </View>
   );
 }
 
-const meta = { title: 'Book/Page', component: Page } satisfies Meta<typeof Page>;
+function Prose({ lines }: { lines: number }) {
+  const c = usePalette();
+  return Array.from({ length: lines }, (_, i) => (
+    <Text key={i} style={prose(c)}>
+      {`Line ${i + 1} of the long description.`}
+    </Text>
+  ));
+}
+
+// In the page's own viewport (toBeVisible ignores scrolling).
+const inView = (el: HTMLElement) => {
+  const r = el.getBoundingClientRect();
+  return r.top >= 0 && r.bottom <= window.innerHeight;
+};
+
+const back = <Control label="Back to World" onPress={() => {}} />;
+const meta = {
+  title: 'Book/Page',
+  component: Framed,
+  args: {
+    title: 'Settings',
+    foot: back,
+    children: <Control label="Start over" onPress={() => {}} />,
+  },
+} satisfies Meta<typeof Framed>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -56,5 +83,97 @@ export const NoRunningHead: Story = {
   args: { journal: [{ state: 'resolved', journal: 'quest.bell.prior' }] as Quest[] },
   play: async ({ canvas }) => {
     await expect(canvas.queryByText('quest.bell.prior')).toBeNull();
+  },
+};
+
+export const WithSectionHeadings: Story = {
+  args: {
+    title: 'Equipment & Inventory',
+    children: (
+      <>
+        <SectionTitle>Held</SectionTitle>
+        <EntityLine name="a torch" onPress={() => {}} />
+        <EntityLine name="a wool cloak" onPress={() => {}} />
+        <SectionTitle>Worn</SectionTitle>
+        <EntityLine name="a leather cap" onPress={() => {}} />
+      </>
+    ),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('heading', { name: 'Held' })).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Worn' })).toBeVisible();
+  },
+};
+
+export const LongTitle: Story = {
+  args: { title: 'The Ferryman’s Notice of Passage across the Flooded Causeway at Low Water' },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('heading', { name: /^The Ferryman’s Notice/ })).toBeVisible();
+  },
+};
+
+// Breaks: the room title scrolls away with the content, or loses its Look tap.
+export const FixedTitle: Story = {
+  args: {
+    title: 'Chapel Nave',
+    fixedTitle: true,
+    onTitlePress: fn(),
+    foot: undefined,
+    // An openable line: a scroll with nothing focusable fails axe (scrollable-region-focusable).
+    children: (
+      <>
+        <Prose lines={40} />
+        <EntityLine name="Old Bram" rest=" is here." onPress={() => {}} />
+      </>
+    ),
+  },
+  play: async ({ canvas, args, userEvent }) => {
+    const look = canvas.getByRole('button', { name: 'Chapel Nave, look' });
+    const last = canvas.getByText('Line 40 of the long description.');
+    last.scrollIntoView();
+    await waitFor(() => expect(inView(last)).toBe(true));
+    await expect(inView(look)).toBe(true);
+    await userEvent.click(look);
+    await expect(args.onTitlePress).toHaveBeenCalledTimes(1);
+  },
+};
+
+// Breaks: an untitled page (a scene) draws an empty header.
+export const NoTitle: Story = {
+  args: {
+    title: undefined,
+    foot: undefined,
+    children: (
+      <>
+        <Text>The bell rings once, and the nave falls silent.</Text>
+        <ContinueButton label="Continue" onPress={() => {}} />
+      </>
+    ),
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByRole('heading')).toBeNull();
+  },
+};
+
+// Breaks: a growing dialogue page stays at its top, hiding the latest line.
+export const ScrollToEnd: Story = {
+  args: {
+    title: 'Old Bram',
+    scrollToEnd: true,
+    foot: <Control label="Leave" onPress={() => {}} />,
+    children: <LogLines lines={Array.from({ length: 30 }, (_, i) => `Bram says line ${i + 1}.`)} />,
+  },
+  play: async ({ canvas }) => {
+    const last = canvas.getByText('Bram says line 30.');
+    await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+
+export const WithFoot: Story = {
+  args: { title: 'Old Bram', foot: <Control label="Leave" onPress={fn()} /> },
+  play: async ({ canvas, args, userEvent }) => {
+    await userEvent.click(canvas.getByRole('button', { name: 'Leave' }));
+    const leave = (args.foot as { props: { onPress: () => void } }).props.onPress;
+    await expect(leave).toHaveBeenCalledTimes(1);
   },
 };

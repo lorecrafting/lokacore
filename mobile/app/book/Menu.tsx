@@ -1,12 +1,11 @@
 // NPC/conversation and Contents views use the existing book controls.
-import { useRef } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
+import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { Control, Sheet, ThingPage, titleFocus, pageTitleStyle, type Thing } from './pages.tsx';
+import { Control, Page, ThingPage, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
@@ -26,7 +25,7 @@ function Choice(p: {
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
-    <View style={{ marginTop: space.lg, gap: space.sm }}>
+    <View style={{ gap: space.sm }}>
       {p.choice.riddle?.attempts && (
         <Text style={note(c)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
@@ -73,17 +72,12 @@ export function NpcPage(p: NpcProps) {
   const cards = actions.filter((b) => b.command !== 'use_service');
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
   const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
-  const scroll = useRef<ScrollView>(null);
   return (
-    <ScrollView
-      ref={scroll}
-      style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: space.page, gap: space.sm }} // NpcPage: not yet a Sheet
-      onContentSizeChange={() => p.log.length && scroll.current?.scrollToEnd({ animated: false })}
+    <Page
+      title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
+      scrollToEnd={p.log.length > 0}
+      foot={<Control label="Leave" onPress={leave} />}
     >
-      <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">
-        {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
-      </Text>
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
@@ -101,8 +95,7 @@ export function NpcPage(p: NpcProps) {
         ))}
         <ServiceOptions {...p} actions={actions} />
       </Cards>
-      <Control label="Leave" onPress={leave} />
-    </ScrollView>
+    </Page>
   );
 }
 
@@ -136,13 +129,13 @@ const SECTIONS: [Section, string][] = [
   ['journal', 'Journal'],
   ['settings', 'Settings'],
 ];
-export function ContentsPage(p: { open: (section: Section) => void }) {
+export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
-    <Sheet title="Contents">
+    <Page title="Contents" foot={<Control label="Back to World" onPress={p.world} />}>
       {SECTIONS.map(([kind, label]) => (
         <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
       ))}
-    </Sheet>
+    </Page>
   );
 }
 
@@ -153,7 +146,7 @@ export function Item(p: {
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button, detail?: string) => void;
-  open: (p: Page) => void;
+  open: (p: Route) => void;
   world: () => void;
   back?: () => void;
 }) {

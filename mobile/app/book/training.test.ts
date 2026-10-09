@@ -84,10 +84,11 @@ test('Character draws projected attributes and acquired qualification with autho
       },
     ],
   };
-  assert.deepEqual(words(CharacterPage({ view, text })), [
+  assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
     'Character',
     'STR 9',
     'Sword craft — unqualified; STR at least 10',
+    'Back to World',
   ]);
   assert.deepEqual(words(SkillDetails({ view, text })), [
     'STR 9',

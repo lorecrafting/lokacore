@@ -230,7 +230,7 @@ test('the chapter title page leaves only Continue', () => {
   });
   const bottom = book.props.children.props.children[1];
   const [navigation, status] = bottom.type(bottom.props).props.children;
-  assert.equal(navigation, null);
+  assert.ok(!navigation);
   assert.equal(status.props.locked, true);
   const button = StatusLine(status.props)
     .props.children.flat()

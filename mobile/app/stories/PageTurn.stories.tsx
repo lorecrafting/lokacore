@@ -24,7 +24,7 @@ function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <PageTurn turn={at.turn} dir={at.dir} paper={c.bg}>
         {at.turn % 2 ? (
-          <SettingsPage startOver={() => go(-1)} />
+          <SettingsPage startOver={() => go(-1)} world={() => go(-1)} />
         ) : (
           <ChapterPage title="Chapter One" done={() => go(1)} />
         )}

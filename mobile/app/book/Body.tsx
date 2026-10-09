@@ -88,14 +88,23 @@ function PageBody(p: BodyProps) {
 function sectionPage(p: BodyProps, page: Page) {
   const { view, text } = p.screen;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
-  if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
-  if (page.kind === 'character') return <CharacterPage view={view} text={text} />;
+  if (page.kind === 'contents')
+    return <ContentsPage open={(kind: Section) => p.open({ kind })} world={p.world} />;
+  if (page.kind === 'character') return <CharacterPage view={view} text={text} world={p.world} />;
   if (page.kind === 'map')
-    return <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} />;
-  if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
-  if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
+    return (
+      <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} world={p.world} />
+    );
+  if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} world={p.world} />;
+  if (page.kind === 'journal') return <JournalPage view={view} text={text} world={p.world} />;
   return (
-    <CarryingPage items={view.inventory} equipment={view.equipment} text={text} open={openThing} />
+    <CarryingPage
+      items={view.inventory}
+      equipment={view.equipment}
+      text={text}
+      open={openThing}
+      world={p.world}
+    />
   );
 }
 

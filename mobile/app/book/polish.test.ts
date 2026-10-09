@@ -248,7 +248,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
 });
 
 // Breaks: Leave is redundant or closes optimistically, journal cues look like speech, or controls leave the log.
-test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
+test('NPC history has distinct journal events and one confirmed Leave in the foot below the log', () => {
   const h = book();
   h.tap('Old Bram');
   const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
@@ -271,8 +271,12 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   );
   assert.deepEqual(
     controls.filter((n) => n.type === 'Pressable').map((n) => n.props.accessibilityLabel),
-    ["Offer to fetch Bram's lantern", 'Leave'],
+    ["Offer to fetch Bram's lantern"],
   );
+  const leaves = h
+    .draw()
+    .filter((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave');
+  assert.equal(leaves.length, 1);
   h.tap('Leave');
   assert.equal(h.game.view().view.choice, undefined);
   h.tap('Old Bram');

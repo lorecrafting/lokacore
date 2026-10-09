@@ -1,12 +1,11 @@
 // A full reading page with the offered actions following its combat history.
-import { ScrollView, Text, View } from 'react-native';
+import { Text } from 'react-native';
 import { bleedingLine, type group } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
-import { pageTitleStyle, RunningHead, titleFocus } from './pages.tsx';
+import { Page, RunningHead } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
-import { space } from './tokens.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
@@ -36,15 +35,9 @@ export function Combat(p: {
   if (!view.combat) return null;
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
-    <View style={{ backgroundColor: c.bg, flex: 1 }}>
+    <>
       <RunningHead view={view} text={text} />
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: space.page, gap: space.sm }}
-      >
-        <Text {...titleFocus} accessibilityRole="header" style={pageTitleStyle(c)}>
-          Combat
-        </Text>
+      <Page title="Combat">
         <Text style={prose(c)}>{text(view.combat.name)}</Text>
         {view.bleeding && (
           <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
@@ -60,7 +53,7 @@ export function Combat(p: {
             <ActionCard key={b.target_ids[0]} b={b} press={p.press} />
           ))}
         </Cards>
-      </ScrollView>
-    </View>
+      </Page>
+    </>
   );
 }
