@@ -67,5 +67,6 @@ answers MCP at `/mcp` (`@storybook/addon-mcp`): list and read components and sto
 instructions, previews, and `test-run` (play function and axe for chosen stories; it runs outside
 the check lock, so not during a smoke or `bin/check_all.sh`). The repo's
 `.mcp.json` points Claude Code at the owner's http://localhost:6006/mcp (approve it once per
-machine); an agent running its own Storybook on another port calls that port's `/mcp`
-instead. For the browser console and clicks, use the Claude in Chrome extension on the same URL.
+machine). Those tools see only the checkout that server serves, so an agent testing its own
+worktree runs Storybook on another port and calls that port's `/mcp` instead. For the browser
+console and clicks, use the Claude in Chrome extension on the same URL.
