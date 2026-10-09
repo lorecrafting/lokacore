@@ -26,9 +26,11 @@ centred), title (`type.chapterTitle` `fg`, centred, wrapping, `accessibilityRole
 `marginTop: space.sm`). Then `ContinueButton` not stretched (`alignSelf: 'center'`). Status locked and running head as
 today (`Book.tsx:199`, book-ui.md unchanged on that).
 
-**Accessible name.** The card is not pressable (the mock's `button` is its dismiss; the Book's is Continue). The
-title is the page header and takes the arriving focus; the label is plain text before it. Continue keeps its name
-"Continue": the label-in-name rule holds with nothing added.
+**Accessible name** (changed after design review 2026-10-09). The card is not pressable (the mock's `button` is its
+dismiss; the Book's is Continue). Label and title together are the page header: one `View accessible
+accessibilityRole="header"` with `useTitleFocus()`, holding both `Text`s, no `accessibilityLabel`, so its name is its
+visible text in order ("Chapter one, The Missing Child — in progress") and a screen reader arriving on the card hears
+the label. Continue keeps its name "Continue": the label-in-name rule holds with nothing added.
 
 **Stories.** `stories/ChapterPages.stories.tsx` `ChapterTitle` (generated view) stays and shows the card. Add one
 hand-props story in the same file, `ChapterTitleLong` ("Long title": a title that wraps at SE width, `done: fn()`),

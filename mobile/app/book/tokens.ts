@@ -78,7 +78,7 @@ export const type = {
   speaker: { fontFamily: font.caps, fontSize: 17, letterSpacing: 0.5 }, // a speech line's name
   tile: { fontFamily: font.head, fontSize: 23 }, // a riddle letter on a touch-sized card
   chapterLabel: { fontFamily: font.caps, fontSize: 13, letterSpacing: 2.6 }, // the chapter card's "Chapter one" (the mock's `.chapter small`)
-  chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`)
+  chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`): 38 above the mock's scaled 33 so it steps above pageTitle
 };
 
 export const space = {
