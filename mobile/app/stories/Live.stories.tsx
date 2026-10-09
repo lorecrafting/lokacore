@@ -53,7 +53,7 @@ export const FirstRoom: StoryObj = {
   play: async ({ canvasElement }) => {
     const page = within(canvasElement);
     await userEvent.click(await page.findByLabelText('Continue')); // a fresh Book opens on its chapter page
-    await userEvent.click(await page.findByLabelText('Elspeth, open'));
+    await userEvent.click(await page.findByLabelText(/^Elspeth is here\./));
     await userEvent.click(await page.findByLabelText('Talk to Elspeth'));
     await userEvent.click(
       await page.findByLabelText('Will you look around the Green for a sign of Wren?'),
