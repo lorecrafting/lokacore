@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: polish batch 6, chapter card and story word Controls (PR #332)](2026-10-09-storybook-b6-332-review.md): **APPROVE WITH NOTES**
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**
 - [Review: polish batch 3, Page shell, PageFoot and E1 (PR #329)](2026-10-09-polish-batch3-review.md): **APPROVE**
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
