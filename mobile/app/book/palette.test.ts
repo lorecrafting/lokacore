@@ -93,7 +93,7 @@ function mount(curve?: (t: number) => number) {
     useShownPalette(target, curve);
     for (const f of pending.splice(0)) f();
     slot = 0;
-    return useShownPalette(target, curve).bg; // after its effects, as the next render sees it
+    return useShownPalette(target, curve); // after its effects, as the next render sees it
   };
   const frame = (at: number) => ((clock = 1000 + at), frames.shift()!());
   return { render, frame, frames };
@@ -103,15 +103,43 @@ function mount(curve?: (t: number) => number) {
 // not switch at once under reduced motion (no curve).
 test('the shown palette: at once on mount and without a curve, else eased over motion.palette', () => {
   const still = mount();
-  assert.equal(still.render(color.dusk), '#2b1e16');
-  assert.equal(still.render(color.light), '#ebe6d7');
+  assert.equal(still.render(color.dusk).bg, '#2b1e16');
+  assert.equal(still.render(color.light).bg, '#ebe6d7');
   const fade = mount((t) => t);
-  assert.equal(fade.render(color.dusk), '#2b1e16');
+  assert.equal(fade.render(color.light).bg, '#ebe6d7');
   assert.equal(fade.frames.length, 0);
-  fade.render(color.light);
+  fade.render(color.dawn);
   fade.frame(750);
-  assert.equal(fade.render(color.light), '#8b8277'); // half-way, by hand
+  assert.equal(fade.render(color.dawn).bg, '#e0e0d9'); // half-way, by hand
   fade.frame(1500);
-  assert.equal(fade.render(color.light), '#ebe6d7');
+  assert.equal(fade.render(color.dawn).bg, '#d5d9da');
   assert.equal(fade.frames.length, 0);
+});
+
+// Breaks: a fade across a polarity flip (ink and paper cross, so some frame has no contrast), or a
+// same-polarity fade whose frame drops a text role under 4.5:1 (docs/BOOK-UI-COMPONENTS.md#design-tokens).
+test('every ordered palette change: same polarity fades readably, a flip switches at once', () => {
+  const flips = new Set(['light>dusk', 'light>dark', 'dawn>dusk', 'dawn>dark']);
+  for (const [from, a] of Object.entries(color))
+    for (const [to, b] of Object.entries(color)) {
+      if (a === b) continue;
+      const pair = `${from}>${to}`;
+      const fade = mount((t) => t);
+      fade.render(a);
+      const first = fade.render(b);
+      if (flips.has(pair) || flips.has(`${to}>${from}`)) {
+        assert.equal(first, b, `${pair} switches at once`);
+        assert.equal(fade.frames.length, 0, `${pair} schedules no fade`);
+        continue;
+      }
+      assert.equal(fade.frames.length, 1, `${pair} fades`);
+      for (let at = 15; at <= 1500; at += 15) {
+        fade.frame(at);
+        const p = fade.render(b);
+        for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const)
+          for (const paper of ['bg', 'card'] as const)
+            assert.ok(contrast(p[role], p[paper]) >= 4.5, `${pair} at ${at}: ${role} on ${paper}`);
+      }
+      assert.equal(fade.render(b), b, `${pair} ends on the target`);
+    }
 });

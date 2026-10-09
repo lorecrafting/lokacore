@@ -20,8 +20,10 @@ const byPhase = new Map([
 ]);
 export const paletteOf = (solar?: string) => byPhase.get(solar!) ?? color.light;
 
-// The palette to show for `target`: at once on mount and without a curve (reduced motion), else
-// cross-faded along `curve` over motion.palette from whatever is shown (a cut-short fade included).
+// The palette to show for `target`: at once on mount, without a curve (reduced motion) and on a
+// polarity flip (ink and paper cross, so no fade keeps text readable: BOOK-UI-COMPONENTS.md
+// #design-tokens), else cross-faded along `curve` over motion.palette from whatever is shown (a
+// cut-short fade included).
 // ponytail: the cross-fade re-renders the Book each frame for motion.palette; fine for
 // a few phase changes a game day, revisit if it stutters on a device.
 export function useShownPalette(target: Palette, curve?: (t: number) => number): Palette {
@@ -30,7 +32,7 @@ export function useShownPalette(target: Palette, curve?: (t: number) => number):
   now.current = shown;
   useEffect(() => {
     if (now.current === target) return;
-    if (!curve) return setShown(target);
+    if (!curve || dark(now.current) !== dark(target)) return setShown(target);
     const from = now.current;
     const start = performance.now();
     let frame = requestAnimationFrame(function step() {
@@ -45,6 +47,12 @@ export function useShownPalette(target: Palette, curve?: (t: number) => number):
 }
 
 const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+// Relative luminance (WCAG 2), enough to order ink against paper.
+const lum = (hex: string) =>
+  rgb(hex)
+    .map((v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+const dark = (p: Palette) => lum(p.fg) > lum(p.bg); // light ink on dark paper
 const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
 function mix(a: Palette, b: Palette, t: number): Palette {
   const out = { ...b };
