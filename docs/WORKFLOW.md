@@ -64,7 +64,8 @@ Report at the end of the slice, not at every step.
    protocol change with new behavior). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted (the issue's Beads notes, `br update <id> --append-notes`,
-   or `docs/briefs/`); a scratchpad copy is only a working file. Link process rules (AGENTS.md,
+   or `docs/briefs/`); a scratchpad copy is only a working file. Beads text uses repo-relative paths and worktree names,
+   never absolute or home-relative paths. Link process rules (AGENTS.md,
    WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
    Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.

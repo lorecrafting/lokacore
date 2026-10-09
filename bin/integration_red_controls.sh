@@ -92,12 +92,18 @@ MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-mix-test 
 MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh > "$R.out" 2>&1 || bad 'check_all record: full run failed'
 [ "$(cat "$rec" 2>/dev/null)" = "$(git rev-parse HEAD^{tree})" ] || bad 'check_all record: a full pass did not record the tree'
 # --- br_create.sh -----------------------------------------------------------------------
-# Stub br logs each call; create prints a new id. Break: the path is not cleared, or on the wrong id.
-printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; esac\n' > "$tmp/br-create"
+# Stub br logs each call; create prints a new id, show prints $SHOW. Break: the path is not cleared,
+# or on the wrong id; a local path in the new row is not warned about, or refuses the create.
+printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; show) echo "$SHOW" ;; esac\n' > "$tmp/br-create"
 mkdir "$tmp/brstub"; mv "$tmp/br-create" "$tmp/brstub/br"; chmod +x "$tmp/brstub/br"
-got=$(BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title') || bad 'br_create: failed'
-[ "$got" = loka-n1 ] && [ "$(tail -1 "$tmp/br.log")" = 'update loka-n1 --source-repo lokacore --source-repo-path ' ] \
-  || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
+for show in '[{"notes":"see bin/x.sh"}]' '[{"notes":"see ~/dev/x"}]'; do
+  : > "$tmp/br.log"
+  got=$(SHOW=$show BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title' 2> "$tmp/br.err") || bad "br_create: failed on $show"
+  [ "$got" = loka-n1 ] && grep -qx 'update loka-n1 --source-repo lokacore --source-repo-path ' "$tmp/br.log" \
+    || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
+  case $show in *'~/'*) grep -q 'loka-n1 text has an absolute or home-relative path' "$tmp/br.err" || bad 'br_create: no local-path warning' ;;
+    *) [ ! -s "$tmp/br.err" ] || { bad 'br_create: warned on a repo-relative path'; cat "$tmp/br.err"; } ;; esac
+done
 # --- after_merge.sh ------------------------------------------------------------------------
 # Bare origin; branch pr (worktree, review-7 on its tip) is merged on origin/main by another clone,
 # local main is behind with a dirty Beads export. Stub gh reports $PR_STATE; stub br close appends
