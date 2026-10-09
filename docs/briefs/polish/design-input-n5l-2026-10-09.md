@@ -22,7 +22,7 @@ Mechanism: **bleed, not height**. `Tap` keeps `minHeight: size.touch` and `justi
 `marginVertical: -space.md`. The padding is inside the pressable's box, so the hit area and
 the web focus ring include it; the equal negative margin removes it from layout, so the
 visible footprint is the child's own height (a 28 px `type.body` line stays 28 px; a line with
-a note stays 28 + 19). `space.md` = 8 = (`size.touch` − `type.body.lineHeight`) / 2, the one
+a note stays 28 + 28, `note` being `type.body` in `dim`). `space.md` = 8 = (`size.touch` − `type.body.lineHeight`) / 2, the one
 value that makes a body line's hit area exactly 44 with no visible padding; no new token.
 
 Not `hitSlop`: react-native-web 0.21 implements `hitSlop` only on the legacy `Touchable`
@@ -34,7 +34,7 @@ platforms and is one style, no measurement, no `onLayout`.
 
 | Consumer | Child height | Visible footprint after | Hit box |
 |---|---|---|---|
-| `EntityLine` `mobile/app/book/lines.tsx:19` | 28 (+19 with a note) | 28 (47) | 44 (63) |
+| `EntityLine` `mobile/app/book/lines.tsx:19` | 28 (+28 with a note) | 28 (56) | 44 (72) |
 | `VerbLine` `mobile/app/book/actions.tsx:45` | 28 | 28 | 44 |
 | Room title (Look) `mobile/app/book/pages.tsx:262` | 24 + `space.md` below = 32 | 32 | 48 |
 | `Position` `mobile/app/book/Status.tsx:122` | 19 (`type.small`) | 28 (`minHeight` 44 − 16) | 44 |
@@ -51,20 +51,21 @@ title and status their own bleed if the owner sees it.
 - Two entity lines in a run (NPCs, items, held, worn, Inside, Contents): 0; the pitch is
   `type.body.lineHeight` (28). Today 44.
 - NPC run to item run in Here (`pages.tsx:185-200`, two Views): `space.block`.
-- Entity line to its carried note: 0, the note's own `type.small` line (19), unchanged.
-- Verb lines after the entity lines: today each `VerbLine` is mapped straight into the Page
-  (`pages.tsx:180`), so consecutive verb lines sit `space.block` apart; the catalogue's "a run
-  of rows of one kind is one block" says they should touch. Out of n5l's scope; log it.
+- Entity line to its carried note: 0, the note's own `type.body` line (28), unchanged.
+- Verb lines after the entity lines: one View (`pages.tsx:148`), so they touch at 28; nothing to do.
 
 ### Overlap of neighbouring hit areas
 
-Allowed. In a run of touching lines each 44 px hit box bleeds 8 px over its neighbours'
-text. The later sibling paints last and wins the hit test on both platforms, so the
-effective target of a line in a run is its own 28 px pitch (36 at the run's first and last
-line, 44 for a lone Tap). 28 px is above WCAG 2.5.8's 24 px minimum; the 44 px rule holds
-wherever a Tap has non-Tap neighbours. A tap in the bleed zone opens the line whose text it
-is nearest to, never the other one, because the bleed never crosses a neighbour's text
-midline (8 < 14).
+Allowed. Each 44 px hit box bleeds 8 px over whatever is around it, and whatever renders
+later takes the overlap on both platforms: the next line in a run, the scroll area under the
+fixed title, the row under the status position, the block under a Worn item or the water
+Surface line. Measured guaranteed targets: a body line inside a run 28 px (its pitch), a line
+with one covered side 36 px (a run's end, a Worn item, the Surface line, the status
+position), the room title 40 px, a free-standing Tap 44 px. All above WCAG 2.5.8's 24 px;
+the rule text in the catalogue says this, not "44 everywhere". A tap in the bleed zone opens
+the line whose text it is nearest to, never the other one, because the bleed never crosses a
+neighbour's text midline (8 < 14); a non-pressable line touching a Tap (a Worn slot label)
+lends it the bleed.
 
 ## Catalogue rule text (docs/BOOK-UI-COMPONENTS.md)
 
@@ -132,5 +133,3 @@ No change to `docs/system/book-ui.md`: no interaction rule moves.
 - Owner: is the room title's 48 px hit box (title line + its `space.md` under-padding + bleed)
   fine, or should the fixed title get no bleed? It shows nothing; only keyboard users see the
   ring.
-- Verb lines `space.block` apart instead of touching (`pages.tsx:180`): separate issue or
-  fold into this slice? Same component, one-line change (wrap the map in a `View`).
