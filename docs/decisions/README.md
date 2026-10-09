@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-09 [Owner decision: Storybook MCP addon and the Chrome extension for agents](owner-decision-storybook-mcp-2026-10-09.md)
 - 2026-10-09 [Owner decision: the designer writes polish batch 5's style code](owner-decision-designer-writes-batch5-style-2026-10-09.md)
 - 2026-10-08 [Owner decision: pre-production merge gate (pre-push and review; hosted CI nightly)](owner-decision-preproduction-gate-2026-10-08.md)
 - 2026-10-08 [Owner decision: designer on Fable for the polish phase](owner-decision-designer-fable-2026-10-08.md)

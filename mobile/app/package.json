@@ -15,7 +15,7 @@
     "storybook": "storybook dev -p 6006 --host 0.0.0.0 --no-open",
     "storybook:build": "storybook build",
     "storybook:live": "node .storybook/live.ts",
-    "storybook:smoke": "tsc -p .storybook && storybook build --quiet && vitest run --config .storybook/vitest.config.mts"
+    "storybook:smoke": "tsc -p .storybook && storybook build --quiet && vitest run"
   },
   "engines": {
     "node": "24.21.0"
@@ -39,6 +39,7 @@
     "@e2e-dev/web": "^0.12.0",
     "@storybook/addon-a11y": "10.6.1",
     "@storybook/addon-docs": "10.6.1",
+    "@storybook/addon-mcp": "10.6.1",
     "@storybook/addon-vitest": "10.6.1",
     "@storybook/react-native-web-vite": "10.6.1",
     "@types/react": "19.2.18",
