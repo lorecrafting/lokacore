@@ -163,7 +163,11 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
     <ScrollView style={scrollPaper} contentContainerStyle={{ padding: 24, gap: 8 }}>
-      <Text {...titleFocus} style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
+      <Text
+        {...(title ? titleFocus : {})}
+        style={{ ...titleStyle, fontSize: 32 }}
+        accessibilityRole="header"
+      >
         {title}
       </Text>
       {children}

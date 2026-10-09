@@ -6,6 +6,7 @@
 import {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type Dispatch,
@@ -97,7 +98,7 @@ function useMotion(
     else pages.delete(turn);
   };
   // The first page, once mounted, warms the picture-taking so the first turn's picture is quick.
-  useEffect(() => void warm(pages.get(turn)!), []);
+  useEffect(() => void (reduced || warm(pages.get(turn)!)), []);
   // Before paint, so a new curl or fade never shows the last turn's finished progress for a frame.
   useLayoutEffect(() => {
     if (!leaving) return;
@@ -105,7 +106,7 @@ function useMotion(
     if (timing) return animate(progress, timing, leaving, setLeaving);
     let live = true;
     // No picture in time, or none at all: the page has simply changed.
-    const late = setTimeout(() => setLeaving(undefined), motion.quick.duration);
+    const late = setTimeout(() => ((live = false), setLeaving(undefined)), motion.quick.duration);
     snapshot(pages.get(leaving.turn)!).then(
       (image) => (live ? setLeaving(image ? { ...leaving, image } : undefined) : image?.dispose()),
       () => live && setLeaving(undefined),
@@ -159,7 +160,7 @@ function Curl(p: {
   size: Size;
   progress: SharedValue<number>;
 }) {
-  const paper = Array.from(Skia.Color(p.paper)).slice(0, 3);
+  const paper = useMemo(() => Array.from(Skia.Color(p.paper)).slice(0, 3), [p.paper]);
   const uniforms = useDerivedValue(() => ({
     size: [p.size.width, p.size.height],
     progress: p.progress.value,
