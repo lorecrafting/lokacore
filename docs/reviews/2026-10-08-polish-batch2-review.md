@@ -73,3 +73,24 @@
 ## Verdict
 
 CHANGES REQUIRED: B1 (red required hosted run), S1, S2. Nits at the developer's discretion.
+
+## Fix round 1 (head `d6805e4e`, commits `c6483d57`, `816fab9d`, `109c11e3`, `d6805e4e`)
+
+- **B1 resolved pending hosted green.** Root cause is sound: `PageTurn.tsx:119` drops the curl when the
+  leaving picture is not taken within `motion.quick` (160 ms), so CPU starvation from parallel story files
+  on a 4-vCPU runner explains the missing canvas; my local 6/6 head and 6/6 base under load fit that.
+  `fileParallelism: false` (`.storybook/vitest.config.mts:12`) is a proportionate fix with no app change.
+  The PM checks ci 37918765054 and book-e2e 37918768492. Follow-up issue recommended (not blocking): the
+  fallback is silent, so a slow device never curls and nothing reports it; the story is the only sensor.
+- **S1 resolved.** `bin/check_lock.sh` sourced in the smoke subshell (`.githooks/pre-push:30`) and by
+  check_all; `integration_red_controls.sh` rc 0; mutant (lock source removed) -> `FAIL pre-push smoke: got
+  '... storybook:smoke '`. No leaked lock after the run.
+- **S2 resolved.** Tiles `Riddle.tsx:24`, Position, Look (`pages.tsx:152`), resources (`model.ts` joins with
+  spaces, en space shown), every EntityLine ends ", open". The new `preview.tsx` afterEach check fails on a
+  planted violation: tile label back to "Letter R, tile 1" -> Riddle story fails `label in name`.
+- **N1, N2, N3 resolved.** Backdoor stated in the gate record (point 6) and cited in `owner-rules.md`;
+  `ast-grep test` rc 0 with `-4`, ternary and `opacity: x ? 0.4 : 1` cases; whole-tree scan rc 0;
+  negative log checks read `.text`. Question: the storybook lane now covers `package(-lock).json` and
+  `mobile/packages/game-view/`; both new `docs_only_red_controls.sh` cases pass (rc 0).
+
+Verdict: APPROVE WITH NOTES. Merge once both hosted runs on `d6805e4e` are green; file the fallback issue.
