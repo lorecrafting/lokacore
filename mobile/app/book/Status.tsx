@@ -29,6 +29,7 @@ const statusRow = {
   alignItems: 'center',
   columnGap: space.sm,
 } as const;
+const group = { flexDirection: 'row', alignItems: 'center', columnGap: space.sm } as const;
 
 // The calendar as one line: day and hour, then the solar term and the moon when the world has them.
 const calendarLine = (calendar: StatusProps['calendar']) =>
@@ -62,15 +63,18 @@ export function StatusLine(p: StatusProps) {
   ].filter(Boolean);
   return (
     <View style={statusRow}>
-      {items.flatMap((item, i) =>
-        i
-          ? [
-              <Text key={`join${i}`} aria-hidden style={{ ...type.small, color: c.dim }}>
-                ·
-              </Text>,
-              item,
-            ]
-          : [item],
+      {/* Each " · " belongs to the item after it, so a wrapped line never ends in a lone dot. */}
+      {items.map((item, i) =>
+        i ? (
+          <View key={(item as { key: string }).key} style={group}>
+            <Text aria-hidden style={{ ...type.small, color: c.dim }}>
+              ·
+            </Text>
+            {item}
+          </View>
+        ) : (
+          item
+        ),
       )}
       {p.pending && (
         <Text style={{ ...type.small, color: c.dim, width: '100%', textAlign: 'center' }}>
@@ -88,8 +92,8 @@ function Contents(p: StatusProps) {
     <Pressable
       disabled={p.locked}
       accessibilityRole="button"
-      // Label in name (WCAG 2.5.3): the visible text first, then where it goes.
-      accessibilityLabel={`${p.resources ? said(p.resources, p.text) : 'character'}; opens Contents, Character`}
+      // Label in name (book-ui.md): the shown text first (its en spaces as spaces), then where it goes.
+      accessibilityLabel={`${p.resources ? said(p.resources, p.text) : 'character'}; opens Contents`}
       onPress={p.open}
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
@@ -100,13 +104,13 @@ function Contents(p: StatusProps) {
   );
 }
 
-// Spaces between resources, not a margin: the shown text must read as words, so it can lead the
-// button's name (WCAG 2.5.3). The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
+// An en space between resources, as text, not a margin: the shown words lead the button's name
+// (book-ui.md, Label in name). The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`.
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
     <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
-      {i ? '  ' : ''}
+      {i ? '\u2002' : ''}
       <Text style={type.label}>{r.resource.key}</Text>
       {` ${r.current}/${r.maximum}`}
     </Text>
@@ -114,13 +118,9 @@ const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
 
 function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
   const c = usePalette();
-  const words = (
-    <Text style={{ ...type.small, color: c.dim }} accessibilityLabel={`Position, ${p.value}`}>
-      {p.value}
-    </Text>
-  );
+  const words = <Text style={{ ...type.small, color: c.dim }}>{p.value}</Text>;
   return p.open ? (
-    <Tap label={`Position, ${p.value}`} onPress={p.open}>
+    <Tap label={`${p.value}, change position`} onPress={p.open}>
       {words}
     </Tap>
   ) : (

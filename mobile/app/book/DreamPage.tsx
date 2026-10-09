@@ -4,7 +4,7 @@ import type { Page } from './model.ts';
 import { Text } from 'react-native';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
-import { ActionCard } from './actions.tsx';
+import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
 import { Control, Sheet } from './pages.tsx';
 import { note, prose, usePalette } from './palette.ts';
@@ -26,13 +26,15 @@ export function DreamPage(p: {
       <Text style={prose(c)}>{p.screen.text(dream.description)}</Text>
       <LogLines lines={p.screen.detail(owner)} />
       <Text style={prose(c)}>{p.screen.text(dream.line)}</Text>
-      {buttons.map((b) => (
-        <ActionCard
-          key={b.action_key + JSON.stringify(b.input)}
-          b={b}
-          press={(b) => p.press(b, owner)}
-        />
-      ))}
+      <Cards>
+        {buttons.map((b) => (
+          <ActionCard
+            key={b.action_key + JSON.stringify(b.input)}
+            b={b}
+            press={(b) => p.press(b, owner)}
+          />
+        ))}
+      </Cards>
       <Control label="Close" onPress={p.close} />
     </Sheet>
   );

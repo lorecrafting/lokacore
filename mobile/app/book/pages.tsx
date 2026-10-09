@@ -8,7 +8,7 @@ import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { ActionCard, VerbLine } from './actions.tsx';
+import { ActionCard, Cards, VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { reason } from './words.ts';
 
@@ -90,6 +90,7 @@ export function Control(p: {
         minWidth: size.touch,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: space.md,
         opacity: disabled ? opacity.disabled : 1,
       }}
     >
@@ -148,7 +149,7 @@ function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button
   return (
     <View style={{ paddingHorizontal: space.page, paddingTop: space.page }}>
       {p.g.look ? (
-        <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
+        <Tap label={`${p.text(p.view.place.title.key)}, look`} onPress={() => p.press(p.g.look!)}>
           {title}
         </Tap>
       ) : (
@@ -190,7 +191,6 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
       name={cap(p.text(e.name))}
       rest=" is here."
       note={e.carrying && p.text(e.carrying)}
-      suffix=", open"
       onPress={() => p.open(e.id)}
     />
   );
@@ -248,19 +248,16 @@ export function ThingPage(p: {
       <LogLines lines={p.log} />
       {tooHeavy(c, p.thing, p.text)}
       {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
-      {p.actions.map((b) => (
-        <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
-      ))}
+      <Cards>
+        {p.actions.map((b) => (
+          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+        ))}
+      </Cards>
       {p.back && <Control label="Back to container" onPress={p.back} />}
       <Control label="Leave" onPress={p.leave} />
       {p.contents.length > 0 && <Text style={sectionTitleStyle(c)}>Inside</Text>}
       {p.contents.map((e) => (
-        <EntityLine
-          key={e.id}
-          name={cap(p.text(e.name))}
-          suffix=", open"
-          onPress={() => p.open(e.id)}
-        />
+        <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
       ))}
     </Sheet>
   );

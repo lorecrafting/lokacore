@@ -1,5 +1,6 @@
 // The offered-action controls: action card, verb line, continue button (BOOK-UI-COMPONENTS.md).
-import { Pressable, Text } from 'react-native';
+import { Children, type ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { Tap } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import type { Button } from './presenter.ts';
@@ -22,12 +23,19 @@ export function ActionCard({ b, press }: { b: Button; press: (b: Button) => void
         justifyContent: 'center',
         paddingVertical: space.md,
         paddingHorizontal: space.lg,
-        marginTop: space.sm,
       }}
     >
       <Text style={prose(c)}>{b.label}</Text>
     </Pressable>
   );
+}
+
+// A list of action cards: one block of its page, the cards `space.sm` apart (no card margin);
+// nothing when the list is empty, so it adds no block gap.
+export function Cards({ children }: { children: ReactNode }) {
+  return Children.toArray(children).length ? (
+    <View style={{ gap: space.sm }}>{children}</View>
+  ) : null;
 }
 
 // A room's offered place action (BOOK-UI-COMPONENTS.md, Verb line).
@@ -55,9 +63,11 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
         minWidth: size.touch,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: space.md,
+        paddingHorizontal: space.lg,
       }}
     >
-      <Text style={{ ...type.control, color: c.bg }}>{p.label}</Text>
+      <Text style={{ ...type.control, color: c.bg, textAlign: 'center' }}>{p.label}</Text>
     </Pressable>
   );
 }

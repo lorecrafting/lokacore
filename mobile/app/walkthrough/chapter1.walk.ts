@@ -20,7 +20,7 @@ const top = () => {
   return {
     title:
       shown('[role="heading"]').at(-1)?.textContent ??
-      shown('[aria-label^="Look, "]').at(-1)?.getAttribute('aria-label')?.slice(6) ??
+      shown('[aria-label$=", look"]').at(-1)?.getAttribute('aria-label')?.slice(0, -6) ??
       '',
     time: shown('[aria-label^="day "]').at(-1)?.getAttribute('aria-label') ?? '',
     buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label')),
@@ -32,12 +32,12 @@ const top = () => {
 // A tap's page and its save land after the 160 ms fade; an instant read waits this long first.
 const settle = () => new Promise((r) => setTimeout(r, 250));
 
-// A riddle answer on the letter tiles ("Letter L, tile 5"), each tile used once, then Submit.
+// A riddle answer on the letter tiles ("L, tile 5"), each tile used once, then Submit.
 const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
   await settle();
-  const tiles = (await browser.evaluate(top)).buttons.filter((b) => b?.startsWith('Letter '));
+  const tiles = (await browser.evaluate(top)).buttons.filter((b) => /^., tile \d+$/.test(b ?? ''));
   for (const letter of word) {
-    const tile = tiles.find((t) => t?.startsWith(`Letter ${letter},`));
+    const tile = tiles.find((t) => t?.startsWith(`${letter},`));
     if (!tile) throw new Error(`walk dead end: no tile for ${letter} in ${word}`);
     tiles.splice(tiles.indexOf(tile), 1);
     await walked.getByRole('button', tile).tap();

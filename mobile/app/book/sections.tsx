@@ -17,7 +17,7 @@ import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { SkillDetails } from './skills.tsx';
 import { space } from './tokens.ts';
-import { ActionCard, ContinueButton } from './actions.tsx';
+import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { band, Control, sectionTitleStyle, Sheet } from './pages.tsx';
 
@@ -69,7 +69,7 @@ export function AncestryPage(p: {
             (b.input as { ancestry?: string }).ancestry === choice.key,
         );
         return (
-          <View key={choice.key}>
+          <View key={choice.key} style={{ gap: space.sm }}>
             <Text style={prose(c)}>{p.text(choice.description)}</Text>
             {button && <ActionCard b={button} press={p.press} />}
           </View>
@@ -129,14 +129,14 @@ export function CarryingPage(p: {
       <Text style={sectionTitleStyle(c)}>Held</Text>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
       {p.items.map((e) => (
-        <EntityLine key={e.id} name={p.text(e.name)} suffix=", open" onPress={() => p.open(e.id)} />
+        <EntityLine key={e.id} name={p.text(e.name)} onPress={() => p.open(e.id)} />
       ))}
       {(p.equipment?.length ?? 0) > 0 && <Text style={sectionTitleStyle(c)}>Worn</Text>}
       {p.equipment?.map(({ slot, item }) => (
         <View key={slot}>
           <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
           {item ? (
-            <EntityLine name={p.text(item.name)} suffix=", open" onPress={() => p.open(item.id)} />
+            <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
           ) : (
             <Text style={note(c)}>Empty</Text>
           )}
@@ -152,7 +152,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
   return p.view.exits.map((e) => {
     const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
     return (
-      <View key={e.direction} style={{ marginTop: space.lg }}>
+      <View key={e.direction} style={{ marginTop: space.lg, gap: space.sm }}>
         {move ? (
           <ActionCard b={move} press={p.press} />
         ) : (
@@ -202,16 +202,20 @@ export function MapPage(p: {
         {...p}
         view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
       />
-      {p.g.place.map((b) => (
-        <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
-      ))}
+      <Cards>
+        {p.g.place.map((b) => (
+          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+        ))}
+      </Cards>
       {p.view.known_npcs?.length ? <Text style={sectionTitleStyle(c)}>Where</Text> : null}
-      {(p.view.known_npcs ?? []).map((n) =>
-        p.g
-          .on(n.id)
-          .filter((b) => b.action_key === 'where')
-          .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
-      )}
+      <Cards>
+        {(p.view.known_npcs ?? []).map((n) =>
+          p.g
+            .on(n.id)
+            .filter((b) => b.action_key === 'where')
+            .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
+        )}
+      </Cards>
     </Sheet>
   );
 }

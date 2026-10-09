@@ -41,7 +41,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   h.draw();
   assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
   drawnTake.props.onPress();
-  assert.ok(h.labels().includes('Position, standing'));
+  assert.ok(h.labels().includes('standing, change position'));
   assert.equal(h.labels().includes('Leave'), false);
   assert.equal(
     h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
@@ -122,7 +122,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap('Go south'); // retries Drop without walking
   assert.deepEqual(h.game.view().view.inventory, []);
   assert.ok(h.labels().includes('A brass lantern is here., open'));
-  assert.ok(h.labels().includes('Position, standing'));
+  assert.ok(h.labels().includes('standing, change position'));
   assert.equal(h.labels().includes('Leave'), false);
   assert.equal(h.p.screen().log.at(-1), 'You drop a brass lantern.');
   h.draw();

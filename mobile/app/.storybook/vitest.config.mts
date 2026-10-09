@@ -9,6 +9,9 @@ export default defineConfig({
   plugins: [storybookTest({ configDir: import.meta.dirname })],
   test: {
     name: 'storybook',
+    // One story file at a time: the page turn's picture has motion.quick (160 ms) to be taken, and on
+    // a 4-vCPU runner other files' renders and axe runs beside it starved it (book-e2e 37912419292).
+    fileParallelism: false,
     browser: {
       enabled: true,
       headless: true,

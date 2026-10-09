@@ -4,7 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
-import { ActionCard } from './actions.tsx';
+import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { Control, Sheet, ThingPage, titleFocus, pageTitleStyle, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -26,7 +26,7 @@ function Choice(p: {
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
-    <View style={{ marginTop: space.lg }}>
+    <View style={{ marginTop: space.lg, gap: space.sm }}>
       {p.choice.riddle?.attempts && (
         <Text style={note(c)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
@@ -78,7 +78,7 @@ export function NpcPage(p: NpcProps) {
     <ScrollView
       ref={scroll}
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: space.page }}
+      contentContainerStyle={{ padding: space.page, gap: space.sm }} // NpcPage: not yet a Sheet
       onContentSizeChange={() => p.log.length && scroll.current?.scrollToEnd({ animated: false })}
     >
       <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">
@@ -95,12 +95,14 @@ export function NpcPage(p: NpcProps) {
       )}
       {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
-      {actions
-        .filter((b) => b.command !== 'use_service')
-        .map((b) => (
-          <ActionCard key={b.label} b={b} press={p.press} />
-        ))}
-      <ServiceOptions {...p} actions={actions} />
+      <Cards>
+        {actions
+          .filter((b) => b.command !== 'use_service')
+          .map((b) => (
+            <ActionCard key={b.label} b={b} press={p.press} />
+          ))}
+        <ServiceOptions {...p} actions={actions} />
+      </Cards>
       <Control label="Leave" onPress={leave} />
     </ScrollView>
   );

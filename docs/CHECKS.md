@@ -95,8 +95,9 @@ their rules and red controls remain available for resumption.
   changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
   stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
   tests run its peers.
-  The `storybook` lane (pre-push only) runs for `mobile/app/book/`, `mobile/app/stories/` or
-  `mobile/app/.storybook/` changes: the hook then runs `npm run storybook:smoke` in `mobile/app`
+  The `storybook` lane (pre-push only) runs for `mobile/app/book/`, `mobile/app/stories/`,
+  `mobile/app/.storybook/`, `mobile/app/package*.json` or `mobile/packages/game-view/` changes: the hook
+  then runs `npm run storybook:smoke` in `mobile/app` under the `bin/check_all.sh` lock (`bin/check_lock.sh`)
   before `bin/check_all.sh`, never alongside `npm test`. The hook refuses a push while tracked files
   have uncommitted changes, since its checks read the working tree. The full browser e2e is not in
   pre-push: a slice that changes an interaction flow runs `npm run test:e2e` in `mobile/app`.
@@ -123,7 +124,7 @@ their rules and red controls remain available for resumption.
   `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`), superseded runs on a ref cancelled;
   no pull request or push triggers ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)). `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), then `npm run storybook:smoke` (every story renders, its play
-  passes, axe at `test: 'error'`; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
+  passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has
   one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed,
   was cancelled or skipped ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its

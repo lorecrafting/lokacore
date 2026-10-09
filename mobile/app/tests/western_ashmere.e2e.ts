@@ -18,7 +18,7 @@ test('Western Ashmere documents and all dark stairs persist through browser relo
 }) => {
   const reload = async (room: string) => {
     await reopen({ app, screen });
-    await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
+    await expect(screen.getByRole('button', `${room}, look`)).toBeVisible();
   };
   await app.clearState();
   await screen.getByRole('button', 'Fey-touched').tap();

@@ -234,7 +234,7 @@ test('the chapter title page leaves only Continue', () => {
   assert.equal(status.props.locked, true);
   const button = StatusLine(status.props)
     .props.children.flat()
-    .find((c: any) => c?.key === 'contents');
+    .find((c: any) => c?.key === 'contents').props.children[1]; // its " · " group: dot, button
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
@@ -262,7 +262,8 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children.flat().find((c: any) => c?.key === 'contents');
+  const button = status.props.children.flat().find((c: any) => c?.key === 'contents').props
+    .children[1];
   const contents = button.type(button.props);
   const shown = contents.props.children.props.children.map((t: any) => [
     t.key,

@@ -162,12 +162,12 @@ test('room is focused while Map retains directions and every detail returns to t
     nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram is here., open'),
   );
   assert.ok(h.text().includes('Ferry Landing'));
-  const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Look, Ferry Landing');
+  const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Ferry Landing, look');
   assert.ok(drawnLook);
   const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   assert.equal(receipts(), 0);
   const token = h.game.view().token;
-  h.tap('Look, Ferry Landing');
+  h.tap('Ferry Landing, look');
   assert.equal(receipts(), 1);
   assert.notEqual(h.game.view().token, token);
   assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
@@ -186,13 +186,13 @@ test('room is focused while Map retains directions and every detail returns to t
   h.tap('Equipment & Inventory');
   h.tap('Back to World');
   assert.ok(h.labels().includes('Old Bram is here., open'));
-  assert.equal(h.labels().includes('Equipment & Inventory'), false);
+  assert.equal(h.labels().includes('Equipment & Inventory, open'), false);
   const sections = ['Character', 'Equipment & Inventory', 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
     h.tap(CONTENTS);
     assert.deepEqual(
-      h.labels().filter((label) => sections.includes(label)),
-      sections,
+      h.labels().filter((label) => sections.some((s) => label === `${s}, open`)),
+      sections.map((s) => `${s}, open`),
     );
     assert.ok(h.text().includes('Contents'));
     h.tap(section);
@@ -330,14 +330,14 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
 test('only World position taps directly cycle the offered states with captured freshness', () => {
   const h = book();
   const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
-  const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'Position, standing');
+  const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'standing, change position');
   for (const [from, to] of [
     ['standing', 'sitting'],
     ['sitting', 'resting'],
     ['resting', 'sleeping'],
     ['sleeping', 'standing'],
   ]) {
-    h.tap(`Position, ${from}`);
+    h.tap(`${from}, change position`);
     assert.equal(h.game.view().view.position, to);
     assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
     assert.ok(h.labels().includes('Old Bram is here., open'));
@@ -352,7 +352,7 @@ test('only World position taps directly cycle the offered states with captured f
     h.labels().filter((s) => ['Stand', 'Sit', 'Rest', 'Sleep'].includes(s)),
     [],
   );
-  assert.equal(h.labels().includes('Position, standing'), false);
+  assert.equal(h.labels().includes('standing, change position'), false);
   h.sql.close();
 });
 

@@ -21,13 +21,13 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
             key={i}
             letter={letter}
             used={selected.includes(i)}
-            label={`Letter ${letter}, tile ${i + 1}`}
+            label={`${letter}, tile ${i + 1}`}
             onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
           />
         ))}
       </View>
       {selected.length > 0 && (
-        <View>
+        <View style={{ gap: space.sm }}>
           <View style={{ flexDirection: 'row' }}>
             <Control label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))} />
             <Control label="Clear" onPress={() => setSelected([])} />

@@ -10,7 +10,6 @@ const meta = {
     name: 'Bram the ferryman',
     rest: ' is here.',
     note: 'He carries a long pole.',
-    suffix: ', open',
     onPress: fn(),
   },
 } satisfies Meta<typeof EntityLine>;
@@ -18,7 +17,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Breaks: the whole line is not one button whose name leads with its shown text (name, rest, note)
-// then the suffix, or a press is dropped.
+// then ", open", or a press is dropped.
 export const NpcWithCarriedNote: Story = {
   play: async ({ canvas, args, userEvent }) => {
     const name = 'Bram the ferryman is here. He carries a long pole., open';
@@ -56,5 +55,5 @@ export const NoticeWithRemainingCount: Story = {
 };
 
 export const ContentsRow: Story = {
-  args: { name: 'Character', rest: undefined, note: undefined, suffix: undefined },
+  args: { name: 'Character', rest: undefined, note: undefined },
 };

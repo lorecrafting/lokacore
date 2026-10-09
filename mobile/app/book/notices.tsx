@@ -3,7 +3,7 @@ import { DreamResume } from './DreamPage.tsx';
 import { Text } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type Page } from './model.ts';
-import { ActionCard } from './actions.tsx';
+import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { Control, Sheet } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
@@ -76,14 +76,12 @@ function NoticeLink(p: Props & { notice: Notice }) {
       <EntityLine
         name={title}
         rest={notice.remaining === undefined ? undefined : ` (${notice.remaining})`}
-        suffix=", open"
         onPress={() => p.open({ kind: 'notice', id: notice.id })}
       />
     );
   return b ? (
     <EntityLine
       name={title}
-      suffix=", open"
       onPress={() => {
         p.open({ kind: 'notice', id: notice.id });
         p.press(b, notice.id);
@@ -142,10 +140,13 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       )}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
-      {!board &&
-        ('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
-          offerControl(c, p, detail.id, offer),
-        )}
+      {!board && (
+        <Cards>
+          {('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
+            offerControl(c, p, detail.id, offer),
+          )}
+        </Cards>
+      )}
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
       {p.screen.view.notices?.some((n) => n.id === detail.id) && (
         <Control label="Leave" onPress={p.world} />

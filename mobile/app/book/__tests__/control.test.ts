@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 
 // The status line's Contents button shows the resources, so it is found by its suffix.
-export const CONTENTS = /; opens Contents, Character$/;
+export const CONTENTS = /; opens Contents$/;
 
 export function control(drawn: any[], shown: string | RegExp) {
   const all = drawn.filter((n) => n.type === 'Pressable' && !n.props.disabled);

@@ -45,7 +45,7 @@ test('a visible deer leaves Willow Shade after the sight deadline and stays gone
     return true;
   });
   await reopen({ app, screen });
-  await expect(screen.getByRole('button', 'Look, Willow Shade')).toBeVisible();
+  await expect(screen.getByRole('button', 'Willow Shade, look')).toBeVisible();
   await expect(screen.getByRole('button', 'A deer is here., open')).not.toBeVisible();
 });
 
@@ -77,7 +77,7 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
     return true;
   });
   await reopen({ app, screen });
-  await expect(screen.getByRole('button', 'Look, Willow Shade')).toBeVisible();
+  await expect(screen.getByRole('button', 'Willow Shade, look')).toBeVisible();
   await expect(screen.getByRole('button', /deer corpse is here\./)).toBeVisible();
   await screen.getByRole('button', /deer corpse is here\./).tap();
   await expect(screen.getByRole('button', /deer hide, open/)).toBeVisible();

@@ -13,7 +13,7 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
   const go = async (direction: string, room: string) => {
     await screen.getByRole('button', 'Map').tap();
     await screen.getByRole('button', `Go ${direction}`).tap();
-    await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
+    await expect(screen.getByRole('button', `${room}, look`)).toBeVisible();
   };
   await app.clearState();
   await screen.getByRole('button', 'Fey-touched').tap();
@@ -52,7 +52,7 @@ test('Peg lesson discounts an actual purchase after browser reload', async ({ ap
   await screen.getByRole('button', 'Go north').tap();
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go west').tap();
-  await expect(screen.getByRole('button', 'Look, Chandler')).toBeVisible();
+  await expect(screen.getByRole('button', 'Chandler, look')).toBeVisible();
   await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Learn haggle (2p) Peg Harrow').tap();
   await screen.getByRole('button', 'Learn haggle (2p)').tap();
@@ -67,7 +67,7 @@ test('Peg lesson discounts an actual purchase after browser reload', async ({ ap
   ).toBeVisible();
   await app.restart();
   await screen.getByRole('button', 'Continue').tap();
-  await screen.getByRole('button', /opens Contents, Character$/).tap();
-  await screen.getByRole('button', 'Equipment & Inventory').tap();
+  await screen.getByRole('button', /; opens Contents$/).tap();
+  await screen.getByRole('button', 'Equipment & Inventory, open').tap();
   await expect(screen.getByRole('button', 'a torch, open')).toBeVisible();
 });

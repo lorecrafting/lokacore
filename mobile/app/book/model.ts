@@ -146,7 +146,7 @@ export const said = (
   text: (key: string) => string | undefined = () => undefined,
 ) =>
   [
-    rs.map((r) => `${r.resource.key} ${r.current}/${r.maximum}`).join(', '),
+    rs.map((r) => `${r.resource.key} ${r.current}/${r.maximum}`).join(' '),
     ...rs.filter((r) => r.resource.key === 'hp').map((r) => `hp ${bandPhrase(r, text)}`),
   ].join('; ');
 

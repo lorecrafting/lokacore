@@ -30,18 +30,18 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
   await settled(browser); // the room page, with its own countdown, fades out
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await reopen({ app, screen });
-  await expect(screen.getByRole('button', 'Look, Well Bottom')).toBeVisible();
+  await expect(screen.getByRole('button', 'Well Bottom, look')).toBeVisible();
   await settled(browser);
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await screen.getByRole('button', 'Surface (free)').tap();
-  await expect(screen.getByRole('button', 'Look, Well Shaft')).toBeVisible();
+  await expect(screen.getByRole('button', 'Well Shaft, look')).toBeVisible();
   await go(screen, 'up', 'Well Lane');
   await go(screen, 'south', 'Ferry Landing');
   await toPoolBottom(screen);
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await expect(screen.getByRole('button', 'Sunken chest is here., open')).toBeVisible();
   await screen.getByRole('button', 'Surface (free)').tap();
-  await expect(screen.getByRole('button', 'Look, Black Pool')).toBeVisible();
+  await expect(screen.getByRole('button', 'Black Pool, look')).toBeVisible();
 });
 
 // Breaks: an elapsed browser reopen renews a dive or Chapel recovery loses the original carried item.
@@ -71,7 +71,7 @@ test('expired dive returns to Chapel and recovers original belongings once after
     return true;
   });
   await reopen({ app, screen });
-  await expect(screen.getByRole('button', 'Look, Chapel Nave')).toBeVisible();
+  await expect(screen.getByRole('button', 'Chapel Nave, look')).toBeVisible();
   await expect(screen.getByRole('button', /Recover belongings from Well Bottom/)).toBeVisible();
   await screen.getByRole('button', /Recover belongings from Well Bottom/).tap();
   await reopen({ app, screen });
