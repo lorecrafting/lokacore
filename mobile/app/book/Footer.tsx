@@ -2,13 +2,14 @@
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, PanResponder, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
+import { Control } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
-import { size, type } from './tokens.ts';
+import { motion, radius, size, space, type } from './tokens.ts';
 
 type Props = {
   keyboardEnabled: boolean;
@@ -19,7 +20,11 @@ type Props = {
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
 };
-const rule = (c: Palette) => ({ flex: 1, height: 1, backgroundColor: c.line });
+const rule = (c: Palette) => ({
+  width: size.footerRule,
+  height: size.rule,
+  backgroundColor: c.line,
+});
 const keys: Record<string, string> = {
   ArrowUp: 'north',
   ArrowDown: 'south',
@@ -55,10 +60,17 @@ export function Footer(p: Props) {
   return (
     <View>
       {tip && <Tip dismiss={learn} />}
-      <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          columnGap: space.sm,
+        }}
+      >
         <View style={rule(c)} />
         <View
-          style={{ width: 56, height: 56, zIndex: 1 }} // above the rules: the zoomed map covers them
+          style={{ width: size.minimap, height: size.minimap, zIndex: 1 }} // above the rules: the zoomed map covers them
           {...readerActions(p.exits, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
@@ -118,30 +130,34 @@ function responder(
   setKnob: (k: { x: number; y: number }) => void,
 ) {
   const to = (v: number) =>
-    Animated.timing(zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
+    Animated.timing(zoom, {
+      toValue: v,
+      duration: motion.quick.duration,
+      useNativeDriver: true,
+    }).start();
   return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => setKnob({ x, y }) }));
 }
 
-function Tip({ dismiss }: { dismiss: () => void }) {
+// The first-run tip: an `fg` bubble, its words in `bg`, Got it right-aligned inside it.
+export function Tip({ dismiss }: { dismiss: () => void }) {
   const c = usePalette();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ ...type.small, color: c.dim, flexShrink: 1, textAlign: 'center' }}>
+    <View
+      style={{
+        backgroundColor: c.fg,
+        borderRadius: radius.card,
+        paddingVertical: space.md,
+        paddingHorizontal: space.lg,
+        alignSelf: 'center',
+        marginHorizontal: space.page,
+      }}
+    >
+      <Text style={{ ...type.small, color: c.bg }}>
         Hold the map and drag toward a path to walk; tap it to open the map.
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Got it"
-        onPress={dismiss}
-        style={{
-          minHeight: size.touch,
-          minWidth: 64,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ ...type.control, color: c.fg }}>got it</Text>
-      </Pressable>
+      <View style={{ alignItems: 'flex-end' }}>
+        <Control label="Got it" onPress={dismiss} onInk />
+      </View>
     </View>
   );
 }

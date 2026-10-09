@@ -4,7 +4,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, said, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
-import { size, type } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 
 // One line: the time as its earthly branch, then the resource button, which shows the body's
 // resources coloured by band when GameView carries them (the room-view status line, an owner-
@@ -27,7 +27,7 @@ const statusRow = {
   flexWrap: 'wrap',
   justifyContent: 'center',
   alignItems: 'center',
-  columnGap: 14,
+  columnGap: space.sm,
 } as const;
 
 // The calendar as one line: day and hour, then the solar term and the moon when the world has them.
@@ -44,31 +44,49 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const time = calendarLine(p.calendar);
+  const items = [
+    <Text
+      key="time"
+      style={{ ...type.small, color: c.dim }}
+      accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}
+    >
+      {time ?? branch(p.time).glyph}
+    </Text>,
+    p.position && <Position key="position" value={p.position} open={p.openPosition} />,
+    p.bleeding && (
+      <Text key="bleeding" style={{ ...type.small, color: c.danger }}>
+        {bleedingLine(p.bleeding, p.time, p.text)}
+      </Text>
+    ),
+    <Pressable
+      key="contents"
+      disabled={p.locked}
+      accessibilityRole="button"
+      accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
+      onPress={p.open}
+      style={{ minHeight: size.touch, justifyContent: 'center' }}
+    >
+      {p.resources ? (
+        <View style={{ flexDirection: 'row', columnGap: space.sm }}>
+          {shown(c, p.resources, p.locked)}
+        </View>
+      ) : (
+        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>character</Text>
+      )}
+    </Pressable>,
+  ].filter(Boolean);
   return (
     <View style={statusRow}>
-      <Text
-        style={{ ...type.small, color: c.dim }}
-        accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}
-      >
-        {time ?? branch(p.time).glyph}
-      </Text>
-      {p.position && <Position value={p.position} open={p.openPosition} />}
-      {p.bleeding && (
-        <Text style={{ ...type.small, color: c.danger }}>
-          {bleedingLine(p.bleeding, p.time, p.text)}
-        </Text>
+      {items.flatMap((item, i) =>
+        i
+          ? [
+              <Text key={`join${i}`} aria-hidden style={{ ...type.small, color: c.dim }}>
+                ·
+              </Text>,
+              item,
+            ]
+          : [item],
       )}
-      <Pressable
-        disabled={p.locked}
-        accessibilityRole="button"
-        accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
-        onPress={p.open}
-        style={{ minHeight: size.touch, justifyContent: 'center' }}
-      >
-        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>
-          {p.resources ? shown(c, p.resources, p.locked) : 'character'}
-        </Text>
-      </Pressable>
       {p.pending && (
         <Text style={{ ...type.small, color: c.dim, width: '100%', textAlign: 'center' }}>
           save not confirmed
@@ -81,14 +99,11 @@ export function StatusLine(p: StatusProps) {
 // The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`.
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
-  rs.map((r, i) => (
+  rs.map((r) => (
     <Text
       key={r.resource.key}
-      style={{
-        color: locked ? c.dim : band(c, toneOf(r)),
-      }}
+      style={{ ...type.small, color: locked ? c.dim : band(c, toneOf(r)) }}
     >
-      {i ? '  ' : ''}
       <Text style={type.label}>{r.resource.key}</Text>
       {` ${r.current}/${r.maximum}`}
     </Text>

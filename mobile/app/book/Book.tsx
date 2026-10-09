@@ -18,7 +18,7 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
-import { type } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
@@ -180,7 +180,15 @@ function Bottom(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   const position = nextPosition(view.position, p.g.position);
   return (
-    <View style={{ padding: 8 }}>
+    <View
+      style={{
+        paddingTop: space.sm,
+        paddingHorizontal: space.xl,
+        paddingBottom: space.lg,
+        borderTopWidth: size.rule,
+        borderTopColor: c.line,
+      }}
+    >
       {!view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
       {!view.ancestry_choices && (
         <StatusLine

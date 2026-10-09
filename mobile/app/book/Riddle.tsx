@@ -1,10 +1,10 @@
 // The riddle answer: a bank of letter tiles over one local buffer (BOOK-UI-COMPONENTS.md, Letter tile).
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import type { Button } from './presenter.ts';
-import { Act, Tap } from './pages.tsx';
-import { note, prose, usePalette } from './palette.ts';
-import { space } from './tokens.ts';
+import { Act, Control } from './pages.tsx';
+import { prose, usePalette } from './palette.ts';
+import { opacity, radius, size, space, type } from './tokens.ts';
 
 // Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
 // size: allow 45, bounded tile editing and submission share one local buffer
@@ -15,30 +15,23 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
   return (
     <View>
       <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.lg }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         {p.bank.map((letter, i) => (
-          <View key={i}>
-            {selected.includes(i) ? (
-              <Text style={note(c)}>{letter}</Text>
-            ) : (
-              <Tap
-                label={`Letter ${letter}, tile ${i + 1}`}
-                onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
-              >
-                <Text style={{ ...prose(c), color: c.action }}>{letter}</Text>
-              </Tap>
-            )}
-          </View>
+          <LetterTile
+            key={i}
+            letter={letter}
+            used={selected.includes(i)}
+            label={`Letter ${letter}, tile ${i + 1}`}
+            onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
+          />
         ))}
       </View>
       {selected.length > 0 && (
         <View>
-          <Tap label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))}>
-            <Text style={prose(c)}>Backspace</Text>
-          </Tap>
-          <Tap label="Clear" onPress={() => setSelected([])}>
-            <Text style={prose(c)}>Clear</Text>
-          </Tap>
+          <View style={{ flexDirection: 'row' }}>
+            <Control label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))} />
+            <Control label="Clear" onPress={() => setSelected([])} />
+          </View>
           <Act
             b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
             press={(b) => {
@@ -49,5 +42,36 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
         </View>
       )}
     </View>
+  );
+}
+
+// A used tile keeps its place in the bank (no reflow), disabled.
+export function LetterTile(p: {
+  letter: string;
+  used: boolean;
+  label: string;
+  onPress: () => void;
+}) {
+  const c = usePalette();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={p.label}
+      disabled={p.used}
+      onPress={p.onPress}
+      style={{
+        width: size.touch,
+        height: size.touch,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: c.card,
+        borderColor: c.line,
+        borderWidth: size.rule,
+        borderRadius: radius.card,
+        opacity: p.used ? opacity.disabled : 1,
+      }}
+    >
+      <Text style={{ ...type.tile, color: c.fg }}>{p.letter}</Text>
+    </Pressable>
   );
 }

@@ -68,8 +68,14 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
 }
 
 // Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
-export function Control(p: { label: string; onPress: () => void; disabled?: boolean }) {
-  const { label, onPress, disabled } = p;
+// `onInk`: the label in `bg`, for a Control on an `fg` fill (the tip's Got it).
+export function Control(p: {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  onInk?: true;
+}) {
+  const { label, onPress, disabled, onInk } = p;
   const c = usePalette();
   return (
     <Pressable
@@ -85,7 +91,9 @@ export function Control(p: { label: string; onPress: () => void; disabled?: bool
         opacity: disabled ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...type.control, color: disabled ? c.dim : c.fg }}>{label}</Text>
+      <Text style={{ ...type.control, color: disabled ? c.dim : onInk ? c.bg : c.fg }}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

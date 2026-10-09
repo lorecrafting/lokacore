@@ -146,6 +146,9 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     assert.ok(b, label);
     b.props.onPress();
   };
+  const used = (label: string) =>
+    draw().find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === label)!.props
+      .disabled;
   const initial = text();
   assert.ok(
     initial.indexOf(bundle.value.text['npc.vesper.description']) <
@@ -173,10 +176,13 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
   tap('Letter N, tile 2');
   tap('Letter N, tile 8');
   assert.ok(text().includes('NN'));
-  assert.ok(!labels().includes('Letter N, tile 2'));
+  // A used tile keeps its place, disabled; a second pick of it does not add a letter.
+  assert.equal(used('Letter N, tile 2'), true);
+  tap('Letter N, tile 2');
+  assert.ok(!text().includes('NNN'));
   tap('Backspace');
   assert.ok(text().includes('N'));
-  assert.ok(labels().includes('Letter N, tile 8'));
+  assert.equal(used('Letter N, tile 8'), false);
   tap('Clear');
   assert.ok(!labels().includes('Submit'));
   for (const label of ['S, tile 9', 'T, tile 6', 'O, tile 4', 'N, tile 2', 'E, tile 7'])

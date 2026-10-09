@@ -229,9 +229,9 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, null);
   assert.equal(status.props.locked, true);
-  const contents = StatusLine(status.props).props.children.find(
-    (c: any) => c?.type === 'Pressable',
-  );
+  const contents = StatusLine(status.props)
+    .props.children.flat()
+    .find((c: any) => c?.type === 'Pressable');
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
       ? []
@@ -258,7 +258,7 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     pending: false,
     open: () => {},
   } as any);
-  const contents = status.props.children.find((c: any) => c?.type === 'Pressable');
+  const contents = status.props.children.flat().find((c: any) => c?.type === 'Pressable');
   const shown = contents.props.children.props.children.map((t: any) => [
     t.key,
     t.props.style.color,
