@@ -33,5 +33,9 @@
         ]
       }
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "storybook",
+    "tidewave"
+  ]
 }
