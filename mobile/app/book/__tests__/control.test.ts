@@ -1,5 +1,5 @@
 // Find an enabled control the way a player names it. A pressable's name leads with its shown text
-// (docs/BOOK-UI-COMPONENTS.md), so `shown` is the exact name, or the start of exactly one name.
+// (WCAG 2.5.3, PM decision 2026-10-08), so `shown` is the exact name, or the start of exactly one name.
 import assert from 'node:assert/strict';
 
 // The status line's Contents button shows the resources, so it is found by its suffix.
