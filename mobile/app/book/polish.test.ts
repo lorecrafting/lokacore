@@ -404,3 +404,43 @@ test('pending ancestry keeps its choices pressable and a later press retries the
   assert.equal(h.game.view().view.ancestry, 'fen_born');
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
 });
+
+// Breaks: NPCs and loose items share one "is here" list, an NPC is listed among the items or
+// dropped, or an empty NPC group leaves its own block (book-ui.md, World and status entry).
+test('the room lists NPCs first, then every other entity as items, empty groups omitted', async () => {
+  const { RoomPage } = await import('./pages.tsx');
+  const entity = (id: string, kind: string) => ({ id, kind, name: id });
+  const groups = (entities: object[]) =>
+    nodes(
+      RoomPage({
+        view: {
+          place: { title: { key: 'Room' }, description: { key: 'A room.' } },
+          exits: [],
+          entities,
+        },
+        text: (key: string) => key,
+        log: [],
+        g: { place: [] },
+        press: () => {},
+        open: () => {},
+        openChoice: () => {},
+        details: null,
+      } as any),
+    )
+      .filter(
+        (n) =>
+          n.type === 'View' && [n.props.children].flat().every((c: any) => c?.type?.name === 'Tap'),
+      )
+      .map((n) => [n.props.children].flat().map((c: any) => c.props.label));
+  const room = [
+    entity('satchel', 'item'),
+    entity('ash', 'npc'),
+    entity('lamp', 'item'),
+    entity('wren', 'npc'),
+  ];
+  assert.deepEqual(groups(room), [
+    ['ash, open', 'wren, open'],
+    ['satchel, open', 'lamp, open'],
+  ]);
+  assert.deepEqual(groups([entity('lamp', 'item')]), [['lamp, open']]);
+});

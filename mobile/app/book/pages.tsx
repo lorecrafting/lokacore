@@ -8,6 +8,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { head, paper, prose, note } from './paper.ts';
+import { space } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -114,8 +115,12 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
     )
     .map((b) => <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
 
+// NPCs, then every other entity as the room's items; no headings, an empty group omitted
+// (book-ui.md, World and status entry).
 function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
-  return p.view.entities.map((e) => {
+  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
+  const items = p.view.entities.filter((e) => e.kind !== 'npc');
+  const line = (e: GameView['entities'][number]) => {
     const name = p.text(e.name);
     return (
       <Tap
@@ -130,7 +135,17 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
         {e.carrying && <Text style={note}>{p.text(e.carrying)}</Text>}
       </Tap>
     );
-  });
+  };
+  return [npcs, items]
+    .filter((group) => group.length > 0)
+    .map((group, i) => (
+      <View
+        key={group[0].kind === 'npc' ? 'npcs' : 'items'}
+        style={i ? { marginTop: space.block } : undefined}
+      >
+        {group.map(line)}
+      </View>
+    ));
 }
 
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
