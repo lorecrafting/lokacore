@@ -82,12 +82,14 @@ console and clicks, use the Claude in Chrome extension on the same URL.
 
 The Loka picker (`mobile/app/.storybook/picker/`, [design input](briefs/polish/design-input-p1-2026-10-09.md)):
 **Pick** in the toolbar or `P`, click an element (shift-click up to four), write in the Polish
-panel on the right, `⌘↩` sends. `storybook dev` only, loopback only. Each send appends one line to
+panel on the right, `↩` sends (`⇧↩` a newline). `storybook dev` only, loopback only. Each send appends one line to
 `.polish/picks.jsonl` in the served worktree (gitignored): `{id, time, note, story: {id, title},
 palette, viewport, elements: [{chain, box, computed, text, role, name, testId, shot}]}`, the crop at
 `.polish/shots/<id>-<i>.png`; Close batch and Keep going append `{id, time, type: 'close' | 'keep-going'}`.
 Agents answer in `.polish/status.jsonl` through `bin/polish_status.sh`: `{id, time, state: working |
 done | stopped, model, summary, sha}`, `{id, time, state: 'moved', beads, summary}` or `{time, type:
-'suggest-close', reason}`; the panel polls it. Outside a session, [`/polish-intake`](../.claude/commands/polish-intake.md) moves waiting
+'suggest-close', reason}`; `bin/polish_status.sh log "<text>"` adds `{time, type: 'log', text}`, a
+muted PM line in the conversation (routed, waiting). The panel polls it and, while a pick works,
+shows an activity line above the composer. Outside a session, [`/polish-intake`](../.claude/commands/polish-intake.md) moves waiting
 picks to Beads. `mise exec -- npm run storybook:picker` runs the picker end to end on a dev server with
 its own queue directory (about a minute; nightly in `book-e2e.yml`).

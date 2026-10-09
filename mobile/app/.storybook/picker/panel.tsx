@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from 'storybook/internal/components';
 import { useAddonState } from 'storybook/manager-api';
 import { ADDON_ID, type Feed, type Status } from './events.ts';
-import { OwnerItem, PmCard, chipText, working } from './items.tsx';
+import { Activity, LogLine, OwnerItem, PmCard, chipText, working } from './items.tsx';
 import { escape, event, initial, pin, send, type State } from './state.ts';
 import { Area, Chip, Column, Composer, Dot, Header, List, Muted, Negative } from './styles.ts';
 
@@ -45,8 +45,10 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
     if (atBottom.current && list.current) list.current.scrollTop = list.current.scrollHeight;
   });
   const answered = Math.max(0, ...feed.picks.filter((p) => p.type).map((p) => p.time));
+  // PM log lines stay; a suggest-close card goes once answered.
   const cards = feed.status.filter(
-    (s): s is Extract<Status, { type: string }> => 'type' in s && s.time > answered,
+    (s): s is Extract<Status, { type: string }> =>
+      'type' in s && (s.type === 'log' || s.time > answered),
   );
   const rows = [...feed.picks.filter((p) => !p.type), ...cards].sort((a, b) => a.time - b.time);
   return (
@@ -64,8 +66,10 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
         </Muted>
       )}
       {rows.map((r) =>
-        'reason' in r ? (
-          <PmCard key={r.time} reason={r.reason} close={close.button} />
+        r.type === 'log' ? (
+          <LogLine key={`log-${r.time}`} text={r.text} />
+        ) : r.type === 'suggest-close' ? (
+          <PmCard key={`card-${r.time}`} reason={r.reason} close={close.button} />
         ) : (
           <OwnerItem key={r.id} p={r} feed={feed} />
         ),
@@ -87,7 +91,7 @@ const Hint = ({ failed }: { failed: string | null }) =>
   failed ? (
     <Negative>not sent: {failed}</Negative>
   ) : (
-    <Muted style={{ fontSize: 11 }}>⌘↩ send · esc clear · ⇧click adds an element</Muted>
+    <Muted style={{ fontSize: 11 }}>↩ send · ⇧↩ newline · esc clear · ⇧click adds an element</Muted>
   );
 
 // The text and pins stay until the queue answered 200 (a failed send shows why).
@@ -114,8 +118,11 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
         placeholder="What should change?"
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submit();
-          else if (e.key === 'Escape') {
+          if (e.nativeEvent.isComposing) return; // IME: Enter picks the candidate
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            void submit();
+          } else if (e.key === 'Escape') {
             setText('');
             if (!text || pending.length) escape(); // text alone: only the text goes
           }
@@ -159,6 +166,7 @@ export const Panel = () => {
     <Column>
       <Session feed={feed} close={close} />
       <Conversation feed={feed} close={close} />
+      {working(feed) > 0 && <Activity feed={feed} />}
       <Compose pending={pending} focus={focus} />
     </Column>
   );
