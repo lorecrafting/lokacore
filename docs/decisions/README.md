@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-08 [Owner decision: designer on Fable for the polish phase](owner-decision-designer-fable-2026-10-08.md)
 - 2026-10-08 [Owner decision: mechanics toolbox before the owner's own world](owner-decision-mechanics-toolbox-2026-10-08.md)
 - 2026-10-08 [Owner decision: process tightening (self-review, mutants, retro)](owner-decision-process-tightening-2026-10-08.md)
 - 2026-10-08 [Owner decision: agent models and tooling](owner-decision-agent-tooling-2026-10-08.md)

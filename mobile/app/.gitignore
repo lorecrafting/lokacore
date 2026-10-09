@@ -5,3 +5,5 @@ node_modules/
 /.e2e/
 /.walkthrough/
 /.dev-cartridge/
+/storybook-static/
+debug-storybook.log

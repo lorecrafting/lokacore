@@ -164,7 +164,10 @@ function animate(
     { duration: timing.duration, easing: easing(timing.easing), reduceMotion: ReduceMotion.Never },
     (done) => done && scheduleOnRN(clear),
   );
-  return () => leaving.image?.dispose();
+  // Skia's canvas can draw the unmounted curl once more: free its picture two frames later. Not
+  // cancelled on unmount: freeing at once is that same use after free; a late free touches no state.
+  return () =>
+    void requestAnimationFrame(() => requestAnimationFrame(() => leaving.image?.dispose()));
 }
 
 function Curl(p: {

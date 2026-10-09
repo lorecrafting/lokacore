@@ -7,7 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
-import { size, space, type } from './tokens.ts';
+import { opacity, size, space, type } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -68,21 +68,24 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
 }
 
 // Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
-export function Control({ label, onPress }: { label: string; onPress: () => void }) {
+export function Control(p: { label: string; onPress: () => void; disabled?: boolean }) {
+  const { label, onPress, disabled } = p;
   const c = usePalette();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
       onPress={onPress}
       style={{
         minHeight: size.touch,
         minWidth: size.touch,
         justifyContent: 'center',
         alignItems: 'center',
+        opacity: disabled ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...type.control, color: c.fg }}>{label}</Text>
+      <Text style={{ ...type.control, color: disabled ? c.dim : c.fg }}>{label}</Text>
     </Pressable>
   );
 }

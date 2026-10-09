@@ -43,7 +43,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: mobile/app
@@ -57,6 +57,9 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npx e2e-web install chromium --with-deps
       - run: npm run test:e2e
+      # Every Storybook story renders, its play function and axe (test: 'error') pass (CHECKS.md).
+      - run: npx playwright install chromium
+      - run: npm run storybook:smoke
       - if: failure()
         name: Redact browser failure diagnostics
         run: |
