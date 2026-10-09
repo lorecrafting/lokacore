@@ -63,8 +63,9 @@ Report at the end of the slice, not at every step.
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
    protocol change with new behavior). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
-   Store the brief durably when it is drafted (the issue's Beads notes, `br update <id> --append-notes`,
-   or `docs/briefs/`); a scratchpad copy is only a working file. Beads text uses repo-relative paths and worktree names,
+   Store the brief durably when it is drafted, one home per kind: a slice brief and its design input
+   live in that slice's Beads issue notes (`br update <id> --append-notes`); `docs/briefs/` holds only
+   milestone or gate plans that several slices or reviewers link to. A scratchpad copy is only a working file. Beads text uses repo-relative paths and worktree names,
    never absolute or home-relative paths. Before ruling on an owner-approved item, read the owner's
    approval note and cite it, not the proposal text. Link process rules (AGENTS.md,
    WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
