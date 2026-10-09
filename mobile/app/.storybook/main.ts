@@ -122,6 +122,15 @@ const config: StorybookConfig = {
         })
           .replaceAll('&', '&amp;')
           .replaceAll('"', '&quot;')}" />
+<style>
+  /* Reserve a strip for the toolbar (no option exists but bottom-left/right placement): 42px bar,
+     16px from the bottom, 16px gap above it, measured in Chromium. Stories size by 100vh inline;
+     the padding lets a taller story scroll clear of the bar. */
+  body { padding-bottom: 74px !important; }
+  #storybook-root [style*='min-height: 100vh'] { min-height: calc(100vh - 74px) !important; }
+  #storybook-root [style^='height: 100vh'],
+  #storybook-root [style*=' height: 100vh'] { height: calc(100vh - 74px) !important; }
+</style>
 <script>
   // toolbar.js skips framed pages unless window.name marks a Tidewave control session; the preview
   // is always framed in the Storybook UI. The name only namespaces the toolbar's saved state.
