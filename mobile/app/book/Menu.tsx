@@ -70,7 +70,8 @@ export function NpcPage(p: NpcProps) {
   const c = usePalette();
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
-  const actions = p.npc ? p.g.on(p.npc.id) : [];
+  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
+  const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
   const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
