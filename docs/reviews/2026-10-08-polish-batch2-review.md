@@ -79,7 +79,7 @@ CHANGES REQUIRED: B1 (red required hosted run), S1, S2. Nits at the developer's 
 - **B1 resolved pending hosted green.** Root cause is sound: `PageTurn.tsx:119` drops the curl when the
   leaving picture is not taken within `motion.quick` (160 ms), so CPU starvation from parallel story files
   on a 4-vCPU runner explains the missing canvas; my local 6/6 head and 6/6 base under load fit that.
-  `fileParallelism: false` (`.storybook/vitest.config.mts:12`) is a proportionate fix with no app change.
+  `fileParallelism: false` (`.storybook/vitest.config.mts:14`) is a proportionate fix with no app change.
   The PM checks ci 37918765054 and book-e2e 37918768492. Follow-up issue recommended (not blocking): the
   fallback is silent, so a slow device never curls and nothing reports it; the story is the only sensor.
 - **S1 resolved.** `bin/check_lock.sh` sourced in the smoke subshell (`.githooks/pre-push:30`) and by
