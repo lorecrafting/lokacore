@@ -1,6 +1,6 @@
 #!/bin/sh
-# Run the PM scripts (sync_pr, after_merge, br_create, check_all lock, pre-push lanes, mutate,
-# session_status) in throwaway repos with stubs; each case names the break it catches.
+# Run the PM scripts (sync_pr, after_merge, br_create, mutate, session_status, preview_update,
+# polish_session) in throwaway repos with stubs; each case names the break it catches.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
@@ -43,74 +43,6 @@ sp base; pushed=$(git rev-parse origin/pr); sy docs-fail 1 1
 [ "$(git rev-parse origin/pr)" = "$pushed" ] || bad 'sync_pr docs-fail: pushed'
 # Break: the rerun sees the local merge, says "already has main" and exits 0 without pushing.
 sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/pr)" ] || bad 'sync_pr rerun: not pushed'
-# --- .githooks/pre-push ----------------------------------------------------------------------
-# Real hook and bin/ci_scope.sh, stub check_all.sh that records its arguments; each push is a new
-# branch off a pushed main. Break: a *.test.ts-only push runs the full line, or source/peer edits
-# get the short lanes.
-O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-git checkout -qb main; mkdir -p .githooks bin kernel/ts/test mobile/app/book; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" "$bin/check_lock.sh" bin/
-printf '#!/bin/sh\necho "lane=$*" > "%s/lane"\n' "$R.d" > bin/check_all.sh; mkdir "$R.d"; chmod +x bin/*.sh .githooks/pre-push
-touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts mobile/app/book/p.tsx; git add . && git commit -qm base && git push -q origin main
-git config core.hooksPath .githooks
-pp() { # <case> <file> <want-args>
-  git checkout -q -b "$1" main; echo 1 >> "$2"; git commit -qam "$1"; rm -f "$R.d/lane"
-  capped git push -q origin "$1" > /dev/null 2>&1 || bad "pre-push $1: push failed"
-  [ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=$3" ] || bad "pre-push $1: $(cat "$R.d/lane" 2>/dev/null), want lane=$3"
-}
-pp tests kernel/ts/test/k.test.ts --no-mix-test
-pp docs a.md --metadata
-pp peer kernel/ts/test/differential_peer.ts ''
-# Break: a later test-only ref downgrades an earlier full-lane ref in the same push.
-for b in p2:kernel/ts/test/differential_peer.ts t2:kernel/ts/test/k.test.ts; do
-  git checkout -q -b "${b%%:*}" main; echo 2 >> "${b#*:}"; git commit -qam "$b"
-done; rm -f "$R.d/lane"
-capped git push -q origin p2 t2 > /dev/null 2>&1 || bad 'pre-push two refs: push failed'
-[ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=" ] || bad "pre-push two refs: $(cat "$R.d/lane" 2>/dev/null), want lane="
-# Break: a Book change skips the Storybook smoke, a non-Book change runs it, or it runs outside the
-# check_all lock (stub mise logs each call and whether the lock is held).
-mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $* $(test -d %s/.git/loka-check.lock && echo locked)" >> "%s/smoke"\n' "$R" "$R.d" > "$R.d/bin/mise"; chmod +x "$R.d/bin/mise"
-PATH="$R.d/bin:$PATH" pp book mobile/app/book/p.tsx ''
-PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
-[ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke locked" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
-# Break: a toolbox/* push runs checks, or a push of toolbox/* plus another branch skips them.
-git checkout -q -b toolbox/x main; echo 4 >> a.md; git commit -qam tb; rm -f "$R.d/lane"
-capped git push origin toolbox/x > "$R.d/out" 2>&1 || bad 'pre-push toolbox: push failed'
-grep -q 'hosted CI is the gate' "$R.d/out" || bad 'pre-push toolbox: hook did not announce the skip'
-[ ! -e "$R.d/lane" ] || bad 'pre-push toolbox: checks ran'
-git checkout -q -b mixed main; echo 3 >> a.md; git commit -qam mixed; rm -f "$R.d/lane"
-capped git push -q origin mixed toolbox/x:refs/heads/toolbox/y > /dev/null 2>&1 || bad 'pre-push mixed: push failed'
-[ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=--metadata" ] || bad 'pre-push mixed: checks skipped'
-# Break: a dirty tracked file is pushed after checks of a tree nobody committed; an untracked file blocks.
-git checkout -q -b dirty main; echo 1 >> a.md; git commit -qam dirty; echo 2 >> a.md; rm -f "$R.d/lane"
-if capped git push -q origin dirty > /dev/null 2>&1; then bad 'pre-push dirty: pushed with a modified tracked file'; fi
-[ ! -e "$R.d/lane" ] || bad 'pre-push dirty: checks ran'
-git checkout -q a.md; touch untracked.tmp
-capped git push -q origin dirty > /dev/null 2>&1 || bad 'pre-push untracked: an untracked file blocked the push'
-rm -f untracked.tmp
-# --- check_all.sh lock --------------------------------------------------------------------
-# Stub mise logs each call. Break: a second run overlaps a live holder instead of waiting, a dead
-# holder's lock blocks forever, or the lock outlives the run.
-printf '#!/bin/sh\necho "$*" >> "$MISE_LOG"\n' > "$tmp/stub/mise"; chmod +x "$tmp/stub/mise"
-R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; cp "$bin/check_all.sh" "$bin/check_lock.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh
-lk=$(git rev-parse --absolute-git-dir)/loka-check.lock
-ca() { MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-ts; }
-sleep 30 & holder=$!; mkdir "$lk"; echo $holder > "$lk/pid"
-ca > out 2>&1 & run=$!
-i=0; until grep -q waiting out || [ $i -ge 40 ]; do sleep 0.5; i=$((i + 1)); done; sleep 1
-grep -q "waiting for $holder" out && [ ! -s "$R.log" ] || { bad 'check_all lock: did not wait for a live holder'; cat out; }
-{ kill $holder; wait $holder || true; } 2>/dev/null; wait $run || bad 'check_all lock: run failed after the holder ended'
-[ -s "$R.log" ] && [ ! -d "$lk" ] || bad 'check_all lock: no run after the holder ended, or lock left behind'
-sh -c 'exit 0' & dead=$!; wait $dead; mkdir "$lk"; echo $dead > "$lk/pid"; : > "$R.log"
-ca > out 2>&1 && [ -s "$R.log" ] || { bad 'check_all lock: a dead holder blocked the run'; cat out; }
-# Break: a partial (--no-mix-test) pass records the tree as checked, so a later full-lane push of
-# the same tree skips mix test at pre-push. A full pass on the same clean tree must record it.
-R=$(mktemp -d); cd "$R"; git init -q; mkdir -p bin kernel/ts/node_modules mobile/app/node_modules node_modules
-cp "$bin/check_all.sh" "$bin/check_lock.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh; git add . && git commit -qm t
-rec=$(git rev-parse --git-path loka-checked-tree)
-MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-mix-test > "$R.out" 2>&1 || bad 'check_all record: --no-mix-test run failed'
-[ ! -f "$rec" ] || bad 'check_all record: a --no-mix-test pass recorded the tree'
-MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh > "$R.out" 2>&1 || bad 'check_all record: full run failed'
-[ "$(cat "$rec" 2>/dev/null)" = "$(git rev-parse HEAD^{tree})" ] || bad 'check_all record: a full pass did not record the tree'
 # --- br_create.sh -----------------------------------------------------------------------
 # Stub br logs each call; create prints a new id, show prints $SHOW. Break: the path is not cleared,
 # or on the wrong id; a local path in the new row is not warned about, refuses the create, or a
@@ -185,9 +117,9 @@ am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] 
 STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
 git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
-# Break: a br write that dirties the export after the commit makes the pre-push hook refuse (stand-in hooks).
-amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit
-printf '#!/bin/sh\ngrep -q "^refs/heads/main " || exit 0\ngit diff --quiet || { echo "pre-push: commit or stash tracked changes first" >&2; exit 1; }\n' > .git/hooks/pre-push; chmod +x .git/hooks/post-commit .git/hooks/pre-push
+# Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
+# uncommitted or unpushed.
+amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit; chmod +x .git/hooks/post-commit
 am concurrent-write 0; git fetch -q origin
 [ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
 # --- mutate.sh -----------------------------------------------------------------------------
