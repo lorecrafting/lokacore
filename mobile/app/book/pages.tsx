@@ -229,7 +229,7 @@ export function Page(p: {
         style={{ flex: 1 }}
         contentContainerStyle={{
           padding: space.page,
-          ...(p.fixedTitle && { paddingTop: space.md }), // the title's own space.md below it, then this: 16 to the description
+          ...(p.fixedTitle && { paddingTop: space.xs }), // the title's own space.md below it, then this: 12 to the description
           gap: space.block,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
