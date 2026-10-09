@@ -24,7 +24,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
       };
     if (url === 'test:keyboard-native')
       return {

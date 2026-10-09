@@ -5,7 +5,8 @@
 import { Animated, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { ANGLE, STAIR, ZOOM as U } from './joystick.ts';
-import { body, paper } from './paper.ts';
+import { usePalette } from './palette.ts';
+import { font } from './tokens.ts';
 
 type Exit = GameView['exits'][number];
 const [STEP, YOU, RING, NODE] = [12, 2.6, 1.5, 2.6]; // ring distance, dot, ring and stair node radii
@@ -55,6 +56,7 @@ function Line(p: { from: number[]; to: number[]; color: string; w?: number }) {
 }
 
 function Path({ exit, on }: { exit: Exit; on: boolean }) {
+  const c = usePalette();
   const a = (ANGLE[exit.direction] * Math.PI) / 180;
   const v = [Math.sin(a), -Math.cos(a)];
   const at = (n: number) => [v[0] * n, v[1] * n];
@@ -62,30 +64,25 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   if (exit.available)
     return (
       <>
-        <Line from={at(YOU)} to={at(STEP - RING)} color={paper.fg} w={w} />
-        <Disc
-          x={at(STEP)[0]}
-          y={at(STEP)[1]}
-          r={RING}
-          fill={on ? paper.fg : paper.bg}
-          border={paper.fg}
-        />
+        <Line from={at(YOU)} to={at(STEP - RING)} color={c.fg} w={w} />
+        <Disc x={at(STEP)[0]} y={at(STEP)[1]} r={RING} fill={on ? c.fg : c.bg} border={c.fg} />
       </>
     );
   const [x, y] = at(STEP * 0.6);
   return (
     <>
-      <Line from={at(YOU)} to={[x, y]} color={paper.accent} w={w} />
+      <Line from={at(YOU)} to={[x, y]} color={c.action} w={w} />
       <Line
         from={[x - v[1] * 1.6, y + v[0] * 1.6]}
         to={[x + v[1] * 1.6, y - v[0] * 1.6]}
-        color={paper.accent}
+        color={c.action}
       />
     </>
   );
 }
 
 function Stair({ exit, on }: { exit: Exit; on: boolean }) {
+  const c = usePalette();
   const [x, y] = STAIR[exit.direction];
   const up = exit.direction === 'up';
   return (
@@ -94,8 +91,8 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
         x={x}
         y={y}
         r={NODE}
-        fill={on ? paper.fg : paper.bg}
-        border={exit.available ? paper.fg : paper.accent}
+        fill={on ? c.fg : c.bg}
+        border={exit.available ? c.fg : c.action}
         dashed={!exit.available}
       />
       <Text
@@ -105,9 +102,9 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
           top: (y + (up ? -7.2 : 3.2)) * U,
           width: 16 * U,
           textAlign: 'center',
-          fontFamily: body,
+          fontFamily: font.body,
           fontSize: 3.6 * U,
-          color: paper.dim,
+          color: c.dim,
         }}
       >
         {exit.direction}
@@ -122,6 +119,7 @@ export function MapDrawing(p: {
   zoom: Animated.Value; // 0 at rest, 1 zoomed
   knob: { x: number; y: number }; // your dot's offset from the middle, in zoomed px
 }) {
+  const c = usePalette();
   const scale = p.zoom.interpolate({ inputRange: [0, 1], outputRange: [1 / U, 1] });
   return (
     <Animated.View
@@ -129,7 +127,7 @@ export function MapDrawing(p: {
       style={{ position: 'absolute', left: 28, top: 28, transform: [{ scale }] }}
     >
       <Animated.View style={{ opacity: p.zoom }}>
-        <Disc x={0} y={0} r={36} fill={paper.bg} />
+        <Disc x={0} y={0} r={36} fill={c.bg} />
       </Animated.View>
       {p.exits.map((e) =>
         e.direction in ANGLE ? (
@@ -141,7 +139,7 @@ export function MapDrawing(p: {
         ) : null,
       )}
       {/* Placed by left/top, not a transform wrapper: that displaced the dot (mobile lessons, Polish O-1). */}
-      <Disc x={p.knob.x / U} y={p.knob.y / U} r={YOU} fill={paper.fg} />
+      <Disc x={p.knob.x / U} y={p.knob.y / U} r={YOU} fill={c.fg} />
     </Animated.View>
   );
 }

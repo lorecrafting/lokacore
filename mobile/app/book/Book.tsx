@@ -15,7 +15,8 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { paper, small } from './paper.ts';
+import { usePalette } from './palette.ts';
+import { type } from './tokens.ts';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
@@ -125,6 +126,7 @@ type ViewProps = {
 };
 
 export function BookView(p: ViewProps) {
+  const c = usePalette();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
@@ -138,8 +140,8 @@ export function BookView(p: ViewProps) {
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-      <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={paper.bg}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
+      <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
         {p.screen.view.combat ? (
           <Combat screen={p.screen} g={g} press={p.press} />
         ) : (
@@ -167,6 +169,7 @@ type BottomProps = {
 };
 
 function Bottom(p: BottomProps) {
+  const c = usePalette();
   const { view, text, pending, fault } = p.screen;
   const position = nextPosition(view.position, p.g.position);
   return (
@@ -186,7 +189,7 @@ function Bottom(p: BottomProps) {
           open={() => p.open({ kind: 'contents' })}
         />
       )}
-      {p.screen.catchingUp && <Text style={{ ...small, color: paper.dim }}>Catching up…</Text>}
+      {p.screen.catchingUp && <Text style={{ ...type.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
@@ -227,22 +230,24 @@ type Screen = ReturnType<Presenter['screen']>;
 // that any press still sends (03 §14).
 // The message sits outside the button: its accessibilityLabel replaces the children it reads.
 function Fault(p: { fault: string; startOver: () => void }) {
+  const c = usePalette();
   return (
     <View style={{ alignItems: 'center' }}>
-      <Text style={{ ...small, color: paper.dim }}>{p.fault}</Text>
+      <Text style={{ ...type.small, color: c.dim }}>{p.fault}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Start over"
         onPress={p.startOver}
         style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ ...small, color: paper.accent }}>start over</Text>
+        <Text style={{ ...type.small, color: c.action }}>start over</Text>
       </Pressable>
     </View>
   );
 }
 
 function Back({ onPress, label }: { onPress: () => void; label: string }) {
+  const c = usePalette();
   return (
     <Pressable
       accessibilityRole="button"
@@ -250,7 +255,7 @@ function Back({ onPress, label }: { onPress: () => void; label: string }) {
       onPress={onPress}
       style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>{label}</Text>
+      <Text style={{ ...type.small, fontSize: 17, color: c.fg }}>{label}</Text>
     </Pressable>
   );
 }

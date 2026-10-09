@@ -28,7 +28,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState=v=>globalThis[Symbol.for('dream-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('dream-effect')](f,d);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('dream-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('dream-effect')](f,d);`,
       };
     if (url === 'test:dream-native')
       return {

@@ -8,8 +8,6 @@ import {
   Act,
   Leave,
   logLines,
-  note,
-  prose,
   Sheet,
   Tap,
   ThingPage,
@@ -17,7 +15,7 @@ import {
   titleStyle,
   type Thing,
 } from './pages.tsx';
-import { paper } from './paper.ts';
+import { note, prose, usePalette, type Palette } from './palette.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
@@ -30,17 +28,18 @@ function Choice(p: {
   g: Grouped;
   press: (b: Button) => void;
 }) {
+  const c = usePalette();
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
     <View style={{ marginTop: 12 }}>
       {p.choice.riddle?.attempts && (
-        <Text style={note}>
+        <Text style={note(c)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
           sitting.
         </Text>
       )}
-      {absent(p.view) !== '' && <Text style={note}>{absent(p.view)}</Text>}
+      {absent(p.view) !== '' && <Text style={note(c)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
         if (p.choice.riddle?.choice_id === o.choice_id)
@@ -52,12 +51,12 @@ function Choice(p: {
               press={p.press}
             />
           ) : (
-            <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
+            <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
           );
         return b ? (
           <Act key={o.choice_id} b={b} press={p.press} />
         ) : (
-          <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
+          <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
       })}
     </View>
@@ -67,22 +66,23 @@ function Choice(p: {
 // Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
 // size: allow 45, bounded tile editing and submission share one local buffer
 function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
+  const c = usePalette();
   const [selected, setSelected] = useState<number[]>([]);
   const answer = selected.map((i) => p.bank[i]).join('');
   return (
     <View>
-      <Text style={prose}>{answer || 'Choose letters to answer.'}</Text>
+      <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {p.bank.map((letter, i) => (
           <View key={i}>
             {selected.includes(i) ? (
-              <Text style={note}>{letter}</Text>
+              <Text style={note(c)}>{letter}</Text>
             ) : (
               <Tap
                 label={`Letter ${letter}, tile ${i + 1}`}
                 onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
               >
-                <Text style={{ ...prose, color: paper.accent }}>{letter}</Text>
+                <Text style={{ ...prose(c), color: c.action }}>{letter}</Text>
               </Tap>
             )}
           </View>
@@ -91,10 +91,10 @@ function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button)
       {selected.length > 0 && (
         <View>
           <Tap label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))}>
-            <Text style={prose}>Backspace</Text>
+            <Text style={prose(c)}>Backspace</Text>
           </Tap>
           <Tap label="Clear" onPress={() => setSelected([])}>
-            <Text style={prose}>Clear</Text>
+            <Text style={prose(c)}>Clear</Text>
           </Tap>
           <Act
             b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
@@ -120,6 +120,7 @@ type NpcProps = {
 };
 
 export function NpcPage(p: NpcProps) {
+  const c = usePalette();
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const actions = p.npc ? p.g.on(p.npc.id) : [];
@@ -129,22 +130,24 @@ export function NpcPage(p: NpcProps) {
   return (
     <ScrollView
       ref={scroll}
-      style={{ flex: 1, backgroundColor: paper.bg }}
+      style={{ flex: 1, backgroundColor: c.bg }}
       contentContainerStyle={{ padding: 24 }}
       onContentSizeChange={() => {
         if (p.log.length) scroll.current?.scrollToEnd({ animated: false });
       }}
     >
-      <Text {...titleFocus} style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
+      <Text {...titleFocus} style={{ ...titleStyle(c), fontSize: 32 }} accessibilityRole="header">
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
-      {description && <Text style={prose}>{plain(p.text(description))}</Text>}
+      {description && <Text style={prose(c)}>{plain(p.text(description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
-        <Text style={note}>{p.text(p.npc.carrying)}</Text>
+        <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}
-      {logLines(p.log)}
-      {npcSkills(p)}
-      {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
+      {logLines(c, p.log)}
+      {npcSkills(c, p)}
+      {!choice && !actions.length && !p.log.length && (
+        <Text style={note(c)}>Nothing to do here.</Text>
+      )}
       {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
       {actions
@@ -159,7 +162,7 @@ export function NpcPage(p: NpcProps) {
 }
 
 // The skills this NPC teaches: learned or not, and whether the player qualifies now.
-const npcSkills = (p: NpcProps) =>
+const npcSkills = (c: Palette, p: NpcProps) =>
   p.view.skills
     ?.filter(
       (s) =>
@@ -174,7 +177,7 @@ const npcSkills = (p: NpcProps) =>
         ),
     )
     .map((s) => (
-      <Text key={s.skill.key} style={note}>
+      <Text key={s.skill.key} style={note(c)}>
         {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
       </Text>
@@ -189,11 +192,12 @@ const SECTIONS: [Section, string][] = [
   ['settings', 'Settings'],
 ];
 export function ContentsPage(p: { open: (section: Section) => void }) {
+  const c = usePalette();
   return (
     <Sheet title="Contents">
       {SECTIONS.map(([kind, label]) => (
         <Tap key={kind} label={label} onPress={() => p.open(kind)}>
-          <Text style={{ ...prose, color: paper.accent }}>{label}</Text>
+          <Text style={{ ...prose(c), color: c.action }}>{label}</Text>
         </Tap>
       ))}
     </Sheet>
@@ -229,12 +233,13 @@ export function Item(p: {
 }
 
 function ShopOptions(p: NpcProps) {
+  const c = usePalette();
   return (
     <>
       {p.npc &&
         'shop' in p.npc &&
         p.npc.shop?.map((o) => (
-          <Text key={o.item_id} style={note}>
+          <Text key={o.item_id} style={note(c)}>
             {p.text(o.name)}: Buy {o.buy.price}p
             {o.buy.available
               ? ''
@@ -248,13 +253,14 @@ function ShopOptions(p: NpcProps) {
 }
 
 function ServiceOptions(p: NpcProps & { actions: Button[] }) {
+  const c = usePalette();
   const offers = p.npc && 'services' in p.npc ? p.npc.services : undefined;
   return offers?.map((s) => {
     const b = p.actions.find((b) => b.action_key === s.action.action_key);
     return b ? (
       <Act key={s.service.key} b={b} press={p.press} />
     ) : (
-      <Text key={s.service.key} style={note}>
+      <Text key={s.service.key} style={note(c)}>
         {p.text(s.label)}: {s.price}p
         {s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}
         {!s.action.available && ` (${why(s.action, p.text)})`}

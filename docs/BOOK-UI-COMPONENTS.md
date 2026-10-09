@@ -31,7 +31,7 @@ words remain in the cartridge; Book owns layout and navigation.
 
 | Piece | Current implementation | Use |
 |---|---|---|
-| Paper, typography and tone | [`paper.ts`](../mobile/app/book/paper.ts), `prose`, `titleStyle`, `note` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Live palette and text styles until the polish phase moves them to the [design tokens](#design-tokens). |
+| Paper, typography and tone | [`palette.ts`](../mobile/app/book/palette.ts) (`usePalette`, `prose`, `note`), `titleStyle` in [`pages.tsx`](../mobile/app/book/pages.tsx) | The shown palette from the [design tokens](#design-tokens) and the text styles built on it. |
 | Touch and action controls | `Tap`, `Act`, `Leave` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Accessible touch target, confirmed offered action and local return. |
 | Page shell and navigation | `BookView`/`Body` in [`Book.tsx`](../mobile/app/book/Book.tsx), `Page`/`pagesAfter` in [`model.ts`](../mobile/app/book/model.ts), `PageTurn` | World/detail stack, foreground precedence, return and transition. |
 | Shared reading layout | `Sheet`, `RoomPage`, `ThingPage` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Scrolling identity, prose, history and action list. |
@@ -69,8 +69,7 @@ it. Do not create a new screen merely because a mechanic has a new name.
 type styles, spacing, sizes, radius, opacity, motion and sound. Its values are the
 [Chapter 1 mock's](design/ui-exploration/chapter-one-playable.html) base page with every effect
 off, consolidated; the [foundation notes](design/foundation/README.md) list each mock value
-against the live one and the [specimen](design/foundation/specimen.html) shows them. Live code
-still reads [`paper.ts`](../mobile/app/book/paper.ts) until the polish phase moves every import.
+against the live one and the [specimen](design/foundation/specimen.html) shows them.
 
 - **Colour.** Four complete palettes with the same roles: `light` (the paper by day), `dawn`
   (a cool grey-blue paper), `dusk` (a warm umber page with lamp ink) and `dark` (the mock's unlit

@@ -3,9 +3,9 @@ import { DreamResume } from './DreamPage.tsx';
 import { Text } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type Page } from './model.ts';
-import { Leave, Sheet, Tap, note, prose } from './pages.tsx';
+import { Leave, Sheet, Tap } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
-import { paper } from './paper.ts';
+import { note, prose, usePalette, type Palette } from './palette.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Notice = NonNullable<GameView['notices']>[number];
@@ -64,6 +64,7 @@ function control(screen: Screen, id: string) {
 }
 
 function NoticeLink(p: Props & { notice: Notice }) {
+  const c = usePalette();
   const { notice, screen } = p;
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
@@ -71,7 +72,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
   if (notice.bed || notice.transport || notice.remaining !== undefined)
     return (
       <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
-        <Text style={{ ...prose, color: paper.accent }}>
+        <Text style={{ ...prose(c), color: c.action }}>
           {title}
           {notice.remaining === undefined ? '' : ` (${notice.remaining})`}
         </Text>
@@ -85,10 +86,10 @@ function NoticeLink(p: Props & { notice: Notice }) {
         p.press(b, notice.id);
       }}
     >
-      <Text style={{ ...prose, color: paper.accent }}>{title}</Text>
+      <Text style={{ ...prose(c), color: c.action }}>{title}</Text>
     </Tap>
   ) : (
-    <Text style={note}>
+    <Text style={note(c)}>
       {title}
       {offer && !offer.available ? `: ${why(offer, screen.text)}` : ''}
     </Text>
@@ -96,6 +97,7 @@ function NoticeLink(p: Props & { notice: Notice }) {
 }
 
 export function NoticeEntries(p: Props) {
+  const c = usePalette();
   return (
     <>
       {(p.screen.view.notice_boards ?? []).map((board) => (
@@ -104,7 +106,7 @@ export function NoticeEntries(p: Props) {
           label={p.screen.text(board.title)}
           onPress={() => p.open({ kind: 'board', id: board.id })}
         >
-          <Text style={{ ...prose, color: paper.accent }}>{p.screen.text(board.title)}</Text>
+          <Text style={{ ...prose(c), color: c.action }}>{p.screen.text(board.title)}</Text>
         </Tap>
       ))}
       {(p.screen.view.notices ?? []).map((notice) => (
@@ -115,6 +117,7 @@ export function NoticeEntries(p: Props) {
 }
 
 export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; world: () => void }) {
+  const c = usePalette();
   const board =
     p.page.kind === 'board'
       ? p.screen.view.notice_boards?.find((b) => b.id === p.page.id)
@@ -123,15 +126,15 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
   if (!detail) return null;
   return (
     <Sheet title={p.screen.text(detail.title)}>
-      <Text style={prose}>{plain(p.screen.text(detail.description))}</Text>
-      {'remaining' in detail && <Text style={note}>Remaining: {detail.remaining}</Text>}
+      <Text style={prose(c)}>{plain(p.screen.text(detail.description))}</Text>
+      {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {p.screen.detail(detail.id).map((line, i) => (
-        <Text key={i} style={prose}>
+        <Text key={i} style={prose(c)}>
           {typeof line === 'string' ? line : line.text}
         </Text>
       ))}
       {'transport' in detail && detail.transport && (
-        <Text style={note}>
+        <Text style={note(c)}>
           {detail.transport.waived
             ? 'Free passage to recover your belongings on the isle.'
             : `Fare: ${detail.transport.charge === 0 ? 'free' : `${detail.transport.charge}p`}.`}
@@ -141,7 +144,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
       {!board &&
         ('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
-          offerControl(p, detail.id, offer),
+          offerControl(c, p, detail.id, offer),
         )}
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
       {p.screen.view.notices?.some((n) => n.id === detail.id) && <Leave leave={p.world} />}
@@ -150,7 +153,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
 }
 
 // A notice's offered action: its live button, or why it is unavailable.
-function offerControl(p: Props, id: string, offer: Offer) {
+function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
   const button = p.screen.buttons.find(
     (b) =>
       b.detail_id === id &&
@@ -163,10 +166,10 @@ function offerControl(p: Props, id: string, offer: Offer) {
       label={button.label}
       onPress={() => p.press(button, id)}
     >
-      <Text style={{ ...prose, color: paper.accent }}>{button.label}</Text>
+      <Text style={{ ...prose(c), color: c.action }}>{button.label}</Text>
     </Tap>
   ) : !offer.available ? (
-    <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note}>
+    <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note(c)}>
       {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
     </Text>
   ) : null;

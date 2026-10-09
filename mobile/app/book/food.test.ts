@@ -30,7 +30,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis.d4Hooks.state(v); export const useRef = v => globalThis.d4Hooks.ref(v); export const useEffect = f => globalThis.d4Hooks.effect(f);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d4Hooks.state(v); export const useRef = v => globalThis.d4Hooks.ref(v); export const useEffect = f => globalThis.d4Hooks.effect(f);`,
       };
     if (url === 'test:d4-native')
       return {

@@ -2,7 +2,6 @@
 // sound. Rules, states and consumers: docs/BOOK-UI-COMPONENTS.md#design-tokens. Values are the
 // Chapter 1 mock's base page with every effect off (docs/design/ui-exploration/chapter-one-playable.html,
 // `.ph`), consolidated; docs/design/foundation/README.md lists mock against live.
-// ponytail: paper.ts still feeds the live Book; the polish phase moves its imports here and deletes it.
 
 const light = {
   bg: '#ebe6d7', // the paper

@@ -1,4 +1,3 @@
-export { prose, note } from './paper.ts';
 import { ItemDetails } from './skills.tsx';
 // The book's room and thing pages and their shared controls (the Contents sections: sections.tsx).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
@@ -7,8 +6,8 @@ import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-nati
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { head, paper, prose, note } from './paper.ts';
-import { space } from './tokens.ts';
+import { note, prose, usePalette, type Palette } from './palette.ts';
+import { font, space } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -16,11 +15,15 @@ type Grouped = ReturnType<typeof group>;
 export type { Thing } from './model.ts';
 
 // Tones are projected by the kernel from the cartridge's band table.
-export const band = (tone: Pool['tone']): string =>
-  ({ normal: paper.fg, warning: paper.mid, danger: paper.accent })[tone];
+export const band = (c: Palette, tone: Pool['tone']): string =>
+  ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
-export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
-export const scrollPaper = { backgroundColor: paper.bg };
+export const titleStyle = (c: Palette) => ({
+  fontFamily: font.head,
+  fontSize: 26,
+  color: c.fg,
+  paddingBottom: 10,
+});
 // A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
 // on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
 export const titleFocus = {
@@ -46,17 +49,19 @@ export function Tap(p: { label: string; onPress: () => void; children: ReactNode
 }
 
 export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
+  const c = usePalette();
   return (
     <Tap label={b.label} onPress={() => press(b)}>
-      <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
+      <Text style={{ ...prose(c), color: c.action }}>{b.label}</Text>
     </Tap>
   );
 }
 
 export function Leave(p: { leave: () => void }) {
+  const c = usePalette();
   return (
     <Tap label="Leave" onPress={p.leave}>
-      <Text style={{ ...prose, color: paper.accent }}>Leave</Text>
+      <Text style={{ ...prose(c), color: c.action }}>Leave</Text>
     </Tap>
   );
 }
@@ -73,8 +78,9 @@ export function RoomPage(p: {
   openChoice: () => void;
   details: ReactNode;
 }) {
+  const c = usePalette();
   const title = (
-    <Text {...titleFocus} style={{ ...titleStyle, textAlign: 'center' }}>
+    <Text {...titleFocus} style={{ ...titleStyle(c), textAlign: 'center' }}>
       {p.text(p.view.place.title.key)}
     </Text>
   );
@@ -89,28 +95,31 @@ export function RoomPage(p: {
           title
         )}
       </View>
-      <ScrollView style={[{ flex: 1 }, scrollPaper]} contentContainerStyle={{ padding: 24 }}>
-        <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
-        {warnings(p.view, p.text)}
+      <ScrollView
+        style={{ flex: 1, backgroundColor: c.bg }}
+        contentContainerStyle={{ padding: 24 }}
+      >
+        <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+        {warnings(c, p.view, p.text)}
         <Here view={p.view} text={p.text} open={p.open} />
         {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
           <Tap label="Continue conversation" onPress={p.openChoice}>
-            <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
+            <Text style={{ ...prose(c), color: c.action }}>Continue conversation</Text>
           </Tap>
         )}
         {p.details}
         {placeActions(p.view, p.g, p.press)}
-        {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
+        {p.log.length > 0 && <Text style={{ ...prose(c), marginTop: 12 }}>{p.log.join('\n')}</Text>}
       </ScrollView>
     </View>
   );
 }
 
-const warnings = (view: GameView, text: Say) =>
+const warnings = (c: Palette, view: GameView, text: Say) =>
   view.exits
     .filter((e) => e.warning)
     .map((e) => (
-      <Text key={e.direction} style={note}>
+      <Text key={e.direction} style={note(c)}>
         {text(e.warning!)}
       </Text>
     ));
@@ -130,6 +139,7 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
 // NPCs, then every other entity as the room's items; no headings, an empty group omitted
 // (book-ui.md, World and status entry).
 function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
+  const c = usePalette();
   const npcs = p.view.entities.filter((e) => e.kind === 'npc');
   const items = p.view.entities.filter((e) => e.kind !== 'npc');
   const line = (e: GameView['entities'][number]) => {
@@ -140,11 +150,11 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
         label={`${name}${e.carrying ? `, ${p.text(e.carrying)}` : ''}, open`}
         onPress={() => p.open(e.id)}
       >
-        <Text style={prose}>
+        <Text style={prose(c)}>
           <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>{cap(name)}</Text> is
           here.
         </Text>
-        {e.carrying && <Text style={note}>{p.text(e.carrying)}</Text>}
+        {e.carrying && <Text style={note(c)}>{p.text(e.carrying)}</Text>}
       </Tap>
     );
   };
@@ -161,11 +171,12 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
 }
 
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
+  const c = usePalette();
   return (
-    <ScrollView style={scrollPaper} contentContainerStyle={{ padding: 24, gap: 8 }}>
+    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ padding: 24, gap: 8 }}>
       <Text
         {...(title ? titleFocus : {})}
-        style={{ ...titleStyle, fontSize: 32 }}
+        style={{ ...titleStyle(c), fontSize: 32 }}
         accessibilityRole="header"
       >
         {title}
@@ -176,18 +187,18 @@ export function Sheet({ title, children }: { title: string; children: ReactNode 
 }
 
 // A page's log: plain lines, then event lines in italics.
-export const logLines = (log: DetailLine[]) =>
+export const logLines = (c: Palette, log: DetailLine[]) =>
   log.map((line, i) => (
-    <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
+    <Text key={i} style={typeof line === 'string' ? prose(c) : { ...note(c), fontStyle: 'italic' }}>
       {typeof line === 'string' ? line : line.text}
     </Text>
   ));
 
-const tooHeavy = (thing: Thing | undefined, text: Say) =>
+const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
   thing?.actions
     .filter((a) => !a.available && a.reason.code === 'too_heavy')
     .map((a) => (
-      <Text key={a.action_key} style={note}>
+      <Text key={a.action_key} style={note(c)}>
         {text(a.label)}: {reason('too_heavy')}.
       </Text>
     ));
@@ -203,25 +214,26 @@ export function ThingPage(p: {
   leave: () => void;
   back?: () => void;
 }) {
+  const c = usePalette();
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
       <ItemDetails thing={p.thing} text={p.text} />
-      {logLines(p.log)}
-      {tooHeavy(p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && <Text style={note}>Nothing to do here.</Text>}
+      {logLines(c, p.log)}
+      {tooHeavy(c, p.thing, p.text)}
+      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
       {p.actions.map((b) => (
         <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
       {p.back && (
         <Tap label="Back to container" onPress={p.back}>
-          <Text style={prose}>Back to container</Text>
+          <Text style={prose(c)}>Back to container</Text>
         </Tap>
       )}
       <Leave leave={p.leave} />
-      {p.contents.length > 0 && <Text style={titleStyle}>Inside</Text>}
+      {p.contents.length > 0 && <Text style={titleStyle(c)}>Inside</Text>}
       {p.contents.map((e) => (
         <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
-          <Text style={{ ...prose, color: paper.accent }}>{cap(p.text(e.name))}</Text>
+          <Text style={{ ...prose(c), color: c.action }}>{cap(p.text(e.name))}</Text>
         </Tap>
       ))}
     </Sheet>

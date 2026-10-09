@@ -29,7 +29,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState=v=>globalThis[Symbol.for('combat-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('combat-effect')](f,d);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('combat-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('combat-effect')](f,d);`,
       };
     if (url === 'test:combat-hosts')
       return {

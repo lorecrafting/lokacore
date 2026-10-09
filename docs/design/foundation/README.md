@@ -12,7 +12,7 @@ rules do not change. This page is the audit and the mock-against-live record.
 
 ## Audit of the live Book (main `294062aa`, `mobile/app/book`, `App.tsx`, `SaveError.tsx`)
 
-- **Raw colours:** 6 hex literals, all in [`paper.ts`](../../../mobile/app/book/paper.ts); none elsewhere.
+- **Raw colours:** 6 hex literals, all in `paper.ts` (since replaced by `tokens.ts`); none elsewhere.
 - **Raw numeric style literals:** 57 in 10 files outside `paper.ts` (`Footer.tsx` 18, `pages.tsx` 11,
   `DiscoveredMap.tsx` 10, `Book.tsx` 5, `Menu.tsx` 4, `MapDrawing.tsx` 4, `SaveError.tsx` 2,
   `Body.tsx`, `Combat.tsx`, `Turn.tsx` (now `PageTurn.tsx`) 1 each). About 18 are drawing geometry (`MapDrawing`,

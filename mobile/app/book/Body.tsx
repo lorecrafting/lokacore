@@ -5,7 +5,8 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
-import { Act, note, RoomPage } from './pages.tsx';
+import { Act, RoomPage } from './pages.tsx';
+import { note, usePalette } from './palette.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -31,13 +32,14 @@ type BodyProps = {
 };
 
 export function Body(p: BodyProps) {
+  const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   return (
     <View style={{ flex: 1 }}>
       {water && (
         <View style={{ paddingHorizontal: 24 }}>
-          <Text style={note}>{water.remaining_seconds} seconds to surface</Text>
+          <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>
           {surface && <Act b={surface} press={p.press} />}
         </View>
       )}
