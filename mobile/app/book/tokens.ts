@@ -77,6 +77,8 @@ export const type = {
   label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // every resource key in the status
   speaker: { fontFamily: font.caps, fontSize: 17, letterSpacing: 0.5 }, // a speech line's name
   tile: { fontFamily: font.head, fontSize: 23 }, // a riddle letter on a touch-sized card
+  chapterLabel: { fontFamily: font.caps, fontSize: 13, letterSpacing: 2.6 }, // the chapter card's "Chapter one" (the mock's `.chapter small`)
+  chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`): 38 above the mock's scaled 33 so it steps above pageTitle
 };
 
 export const space = {
@@ -98,6 +100,7 @@ export const size = {
   minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
   focus: 2, // the web keyboard focus ring: its outline width and its offset
+  chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
 };
 
 export const radius = { tag: 3, card: 10 };

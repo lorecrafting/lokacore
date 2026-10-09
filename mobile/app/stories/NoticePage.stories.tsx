@@ -15,7 +15,10 @@ const meta: Meta = {
 export default meta;
 
 export const Board: StoryObj = { ...pageStory(NoticeBoardView), name: 'Board' };
-export const NoticeWithRead: StoryObj = { ...pageStory(NoticeReadView), name: 'Notice with Read' };
+export const NoticeWithRead: StoryObj = {
+  ...pageStory(NoticeReadView, undefined, ['detail.notice.description']),
+  name: 'Notice with Read',
+};
 export const BedWithResumeDream: StoryObj = {
   ...pageStory(NoticeBedResumeView),
   name: 'Bed with Resume dream',
