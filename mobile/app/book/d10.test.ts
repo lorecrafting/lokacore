@@ -56,3 +56,12 @@ test('Where touch sends exact identity and labels here, saved last seen and unkn
     'Their whereabouts are unknown.',
   );
 });
+
+// Breaks: a conflict, invalid or unauthorized press logs its raw kind, "(conflict)", instead of
+// the owner-approved sentence (book-ui.md, Shared elapsed status).
+test('a press that changed nothing logs a plain sentence', () => {
+  const line = (kind: string) => replyLine({ kind } as Reply, (s) => s, view);
+  assert.equal(line('conflict'), 'The book is still catching up; try again.');
+  assert.equal(line('invalid'), "That can't be done.");
+  assert.equal(line('unauthorized'), "That isn't yours to do.");
+});

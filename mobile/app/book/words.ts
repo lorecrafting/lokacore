@@ -59,11 +59,18 @@ type Say = (key: string) => string;
 export const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
   lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
 
+// A press that changed nothing, as one plain sentence (book-ui.md, Shared elapsed status).
+const UNDONE: Partial<Record<Reply['kind'], string>> = {
+  conflict: 'The book is still catching up; try again.',
+  invalid: "That can't be done.",
+  unauthorized: "That isn't yours to do.",
+};
+
 // What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
 // command, else the refusal in words. Never a raw outcome code.
 export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string): string {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
-  if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
+  if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
     const { code } = d.error; // the same sentence as a refused drag (model.ts `refused`)
