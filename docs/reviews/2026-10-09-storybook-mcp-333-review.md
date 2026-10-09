@@ -29,3 +29,13 @@
 - **N1 nit** PR body cites the addon registration at `main.ts:76`; it is `main.ts:96`.
 - **N2 nit** Upstream: `/tidewave/config` answers 200 to a loopback request with a foreign `Host`, so a rebinding page can read `root` (the checkout path). Information only; note for the slim replacement.
 - **N3 question** The 74px rewrite also applies when the designer judges full-height pages in dev Storybook; are polish screenshots taken from dev or the build?
+
+## Fix round 1 (head `f20afdb9`)
+
+Scope: `f20afdb9` only (package.json scripts, `live.ts`, `main.ts:12-13`, web-preview, decision record).
+
+- S1 **fixed**. `package.json:15` binds 127.0.0.1; `:16` `storybook:lan` keeps 0.0.0.0, and web-preview and the record say it exposes `/mcp` (owner choice, paraphrased). Storybook on :6806 with `--host 127.0.0.1`: LAN IP `/mcp` 000 (refused). Loopback with `Host: rebind.evil.test:6806`: 403 `Invalid host`, because Storybook checks Host when bound to a specific address (with 0.0.0.0 it answered 200 above). So rebinding is blocked by default. `http://localhost:6806` (as in `.mcp.json`) reaches `/mcp` and `/tidewave/mcp` (200 via 127.0.0.1); `/tidewave/ws` with the localhost origin 101. Residual: under `storybook:lan` both LAN and rebinding reach `/mcp`. The owner accepted that for phone sessions (should-fix risk, accepted).
+- S2 **fixed**. `LOKA_NO_TIDEWAVE=1`: `previewHead` empty; without it, 1394 chars with toolbar.js. `npm run storybook:live` at this head: exit 0, 9/9 Live stories `ok`. `live.ts` binds 127.0.0.1 and fetches `localhost`; that resolved.
+- N1 fixed in the PR body; N3 answered there.
+
+Verdict: **APPROVE**.
