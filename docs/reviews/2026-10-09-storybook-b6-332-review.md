@@ -36,3 +36,24 @@ None blocking.
 ## Notes
 
 - For the node tests, `mobile/app/node_modules` and `kernel/ts/node_modules` were first symlinked to the main checkout. A vitest attempt left an empty `.vite-temp` in the main checkout's `mobile/app/node_modules`. The directory is empty; I used `npm ci` in the review worktree for the story run. Symlinks removed before the worktree was removed.
+
+## Fix round 1 (head `6dbe64e5`: c04a9f54 designer text, 6dbe64e5 fix)
+
+Scope: the Fable design review's should-fix (a screen reader never heard "Chapter one"). Verdict: **APPROVE WITH NOTES**.
+
+- Fix `sections.tsx:274-283`: one `View accessible accessibilityRole="header"` with `useTitleFocus()` holds the label and the title. It has no `accessibilityLabel`, so its name is the visible text in order. This holds the label-in-name rule.
+- Direct callers:
+  - `useTitleFocus` (`pages.tsx:39`) gives a ref and `tabIndex -1`. A react-native-web View takes both.
+  - `ChapterTitle` play: the header can take focus. It calls `focus()` itself, so it does not test arrival after a turn.
+  - The `PageTurn.stories.tsx:56` regex query is correct.
+- Red control: I moved the label out of the header View, so the header held only the title. `ChapterTitle` failed ("Unable to find … heading … `/^Chapter one\W+The Missing Child/`"); the other 3 passed. Restored.
+- Runs:
+  - `ChapterPages` stories: 4/4 pass.
+  - `PageTurn/ChapterToSettings`: failed twice at the new head, then passed. At the old head `79dcc50f` it passed once and then failed (`expected null not to be null`, the curl wait). This is load flake, not the fix.
+  - Typecheck: not rerun.
+- Tokens: `tokens.ts:81` now explains why 38 is above the mock's scaled 33. That is the designer's call. It replaces my round-1 reasoning that 38 is 2.1em × 18.
+
+### Findings
+
+- should-fix `docs/briefs/polish/design-input-batch-6-2026-10-09.md:23-24` (§1 Layout) and `:42` (the catalogue row copy in the brief): both still put `accessibilityRole="header"` and `useTitleFocus()` on the title alone ("the title … the page header, arriving focus"). That contradicts the revised §1 Accessible name paragraph, `BOOK-UI-COMPONENTS.md:119` and the code. Failure scenario: a later slice that follows §1 Layout puts the header back on the title, and the label drops out of the name again. Fix: the same words as the Accessible name paragraph.
+- nit: §1 and `BOOK-UI-COMPONENTS.md:119` give the name with a comma ("Chapter one, The Missing Child"). On web the two Texts join with no comma, and the play regex `\W+` accepts either. To match, say "in order" without punctuation.
