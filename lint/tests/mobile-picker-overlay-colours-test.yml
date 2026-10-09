@@ -1,0 +1,9 @@
+id: mobile-picker-overlay-colours
+valid:
+  - "const BLUE = '#1EA7FD';"
+  - "const WHITE = '#FFFFFF';"
+  - "box.style.cssText = `border:2px solid ${BLUE}99`;"
+invalid:
+  - "const s = '#7b2d20';"
+  - "const s = '#fff';"
+  - "const s = 'rgb(30 167 253 / 60%)';"

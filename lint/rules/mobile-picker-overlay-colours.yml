@@ -1,0 +1,9 @@
+id: mobile-picker-overlay-colours
+language: tsx
+severity: error
+message: 'The preview overlay has no theme and exactly two raw colours, #1EA7FD (Storybook blue) and #FFFFFF (design input P1, Separation rule).'
+files: [mobile/app/.storybook/picker/overlay.ts]
+rule:
+  kind: string_fragment
+  regex: '^#[0-9a-fA-F]{3,8}$|\b(rgba?|hsla?)\('
+  not: { regex: '^#(1EA7FD|FFFFFF)$' }

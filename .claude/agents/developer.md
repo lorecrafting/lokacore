@@ -1,7 +1,7 @@
 ---
 name: developer
 description: Implements one PR-sized slice from a PM brief in the Loka v3 repo, self-reviews it, opens the PR, then fixes review findings sent back to it. Use per docs/WORKFLOW.md.
-tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch, mcp__storybook__stories-preview, mcp__storybook__get-storybook-story-instructions, mcp__storybook__stories-changed, mcp__storybook__stories-find-by-component, mcp__storybook__test-run, mcp__storybook__docs-list, mcp__storybook__docs-show, mcp__storybook__docs-show-story, mcp__tidewave__get_docs, mcp__tidewave__get_source_location, mcp__tidewave__project_eval, mcp__tidewave__get_logs, mcp__tidewave__browser_eval, mcp__tidewave__create_design_canvas
+tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch, mcp__storybook__stories-preview, mcp__storybook__get-storybook-story-instructions, mcp__storybook__stories-changed, mcp__storybook__stories-find-by-component, mcp__storybook__test-run, mcp__storybook__docs-list, mcp__storybook__docs-show, mcp__storybook__docs-show-story
 model: sonnet
 ---
 

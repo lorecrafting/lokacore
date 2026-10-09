@@ -237,6 +237,7 @@ The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026
 `bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
 style code, tokens and the catalogue line in that worktree, applies each picker prompt at once and
 commits each accepted tweak; the owner's approval in the session is the design review.
+The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 The PM routes each prompt. **Nit** (one place, existing tokens only: which token a style uses,
 alignment, a value inside one component, a label's wording): designer on Sonnet. **Design** (a token
 value, a new token or component, hierarchy, typography, colour or composition, several components, a

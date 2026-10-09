@@ -1,0 +1,9 @@
+id: mobile-picker-raw-colours
+language: tsx
+severity: error
+message: 'The picker''s manager side uses only storybook/theming roles (design input P1, Separation rule): no raw colour. The two overlay constants live in overlay.ts (mobile-picker-overlay-colours).'
+files: [mobile/app/.storybook/picker/**]
+ignores: [mobile/app/.storybook/picker/overlay.ts]
+rule:
+  kind: string_fragment
+  regex: '^#[0-9a-fA-F]{3,8}$|\b(rgba?|hsla?)\('

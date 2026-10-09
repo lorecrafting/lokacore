@@ -4,7 +4,8 @@ severity: error
 message: 'A Book value comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette), a `type` style or a `space`/`size`/`radius`/`opacity` token, never a raw hex colour, font family or numeric size.'
 files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx, mobile/app/stories/*.tsx, mobile/app/.storybook/*.tsx]
 # Drawings place their own geometry (joystick.ts, the drag geometry, is .ts and outside this glob).
-ignores: [mobile/app/book/MapDrawing.tsx, mobile/app/book/DiscoveredMap.tsx]
+# The Loka picker is tool chrome, not Book UI; its own colour rules: mobile-picker-*.yml.
+ignores: [mobile/app/book/MapDrawing.tsx, mobile/app/book/DiscoveredMap.tsx, mobile/app/.storybook/picker/**]
 # tokens.ts is .ts, so outside this glob. A computed size (MapDrawing's `3.6 * U`) is a drawing, not a
 # literal, and passes.
 rule:
