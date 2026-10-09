@@ -12,11 +12,16 @@ const port = await new Promise<number>((found) => {
   });
 });
 const url = `http://localhost:${port}`;
-const server = spawn('npx', ['storybook', 'dev', '-p', `${port}`, '--ci', '--no-open'], {
-  cwd: new URL('..', import.meta.url),
-  stdio: ['ignore', 'ignore', 'inherit'],
-  detached: true, // its own process group, stopped whole below
-});
+const server = spawn(
+  'npx',
+  ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
+  {
+    cwd: new URL('..', import.meta.url),
+    env: { ...process.env, LOKA_NO_TIDEWAVE: '1' }, // the nightly run tests the Book, not the toolbar
+    stdio: ['ignore', 'ignore', 'inherit'],
+    detached: true, // its own process group, stopped whole below
+  },
+);
 const failed: string[] = [];
 try {
   let index: { entries: Record<string, { id: string; title: string; type: string }> } | undefined;

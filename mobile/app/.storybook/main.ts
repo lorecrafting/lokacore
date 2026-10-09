@@ -8,8 +8,9 @@ const fromExpo = createRequire(createRequire(import.meta.url).resolve('expo'));
 const expoAsset = fromExpo.resolve('expo-asset');
 const tidewaveVersion: string = createRequire(import.meta.url)('tidewave/package.json').version;
 // Tidewave only under `storybook dev`: addon-vitest (smoke, MCP test-run) also loads this config
-// as DEVELOPMENT, so its VITEST flag excludes it there.
-const withTidewave = (configType?: string) => configType === 'DEVELOPMENT' && !process.env.VITEST;
+// as DEVELOPMENT, so its VITEST flag excludes it there; storybook:live sets LOKA_NO_TIDEWAVE.
+const withTidewave = (configType?: string) =>
+  configType === 'DEVELOPMENT' && !process.env.VITEST && !process.env.LOKA_NO_TIDEWAVE;
 
 // expo-sqlite's web worker as Metro serves it (SQLiteModule.ts): a module worker Vite transforms,
 // its wasm import a URL. ponytail: dev server only; a static build would need the worker bundled.

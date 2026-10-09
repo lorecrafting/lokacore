@@ -16,6 +16,8 @@ After a local spike put the Tidewave toolbar on the dev Storybook, the owner add
 - `@storybook/addon-mcp` is registered in `mobile/app/.storybook/main.ts`; the dev server answers
   MCP at `/mcp`. The repo-root `.mcp.json` points Claude Code at the owner's Storybook
   (http://localhost:6006/mcp).
+- The owner chose, 2026-10-09 (paraphrased): Storybook stays on this computer by default, since
+  `/mcp` has no authentication; `npm run storybook:lan` opens it to the network for phone sessions.
 - Tidewave (trial): `storybook dev` only, never the build or the smoke, loads Tidewave's toolbar
   and serves its MCP at `/tidewave/mcp`, also in `.mcp.json`. The toolbar is a hosted script
   (https://tidewave.ai/tc/toolbar.js) with a free tier of 10 prompts a month; a slim version of

@@ -50,8 +50,9 @@ The current suite contains one deterministic saved-move-after-reload check. It i
 ## Storybook
 
 The Book UI's components and pages render in Storybook from `mobile/app`:
-`mise exec -- npm run storybook` serves **http://localhost:6006** on every interface, so a phone
-on the same network opens `http://<this computer's LAN address>:6006`. The toolbar picks the
+`mise exec -- npm run storybook` serves **http://localhost:6006** on this computer only; for a phone
+session, `mise exec -- npm run storybook:lan` serves every interface, so a phone on the same network
+opens `http://<this computer's LAN address>:6006` (and reaches `/mcp` too). The toolbar picks the
 palette and a phone viewport. `mise exec -- npm run storybook:smoke` type-checks, builds and runs
 every story headless (render, play function, axe at error level); CI runs it in `book-e2e.yml`
 ([checks](CHECKS.md)). Install its browser once with `mise exec -- npx playwright install chromium`.
