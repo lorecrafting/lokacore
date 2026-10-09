@@ -1,7 +1,10 @@
 name: book-e2e
 
-# Pre-production: nightly on main and by hand only (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md).
+# Pre-production: every push to a branch, nightly on main and by hand; a green run on the exact
+# head is the merge gate (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md).
 on:
+  push:
+    branches-ignore: [main]
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
@@ -14,9 +17,10 @@ permissions:
   contents: read
 
 jobs:
-  browser:
+  # The local Book browser save/reload path with tester.army e2e (docs/web-preview.md).
+  e2e:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: mobile/app
@@ -27,16 +31,11 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: mobile/app/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npx e2e-web install chromium --with-deps
       - run: npm run test:e2e
-      # Every Storybook story renders, its play function and axe (test: 'error') pass (CHECKS.md).
-      - run: npx playwright install chromium
-      - run: npm run storybook:smoke
-      # The Live stories' click-throughs on the dev server (web-preview.md#storybook).
-      - run: npm run storybook:live
-      # The Loka picker end to end on the dev server (web-preview.md#polish-queue).
-      - run: npm run storybook:picker
       - if: failure()
         name: Redact browser failure diagnostics
         run: |
@@ -63,9 +62,32 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
 
-  # The run's one verdict: fails unless the browser job succeeded.
+  # Every Storybook story renders, its play function and axe (test: 'error') pass (CHECKS.md); then the
+  # Live stories' click-throughs and the Loka picker end to end on the dev server (web-preview.md).
+  storybook:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mobile/app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: mobile/app/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium --with-deps
+      - run: npm run storybook:smoke
+      - run: npm run storybook:live
+      - run: npm run storybook:picker
+
+  # The run's one verdict: fails unless both jobs succeeded.
   book-e2e-green:
-    needs: [browser]
+    needs: [e2e, storybook]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2

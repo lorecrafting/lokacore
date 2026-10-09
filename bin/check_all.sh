@@ -1,34 +1,20 @@
 #!/bin/sh
-# The full local check line (docs/CHECKS.md): everything CI runs except `mix hex.audit`
-# (needs the network) and the e1-recorder job (about 6 minutes; CHECKS.md). Toolchain from mise.toml.
-# --metadata runs docs and tracker guards for a verified metadata or native-config-only push.
-# --no-ts remains available for a focused local Elixir run.
-# --no-mix-test skips mix test and credo for a push whose code changes are only *.test.ts files.
+# The full check line (docs/CHECKS.md) for a local run that mirrors hosted CI, minus `mix hex.audit`
+# (needs the network), the 10,000-sequence simulator and the e1-recorder job. Hosted CI on the pushed
+# head is the gate (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md); on the owner's M1 run
+# only focused checks. Toolchain from mise.toml. --no-ts remains available for a focused Elixir run.
 set -e
 cd "$(dirname "$0")/.."
 export MIX_ENV=test
 # The dot reporter keeps the node test output to a line; failures still print in full.
 export TEST_REPORTER=dot
-# The last line is the verdict developers quote: `check_all: PASS` or `check_all: FAIL <step>`.
+# The last line is the verdict: `check_all: PASS` or `check_all: FAIL <step>`.
 # The step goes through a file because some steps run in subshells.
 stepf=$(mktemp)
 step() { echo "$*" > "$stepf"; }
 verdict() { [ $1 = 0 ] && echo "check_all: PASS" || echo "check_all: FAIL $(cat "$stepf")"; rm -f "$stepf"; }
 trap 'verdict $?' EXIT
 m() { step "$@"; mise exec -- "$@"; }
-# A full pass on a clean tree is recorded so pre-push can skip rerunning it unchanged.
-tree() { [ -z "$(git status --porcelain --untracked-files=all)" ] && git rev-parse HEAD^{tree}; }
-start=$(tree || true)
-if [ "${1-}" = --metadata ]; then
-  m elixir bin/check_docs.exs
-  m bin/docs_red_controls.sh
-  m python3 bin/check_beads_export.py
-  m sh bin/beads_red_controls.sh
-  exit 0
-fi
-# One heavy run at a time across worktrees (pre-push execs this script): a second run waits.
-. bin/check_lock.sh
-trap 'rc=$?; verdict $rc; rm -rf "$lock"' EXIT # check_lock.sh set its own EXIT trap
 # Every lint rule over the whole tree (pre-commit sees only staged files); first, as it needs no deps.
 m ast-grep scan --error . mobile/app/.storybook # hidden directories are skipped unless named
 m mix deps.get --check-locked
@@ -38,13 +24,12 @@ m elixir bin/contracts.exs --check
 m elixir bin/features.exs --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
-[ "${1-}" = --no-mix-test ] || m mix test
-[ "${1-}" = --no-mix-test ] || m mix credo --strict
+m mix test
+m mix credo --strict
 m elixir bin/check_size.exs
 m elixir bin/red_controls.exs
 m ast-grep test --skip-snapshot-tests
 m bin/lint_red_controls.sh --core-only
-m bin/docs_only_red_controls.sh
 m bin/integration_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
@@ -61,5 +46,3 @@ m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
 step prettier
 git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
-[ -z "${1-}" ] && [ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
-true
