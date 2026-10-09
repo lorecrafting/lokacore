@@ -125,7 +125,11 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
-   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Merge `main` into the
+   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). An E-gate closure or the
+   release candidate also needs a green `gh workflow run ci.yml --ref <branch> -f full=true` on the
+   exact head, so the E1 recorder ran ([E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy));
+   that dispatch cancels the head's push run of `ci.yml` (same concurrency group), so the dispatch
+   run is the verdict. Merge `main` into the
    branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.

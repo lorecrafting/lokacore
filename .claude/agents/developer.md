@@ -28,7 +28,7 @@ Before handing off:
    the touched layer's type/compile checks and the focused tests your diff touches; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, `gh run list --branch <branch> --commit <sha>` until both workflows' runs appear,
+   after a push, `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) until both workflows' runs appear,
    then `gh run watch <id> --exit-status` on each in the background and quote each verdict (job
    names, durations) in the handoff; fix a red run before handing off. Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
