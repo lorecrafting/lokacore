@@ -1,15 +1,27 @@
 id: mobile-book-raw-values
 language: tsx
 severity: error
-message: 'A Book colour or font size comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette) or a `type` style, never a raw hex colour or numeric fontSize.'
-files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx]
+message: 'A Book value comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette), a `type` style or a `space`/`size`/`radius`/`opacity` token, never a raw hex colour, font family or numeric size.'
+files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx, mobile/app/stories/*.tsx, mobile/app/.storybook/*.tsx]
+# Drawings place their own geometry (joystick.ts, the drag geometry, is .ts and outside this glob).
+ignores: [mobile/app/book/MapDrawing.tsx, mobile/app/book/DiscoveredMap.tsx]
 # tokens.ts is .ts, so outside this glob. A computed size (MapDrawing's `3.6 * U`) is a drawing, not a
 # literal, and passes.
 rule:
   any:
     - kind: string_fragment
       regex: '^#[0-9a-fA-F]{3,8}$'
+    - kind: string_fragment
+      inside:
+        kind: string
+        inside:
+          kind: pair
+          has: { field: key, regex: '^fontFamily$' }
+    # Zero is no size (a measured box's start, PageTurn's `{ width: 0, height: 0 }`), so it passes.
     - kind: number
+      not: { regex: '^0$' }
       inside:
         kind: pair
-        has: { field: key, regex: '^fontSize$' }
+        has:
+          field: key
+          regex: '^(fontSize|lineHeight|letterSpacing|padding\w*|margin\w*|gap|rowGap|columnGap|borderRadius|borderWidth|minHeight|minWidth|width|height|opacity)$'

@@ -219,13 +219,16 @@ function DevClock() {
     if (rate && Number.isSafeInteger(m) && m > 0)
       g.loka_dev_skew = skew() + Math.ceil((m * 60_000) / rate);
   };
+  // The dev-only time panel is a tool, not a Book surface, so it keeps raw sizes.
   return (
+    // ast-grep-ignore: mobile-book-raw-values
     <View style={{ position: 'absolute', top: 4, right: 4, flexDirection: 'row', gap: 4 }}>
       <TextInput
         aria-label="Game minutes"
         inputMode="numeric"
         value={minutes}
         onChangeText={setMinutes}
+        // ast-grep-ignore: mobile-book-raw-values
         style={{ width: 56, borderWidth: 1, backgroundColor: 'white' }}
       />
       <Button title="Advance game minutes" onPress={advance} />
