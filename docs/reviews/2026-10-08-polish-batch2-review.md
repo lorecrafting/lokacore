@@ -94,3 +94,7 @@ CHANGES REQUIRED: B1 (red required hosted run), S1, S2. Nits at the developer's 
   `mobile/packages/game-view/`; both new `docs_only_red_controls.sh` cases pass (rc 0).
 
 Verdict: APPROVE WITH NOTES. Merge once both hosted runs on `d6805e4e` are green; file the fallback issue.
+- **Designer question, `notices.tsx:143-147` (dropped `!board &&`): safe, no finding.** A board can't carry
+  `actions`: `protocol/gameview.schema.json` `NoticeBoardView` allows only `id, title, description, notices`
+  (`additionalProperties: false`). The producer `kernel/ts/src/view/notice_boards.ts:70-84` emits no actions
+  on the board; only its notices get them (`:75`). So for a board, `'actions' in detail` is false.
