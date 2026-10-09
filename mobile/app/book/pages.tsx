@@ -35,9 +35,9 @@ export function titleFocus() {
   };
   return box;
 }
-export const Turned = createContext(titleFocus());
+export const titleContext = createContext(titleFocus());
 export const useTitleFocus = () => ({
-  ref: useContext(Turned).ref,
+  ref: useContext(titleContext).ref,
   ...({ tabIndex: -1 } as object),
 });
 

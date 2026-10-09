@@ -117,6 +117,8 @@ export const CorpseContents: StoryObj = {
   play: async ({ canvasElement }) => {
     const { page, tap } = await opened(canvasElement);
     await tap(/^A deer corpse is here\./);
+    // the page a turn brings takes focus at its title (pages.tsx titleFocus), for screen readers
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('heading'));
     await tap('A deer hide, open'); // its Inside row
     await tap('Take a deer hide');
     // book-ui.md (Take from a corpse): back on the corpse, its pickup line, Leave still offered
