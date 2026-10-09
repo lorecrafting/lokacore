@@ -48,7 +48,7 @@ sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse or
 # branch off a pushed main. Break: a *.test.ts-only push runs the full line, or source/peer edits
 # get the short lanes.
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-git checkout -qb main; mkdir -p .githooks bin kernel/ts/test mobile/app/book; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" bin/
+git checkout -qb main; mkdir -p .githooks bin kernel/ts/test mobile/app/book; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" "$bin/check_lock.sh" bin/
 printf '#!/bin/sh\necho "lane=$*" > "%s/lane"\n' "$R.d" > bin/check_all.sh; mkdir "$R.d"; chmod +x bin/*.sh .githooks/pre-push
 touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts mobile/app/book/p.tsx; git add . && git commit -qm base && git push -q origin main
 git config core.hooksPath .githooks
@@ -66,11 +66,12 @@ for b in p2:kernel/ts/test/differential_peer.ts t2:kernel/ts/test/k.test.ts; do
 done; rm -f "$R.d/lane"
 capped git push -q origin p2 t2 > /dev/null 2>&1 || bad 'pre-push two refs: push failed'
 [ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=" ] || bad "pre-push two refs: $(cat "$R.d/lane" 2>/dev/null), want lane="
-# Break: a Book change skips the Storybook smoke, or a non-Book change runs it (stub mise logs it).
-mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $*" >> "%s/smoke"\n' "$R.d" > "$R.d/bin/mise"; chmod +x "$R.d/bin/mise"
+# Break: a Book change skips the Storybook smoke, a non-Book change runs it, or it runs outside the
+# check_all lock (stub mise logs each call and whether the lock is held).
+mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $* $(test -d %s/.git/loka-check.lock && echo locked)" >> "%s/smoke"\n' "$R" "$R.d" > "$R.d/bin/mise"; chmod +x "$R.d/bin/mise"
 PATH="$R.d/bin:$PATH" pp book mobile/app/book/p.tsx ''
 PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
-[ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
+[ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke locked" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
 # Break: a dirty tracked file is pushed after checks of a tree nobody committed; an untracked file blocks.
 git checkout -q -b dirty main; echo 1 >> a.md; git commit -qam dirty; echo 2 >> a.md; rm -f "$R.d/lane"
 if capped git push -q origin dirty > /dev/null 2>&1; then bad 'pre-push dirty: pushed with a modified tracked file'; fi
@@ -82,7 +83,7 @@ rm -f untracked.tmp
 # Stub mise logs each call. Break: a second run overlaps a live holder instead of waiting, a dead
 # holder's lock blocks forever, or the lock outlives the run.
 printf '#!/bin/sh\necho "$*" >> "$MISE_LOG"\n' > "$tmp/stub/mise"; chmod +x "$tmp/stub/mise"
-R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; cp "$bin/check_all.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh
+R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; cp "$bin/check_all.sh" "$bin/check_lock.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh
 lk=$(git rev-parse --absolute-git-dir)/loka-check.lock
 ca() { MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-ts; }
 sleep 30 & holder=$!; mkdir "$lk"; echo $holder > "$lk/pid"
@@ -96,7 +97,7 @@ ca > out 2>&1 && [ -s "$R.log" ] || { bad 'check_all lock: a dead holder blocked
 # Break: a partial (--no-mix-test) pass records the tree as checked, so a later full-lane push of
 # the same tree skips mix test at pre-push. A full pass on the same clean tree must record it.
 R=$(mktemp -d); cd "$R"; git init -q; mkdir -p bin kernel/ts/node_modules mobile/app/node_modules node_modules
-cp "$bin/check_all.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh; git add . && git commit -qm t
+cp "$bin/check_all.sh" "$bin/check_lock.sh" bin/; touch bin/check_beads_export.py bin/beads_red_controls.sh; git add . && git commit -qm t
 rec=$(git rev-parse --git-path loka-checked-tree)
 MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-mix-test > "$R.out" 2>&1 || bad 'check_all record: --no-mix-test run failed'
 [ ! -f "$rec" ] || bad 'check_all record: a --no-mix-test pass recorded the tree'

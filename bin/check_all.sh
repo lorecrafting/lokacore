@@ -21,21 +21,7 @@ if [ "${1-}" = --metadata ]; then
   exit 0
 fi
 # One heavy run at a time across worktrees (pre-push execs this script): a second run waits.
-lock=$(git rev-parse --git-common-dir)/loka-check.lock
-until mkdir "$lock" 2>/dev/null; do
-  pid=$(cat "$lock/pid" 2>/dev/null || true)
-  if [ -z "$pid" ] || kill -0 "$pid" 2>/dev/null; then
-    [ "$pid" = "${said-x}" ] || { echo "check_all: waiting for ${pid:-a starting run} (another check run holds $lock)"; said=$pid; }
-    sleep 2
-  else
-    rm -rf "$lock" # its holder died without cleanup
-  fi
-done
-# ponytail: a run killed between mkdir and this write (or a reused pid) leaves a lock to remove by hand,
-# and two waiters taking over one dead lock can race; use flock if that ever bites.
-echo $$ > "$lock/pid"
-trap 'rm -rf "$lock"' EXIT
-trap 'exit 130' INT TERM
+. bin/check_lock.sh
 # Every lint rule over the whole tree (pre-commit sees only staged files); first, as it needs no deps.
 m ast-grep scan --error . mobile/app/.storybook # hidden directories are skipped unless named
 m mix deps.get --check-locked

@@ -26,7 +26,8 @@ done
 [ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
 [ "$seen" = 1 ] || { scope=full; smoke=1; }
 git diff --quiet HEAD -- || { echo "pre-push: commit or stash tracked changes first (the checks run on the working tree)"; exit 1; }
-[ "$smoke" = 0 ] || (cd mobile/app && mise exec -- npm run storybook:smoke) || exit 1
+# Under check_all's lock, so the smoke never runs beside another worktree's npm test.
+[ "$smoke" = 0 ] || (. bin/check_lock.sh && cd mobile/app && mise exec -- npm run storybook:smoke) || exit 1
 passed=$(cat "$(git rev-parse --git-path loka-checked-tree)" 2>/dev/null || true)
 if [ -n "$passed" ] && [ -z "$(git status --porcelain --untracked-files=all)" ] && [ "$(git rev-parse HEAD^{tree})" = "$passed" ]; then
   echo "pre-push: bin/check_all.sh already passed on this clean tree"; exit 0
