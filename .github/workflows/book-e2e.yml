@@ -35,6 +35,8 @@ jobs:
       - run: npm run storybook:smoke
       # The Live stories' click-throughs on the dev server (web-preview.md#storybook).
       - run: npm run storybook:live
+      # The Loka picker end to end on the dev server (web-preview.md#polish-queue).
+      - run: npm run storybook:picker
       - if: failure()
         name: Redact browser failure diagnostics
         run: |

@@ -76,6 +76,18 @@ the check lock, so not during a smoke or `bin/check_all.sh`). The repo's
 `.mcp.json` points Claude Code at the owner's http://localhost:6006/mcp (approve it once per
 machine). Those tools see only the checkout that server serves, so an agent testing its own
 worktree runs Storybook on another port and calls that port's `/mcp` instead. For the browser
-console and clicks, use the Claude in Chrome extension on the same URL. Trial: `storybook dev`
-also loads the Tidewave toolbar below each story (a hosted script, 10 free prompts a month) and
-serves Tidewave's MCP at `/tidewave/mcp`, also in `.mcp.json`; the build and smoke leave it out.
+console and clicks, use the Claude in Chrome extension on the same URL.
+
+## Polish queue
+
+The Loka picker (`mobile/app/.storybook/picker/`, [design input](briefs/polish/design-input-p1-2026-10-09.md)):
+**Pick** in the toolbar or `P`, click an element (shift-click up to four), write in the Polish
+panel on the right, `⌘↩` sends. `storybook dev` only, loopback only. Each send appends one line to
+`.polish/picks.jsonl` in the served worktree (gitignored): `{id, time, note, story: {id, title},
+palette, viewport, elements: [{chain, box, computed, text, role, name, testId, shot}]}`, the crop at
+`.polish/shots/<id>-<i>.png`; Close batch and Keep going append `{id, time, type: 'close' | 'keep-going'}`.
+Agents answer in `.polish/status.jsonl` through `bin/polish_status.sh`: `{id, time, state: working |
+done | stopped, model, summary, sha}`, `{id, time, state: 'moved', beads, summary}` or `{time, type:
+'suggest-close', reason}`; the panel polls it. Outside a session, [`/polish-intake`](../.claude/commands/polish-intake.md) moves waiting
+picks to Beads. `mise exec -- npm run storybook:picker` runs the picker end to end on a dev server with
+its own queue directory (about a minute; nightly in `book-e2e.yml`).

@@ -56,8 +56,8 @@ jobs:
         with:
           node-version: '24.21.0'
       - run: npm install --global @ast-grep/cli@0.45.3
-      - run: ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
-      - run: ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
+      - run: ast-grep test --skip-snapshot-tests
+      - run: ast-grep scan --error . mobile/app/.storybook # as bin/check_all.sh: whole tree, every rule
       - run: bin/lint_red_controls.sh --core-only
       - run: bin/docs_only_red_controls.sh
       - run: bin/integration_red_controls.sh

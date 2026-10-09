@@ -120,6 +120,7 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, which passed the
    pre-push hook ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
+   A `toolbox/*` branch skips the pre-push checks, so "passed the hook" above does not apply to it; its gate is a green hosted run on the exact head ([record](decisions/owner-decision-hosted-ci-toolbox-2026-10-09.md)).
    Hosted CI runs nightly on `main` and by hand; a PR that touches save, protocol or kernel code,
    and the release candidate and E3, merge only after `gh workflow run ci.yml --ref <branch>` and
    `gh workflow run book-e2e.yml --ref <branch>` both end green on that head. A red nightly is
@@ -237,6 +238,7 @@ The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026
 `bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
 style code, tokens and the catalogue line in that worktree, applies each picker prompt at once and
 commits each accepted tweak; the owner's approval in the session is the design review.
+The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 The PM routes each prompt. **Nit** (one place, existing tokens only: which token a style uses,
 alignment, a value inside one component, a label's wording): designer on Sonnet. **Design** (a token
 value, a new token or component, hierarchy, typography, colour or composition, several components, a

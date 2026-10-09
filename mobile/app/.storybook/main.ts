@@ -2,15 +2,14 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import type { StorybookConfig } from '@storybook/react-native-web-vite';
-import { mergeConfig, type Plugin, type ViteDevServer } from 'vite';
+import { mergeConfig, type Plugin } from 'vite';
+import { polishQueue } from './picker/middleware.ts';
 
 const fromExpo = createRequire(createRequire(import.meta.url).resolve('expo'));
 const expoAsset = fromExpo.resolve('expo-asset');
-const tidewaveVersion: string = createRequire(import.meta.url)('tidewave/package.json').version;
-// Tidewave only under `storybook dev`: addon-vitest (smoke, MCP test-run) also loads this config
-// as DEVELOPMENT, so its VITEST flag excludes it there; storybook:live sets LOKA_NO_TIDEWAVE.
-const withTidewave = (configType?: string) =>
-  configType === 'DEVELOPMENT' && !process.env.VITEST && !process.env.LOKA_NO_TIDEWAVE;
+// The picker queue only under `storybook dev`: addon-vitest (smoke, MCP test-run) also loads this
+// config as DEVELOPMENT, so its VITEST flag excludes it there.
+const dev = (configType?: string) => configType === 'DEVELOPMENT' && !process.env.VITEST;
 
 // expo-sqlite's web worker as Metro serves it (SQLiteModule.ts): a module worker Vite transforms,
 // its wasm import a URL. ponytail: dev server only; a static build would need the worker bundled.
@@ -79,22 +78,6 @@ const plugins: Plugin[] = [
   },
 ];
 
-// Vite runs in middleware mode under Storybook: no httpServer for Tidewave's browser websocket
-// (browser_eval) and no port for its default origin check, so hand it Storybook's own server.
-const tidewaveOnStorybook = async (port?: number): Promise<Plugin> => {
-  const { default: tidewave } = await import('tidewave/vite-plugin'); // patches console on import
-  const plugin = tidewave({ allowedOrigins: [`//localhost:${port}`, `//127.0.0.1:${port}`] });
-  const configureServer = plugin.configureServer as (server: ViteDevServer) => Promise<void>;
-  return {
-    ...plugin,
-    configureServer: (server) => {
-      const { hmr } = server.config.server;
-      const httpServer = typeof hmr === 'object' ? hmr.server : undefined;
-      return configureServer(Object.create(server, { httpServer: { value: httpServer } }));
-    },
-  };
-};
-
 const config: StorybookConfig = {
   stories: ['../stories/*.mdx', '../stories/*.stories.tsx'],
   addons: [
@@ -111,48 +94,11 @@ const config: StorybookConfig = {
   core: { disableTelemetry: true, disableWhatsNewNotifications: true, crossOriginIsolated: true },
   // The manager chrome uses the Book's fonts too (manager.ts): one font file for both documents.
   managerHead: (head) => head + readFileSync(new URL('preview-head.html', import.meta.url), 'utf8'),
-  // Storybook serves iframe.html before Vite's middlewares, so Tidewave cannot inject its toolbar.
-  // ponytail: the window.name opt-in below relies on tidewave.ai's toolbar.js as of 2026-10-09.
-  // ponytail: copies tidewave 0.9.0's internal tidewaveConfigMeta shape; recheck on upgrade.
-  previewHead: (head, { configType, port }) =>
-    !withTidewave(configType)
-      ? head
-      : `${head}<meta name="tidewave:config" content="${JSON.stringify({
-          tidewave: {
-            project_name: 'loka-app',
-            framework_type: 'vite',
-            tidewave_version: tidewaveVersion,
-            team: {},
-            local_port: port,
-            local_scheme: 'http',
-            tmp_dir: 'tmp',
-          },
-          root: process.cwd(),
-          wsl_distro: null,
-          framework: {},
-        })
-          .replaceAll('&', '&amp;')
-          .replaceAll('"', '&quot;')}" />
-<style>
-  /* Reserve a strip for the toolbar (no option exists but bottom-left/right placement): 42px bar,
-     16px from the bottom, 16px gap above it, measured in Chromium. Stories size by 100vh inline;
-     the padding lets a taller story scroll clear of the bar. */
-  body { padding-bottom: 74px !important; }
-  #storybook-root [style*='min-height: 100vh'] { min-height: calc(100vh - 74px) !important; }
-  #storybook-root [style^='height: 100vh'],
-  #storybook-root [style*=' height: 100vh'] { height: calc(100vh - 74px) !important; }
-</style>
-<script>
-  // toolbar.js skips framed pages unless window.name marks a Tidewave control session; the preview
-  // is always framed in the Storybook UI. The name only namespaces the toolbar's saved state.
-  if (window.self !== window.top) window.name = 'tidewave-control-session-storybook';
-</script>
-<script async type="module" src="https://tidewave.ai/tc/toolbar.js"></script>`,
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
-  viteFinal: async (config, { configType, port }) =>
+  viteFinal: async (config, { configType }) =>
     mergeConfig(config, {
-      // Tidewave (docs/web-preview.md#storybook)
-      plugins: withTidewave(configType) ? [...plugins, await tidewaveOnStorybook(port)] : plugins,
+      // The Loka picker's queue (docs/web-preview.md#polish-queue)
+      plugins: dev(configType) ? [...plugins, polishQueue()] : plugins,
       // expo-modules-core's src imports declare-only classes for its global types (Metro drops them).
       optimizeDeps: { rolldownOptions: { shimMissingExports: true, plugins: [sqliteWorker] } },
     }),

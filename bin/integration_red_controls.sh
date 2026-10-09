@@ -72,6 +72,14 @@ mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $* $(test -d %s
 PATH="$R.d/bin:$PATH" pp book mobile/app/book/p.tsx ''
 PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
 [ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke locked" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
+# Break: a toolbox/* push runs checks, or a push of toolbox/* plus another branch skips them.
+git checkout -q -b toolbox/x main; echo 4 >> a.md; git commit -qam tb; rm -f "$R.d/lane"
+capped git push origin toolbox/x > "$R.d/out" 2>&1 || bad 'pre-push toolbox: push failed'
+grep -q 'hosted CI is the gate' "$R.d/out" || bad 'pre-push toolbox: hook did not announce the skip'
+[ ! -e "$R.d/lane" ] || bad 'pre-push toolbox: checks ran'
+git checkout -q -b mixed main; echo 3 >> a.md; git commit -qam mixed; rm -f "$R.d/lane"
+capped git push -q origin mixed toolbox/x:refs/heads/toolbox/y > /dev/null 2>&1 || bad 'pre-push mixed: push failed'
+[ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=--metadata" ] || bad 'pre-push mixed: checks skipped'
 # Break: a dirty tracked file is pushed after checks of a tree nobody committed; an untracked file blocks.
 git checkout -q -b dirty main; echo 1 >> a.md; git commit -qam dirty; echo 2 >> a.md; rm -f "$R.d/lane"
 if capped git push -q origin dirty > /dev/null 2>&1; then bad 'pre-push dirty: pushed with a modified tracked file'; fi

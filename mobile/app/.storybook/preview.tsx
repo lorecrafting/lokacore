@@ -2,6 +2,7 @@ import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { PaletteContext, useFocusRing } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
+import './picker/overlay.ts'; // the Loka picker's hover/pin layer (manager side: picker/manager.tsx)
 
 const device = (
   name: string,
@@ -52,11 +53,23 @@ const preview: Preview = {
     },
     viewport: {
       options: {
-        iphone11: device('iPhone 11', 414, 896),
+        // Phones, narrow to wide, then tablets. Sizes are CSS px, portrait (yesviz.com).
+        galaxyS25: device('Galaxy S25', 360, 780),
         iphoneSE: device('iPhone SE', 375, 667),
+        iphone13: device('iPhone 13/14/16e', 390, 844),
+        iphone15: device('iPhone 15/16', 393, 852),
+        iphone17: device('iPhone 17/17 Pro', 402, 874),
         pixel7: device('Pixel 7', 412, 915),
-        // one tablet check: the centred page width and the footer rules
+        iphone11: device('iPhone 11', 414, 896),
+        pixel9: device('Pixel 9/10', 412, 924),
+        iphoneAir: device('iPhone Air', 420, 912),
+        iphone17ProMax: device('iPhone 17 Pro Max', 440, 956),
+        // tablets: the centred page width and the footer rules
         ipadMini: device('iPad mini', 744, 1133, 'tablet'),
+        ipad11: device('iPad 11th gen/Air 11', 820, 1180, 'tablet'),
+        ipadPro11: device('iPad Pro 11', 834, 1210, 'tablet'),
+        ipadAir13: device('iPad Air 13', 1024, 1366, 'tablet'),
+        ipadPro13: device('iPad Pro 13', 1032, 1376, 'tablet'),
       },
     },
     // Fail the smoke on any axe violation, colour contrast included.

@@ -11,15 +11,18 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
+- [Review: Storybook current phone and tablet viewports (PR #340)](2026-10-09-storybook-viewports-340-review.md): **PASS**
 - [Review: Storybook MCP addon, Tidewave trial, smoke vitest config move (PR #333)](2026-10-09-storybook-mcp-333-review.md): **APPROVE**
 - [Review: Storybook hardening, PageTurn wait, second tab, Live DB close, after_merge (PR #336)](2026-10-09-storybook-hardening-336-review.md): **APPROVE**
 - [Review: polish batch 6, chapter card and story word Controls (PR #332)](2026-10-09-storybook-b6-332-review.md): **APPROVE WITH NOTES**
 - [Review: live polish session lane and session/preview scripts (PR #337)](2026-10-09-polish-session-337-review.md): **APPROVE WITH NOTES**
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**
 - [Review: polish batch 3, Page shell, PageFoot and E1 (PR #329)](2026-10-09-polish-batch3-review.md): **APPROVE**
+- [Review: Loka picker + polish panel; remove Tidewave (PR #339)](2026-10-09-picker-339-review.md): **APPROVE WITH NOTES**
 - [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
 - [Review: Housekeeping, red controls by PID, after_merge pulls (PR #338)](2026-10-09-housekeeping-338-review.md): **APPROVE WITH NOTES**
 - [Review: housekeeping 2026-10-09, check_all verdict line and developer/PM rules (PR #331)](2026-10-09-housekeeping-331-review.md): **PASS**
+- [Review: pre-push hook, toolbox/* branches gated by hosted CI (PR #341)](2026-10-09-hosted-ci-toolbox-341-review.md): **APPROVE WITH NOTES**
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
 - [Review: pre-polish final (PR #324)](2026-10-08-prepolish-final-review.md): **APPROVE WITH NOTES**
 - [Review: pre-polish batch 2 (code fixes)](2026-10-08-prepolish-batch2-review.md): **APPROVE**

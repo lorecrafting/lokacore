@@ -1,0 +1,9 @@
+id: mobile-picker-no-book-import
+valid:
+  - "import { addons } from 'storybook/preview-api';"
+  - "import { PICK } from './events.ts';"
+  - "const m = await import('html-to-image');"
+invalid:
+  - "import { color } from '../../book/tokens.ts';"
+  - "import { usePalette } from '../../book/palette.ts';"
+  - "const t = await import('../../book/tokens.ts');"

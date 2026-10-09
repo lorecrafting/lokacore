@@ -2,9 +2,11 @@
 import { addons } from 'storybook/manager-api';
 import { create } from 'storybook/theming';
 import { color, font } from '../book/tokens.ts';
+import './picker/manager.tsx'; // the Loka picker's Pick tool and Polish panel
 
 const c = color.light;
 addons.setConfig({
+  panelPosition: 'right', // the Polish panel beside a phone-wide story (picker/manager.tsx)
   theme: create({
     base: 'light',
     brandTitle: 'Loka Book UI',
