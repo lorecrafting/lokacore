@@ -25,6 +25,12 @@ const rule = (c: Palette) => ({
   height: size.rule,
   backgroundColor: c.line,
 });
+const row = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  columnGap: space.sm,
+} as const;
 const keys: Record<string, string> = {
   ArrowUp: 'north',
   ArrowDown: 'south',
@@ -60,14 +66,7 @@ export function Footer(p: Props) {
   return (
     <View>
       {tip && <Tip dismiss={learn} />}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          columnGap: space.sm,
-        }}
-      >
+      <View style={row}>
         <View style={rule(c)} />
         <View
           style={{ width: size.minimap, height: size.minimap, zIndex: 1 }} // above the rules: the zoomed map covers them

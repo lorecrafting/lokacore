@@ -7,7 +7,6 @@ import { prose, usePalette } from './palette.ts';
 import { opacity, radius, size, space, type } from './tokens.ts';
 
 // Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
-// size: allow 45, bounded tile editing and submission share one local buffer
 export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
   const c = usePalette();
   const [selected, setSelected] = useState<number[]>([]);

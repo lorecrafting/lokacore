@@ -58,22 +58,7 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
-    <Pressable
-      key="contents"
-      disabled={p.locked}
-      accessibilityRole="button"
-      accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
-      onPress={p.open}
-      style={{ minHeight: size.touch, justifyContent: 'center' }}
-    >
-      {p.resources ? (
-        <View style={{ flexDirection: 'row', columnGap: space.sm }}>
-          {shown(c, p.resources, p.locked)}
-        </View>
-      ) : (
-        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>character</Text>
-      )}
-    </Pressable>,
+    <Contents key="contents" {...p} />,
   ].filter(Boolean);
   return (
     <View style={statusRow}>
@@ -93,6 +78,28 @@ export function StatusLine(p: StatusProps) {
         </Text>
       )}
     </View>
+  );
+}
+
+// The resources (or "character"), a button that opens Contents; not pressable while locked.
+function Contents(p: StatusProps) {
+  const c = usePalette();
+  return (
+    <Pressable
+      disabled={p.locked}
+      accessibilityRole="button"
+      accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
+      onPress={p.open}
+      style={{ minHeight: size.touch, justifyContent: 'center' }}
+    >
+      {p.resources ? (
+        <View style={{ flexDirection: 'row', columnGap: space.sm }}>
+          {shown(c, p.resources, p.locked)}
+        </View>
+      ) : (
+        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>character</Text>
+      )}
+    </Pressable>
   );
 }
 
