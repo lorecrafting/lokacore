@@ -18,6 +18,7 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
+export const pageTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.pageTitle });
 export const titleStyle = (c: Palette) => ({
   fontFamily: font.head,
   // ast-grep-ignore: mobile-book-raw-values (one-off for the designer: no token for a 26 section title)
@@ -80,26 +81,10 @@ export function RoomPage(p: {
   details: ReactNode;
 }) {
   const c = usePalette();
-  const title = (
-    <Text {...titleFocus} style={{ ...titleStyle(c), textAlign: 'center' }}>
-      {p.text(p.view.place.title.key)}
-    </Text>
-  );
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-        {p.g.look ? (
-          <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
-            {title}
-          </Tap>
-        ) : (
-          title
-        )}
-      </View>
-      <ScrollView
-        style={{ flex: 1, backgroundColor: c.bg }}
-        contentContainerStyle={{ padding: 24 }}
-      >
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <RoomTitle {...p} />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
         <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
         {warnings(c, p.view, p.text)}
         <Here view={p.view} text={p.text} open={p.open} />
@@ -112,6 +97,26 @@ export function RoomPage(p: {
         {placeActions(p.view, p.g, p.press)}
         {p.log.length > 0 && <Text style={{ ...prose(c), marginTop: 12 }}>{p.log.join('\n')}</Text>}
       </ScrollView>
+    </View>
+  );
+}
+
+// The room's title; a tap looks.
+function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
+  const title = (
+    <Text {...titleFocus} style={{ ...titleStyle(usePalette()), textAlign: 'center' }}>
+      {p.text(p.view.place.title.key)}
+    </Text>
+  );
+  return (
+    <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+      {p.g.look ? (
+        <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
+          {title}
+        </Tap>
+      ) : (
+        title
+      )}
     </View>
   );
 }
@@ -175,11 +180,7 @@ export function Sheet({ title, children }: { title: string; children: ReactNode 
   const c = usePalette();
   return (
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ padding: 24, gap: 8 }}>
-      <Text
-        {...(title ? titleFocus : {})}
-        style={{ ...titleStyle(c), ...type.pageTitle }}
-        accessibilityRole="header"
-      >
+      <Text {...(title ? titleFocus : {})} style={pageTitleStyle(c)} accessibilityRole="header">
         {title}
       </Text>
       {children}

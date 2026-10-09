@@ -11,18 +11,14 @@ import { openGame } from '../../authority/local-story/session.ts';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
-    // No Reanimated in node: the palette switches at once, as under reduced motion.
-    if (s === './fade.ts')
-      return {
-        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
-        shortCircuit: true,
-      };
+    if (s === './fade.ts') return fadeStub;
     if (s === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',

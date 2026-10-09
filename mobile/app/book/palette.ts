@@ -10,7 +10,8 @@ export const prose = (c: Palette) => ({ ...type.body, color: c.fg });
 export const note = (c: Palette) => ({ ...type.body, color: c.dim });
 
 // The confirmed GameView solar phase's palette (docs/system/book-ui.md#world-and-status-entry):
-// the Book reads the cartridge's phase name and computes no hours.
+// the Book reads the cartridge's phase name and computes no hours. Confirmed: the Book passes
+// game.view(), which a pending attempt never changes.
 const byPhase = new Map([
   ['day', color.light],
   ['dawn', color.dawn],
@@ -21,7 +22,7 @@ export const paletteOf = (solar?: string) => byPhase.get(solar!) ?? color.light;
 
 // The palette to show for `target`: at once on mount and without a curve (reduced motion), else
 // cross-faded along `curve` over motion.palette from whatever is shown (a cut-short fade included).
-// ponytail: the cross-fade re-renders every palette reader each frame for motion.palette; fine for
+// ponytail: the cross-fade re-renders the Book each frame for motion.palette; fine for
 // a few phase changes a game day, revisit if it stutters on a device.
 export function useShownPalette(target: Palette, curve?: (t: number) => number): Palette {
   const [shown, setShown] = useState(target);
@@ -32,8 +33,9 @@ export function useShownPalette(target: Palette, curve?: (t: number) => number):
     if (!curve) return setShown(target);
     const from = now.current;
     const start = performance.now();
-    let frame = requestAnimationFrame(function step(at) {
-      const t = Math.min(1, (at - start) / motion.palette.duration);
+    let frame = requestAnimationFrame(function step() {
+      // One clock for start and now (a frame's timestamp may not be performance.now's).
+      const t = Math.min(1, Math.max(0, (performance.now() - start) / motion.palette.duration));
       setShown(t < 1 ? mix(from, target, curve(t)) : target);
       if (t < 1) frame = requestAnimationFrame(step);
     });

@@ -12,13 +12,7 @@ const turn = async ({ from, to }: { from: string; to: string }) => {
   const frames = 600; // about 10 s at 60 fps
   for (let i = 0; i < frames && document.querySelector('canvas'); i++)
     await new Promise(requestAnimationFrame); // the previous turn's curl has gone
-  const effect = (globalThis as any).CanvasKit.RuntimeEffect.prototype;
-  const make = effect.makeShaderWithChildren;
-  const progress: number[] = [];
-  effect.makeShaderWithChildren = function (uniforms: number[], ...rest: unknown[]) {
-    progress.push(uniforms[2]); // size.x, size.y, progress, ...
-    return make.call(this, uniforms, ...rest);
-  };
+  const progress: number[] = ((globalThis as any).curlProgress = []); // filled by watchCurl
   (document.querySelector(`[aria-label="${from}"]`) as HTMLElement).click();
   let curl = false;
   let arrived: number | undefined; // the frame time the arriving page first showed
@@ -48,8 +42,19 @@ const turn = async ({ from, to }: { from: string; to: string }) => {
       if (!canvas) break; // the leaving page and its curl have gone
     }
   }
-  effect.makeShaderWithChildren = make;
   return { curl, hit, stayed, focused, reachable, first: progress[0] ?? null };
+};
+
+// Records the progress each curl shader is built with (CanvasKit's, as the preview runs it) into
+// the array `turn` sets out.
+const watchCurl = () => {
+  const effect = (globalThis as any).CanvasKit.RuntimeEffect.prototype;
+  const make = effect.makeShaderWithChildren;
+  effect.makeShaderWithChildren = function (uniforms: number[], ...rest: unknown[]) {
+    (globalThis as any).curlProgress?.push(uniforms[2]); // size.x, size.y, progress, ...
+    return make.call(this, uniforms, ...rest);
+  };
+  return null;
 };
 
 // A cold Metro builds the preview's Skia chunk on first request; that once outlasted the default wait.
@@ -65,6 +70,7 @@ test('the page curl draws over a live arriving page, both ways', async ({
 }) => {
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
+  await browser.evaluate(watchCurl);
   const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true, first: 0 });
   await app.screenshot('page-curl-forward');

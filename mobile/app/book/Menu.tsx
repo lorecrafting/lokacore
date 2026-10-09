@@ -12,7 +12,7 @@ import {
   Tap,
   ThingPage,
   titleFocus,
-  titleStyle,
+  pageTitleStyle,
   type Thing,
 } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -43,20 +43,18 @@ function Choice(p: {
       {absent(p.view) !== '' && <Text style={note(c)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
-        if (p.choice.riddle?.choice_id === o.choice_id)
-          return b ? (
+        const riddle = p.choice.riddle;
+        if (b && riddle?.choice_id === o.choice_id)
+          return (
             <Riddle
-              key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${p.choice.riddle.bank.join('')}`}
-              bank={p.choice.riddle.bank}
+              key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${riddle.bank.join('')}`}
+              bank={riddle.bank}
               button={b}
               press={p.press}
             />
-          ) : (
-            <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
           );
-        return b ? (
-          <Act key={o.choice_id} b={b} press={p.press} />
-        ) : (
+        if (b) return <Act key={o.choice_id} b={b} press={p.press} />;
+        return (
           <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
       })}
@@ -133,15 +131,9 @@ export function NpcPage(p: NpcProps) {
       ref={scroll}
       style={{ flex: 1, backgroundColor: c.bg }}
       contentContainerStyle={{ padding: 24 }}
-      onContentSizeChange={() => {
-        if (p.log.length) scroll.current?.scrollToEnd({ animated: false });
-      }}
+      onContentSizeChange={() => p.log.length && scroll.current?.scrollToEnd({ animated: false })}
     >
-      <Text
-        {...titleFocus}
-        style={{ ...titleStyle(c), ...type.pageTitle }}
-        accessibilityRole="header"
-      >
+      <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
       {description && <Text style={prose(c)}>{plain(p.text(description))}</Text>}

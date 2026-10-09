@@ -91,8 +91,6 @@ export default function Book(p: BookProps) {
   current.current = { stack, view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
-  // Confirmed GameView only (game.view() never shows a pending attempt): its solar phase's palette.
-  const palette = useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve());
   const go = (next: Page[], dir: 1 | -1) => {
     const view = pr.screen().view;
     next = pagesAfter(next, view, view);
@@ -105,7 +103,7 @@ export default function Book(p: BookProps) {
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
-      palette={palette}
+      palette={useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
       screen={screen}
       stack={stack}
       flip={flip}

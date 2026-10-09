@@ -1,7 +1,29 @@
 import assert from 'node:assert/strict';
+import { registerHooks } from 'node:module';
 import { test } from 'node:test';
-import { paletteOf } from './palette.ts';
 import { color } from './tokens.ts';
+
+// palette.ts's hooks outside React: one component, its state slots and effects run by hand.
+const h = globalThis as any;
+registerHooks({
+  resolve: (s, c, next) =>
+    s === 'react' && c.parentURL?.endsWith('/palette.ts')
+      ? { url: 'test:palette-react', shortCircuit: true }
+      : next(s, c),
+  load: (url, c, next) =>
+    url === 'test:palette-react'
+      ? {
+          format: 'module',
+          shortCircuit: true,
+          source: `export const createContext = v => ({ _currentValue: v });
+export const useContext = c => c._currentValue;
+export const useState = v => globalThis.hook.state(v);
+export const useRef = v => globalThis.hook.state({ current: v })[0];
+export const useEffect = (f, deps) => globalThis.hook.effect(f, deps);`,
+        }
+      : next(url, c),
+});
+const { paletteOf, useShownPalette } = await import('./palette.ts');
 
 // Breaks: a phase shows the wrong palette, an unknown or inherited name ('constructor') or a world
 // without a calendar shows anything but light (docs/system/book-ui.md#world-and-status-entry).
@@ -39,4 +61,57 @@ test('every text role is at least 4.5:1 on bg and card in every palette', () => 
     for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const)
       for (const paper of ['bg', 'card'] as const)
         assert.ok(contrast(p[role], p[paper]) >= 4.5, `${name}.${role} on ${paper}`);
+});
+
+// Drives useShownPalette as a component would be: render, then run changed effects; frames and the
+// clock are in the test's hands.
+function mount(curve?: (t: number) => number) {
+  const slots: any[] = [];
+  const deps: unknown[][] = [];
+  const frames: (() => void)[] = [];
+  let clock = 1000;
+  let slot = 0;
+  let pending: (() => void)[] = [];
+  h.requestAnimationFrame = (f: () => void) => frames.push(f);
+  h.cancelAnimationFrame = () => frames.splice(0);
+  h.performance = { now: () => clock };
+  h.hook = {
+    state: (v: unknown) => {
+      const i = slot++;
+      if (!(i in slots)) slots[i] = v;
+      return [slots[i], (n: unknown) => (slots[i] = n)];
+    },
+    effect: (f: () => void, d: unknown[]) => {
+      const i = slot++;
+      if (deps[i]?.every((x, j) => Object.is(x, d[j]))) return;
+      deps[i] = d;
+      pending.push(f);
+    },
+  };
+  const render = (target: typeof color.light) => {
+    slot = 0;
+    useShownPalette(target, curve);
+    for (const f of pending.splice(0)) f();
+    slot = 0;
+    return useShownPalette(target, curve).bg; // after its effects, as the next render sees it
+  };
+  const frame = (at: number) => ((clock = 1000 + at), frames.shift()!());
+  return { render, frame, frames };
+}
+
+// Breaks: the Book fades in from light on opening, never reaches the new palette exactly, or does
+// not switch at once under reduced motion (no curve).
+test('the shown palette: at once on mount and without a curve, else eased over motion.palette', () => {
+  const still = mount();
+  assert.equal(still.render(color.dusk), '#2b1e16');
+  assert.equal(still.render(color.light), '#ebe6d7');
+  const fade = mount((t) => t);
+  assert.equal(fade.render(color.dusk), '#2b1e16');
+  assert.equal(fade.frames.length, 0);
+  fade.render(color.light);
+  fade.frame(750);
+  assert.equal(fade.render(color.light), '#8b8277'); // half-way, by hand
+  fade.frame(1500);
+  assert.equal(fade.render(color.light), '#ebe6d7');
+  assert.equal(fade.frames.length, 0);
 });

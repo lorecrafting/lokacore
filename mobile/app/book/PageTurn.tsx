@@ -101,15 +101,14 @@ function useMotion(
   useEffect(() => void (reduced || warm(pages.get(turn)!)), []);
   // Before paint, so a new curl or fade never shows the last turn's finished progress for a frame.
   useLayoutEffect(() => {
-    if (!leaving) return;
+    // A curl or fade first draws with the progress it mounts on (a stale 1 flashed the arriving page).
+    if (!leaving) return void (progress.value = 0);
     const timing = leaving.image ? motion.turn : reduced ? motion.fade : undefined;
     if (timing) return animate(progress, timing, leaving, setLeaving);
     let live = true;
     // No picture in time, or none at all: the page has simply changed.
     const late = setTimeout(() => ((live = false), setLeaving(undefined)), motion.quick.duration);
-    // The curl is first drawn with the progress it mounts with: back to 0 before it mounts, or every
-    // turn after the first shows the arriving page for a few frames (the last curl's 1) and then the
-    // whole leaf again.
+    // A curl first draws with the progress it mounts on: 0 here too, for a turn that cut one short.
     snapshot(pages.get(leaving.turn)!).then(
       (image) =>
         live

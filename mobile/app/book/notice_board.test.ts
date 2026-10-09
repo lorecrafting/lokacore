@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url),
   ts = require('typescript');
@@ -16,12 +17,7 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
-    // No Reanimated in node: the palette switches at once, as under reduced motion.
-    if (specifier === './fade.ts')
-      return {
-        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
-        shortCircuit: true,
-      };
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
