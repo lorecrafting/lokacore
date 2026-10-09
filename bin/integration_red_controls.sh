@@ -174,7 +174,7 @@ amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; 
 echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
 am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
 # Break: a checkout whose own after_merge.sh is behind main runs the old copy (here it exits 9 before doing anything).
-STALE=1 amk; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
+STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
 git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
 # Break: a br write that dirties the export after the commit makes the pre-push hook refuse (stand-in hooks).

@@ -8,7 +8,7 @@
 # A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
 # rewrites it from the database; it is refused when main also changed the export (the post-merge
 # import is not proven to run first, so copying back could drop main's rows). Every refusal
-# (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change.
+# (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
 # An export dirtied again after the commit (a concurrent br write) gets its own Beads commit before the push.
