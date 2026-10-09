@@ -19,6 +19,8 @@
   "ancestry.strong.description": "Broad shoulders: strength 15.",
   "ancestry.nimble.label": "Nimble",
   "ancestry.nimble.description": "Quick hands, weak arms: strength 5.",
+  "ancestry.hardy.label": "Hardy",
+  "ancestry.hardy.description": "Thick-skinned: constitution 16.",
   "combat.player_hit": "You strike the dummy.",
   "combat.player_miss": "You miss the dummy.",
   "combat.npc_hit": "The dummy sways into you.",

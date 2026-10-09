@@ -274,6 +274,18 @@ events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler));
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
 
+The player body's hp maximum moves with the derived `hp_max` table
+([row 2](#stats-derived-from-attributes-toolbox-row-2); [PM decision](../decisions/pm-decision-derived-pool-max-2026-10-09.md)):
+its effective maximum is the authored `maximum` plus the bonus, never below `minimum`, read on
+each use and never stored. Every bound above uses it: queries, saturation, costs, regeneration
+(which stops there), the GameView maximum and band, the status tick and the death restore (capped
+at it). The start value is unchanged, so a raised maximum is reached by regeneration. Composition
+carries it as the non-saved `resource_maxima` map, keyed by the exact canonical resource target,
+in both kernels' composition and independent replay; an entry replaces the spec's `maximum` for
+that target, and a row stored above it (the maximum fell since) reads as the maximum with a zero
+remainder, so the next write starts there. Without an entry, a row above `maximum` still fails.
+NPC bodies, other pools and cartridges without `hp_max` are unchanged.
+
 <a id="attributes1"></a>
 
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
@@ -1693,5 +1705,6 @@ At a due job strictly before `ends_at` and not before `next_tick_at`, add `per_t
 - `hit_chance`: the player's attack chance (the usable wielded weapon's, otherwise `combat.player_attack`), clamped to 0..100.
 - `damage`: both `damage_min` and `damage_max` of that profile, each clamped at 0, so the interval keeps its order; a hit whose damage is 0 deals no loss.
 - `carry_grams`: `carry.max_grams` for the player's body, clamped at 0, on every carry path (Take, purchase and dialogue receipt, exchange and harvest, Fill).
+- `hp_max`: the hp pool's `maximum` for the player's body, clamped at the pool's `minimum` ([resource@1](#resource1-kerneltssrcmechanicsresourcets); Beads `loka-kgd.8`).
 
-Nothing is stored: the stats are read at use, so a later attribute writer changes them at once. NPCs have no attributes; their attack profiles and any other body's carrying are unchanged. Hit points are not derived here (Beads `loka-kgd.8`). A cartridge without `world.derived` behaves as before. The sampler's ancestries give strength 15 (strong) and 5 (nimble): with the base chance 75, damage 4 and carry 10000 g, the strong character hits at 100 for 6 and lifts the 8000 g anvil; the nimble one hits at 50 for 1 and cannot lift it. The player sees no new Book line: the Character page already shows the attributes.
+Nothing is stored: the stats are read at use, so a later attribute writer changes them at once. NPCs have no attributes; their attack profiles, hit points and any other body's carrying are unchanged. A cartridge without `world.derived` behaves as before. The sampler's ancestries give strength 15 (strong), 5 (nimble) and constitution 16 (hardy): with the base chance 75, damage 4, carry 10000 g and hp maximum 10, the strong character hits at 100 for 6 and lifts the 8000 g anvil; the nimble one hits at 50 for 1 and cannot lift it; the hardy one starts at hp 10 of 16 and regenerates to 16. The player sees no new Book line: the Character page already shows the attributes and each pool's current and maximum.

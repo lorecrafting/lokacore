@@ -45,4 +45,42 @@ defmodule Loka.Core.CalendarResourceTest do
              Invariants.check("delta_preconditions_hold", %{observation | "delta" => forged})
            ] == [true, false]
   end
+
+  # Breaks: composition or the independent replay keeps the authored maximum 10 when
+  # resource_maxima moves it (derived hp_max, mechanics.md resource@1): a raised write above 10 or
+  # a row stored above a lowered maximum faults instead of settling there with no fraction.
+  test "a resource_maxima entry replaces the maximum and caps a row stored above it" do
+    fixture = JSON.decode!(File.read!("protocol/fixtures/resource_recovery.json"))
+    at = Compose.key(fixture["target"])
+    row = &%{"value" => &1, "at" => &2, "rate" => 2, "remainder" => &3}
+
+    # raised to 14: 10 s at rate 2 per 10 s gains 2 past the authored 10; lowered to 6: the
+    # stored 9 with fraction 3 reads as 6 with none.
+    for {maximum, clock, stored, from, to, written} <- [
+          {14, 110, row.(10, 100, 0), 12, 13, row.(13, 110, 0)},
+          {6, 100, row.(9, 95, 3), 6, 5, row.(5, 100, 0)}
+        ] do
+      state = %{
+        "clock" => clock,
+        "resource_specs" => %{Compose.key(fixture["resource"]) => fixture["spec"]},
+        "resource_maxima" => %{at => maximum},
+        "resources" => %{at => stored}
+      }
+
+      op = %{
+        "op" => "resource.adjust",
+        "writer_group" => 0,
+        "resource" => fixture["resource"],
+        "entity_id" => fixture["target"]["entity_id"],
+        "from" => from,
+        "to" => to
+      }
+
+      delta = %{"ops" => [op]}
+      result = %{"changes" => [%{"target" => fixture["target"], "value" => written}]}
+      assert Compose.compose(state, delta) == result, "maximum #{maximum}"
+      observation = %{"state" => state, "delta" => delta, "result" => result}
+      assert Invariants.check("delta_preconditions_hold", observation), "replay #{maximum}"
+    end
+  end
 end

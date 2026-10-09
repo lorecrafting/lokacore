@@ -361,6 +361,61 @@ test('independent recovery replay rejects an unauthored stored rate', () => {
   assert.equal(check('delta_preconditions_hold', { state, delta, result }), false);
 });
 
+// Breaks: composition or the independent replay keeps the authored maximum 10 when resource_maxima
+// moves it (derived hp_max, mechanics.md resource@1): a raised write above 10 or a row stored above
+// a lowered maximum faults instead of settling there with no fraction.
+test('a resource_maxima entry replaces the maximum and caps a row stored above it', () => {
+  const fixture = read('protocol/fixtures/resource_recovery.json');
+  const at = key(fixture.target);
+  const cases: [number, number, object, number, number, object][] = [
+    // raised to 14: 10 s at rate 2 per 10 s gains 2 past the authored 10.
+    [
+      14,
+      110,
+      { value: 10, at: 100, rate: 2, remainder: 0 },
+      12,
+      13,
+      { value: 13, at: 110, rate: 2, remainder: 0 },
+    ],
+    // lowered to 6: the stored 9 with fraction 3 reads as 6 with none.
+    [
+      6,
+      100,
+      { value: 9, at: 95, rate: 2, remainder: 3 },
+      6,
+      5,
+      { value: 5, at: 100, rate: 2, remainder: 0 },
+    ],
+  ];
+  for (const [maximum, clock, row, from, to, after] of cases) {
+    const state: State = {
+      clock,
+      resource_specs: { [key(fixture.resource)]: fixture.spec },
+      resource_maxima: { [at]: maximum },
+      resources: { [at]: row },
+    } as never;
+    const delta = {
+      ops: [
+        {
+          op: 'resource.adjust',
+          writer_group: 0,
+          resource: fixture.resource,
+          entity_id: fixture.target.entity_id,
+          from,
+          to,
+        },
+      ],
+    };
+    const result = { changes: [{ target: fixture.target, value: after }] };
+    assert.deepEqual(compose(state, delta as never), result, `maximum ${maximum}`);
+    assert.equal(
+      check('delta_preconditions_hold', { state, delta, result }),
+      true,
+      `replay ${maximum}`,
+    );
+  }
+});
+
 // Breaks: optional recovery schemas accept omitted table fields, unsafe/negative rates or malformed intervals.
 test('recovery schema trust-boundary literals', () => {
   for (const c of read('protocol/fixtures/resource_recovery.json').contracts)

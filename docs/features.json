@@ -446,7 +446,7 @@
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3)"
+    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3) and hp maximum (loka-kgd.8)"
   },
   "equipment": {
     "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",

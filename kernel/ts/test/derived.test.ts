@@ -15,7 +15,9 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
 import { carryingAdded, carryingExchange } from '../src/mechanics/containment/shared.ts';
-import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
+import { apply } from '../src/runtime/apply.ts';
+import { gameView } from '../src/view/view.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-derived-sampler-'));
 let artifact: Uint8Array;
@@ -145,6 +147,45 @@ test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0
   assert.equal(hp(round(chosen('strong', weak))), 20);
 });
 
+const hpView = (w: World) => {
+  const { current, maximum } = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+  return [current, maximum];
+};
+
+// Breaks: resourceSpec or the GameView keeps the authored maximum 10 (hardy shows 10/10 and never
+// regenerates past it), or base() omits resource_maxima so composition refuses a write from 16.
+test('constitution 16 raises the hp maximum to 16; the body regenerates to it and spends from it', () => {
+  const hardy = chosen('hardy');
+  assert.deepEqual(hpView(hardy), [10, 16]);
+  const later = wait(hardy, 3 * 3600); // gain 5 per hour boundary from the start value 10
+  assert.deepEqual(hpView(later), [16, 16]);
+  assert.deepEqual(hpView(wait(chosen('nimble'), 3 * 3600)), [10, 10]);
+  const hp = resourceRef(later, 'hp');
+  const spent = apply(later, [adjust(later, later.body, hp, -1, {}).op]);
+  assert.ok('world' in spent, JSON.stringify(spent));
+  assert.equal(level(spent.world, later.body, hp), 15);
+});
+
+// Breaks: the death sequence restores the authored 10 above a derived maximum of 4, so the killing
+// round faults composition and the player never returns.
+test('a maximum lowered to 4 reads the start value 10 as 4 and caps the death restore', () => {
+  const frail = structuredClone(content) as any; // constitution 16: -1 * (16 - 10) = -6
+  frail.world.derived.hp_max.terms[0].per_point = -1;
+  frail.npcs['derived_sampler@0.0.1:npc/dummy'].attack = {
+    chance: 100,
+    damage_min: 9,
+    damage_max: 9,
+  };
+  const w = chosen('hardy', frail);
+  assert.deepEqual(hpView(w), [4, 4]);
+  const fought = wait(
+    play(play(w, { type: 'move', direction: 'east' }), { type: 'attack', target_id: dummy(w) }),
+    150,
+  );
+  assert.equal(gameView(fought).place!.title.key, 'room.hall.title'); // died and returned at the shrine
+  assert.deepEqual(hpView(fought), [4, 4]);
+});
+
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,
 // a missing owner or an old API floor loads and fails in play.
 test('the loader refuses each unsound derived table', () => {
@@ -153,6 +194,11 @@ test('the loader refuses each unsound derived table', () => {
   const rows: [(c: any) => void, string, string][] = [
     [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.38'),
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.39'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
@@ -206,7 +252,7 @@ test('the loader refuses each unsound derived table', () => {
 });
 
 // Breaks: a compiled table without terms, a term missing a field, an extra field or a divisor
-// outside 1..2^31-1 loads, or a stat outside the three (hp_max is loka-kgd.8) is accepted.
+// outside 1..2^31-1 loads, or a stat outside the four is accepted.
 test('a derived table requires its terms and a positive 32-bit divisor', () => {
   const term = {
     attribute: { cartridge_id: 'c', cartridge_version: '1.0.0', kind: 'attribute', key: 'str' },
@@ -230,7 +276,7 @@ test('a derived table requires its terms and a positive 32-bit divisor', () => {
   ];
   for (const [value, path, code] of rows)
     assert.deepEqual(validate('DerivedStat', value), [{ path, code }], path);
-  assert.deepEqual(validate('WorldSettings', { derived: { hp_max: ok } }), [
-    { path: '/derived/hp_max', code: 'unknown_property' },
+  assert.deepEqual(validate('WorldSettings', { derived: { mv_max: ok } }), [
+    { path: '/derived/mv_max', code: 'unknown_property' },
   ]);
 });

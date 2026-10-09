@@ -1,6 +1,6 @@
 import type { BandTable, Key, ResourceView } from '../contracts.gen.ts';
 import { refString, type World } from '../runtime/decision.ts';
-import { level, resourceRef } from '../mechanics/resource.ts';
+import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
 
 // The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
@@ -32,8 +32,9 @@ export function resources(world: World): ResourceView[] {
           (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
         ),
     )
-    .map(({ key: k, minimum, maximum, bands }) => {
+    .map(({ key: k, bands }) => {
       const resource = resourceRef(world, k);
+      const { minimum, maximum } = resourceSpec(world, world.body, resource);
       const current = level(world, world.body, resource)!;
       const { key: band, tone } = (bands ?? world.cartridge.world?.bands ?? BANDS).find(
         (b) => 100 * (current - minimum) >= b.at_percent * (maximum - minimum),

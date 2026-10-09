@@ -3,6 +3,7 @@ defmodule Loka.Content.Derived do
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
+  # hp_max needs the hp pool, which every compiled cartridge has (Resources @defaults).
   @needs %{"hit_chance" => "combat", "damage" => "combat", "carry_grams" => "carry"}
 
   def settings(%{"world" => %{"derived" => d}} = settings, m),
@@ -23,18 +24,18 @@ defmodule Loka.Content.Derived do
   def check(m, defs, {_, settings}) do
     case get_in(settings, ["world", "derived"]) do
       nil -> []
-      table -> gate(m) ++ Enum.flat_map(table, &stat(&1, m, defs, settings["world"]))
+      table -> gate(m, table) ++ Enum.flat_map(table, &stat(&1, m, defs, settings["world"]))
     end
   end
 
-  defp gate(m) do
+  defp gate(m, table) do
     version =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
     api =
-      if version < [1, 39],
+      if version < if(table["hp_max"], do: [1, 40], else: [1, 39]),
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 
@@ -59,7 +60,7 @@ defmodule Loka.Content.Derived do
     path = ["world", "derived", key]
 
     needs =
-      if is_map_key(world, @needs[key]),
+      if @needs[key] == nil or is_map_key(world, @needs[key]),
         do: [],
         else: [diag("SCHEMA_VIOLATION", at("cartridge.json", path))]
 

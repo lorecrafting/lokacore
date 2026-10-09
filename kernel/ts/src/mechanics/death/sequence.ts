@@ -3,7 +3,7 @@ import type { CharacterId, Command, DeltaOp, DomainEvent, EntityId } from '../..
 import { bodyOf, refString, type Mint, type World } from '../../runtime/decision.ts';
 import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { level, resourceRef, recoveryAdjustments, adjust } from '../resource.ts';
+import { level, resourceRef, resourceSpec, recoveryAdjustments, adjust } from '../resource.ts';
 import { fact, positionOf } from '../position/shared.ts';
 import { wornIn } from '../equipment/rule.ts';
 import { fail } from '../patrol/sequence.ts';
@@ -210,17 +210,13 @@ function restoredPools(world: World, victim_id: EntityId) {
   const restored = recoveryAdjustments(world, victim_id, 'standing').map((op) => ({ ...op }));
   for (const pool of ['hp', 'mv'] as const) {
     const resource = resourceRef(world, pool);
+    // A derived hp_max can fall below the authored restore value.
+    const to = Math.min(settings.restore[pool], resourceSpec(world, victim_id, resource).maximum);
     const existing = restored.find((op) => same(op.resource, resource));
-    if (existing) existing.to = settings.restore[pool];
+    if (existing) existing.to = to;
     else
       restored.push(
-        adjust(
-          world,
-          victim_id,
-          resource,
-          settings.restore[pool] - level(world, victim_id, resource)!,
-          {},
-        ).op,
+        adjust(world, victim_id, resource, to - level(world, victim_id, resource)!, {}).op,
       );
   }
   return restored;

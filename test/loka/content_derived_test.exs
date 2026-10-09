@@ -2,7 +2,8 @@ defmodule Loka.ContentDerivedTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/derived_sampler")}
 
-  # Breaks: a derived table naming no attribute, lacking attributes@1, an old API floor, or
+  # Breaks: a derived table naming no attribute, lacking attributes@1, an old API floor (1.40 with
+  # hp_max), or
   # modifying a stat whose combat or carry settings are absent compiles
   # (hit_chance and damage need world.combat, carry_grams world.carry).
   test "derived tables keep their references, owner and settings", %{dir: dir} do
@@ -12,6 +13,8 @@ defmodule Loka.ContentDerivedTest do
     cases = [
       {&put_in(&1, terms.("damage") ++ ["attribute"], "luck"),
        {"UNRESOLVED_REFERENCE", "cartridge.world.derived.damage.terms[0].attribute"}},
+      {&put_in(&1, ["requires", "kernel_api", "at_least"], "1.39"),
+       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {&put_in(&1, ["requires", "kernel_api", "at_least"], "1.38"),
        {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {&update_in(&1, ["world"], fn w -> Map.delete(w, "carry") end),

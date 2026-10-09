@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-09 [PM decision: HP maximum derived from attributes](pm-decision-derived-pool-max-2026-10-09.md)
 - 2026-10-09 [Owner decision: two-lane CI, hosted gate for every branch](owner-decision-two-lane-ci-2026-10-09.md)
 - 2026-10-09 [Owner decision: hosted CI gates toolbox/* branches](owner-decision-hosted-ci-toolbox-2026-10-09.md)
 - 2026-10-09 [Owner decision: live polish sessions in Storybook](owner-decision-live-polish-session-2026-10-09.md)
