@@ -18,6 +18,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**
 - [Review: polish batch 3, Page shell, PageFoot and E1 (PR #329)](2026-10-09-polish-batch3-review.md): **APPROVE**
 - [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
+- [Review: Housekeeping, red controls by PID, after_merge pulls (PR #338)](2026-10-09-housekeeping-338-review.md): **APPROVE WITH NOTES**
 - [Review: housekeeping 2026-10-09, check_all verdict line and developer/PM rules (PR #331)](2026-10-09-housekeeping-331-review.md): **PASS**
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
 - [Review: pre-polish final (PR #324)](2026-10-08-prepolish-final-review.md): **APPROVE WITH NOTES**
