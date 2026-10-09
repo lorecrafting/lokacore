@@ -6,45 +6,48 @@ import { color, motion, opacity, radius, size, sound, space, type } from '../boo
 
 const textRoles = ['fg', 'dim', 'action', 'danger', 'warning'] as const;
 
+type Palette = (typeof color)['light'];
+
+// One role's swatch, value and, for a text role, its ratio on bg and card.
+function Swatch({ p, role, hex }: { p: Palette; role: string; hex: string }) {
+  const small = { ...type.small, color: p.fg };
+  const ratios = (textRoles as readonly string[]).includes(role)
+    ? [contrast(hex, p.bg), contrast(hex, p.card)]
+    : [];
+  return (
+    <View style={{ gap: space.hair }}>
+      <View
+        style={{
+          height: size.touch,
+          backgroundColor: hex,
+          borderWidth: size.rule,
+          borderColor: p.line,
+        }}
+      />
+      <Text style={small}>{`${role} ${hex}`}</Text>
+      {ratios.length > 0 && (
+        <Text style={{ ...small, color: ratios.some((r) => r < 4.5) ? p.danger : p.fg }}>
+          {`bg ${ratios[0].toFixed(2)} card ${ratios[1].toFixed(2)}`}
+        </Text>
+      )}
+    </View>
+  );
+}
+
 function Palettes() {
   return (
     <View style={{ flexDirection: 'row' }}>
-      {Object.entries(color).map(([name, p]) => {
-        const small = { ...type.small, color: p.fg };
-        return (
-          <View
-            key={name}
-            style={{ flex: 1, backgroundColor: p.bg, padding: space.md, gap: space.xs }}
-          >
-            <Text style={{ ...type.sectionTitle, color: p.fg }}>{name}</Text>
-            {Object.entries(p).map(([role, hex]) => {
-              const ratios = (textRoles as readonly string[]).includes(role)
-                ? [contrast(hex, p.bg), contrast(hex, p.card)]
-                : [];
-              return (
-                <View key={role} style={{ gap: space.hair }}>
-                  <View
-                    style={{
-                      height: size.touch,
-                      backgroundColor: hex,
-                      borderWidth: size.rule,
-                      borderColor: p.line,
-                    }}
-                  />
-                  <Text style={small}>{`${role} ${hex}`}</Text>
-                  {ratios.length > 0 && (
-                    <Text
-                      style={{ ...small, color: ratios.some((r) => r < 4.5) ? p.danger : p.fg }}
-                    >
-                      {`bg ${ratios[0].toFixed(2)} card ${ratios[1].toFixed(2)}`}
-                    </Text>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        );
-      })}
+      {Object.entries(color).map(([name, p]) => (
+        <View
+          key={name}
+          style={{ flex: 1, backgroundColor: p.bg, padding: space.md, gap: space.xs }}
+        >
+          <Text style={{ ...type.sectionTitle, color: p.fg }}>{name}</Text>
+          {Object.entries(p).map(([role, hex]) => (
+            <Swatch key={role} p={p} role={role} hex={hex} />
+          ))}
+        </View>
+      ))}
     </View>
   );
 }
