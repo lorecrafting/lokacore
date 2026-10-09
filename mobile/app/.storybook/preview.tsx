@@ -54,13 +54,13 @@ const preview: Preview = {
       options: {
         // Phones, narrow to wide, then tablets. Sizes are CSS px, portrait (yesviz.com).
         galaxyS25: device('Galaxy S25', 360, 780),
-        pixel9: device('Pixel 9', 360, 808),
         iphoneSE: device('iPhone SE', 375, 667),
-        iphone13: device('iPhone 13/14', 390, 844),
+        iphone13: device('iPhone 13/14/16e', 390, 844),
         iphone15: device('iPhone 15/16', 393, 852),
         iphone17: device('iPhone 17/17 Pro', 402, 874),
         pixel7: device('Pixel 7', 412, 915),
         iphone11: device('iPhone 11', 414, 896),
+        pixel9: device('Pixel 9/10', 412, 924),
         iphoneAir: device('iPhone Air', 420, 912),
         iphone17ProMax: device('iPhone 17 Pro Max', 440, 956),
         // tablets: the centred page width and the footer rules
