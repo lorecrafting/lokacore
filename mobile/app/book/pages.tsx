@@ -19,7 +19,6 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
-const titleStyle = (c: Palette) => ({ color: c.fg, paddingBottom: space.md });
 // A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
 // on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
 export const titleFocus = {
@@ -267,7 +266,7 @@ export function PageFoot({ children }: { children: ReactNode }) {
 // A heading inside a page (Inside, Held, Worn, Where).
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <Text accessibilityRole="header" style={{ ...titleStyle(usePalette()), ...type.sectionTitle }}>
+    <Text accessibilityRole="header" style={{ color: usePalette().fg, ...type.sectionTitle }}>
       {children}
     </Text>
   );
