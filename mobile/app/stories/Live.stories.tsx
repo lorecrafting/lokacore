@@ -16,7 +16,8 @@ const live = (checkpoint: string) => async (): Promise<Loaded> => {
   const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
   await LoadSkiaWeb({ locateFile: () => wasm });
   const { default: BookC } = await import('../book/Book.tsx'); // PageTurn needs CanvasKit first
-  const db = await openDatabaseAsync(':memory:'); // a fresh save per mount
+  // a fresh save per mount: the worker otherwise hands back the last story's open ':memory:' (loka-0qz)
+  const db = await openDatabaseAsync(':memory:', { useNewConnection: true });
   await db.execAsync(checkpoint);
   // the checkpoint's own wall clock (the Node harness's), so opening does not catch up real time
   const { wall_ms } = (await db.getFirstAsync<{ wall_ms: number }>('SELECT wall_ms FROM elapsed'))!;
