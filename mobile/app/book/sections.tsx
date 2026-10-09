@@ -17,7 +17,7 @@ import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { SkillDetails } from './skills.tsx';
-import { space } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
@@ -264,10 +264,32 @@ export function SettingsPage(p: { startOver: () => void; world: () => void }) {
   );
 }
 
-export function ChapterPage(p: { title: string; done: () => void }) {
+// The chapter card (BOOK-UI-COMPONENTS.md, Chapter card): label, title (the page header), rule.
+export function ChapterPage(p: { label: string; title: string; done: () => void }) {
+  const c = usePalette();
   return (
-    <Page title={p.title}>
-      <ContinueButton label="Continue" onPress={p.done} />
+    <Page centred>
+      <View style={{ alignItems: 'center', gap: space.sm }}>
+        <Text style={[type.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
+        <Text
+          {...useTitleFocus()}
+          accessibilityRole="header"
+          style={[type.chapterTitle, { color: c.fg, textAlign: 'center' }]}
+        >
+          {p.title}
+        </Text>
+        <View
+          style={{
+            width: size.chapterRule,
+            height: size.rule,
+            backgroundColor: c.dim,
+            marginTop: space.sm,
+          }}
+        />
+      </View>
+      <View style={{ alignItems: 'center' }}>
+        <ContinueButton label="Continue" onPress={p.done} />
+      </View>
     </Page>
   );
 }

@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font';
 import { fonts } from './App.tsx';
 import { PageTurn } from './book/PageTurn.tsx';
 import { ChapterPage, SettingsPage } from './book/sections.tsx';
+import { chapterLabel } from './book/words.ts';
 import { usePalette } from './book/palette.ts';
 
 export default function PageTurnPreview() {
@@ -20,7 +21,7 @@ export default function PageTurnPreview() {
         {at.turn % 2 ? (
           <SettingsPage startOver={() => go(-1)} world={() => go(-1)} />
         ) : (
-          <ChapterPage title="Chapter One" done={() => go(1)} />
+          <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={() => go(1)} />
         )}
       </PageTurn>
     </View>
