@@ -1,6 +1,7 @@
 // StatusLine: the one centred line under the footer (BOOK-UI-COMPONENTS.md, Status line).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
+import { size } from '../book/tokens.ts';
 import type { Pool } from '../book/model.ts';
 import { StatusLine } from '../book/Status.tsx';
 
@@ -75,3 +76,12 @@ export const Locked: Story = {
 };
 
 export const Pending: Story = { args: { pending: true } };
+
+// Breaks: Tap loses its minHeight; a type.small position reaches size.touch by minHeight alone.
+export const Position: Story = {
+  args: { position: 'standing' as never, openPosition: fn() }, // a Key, shown as is
+  play: async ({ canvas }) => {
+    const button = canvas.getByRole('button', { name: 'standing, change position' });
+    await expect(button.getBoundingClientRect().height).toBe(size.touch);
+  },
+};
