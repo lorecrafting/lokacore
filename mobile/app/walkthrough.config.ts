@@ -3,7 +3,8 @@
 import { web } from '@e2e-dev/web';
 import type { E2EConfig } from 'e2e';
 
-const port = process.env.LOKA_PREVIEW_PORT ?? '19016';
+// Port 0: the runner assigns a free port per run, so concurrent runs never share one.
+const port = process.env.LOKA_PREVIEW_PORT ?? '0';
 
 export default {
   tests: ['walkthrough/*.walk.ts'],
@@ -31,8 +32,8 @@ export default {
           executable: 'node',
           args: ['preview-server.cjs'],
           env: {
-            LOKA_PREVIEW_PORT: port,
-            LOKA_METRO_PORT: process.env.LOKA_METRO_PORT ?? '19017',
+            LOKA_PREVIEW_PORT: '{port}',
+            LOKA_METRO_PORT: process.env.LOKA_METRO_PORT ?? '0',
           },
           startupTimeout: 120_000,
         },

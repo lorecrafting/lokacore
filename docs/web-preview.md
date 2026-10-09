@@ -30,10 +30,12 @@ Its web support is alpha. On an SDK update, review that guard and repeat real br
 open, action, reload, tab reopen and Fast Refresh checks before using the preview.
 
 Run the deterministic Book browser test from `mobile/app` with `mise exec -- npm run
-test:e2e`. The tester.army e2e runner starts and stops its own preview on ports 19106 and
-19107, uses a fresh browser profile, and checks a saved move after reload. It does not
-touch the usual preview at 19006 or its save. Install its browser once with `mise exec --
-npx e2e-web install chromium`. The test uses no model or API key, and telemetry is disabled.
+test:e2e`. The tester.army e2e runner starts and stops its own preview, uses a fresh browser
+profile, and checks a saved move after reload. Each run gets a free preview port from the runner
+and a free Metro port from `preview-server.cjs`; set `LOKA_PREVIEW_PORT` or `LOKA_METRO_PORT`
+to fix one. It does not touch the usual preview at 19006 or its save. Install its
+browser once with `mise exec -- npx e2e-web install chromium`. The test uses no model or API
+key, and telemetry is disabled.
 Its pretest also runs the controlled worker deadline check governed by
 [the save boundary](system/save.md#commit-fence-reconcile), with
 [delayed/silent-worker red controls and browser proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-web-sqlite-sync-deadline/README.md).

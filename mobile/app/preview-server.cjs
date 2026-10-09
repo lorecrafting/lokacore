@@ -2,11 +2,21 @@
 // required by expo-sqlite's synchronous browser worker. Both ports stay on localhost.
 const http = require('node:http');
 const net = require('node:net');
-const { spawn } = require('node:child_process');
+const { execFileSync, spawn } = require('node:child_process');
 const path = require('node:path');
 
 const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
-const metroPort = Number(process.env.LOKA_METRO_PORT || 19007);
+// LOKA_METRO_PORT=0 (the e2e configs): ask the OS for a free port, so concurrent runs never share one.
+// ponytail: the port is free when probed, not reserved; if Expo ever loses it to another run, pass
+// Expo's real port to the proxy instead.
+const metroPort =
+  Number(process.env.LOKA_METRO_PORT || 19007) ||
+  Number(
+    execFileSync(process.execPath, [
+      '-e',
+      "const s = require('node:net').createServer().listen(0, 'localhost', () => { process.stdout.write(String(s.address().port)); s.close(); });",
+    ]),
+  );
 const expo = spawn(
   process.execPath,
   [
