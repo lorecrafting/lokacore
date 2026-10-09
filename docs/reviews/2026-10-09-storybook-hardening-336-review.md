@@ -36,3 +36,16 @@
 ## Open items
 
 - loka-x6t.2's acceptance is "smoke passes under load" (load 25-70). The PR shows a pass at load about 15 / 2x CPU and 5/5 fails at 3x. loka-v2j stays open after merge, as the PR body says.
+
+## Fix round (head `60e7b851`)
+
+- Finding 1, **resolved**:
+  - The play no longer warms the picture itself. It records `HTMLImageElement.decode` calls from `beforeEach` (before render) and waits for PageTurn's own warm-up decode.
+  - Baseline passes 1/1.
+  - With `book/PageTurn.tsx:116` deleted, it fails: `expected 0 to be greater than 0`.
+- Finding 2, **resolved**:
+  - `bin/after_merge.sh` checks the sha it read (`review=`) and deletes it with `git update-ref -d ... "$review"`.
+  - Red controls: exit 0 at head.
+  - With the read emptied, `unmerged-review` fails.
+  - The compare-and-delete is not covered by a red control: dropping the old-value argument stays green. By hand, `update-ref -d` with a stale sha refuses and keeps the ref. Accepted; a test for the race would need a concurrent writer.
+- Verdict: **APPROVE**.
