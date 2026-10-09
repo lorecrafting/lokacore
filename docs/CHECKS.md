@@ -95,10 +95,13 @@ their rules and red controls remain available for resumption.
   changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
   stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
   tests run its peers.
-  Hosted CI no longer classifies: every scheduled or dispatched run runs every job, so only pre-push
-  uses `bin/ci_scope.sh`; `bin/ci_base.sh` (the newest ancestor with the relevant jobs actually green,
-  API errors force `run`) is unused by CI. `bin/docs_only_red_controls.sh` plants both positive
-  and unsafe-skip cases, including a local-story save edit and API errors.
+  The `storybook` lane (pre-push only) runs for `mobile/app/book/`, `mobile/app/stories/` or
+  `mobile/app/.storybook/` changes: the hook then runs `npm run storybook:smoke` in `mobile/app`
+  before `bin/check_all.sh`, never alongside `npm test`. The hook refuses a push while tracked files
+  have uncommitted changes, since its checks read the working tree. The full browser e2e is not in
+  pre-push: a slice that changes an interaction flow runs `npm run test:e2e` in `mobile/app`.
+  Hosted CI does not classify: every scheduled or dispatched run runs every job.
+  `bin/docs_only_red_controls.sh` plants both positive and unsafe-skip cases, including a local-story save edit.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
@@ -109,7 +112,7 @@ their rules and red controls remain available for resumption.
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
   pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
   a dead holder's lock is taken over, the lock is removed at exit. It pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
-  a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
+  a peer or mixed push the full line, only a Book push runs the Storybook smoke, a dirty tracked file refuses the push and an untracked one does not) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash

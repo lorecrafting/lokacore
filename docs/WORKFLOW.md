@@ -80,7 +80,7 @@ Report at the end of the slice, not at every step.
 3. **Build and self-review (developer).** Implement, check and self-review as
    [`developer.md`](../.claude/agents/developer.md) says, in the developer's own worktree, never the
    main checkout; the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)
-   makes the final local publication run. A PR that adds or changes a schema also runs the
+   makes the final local publication run (with the Storybook smoke for Book or story changes); a slice that changes an interaction flow also runs `npm run test:e2e` in `mobile/app`. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
    per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
 4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push went

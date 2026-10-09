@@ -20,7 +20,7 @@ recommendation below:
 3. A hosted run is still required before merging a PR that touches save, protocol or kernel code
    (`kernel/`, `lib/loka/core/`, `protocol/`, `mobile/authority/local-story/`), and at the release
    candidate and E3: the PM runs `gh workflow run <workflow> --ref <branch>` for both workflows
-   and merges only on green.
+   and merges only on green. Merge `main` into the branch before a manual run: it tests the branch head.
 4. A red nightly is the next session's first job: `bin/session_status.sh` prints the latest
    scheduled run of each workflow on `main`.
 5. PRs and review records stay. The PM merges with a merge commit (`gh pr merge --merge`, or

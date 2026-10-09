@@ -48,9 +48,9 @@ sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse or
 # branch off a pushed main. Break: a *.test.ts-only push runs the full line, or source/peer edits
 # get the short lanes.
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-git checkout -qb main; mkdir -p .githooks bin kernel/ts/test; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" bin/
+git checkout -qb main; mkdir -p .githooks bin kernel/ts/test mobile/app/book; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" bin/
 printf '#!/bin/sh\necho "lane=$*" > "%s/lane"\n' "$R.d" > bin/check_all.sh; mkdir "$R.d"; chmod +x bin/*.sh .githooks/pre-push
-touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts; git add . && git commit -qm base && git push -q origin main
+touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts mobile/app/book/p.tsx; git add . && git commit -qm base && git push -q origin main
 git config core.hooksPath .githooks
 pp() { # <case> <file> <want-args>
   git checkout -q -b "$1" main; echo 1 >> "$2"; git commit -qam "$1"; rm -f "$R.d/lane"
@@ -66,6 +66,18 @@ for b in p2:kernel/ts/test/differential_peer.ts t2:kernel/ts/test/k.test.ts; do
 done; rm -f "$R.d/lane"
 capped git push -q origin p2 t2 > /dev/null 2>&1 || bad 'pre-push two refs: push failed'
 [ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=" ] || bad "pre-push two refs: $(cat "$R.d/lane" 2>/dev/null), want lane="
+# Break: a Book change skips the Storybook smoke, or a non-Book change runs it (stub mise logs it).
+mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $*" >> "%s/smoke"\n' "$R.d" > "$R.d/bin/mise"; chmod +x "$R.d/bin/mise"
+PATH="$R.d/bin:$PATH" pp book mobile/app/book/p.tsx ''
+PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
+[ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
+# Break: a dirty tracked file is pushed after checks of a tree nobody committed; an untracked file blocks.
+git checkout -q -b dirty main; echo 1 >> a.md; git commit -qam dirty; echo 2 >> a.md; rm -f "$R.d/lane"
+if capped git push -q origin dirty > /dev/null 2>&1; then bad 'pre-push dirty: pushed with a modified tracked file'; fi
+[ ! -e "$R.d/lane" ] || bad 'pre-push dirty: checks ran'
+git checkout -q a.md; touch untracked.tmp
+capped git push -q origin dirty > /dev/null 2>&1 || bad 'pre-push untracked: an untracked file blocked the push'
+rm -f untracked.tmp
 # --- check_all.sh lock --------------------------------------------------------------------
 # Stub mise logs each call. Break: a second run overlaps a live holder instead of waiting, a dead
 # holder's lock blocks forever, or the lock outlives the run.
