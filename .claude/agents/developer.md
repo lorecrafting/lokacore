@@ -16,7 +16,7 @@ you will mirror. The advisor re-reads the whole conversation at full price: put 
 question in one call, as early as possible, and never ask it to confirm what the brief
 decided.
 
-Work in your own worktree (docs/WORKFLOW.md, Git hygiene). Scope: exactly the brief.
+Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first. Scope: exactly the brief.
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
