@@ -74,7 +74,7 @@ PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
 [ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke locked" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
 # Break: a toolbox/* push runs checks, or a push of toolbox/* plus another branch skips them.
 git checkout -q -b toolbox/x main; echo 4 >> a.md; git commit -qam tb; rm -f "$R.d/lane"
-capped git push -q origin toolbox/x > /dev/null 2>&1 || bad 'pre-push toolbox: push failed'
+capped git push origin toolbox/x 2>&1 | grep -q 'hosted CI is the gate' || bad 'pre-push toolbox: hook did not announce the skip'
 [ ! -e "$R.d/lane" ] || bad 'pre-push toolbox: checks ran'
 git checkout -q -b mixed main; echo 3 >> a.md; git commit -qam mixed; rm -f "$R.d/lane"
 capped git push -q origin mixed toolbox/x:refs/heads/toolbox/y > /dev/null 2>&1 || bad 'pre-push mixed: push failed'
