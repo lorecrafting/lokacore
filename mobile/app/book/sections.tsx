@@ -271,14 +271,16 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
   return (
     <Page centred>
       <View style={{ alignItems: 'center', gap: space.sm }}>
-        <Text style={[type.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
-        <Text
-          {...useTitleFocus()}
+        {/* one header, named label then title, so the arriving focus reads "Chapter one" too */}
+        <View
+          accessible
           accessibilityRole="header"
-          style={[type.chapterTitle, { color: c.fg, textAlign: 'center' }]}
+          {...useTitleFocus()}
+          style={{ alignItems: 'center', gap: space.sm }}
         >
-          {p.title}
-        </Text>
+          <Text style={[type.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
+          <Text style={[type.chapterTitle, { color: c.fg, textAlign: 'center' }]}>{p.title}</Text>
+        </View>
         <View
           style={{
             width: size.chapterRule,

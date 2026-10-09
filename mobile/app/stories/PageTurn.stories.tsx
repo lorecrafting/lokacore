@@ -44,7 +44,7 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
   // turn with no curl (no picture in time) fails the canvas wait.
   play: async ({ canvas, canvasElement, userEvent }) => {
     const curl = () => canvasElement.querySelector('canvas');
-    const turn = async (button: string, arriving: string) => {
+    const turn = async (button: string, arriving: string | RegExp) => {
       await userEvent.click(canvas.getByRole('button', { name: button }));
       await expect(await canvas.findByRole('heading', { name: arriving })).toBeVisible();
       await waitFor(() => expect(curl()).not.toBeNull());
@@ -53,6 +53,6 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
       await expect(canvas.getByRole('heading', { name: arriving })).toBeVisible();
     };
     await turn('Continue', 'Settings');
-    await turn('Start over', 'The Missing Child');
+    await turn('Start over', /The Missing Child/);
   },
 };
