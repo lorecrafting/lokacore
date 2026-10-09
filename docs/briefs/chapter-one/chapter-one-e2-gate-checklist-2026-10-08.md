@@ -31,7 +31,7 @@ Gate audit of S0-S4: [Fable, PASS WITH NOTES](../../reviews/2026-10-08-e2-gate-f
 | Memory adopted before a failed COMMIT (`save.ts`) | authority `r9c_custody_terminal.test.ts:323` (S2 M1); all four `r9c_faults.test.ts` rows (rc1) | E2 row |
 | Export before the final acknowledgement (scene `on_end` at line 1, `scene/rule.ts:30`) | kernel `r9c_custody_terminal.test.ts:288`; authority `:308` (S2 M3) | E2 row |
 | Mutually exclusive terminal change allowed (`policy.ts:39`) | green on r9c; `kernel/ts/test/missing_child_bell.test.ts:136` red (S2 M2) | linked to chapter/focused test |
-| Omit provenance / cap | cap: the six-member bound asserted at `kernel/ts/test/hounds.test.ts:154-158` and `:170-172` and `c4_pack.test.ts:14-17` (S4 developer's population cap +1 mutant; the deer test it also named has no cap assertion I could find); crow origin guard `crow/shared.ts:74-80` | cap linked to focused test; provenance known untested (loka-zfq, [#320](https://github.com/lorecrafting/lokacore/pull/320)) |
+| Omit provenance / cap | cap: the six-member bound asserted at `kernel/ts/test/hounds.test.ts:154-158` and `:170-172` and `c4_pack.test.ts:14-17` (S4 developer's population cap +1 mutant; the deer test it also named, `deer.test.ts:461-474`, checks three live members over thirty days but was not measured against the cap mutant); crow origin guard `crow/shared.ts:74-80` | cap linked to focused test; provenance known untested (loka-zfq, [#320](https://github.com/lorecrafting/lokacore/pull/320)) |
 
 ## Carries
 

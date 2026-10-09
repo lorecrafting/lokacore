@@ -45,7 +45,7 @@ pass `numeric-vectors.json` and `adverse-cases.json` (`test/loka/core/portable_a
 Implementations: canonical JSON and its hash (`kernel/ts/src/foundation/canonical.ts`,
 `lib/loka/core/canonical.ex`), checked integers (`foundation/int.ts`, `int.ex`), RNG (`foundation/rng.ts`, `rng.ex`),
 IdSource, CommandId and the job CommandId (`foundation/id_source.ts`, `id_source.ex`); a decision mints its
-ordinals from one allocator (`kernel/ts/src/runtime/decision.ts:218`).
+ordinals from one allocator (`kernel/ts/src/runtime/decision.ts:244`).
 
 ## The decision loop
 

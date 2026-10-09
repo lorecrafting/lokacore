@@ -29,14 +29,15 @@ their rules and red controls remain available for resumption.
   `.prettierignore` only applies there). CI and `bin/check_all.sh` currently select
   non-mobile files; `mobile/` formatting is deferred in both, but the pre-commit hook
   still runs Prettier and `ast-grep scan --error` on staged `mobile/` files. The mobile app's
-  `npx tsc --noEmit` and `npm test` are also deferred. Active TypeScript verification is
-  `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
+  `npx tsc --noEmit` is also deferred. Active TypeScript verification is
+  `npm run typecheck && npm test` in `kernel/ts` and `npm test` in `mobile/app` (local-story
+  authority and Book tests), in CI's `typescript` job and `bin/check_all.sh` (Node's built-in test runner).
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
   passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
   40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt), `mobile/` included:
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs`. With no paths the TypeScript check
-  selects the tracked files itself; CI, `bin/check_all.sh` and `bin/integrate_batch.sh` all call it
+  selects the tracked files itself; CI and `bin/check_all.sh` both call it
   that way (red control `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse. Source files: a file at its limit (300 lines, or its existing
@@ -63,8 +64,10 @@ their rules and red controls remain available for resumption.
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name);
-  `docs/reviews/README.md` and `docs/decisions/README.md` have exactly one index line per record
-  file in their directory (catches a union merge that duplicated a twice-edited line, or a missing line).
+  `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
+  duplicated a twice-edited line, or a missing line); `docs/reviews/README.md` equals the output of
+  `bin/review_index.sh` (title and final verdict per record) and each record is named
+  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental
@@ -76,22 +79,34 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/ci_scope.sh <base> <after> <code|browser>` prints `skip` for metadata-only changes
   (`*.md` except generated `*.gen.md`, or `.beads/issues.jsonl`). The code lane also skips
-  changes confined to `mobile/` outside `mobile/authority/local-story/`, plus metadata;
-  local-story authority/save changes run the broad code lane. The browser lane runs
+  `mobile/app/plugins/` and `mobile/app/app.json` (native config), plus metadata; every other mobile
+  file, including the Book (kernel tests import its `model.ts` and `presenter.ts`), every mobile
+  `.ts`/`.tsx` (mobile tests run `App.tsx`) and local-story authority/save code, runs the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
-  changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`.
+  changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
+  lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
+  changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
+  stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
+  tests run its peers.
   `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
   force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
   skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
   and unsafe-skip cases, including a local-story save edit and API errors.
-- `bin/integration_red_controls.sh` runs E1 batch integration (`bin/integrate_batch.sh`) in
-  throwaway repositories with stub checks: no integration on a pending-count mismatch, a failed
-  recorder, a conflict or an oversized untouched file.
-  It also runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, the review
-  index is rebuilt as main's list plus the branch's lines, and a failed docs check blocks the push.
-  It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
-  leaves a diff or a skipped narrow command fails) and `bin/session_status.sh` with stub `br` (the
-  housekeeping list, the missed-retro note, a failing `br` still exits 0).
+- `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
+  It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
+  index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
+  It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
+  PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
+  branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
+  It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared).
+  It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
+  pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
+  a dead holder's lock is taken over, the lock is removed at exit. It pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
+  a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
+  leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
+  narrow command fails) and `bin/session_status.sh` with stub `br` (the
+  housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
+  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
@@ -107,7 +122,7 @@ their rules and red controls remain available for resumption.
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
   The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
-  on the selected v042 artifact, rebuilt and sha-checked as `bin/integrate_batch.sh` does, and
+  on the selected v042 artifact, rebuilt from `protocol/fixtures/missing_child_v042_hash.json` and sha-checked, and
   fails on a pending obligation, a gap or a failed case (about 6 minutes). It is not in
   `bin/check_all.sh`: that line has no area lanes, so it would add those minutes to every run.
   The code lane's green baseline (`bin/ci_base.sh`) includes it.

@@ -48,25 +48,29 @@ test('loader refuses a one-way hound area with a valid hash', () => {
     );
 });
 
-// Breaks: a plan whose wander interval exceeds its replacement delay enters the loaded world.
-test('loader refuses a slower wander than replacement with a valid hash', () => {
-  const c = structuredClone(pin.value);
-  const plan = c.populations['ashmere_missing_child@0.0.30:population/fen_hounds'];
-  plan.wander_interval = 7200;
-  plan.replacement_delay = 3600;
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const result = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  assert.equal(result.ok, false);
-  if (!result.ok)
-    assert.equal(
-      result.diagnostic.path,
-      '.cartridge.populations["ashmere_missing_child@0.0.30:population/fen_hounds"].wander_interval',
+// Breaks: a plan whose wander interval exceeds its replacement delay, or whose night window does
+// not wrap midnight (night every hour), enters the loaded world.
+for (const [name, change] of [
+  ['a slower wander than replacement', { wander_interval: 7200, replacement_delay: 3600 }],
+  ['a night window that does not wrap midnight', { night_start: 1, night_end: 5 }],
+  ['an empty night window', { night_start: 5, night_end: 5 }],
+] as const)
+  test(`loader refuses ${name} with a valid hash`, () => {
+    const c = structuredClone(pin.value);
+    Object.assign(c.populations['ashmere_missing_child@0.0.30:population/fen_hounds'], change);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const result = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
     );
-});
+    assert.equal(result.ok, false);
+    if (!result.ok)
+      assert.equal(
+        result.diagnostic.path,
+        '.cartridge.populations["ashmere_missing_child@0.0.30:population/fen_hounds"].wander_interval',
+      );
+  });
 const hounds = (w: World) =>
   Object.entries(w.state.created ?? {}).filter(
     ([, i]) => i.origin.kind === 'spawned' && i.origin.role === 'hound',

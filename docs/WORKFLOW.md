@@ -63,6 +63,9 @@ Report at the end of the slice, not at every step.
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
    protocol change with new behavior). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
+   Store the brief durably when it is drafted (the issue's Beads notes, `br update <id> --append-notes`,
+   or `docs/briefs/`); a scratchpad copy is only a working file. Link process rules (AGENTS.md,
+   WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
    Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
    Mechanic briefs include the [composition record](system/architecture.md#building-mechanics-by-composition).
@@ -85,8 +88,8 @@ Report at the end of the slice, not at every step.
    requirements from them before reading the diff, checks the [composition record](system/architecture.md#building-mechanics-by-composition)
    against the actual consumer and diff, checks changed actions' exact offered invocations
    against keyed admission, and tests the tests by breaking
-   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
-   [the index](reviews/README.md), and returns the findings.
+   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, regenerates
+   [the index](reviews/README.md) with `bin/review_index.sh`, and returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
    developer, whose context is intact, while that context is small
    (the threshold is in [Claude Code specifics](#token-hygiene)); past that, or after a PM
@@ -94,7 +97,7 @@ Report at the end of the slice, not at every step.
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
-   resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the two lists) without waking the
+   resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the decisions list) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
@@ -105,7 +108,9 @@ Report at the end of the slice, not at every step.
    the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
-   rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
+   rewrote a core piece or the slice freezes a contract or closes a gate. A comment- or doc-only nit
+   fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
+   diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
    NOTES with nothing open, every required hosted CI check is present and green on the
@@ -115,7 +120,7 @@ Report at the end of the slice, not at every step.
    A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
    before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
    A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after the last of several close merges, run
-   `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, index = main's list plus the branch's own lines at the end, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
+   `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
    `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
    required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on
@@ -132,13 +137,15 @@ Report at the end of the slice, not at every step.
    next merge: branch protection on `main` requiring status checks `ci-green` and
    `book-e2e-green`, `enforce_admins` off, and the repository setting "allow auto-merge" on.
    Because `enforce_admins` is off, branch protection does not bind admins: the owner, or the PM
-   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, review index
+   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, decisions index
    lines), may push to `main` directly or merge with `--admin`; never for unreviewed code or to
    bypass a red check. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
    ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
-   ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
-   PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
+   ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
+   `bin/after_merge.sh <PR> <beads-id> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
+   ROADMAP edit: pull, close the issue, remove the worktree, branch and `review-<N>`, commit, push. Then tell the owner:
+   PR link, verdict, notes; cite every PR as #N (Beads id, short description). Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
@@ -250,7 +257,7 @@ A slice that changes what the player sees consults the [designer](decisions/owne
   an open review merely to shorten context.
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
-- PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
+- PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
 - Start a new slice agent with a self-contained brief and no inherited chat
   history; keep a visited path/revision list while following doc links. Reuse
@@ -261,8 +268,8 @@ slice from `.claude/agents/`; resume the same agent only for that slice's scoped
 fix/recheck while its context remains small. Send full check output to a
 scratchpad and return the short result specified by each role prompt. Before
 clearing or starting a new Claude session, write the same exact-head/open-finding
-handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the reviews and
-decisions indexes are not part of it).
+handoff and the [retro](#retro-and-housekeeping-queue); on takeover read that handoff once and reopen only changed sections (the
+decisions index is not part of it).
 
 This preserves the brief, review records and failing evidence on disk;
 compaction or a fresh session never substitutes for a reviewed merge or
@@ -294,8 +301,8 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   the retro. At each milestone gate (E3, release-candidate certification, release) a pattern retro: a
   Sonnet subagent reads the housekeeping issues, review records and `gh` CI timings since the last gate
   and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
-- **Beads:** `br create -l housekeeping --description-file <file>`, then clear `source_repo_path`
-  ([BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
+- **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>` (it clears
+  `source_repo_path`, [BEADS](BEADS.md)); `br list -l housekeeping` shows the queue. The owner approves: approved items go
   to the next housekeeping PR, rejected ones to `br close` with the reason.
 - **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
   PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last
@@ -312,9 +319,11 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Place worktrees outside paths the checks scan, and preserve unfinished ones.
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
-- `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
+- `.gitattributes` merges `docs/decisions/README.md` (an append-only list) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
   check may still report a conflict, so the PM still merges `main` locally and checks the merged index for order (`bin/check_docs.exs` fails a duplicate, twice-edited or missing line).
+  `docs/reviews/README.md` is generated by `bin/review_index.sh`: a conflict there is resolved by
+  rerunning it (`bin/sync_pr.sh` and `bin/after_merge.sh` do).
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree

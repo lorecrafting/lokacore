@@ -67,7 +67,7 @@ defmodule Loka.Content.Population do
 
     valid_time =
       is_integer(hours) and is_integer(period) and
-        p["night_start"] < hours and p["night_end"] < hours and
+        p["night_start"] < hours and p["night_end"] < p["night_start"] and
         p["wander_interval"] <= p["replacement_delay"] and
         rem(p["wander_interval"], period) == 0 and
         p["replacement_delay"] <= div(9_007_199_254_740_991, 2)

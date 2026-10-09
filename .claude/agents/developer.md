@@ -37,7 +37,9 @@ Before handing off:
 3. Commit (attribution lines per the session). Provisional local:
    hand the branch and exact head to the PM without pushing; draft PR: push only when the brief
    says (the branch is pushed once per wave); hosted PR: push the branch and open the PR citing the governing `docs/system` sections and
-   including the `/code-review` result. A slice that adds or changes a mechanic
+   including the `/code-review` result. A "catches", "only here" or "every" claim, and every
+   `file:line` cite, in the PR body or handoff is copied from a red-control, test or grep run in
+   the same turn; the PR body lists those runs. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
 4. Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review

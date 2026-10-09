@@ -21,8 +21,8 @@ and auto-imports newer JSONL on commands by default; use `br sync --status --jso
 to inspect drift, `br sync --import-only` to recover an out-of-date index, and
 `br sync --flush-only` before a tracker commit if the index is dirty. Review the JSONL diff
 and verify it contains no local machine path; the installed release writes
-`source_repo_path` on creation, so clear it with
-`br update <id> --source-repo lokacore --source-repo-path ''` before committing.
+`source_repo_path` on creation: create issues with `bin/br_create.sh <br create arguments>`,
+which clears it, or clear it with `br update <id> --source-repo lokacore --source-repo-path ''`.
 Avoid `-wisp-` in an issue ID: Beads Rust reserves it for ephemeral records,
 even when the task itself is durable.
 

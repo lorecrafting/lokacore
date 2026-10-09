@@ -92,6 +92,7 @@ reach = fn
 end
 
 roots = Enum.filter(["README.md", "AGENTS.md", "CLAUDE.md"], &Map.has_key?(links, &1))
+
 seen = reach.(reach, MapSet.new(roots), roots)
 orphans = for f <- docs, f not in seen, do: "unreachable #{f}"
 
@@ -149,10 +150,23 @@ pointers =
       problem != nil,
       do: "stale pointer #{file}: #{path}:#{line} (#{problem})"
 
-# Each record in docs/reviews and docs/decisions has exactly one index line (a list line whose
+# Review records are named <YYYY-MM-DD>-<slug>.md, so a listing sorts them by date, and
+# docs/reviews/README.md is exactly what bin/review_index.sh generates from them.
+records = for f <- docs, Path.dirname(f) == "docs/reviews", f != "docs/reviews/README.md", do: f
+
+{stale, review_rc} = System.cmd("sh", ["bin/review_index.sh", "--check"], cd: root)
+
+names =
+  for f <- records,
+      not String.match?(Path.basename(f), ~r/\A\d{4}-\d{2}-\d{2}-[a-z0-9.-]+\.md\z/),
+      do: "review record #{f}: name it <YYYY-MM-DD>-<slug>.md"
+
+names = if review_rc == 0, do: names, else: names ++ [String.trim(stale)]
+
+# Each record in docs/decisions has exactly one index line (a list line whose
 # first link is the bare file name): a union merge (.gitattributes) duplicates a twice-edited line.
 index =
-  for dir <- ["docs/reviews", "docs/decisions"],
+  for dir <- ["docs/decisions"],
       readme = Path.join(dir, "README.md"),
       counts =
         Regex.scan(
@@ -168,7 +182,8 @@ index =
       do: "#{readme}: #{name} has #{n} index lines, want 1"
 
 problems =
-  Enum.sort(broken) ++ Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ index
+  Enum.sort(broken) ++
+    Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ names ++ index
 
 Enum.each(problems, &IO.puts/1)
 

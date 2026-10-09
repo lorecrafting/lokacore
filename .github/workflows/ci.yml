@@ -123,7 +123,7 @@ jobs:
 
   # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout. Artifact as in bin/integrate_batch.sh.
+  # tree, so its artifact and output stay outside the checkout.
   e1-recorder:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
@@ -146,7 +146,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15 # 3 min before the mobile suite (67 s wall, 327 s CPU locally)
     env:
       MIX_ENV: test
     steps:
@@ -165,6 +165,9 @@ jobs:
       - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
+      # Local-story authority (saves, faults, start-over) and Book tests.
+      - run: npm ci --no-audit --no-fund && npm test
+        working-directory: mobile/app
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - run: node bin/check_ts_size.mjs
       - run: bin/ts_size_red_controls.sh
