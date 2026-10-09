@@ -120,8 +120,8 @@ jobs:
           echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
           node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
 
-  # Kernel typecheck and unit tests (sim.test.ts runs in the sim job). The chapter fixtures compile the
-  # real authored cartridge with mix.
+  # Kernel typecheck and unit tests (sim.test.ts runs in the sim job) and the TypeScript size gates
+  # (they load typescript from kernel/ts). The chapter fixtures compile the real authored cartridge with mix.
   kernel:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -145,6 +145,8 @@ jobs:
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
       - run: bin/kernel_red_controls.sh
+      - run: node bin/check_ts_size.mjs # loads typescript from kernel/ts
+      - run: bin/ts_size_red_controls.sh
       - if: failure() # a failing run's game trace (ADR-075 §2) or fault corpus
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -153,7 +155,7 @@ jobs:
           if-no-files-found: ignore
 
   # Local-story authority (saves, faults, start-over) and Book tests (67 s wall, 327 s CPU locally);
-  # its fixtures also compile the chapter with mix. Prettier and the size gates ride along.
+  # its fixtures also compile the chapter with mix. Prettier rides along.
   mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -179,8 +181,6 @@ jobs:
       - run: npm ci --no-audit --no-fund && npm test
         working-directory: mobile/app
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
-      - run: node bin/check_ts_size.mjs
-      - run: bin/ts_size_red_controls.sh
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
