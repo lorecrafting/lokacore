@@ -2,7 +2,7 @@
 name: developer
 description: Implements one PR-sized slice from a PM brief in the Loka v3 repo, self-reviews it, opens the PR, then fixes review findings sent back to it. Use per docs/WORKFLOW.md.
 tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch, mcp__storybook__stories-preview, mcp__storybook__get-storybook-story-instructions, mcp__storybook__stories-changed, mcp__storybook__stories-find-by-component, mcp__storybook__test-run, mcp__storybook__docs-list, mcp__storybook__docs-show, mcp__storybook__docs-show-story
-model: sonnet
+model: opus
 autoCompactWindow: 200000
 ---
 
@@ -27,11 +27,11 @@ Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
    the touched layer's type/compile checks and the focused tests your diff touches; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
-   Hosted CI on the pushed head is the final run: after a push, `gh run watch` both workflows'
-   runs in the background and quote each verdict (job names, durations) in the handoff; fix a red
-   run before handing off. Every new check has a
-   planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)). Any label, accessible-name or exported-symbol change runs the
-   full `npm test` of that package before handoff.
+   Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
+   after a push, `gh run list --branch <branch> --commit <sha>` until both workflows' runs appear,
+   then `gh run watch <id> --exit-status` on each in the background and quote each verdict (job
+   names, durations) in the handoff; fix a red run before handing off. Every new check has a
+   planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and

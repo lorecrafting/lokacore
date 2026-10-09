@@ -101,20 +101,25 @@ jobs:
 
   # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout. Nightly and on a `full` dispatch
-  # only (about 6 minutes); ci-green accepts it skipped.
+  # tree, so its artifact and output stay outside the checkout. Its steps run nightly and on a
+  # `full` dispatch only (about 6 minutes); on a push the job succeeds with every step skipped, so
+  # ci-green needs no per-job exception.
   e1-recorder:
-    if: github.event_name == 'schedule' || inputs.full
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      FULL: ${{ github.event_name == 'schedule' || inputs.full }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - if: env.FULL == 'true'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - if: env.FULL == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
-      - run: |
+      - if: env.FULL == 'true'
+        run: |
           a=$RUNNER_TEMP/e1-selected-v042.json
           python3 -c "import json,sys;f=json.load(open('protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\"cartridge\":'+f['canonical']+',\"content_hash\":\"'+f['sha256']+'\"}')" > "$a"
           echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
@@ -188,15 +193,12 @@ jobs:
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
-  # The run's one verdict: fails unless every job succeeded; only e1-recorder may be skipped.
+  # The run's one verdict: fails unless every job succeeded.
   ci-green:
     needs: [e1-recorder, elixir, lint, sim, kernel, mobile]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - if: >-
-          contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-          || needs.elixir.result == 'skipped' || needs.lint.result == 'skipped' || needs.sim.result == 'skipped'
-          || needs.kernel.result == 'skipped' || needs.mobile.result == 'skipped'
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
         run: exit 1

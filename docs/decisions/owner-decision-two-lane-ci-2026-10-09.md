@@ -27,6 +27,10 @@ effort rule).
 7. **Per-agent effort and compaction.** The PM sets each spawn's effort: low for Sonnet nits, high for
    reviewers and Fable design, default otherwise. `developer`, `reviewer` and `designer` set
    `autoCompactWindow: 200000`; the 220k handoff rule stays as the fallback.
+8. **Model routing** (added the same day, paraphrased): developers run on Opus, Sonnet only for a
+   bounded content or docs edit; reviews of item, infra and polish PRs are Opus; Fable only for one
+   review per mechanics batch on the final batch head, the designer, the E-gate closures and the
+   release-candidate audit.
 
 Dropped rules: the two-runner cap, the check lock, the pre-push lanes, "run `bin/check_all.sh` once
 and quote it", the save/protocol/kernel-only hosted-run exception, "merge `main` before a manual run"

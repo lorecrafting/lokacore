@@ -9,20 +9,20 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: per the [routing table](#work-routing). | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for one review per mechanics batch on its final head and the E-gate closures (E1: see the fix re-check row). | independent review, review record |
 | Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus; Fable for the polish phase ([owner decision](decisions/owner-decision-designer-fable-2026-10-08.md)) | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
-reviewer on the highest Opus; Fable reviews only the E2–E3 gate closures and the release-candidate audit. Codex and
+reviewer on the highest Opus; Fable reviews only one mechanics batch's final head, the E-gate closures and the release-candidate audit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Codex and
 other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a id="work-routing"></a>:
 
 | Work | Claude Code default | Escalate when |
 |---|---|---|
 | Lookup or broad search; a brief drafter's search, citation re-anchoring and consumer inventories | [`Explore`](../.claude/agents/Explore.md) agent, Haiku (project override; the built-in inherits Opus); the drafter keeps only decisions | never for judgment |
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
-| Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
-| Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
+| Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
+| Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text); in a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
 
 The PM also sets each spawn's `effort`: low for a Sonnet nit, high for a reviewer or Fable design
@@ -189,7 +189,7 @@ The brief names the lane. Sequential or dependent slices share one draft branch 
 |---|---|---|---|---|
 | Hosted PR | a slice that must merge alone, or a single fix | focused tests; pushes and opens a ready PR; hosted CI on the head is the final run | fresh reviewer right after the push (step 4) | step 7 |
 | Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | each slice or batch on its exact head while the PR is a draft; the PM marks it ready before the final review on the publication head ([step 7](#loop)) | step 7 on the ready head |
-| Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: every review closed, hosted CI green on its head, then step 7 |
+| Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | push the accumulated local `main` as a branch and open its PR (a push to `main` starts no hosted run): every review closed, then step 7 on that head |
 
 Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
 one push per wave, not per small change. Collect tracker, process and docs changes into one

@@ -117,9 +117,9 @@ am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] 
 STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
 git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
-# Break: a br write that dirties the export after the commit makes the pre-push hook refuse (stand-in hooks).
-amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit
-printf '#!/bin/sh\ngrep -q "^refs/heads/main " || exit 0\ngit diff --quiet || { echo "pre-push: commit or stash tracked changes first" >&2; exit 1; }\n' > .git/hooks/pre-push; chmod +x .git/hooks/post-commit .git/hooks/pre-push
+# Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
+# uncommitted or unpushed.
+amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit; chmod +x .git/hooks/post-commit
 am concurrent-write 0; git fetch -q origin
 [ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
 # --- mutate.sh -----------------------------------------------------------------------------

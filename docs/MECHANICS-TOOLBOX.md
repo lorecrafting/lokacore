@@ -122,7 +122,7 @@ have / partial / missing per the audit. Ids in parentheses are the
 - **Brief:** the PM writes it in the Beads issue; no brief-drafter agent, no stage labels.
 - **Build:** own worktree, hosted PR lane, focused tests plus one red control
   ([test rules](../AGENTS.md#writing-tests-every-change-every-agent)).
-- **Review:** one fresh Opus reviewer, no second opinion; findings as PR comments ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Fix rounds as in the workflow.
+- **Review:** one fresh Opus reviewer per item, no second opinion; one Fable review of the batch on its final head; findings as PR comments ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Fix rounds as in the workflow.
 - **Merge:** the PM merges after the verdict on green hosted runs ([workflow step 7](WORKFLOW.md#loop)); no ROADMAP status commit.
 
 ## How to pick the next item
