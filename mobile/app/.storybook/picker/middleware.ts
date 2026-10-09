@@ -3,7 +3,8 @@
 //   POST /polish/picks   one pick (or {type:'close'|'keep-going'}) -> a line in .polish/picks.jsonl
 //   GET  /polish/status  {session, picks, status} from the two files
 //   GET  /polish/shots/<id>-<i>.png
-// The files live in the served worktree (LOKA_POLISH_DIR overrides, for tests).
+// The files live in the served worktree and the session is its branch (LOKA_POLISH_DIR and
+// LOKA_POLISH_SESSION override, for tests).
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -83,7 +84,7 @@ const wellFormed = (pick: unknown): pick is Pick =>
 // The session pill: a polish session branch (bin/polish_session.sh) served from this worktree.
 const session = () => {
   const branch =
-    process.env.LOKA_POLISH_SESSION ??
+    process.env.LOKA_POLISH_SESSION ||
     execFileSync('git', ['branch', '--show-current'], { cwd: root }).toString().trim();
   return branch.startsWith('polish/session-') ? branch : null;
 };

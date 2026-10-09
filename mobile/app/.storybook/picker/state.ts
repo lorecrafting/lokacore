@@ -95,11 +95,15 @@ export const event = async (type: 'close' | 'keep-going') => {
 
 const key = (e: { key: string; altKey: boolean; ctrlKey: boolean; metaKey: boolean }) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
-  const { on, pending } = api.getAddonState<State>(ADDON_ID) ?? initial;
+  const { on } = api.getAddonState<State>(ADDON_ID) ?? initial;
   if (e.key === 'p' || e.key === 'P') toggle(!on);
-  else if (e.key === 'Escape' && pending.length)
-    clear(); // a second Esc leaves Pick
-  else if (e.key === 'Escape' && on) toggle(false);
+  else if (e.key === 'Escape') escape();
+};
+// One Esc policy for the preview, the manager document and the composer: clear, then leave Pick.
+export const escape = () => {
+  const { on, pending } = api.getAddonState<State>(ADDON_ID) ?? initial;
+  if (pending.length) clear();
+  else if (on) toggle(false);
 };
 
 // Once, from addons.register.

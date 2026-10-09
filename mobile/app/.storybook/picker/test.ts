@@ -1,7 +1,8 @@
 // npm run storybook:picker (Beads loka-x6t.3): the picker end to end on a dev server with its own
 // queue directory. Breaks it catches: a pick that reaches the queue without its owner chain or
 // story id; a status line bin/polish_status.sh wrote that the panel does not show; Close batch
-// enabled while an item is working; an overlay that moves a story box while Pick is on.
+// enabled while an item is working; an overlay that moves a story box while Pick is on; an Esc in
+// the composer that leaves Pick on (or the first one leaving it).
 import { spawn } from 'node:child_process';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -84,21 +85,23 @@ try {
     const after = await boxes(preview);
     if (after.join('|') !== before.join('|')) fail('the overlay moved a story box while picking');
     // Esc in the composer (focused by the pin): first clears, second turns Pick off.
-    const layer = () =>
-      getComputedStyle(document.querySelector('div[style*="crosshair"]')!).display;
+    const layer = (display: string, why: string) =>
+      preview
+        .waitForFunction(
+          (d) =>
+            document.querySelector<HTMLElement>('div[style*="crosshair"]')?.style.display === d,
+          display,
+          { timeout: 5_000 },
+        )
+        .catch((e: Error) => fail(`${why} (${e.message.split('\n')[0]})`));
+    await page.waitForFunction(() => document.activeElement?.tagName === 'TEXTAREA');
     await page.keyboard.press('Escape');
     await page.waitForSelector('button[title="Remove"]', { state: 'detached' });
-    if ((await preview.evaluate(layer)) !== 'block') fail('Pick off after the first Esc');
+    await layer('block', 'Pick off after the first Esc');
     await page.keyboard.press('Escape');
-    await preview
-      .waitForFunction(
-        () =>
-          document.querySelector<HTMLElement>('div[style*="crosshair"]')!.style.display === 'none',
-        undefined,
-        { timeout: 5_000 },
-      )
-      .catch(() => fail('Pick still on after Esc in the empty composer'));
+    await layer('none', 'Pick still on after Esc in the empty composer');
     await page.click('[title="Pick an element (P)"]');
+    await layer('block', 'Pick not back on');
     await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
     await page.waitForSelector('button[title="Remove"]');
     await page.fill('textarea[placeholder="What should change?"]', 'quick: tighten the row');
