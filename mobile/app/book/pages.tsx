@@ -45,6 +45,28 @@ export function Tap(p: { label: string; onPress: () => void; children: ReactNode
   );
 }
 
+// The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
+// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+export function RunningHead({ view, text }: { view: GameView; text: Say }) {
+  const c = usePalette();
+  const quest = view.journal.find(
+    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
+  );
+  if (!quest) return null;
+  return (
+    <Text
+      style={{
+        ...type.runningHead,
+        color: c.dim,
+        paddingHorizontal: space.page,
+        paddingTop: space.page,
+      }}
+    >
+      {plain(text(quest.journal!))}
+    </Text>
+  );
+}
+
 // Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
 export function Control({ label, onPress }: { label: string; onPress: () => void }) {
   const c = usePalette();

@@ -1,13 +1,13 @@
 import { Text, View } from 'react-native';
 import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
-import { group, conversation, npcPage, plain, type Page } from './model.ts';
+import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
-import { Act, RoomPage } from './pages.tsx';
+import { Act, RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette } from './palette.ts';
-import { space, type } from './tokens.ts';
+import { space } from './tokens.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -38,7 +38,7 @@ export function Body(p: BodyProps) {
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   return (
     <View style={{ flex: 1 }}>
-      {p.page?.kind !== 'journal' && <RunningHead screen={p.screen} />}
+      {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
       {water && (
         <View style={{ paddingHorizontal: space.page }}>
           <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>
@@ -47,28 +47,6 @@ export function Body(p: BodyProps) {
       )}
       <PageBody {...p} />
     </View>
-  );
-}
-
-// The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
-// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
-export function RunningHead({ screen }: { screen: Screen }) {
-  const c = usePalette();
-  const quest = screen.view.journal.find(
-    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
-  );
-  if (!quest) return null;
-  return (
-    <Text
-      style={{
-        ...type.runningHead,
-        color: c.dim,
-        paddingHorizontal: space.page,
-        paddingTop: space.page,
-      }}
-    >
-      {plain(screen.text(quest.journal!))}
-    </Text>
   );
 }
 

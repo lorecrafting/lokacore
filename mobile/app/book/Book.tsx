@@ -1,6 +1,6 @@
 // The Book draws GameView through its presenter; App injects the shell.
 import { useRef, useState } from 'react';
-import { Pressable, SafeAreaView, Text, View } from 'react-native';
+import { SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer, Status } from './Footer.tsx';
@@ -17,7 +17,7 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
-import { size, type } from './tokens.ts';
+import { type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
@@ -240,14 +240,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
   return (
     <View style={{ alignItems: 'center' }}>
       <Text style={{ ...type.small, color: c.dim }}>{p.fault}</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Start over"
-        onPress={p.startOver}
-        style={{ minHeight: size.touch, justifyContent: 'center', alignItems: 'center' }}
-      >
-        <Text style={{ ...type.control, color: c.fg }}>start over</Text>
-      </Pressable>
+      <Control label="Start over" onPress={p.startOver} />
     </View>
   );
 }
