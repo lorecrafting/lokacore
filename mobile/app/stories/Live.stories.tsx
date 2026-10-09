@@ -17,11 +17,12 @@ const live = (checkpoint: string) => async (): Promise<Loaded> => {
   const { default: BookC } = await import('../book/Book.tsx'); // PageTurn needs CanvasKit first
   const db = await openDatabaseAsync(':memory:'); // a fresh save per mount
   await db.execAsync(checkpoint);
-  // the checkpoint's own clock (the Node harness's), so opening does not catch up real time
+  // the checkpoint's own wall clock (the Node harness's), so opening does not catch up real time
+  const { wall_ms } = (await db.getFirstAsync<{ wall_ms: number }>('SELECT wall_ms FROM elapsed'))!;
   const game = openGame(webDb(db), chapter, {
     newId: () => crypto.randomUUID(),
     kernel_version: `loka-kernel@${'0'.repeat(40)}-dirty`,
-    time: { wall: () => 10000, monotonic: () => 0 },
+    time: { wall: () => wall_ms, monotonic: () => 0 },
   });
   return { Book: BookC, game };
 };
@@ -47,23 +48,81 @@ export default meta;
 const sql = import.meta.glob<string>('./live/*.sql', { query: '?raw', import: 'default' });
 const at = (name: string) => [async () => live(await sql[`./live/${name}.sql`]!())()];
 
+// A click-through's page; a restored Book opens on its chapter page first.
+const opened = async (canvas: HTMLElement) => {
+  const page = within(canvas);
+  const tap = async (label: string | RegExp) => userEvent.click(await page.findByLabelText(label));
+  await tap('Continue');
+  return { page, tap };
+};
+
 export const FirstRoom: StoryObj = {
   name: 'First room',
   loaders: at('first-room'),
   play: async ({ canvasElement }) => {
-    const page = within(canvasElement);
-    await userEvent.click(await page.findByLabelText('Continue')); // a fresh Book opens on its chapter page
-    await userEvent.click(await page.findByLabelText(/^Elspeth is here\./));
-    await userEvent.click(await page.findByLabelText('Talk to Elspeth'));
-    await userEvent.click(
-      await page.findByLabelText('Will you look around the Green for a sign of Wren?'),
-    );
+    const { page, tap } = await opened(canvasElement);
+    await tap(/^Elspeth is here\./);
+    await tap('Talk to Elspeth');
+    await tap('Will you look around the Green for a sign of Wren?');
     await page.findByText('Journal updated'); // the real kernel answered: the quest began
+    await tap('Leave');
+    await page.findByText('Look for a sign of Wren on Village Green.'); // the running head
   },
 };
 export const ElspethAsked: StoryObj = { name: 'Elspeth asked', loaders: at('elspeth-asked') };
-export const VesperRiddle: StoryObj = { name: 'Vesper riddle', loaders: at('vesper-riddle') };
-export const PegShop: StoryObj = { name: 'Peg shop', loaders: at('peg-shop') };
+export const VesperRiddle: StoryObj = {
+  name: 'Vesper riddle',
+  loaders: at('vesper-riddle'),
+  play: async ({ canvasElement }) => {
+    const { page, tap } = await opened(canvasElement);
+    // the riddle's tiles, one per letter, then Submit (walkthrough/chapter1.walk.ts spellOn)
+    const spell = async (word: string) => {
+      const tiles = (await page.findAllByLabelText(/^., tile \d+$/)).map((t) => t.ariaLabel ?? '');
+      for (const letter of word)
+        await tap(
+          tiles.splice(
+            tiles.findIndex((t) => t[0] === letter),
+            1,
+          )[0]!,
+        );
+      await tap('Submit');
+    };
+    await tap(/^Vesper is here\./);
+    await spell('RAN');
+    await page.findByText(/Try the letters again/); // a wrong word is the riddle's own answer
+    await tap(/^L, tile/);
+    await tap('Clear');
+    await spell('LANTERN');
+    await waitFor(() => expect(page.queryByLabelText('Submit')).toBeNull());
+  },
+};
+export const PegShop: StoryObj = {
+  name: 'Peg shop',
+  loaders: at('peg-shop'),
+  play: async ({ canvasElement }) => {
+    const { page, tap } = await opened(canvasElement);
+    await tap(/^Peg Harrow is here\./);
+    await tap('Buy a torch — 2p');
+    await page.findByLabelText(/pennies 18\//); // the status line paid
+    await tap('Leave');
+    await tap(/; opens Contents$/);
+    await tap('Equipment & Inventory');
+    await page.findByLabelText('a torch, open');
+  },
+};
 export const MaudPaidBed: StoryObj = { name: 'Maud paid bed', loaders: at('maud-paid-bed') };
+export const CorpseContents: StoryObj = {
+  name: 'Corpse contents',
+  loaders: at('corpse-contents'),
+  play: async ({ canvasElement }) => {
+    const { page, tap } = await opened(canvasElement);
+    await tap(/^A deer corpse is here\./);
+    await tap('A deer hide, open'); // its Inside row
+    await tap('Take a deer hide');
+    await page.findByText('You pick up a deer hide.');
+    await page.findByLabelText('Put a deer hide in a deer corpse');
+  },
+};
 export const HoundCombat: StoryObj = { name: 'Hound combat', loaders: at('hound-combat') };
 export const ChapelMap: StoryObj = { name: 'Chapel map', loaders: at('chapel-map') };
+export const NightGreen: StoryObj = { name: 'Night green', loaders: at('night-green') };

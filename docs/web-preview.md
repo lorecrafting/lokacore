@@ -55,4 +55,9 @@ on the same network opens `http://<this computer's LAN address>:6006`. The toolb
 palette and a phone viewport. `mise exec -- npm run storybook:smoke` type-checks, builds and runs
 every story headless (render, play function, axe at error level); CI runs it in `book-e2e.yml`
 ([checks](CHECKS.md)). Install its browser once with `mise exec -- npx playwright install chromium`.
+The `Live` stories run the real Book over the local authority, restored from a checkpoint save
+(`stories/routes.ts`, written by `npm run stories:views`); they need the dev server's isolation
+headers, so the smoke skips them. `mise exec -- npm run storybook:live` starts a dev server on a free
+port, runs every Live story and its click-through headless, and stops it (about 90 s, so
+`book-e2e.yml` runs it nightly rather than the pre-push hook).
 What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).

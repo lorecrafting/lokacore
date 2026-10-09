@@ -21,7 +21,7 @@ const sqliteWorker: Plugin = {
   transform: (src, id) =>
     // wa-sqlite.js is an Emscripten UMD file; the worker imports its default
     /expo-sqlite\/web\/wa-sqlite\/wa-sqlite\.js(\?|$)/.test(id)
-      ? rewrite(src, id, /^var Module=[^]*$/, '$&\nexport default Module;')
+      ? rewrite(src, id, /^var Module ?=[^]*$/, '$&\nexport default Module;')
       : /expo-sqlite\/web\/SQLiteModule\.ts(\?|$)/.test(id)
         ? rewrite(
             src,

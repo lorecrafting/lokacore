@@ -33,6 +33,8 @@ jobs:
       # Every Storybook story renders, its play function and axe (test: 'error') pass (CHECKS.md).
       - run: npx playwright install chromium
       - run: npm run storybook:smoke
+      # The Live stories' click-throughs on the dev server (web-preview.md#storybook).
+      - run: npm run storybook:live
       - if: failure()
         name: Redact browser failure diagnostics
         run: |

@@ -14,6 +14,7 @@
     "stories:views": "node stories/scenarios.ts",
     "storybook": "storybook dev -p 6006 --host 0.0.0.0 --no-open",
     "storybook:build": "storybook build",
+    "storybook:live": "node .storybook/live.ts",
     "storybook:smoke": "tsc -p .storybook && storybook build --quiet && vitest run --config .storybook/vitest.config.mts"
   },
   "engines": {

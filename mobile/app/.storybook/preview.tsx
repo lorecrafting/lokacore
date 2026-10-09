@@ -60,6 +60,7 @@ const preview: Preview = {
   decorators: [
     (Story, { globals }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;
+      // TODO(batch 5 merge): call useFocusRing(c) from book/palette.ts here (no Chrome blue ring).
       return (
         <PaletteContext.Provider value={c}>
           {/* The page's paper, so axe measures contrast against the real background. */}

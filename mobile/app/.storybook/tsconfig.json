@@ -1,8 +1,7 @@
 // Storybook's types pull in Node's, which the app's tsconfig keeps out (tests/page_turn.e2e.ts).
-// The Node generator (stories/scenarios.ts, routes.ts) is left out: it imports the Node Book harness.
 {
   "extends": "../tsconfig.json",
   "compilerOptions": { "types": ["vite/client"] },
   "include": ["*.ts", "*.mts", "*.tsx", "../stories", "../book/sksl.d.ts"],
-  "exclude": ["../stories/scenarios.ts", "../stories/routes.ts"]
+  "exclude": [] // the app's excludes 'stories'
 }
