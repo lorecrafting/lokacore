@@ -52,6 +52,7 @@ registerHooks({
 const { color } = await import('./tokens.ts');
 const { Footer, Status } = await import('./Footer.tsx');
 const { BookView } = await import('./Book.tsx');
+const { CharacterPage } = await import('./sections.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -235,9 +236,10 @@ test('the chapter title page leaves only Continue', () => {
   assert.deepEqual(new Set(colours(contents)), new Set(['#645c4f'])); // paper.dim
 });
 
-// Breaks: pennies (or any count) take a band colour, or the condition pools lose theirs
+// Breaks: pennies (or any count) take a band colour on the status line or the Character page, or
+// the condition pools lose theirs
 // (docs/system/book-ui.md#world-and-status-entry: band colours only on hp, ma and mv).
-test('status band colours mark hp, ma and mv only, never pennies', () => {
+test('status and Character band colours mark hp, ma and mv only, never pennies', () => {
   const pool = (key: string, tone: string) => ({
     resource: { key },
     current: 1,
@@ -263,4 +265,18 @@ test('status band colours mark hp, ma and mv only, never pennies', () => {
     ['mv', '#845512'], // paper.warning
     ['pennies', '#241f19'], // paper.fg
   ]);
+  const character = CharacterPage({
+    resources: [pool('hp', 'danger'), pool('pennies', 'danger')],
+    text: (key: string) => key,
+  });
+  assert.deepEqual(
+    [character.props.children]
+      .flat(2)
+      .filter((t: any) => t?.key)
+      .map((t: any) => [t.key, t.props.style.color]),
+    [
+      ['hp', '#7b2d20'], // paper.danger
+      ['pennies', '#241f19'], // paper.fg
+    ],
+  );
 });

@@ -2,7 +2,16 @@
 // and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, expeditionLine, plain, why, type group, type Thing } from './model.ts';
+import {
+  bandPhrase,
+  cap,
+  expeditionLine,
+  plain,
+  toneOf,
+  why,
+  type group,
+  type Thing,
+} from './model.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
@@ -31,7 +40,7 @@ export function CharacterPage(
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
-        <Text key={r.resource.key} style={{ ...prose(c), color: band(c, r.tone) }}>
+        <Text key={r.resource.key} style={{ ...prose(c), color: band(c, toneOf(r)) }}>
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}

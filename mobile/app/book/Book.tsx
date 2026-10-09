@@ -245,7 +245,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
         onPress={p.startOver}
         style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ ...type.control, color: c.action }}>start over</Text>
+        <Text style={{ ...type.control, color: c.fg }}>start over</Text>
       </Pressable>
     </View>
   );

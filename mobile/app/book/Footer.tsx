@@ -6,7 +6,7 @@ import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { bleedingLine, branch, refused, said, why, type Hint, type Pool } from './model.ts';
+import { bleedingLine, branch, refused, said, toneOf, why, type Hint, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { type } from './tokens.ts';
@@ -136,7 +136,7 @@ function Tip({ dismiss }: { dismiss: () => void }) {
         onPress={dismiss}
         style={{ minHeight: 44, minWidth: 64, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ ...type.control, color: c.action }}>got it</Text>
+        <Text style={{ ...type.control, color: c.fg }}>got it</Text>
       </Pressable>
     </View>
   );
@@ -257,15 +257,14 @@ export function Status(p: StatusProps) {
   );
 }
 
-// The resources as the status line shows them (band colours on the condition pools only, never
-// pennies: book-ui.md#world-and-status-entry; dim while locked); its label is model.ts `said`.
-const pools = ['hp', 'ma', 'mv'];
+// The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
+// locked); its label is model.ts `said`.
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
     <Text
       key={r.resource.key}
       style={{
-        color: locked ? c.dim : band(c, pools.includes(r.resource.key) ? r.tone : 'normal'),
+        color: locked ? c.dim : band(c, toneOf(r)),
       }}
     >
       {i ? '  ' : ''}
