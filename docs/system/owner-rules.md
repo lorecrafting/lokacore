@@ -176,7 +176,7 @@ and not repeated here.
 
 - The one-time Chapter 1 [docs audit](../evidence/2026-10-06-chapter-one-docs-audit.md) and [architecture audit](../evidence/2026-10-06-post-d10-architecture-audit.md) are done and their repairs closed ([docs record](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md), [architecture record](../decisions/owner-decision-chapter-one-architecture-audit-2026-10-05.md)); the architecture follow-ups stay Beads issues.
 
-- After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
+- After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; the [pre-production gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md) governs later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
 
@@ -190,12 +190,12 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Mechanics PRs use one fresh independent reviewer by default; a second opinion
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
-- Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
-  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM may merge PRs
-  ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)) with GitHub auto-merge on
-  the required `ci-green` and `book-e2e-green` checks; admins (the owner, or the PM when asked or
-  for status-only commits) may push to `main` or merge directly, never for unreviewed code or past
-  a red check ([record](../decisions/owner-decision-required-checks-merge-2026-10-08.md)); the PM runs a slice to its
+- Merge: APPROVE or APPROVE WITH NOTES with nothing open on a head that passed the pre-push hook;
+  hosted CI runs nightly and by hand, and must be green first for save, protocol or kernel PRs, the
+  release candidate and E3 ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM
+  merges PRs ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); admins (the owner, or
+  the PM when asked or for status-only commits) may push to `main` or merge directly, never for
+  unreviewed code or past a red check; the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the

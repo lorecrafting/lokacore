@@ -219,4 +219,21 @@ grep -qxF "worktree $wt" out && grep -qx 'stashes: 1' out && grep -qx 'merged re
   && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh "$R.wt/bin/session_status.sh" > out 2>&1 || true
 if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout listed from a linked worktree'; fi
+# Break: a red nightly prints nothing or reads as green, a running one reads as red, a missing one
+# prints a blank. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
+mkdir -p "$tmp/gh"; cat > "$tmp/gh/gh" <<'SH'
+#!/bin/sh
+[ "$1 $2" = "run list" ] || exit 1
+case $* in *ci.yml*) json=$CI ;; *) json=$E2E ;; esac
+while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; shift; done
+printf '%s\n' "$json" | jq -r "$q"
+SH
+chmod +x "$tmp/gh/gh"
+CI='[{"conclusion":"failure","status":"completed","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e.yml no scheduled run yet' out \
+  || { bad 'session_status nightly: red or missing run misreported'; sed -n '/Nightly/,/Housekeeping/p' out; }
+CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
 exit $fail

@@ -1,10 +1,9 @@
 name: book-e2e
 
+# Pre-production: nightly on main and by hand only (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md).
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main]
+  schedule:
+    - cron: '0 10 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -15,33 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  changes:
-    # Draft PRs run no hosted CI; downstream jobs skip with this one (CHECKS.md).
-    if: github.event.pull_request.draft != true
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      skip: ${{ steps.scope.outputs.skip }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - id: scope
-        run: |
-          base=$(bin/ci_base.sh "$HEAD" browser)
-          echo "skip=$([ "$(bin/ci_scope.sh "$base" "$HEAD" browser)" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-
   browser:
-    needs: changes
-    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
@@ -86,12 +59,12 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
 
-  # The one check `main` requires. A skipped browser job passes; a draft (changes skipped) fails.
+  # The run's one verdict: fails unless the browser job succeeded.
   book-e2e-green:
-    needs: [changes, browser]
+    needs: [browser]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
         run: exit 1
