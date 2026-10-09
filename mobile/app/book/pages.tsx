@@ -47,7 +47,13 @@ export function Tap(p: { label: string; onPress: () => void; children: ReactNode
       accessibilityRole="button"
       accessibilityLabel={p.label}
       onPress={p.onPress}
-      style={{ minHeight: size.touch, justifyContent: 'center' }}
+      // The size.touch hit area bleeds; the shown line keeps the rhythm (BOOK-UI-COMPONENTS.md).
+      style={{
+        minHeight: size.touch,
+        justifyContent: 'center',
+        paddingVertical: space.md,
+        marginVertical: -space.md,
+      }}
     >
       {p.children}
     </Pressable>

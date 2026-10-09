@@ -1,0 +1,15 @@
+id: mobile-book-bleed-only-tap
+language: tsx
+severity: error
+message: 'Only `Tap` bleeds (docs/BOOK-UI-COMPONENTS.md, Where each fact lives): a negative marginVertical elsewhere pulls a box over its neighbours; give it visible space or render it through `Tap`.'
+files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx, mobile/app/stories/*.tsx, mobile/app/.storybook/*.tsx]
+rule:
+  kind: pair
+  has: { field: key, regex: '^marginVertical$' }
+  all:
+    - has: { field: value, kind: unary_expression, regex: '^-' }
+    - not:
+        inside:
+          kind: function_declaration
+          has: { field: name, regex: '^Tap$' }
+          stopBy: end
