@@ -5,6 +5,7 @@
 # not attached fail. CI's check_ts_size step must report a tracked file under mobile/ (staged in a
 # throwaway index read from HEAD) and skip an untracked one. Only what this script created is removed.
 set -eu
+. "$(dirname "$0")/lib/clean_git_env.sh"
 cd "$(dirname "$0")/.."
 L= T= M= I=
 trap 'rm -rf "$L" "$T" "$M" "$I"' EXIT

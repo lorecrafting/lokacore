@@ -67,7 +67,9 @@ their rules and red controls remain available for resumption.
   `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
   duplicated a twice-edited line, or a missing line); `docs/reviews/README.md` equals the output of
   `bin/review_index.sh` (title and final verdict per record) and each record is named
-  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name).
+  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name);
+  a `bin/*.sh` that runs `git init` sources `bin/lib/clean_git_env.sh`, so a hook's `GIT_DIR` cannot
+  send a throwaway repo's writes into the real one (it plants a harness without the line).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental

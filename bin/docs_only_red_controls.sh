@@ -1,8 +1,7 @@
 #!/bin/sh
 # Plant commits in a throwaway repo and require the CI scope selector to reject unsafe skips.
 set -eu
-# A git hook exports GIT_DIR and friends: without this the plants would land in the real repository.
-unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
+. "$(dirname "$0")/lib/clean_git_env.sh"
 script=$(cd "$(dirname "$0")" && pwd)/ci_scope.sh
 d=$(mktemp -d)
 trap 'rm -rf "$d"' EXIT

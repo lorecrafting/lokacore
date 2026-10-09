@@ -3,8 +3,7 @@
 # lines; its last line passes) and an ambiguous bare name, and require bin/check_docs.exs to
 # report each as a stale pointer and exit non-zero. Only the file this script created is removed.
 set -eu
-# A git hook exports GIT_DIR and friends: without this the throwaway repo's git add lands in the real index.
-unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
+. "$(dirname "$0")/lib/clean_git_env.sh"
 cd "$(dirname "$0")/.."
 P=$(mktemp "${TMPDIR:-/tmp}/pointers.XXXXXX")
 D=$(mktemp -d "${TMPDIR:-/tmp}/anchors.XXXXXX")
@@ -51,3 +50,9 @@ printf '# Bad\n' > docs/reviews/Bad.md; sh bin/review_index.sh
 if git add . && elixir bin/check_docs.exs > out 2>&1; then echo "FAIL: badly named review record passed"; exit 1; fi
 grep -q 'review record docs/reviews/Bad.md' out || { echo "FAIL: no naming message"; cat out; exit 1; }
 echo "ok   docs: generated review index, record names"
+
+# A bin/*.sh that runs git init without sourcing bin/lib/clean_git_env.sh fails.
+rm docs/reviews/Bad.md; sh bin/review_index.sh; printf '#!/bin/sh\ngit init -q\n' > bin/x.sh
+if git add . && elixir bin/check_docs.exs > out 2>&1; then echo "FAIL: harness without clean_git_env.sh passed"; exit 1; fi
+grep -qx 'bin/x.sh runs git init without sourcing bin/lib/clean_git_env.sh' out || { echo "FAIL: no clean_git_env message"; cat out; exit 1; }
+echo "ok   docs: git init harness sources clean_git_env.sh"

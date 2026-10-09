@@ -2,8 +2,7 @@
 # Run the PM scripts (sync_pr, after_merge, br_create, check_all lock, pre-push lanes, mutate,
 # session_status) in throwaway repos with stubs; each case names the break it catches.
 set -eu
-# A git hook exports GIT_DIR and friends: without this the fixtures would land in the real repository.
-unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
+. "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
 bin=$(cd "$(dirname "$0")" && pwd)
 tmp=$(mktemp -d)
