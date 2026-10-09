@@ -1,4 +1,5 @@
-// expo-sqlite 57.0.3 truncates sync lengths, loses Error messages and times out by CPU speed.
+// expo-sqlite 57.0.3 truncates sync lengths, loses Error messages, times out by CPU speed and
+// allocates a 1 MB SharedArrayBuffer per sync call (Chrome runs out of array-buffer memory in play).
 // Keep these exact guards until the installed SDK fixes them upstream.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -52,6 +53,47 @@ for (const [before, after] of [
       Atomics.pause();
     }
   }`,
+  ],
+  [
+    'let hasWarnedSync = false;\n\n',
+    `let hasWarnedSync = false;
+// Sync calls block the main thread, so one lock and one result buffer per worker serve them all.
+const syncBuffers = new WeakMap<Worker, { lockBuffer: SharedArrayBuffer; resultBuffer: SharedArrayBuffer }>();
+
+`,
+  ],
+  [
+    `  const lockBuffer = new SharedArrayBuffer(4);
+  const lock = new Int32Array(lockBuffer);
+  const resultBuffer = new SharedArrayBuffer(1024 * 1024);
+`,
+    `  const buffers = syncBuffers.get(worker) ?? {
+    lockBuffer: new SharedArrayBuffer(4),
+    // ponytail: a result over 64 MB still times out, as one over 1 MB did upstream.
+    resultBuffer: new SharedArrayBuffer(1024 * 1024, { maxByteLength: 64 * 1024 * 1024 }),
+  };
+  // Cached again only after a reply, so a timed-out call's late reply cannot answer the next call.
+  syncBuffers.delete(worker);
+  const { lockBuffer, resultBuffer } = buffers;
+  const lock = new Int32Array(lockBuffer);
+`,
+  ],
+  [
+    `  }
+
+  const length = new Uint32Array(resultArray.buffer, 0, 1)[0];`,
+    `  }
+  syncBuffers.set(worker, buffers);
+
+  const length = new Uint32Array(resultArray.buffer, 0, 1)[0];`,
+  ],
+  [
+    `    const length = resultBytes.length;
+    resultArray.set(`,
+    `    const length = resultBytes.length;
+    // The main thread cannot receive a bigger buffer while it waits, so the worker grows the shared one.
+    if (length + 4 > resultBuffer.byteLength) resultBuffer.grow(length + 4);
+    resultArray.set(`,
   ],
 ]) {
   const oldCount = patched.split(before).length - 1;

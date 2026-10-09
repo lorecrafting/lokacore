@@ -5,7 +5,7 @@ import { test, type Browser } from '@e2e-dev/web';
 import { expect, type TestFixtures } from 'e2e';
 // @ts-expect-error the app has no Node types; the e2e runner is Node
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { begin, go, reopen } from '../tests/steps.ts';
+import { begin, go } from '../tests/steps.ts';
 
 type Fixtures = Pick<TestFixtures, 'app' | 'screen'> & { browser: Browser };
 type Screen = Fixtures['screen'];
@@ -90,16 +90,6 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
     spell,
     screen: walked,
     note,
-    // The browser preview stops confirming saves ("Array buffer allocation failed") after about
-    // 30 s of paced play; a reopen clears it. Call this on a room page between recipe blocks.
-    reopen: async () => {
-      await note('Reopen the Book (browser save workaround)');
-      await reopen({ app, screen: walked });
-      // A reopen restores the last detail page the save names; walk back to the room.
-      await settle();
-      if (await walked.getByRole('button', 'Leave').isVisible())
-        await walked.getByRole('button', 'Leave').tap();
-    },
   };
 }
 
@@ -168,7 +158,6 @@ for (const [child, allegiance] of ENDINGS)
     await screen.getByRole('button', 'Tracks').tap();
     await screen.getByRole('button', 'Study tracks').tap();
     await screen.getByRole('button', 'Leave').tap();
-    await r.reopen();
     if (child !== 'lost') {
       // childReturn(child)
       await moves(screen, 'south', 'south');
@@ -180,14 +169,12 @@ for (const [child, allegiance] of ENDINGS)
       if (child === 'stays')
         await talk(screen, 'Vesper', '“I’ll take your message to Elspeth. Wren can stay.”');
       else await talk(screen, 'Wren', '“Come with me. I’ll take you back to Elspeth.”');
-      await r.reopen();
       await moves(screen, 'north', 'north', 'north', 'north');
       await talk(
         screen,
         'Elspeth',
         child === 'stays' ? 'Give Elspeth Vesper’s message.' : 'Bring Wren to his mother.',
       );
-      await r.reopen();
     }
     // bell(allegiance, lost)
     await moves(screen, ...Array(child === 'lost' ? 7 : 5).fill('north'));
@@ -198,7 +185,6 @@ for (const [child, allegiance] of ENDINGS)
       .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
       .tap();
     await scene(screen);
-    await r.reopen();
     await moves(screen, 'down', 'down', 'south', 'south', 'south');
     // the epilogue at the market cross
     await screen.getByRole('button', 'Begin epilogue').tap();
@@ -215,7 +201,6 @@ walk('2-chandlers-debt', "Side quest: the Chandler's debt, on time", async (r) =
     'Peg Harrow',
     'Take the ledger; promise to deliver it by the second day at six.',
   );
-  await r.reopen();
   await moves(screen, 'east', 'north', 'north', 'north', 'north');
   await talk(screen, 'Prior Aldric', 'Give Aldric Peg’s ledger before the deadline.');
 });
@@ -248,14 +233,12 @@ walk('4-wisp-ward', 'Side quest: the wisp ward', async (r) => {
   await screen.getByRole('button', 'Speak to Wisp Wisp').tap();
   await screen.getByRole('button', 'Accept the riddle').tap();
   await screen.getByRole('button', 'Leave').tap();
-  await r.reopen();
   await screen.getByRole('button', 'Wisp, open').tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   for (const wrong of ['EDIT', 'DIET', 'TIED']) await r.spell(wrong);
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   await r.spell('TIDE');
   await screen.getByRole('button', 'Leave').tap();
-  await r.reopen();
   await moves(screen, 'west', ...Array(8).fill('north'));
   await screen.getByRole('button', 'Prior Aldric, open').tap();
   await screen.getByRole('button', 'Ask about ward Prior Aldric').tap();
