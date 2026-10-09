@@ -61,8 +61,11 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
-    ...(p.conditions ?? []).map((x) => (
-      <Text key={x.label} style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}>
+    ...(p.conditions ?? []).map((x, i) => (
+      <Text
+        key={`${x.label}-${i}`}
+        style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
+      >
         {conditionLine(x, p.time, p.text)}
       </Text>
     )),

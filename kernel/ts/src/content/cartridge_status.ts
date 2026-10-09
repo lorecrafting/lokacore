@@ -23,7 +23,7 @@ export function status(c: Obj): Diagnostic[] {
   if (!Object.keys(defs).length && !applies.length && !cures.length) return out;
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, '1.38') < 0 ||
-    c.lock.capabilities.status !== 1
+    ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries(defs)) {
@@ -32,7 +32,8 @@ export function status(c: Obj): Diagnostic[] {
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
     if (s.tick_every >= s.duration) out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
     if (s.per_tick === 0) out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
-    if (!c.text?.[s.label] || Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
+    if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
+    if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
   }
   for (const [at, ref] of [...applies, ...cures])

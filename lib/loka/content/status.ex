@@ -20,13 +20,16 @@ defmodule Loka.Content.Status do
       else: gate(m) ++ values(statuses, m, defs, text) ++ foods(cures, m, defs)
   end
 
+  # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m) do
+    caps = m["requires"]["capabilities"]
+
     [major, minor] =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if major > 1 or (major == 1 and minor >= 38),
+    if caps["status"] == 1 and caps["death"] == 1 and (major > 1 or (major == 1 and minor >= 38)),
       do: [],
       else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
   end
@@ -36,18 +39,22 @@ defmodule Loka.Content.Status do
   end
 
   defp status(rel, s, m, defs, text) do
-    keys = [s["label"] | Map.values(s["narration"] || %{})]
-
     Refs.reference(rel, [], "resource", s, m, defs) ++
       if(s["tick_every"] >= s["duration"],
         do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
         else: []
       ) ++
       if(s["per_tick"] == 0, do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))], else: []) ++
-      if(text == :unknown or Enum.all?(keys, &Map.has_key?(text, &1)),
-        do: [],
-        else: [diag("SCHEMA_VIOLATION", at(rel, ["narration"]))]
-      )
+      missing_text(rel, ["label"], [s["label"]], text) ++
+      missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text)
+  end
+
+  defp missing_text(_, _, _, :unknown), do: []
+
+  defp missing_text(rel, path, keys, text) do
+    if Enum.all?(keys, &Map.has_key?(text, &1)),
+      do: [],
+      else: [diag("SCHEMA_VIOLATION", at(rel, path))]
   end
 
   defp foods(cures, m, defs) do

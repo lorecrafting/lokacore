@@ -20,8 +20,8 @@ function Fight({ view, text }: Pick<Screen, 'view' | 'text'>) {
       {view.bleeding && (
         <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
       )}
-      {view.conditions?.map((x) => (
-        <Text key={x.label} style={prose(c)}>
+      {view.conditions?.map((x, i) => (
+        <Text key={`${x.label}-${i}`} style={prose(c)}>
           {conditionLine(x, view.time, text)}
         </Text>
       ))}

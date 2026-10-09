@@ -27,7 +27,8 @@ export function runStatus(
   const current = level(visit, body, spec.resource);
   const pool = resourceSpec(visit, body, spec.resource);
   const expired = now >= row.ends_at;
-  const tick = !expired && now >= row.next_tick_at && current !== undefined && pool !== undefined;
+  const due = !expired && now >= row.next_tick_at;
+  const tick = due && current !== undefined && pool !== undefined;
   // Saturate at the pool bounds; the op itself stays exact.
   const by = tick
     ? Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick))
@@ -53,7 +54,8 @@ export function runStatus(
     return accepted(world, 'job_ran', ops, died.events, [{ key: spec.narration.tick }]);
   }
   if (expired) return accepted<never>(world, 'job_ran', ops, [], [{ key: spec.narration.expired }]);
-  const next_tick_at = tick ? add(row.next_tick_at, spec.tick_every) : row.next_tick_at;
+  // A due tick on an unreadable pool is skipped, never re-due at the same clock.
+  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : row.next_tick_at;
   const successor = mint() as JobId;
   ops.push({
     op: 'status.transition',

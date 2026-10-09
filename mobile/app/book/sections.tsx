@@ -45,8 +45,8 @@ export function CharacterPage(
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
-      {p.view?.conditions?.map((x) => (
-        <Text key={x.label} style={prose(c)}>
+      {p.view?.conditions?.map((x, i) => (
+        <Text key={`${x.label}-${i}`} style={prose(c)}>
           {p.text(x.label)}
         </Text>
       ))}

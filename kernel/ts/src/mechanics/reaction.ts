@@ -80,6 +80,7 @@ export function sequence(
   if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
+  const applied = new Set<string>();
   const ops: DeltaOp[] = [];
   const events: DomainEvent[] = [];
   const narration: { key: TextKey }[] = [];
@@ -120,6 +121,8 @@ export function sequence(
     } else if (step.op === 'status.apply') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
+      if (applied.has(refString(step.status))) continue; // one row write per status per rule
+      applied.add(refString(step.status));
       ops.push(...applyStatus(then, body, step.status, group, mint));
       const label = specOf(then, step.status)?.narration.applied;
       if (label) narration.push({ key: label });
