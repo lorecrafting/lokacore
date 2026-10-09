@@ -245,7 +245,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
         onPress={p.startOver}
         style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ ...type.small, color: c.action }}>start over</Text>
+        <Text style={{ ...type.control, color: c.action }}>start over</Text>
       </Pressable>
     </View>
   );
@@ -260,16 +260,7 @@ function Back({ onPress, label }: { onPress: () => void; label: string }) {
       onPress={onPress}
       style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Text
-        style={{
-          ...type.small,
-          // ast-grep-ignore: mobile-book-raw-values (one-off for the designer: Back's 17)
-          fontSize: 17,
-          color: c.fg,
-        }}
-      >
-        {label}
-      </Text>
+      <Text style={{ ...type.control, color: c.fg }}>{label}</Text>
     </Pressable>
   );
 }

@@ -7,7 +7,7 @@ import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { SkillDetails } from './skills.tsx';
-import { Act, band, Sheet, Tap, titleStyle } from './pages.tsx';
+import { Act, band, sectionTitleStyle, Sheet, Tap } from './pages.tsx';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -114,14 +114,14 @@ export function CarryingPage(p: {
   const c = usePalette();
   return (
     <Sheet title="Equipment & Inventory">
-      <Text style={titleStyle(c)}>Held</Text>
+      <Text style={sectionTitleStyle(c)}>Held</Text>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
       {p.items.map((e) => (
         <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
           <Text style={prose(c)}>{p.text(e.name)}</Text>
         </Tap>
       ))}
-      {(p.equipment?.length ?? 0) > 0 && <Text style={titleStyle(c)}>Worn</Text>}
+      {(p.equipment?.length ?? 0) > 0 && <Text style={sectionTitleStyle(c)}>Worn</Text>}
       {p.equipment?.map(({ slot, item }) => (
         <View key={slot}>
           <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
@@ -201,7 +201,7 @@ export function MapPage(p: {
       {p.g.place.map((b) => (
         <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
-      {p.view.known_npcs?.length ? <Text style={titleStyle(c)}>Where</Text> : null}
+      {p.view.known_npcs?.length ? <Text style={sectionTitleStyle(c)}>Where</Text> : null}
       {(p.view.known_npcs ?? []).map((n) =>
         p.g
           .on(n.id)

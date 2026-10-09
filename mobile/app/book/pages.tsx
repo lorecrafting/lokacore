@@ -7,7 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
-import { font, space, type } from './tokens.ts';
+import { space, type } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -18,14 +18,9 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
+const titleStyle = (c: Palette) => ({ color: c.fg, paddingBottom: space.md });
 export const pageTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.pageTitle });
-export const titleStyle = (c: Palette) => ({
-  fontFamily: font.head,
-  // ast-grep-ignore: mobile-book-raw-values (one-off for the designer: no token for a 26 section title)
-  fontSize: 26,
-  color: c.fg,
-  paddingBottom: 10,
-});
+export const sectionTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.sectionTitle });
 // A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
 // on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
 export const titleFocus = {
@@ -104,7 +99,10 @@ export function RoomPage(p: {
 // The room's title; a tap looks.
 function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
   const title = (
-    <Text {...titleFocus} style={{ ...titleStyle(usePalette()), textAlign: 'center' }}>
+    <Text
+      {...titleFocus}
+      style={{ ...titleStyle(usePalette()), ...type.roomTitle, textAlign: 'center' }}
+    >
       {p.text(p.view.place.title.key)}
     </Text>
   );
@@ -232,7 +230,7 @@ export function ThingPage(p: {
         </Tap>
       )}
       <Leave leave={p.leave} />
-      {p.contents.length > 0 && <Text style={titleStyle(c)}>Inside</Text>}
+      {p.contents.length > 0 && <Text style={sectionTitleStyle(c)}>Inside</Text>}
       {p.contents.map((e) => (
         <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
           <Text style={{ ...prose(c), color: c.action }}>{cap(p.text(e.name))}</Text>

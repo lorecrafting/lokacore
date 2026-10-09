@@ -136,7 +136,7 @@ function Tip({ dismiss }: { dismiss: () => void }) {
         onPress={dismiss}
         style={{ minHeight: 44, minWidth: 64, justifyContent: 'center', alignItems: 'center' }}
       >
-        <Text style={{ ...type.small, color: c.action }}>got it</Text>
+        <Text style={{ ...type.control, color: c.action }}>got it</Text>
       </Pressable>
     </View>
   );
