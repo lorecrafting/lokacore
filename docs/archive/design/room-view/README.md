@@ -1,8 +1,8 @@
 # Room view prototype (design exploration)
 
-**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [current system docs](../../system/README.md) govern, including [00 §4.10 Touch interface](../../archive/spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../archive/spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
+**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [current system docs](../../../system/README.md) govern, including [00 §4.10 Touch interface](../../../archive/spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../../archive/spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
 
-Open [room-view.html](room-view.html) in a browser to play the Lantern loop on the chosen design. The pages are self-contained HTML and load fonts from Google Fonts. The model inside is a hand-written mock of the proof's four places, not the engine.
+Open [room-view.html](../../../design/room-view/room-view.html) in a browser to play the Lantern loop on the chosen design. The pages are self-contained HTML and load fonts from Google Fonts. The model inside is a hand-written mock of the proof's four places, not the engine.
 
 ## The chosen direction
 
@@ -11,12 +11,12 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
 - **The page.** A pinned room title, then the description (only small details such as the mooring post are tappable inline), then MUD-style lines for people and things ("**Bram** the ferryman stands here, one boot on the ferry."), then that room's event log.
 - **The footer.** A tiny endpaper minimap sits between two long hairline rules. You are the solid dot, places are open rings reaching two steps out, and paths meet each ring at its edge. Unexplored ways are dotted, and a barred way ends in a small red tick.
   - **The map is the joystick.** Press it and it zooms about 2.6×. Drag toward a path to light it, then release to walk; drag back to the middle to cancel. For up and down, drag out to stair nodes that appear beside it. A tap opens the Map page. A tip bubble teaches the gesture once, and hidden "Go north" buttons serve screen readers.
-  - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
+  - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
   - Swiping up on the footer (away from the map), or tapping the small handle, opens the text drawer. Every tap shows up there as its command.
 
 ## Owner taste rulings (2026-09-25, paraphrased)
 
-From the later exploration rounds; the [design foundation](../../decisions/owner-decision-design-foundation-2026-10-07.md) governs where it differs.
+From the later exploration rounds; the [design foundation](../../../decisions/owner-decision-design-foundation-2026-10-07.md) governs where it differs.
 - Ruled out: gamebook "turn to §" choices, the ribbon, the tide band, always-visible side tabs,
   page tilt and an on-page sun.
 - The chapter card is kept for major story-arc markers (a main questline resolved), not routine events.
@@ -35,17 +35,17 @@ The map joystick with stair nodes replaces the six-way compass ring. Full pages 
 
 ## GameView needs
 
-Compared against [protocol/gameview.schema.json](../../../protocol/gameview.schema.json) at `4e8f40b`, which already covers several of the first-pass notes: exit and action reasons with an optional message, text bindings, the choice prompt, speaker and `closable`, `NarrationRecord`, the current `time`, and `up`/`down` exits (ExitView directions are keys, with the same reasons). None of the gaps below blocks the Lantern loop by touch. This table supersedes the numbered notes panels inside the HTML pages, which are the first-pass drafts.
+Compared against [protocol/gameview.schema.json](../../../../protocol/gameview.schema.json) at `4e8f40b`, which already covers several of the first-pass notes: exit and action reasons with an optional message, text bindings, the choice prompt, speaker and `closable`, `NarrationRecord`, the current `time`, and `up`/`down` exits (ExitView directions are keys, with the same reasons). None of the gaps below blocks the Lantern loop by touch. This table supersedes the numbered notes panels inside the HTML pages, which are the first-pass drafts.
 
 | # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
-| 1 | resources as current/max with a condition band ([04 §15](../../archive/spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
-| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../system/mechanics.md#position1-kerneltssrcmechanicspositionrulets)); book status/actions verified by [c1-touch review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md); `meditating` LATER |
+| 1 | resources as current/max with a condition band ([04 §15](../../../archive/spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
+| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../../system/mechanics.md#position1-kerneltssrcmechanicspositionrulets)); book status/actions verified by [c1-touch review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md); `meditating` LATER |
 | 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
-| 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView includes optional authored `description`; current projections populate it ([Book UI](../../system/book-ui.md)); per-entity visible status remains LATER |
+| 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView includes optional authored `description`; current projections populate it ([Book UI](../../../system/book-ui.md)); per-entity visible status remains LATER |
 | 6 | inspectable details marked as targetable non-entities | the tappable mooring post | none |
-| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); book rendering and sampler touch acceptance verified by [c1-touch review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md) |
+| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); book rendering and sampler touch acceptance verified by [c1-touch review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-03-c1-touch-review.md) |
 | 8 | discovered dialogue topics per NPC | "Ask about" chips | none |
 | 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
 | 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
@@ -57,7 +57,7 @@ Questions for the engine rather than needs:
 - Should rooms carry lit or dark, and obscured entities a perceived name ("something brass") with an opaque handle?
 - Are "is here" lines ("Bram the ferryman stands here…") cartridge content in GameView, or built by the UI from the name?
 - Should narration carry a semantic cue key (for example `quest_resolved`) for sound and haptics, or should the UI infer it?
-- Answered: moving costs 1 `mv` per room from R5 S6b; per-terrain costs come at R8 ([owner decision](../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
+- Answered: moving costs 1 `mv` per room from R5 S6b; per-terrain costs come at R8 ([owner decision](../../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
 
 ## Explorations
 
