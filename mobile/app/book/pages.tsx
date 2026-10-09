@@ -42,12 +42,13 @@ export const useTitleFocus = () => ({
 });
 
 export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
+  const bleed = { paddingVertical: space.md, marginVertical: -space.md }; // hit area, no shown space
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
       onPress={p.onPress}
-      style={{ minHeight: size.touch, justifyContent: 'center' }}
+      style={{ minHeight: size.touch, justifyContent: 'center', ...bleed }}
     >
       {p.children}
     </Pressable>

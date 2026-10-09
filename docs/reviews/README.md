@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
 - [Review: Storybook MCP addon, Tidewave trial, smoke vitest config move (PR #333)](2026-10-09-storybook-mcp-333-review.md): **APPROVE**
 - [Review: polish batch 6, chapter card and story word Controls (PR #332)](2026-10-09-storybook-b6-332-review.md): **APPROVE WITH NOTES**
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**

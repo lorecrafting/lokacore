@@ -1,0 +1,7 @@
+id: mobile-book-bleed-only-tap
+valid:
+  - "function Tap() { return <Pressable style={{ paddingVertical: space.md, marginVertical: -space.md }} />; }"
+  - "const s = { marginVertical: space.md, marginTop: -space.sm };"
+invalid:
+  - "function Row() { return <View style={{ marginVertical: -space.md }} />; }"
+  - "const s = { marginVertical: -space.sm };"
