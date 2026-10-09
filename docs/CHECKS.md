@@ -111,7 +111,8 @@ their rules and red controls remain available for resumption.
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
   a decoy server found only by name survives, a second run restarts nothing, `npm ci` runs only for a
-  changed lockfile, a dirty preview or session is refused, close pushes, opens the PR and serves the preview again.
+  changed lockfile, a dirty preview, a served or closed session is refused; close pushes, opens the PR and serves
+  the preview again, leaving the web preview and Expo running.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared; a local path in the new row warns but still creates).
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
   pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
