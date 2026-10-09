@@ -11,13 +11,18 @@ roadmap remains the published completion record. The [actual chapter cutover](de
 sets the active development source and save; the [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-decision-no-wait-opening-2026-10-05.md).
 
+## Next
+
+Chapter 1 is frozen as a mechanics sample; after the foundation phase, work follows the ranked
+[mechanics toolbox](MECHANICS-TOOLBOX.md) ([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)).
+
 ## Slices
 
 | Stage | Slices | Content |
 |---|---|---|
 | R3 to C1 | done | Gates R3, R5, R6, early R7/R8, R6P and C1 ([#149](https://github.com/lorecrafting/lokacore/pull/149), [checklist](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/C1-GATE-2026-10-03.md)) passed; slices, reviews and decisions in [the archive](archive/ROADMAP.md) and the [publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md). Open C1 carries: [C1 carry checkpoints](#c1-carry-checkpoints). |
 | M mechanics continuation | 23 original planning groups | [Adopted queue #150](https://github.com/lorecrafting/lokacore/pull/150); dated proposal in [mechanics history](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/NEXT-MECHANICS-2026-10-06.md). Installed Chapter 1 outcomes and remaining proof follow [current completion](#chapter-one-completion). |
-| Later chapter mechanics lookahead | provisional; PR count unset | [C2/C3/CC quest-consumer queues](LATER-MECHANICS.md), after current Missing Child work. No installed mechanic, active M renumbering or completed-slice credit. |
+| Later chapter mechanics lookahead | provisional; PR count unset | Superseded by the [mechanics toolbox](MECHANICS-TOOLBOX.md); the quest-consumer queues are [archived](archive/LATER-MECHANICS.md). |
 | Playtest and tune | open; owner ends stage | [Owner decision](archive/decisions/owner-decision-playtest-2026-09-25.md); historical iterations in the [publication log](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive/ROADMAP-2026-10-06.md). Unaided first-tester completion remains a prelaunch obligation. Native proof is paused; current UI deferrals remain in [carry checkpoints](#c1-carry-checkpoints). |
 
 ## Chapter one completion
@@ -25,10 +30,9 @@ excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-dec
 **32 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6, D1–D12, E1 ([#288](https://github.com/lorecrafting/lokacore/pull/288)) and E2.
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
 D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-bundled-chapter)
-owns the release/API/hash/ID pins. **E3 remains open.** E2, the R9C interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
-Order: E1 (coverage complete), E2 (done), a Chapter 1 UI polish phase, release-candidate
-certification on one frozen source, then E3 and release
-([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
+owns the release/API/hash/ID pins. **E3 and release-candidate certification are not planned: Chapter 1 is [frozen as a mechanics sample](decisions/owner-decision-mechanics-toolbox-2026-10-08.md).** E2, the R9C interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
+The [original order](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) (E1, E2,
+polish, release-candidate certification, E3) now ends after the polish phase.
 The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
