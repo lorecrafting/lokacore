@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { presenter } from './presenter.ts';
-import { detail } from './words.ts';
+import { comings, detail } from './words.ts';
 
 const VIEW = {
   actions: [],
@@ -355,4 +355,17 @@ test('combat receipt history is once-only when completion follows an already dis
   }
   assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'The marsh rat falls.']);
   assert.deepEqual(p.screen().log, []);
+});
+
+// Breaks: an NPC whose cartridge name starts lower case ("a crow") leaves or arrives mid-sentence.
+test('a coming or going starts its sentence with a capital', () => {
+  const at = (...names: string[]) =>
+    ({
+      place: { id: 'green' },
+      entities: names.map((name) => ({ id: name, name, kind: 'npc' })),
+    }) as unknown as GameView;
+  assert.deepEqual(
+    comings(at('a crow'), at('a fox'), (s) => s),
+    ['A crow leaves.', 'A fox arrives.'],
+  );
 });

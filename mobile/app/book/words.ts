@@ -93,6 +93,8 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
+const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());
+
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
 // still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
 export function comings(was: GameView, now: GameView, text: Say): string[] {
@@ -102,7 +104,7 @@ export function comings(was: GameView, now: GameView, text: Say): string[] {
   return [
     ...gone(was, now)
       .filter((e) => e.id !== was.combat?.opponent_id)
-      .map((e) => `${text(e.name)} leaves.`),
-    ...gone(now, was).map((e) => `${text(e.name)} arrives.`),
+      .map((e) => `${sentence(text(e.name))} leaves.`),
+    ...gone(now, was).map((e) => `${sentence(text(e.name))} arrives.`),
   ];
 }
