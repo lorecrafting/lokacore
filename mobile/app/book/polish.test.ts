@@ -273,10 +273,11 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
     controls.filter((n) => n.type === 'Pressable').map((n) => n.props.accessibilityLabel),
     ["Offer to fetch Bram's lantern"],
   );
-  const leaves = h
-    .draw()
-    .filter((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave');
-  assert.equal(leaves.length, 1);
+  const page = h.draw(); // preorder: the scroll's subtree follows it, then the foot
+  const end = page.findIndex((n) => n.type === 'ScrollView') + nodes(scroll).length;
+  const leave = (n: any) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave';
+  assert.equal(page.filter(leave).length, 1);
+  assert.ok(page.findIndex(leave) >= end);
   h.tap('Leave');
   assert.equal(h.game.view().view.choice, undefined);
   h.tap('Old Bram');
