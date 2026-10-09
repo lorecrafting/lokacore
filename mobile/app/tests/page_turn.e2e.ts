@@ -6,11 +6,19 @@ import { readFileSync } from 'node:fs';
 // In the page: press `from` and watch until the leaving page and its curl have gone (or it faded
 // out); report whether the curl canvas drew and whether `to`, on the arriving page, received the
 // pointer at its centre all the while, and how long (ms) the leaving page stayed over it. While both
-// pages show: which text has focus, and whether `from` can take focus or is announced.
+// pages show: which text has focus, and whether `from` can take focus or is announced. `first`: the
+// progress the curl shader is first built with (CanvasKit's, as the preview runs it).
 const turn = async ({ from, to }: { from: string; to: string }) => {
   const frames = 600; // about 10 s at 60 fps
   for (let i = 0; i < frames && document.querySelector('canvas'); i++)
     await new Promise(requestAnimationFrame); // the previous turn's curl has gone
+  const effect = (globalThis as any).CanvasKit.RuntimeEffect.prototype;
+  const make = effect.makeShaderWithChildren;
+  const progress: number[] = [];
+  effect.makeShaderWithChildren = function (uniforms: number[], ...rest: unknown[]) {
+    progress.push(uniforms[2]); // size.x, size.y, progress, ...
+    return make.call(this, uniforms, ...rest);
+  };
   (document.querySelector(`[aria-label="${from}"]`) as HTMLElement).click();
   let curl = false;
   let arrived: number | undefined; // the frame time the arriving page first showed
@@ -40,14 +48,16 @@ const turn = async ({ from, to }: { from: string; to: string }) => {
       if (!canvas) break; // the leaving page and its curl have gone
     }
   }
-  return { curl, hit, stayed, focused, reachable };
+  effect.makeShaderWithChildren = make;
+  return { curl, hit, stayed, focused, reachable, first: progress[0] ?? null };
 };
 
 // A cold Metro builds the preview's Skia chunk on first request; that once outlasted the default wait.
 const COLD = 60_000;
 
 // Breaks: the curl (or the leaving page held under it) takes the arriving page's touches, the
-// leaving page's picture fails on web so nothing curls, or a back turn breaks the next press.
+// leaving page's picture fails on web so nothing curls, a back turn breaks the next press, or a curl
+// first draws with the last turn's finished progress (the leaf gone for a frame: a flash).
 test('the page curl draws over a live arriving page, both ways', async ({
   app,
   screen,
@@ -56,10 +66,10 @@ test('the page curl draws over a live arriving page, both ways', async ({
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
   const args = { from: 'Continue', to: 'Start over' };
-  expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true });
+  expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true, first: 0 });
   await app.screenshot('page-curl-forward');
   const back = { from: 'Start over', to: 'Continue' };
-  expect(await browser.evaluate(turn, back)).toMatchObject({ curl: true, hit: true });
+  expect(await browser.evaluate(turn, back)).toMatchObject({ curl: true, hit: true, first: 0 });
 });
 
 // Breaks: reduced motion still curls, its cross-fading leaving page takes the touches, keyboard

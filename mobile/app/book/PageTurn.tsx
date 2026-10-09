@@ -107,8 +107,14 @@ function useMotion(
     let live = true;
     // No picture in time, or none at all: the page has simply changed.
     const late = setTimeout(() => ((live = false), setLeaving(undefined)), motion.quick.duration);
+    // The curl is first drawn with the progress it mounts with: back to 0 before it mounts, or every
+    // turn after the first shows the arriving page for a few frames (the last curl's 1) and then the
+    // whole leaf again.
     snapshot(pages.get(leaving.turn)!).then(
-      (image) => (live ? setLeaving(image ? { ...leaving, image } : undefined) : image?.dispose()),
+      (image) =>
+        live
+          ? ((progress.value = 0), setLeaving(image ? { ...leaving, image } : undefined))
+          : image?.dispose(),
       () => live && setLeaving(undefined),
     );
     return () => {
