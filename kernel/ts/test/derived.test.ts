@@ -167,8 +167,12 @@ test('constitution 16 raises the hp maximum to 16; the body regenerates to it an
 });
 
 // Breaks: the death sequence restores the authored 10 above a derived maximum of 4, so the killing
-// round faults composition and the player never returns.
+// round faults composition and the player never returns; or the maximum loses its floor at the
+// pool minimum 0 (constitution 16 at -3 per point would read -8).
 test('a maximum lowered to 4 reads the start value 10 as 4 and caps the death restore', () => {
+  const crushed = structuredClone(content) as any;
+  crushed.world.derived.hp_max.terms[0].per_point = -3;
+  assert.deepEqual(hpView(chosen('hardy', crushed)), [0, 0]);
   const frail = structuredClone(content) as any; // constitution 16: -1 * (16 - 10) = -6
   frail.world.derived.hp_max.terms[0].per_point = -1;
   frail.npcs['derived_sampler@0.0.1:npc/dummy'].attack = {
