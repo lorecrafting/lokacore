@@ -4,9 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const out = path.join(__dirname, '../.walkthrough');
+// A run that failed before any route started leaves an empty sheet, not a stack trace.
+const list = (dir, options) => (fs.existsSync(dir) ? fs.readdirSync(dir, options) : []);
 const shots = new Map(
-  fs
-    .readdirSync(path.join(out, 'artifacts'), { recursive: true })
+  list(path.join(out, 'artifacts'), { recursive: true })
     .filter((f) => f.endsWith('.png'))
     .map((f) => [path.basename(f), path.join(out, 'artifacts', f)]),
 );
@@ -16,8 +17,7 @@ const escape = (s) =>
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
   );
 
-const routes = fs
-  .readdirSync(path.join(out, 'steps'))
+const routes = list(path.join(out, 'steps'))
   .sort()
   .map((file) => JSON.parse(fs.readFileSync(path.join(out, 'steps', file), 'utf8')));
 const sections = routes.map(({ title, steps }) => {

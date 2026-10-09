@@ -29,12 +29,15 @@ const top = () => {
 
 // A route's screen: before every tap it waits for the control, lets the reduced-motion fade
 // (motion.fade, 160 ms) settle, screenshots the page and logs the step to .walkthrough/steps.
+// A tap's page and its save land after the 160 ms fade; an instant read waits this long first.
+const settle = () => new Promise((r) => setTimeout(r, 250));
+
 function recorder(route: string, title: string, { app, screen, browser }: Fixtures) {
   const dir = new URL('../.walkthrough/steps/', import.meta.url);
   mkdirSync(dir, { recursive: true });
   const steps: object[] = [];
   const note = async (action: string) => {
-    await new Promise((r) => setTimeout(r, 200));
+    await settle();
     const label = `${route}-${String(steps.length + 1).padStart(3, '0')}`;
     const page = await browser.evaluate(top);
     steps.push({ action, title: page.title, time: page.time, shot: await app.screenshot(label) });
@@ -51,7 +54,6 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
             await expect(target)
               .toBeVisible()
               .catch(async () => {
-                await note(`Dead end: no ${String(name)}`);
                 throw new Error(
                   `walk dead end: no "${String(name)}"; buttons: ${(await browser.evaluate(top)).buttons.join(' | ')}`,
                 );
@@ -73,6 +75,7 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
   }) as Screen;
   // A riddle answer on the letter tiles ("Letter L, tile 5"), each tile used once, then Submit.
   const spell = async (word: string) => {
+    await settle();
     const tiles = (await browser.evaluate(top)).buttons.filter((b) => b?.startsWith('Letter '));
     for (const letter of word) {
       const tile = tiles.find((t) => t?.startsWith(`Letter ${letter},`));
@@ -86,13 +89,14 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
     app,
     spell,
     screen: walked,
-    end: () => note('End of route'),
+    note,
     // The browser preview stops confirming saves ("Array buffer allocation failed") after about
     // 30 s of paced play; a reopen clears it. Call this on a room page between recipe blocks.
     reopen: async () => {
       await note('Reopen the Book (browser save workaround)');
       await reopen({ app, screen: walked });
       // A reopen restores the last detail page the save names; walk back to the room.
+      await settle();
       if (await walked.getByRole('button', 'Leave').isVisible())
         await walked.getByRole('button', 'Leave').tap();
     },
@@ -110,19 +114,34 @@ const talk = async (screen: Screen, npc: string, ...choices: string[]) => {
 const moves = async (screen: Screen, ...directions: string[]) => {
   for (const d of directions) await go(screen, d);
 };
-// A scene: Continue until its pages end.
+// A scene: Continue until its pages end (at most 20, so a stuck scene fails the route).
 const scene = async (screen: Screen) => {
-  while (await screen.getByRole('button', 'Continue').isVisible())
+  for (
+    let page = 0;
+    await settle(), await screen.getByRole('button', 'Continue').isVisible();
+    page++
+  ) {
+    if (page === 20) throw new Error('walk dead end: the scene never ends');
     await screen.getByRole('button', 'Continue').tap();
+  }
 };
 
 type Walk = ReturnType<typeof recorder>;
 // One route, one test, one contact-sheet section; `id` orders the sections.
 const walk = (id: string, title: string, route: (r: Walk) => Promise<void>) =>
   test(title, async (f) => {
+    // As page_turn.e2e.ts: a cold Metro builds the bundle on first request, past the default wait.
+    await f.app.open();
+    await expect(f.screen.getByRole('button', 'Fey-touched')).toBeVisible({ timeout: 60_000 });
     const r = recorder(id, title, f);
-    await route(r);
-    await r.end();
+    try {
+      await route(r);
+    } catch (error) {
+      // Any failure ends the section on a captioned dead-end page.
+      await r.note(`Dead end: ${String(error).split('\n')[0]}`);
+      throw error;
+    }
+    await r.note('End of route');
   });
 
 // e1_paths.ts ending(child, allegiance) for each of its ENDINGS (copied: that module needs Node
