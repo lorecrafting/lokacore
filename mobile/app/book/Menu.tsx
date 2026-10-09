@@ -70,10 +70,10 @@ export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const actions = p.npc ? p.g.on(p.npc.id) : [];
+  const cards = actions.filter((b) => b.command !== 'use_service');
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
   const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
   const scroll = useRef<ScrollView>(null);
-  const description = p.npc?.description;
   return (
     <ScrollView
       ref={scroll}
@@ -84,7 +84,7 @@ export function NpcPage(p: NpcProps) {
       <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
-      {description && <Text style={prose(c)}>{plain(p.text(description))}</Text>}
+      {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}
@@ -96,11 +96,9 @@ export function NpcPage(p: NpcProps) {
       {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
       <Cards>
-        {actions
-          .filter((b) => b.command !== 'use_service')
-          .map((b) => (
-            <ActionCard key={b.label} b={b} press={p.press} />
-          ))}
+        {cards.map((b) => (
+          <ActionCard key={b.label} b={b} press={p.press} />
+        ))}
         <ServiceOptions {...p} actions={actions} />
       </Cards>
       <Control label="Leave" onPress={leave} />

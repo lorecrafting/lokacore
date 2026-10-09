@@ -1,4 +1,5 @@
 // The status line under the footer (BOOK-UI-COMPONENTS.md, Status line).
+import type { ReactElement } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, said, toneOf, type Pool } from './model.ts';
@@ -63,19 +64,7 @@ export function StatusLine(p: StatusProps) {
   ].filter(Boolean);
   return (
     <View style={statusRow}>
-      {/* Each " · " belongs to the item after it, so a wrapped line never ends in a lone dot. */}
-      {items.map((item, i) =>
-        i ? (
-          <View key={(item as { key: string }).key} style={group}>
-            <Text aria-hidden style={{ ...type.small, color: c.dim }}>
-              ·
-            </Text>
-            {item}
-          </View>
-        ) : (
-          item
-        ),
-      )}
+      {items.map((item, i) => (i ? joined(c, item as ReactElement) : item))}
       {p.pending && (
         <Text style={{ ...type.small, color: c.dim, width: '100%', textAlign: 'center' }}>
           save not confirmed
@@ -84,6 +73,16 @@ export function StatusLine(p: StatusProps) {
     </View>
   );
 }
+
+// Each " · " belongs to the item after it, so a wrapped line never ends in a lone dot.
+const joined = (c: Palette, item: ReactElement) => (
+  <View key={item.key} style={group}>
+    <Text aria-hidden style={{ ...type.small, color: c.dim }}>
+      ·
+    </Text>
+    {item}
+  </View>
+);
 
 // The resources (or "character"), a button that opens Contents; not pressable while locked.
 function Contents(p: StatusProps) {

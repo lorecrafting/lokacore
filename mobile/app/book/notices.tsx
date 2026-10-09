@@ -140,13 +140,11 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       )}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
-      {!board && (
-        <Cards>
-          {('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
-            offerControl(c, p, detail.id, offer),
-          )}
-        </Cards>
-      )}
+      <Cards>
+        {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
+          offerControl(c, p, detail.id, o),
+        )}
+      </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
       {p.screen.view.notices?.some((n) => n.id === detail.id) && (
         <Control label="Leave" onPress={p.world} />
