@@ -54,3 +54,38 @@ test('status rows, transitions and condition views require their complete shape'
     { path: '/tick_every', code: 'below_minimum' },
   ]);
 });
+
+// Breaks: a compiled status definition missing one field, or with a zero duration or cadence,
+// loads (the compiler's own checks are not the contract).
+test('a status definition requires every field and positive times', () => {
+  const def = {
+    key: 'poison',
+    duration: 300,
+    tick_every: 60,
+    resource: {
+      cartridge_id: 'status_sampler',
+      cartridge_version: '0.0.1',
+      kind: 'resource',
+      key: 'hp',
+    },
+    per_tick: -1,
+    label: 'condition.poisoned',
+    narration: {
+      applied: 'narration.poison.applied',
+      tick: 'narration.poison.tick',
+      expired: 'narration.poison.expired',
+    },
+  };
+  assert.deepEqual(validate('StatusDefinition', def), []);
+  for (const field of Object.keys(def)) {
+    const partial: Record<string, unknown> = { ...def };
+    delete partial[field];
+    assert.deepEqual(validate('StatusDefinition', partial), [
+      { path: '/' + field, code: 'missing_property' },
+    ]);
+  }
+  for (const field of ['duration', 'tick_every'])
+    assert.deepEqual(validate('StatusDefinition', { ...def, [field]: 0 }), [
+      { path: '/' + field, code: 'below_minimum' },
+    ]);
+});
