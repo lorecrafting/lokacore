@@ -120,7 +120,9 @@ test('patched worker returns a result larger than the first buffer', async () =>
 
 // Breaks: a timed-out call's late reply lands in the reused buffer and answers the next call.
 test('patched worker never returns a timed-out reply to the next call', async () => {
-  const [timedOut, next] = await replies(true, [
+  // The first reply caches the buffers the timed-out call then reuses.
+  const [, timedOut, next] = await replies(true, [
+    { delay: 0, text: 'first reply' },
     { delay: 5_500, text: 'late reply' },
     { delay: 1_500, text: 'next reply' },
   ]);

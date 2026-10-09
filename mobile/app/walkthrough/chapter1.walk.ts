@@ -185,6 +185,8 @@ for (const [child, allegiance] of ENDINGS)
       .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
       .tap();
     await scene(screen);
+    // The bell's scene ends back on the Chapel bell page.
+    await screen.getByRole('button', 'Leave').tap();
     await moves(screen, 'down', 'down', 'south', 'south', 'south');
     // the epilogue at the market cross
     await screen.getByRole('button', 'Begin epilogue').tap();
