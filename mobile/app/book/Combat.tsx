@@ -1,9 +1,11 @@
 // A full reading page with the offered actions following its combat history.
-import { ScrollView, Text } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { RunningHead } from './Body.tsx';
 import { bleedingLine, type group } from './model.ts';
 import { Act, pageTitleStyle, titleFocus } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
+import { space } from './tokens.ts';
 
 export function Combat(p: {
   screen: ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -15,33 +17,39 @@ export function Combat(p: {
   if (!view.combat) return null;
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
-    <ScrollView style={{ backgroundColor: c.bg, flex: 1 }} contentContainerStyle={{ padding: 24 }}>
-      <Text {...titleFocus} accessibilityRole="header" style={pageTitleStyle(c)}>
-        Combat
-      </Text>
-      <Text style={prose(c)}>{text(view.combat.name)}</Text>
-      {view.bleeding && (
-        <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
-      )}
-      {view.combat.active_opponents?.map((opponent) => (
-        <Text key={opponent.id} style={prose(c)}>
-          {text(opponent.name)}
-          {opponent.id === view.combat!.opponent_id ? ' (your target)' : ''}
+    <View style={{ flex: 1 }}>
+      <RunningHead screen={p.screen} />
+      <ScrollView
+        style={{ backgroundColor: c.bg, flex: 1 }}
+        contentContainerStyle={{ padding: space.page }}
+      >
+        <Text {...titleFocus} accessibilityRole="header" style={pageTitleStyle(c)}>
+          Combat
         </Text>
-      ))}
-      {combatLog.map((line, i) => (
-        <Text key={i} style={prose(c)}>
-          {line}
-        </Text>
-      ))}
-      {stand && <Act b={stand} press={p.press} />}
-      {p.g.look && <Act b={p.g.look} press={p.press} />}
-      {p.g.flee.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
-      ))}
-      {p.g.bandage.map((b) => (
-        <Act key={b.target_ids[0]} b={b} press={p.press} />
-      ))}
-    </ScrollView>
+        <Text style={prose(c)}>{text(view.combat.name)}</Text>
+        {view.bleeding && (
+          <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
+        )}
+        {view.combat.active_opponents?.map((opponent) => (
+          <Text key={opponent.id} style={prose(c)}>
+            {text(opponent.name)}
+            {opponent.id === view.combat!.opponent_id ? ' (your target)' : ''}
+          </Text>
+        ))}
+        {combatLog.map((line, i) => (
+          <Text key={i} style={prose(c)}>
+            {line}
+          </Text>
+        ))}
+        {stand && <Act b={stand} press={p.press} />}
+        {p.g.look && <Act b={p.g.look} press={p.press} />}
+        {p.g.flee.map((b) => (
+          <Act key={b.label} b={b} press={p.press} />
+        ))}
+        {p.g.bandage.map((b) => (
+          <Act key={b.target_ids[0]} b={b} press={p.press} />
+        ))}
+      </ScrollView>
+    </View>
   );
 }

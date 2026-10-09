@@ -7,7 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
-import { space, type } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -38,9 +38,29 @@ export function Tap(p: { label: string; onPress: () => void; children: ReactNode
       accessibilityRole="button"
       accessibilityLabel={p.label}
       onPress={p.onPress}
-      style={{ minHeight: 44, justifyContent: 'center' }}
+      style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
       {p.children}
+    </Pressable>
+  );
+}
+
+// Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
+export function Control({ label, onPress }: { label: string; onPress: () => void }) {
+  const c = usePalette();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={{
+        minHeight: size.touch,
+        minWidth: size.touch,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ ...type.control, color: c.fg }}>{label}</Text>
     </Pressable>
   );
 }

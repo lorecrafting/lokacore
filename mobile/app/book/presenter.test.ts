@@ -280,7 +280,7 @@ test('the log stops growing in one room, its last line the latest answer', () =>
 // lock message shown to the player.
 test('the save-error line says a pending start over in words and shows any other message', () => {
   const failed = { message: '', startOver: true };
-  assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'start over not confirmed');
+  assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'Start over was not confirmed.');
   assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
   const missing = 'pinned_release_missing';
   assert.equal(detail({ ...failed, kind: missing, message: missing }), undefined);

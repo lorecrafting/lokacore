@@ -16,7 +16,7 @@ import {
   type Thing,
 } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
-import { type } from './tokens.ts';
+import { space, type } from './tokens.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
@@ -71,7 +71,7 @@ function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button)
   return (
     <View>
       <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.lg }}>
         {p.bank.map((letter, i) => (
           <View key={i}>
             {selected.includes(i) ? (

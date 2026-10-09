@@ -17,7 +17,8 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
-import { type } from './tokens.ts';
+import { size, type } from './tokens.ts';
+import { Control } from './pages.tsx';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
@@ -211,7 +212,7 @@ function navigation(p: BottomProps) {
     p.page.kind === 'dream' ||
     p.page.kind === 'chapter' ||
     (notice && view.notices?.some((n) => n.id === notice)) ? null : (
-      <Back
+      <Control
         label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}
         onPress={p.page.kind === 'notice' || p.page.kind === 'board' ? p.back : p.world}
       />
@@ -243,24 +244,10 @@ function Fault(p: { fault: string; startOver: () => void }) {
         accessibilityRole="button"
         accessibilityLabel="Start over"
         onPress={p.startOver}
-        style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
+        style={{ minHeight: size.touch, justifyContent: 'center', alignItems: 'center' }}
       >
         <Text style={{ ...type.control, color: c.fg }}>start over</Text>
       </Pressable>
     </View>
-  );
-}
-
-function Back({ onPress, label }: { onPress: () => void; label: string }) {
-  const c = usePalette();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <Text style={{ ...type.control, color: c.fg }}>{label}</Text>
-    </Pressable>
   );
 }

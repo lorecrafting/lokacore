@@ -36,33 +36,39 @@ export function Body(p: BodyProps) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
-  // The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
-  // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
-  const quest = p.screen.view.journal.find(
-    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
-  );
   return (
     <View style={{ flex: 1 }}>
-      {quest && p.page?.kind !== 'journal' && (
-        <Text
-          style={{
-            ...type.runningHead,
-            color: c.dim,
-            paddingHorizontal: space.page,
-            paddingTop: space.page,
-          }}
-        >
-          {plain(p.screen.text(quest.journal!))}
-        </Text>
-      )}
+      {p.page?.kind !== 'journal' && <RunningHead screen={p.screen} />}
       {water && (
-        <View style={{ paddingHorizontal: 24 }}>
+        <View style={{ paddingHorizontal: space.page }}>
           <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>
           {surface && <Act b={surface} press={p.press} />}
         </View>
       )}
       <PageBody {...p} />
     </View>
+  );
+}
+
+// The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
+// ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+export function RunningHead({ screen }: { screen: Screen }) {
+  const c = usePalette();
+  const quest = screen.view.journal.find(
+    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
+  );
+  if (!quest) return null;
+  return (
+    <Text
+      style={{
+        ...type.runningHead,
+        color: c.dim,
+        paddingHorizontal: space.page,
+        paddingTop: space.page,
+      }}
+    >
+      {plain(screen.text(quest.journal!))}
+    </Text>
   );
 }
 

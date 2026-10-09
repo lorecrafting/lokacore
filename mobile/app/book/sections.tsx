@@ -16,7 +16,7 @@ import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { SkillDetails } from './skills.tsx';
-import { Act, band, sectionTitleStyle, Sheet, Tap } from './pages.tsx';
+import { Act, band, Control, sectionTitleStyle, Sheet, Tap } from './pages.tsx';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -223,12 +223,9 @@ export function MapPage(p: {
 
 // `startOver` asks first: it destroys the save (the shell's confirm). Nothing else lives here yet.
 export function SettingsPage({ startOver }: { startOver: () => void }) {
-  const c = usePalette();
   return (
     <Sheet title="Settings">
-      <Tap label="Start over" onPress={startOver}>
-        <Text style={{ ...prose(c), color: c.action }}>Start over</Text>
-      </Tap>
+      <Control label="Start over" onPress={startOver} />
     </Sheet>
   );
 }

@@ -116,3 +116,32 @@ test('combat page lists offered controls vertically below history in one scroll'
     [],
   );
 });
+
+// Breaks: Combat drops the running head (BOOK-UI-COMPONENTS.md, Page), or a Journal page left on the
+// stack under the fight hides it.
+test('combat shows the running head, even over a Journal page', () => {
+  const head = 'Find the lantern.';
+  const current = view({ journal: [{ state: 'active', journal: 'quest.head' }] });
+  const screen = presenter({
+    ...game(current),
+    text: (key) => (key === 'quest.head' ? head : game(current).text(key)),
+  }).screen();
+  for (const stack of [[], [{ kind: 'journal' }]] as Page[][]) {
+    const drawn = nodes(
+      BookView({
+        palette: color.light,
+        screen,
+        stack,
+        flip: { turn: 0, dir: 1 },
+        go: () => {},
+        press: () => {},
+        refused: () => {},
+        startOver: () => {},
+        shell: { confirm: (f) => f(), learned: { get: () => true } as never },
+      }),
+    );
+    const lines = drawn.filter((n) => n.type === 'Text').map(words);
+    assert.ok(lines.includes('Combat'));
+    assert.equal(lines.filter((line) => line === head).length, 1);
+  }
+});

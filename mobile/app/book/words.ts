@@ -23,7 +23,7 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
  */
 export const detail = (f: Failed) =>
   f.code === 'start_over_pending'
-    ? 'start over not confirmed'
+    ? 'Start over was not confirmed.'
     : f.message === f.kind
       ? undefined
       : /Access Handles? cannot be created/.test(f.message)

@@ -9,7 +9,7 @@ import { MapDrawing } from './MapDrawing.tsx';
 import { bleedingLine, branch, refused, said, toneOf, why, type Hint, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
-import { type } from './tokens.ts';
+import { size, type } from './tokens.ts';
 
 type Props = {
   keyboardEnabled: boolean;
@@ -134,7 +134,12 @@ function Tip({ dismiss }: { dismiss: () => void }) {
         accessibilityRole="button"
         accessibilityLabel="Got it"
         onPress={dismiss}
-        style={{ minHeight: 44, minWidth: 64, justifyContent: 'center', alignItems: 'center' }}
+        style={{
+          minHeight: size.touch,
+          minWidth: 64,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
       >
         <Text style={{ ...type.control, color: c.fg }}>got it</Text>
       </Pressable>
