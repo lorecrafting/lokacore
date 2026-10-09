@@ -10,7 +10,7 @@ import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm';
 const skia = () =>
   import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb')
     .then(({ LoadSkiaWeb }) => LoadSkiaWeb({ locateFile: () => wasm }))
-    .catch(() => {});
+    .catch((e) => console.warn('No page curl: CanvasKit did not load.', e));
 const App = lazy(() => skia().then(() => import('./web-app.ts')));
 const Preview = lazy(() => skia().then(() => import('./page-turn-preview.tsx')));
 

@@ -165,4 +165,6 @@ test('without CanvasKit the pages change with no curl', async ({ app, screen, br
   expect(await browser.evaluate(() => 'CanvasKit' in globalThis)).toBe(false);
   const args = { from: 'Continue', to: 'Start over' };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: false, hit: true });
+  await app.open('/'); // the app itself, not only the preview
+  await expect(screen.getByText('Choose your ancestry')).toBeVisible({ timeout: COLD });
 });
