@@ -35,3 +35,15 @@
 ## Open items (accepted in the PR)
 
 Unscoped `shimMissingExports`; it is dev pre-bundle only, so imports from app code are not shimmed. E5 adds about 10 s. Same-type remounts keep their state (the `ponytail:` note in polish-book.test.ts).
+
+## Fix round 1 (head `e26dc875`, commits `a37f5cee`, `e26dc875`)
+
+- Verdict: **APPROVE**.
+- R1 fixed: `Live.stories.tsx:2` now cites `scenarios.ts` and `routes.ts`, both of which exist. R2 fixed: `preview.tsx:84` skips the decorator ring for `Pages/Recovery`. R3 fixed: the PR body has a "batch developers" `/code-review` section.
+- Title focus (`pages.tsx:27-42`, `PageTurn.tsx:67-69`):
+  - Callers: Title (`pages.tsx:248`) and ScenePage (`sections.tsx:284`).
+  - `turned` is set during render, before the commit attaches the refs. The ref callback is stable, so a leaving page that keeps its instance is not focused again.
+  - Every stack change that turns increments `flip.turn` (`Book.tsx:101`, `updates.ts:51`), so after a turn screen readers still get the title's focus event. At launch (turn 0) there is none. SaveError has no PageTurn, so the default context gives it no focus either.
+  - Always-focus is caught by `RoomPage.stories.tsx:27` in the smoke. Never-focus is caught only by `Live.stories.tsx:121`, which runs nightly.
+- Palette-lock check: planting `globals: { palette: 'night' }` in Live.stories makes `stories.test.ts` fail. At head, `node --test stories.test.ts book/*.test.ts` gives 139 pass and 0 fail, so the views (Long log, One foe) are fresh.
+- The minimap dot is `action` (`MapDrawing.tsx:147`), which matches the Footer row now in the catalogue.
