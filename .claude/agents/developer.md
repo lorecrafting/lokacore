@@ -28,7 +28,7 @@ Before handing off:
    active line runs on the accumulated head. Hosted PR:
    run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)) and quote its last line (`check_all: PASS` or `check_all: FAIL <step>`) in the handoff; the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
-   planted violation that fails. Any label, accessible-name or exported-symbol change runs the
+   planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)). Any label, accessible-name or exported-symbol change runs the
    full `npm test` of that package before handoff.
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are

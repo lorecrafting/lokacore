@@ -108,7 +108,7 @@ their rules and red controls remain available for resumption.
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
   PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
-  branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
+  branch and `review-<N>` are removed and main is pushed with the ROADMAP edit; a script copy behind main is replaced and re-run, and an export dirtied after the commit gets its own commit before the push.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
   a decoy server found only by name survives, a second run restarts nothing, `npm ci` runs only for a
   changed lockfile, a dirty preview, a served or closed session is refused; close pushes, opens the PR and serves

@@ -8,8 +8,10 @@
 # A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
 # rewrites it from the database; it is refused when main also changed the export (the post-merge
 # import is not proven to run first, so copying back could drop main's rows). Every refusal
-# (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change.
+# (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
+# A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
+# An export dirtied again after the commit (a concurrent br write) gets its own Beads commit before the push.
 set -u
 GH=${GH:-gh}
 die() { echo "after_merge: $*" >&2; exit 1; }
@@ -17,6 +19,13 @@ die() { echo "after_merge: $*" >&2; exit 1; }
 pr=$1 id=$2 subject=${3-} j=.beads/issues.jsonl
 cd "$(git rev-parse --show-toplevel)" || exit 2
 [ "$(git branch --show-current)" = main ] || die 'main is not checked out here'
+if [ -z "${AFTER_MERGE_REEXEC-}" ]; then
+  git fetch -q origin main || die 'fetch failed'
+  git diff --quiet HEAD origin/main -- bin/after_merge.sh || {
+    git merge -q --ff-only origin/main || die 'this script is behind main and the pull failed: pull by hand'
+    AFTER_MERGE_REEXEC=1 exec sh bin/after_merge.sh "$@"
+  }
+fi
 info=$($GH pr view "$pr" --json state,headRefName --jq '"\(.state) \(.headRefName)"') || die "cannot read PR #$pr"
 [ "${info%% *}" = MERGED ] || die "PR #$pr is ${info%% *}, not MERGED"
 branch=${info#* }
@@ -62,6 +71,7 @@ sh bin/review_index.sh || die 'review index not regenerated'
 git add $j docs/reviews/README.md && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'
 if ! git diff --cached --quiet; then
   git commit -qm "${subject:-Beads: close $id (merged #$pr)}" || die 'commit failed'
+  git diff --quiet -- $j || git commit -qm "Beads: export after $id (merged #$pr)" -- $j || die 'export commit failed'
   git push -q origin main || die 'push failed; commit is local'
 fi
 echo "after_merge: #$pr done ($id closed, $branch removed)"
