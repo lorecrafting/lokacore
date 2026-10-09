@@ -70,7 +70,6 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Food.check(manifest, defs, v2),
       Loka.Content.Bleed.check(manifest, defs, v2),
-      Loka.Content.Status.check(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
       Loka.Content.Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
@@ -90,6 +89,7 @@ defmodule Loka.Content.Compiler do
   defp final_checks(manifest, defs, v2, located, registry),
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
+        Loka.Content.Status.check(manifest, defs, v2) ++
         Position.check(manifest, defs) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{}))

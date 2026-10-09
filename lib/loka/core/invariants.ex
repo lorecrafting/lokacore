@@ -1,4 +1,4 @@
-# size: allow 343, patrol, water, bleed, expedition and character pairing join precondition replay
+# size: allow 347, patrol, water, bleed, status, expedition and character pairing join precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc "Pure portable invariants: composition, resolution and host outcomes; unknown IDs raise."
   alias Loka.Core.Compose
