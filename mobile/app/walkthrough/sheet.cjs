@@ -1,4 +1,4 @@
-// Builds .walkthrough/contact-sheet.html from the routes chapter1.walk.ts logged: one section per
+// Builds .walkthrough/contact-sheet.html from the routes <cartridge>.walk.ts logged: one section per
 // route, every page in order, the screenshots inlined so the file stands alone. Click to enlarge.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -30,7 +30,8 @@ const sections = routes.map(({ title, steps }) => {
   return `<h2>${escape(title)} <small>(${steps.length} pages)</small></h2>\n<div class="grid">${figures.join('\n')}</div>`;
 });
 
-const html = `<!doctype html><meta charset="utf-8"><title>Chapter 1 walkthrough</title>
+const name = `${process.env.LOKA_WALK || 'Chapter 1'} walkthrough`;
+const html = `<!doctype html><meta charset="utf-8"><title>${escape(name)}</title>
 <style>
 body{font:13px system-ui;margin:16px;background:#f4f1ea;color:#222}
 .grid{display:flex;flex-wrap:wrap;gap:10px}
@@ -39,7 +40,7 @@ figcaption{line-height:1.3}.dead img{outline:4px solid #c00}.dead figcaption{col
 #zoom{position:fixed;inset:0;background:#000c;display:none;justify-content:center;align-items:center;cursor:zoom-out}
 #zoom img{max-height:96vh}
 </style>
-<h1>Chapter 1 walkthrough</h1>
+<h1>${escape(name)}</h1>
 <p>Generated ${new Date().toISOString()} by <code>npm run walkthrough</code>. Each screenshot is the page the step's action was taken on.</p>
 ${sections.join('\n')}
 <div id="zoom" onclick="this.style.display='none'"><img></div>

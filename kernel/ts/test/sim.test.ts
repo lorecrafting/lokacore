@@ -200,15 +200,14 @@ test('each regression seed still issues the command type it was kept for', () =>
 // Breaks: anything nondeterministic in the kernel or the generator (time, Math.random, host
 // iteration order), which would make a failing seed unreproducible.
 test('a seed gives byte-identical steps twice in one process and in another process', () => {
-  const digests = seeds.map((s) => simulate(s).digest);
+  const outcomes = seeds.map((s) => simulate(s));
+  const digests = outcomes.map((o) => o.digest);
   assert.deepEqual(
     seeds.map((s) => simulate(s).digest),
     digests,
   );
   const r = spawnSync('node', [SIM, ...seeds.map(String)], { encoding: 'utf8' });
-  const named = seeds.map(
-    (s, i) => `${s} ${simulate(s).loaded.cartridge.manifest.id} ${digests[i]}\n`,
-  );
+  const named = outcomes.map((o) => `${o.seed} ${o.loaded.cartridge.manifest.id} ${o.digest}\n`);
   assert.equal(r.stdout, named.join(''), r.stderr);
 });
 

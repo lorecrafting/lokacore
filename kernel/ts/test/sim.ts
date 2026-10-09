@@ -1,4 +1,4 @@
-// size: allow 530, the existing headless action generator also consumes exact service offers
+// size: allow 540, the existing headless action generator also consumes exact service offers
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -78,12 +78,14 @@ export const CARTRIDGES: Loaded[] = globSync('protocol/fixtures/cartridge_*hash.
     read(path.replace(/cartridge_(items|locks|sampler)_hash/, 'containers_cartridge_$1_hash')),
   )
   .filter((k) => k.value.format === 'loka-cartridge-v2')
-  .map((k) => loaded(`{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`));
+  .map((k) =>
+    loaded(`{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`, k.value.manifest.id),
+  );
 
 /** A cartridge from its artifact bytes (a fixture's, or `mix loka.compile` output). */
-export function loaded(artifact: string): Loaded {
+export function loaded(artifact: string, name = 'cartridge'): Loaded {
   const r = loadCartridge(utf8(artifact), INSTALLED);
-  if (!r.ok) throw new Error(`cartridge refused: ${encode(r.diagnostic as never)}`);
+  if (!r.ok) throw new Error(`${name} refused: ${encode(r.diagnostic as never)}`);
   return { cartridge: r.cartridge as Cartridge, hash: r.hash, artifact };
 }
 
@@ -515,7 +517,11 @@ function transcript(o: Outcome, commands: readonly Command[]): string {
 if (import.meta.main) {
   const args = process.argv.slice(2);
   const only = args[0] === '--cartridge';
-  const flags = only ? `--cartridge ${args[1]} ` : '';
+  if (only && !args[1]) {
+    console.error('usage: node kernel/ts/test/sim.ts [--cartridge <artifact>] <seed>...');
+    process.exit(2);
+  }
+  const flags = only ? `--cartridge ${JSON.stringify(args[1])} ` : '';
   const cartridges = only ? [loaded(readFileSync(args[1]!, 'utf8'))] : CARTRIDGES;
   for (const seed of args.slice(only ? 2 : 0).map(Number)) {
     const o = simulate(seed, KERNEL, cartridges);
