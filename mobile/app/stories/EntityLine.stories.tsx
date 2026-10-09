@@ -60,9 +60,8 @@ export const ContentsRow: Story = {
   args: { name: 'Character', rest: undefined, note: undefined },
 };
 
-// A run of touching lines, as in Here. Breaks: a line's hit box is under size.touch, the bleed
-// shows as space (pitch over the body line), the note line's bleed is lost, or the earlier line
-// wins a tap in the overlap.
+// A run of touching lines, as in Here. Breaks: the bleed shows as space (pitch over the body
+// line) or the note line's bleed is lost. Also pins line 2's 44 box and its overlap tap.
 export const Run: Story = {
   render: (args) => (
     <View>
