@@ -68,6 +68,7 @@ test('every text role is at least 4.5:1 on bg and card in every palette', () => 
 function mount(curve?: (t: number) => number) {
   const slots: any[] = [];
   const deps: unknown[][] = [];
+  const cleanups: ((() => void) | void)[] = [];
   const frames: (() => void)[] = [];
   let clock = 1000;
   let slot = 0;
@@ -81,11 +82,11 @@ function mount(curve?: (t: number) => number) {
       if (!(i in slots)) slots[i] = v;
       return [slots[i], (n: unknown) => (slots[i] = n)];
     },
-    effect: (f: () => void, d: unknown[]) => {
+    effect: (f: () => (() => void) | void, d: unknown[]) => {
       const i = slot++;
       if (deps[i]?.every((x, j) => Object.is(x, d[j]))) return;
       deps[i] = d;
-      pending.push(f);
+      pending.push(() => (cleanups[i]?.(), (cleanups[i] = f())));
     },
   };
   const render = (target: typeof color.light) => {
@@ -142,4 +143,14 @@ test('every ordered palette change: same polarity fades readably, a flip switche
       }
       assert.equal(fade.render(b), b, `${pair} ends on the target`);
     }
+});
+
+// Breaks: a fade cut short by a flip keeps fading from its mixed frame across the flip.
+test('a flip during a same-polarity fade switches at once', () => {
+  const fade = mount((t) => t);
+  fade.render(color.light);
+  fade.render(color.dawn);
+  fade.frame(750);
+  assert.equal(fade.render(color.dusk), color.dusk);
+  assert.equal(fade.frames.length, 0);
 });
