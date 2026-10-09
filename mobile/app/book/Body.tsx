@@ -38,12 +38,12 @@ export function Body(p: BodyProps) {
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   // The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
   // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
-  const quest = p.screen.view.journal?.find(
+  const quest = p.screen.view.journal.find(
     (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
   );
   return (
     <View style={{ flex: 1 }}>
-      {quest && (
+      {quest && p.page?.kind !== 'journal' && (
         <Text
           style={{
             ...type.runningHead,

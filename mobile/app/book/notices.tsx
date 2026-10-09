@@ -132,7 +132,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
       {p.screen
         .detail(detail.id)
-        .filter((line) => line !== description)
+        .filter((line) => typeof line !== 'string' || plain(line) !== description)
         .map((line, i) => (
           <Text key={i} style={prose(c)}>
             {typeof line === 'string' ? line : line.text}

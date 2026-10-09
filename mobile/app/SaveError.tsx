@@ -22,7 +22,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
         <Text style={{ fontFamily: font.head, fontSize: 22, color: paper.fg }}>
           {PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}
         </Text>
-        {why && <Text style={{ fontFamily: font.body, color: paper.dim }}>({why})</Text>}
+        {why ? <Text style={{ fontFamily: font.body, color: paper.dim }}>({why})</Text> : null}
         {failed.startOver && <Button title="Start over" color={paper.action} onPress={startOver} />}
       </View>
     </SafeAreaView>
