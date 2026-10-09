@@ -42,6 +42,16 @@ wandering populations (`mechanics/population/`), recipes with luck and attribute
 (`mechanics/action_recipe/rule.ts`), and discovered places, map and Knock
 ([D10](system/mechanics.md#d10-discovered-places-observations-and-knock-selected-contract)).
 
+## Owner decisions (2026-10-08, paraphrased)
+
+Answers to the plan's open questions ([record](decisions/owner-decision-mechanics-toolbox-2026-10-08.md#answers-to-the-open-questions)):
+
+1. **Levelling is class-free.** Experience grants attribute points; skills grow by use; classes may come later as starting packages.
+2. **Ranged combat** starts with a same-room first strike; shooting into adjacent rooms comes later.
+3. **Dev clock and unpinned preview** sit in a dev panel shown only with `?dev=1`; never in release.
+4. **The Chapter 1 E1 recorder stays in CI** as the engine regression net.
+5. **Spells use one engine** with per-spell requirements declared in the cartridge: spoken words (incantation text); an optional must-be-learned gate (existing learned facts, earned from quests or teachers); optional minimum level and attributes; optional reagents consumed (the crafting input consumption); a mana cost from a mana pool; optional secret words found in lore, checked like riddle answers. Intended mix: common spells open with reagents and mana, great spells are learned by quest with level and stat gates. Ranked as row 29.
+
 ## Ranked toolbox
 
 Rank = likely need in a generic fantasy RPG x what it unlocks x effort, foundations first,
@@ -80,27 +90,26 @@ have / partial / missing per the audit. Ids in parentheses are the
 | 26 | Sequence and combination puzzles | partial: riddles have (`mechanics/dialogue/shared.ts`); order and dial puzzles missing | M | – | `mechanics/quest/lifecycle.ts`; `mechanics/barrier/rule.ts`; `mechanics/dialogue/` | three levers in order open a door; A,C,B does not; dial of three digits | todo |
 | 27 | Unidentified items (C2-M06) | missing | M | 3 | `mechanics/knowledge/rule.ts`; `mechanics/equipment/rule.ts` | "a dull ring" shows +2 after a sage identifies it; affect applies before | todo |
 | 28 | Curses and blessing (C2-M07) | missing | M | 3 | `mechanics/equipment/rule.ts`; `mechanics/dialogue/` | cursed ring refuses remove until blessed | todo |
-| 29 | Teacher learning (C2-M08) | partial: paid lesson and books ([D1](system/mechanics.md#d1-paid-ferry-and-sedge-lesson-selected-contract), [D2](system/mechanics.md#d2-held-books-and-public-priory-selected-contract)) | S | – | `mechanics/knowledge/rule.ts`; `mechanics/dialogue/payment.ts` | tutor teaches a word once for a fee; repeat refused | todo |
-| 30 | Spell casting (C2-M09) | missing | L | 1, 29 | `mechanics/action_recipe/rule.ts` cost and check; `mechanics/knowledge/` | cast light and ward from a mana pool; unknown word refused | todo |
-| 31 | Rope and climb (C2-M02) | missing | S | – | `mechanics/movement/rule.ts`; `mechanics/resource.ts` damage | cliff: rope descends; no rope falls for fixed damage | todo |
-| 32 | Weather | missing | M | 10 | `mechanics/calendar.ts`; `mechanics/schedule/rule.ts`; `mechanics/description_variant/rule.ts` | rain on a schedule changes descriptions and a movement cost | todo |
-| 33 | Fast travel | partial: authored paid routes (`mechanics/transport/rule.ts`), no map travel | S | 11 | `mechanics/transport/rule.ts`; D10 visited map | travel between two visited waypoints for a fee and elapsed time | todo |
-| 34 | Theft and fence (C3-M06) | missing | M | 16 | `mechanics/containment/`; `mechanics/commerce/shared.ts` | pickpocket a purse; stolen flag; fence buys stolen only | todo |
-| 35 | Witnessed crime and wanted (C3-M07) | missing | M | 34 | `mechanics/light/shared.ts` perception; `mechanics/fact.ts` | seen theft sets wanted; unseen does not | todo |
-| 36 | Trial (C3-M08) | missing | M | 35 | `mechanics/scene/rule.ts` | arrested at the watch house; fine or sentence scene | todo |
-| 37 | Jail (C3-M09) | missing | L | 36 | `mechanics/death/sequence.ts` relocation; `mechanics/barrier/rule.ts` | serve a sentence or escape by tunnel; wanted stays | todo |
-| 38 | Phased world events (C2-M12) | missing | L | 6, 9, 10 | `mechanics/schedule/rule.ts`; `mechanics/population/`; `mechanics/reaction.ts` | full-moon raid: spawn, fight, aftermath once per cycle | todo |
-| 39 | Protect objective (C2-M13) | missing | M | 38 | `mechanics/quest/lifecycle.ts` | named defender alive at close wins; dead fails | todo |
-| 40 | Boss phases (C2-M10) | missing | L | 1, 6 | `mechanics/combat/behavior.ts` | boss summons at 60% HP, withdraws at 25%, drops one crown | todo |
-| 41 | Material-sensitive damage (C2-M04) | missing | S | 7 | `mechanics/combat/round_attack.ts` | silver vs iron against one wight: hand-fixed HP results | todo |
-| 42 | Perishable food (C3-M04) | partial: water expiry (`mechanics/water/expiry.ts`) | S | – | `mechanics/water/expiry.ts`; `mechanics/food/shared.ts` | fish spoils after a day; smoked fish lasts | todo |
-| 43 | Song and instrument buff (C3-M13) | missing | S | 1 | status effects (row 1) | song with a lute buffs present listeners | todo |
-| 44 | Mounts and terrain costs (C3-M10) | missing | L | 2 | `mechanics/movement/`; `mechanics/escort/shared.ts` co-location | horse on road moves both; fen refuses; dismount | todo |
-| 45 | Race objective (C3-M11) | missing | M | 44 | `mechanics/quest/lifecycle.ts` | reach the finish before the cart's scheduled arrival | todo |
-| 46 | Pet growth (C2-M15) | missing | L | 9, 22 | `mechanics/population/birth.ts` | adopted pup grows at an age boundary; dead pup stays dead | todo |
-| 47 | Achievements and collections | missing: journal only (`view/quest_journal.ts`) | S | 4 | `view/quest_journal.ts`; `mechanics/fact.ts` counters | "visited all five rooms" badge | todo |
-| 48 | Death penalty options: XP loss, item drop | have corpse custody; options missing | S | 4 | `mechanics/death/sequence.ts` | cartridge chooses XP loss on death; sampler loses 10% | todo |
-| 49 | Chapter carry-over (CC-M01..03): export, import, item and knowledge ports | missing | L | 3, 4 | `mechanics/quest/`, save receipts | sampler A exports a flag and a ring; sampler B imports once | todo |
+| 29 | Spell engine (configurable requirements) | missing; partial teacher learning: paid lesson and books ([D1](system/mechanics.md#d1-paid-ferry-and-sedge-lesson-selected-contract), [D2](system/mechanics.md#d2-held-books-and-public-priory-selected-contract)) (C2-M08, C2-M09) | L | 2, 4 | `mechanics/action_recipe/rule.ts` cost and check; `mechanics/knowledge/rule.ts` learned facts; `mechanics/dialogue/payment.ts` teacher fee; `mechanics/dialogue/shared.ts` `answerFits` typed word; recipe input consumption for reagents; `mechanics/resource.ts` mana pool | cast light from reagents and mana; ward needs a quest-taught word, level and stat; unknown or unlearned word refused; a secret word from lore works once known | todo |
+| 30 | Rope and climb (C2-M02) | missing | S | – | `mechanics/movement/rule.ts`; `mechanics/resource.ts` damage | cliff: rope descends; no rope falls for fixed damage | todo |
+| 31 | Weather | missing | M | 10 | `mechanics/calendar.ts`; `mechanics/schedule/rule.ts`; `mechanics/description_variant/rule.ts` | rain on a schedule changes descriptions and a movement cost | todo |
+| 32 | Fast travel | partial: authored paid routes (`mechanics/transport/rule.ts`), no map travel | S | 11 | `mechanics/transport/rule.ts`; D10 visited map | travel between two visited waypoints for a fee and elapsed time | todo |
+| 33 | Theft and fence (C3-M06) | missing | M | 16 | `mechanics/containment/`; `mechanics/commerce/shared.ts` | pickpocket a purse; stolen flag; fence buys stolen only | todo |
+| 34 | Witnessed crime and wanted (C3-M07) | missing | M | 33 | `mechanics/light/shared.ts` perception; `mechanics/fact.ts` | seen theft sets wanted; unseen does not | todo |
+| 35 | Trial (C3-M08) | missing | M | 34 | `mechanics/scene/rule.ts` | arrested at the watch house; fine or sentence scene | todo |
+| 36 | Jail (C3-M09) | missing | L | 35 | `mechanics/death/sequence.ts` relocation; `mechanics/barrier/rule.ts` | serve a sentence or escape by tunnel; wanted stays | todo |
+| 37 | Phased world events (C2-M12) | missing | L | 6, 9, 10 | `mechanics/schedule/rule.ts`; `mechanics/population/`; `mechanics/reaction.ts` | full-moon raid: spawn, fight, aftermath once per cycle | todo |
+| 38 | Protect objective (C2-M13) | missing | M | 37 | `mechanics/quest/lifecycle.ts` | named defender alive at close wins; dead fails | todo |
+| 39 | Boss phases (C2-M10) | missing | L | 1, 6 | `mechanics/combat/behavior.ts` | boss summons at 60% HP, withdraws at 25%, drops one crown | todo |
+| 40 | Material-sensitive damage (C2-M04) | missing | S | 7 | `mechanics/combat/round_attack.ts` | silver vs iron against one wight: hand-fixed HP results | todo |
+| 41 | Perishable food (C3-M04) | partial: water expiry (`mechanics/water/expiry.ts`) | S | – | `mechanics/water/expiry.ts`; `mechanics/food/shared.ts` | fish spoils after a day; smoked fish lasts | todo |
+| 42 | Song and instrument buff (C3-M13) | missing | S | 1 | status effects (row 1) | song with a lute buffs present listeners | todo |
+| 43 | Mounts and terrain costs (C3-M10) | missing | L | 2 | `mechanics/movement/`; `mechanics/escort/shared.ts` co-location | horse on road moves both; fen refuses; dismount | todo |
+| 44 | Race objective (C3-M11) | missing | M | 43 | `mechanics/quest/lifecycle.ts` | reach the finish before the cart's scheduled arrival | todo |
+| 45 | Pet growth (C2-M15) | missing | L | 9, 22 | `mechanics/population/birth.ts` | adopted pup grows at an age boundary; dead pup stays dead | todo |
+| 46 | Achievements and collections | missing: journal only (`view/quest_journal.ts`) | S | 4 | `view/quest_journal.ts`; `mechanics/fact.ts` counters | "visited all five rooms" badge | todo |
+| 47 | Death penalty options: XP loss, item drop | have corpse custody; options missing | S | 4 | `mechanics/death/sequence.ts` | cartridge chooses XP loss on death; sampler loses 10% | todo |
+| 48 | Chapter carry-over (CC-M01..03): export, import, item and knowledge ports | missing | L | 3, 4 | `mechanics/quest/`, save receipts | sampler A exports a flag and a ring; sampler B imports once | todo |
 
 ## Toolbox slice process
 

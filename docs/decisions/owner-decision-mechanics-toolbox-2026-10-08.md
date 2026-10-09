@@ -28,3 +28,13 @@ common RPG mechanics so that world can be assembled from finished parts.
 - **[LATER-MECHANICS.md](../archive/LATER-MECHANICS.md) is superseded** by the toolbox and
   archived; its story-bound rows (C*, CC-C, CC-P) are dropped, its generic rows are re-ranked in
   the toolbox.
+
+## Answers to the open questions
+
+(paraphrased, same day)
+
+1. Levelling is class-free: experience grants attribute points, skills grow by use, classes may come later as starting packages.
+2. Ranged combat starts with a same-room first strike; shooting into adjacent rooms later.
+3. The dev clock and unpinned preview live in a dev panel shown only with `?dev=1`, never in release.
+4. The Chapter 1 E1 recorder stays in CI as the engine regression net.
+5. One spell engine with per-spell requirements declared in the cartridge: spoken words, optional must-be-learned gate, optional minimum level and attributes, optional consumed reagents, mana cost, optional secret words found in lore. Common spells open with reagents and mana; great spells are learned by quest with level and stat gates.
