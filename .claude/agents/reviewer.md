@@ -15,7 +15,7 @@ You are an independent reviewer. You authored none of the work under review. Rea
 3. **Test the tests** (skip for docs/config-only slices). In a throwaway detached worktree, break the core logic with two or three narrow mutants (an
    off-by-one, a swapped order, a skipped check), run against the test files that import the mutated module, and confirm the suite fails; remove the worktree
    afterwards and never commit it. A suite that stays green is a blocker.
-   Likewise confirm each new check fails on its planted violation.
+   Likewise confirm each new check fails on its planted violation. Mutants and red controls stop only the PIDs you started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 4. Construct inputs or states that give a wrong result; run them if cheap. Where Elixir
    and TypeScript both implement a rule, look for a case where they would differ.
 5. Were expected answers or frozen fixtures touched? Do the tests follow AGENTS.md

@@ -132,11 +132,11 @@ am() { # <case> <want-rc> [subject]
 amk() {
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
   git checkout -qb main; mkdir -p .beads docs/reviews bin; echo base > .beads/issues.jsonl; echo r > docs/ROADMAP.md
-  cp "$bin/review_index.sh" bin/; sh bin/review_index.sh
+  cp "$bin/review_index.sh" bin/; sh bin/review_index.sh; [ -z "${STALE-}" ] || sed 's/^info=/exit 9; info=/' "$bin/after_merge.sh" > bin/after_merge.sh
   git add . && git commit -qm base && git push -q origin main
   git checkout -qb pr; echo feature > f; git add f && git commit -qm pr && git push -q origin pr; git branch review-7
   git checkout -q main; git worktree add -q "$R.wt" pr 2>/dev/null
-  M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && git push -q origin main)
+  M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && { [ -z "${STALE-}" ] || { cp "$bin/after_merge.sh" bin/ && git commit -qam script; }; } && git push -q origin main)
   echo local-write >> .beads/issues.jsonl; : > "$R.br"
 }
 amk; head=$(git rev-parse HEAD); echo stray > s; am dirty 1; rm s
@@ -173,6 +173,15 @@ am cherry-picked 0
 amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; git merge -q --no-ff origin/main -m mrg
 echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
 am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
+# Break: a checkout whose own after_merge.sh is behind main runs the old copy (here it exits 9 before doing anything).
+STALE=1 amk; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
+git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
+  || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
+# Break: a br write that dirties the export after the commit makes the pre-push hook refuse (stand-in hooks).
+amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit
+printf '#!/bin/sh\ngrep -q "^refs/heads/main " || exit 0\ngit diff --quiet || { echo "pre-push: commit or stash tracked changes first" >&2; exit 1; }\n' > .git/hooks/pre-push; chmod +x .git/hooks/post-commit .git/hooks/pre-push
+am concurrent-write 0; git fetch -q origin
+[ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor
