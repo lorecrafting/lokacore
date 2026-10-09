@@ -106,6 +106,9 @@ function useMotion(
     if (view) pages.set(turn, view);
     else pages.delete(turn);
   };
+  // Curl pictures waiting to be freed; unmounting frees them at once.
+  const frees = useRef(new Set<() => void>()).current;
+  useEffect(() => () => frees.forEach((free) => free()), []);
   // The first page, once mounted, warms the picture-taking so the first turn's picture is quick.
   useEffect(() => void (reduced || warm(pages.get(turn)!)), []);
   // Before paint, so a new curl or fade never shows the last turn's finished progress for a frame.
@@ -113,7 +116,7 @@ function useMotion(
     // A curl or fade first draws with the progress it mounts on (a stale 1 flashed the arriving page).
     if (!leaving) return void (progress.value = 0);
     const timing = leaving.image ? motion.turn : reduced ? motion.fade : undefined;
-    if (timing) return animate(progress, timing, leaving, setLeaving);
+    if (timing) return animate(progress, timing, leaving, setLeaving, frees);
     let live = true;
     // No picture in time, or none at all: the page has simply changed.
     const late = setTimeout(() => ((live = false), setLeaving(undefined)), motion.quick.duration);
@@ -155,6 +158,7 @@ function animate(
   timing: { duration: number; easing: string },
   leaving: Leaving,
   setLeaving: SetLeaving,
+  frees: Set<() => void>,
 ) {
   const clear = () => setLeaving((l) => (l === leaving ? undefined : l));
   progress.value = 0;
@@ -164,7 +168,14 @@ function animate(
     { duration: timing.duration, easing: easing(timing.easing), reduceMotion: ReduceMotion.Never },
     (done) => done && scheduleOnRN(clear),
   );
-  return () => leaving.image?.dispose();
+  return () => {
+    const image = leaving.image;
+    if (!image) return;
+    // Skia's canvas can draw the unmounted curl once more: free its picture two frames later.
+    const free = () => (frees.delete(free), cancelAnimationFrame(frame), image.dispose());
+    let frame = requestAnimationFrame(() => (frame = requestAnimationFrame(free)));
+    frees.add(free);
+  };
 }
 
 function Curl(p: {
