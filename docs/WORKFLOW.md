@@ -334,9 +334,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
-- A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
-  first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`. The PM's worktree
-  does this once, then `npm ci` only on a lockfile change.
+- A new worktree has no `deps/`, `_build/` or `node_modules`: run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) there once, then `npm ci` only on a lockfile change.
 - CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
   the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
   or force-push) before anything else.
