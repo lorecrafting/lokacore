@@ -11,6 +11,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { passage } from '../movement/shared.ts';
+import { barrierState } from '../lookups.ts';
 export type Plan = World['populationSpecs'][string];
 export type Binding = { plan: DefinitionRef; slot: number; row: CrowTransport; spec: Plan };
 export const target = (plan: DefinitionRef, slot: number) => key({ kind: 'crow', plan, slot });
@@ -108,9 +109,7 @@ export function openNest(world: World, b: Binding) {
   const barrier = item?.kind === 'item' && item.barrier;
   return (
     world.state.containers[nest] === rooms.at(-1) &&
-    (!barrier ||
-      (world.state.barriers?.[key({ kind: 'barrier', barrier })] ??
-        world.barrierInitial[key(barrier)]) === 'open') &&
+    (!barrier || barrierState(world, barrier) === 'open') &&
     Object.values(world.state.containers).filter((holder) => holder === nest).length <
       world.capacities[nest]
   );

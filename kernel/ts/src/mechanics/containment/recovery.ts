@@ -50,6 +50,8 @@ export function recover(
   steps: Steps,
 ) {
   const plan = recovery(world, p.actor_id, p.corpse_id, steps);
+  if (plan === 'budget_exceeded' || plan === 'precondition_failed')
+    return { kind: 'fault' as const, code: plan };
   if (typeof plan === 'string') return rejected(plan);
   return accepted<never>(
     world,

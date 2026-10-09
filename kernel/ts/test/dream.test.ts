@@ -360,3 +360,26 @@ test('a Rest occurrence cannot credit a nonliving body', () => {
   };
   assert.deepEqual(restStarts(dead, event), []);
 });
+
+// Breaks: a paid-up renter with no pennies left reads "unaffordable" instead of "already paid" (audit A6).
+test('a second Rent at zero pennies refuses as already paid, not unaffordable', () => {
+  const w = fresh((c) => {
+    c.resources[`ashmere_missing_child@0.0.28:resource/pennies`].start = 3;
+  });
+  const rent = (at: typeof w, n: number) =>
+    step(
+      at,
+      command(at, n, {
+        type: 'use_service',
+        provider_id: entity(at, 'npc', 'maud'),
+        service: ref('service', 'lantern_room'),
+        quoted_price: 3,
+      }),
+      n,
+      'rent_lantern_room' as Key,
+    );
+  const paid = rent(w, 1);
+  assert.equal(paid.decision.kind, 'accepted');
+  const again = rent(paid.world, 2);
+  assert.deepEqual(again.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+});
