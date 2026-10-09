@@ -101,6 +101,7 @@ const config: StorybookConfig = {
   // The manager chrome uses the Book's fonts too (manager.ts): one font file for both documents.
   managerHead: (head) => head + readFileSync(new URL('preview-head.html', import.meta.url), 'utf8'),
   // Storybook serves iframe.html before Vite's middlewares, so Tidewave cannot inject its toolbar.
+  // ponytail: the window.name opt-in below relies on tidewave.ai's toolbar.js as of 2026-10-09.
   // ponytail: copies tidewave 0.9.0's internal tidewaveConfigMeta shape; recheck on upgrade.
   previewHead: (head, { configType, port }) =>
     configType !== 'DEVELOPMENT'
@@ -121,6 +122,11 @@ const config: StorybookConfig = {
         })
           .replaceAll('&', '&amp;')
           .replaceAll('"', '&quot;')}" />
+<script>
+  // toolbar.js skips framed pages unless window.name marks a Tidewave control session; the preview
+  // is always framed in the Storybook UI. The name only namespaces the toolbar's saved state.
+  if (window.self !== window.top) window.name = 'tidewave-control-session-storybook';
+</script>
 <script async type="module" src="https://tidewave.ai/tc/toolbar.js"></script>`,
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
   viteFinal: (config, { configType }) =>
