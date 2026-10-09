@@ -195,7 +195,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   release candidate and E3 ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM
   merges PRs ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); admins (the owner, or
   the PM when asked or for status-only commits) may push to `main` or merge directly, never for
-  unreviewed code or past a red check; the PM runs a slice to its
+  unreviewed code or past a red check ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the

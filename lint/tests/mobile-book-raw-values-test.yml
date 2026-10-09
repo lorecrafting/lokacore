@@ -5,6 +5,7 @@ valid:
   - "const t = '#1 in the list';"
   - "const s = { padding: space.page, gap: space.md, fontFamily: font.body };"
   - "const s = { width: 0, height: 0, flex: 1, top: 4 };"
+  - "const s = { opacity: used ? opacity.disabled : 1, width: 1 - progress.value };"
 invalid:
   - "const s = { color: '#7b2d20' };"
   - "<View style={{ backgroundColor: \"#fff\" }} />"
@@ -12,3 +13,6 @@ invalid:
   - "const s = { padding: 8 };"
   - "const s = { fontFamily: 'Georgia' };"
   - "<View style={{ marginTop: 12 }} />"
+  - "const s = { marginTop: -4 };"
+  - "const s = { gap: n ? 8 : 4 };"
+  - "const s = { opacity: used ? 0.4 : 1 };"

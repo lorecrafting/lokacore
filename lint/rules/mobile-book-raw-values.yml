@@ -17,11 +17,23 @@ rule:
         inside:
           kind: pair
           has: { field: key, regex: '^fontFamily$' }
-    # Zero is no size (a measured box's start, PageTurn's `{ width: 0, height: 0 }`), so it passes.
+    # Zero is no size (a measured box's start, PageTurn's `{ width: 0, height: 0 }`), so it passes;
+    # so does a full opacity of 1. The number may sit under a sign or a ternary (`-4`, `n ? 8 : 4`);
+    # arithmetic (`1 - progress.value`, `3.6 * U`) is computed and passes.
     - kind: number
       not: { regex: '^0$' }
-      inside:
-        kind: pair
-        has:
-          field: key
-          regex: '^(fontSize|lineHeight|letterSpacing|padding\w*|margin\w*|gap|rowGap|columnGap|borderRadius|borderWidth|minHeight|minWidth|width|height|opacity)$'
+      inside: { matches: raw-size-pair, stopBy: { not: { matches: raw-sign-or-branch } } }
+    - kind: number
+      not: { regex: '^[01]$' }
+      inside: { matches: raw-opacity-pair, stopBy: { not: { matches: raw-sign-or-branch } } }
+utils:
+  raw-sign-or-branch:
+    any: [{ kind: unary_expression }, { kind: ternary_expression }, { kind: parenthesized_expression }]
+  raw-size-pair:
+    kind: pair
+    has:
+      field: key
+      regex: '^(fontSize|lineHeight|letterSpacing|padding\w*|margin\w*|gap|rowGap|columnGap|borderRadius|borderWidth|minHeight|minWidth|width|height)$'
+  raw-opacity-pair:
+    kind: pair
+    has: { field: key, regex: '^opacity$' }

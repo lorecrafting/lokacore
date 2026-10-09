@@ -26,6 +26,8 @@ recommendation below:
 5. PRs and review records stay. The PM merges with a merge commit (`gh pr merge --merge`, or
    `--admin` only while GitHub still requires checks); auto-merge arming is gone. The PM changes
    branch protection after this lands.
+6. The admin backdoor stays: the owner, or the PM when the owner asks or for status-only commits,
+   may push to `main` or merge directly, never for unreviewed code or past a red check.
 
 Supersedes the [required-checks merge decision](owner-decision-required-checks-merge-2026-10-08.md)
 and the CI-green-before-review part of [workflow step 4](../WORKFLOW.md#loop). Review, exact-head
