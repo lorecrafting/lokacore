@@ -8,7 +8,8 @@
 // accepted, adopt exactly what its delta composes to; its canonical decision and state hash feed
 // the sequence digest. A failure is shrunk by greedy step deletion and reported with its seed,
 // the generator version, the command that reproduces it and a `loka play` playback.
-//   node kernel/ts/test/sim.ts <seed>...   prints each seed's digest and failure, if any
+//   node kernel/ts/test/sim.ts [--cartridge <artifact>] <seed>...   prints each seed's
+//   cartridge, digest and failure, if any
 import { createHash } from 'node:crypto';
 import { globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
@@ -69,7 +70,8 @@ export const CHECKED = {
 export type Kernel = { step: typeof step; gameView: typeof gameView };
 export const KERNEL: Kernel = { step, gameView };
 
-type Loaded = { cartridge: Cartridge; hash: string; artifact: string };
+// `path`: the `--cartridge` artifact the reproduce line names; fixture cartridges have none.
+type Loaded = { cartridge: Cartridge; hash: string; artifact: string; path?: string };
 export const CARTRIDGES: Loaded[] = globSync('protocol/fixtures/cartridge_*hash.json', {
   cwd: ROOT,
 })
@@ -461,8 +463,9 @@ function boundaries(world: World): number[] {
 
 /** The failure report: seed, generator, the reproducer, shrunk commands and, for a fresh */
 /** start, a playback. */
-export function report(o: Outcome, kernel = KERNEL, flags = ''): string {
+export function report(o: Outcome, kernel = KERNEL): string {
   const f = o.failure!;
+  const flags = o.loaded.path ? `--cartridge ${JSON.stringify(o.loaded.path)} ` : '';
   const commands = shrink(o, f.id, kernel);
   const name = o.loaded.cartridge.manifest.id;
   const head = `simulation failure: ${f.id} (${f.detail}) at step ${f.at + 1}\ngenerator ${GENERATOR}, seed ${o.seed}, cartridge ${name}, ${o.drained ? `drained start: ${o.drained}` : 'fresh start'}\nreproduce (re-checks every invariant): node kernel/ts/test/sim.ts ${flags}${o.seed}\n`;
@@ -521,14 +524,13 @@ if (import.meta.main) {
     console.error('usage: node kernel/ts/test/sim.ts [--cartridge <artifact>] <seed>...');
     process.exit(2);
   }
-  const flags = only ? `--cartridge ${JSON.stringify(args[1])} ` : '';
-  const cartridges = only ? [loaded(readFileSync(args[1]!, 'utf8'))] : CARTRIDGES;
+  const cartridges = only
+    ? [{ ...loaded(readFileSync(args[1]!, 'utf8')), path: args[1] }]
+    : CARTRIDGES;
   for (const seed of args.slice(only ? 2 : 0).map(Number)) {
     const o = simulate(seed, KERNEL, cartridges);
     process.stdout.write(
-      o.failure
-        ? report(o, KERNEL, flags)
-        : `${seed} ${o.loaded.cartridge.manifest.id} ${o.digest}\n`,
+      o.failure ? report(o) : `${seed} ${o.loaded.cartridge.manifest.id} ${o.digest}\n`,
     );
   }
 }

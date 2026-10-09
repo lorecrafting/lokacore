@@ -5,14 +5,20 @@
 import { web } from '@e2e-dev/web';
 import type { E2EConfig } from 'e2e';
 // @ts-expect-error the app has no Node types; the e2e runner is Node
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 // Port 0: the runner assigns a free port per run, so concurrent runs never share one.
 const port = process.env.LOKA_PREVIEW_PORT ?? '0';
 const cartridge = process.env.LOKA_WALK || undefined;
 if (cartridge) {
-  // The route must play the cartridge the preview holds, not a stale `bin/loka dev` build.
-  const held = JSON.parse(readFileSync('.dev-cartridge/current.json', 'utf8')) as {
+  // The route must play the cartridge the preview holds, not an earlier `bin/loka dev` build
+  // of another cartridge.
+  const current = '.dev-cartridge/current.json';
+  if (!existsSync(current))
+    throw new Error(
+      `LOKA_WALK=${cartridge}, but no ${current}: run bin/loka dev cartridges/${cartridge}`,
+    );
+  const held = JSON.parse(readFileSync(current, 'utf8')) as {
     canonical: string;
   };
   const id = (JSON.parse(held.canonical) as { manifest: { id: string } }).manifest.id;

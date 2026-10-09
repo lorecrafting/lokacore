@@ -18,7 +18,16 @@ import type {
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/runtime/world.ts';
 import { check } from '../src/runtime/invariants.ts';
-import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
+import {
+  CHECKED,
+  GENERATOR,
+  KERNEL,
+  loaded,
+  report,
+  shrink,
+  simulate,
+  type Kernel,
+} from './sim.ts';
 import { read } from './read.ts';
 import { fresh } from './sim_batch.ts';
 
@@ -243,9 +252,9 @@ test('--cartridge runs every seed on that artifact and refuses a forged one', ()
 const planted = (k: Partial<Kernel>): Kernel => ({ ...KERNEL, ...k });
 
 // The first of seeds 1, 2, ... whose sequence fails on `kernel`, shrunk and reported.
-function caught(kernel: Kernel) {
+function caught(kernel: Kernel, cartridges?: Parameters<typeof simulate>[2]) {
   for (let seed = 1; seed <= 2000; seed++) {
-    const o = simulate(seed, kernel);
+    const o = simulate(seed, kernel, cartridges);
     if (o.failure)
       return { ...o.failure, shrunk: shrink(o, o.failure.id, kernel), text: report(o, kernel) };
   }
@@ -272,17 +281,17 @@ test('red control: input mutation is caught before rollback checks read the chan
   assert.equal(outcome.failure?.id, 'input_mutated');
 });
 
+const dropsIntoItself = planted({
+  step: (w, c, r) => {
+    const s = step(w, c, r);
+    if (c.payload.type !== 'drop' || s.decision.kind !== 'accepted') return s;
+    const containers = { ...s.world.state.containers, [c.payload.item_id]: c.payload.item_id };
+    return { ...s, world: { ...s.world, state: { ...s.world.state, containers } } };
+  },
+});
+
 test('red control: a planted rule bug (drop puts the item inside itself) is found and shrunk', () => {
-  const f = caught(
-    planted({
-      step: (w, c, r) => {
-        const s = step(w, c, r);
-        if (c.payload.type !== 'drop' || s.decision.kind !== 'accepted') return s;
-        const containers = { ...s.world.state.containers, [c.payload.item_id]: c.payload.item_id };
-        return { ...s, world: { ...s.world, state: { ...s.world.state, containers } } };
-      },
-    }),
-  );
+  const f = caught(dropsIntoItself);
   assert.equal(f.id, 'containment_acyclic');
   // moves to an item, take, drop; a drained start may need a wait first (which seed finds it
   // depends on the demo cartridges; lantern_proof's nearest item is three moves from the entry).
@@ -292,6 +301,17 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
     /^simulation failure: containment_acyclic .*\ngenerator 17, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
+});
+
+// Breaks: the reproduce line drops `--cartridge <artifact>`, so it reruns the seed on the fixture set.
+test('a failure on a --cartridge artifact reproduces on that artifact', () => {
+  const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
+  const artifact = `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`;
+  const f = caught(dropsIntoItself, [{ ...loaded(artifact), path: 'tmp/a sampler.json' }]);
+  assert.match(
+    f.text,
+    /\nreproduce .*: node kernel\/ts\/test\/sim.ts --cartridge "tmp\/a sampler.json" \d+\n/,
+  );
 });
 
 // Breaks: job_complete_owned_by_run not checked per step, or blind to a job.complete in the
