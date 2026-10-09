@@ -1,5 +1,6 @@
 // Live stories (spike, Beads loka-bhb batch 4): the real Book over the real local authority, its
-// save restored from a checkpoint stories/live/checkpoints.ts wrote, so a click runs real rules.
+// save restored from a checkpoint stories/scenarios.ts wrote from stories/routes.ts, so a click
+// runs real rules.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { openDatabaseAsync } from 'expo-sqlite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';

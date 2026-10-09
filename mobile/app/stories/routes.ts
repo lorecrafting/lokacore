@@ -140,6 +140,16 @@ const satchel = [
 // The lone crow in the Oak Branches; the deer at the Drowned Oak below it.
 const oak = [...road, go('north', 'north', 'south', 'south', 'south', 'south', 'west', 'south')];
 const deer = [...oak, 'A deer is here.', 'Attack a deer', wait(3000)];
+// Wren's boot at the Reed Bank, taken, then dropped and taken again: World log lines, no move.
+const boot = ['Wren’s boot is here., open', 'Take Wren’s boot'];
+const again = [
+  ...contents('Equipment & Inventory'),
+  'Wren’s boot, open',
+  'Drop Wren’s boot',
+  ...boot,
+];
+// The one-opponent fight (no pack roster, contracts CombatView): a cellar rat, two rounds in.
+const rat = [...inn, go('down'), nth('A cellar rat is here.'), 'Attack a cellar rat'];
 const bell = [
   ...search,
   go(...Array(7).fill('north')),
@@ -153,7 +163,7 @@ export const routes: Record<string, Step[]> = {
   'room-first': fen,
   'room-npcs-items': [...fen, ...talk('Elspeth', ask), go('north', 'north')],
   'room-notices': inn,
-  'room-long-log': search,
+  'room-long-log': [...search, ...boot, ...again, ...again, ...again],
   'room-refusal': [...shut, 'Back to World', drag],
   'room-at-night': [...fen, wait(180_000), 'Ferry Landing, look'],
   'npc-choice': [...fen, 'Elspeth is here.', 'Talk to Elspeth'],
@@ -181,7 +191,7 @@ export const routes: Record<string, Step[]> = {
     go('up'),
     'An old trunk is here.',
   ],
-  'combat-one-foe': [...oak, go('up'), 'A crow is here.', 'Attack a crow'],
+  'combat-one-foe': [...rat, wait(3000), wait(3000)],
   'combat-pack': [...hounds, nth('Old bones')],
   'combat-bleeding': [...attack, wait(3000), wait(3000), wait(3000)],
   'map-two-levels': [...chapel, go('up', 'up'), (b) => b.map()],

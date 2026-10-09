@@ -20,7 +20,7 @@ import { SkillDetails } from './skills.tsx';
 import { space } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { band, Control, Page, SectionTitle, titleFocus } from './pages.tsx';
+import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 
 const home = (world: () => void) => <Control label="Back to World" onPress={world} />;
 
@@ -281,7 +281,7 @@ export function ScenePage(p: {
   const c = usePalette();
   return (
     <Page>
-      <Text {...titleFocus} style={prose(c)}>
+      <Text {...useTitleFocus()} style={prose(c)}>
         {plain(p.text(p.scene.line))}
       </Text>
       {p.next && <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />}

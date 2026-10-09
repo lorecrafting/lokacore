@@ -19,7 +19,7 @@ import {
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, useBookPalette, usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
-import { Control } from './pages.tsx';
+import { Control, titleFocus, Turned } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
@@ -132,6 +132,8 @@ type ViewProps = {
 
 export function BookView(p: ViewProps) {
   const c = p.palette;
+  const turned = useRef(titleFocus()).current;
+  turned.turned = p.flip.turn > 0;
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
@@ -147,13 +149,15 @@ export function BookView(p: ViewProps) {
   return (
     <PaletteContext value={c}>
       <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-        <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-          {p.screen.view.combat ? (
-            <Combat screen={p.screen} g={g} press={p.press} />
-          ) : (
-            <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
-          )}
-        </PageTurn>
+        <Turned value={turned}>
+          <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
+            {p.screen.view.combat ? (
+              <Combat screen={p.screen} g={g} press={p.press} />
+            ) : (
+              <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
+            )}
+          </PageTurn>
+        </Turned>
         <Bottom {...ctx} page={page} />
       </SafeAreaView>
     </PaletteContext>

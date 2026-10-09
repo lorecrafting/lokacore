@@ -19,3 +19,10 @@ test('stories/views and stories/live are fresh (run npm run stories:views)', () 
   for (const path of Object.keys(fresh))
     assert.ok(committed[path] === fresh[path], `${path} is stale`);
 });
+
+// Breaks: a story-level `globals: { palette }` locks the toolbar, so that story shows one palette only.
+test('no story locks the palette toolbar', () => {
+  const dir = new URL('stories/', import.meta.url);
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.tsx')))
+    assert.doesNotMatch(readFileSync(new URL(f, dir), 'utf8'), /globals:\s*\{\s*palette/, f);
+});

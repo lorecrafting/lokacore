@@ -12,15 +12,12 @@ export default meta;
 export const OneFoe: StoryObj = {
   ...pageStory(CombatOneFoeView),
   name: 'One foe',
-  globals: { palette: 'dusk' },
 };
 export const Pack: StoryObj = {
   ...pageStory(CombatPackView),
   name: 'Pack',
-  globals: { palette: 'dusk' },
 };
 export const Bleeding: StoryObj = {
   ...pageStory(CombatBleedingView),
   name: 'Bleeding',
-  globals: { palette: 'dusk' },
 };

@@ -1,5 +1,6 @@
 // C row Pages, Room (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import { expect } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
 import { NoticeEntries } from '../book/notices.tsx';
 import { RoomPage } from '../book/pages.tsx';
@@ -18,7 +19,13 @@ const meta: Meta = {
 };
 export default meta;
 
-export const FirstRoom: StoryObj = { ...pageStory(RoomFirstView), name: 'First room' };
+export const FirstRoom: StoryObj = {
+  ...pageStory(RoomFirstView),
+  name: 'First room',
+  // At launch no title takes focus, so no ring before keyboard use (BOOK-UI-COMPONENTS.md Focus).
+  play: async ({ canvasElement }) =>
+    expect(canvasElement.contains(document.activeElement)).toBe(false),
+};
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
 export const WithNotices: StoryObj = { ...pageStory(RoomNoticesView), name: 'With notices' };
 export const LongLog: StoryObj = { ...pageStory(RoomLongLogView), name: 'Long log' };
@@ -26,5 +33,4 @@ export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Ref
 export const AtNight: StoryObj = {
   ...pageStory(RoomAtNightView),
   name: 'At night',
-  globals: { palette: 'dusk' },
 };

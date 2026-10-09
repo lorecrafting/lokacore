@@ -51,5 +51,3 @@ export const BarredExit: Story = {
 };
 
 export const UpAndDown: Story = { args: { exits: [open('north'), open('up'), open('down')] } };
-
-export const Night: Story = { globals: { palette: 'dark' } };

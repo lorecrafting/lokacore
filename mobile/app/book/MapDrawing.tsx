@@ -61,8 +61,8 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   const v = [Math.sin(a), -Math.cos(a)];
   const at = (n: number) => [v[0] * n, v[1] * n];
   const w = on ? 1.8 : 0.9;
-  // Colour roles (BOOK-UI-COMPONENTS.md, Footer): a path at rest in `dim`, the lit one in `fg`
-  // (ink, as you are), a barred way in `danger`; so at night the exits no longer read as a "+".
+  // Colour roles (BOOK-UI-COMPONENTS.md, Footer): a path at rest in `dim`, the lit one in `fg`,
+  // a barred way in `danger`, your dot in `action`; so at night the exits no longer read as a "+".
   const ink = on ? c.fg : c.dim;
   if (exit.available)
     return (
@@ -144,7 +144,7 @@ export function MapDrawing(p: {
         ) : null,
       )}
       {/* Placed by left/top, not a transform wrapper: that displaced the dot (mobile lessons, Polish O-1). */}
-      <Disc x={p.knob.x / U} y={p.knob.y / U} r={YOU} fill={c.fg} />
+      <Disc x={p.knob.x / U} y={p.knob.y / U} r={YOU} fill={c.action} />
     </Animated.View>
   );
 }

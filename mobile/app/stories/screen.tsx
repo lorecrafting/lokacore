@@ -48,7 +48,8 @@ const loadBook = async () => {
   return { BookView: (await import('../book/Book.tsx')).BookView };
 };
 
-/** A whole-page story: the saved view in a phone-high frame, every press a spy. */
+/** A whole-page story: the saved view in a phone-high frame, every press a spy. The status clock
+ * (e.g. "18:00 · dusk") is the saved view's; the toolbar palette repaints the page, not the hour. */
 export const pageStory = (saved: unknown, shell?: Partial<Screen>): StoryObj => ({
   loaders: [loadBook],
   render: (_, { loaded, globals }) => {

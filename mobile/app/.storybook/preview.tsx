@@ -29,7 +29,27 @@ const preview: Preview = {
   initialGlobals: { palette: 'light', viewport: { value: 'iphone11', isRotated: false } },
   parameters: {
     layout: 'fullscreen',
-    options: { storySort: { order: ['Docs', 'Book', 'Pages', 'Live'] } },
+    options: {
+      storySort: {
+        order: [
+          'Docs',
+          'Book',
+          'Pages',
+          [
+            'Room',
+            'NPC',
+            'Notices',
+            'Item',
+            'Combat',
+            'Map',
+            'Sections',
+            'Chapter and scene',
+            'Recovery',
+          ],
+          'Live',
+        ],
+      },
+    },
     viewport: {
       options: {
         iphone11: device('iPhone 11', 414, 896),
@@ -60,7 +80,8 @@ const preview: Preview = {
   decorators: [
     (Story, { globals, title }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;
-      useFocusRing(title === 'Live' ? undefined : c); // a Live Book rings in its own palette
+      // A Live Book and SaveError ring in their own palette.
+      useFocusRing(title === 'Live' || title === 'Pages/Recovery' ? undefined : c);
       return (
         <PaletteContext.Provider value={c}>
           {/* The page's paper, so axe measures contrast against the real background. */}

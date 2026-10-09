@@ -462,7 +462,8 @@
     ]
    }
   ],
-  "entities": [
+  "entities": [],
+  "inventory": [
    {
     "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
     "name": "item.boot.short",
@@ -471,20 +472,30 @@
     "actions": [
      {
       "available": true,
-      "action_key": "take",
-      "label": "action.take",
+      "action_key": "drop",
+      "label": "action.drop",
       "target": {
        "kind": "entity",
        "scopes": [
-        "room_contents"
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
        ]
       },
       "input": []
      }
     ]
-   }
-  ],
-  "inventory": [
+   },
    {
     "id": "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
     "name": "item.fox_drawing.short",
@@ -621,7 +632,15 @@
   ]
  },
  "stack": [],
- "log": [],
+ "log": [
+  "You pick up Wren’s boot.",
+  "You drop Wren’s boot.",
+  "You pick up Wren’s boot.",
+  "You drop Wren’s boot.",
+  "You pick up Wren’s boot.",
+  "You drop Wren’s boot.",
+  "You pick up Wren’s boot."
+ ],
  "combatLog": [],
  "details": {}
 }

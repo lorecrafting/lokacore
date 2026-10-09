@@ -4,31 +4,17 @@
   "map": {
    "rooms": [
     {
-     "id": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "title": "room.willow_shade.title",
-     "x": -2,
-     "y": 4,
-     "z": 0
-    },
-    {
-     "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "title": "room.reed_path.title",
-     "x": 0,
-     "y": 2,
-     "z": 0
+     "id": "2a2d32e5-e113-8dca-a989-b9f1a35c4c78",
+     "title": "room.lantern_cellar.title",
+     "x": 2,
+     "y": -2,
+     "z": -1
     },
     {
      "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "title": "room.well_lane.title",
      "x": 0,
      "y": -2,
-     "z": 0
-    },
-    {
-     "id": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "title": "room.reed_bank.title",
-     "x": 0,
-     "y": 4,
      "z": 0
     },
     {
@@ -39,67 +25,28 @@
      "z": 0
     },
     {
-     "id": "6514913d-4eee-8eae-857e-c5bd36d48735",
-     "title": "room.village_green.title",
-     "x": 0,
-     "y": -4,
-     "z": 0
-    },
-    {
-     "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "title": "room.oak_branches.title",
-     "x": -2,
-     "y": 6,
-     "z": 1
-    },
-    {
-     "id": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "x": -2,
-     "y": 6,
+     "id": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+     "title": "room.drowned_lantern.title",
+     "x": 2,
+     "y": -2,
      "z": 0
     }
    ],
    "links": [
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "from": "2a2d32e5-e113-8dca-a989-b9f1a35c4c78",
+     "to": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+     "direction": "up"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
      "direction": "east"
     },
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "south"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "direction": "north"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "direction": "south"
-    },
-    {
-     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
-     "direction": "north"
-    },
-    {
      "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
      "direction": "south"
-    },
-    {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "direction": "north"
-    },
-    {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "west"
     },
     {
      "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
@@ -107,29 +54,14 @@
      "direction": "north"
     },
     {
-     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "direction": "south"
-    },
-    {
-     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
-     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "direction": "south"
-    },
-    {
-     "from": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
+     "from": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+     "to": "2a2d32e5-e113-8dca-a989-b9f1a35c4c78",
      "direction": "down"
     },
     {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "north"
-    },
-    {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "direction": "up"
+     "from": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "west"
     }
    ]
   },
@@ -272,50 +204,38 @@
   "ancestry": "road_born",
   "topics": [],
   "combat": {
-   "encounter_id": "edbe85e0-4afe-85ff-9376-2f8012a74e51",
-   "opponent_id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-   "name": "npc.crow.short"
+   "encounter_id": "cc8c0ac8-1db8-8faa-8275-633a862a9d3a",
+   "opponent_id": "58935a9a-fada-894c-978c-607047afbc25",
+   "name": "npc.cellar_rat.short"
   },
   "place": {
-   "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
+   "id": "2a2d32e5-e113-8dca-a989-b9f1a35c4c78",
    "title": {
-    "key": "room.oak_branches.title"
+    "key": "room.lantern_cellar.title"
    },
    "description": {
-    "key": "room.oak_branches.description"
+    "key": "room.lantern_cellar.description"
    }
   },
   "exits": [
    {
     "available": false,
-    "direction": "down",
+    "direction": "up",
     "sight": {
-     "room": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
+     "room": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+     "title": "room.drowned_lantern.title",
      "entities": [
       {
-       "id": "515ae065-0916-84db-9f13-345580da21be",
-       "name": "npc.crow.short",
+       "id": "cf0d9c5d-717d-8796-b5f0-095efed5e284",
+       "name": "npc.gareth.short",
        "kind": "npc"
       },
       {
-       "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
-       "name": "npc.oak_deer.short",
+       "id": "d72e86a8-d96d-81da-b47f-ee8097d9290d",
+       "name": "npc.maud.short",
        "kind": "npc"
       }
      ]
-    },
-    "reason": {
-     "code": "invalid_state"
-    }
-   },
-   {
-    "available": false,
-    "direction": "up",
-    "sight": {
-     "room": "7d88a524-5246-885e-a937-f6be4219ad48",
-     "title": "room.oak_crown.title",
-     "entities": []
     },
     "reason": {
      "code": "invalid_state"
@@ -353,17 +273,37 @@
   ],
   "entities": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "item.crow_nest.short",
-    "description": "item.crow_nest.description",
-    "kind": "item",
-    "state": "open",
+    "id": "58935a9a-fada-894c-978c-607047afbc25",
+    "name": "npc.cellar_rat.short",
+    "description": "npc.cellar_rat.description",
+    "kind": "npc",
     "actions": []
    },
    {
-    "id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-    "name": "npc.crow.short",
-    "description": "npc.crow.description",
+    "id": "0556eeda-6c38-8679-bc0b-5a9848eba57a",
+    "name": "npc.cellar_rat.short",
+    "description": "npc.cellar_rat.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "a843bbb3-846a-8dce-ade2-36356c37c183",
+    "name": "npc.cellar_rat.short",
+    "description": "npc.cellar_rat.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "f9f5ff00-b852-83ff-97b4-b54072c401bd",
+    "name": "npc.cellar_rat.short",
+    "description": "npc.cellar_rat.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "887efed7-40bb-8854-8ece-640e45e3e5d4",
+    "name": "npc.cellar_rat.short",
+    "description": "npc.cellar_rat.description",
     "kind": "npc",
     "actions": []
    }
@@ -389,11 +329,11 @@
    "index": 0,
    "title": "chapter.missing_child"
   },
-  "time": 64800,
+  "time": 65100,
   "calendar_status": {
    "day": 1,
    "hour": 18,
-   "subdivision": 0,
+   "subdivision": 5,
    "solar": "dusk",
    "lunar": "new"
   },
@@ -405,9 +345,9 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 10,
+    "current": 8,
     "maximum": 10,
-    "band": "ready",
+    "band": "few_bruises",
     "tone": "normal"
    },
    {
@@ -429,7 +369,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 91,
+    "current": 98,
     "maximum": 100,
     "band": "steady",
     "tone": "normal"
@@ -454,6 +394,9 @@
   }
  ],
  "log": [],
- "combatLog": [],
+ "combatLog": [
+  "Your blow strikes the beast squarely. The beast sinks its teeth into you.",
+  "The beast sinks its teeth into you. The beast darts clear of your blow."
+ ],
  "details": {}
 }
