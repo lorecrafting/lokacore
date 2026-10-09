@@ -29,7 +29,6 @@ export function DreamPage(p: {
       {buttons.map((b) => (
         <Act key={b.action_key + JSON.stringify(b.input)} b={b} press={(b) => p.press(b, owner)} />
       ))}
-      {!dream.available && <Text style={note}>This dream is waiting at the bed.</Text>}
       <Tap label="Close" onPress={p.close}>
         <Text style={prose}>Close</Text>
       </Tap>

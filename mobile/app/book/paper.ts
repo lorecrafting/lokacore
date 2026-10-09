@@ -13,3 +13,5 @@ export const body = 'EBGaramond';
 
 export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 export const note = { ...prose, color: paper.dim };
+// Small capitals: the status line, Back and Start over.
+export const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };

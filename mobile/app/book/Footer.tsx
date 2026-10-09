@@ -8,7 +8,7 @@ import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { bleedingLine, branch, refused, said, why, type Hint, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
-import { body, paper } from './paper.ts';
+import { paper, small } from './paper.ts';
 
 type Props = {
   keyboardEnabled: boolean;
@@ -19,7 +19,6 @@ type Props = {
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
 };
-const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
 const keys: Record<string, string> = {
   ArrowUp: 'north',

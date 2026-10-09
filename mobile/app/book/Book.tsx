@@ -15,7 +15,7 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { body, paper } from './paper.ts';
+import { paper, small } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
@@ -28,8 +28,6 @@ export type Shell = {
   learned: Hint;
   recovered?: (healthy: boolean) => void;
 };
-
-const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
 // original presentation context, and a throw shows its fault beside Start over.
