@@ -1,6 +1,6 @@
 import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { PaletteContext } from '../book/palette.ts';
+import { PaletteContext, useFocusRing } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
 
 const device = (
@@ -60,7 +60,7 @@ const preview: Preview = {
   decorators: [
     (Story, { globals }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;
-      // TODO(batch 5 merge): call useFocusRing(c) from book/palette.ts here (no Chrome blue ring).
+      useFocusRing(c);
       return (
         <PaletteContext.Provider value={c}>
           {/* The page's paper, so axe measures contrast against the real background. */}

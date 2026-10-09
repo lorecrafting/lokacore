@@ -118,9 +118,12 @@ export const CorpseContents: StoryObj = {
     await tap(/^A deer corpse is here\./);
     await tap('A deer hide, open'); // its Inside row
     await tap('Take a deer hide');
-    // ponytail: pins today's Book, which stays on the hide; book-ui.md (Take from a corpse) returns to the corpse
+    // book-ui.md (Take from a corpse): back on the corpse, its pickup line, Leave still offered
     await page.findByText('You pick up a deer hide.');
     await page.findByLabelText('Put a deer hide in a deer corpse');
+    // the held hide's own page offers Drop; the corpse's does not
+    await waitFor(() => expect(page.queryByLabelText('Drop a deer hide')).toBeNull());
+    await page.findByLabelText('Leave');
   },
 };
 export const HoundCombat: StoryObj = { name: 'Hound combat', loaders: at('hound-combat') };
