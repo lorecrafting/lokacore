@@ -20,3 +20,6 @@ erl_crash.dump
 *.ez
 
 /node_modules/
+
+# The Loka picker queue (docs/web-preview.md#polish-queue)
+/.polish/

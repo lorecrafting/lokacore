@@ -1,0 +1,9 @@
+id: mobile-picker-no-book-import
+language: tsx
+severity: error
+message: 'The Loka picker is a Storybook tool, not Book UI (docs/briefs/polish/design-input-p1-2026-10-09.md, Separation rule): it never imports book/.'
+files: [mobile/app/.storybook/picker/**]
+rule:
+  kind: string_fragment
+  regex: '(^|/)book/'
+  inside: { matches: module-specifier }

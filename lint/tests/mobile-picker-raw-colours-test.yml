@@ -1,0 +1,9 @@
+id: mobile-picker-raw-colours
+valid:
+  - "const s = styled.div(({ theme }) => ({ color: theme.textMutedColor, border: `1px solid ${theme.appBorderColor}` }));"
+  - "const t = '#1 in the list';"
+invalid:
+  - "const s = { color: '#1EA7FD' };"
+  - "const s = { background: '#fff' };"
+  - "const s = { background: 'rgba(0, 0, 0, 0.5)' };"
+  - "const s = { border: '1px solid #fff' };"

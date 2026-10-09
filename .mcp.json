@@ -1,6 +1,5 @@
 {
   "mcpServers": {
-    "storybook": { "type": "http", "url": "http://localhost:6006/mcp" },
-    "tidewave": { "type": "http", "url": "http://localhost:6006/tidewave/mcp" }
+    "storybook": { "type": "http", "url": "http://localhost:6006/mcp" }
   }
 }

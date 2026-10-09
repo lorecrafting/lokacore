@@ -2,6 +2,7 @@ import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { PaletteContext, useFocusRing } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
+import './picker/overlay.ts'; // the Loka picker's hover/pin layer (manager side: picker/manager.tsx)
 
 const device = (
   name: string,

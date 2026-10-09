@@ -17,7 +17,6 @@ const server = spawn(
   ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
   {
     cwd: new URL('..', import.meta.url),
-    env: { ...process.env, LOKA_NO_TIDEWAVE: '1' }, // the nightly run tests the Book, not the toolbar
     stdio: ['ignore', 'ignore', 'inherit'],
     detached: true, // its own process group, stopped whole below
   },

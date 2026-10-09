@@ -17,6 +17,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: live polish session lane and session/preview scripts (PR #337)](2026-10-09-polish-session-337-review.md): **APPROVE WITH NOTES**
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**
 - [Review: polish batch 3, Page shell, PageFoot and E1 (PR #329)](2026-10-09-polish-batch3-review.md): **APPROVE**
+- [Review: Loka picker + polish panel; remove Tidewave (PR #339)](2026-10-09-picker-339-review.md): **APPROVE WITH NOTES**
 - [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
 - [Review: Housekeeping, red controls by PID, after_merge pulls (PR #338)](2026-10-09-housekeeping-338-review.md): **APPROVE WITH NOTES**
 - [Review: housekeeping 2026-10-09, check_all verdict line and developer/PM rules (PR #331)](2026-10-09-housekeeping-331-review.md): **PASS**
