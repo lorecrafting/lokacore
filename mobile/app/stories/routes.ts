@@ -98,6 +98,17 @@ const bed = [
 ];
 const dream: Step[] = [...bed, scene];
 const chapel = [...road, go('north', 'north', 'north', 'north', 'north')];
+// Peg's shop at 6p: the iron sword (7p) is a note, the torch (2p) still a Buy.
+const peg = [
+  ...road,
+  go('north', 'west'),
+  'Peg Harrow is here.',
+  'Buy a waterskin — 3p',
+  'Buy a spare waterskin — 3p',
+  'Buy a small satchel — 4p',
+  'Buy a wooden shield — 3p',
+  'Buy a flask of lamp oil — 1p',
+];
 // Chapel Steps with the chapel door shut from the map: the way north is barred.
 const shut = [
   ...road,
@@ -147,7 +158,7 @@ export const routes: Record<string, Step[]> = {
   'room-at-night': [...fen, wait(180_000), 'Ferry Landing, look'],
   'npc-choice': [...fen, 'Elspeth is here.', 'Talk to Elspeth'],
   'npc-riddle': vesper,
-  'npc-shop': [...road, go('north', 'west'), 'Peg Harrow is here.'],
+  'npc-shop': peg,
   'npc-services': [...inn, 'Widow Maud is here.'],
   'npc-refused': [...wisp, spell('EDIT')],
   'npc-closed': [...search, go('north', 'north'), 'Elspeth is here.'],
@@ -201,7 +212,7 @@ export const checkpoints: Record<string, Step[]> = {
   'first-room': fen,
   'elspeth-asked': [...fen, 'Elspeth is here.', 'Talk to Elspeth', ask],
   'vesper-riddle': vesper,
-  'peg-shop': [...road, go('north', 'west'), 'Peg Harrow is here.'],
+  'peg-shop': peg,
   'maud-paid-bed': [...inn, 'Widow Maud is here.', 'Rent room — 3p', 'Leave'],
   'hound-combat': hounds,
   'chapel-map': [...chapel, go('up', 'up')],

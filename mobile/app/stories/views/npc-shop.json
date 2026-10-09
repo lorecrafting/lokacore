@@ -337,12 +337,12 @@
       "name": "item.lamp_oil.short",
       "buy": {
        "price": 1,
-       "available": true
+       "available": false,
+       "reason": "not_owned"
       },
       "sell": {
        "price": 1,
-       "available": false,
-       "reason": "not_owned"
+       "available": true
       }
      },
      {
@@ -350,12 +350,12 @@
       "name": "item.waterskin.short",
       "buy": {
        "price": 3,
-       "available": true
+       "available": false,
+       "reason": "not_owned"
       },
       "sell": {
        "price": 2,
-       "available": false,
-       "reason": "not_owned"
+       "available": true
       }
      },
      {
@@ -363,12 +363,12 @@
       "name": "item.satchel.short",
       "buy": {
        "price": 4,
-       "available": true
+       "available": false,
+       "reason": "not_owned"
       },
       "sell": {
        "price": 2,
-       "available": false,
-       "reason": "not_owned"
+       "available": true
       }
      },
      {
@@ -376,7 +376,8 @@
       "name": "item.iron_sword.short",
       "buy": {
        "price": 7,
-       "available": true
+       "available": false,
+       "reason": "insufficient_resource"
       },
       "sell": {
        "price": 4,
@@ -389,12 +390,12 @@
       "name": "item.wooden_shield.short",
       "buy": {
        "price": 3,
-       "available": true
+       "available": false,
+       "reason": "not_owned"
       },
       "sell": {
        "price": 2,
-       "available": false,
-       "reason": "not_owned"
+       "available": true
       }
      },
      {
@@ -402,12 +403,12 @@
       "name": "item.spare_waterskin.short",
       "buy": {
        "price": 3,
-       "available": true
+       "available": false,
+       "reason": "not_owned"
       },
       "sell": {
        "price": 2,
-       "available": false,
-       "reason": "not_owned"
+       "available": true
       }
      }
     ]
@@ -433,7 +434,343 @@
     ]
    }
   ],
-  "inventory": [],
+  "inventory": [
+   {
+    "id": "619363b4-697f-8e0d-ae4a-5208a285a460",
+    "name": "item.lamp_oil.short",
+    "description": "item.lamp_oil.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "619363b4-697f-8e0d-ae4a-5208a285a460",
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      ]
+     }
+    ],
+    "fuel": {
+     "remaining": 7200,
+     "capacity": 7200,
+     "lit": false
+    }
+   },
+   {
+    "id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+    "name": "item.satchel.short",
+    "description": "item.satchel.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     }
+    ]
+   },
+   {
+    "id": "30c00822-6fb5-833d-a05e-7787134bea59",
+    "name": "item.spare_waterskin.short",
+    "description": "item.spare_waterskin.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "30c00822-6fb5-833d-a05e-7787134bea59",
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      ]
+     },
+     {
+      "action_key": "drink",
+      "command": "drink",
+      "label": "action.drink",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "30c00822-6fb5-833d-a05e-7787134bea59"
+      ],
+      "available": false,
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "action_key": "pour",
+      "command": "pour",
+      "label": "action.pour",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "30c00822-6fb5-833d-a05e-7787134bea59",
+       "c02e04c1-54a8-850e-ac17-20b61b7c9630"
+      ],
+      "available": false,
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ],
+    "liquid": {
+     "kind": null,
+     "quantity": 0,
+     "capacity": 4,
+     "unit_label": "liquid.units",
+     "label": "liquid.empty"
+    }
+   },
+   {
+    "id": "c02e04c1-54a8-850e-ac17-20b61b7c9630",
+    "name": "item.waterskin.short",
+    "description": "item.waterskin.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "c02e04c1-54a8-850e-ac17-20b61b7c9630",
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      ]
+     },
+     {
+      "action_key": "drink",
+      "command": "drink",
+      "label": "action.drink",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "c02e04c1-54a8-850e-ac17-20b61b7c9630"
+      ],
+      "available": false,
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "action_key": "pour",
+      "command": "pour",
+      "label": "action.pour",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "c02e04c1-54a8-850e-ac17-20b61b7c9630",
+       "30c00822-6fb5-833d-a05e-7787134bea59"
+      ],
+      "available": false,
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ],
+    "liquid": {
+     "kind": null,
+     "quantity": 0,
+     "capacity": 4,
+     "unit_label": "liquid.units",
+     "label": "liquid.empty"
+    }
+   },
+   {
+    "id": "ab0ecc27-da55-8e79-a207-6e4cb55436c9",
+    "name": "item.wooden_shield.short",
+    "description": "item.wooden_shield.description",
+    "kind": "item",
+    "slot": "off_hand",
+    "block_chance": 25,
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "ab0ecc27-da55-8e79-a207-6e4cb55436c9",
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      ]
+     },
+     {
+      "available": true,
+      "action_key": "wear",
+      "label": "action.wear",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     }
+    ]
+   }
+  ],
   "equipment": [
    {
     "slot": "cloak"
@@ -506,7 +843,7 @@
      "kind": "resource",
      "key": "pennies"
     },
-    "current": 20,
+    "current": 6,
     "maximum": 1000,
     "band": "dying",
     "tone": "danger"
@@ -521,5 +858,13 @@
  ],
  "log": [],
  "combatLog": [],
- "details": {}
+ "details": {
+  "bea306fb-2b58-847c-a4e0-045f9d13b739": [
+   "Peg takes your pennies and hands you the purchase.",
+   "Peg takes your pennies and hands you the purchase.",
+   "Peg takes your pennies and hands you the purchase.",
+   "Peg takes your pennies and hands you the purchase.",
+   "Peg takes your pennies and hands you the purchase."
+  ]
+ }
 }

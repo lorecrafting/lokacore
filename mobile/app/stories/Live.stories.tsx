@@ -101,7 +101,8 @@ export const PegShop: StoryObj = {
     const { page, tap } = await opened(canvasElement);
     await tap(/^Peg Harrow is here\./);
     await tap('Buy a torch — 2p');
-    await page.findByLabelText(/pennies 18\//); // the status line paid
+    await page.findByLabelText(/pennies 4\//); // the status line paid
+    await page.findByText(/^an iron sword: Buy 7p \(/); // 7p over 4p: a note, not a Buy
     await tap('Leave');
     await tap(/; opens Contents$/);
     await tap('Equipment & Inventory, open');
@@ -117,6 +118,7 @@ export const CorpseContents: StoryObj = {
     await tap(/^A deer corpse is here\./);
     await tap('A deer hide, open'); // its Inside row
     await tap('Take a deer hide');
+    // ponytail: pins today's Book, which stays on the hide; book-ui.md (Take from a corpse) returns to the corpse
     await page.findByText('You pick up a deer hide.');
     await page.findByLabelText('Put a deer hide in a deer corpse');
   },
