@@ -62,7 +62,12 @@ export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEn
 export const type = {
   body: { fontFamily: font.body, fontSize: 18, lineHeight: 28 }, // prose, entity lines, actions
   log: { fontFamily: font.body, fontSize: 17, lineHeight: 26 }, // event log and detail history
-  small: { fontFamily: font.body, fontSize: 13, lineHeight: 19 }, // status line, the tip
+  small: {
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 19,
+    fontVariant: ['oldstyle-nums' as const],
+  }, // status line, the tip
   roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 }, // the room's fixed Look title
   pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 }, // every page, Combat's included
   sectionTitle: { fontFamily: font.caps, fontSize: 23, lineHeight: 25, letterSpacing: 0.5 }, // Inside, Held, Worn; the mock's h2
