@@ -19,7 +19,7 @@ const room = (description: string) => ({
 });
 
 // Breaks: a blank line in the authored description is shown as one run of text (the split dropped),
-// or a single line break splits a paragraph in two.
+// a single line break splits a paragraph in two, or a trailing line break draws a blank line.
 test('a blank line in the room description starts a new paragraph; a line break does not', async () => {
   const { RoomPage } = await import('./pages.tsx');
   const paragraphs = (description: string) =>
@@ -28,7 +28,7 @@ test('a blank line in the room description starts a new paragraph; a line break 
         (n) => n.type === 'View' && [n.props.children].flat().every((c: any) => c?.type === 'Text'),
       )
       .map((n) => [n.props.children].flat().map(words));
-  assert.deepEqual(paragraphs('The nave is cold.\n\nA bell rope hangs.'), [
+  assert.deepEqual(paragraphs('The nave is cold.\n\nA bell rope hangs.\n'), [
     ['The nave is cold.', 'A bell rope hangs.'],
   ]);
   assert.deepEqual(paragraphs('The nave is cold.\nA bell rope hangs.'), [

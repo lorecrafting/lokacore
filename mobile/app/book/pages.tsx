@@ -120,7 +120,8 @@ export function RoomPage(p: {
     >
       <View style={{ gap: space.lg }}>
         {plain(p.text(p.view.place.description.key))
-          .split(/\n\s*\n/) // a blank line in the authored text is a paragraph break
+          .trim()
+          .split(/\s*\n\s*\n\s*/) // a blank line in the authored text is a paragraph break
           .map((paragraph, i) => (
             <Text key={i} style={prose(c)}>
               {paragraph}

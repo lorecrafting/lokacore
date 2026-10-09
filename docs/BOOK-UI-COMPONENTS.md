@@ -83,9 +83,10 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   (`MapDrawing`, `DiscoveredMap` layout, `joystick`) is exempt: its numbers are a drawing,
   not spacing.
 - **Focus.** On web, keyboard focus draws a `size.focus` `action` outline `size.focus` outside the
-  focused element, on `:focus-visible` only (the mock's rule): a tap or a click draws no ring, a
-  Tab or an arriving page's title focus does. One document rule (`useFocusRing`, by the Book's
-  palette), never a per-component style; a device draws no ring.
+  focused element, on `:focus-visible` only (the mock's rule): a tap or a click draws no ring; a
+  Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
+  (`useFocusRing`, recoloured by the Book's shown palette), never a per-component style; a device
+  draws no ring.
 - **Motion and sound.** Only the plain state changes in `motion` and the page turn's sound;
   no decorative animation. `motion.palette` is the slow cross-fade between palettes (light
   changes need more than `motion.fade`). Text stays readable through a change: every frame

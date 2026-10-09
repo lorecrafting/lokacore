@@ -69,13 +69,21 @@ function mix(a: Palette, b: Palette, t: number): Palette {
 }
 
 // The web keyboard focus ring (BOOK-UI-COMPONENTS.md#design-tokens): `size.focus` `action` outline,
-// `size.focus` out, on `:focus-visible` only, so a tap or a click draws none. A device has no ring.
+// `size.focus` out, on `:focus-visible` only, so a tap or a click draws none. One document-wide rule
+// (the Book is the web document), its colour reset in place as the shown palette changes; a device
+// has no ring.
+let ring: HTMLStyleElement | undefined;
 export function useFocusRing(c: Palette) {
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    const style = document.createElement('style');
-    style.textContent = `:focus-visible{outline:${size.focus}px solid ${c.action};outline-offset:${size.focus}px}`;
-    document.head.append(style);
-    return () => style.remove();
+    ring ??= document.head.appendChild(document.createElement('style'));
+    ring.textContent = `:focus-visible{outline:${size.focus}px solid ${c.action};outline-offset:${size.focus}px}`;
   }, [c.action]);
+}
+
+// The Book's palette: the shown one, with the web focus ring in its colour.
+export function useBookPalette(target: Palette, curve?: (t: number) => number): Palette {
+  const shown = useShownPalette(target, curve);
+  useFocusRing(shown);
+  return shown;
 }
