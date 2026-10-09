@@ -20,5 +20,3 @@ export const StartOver: Story = {
 };
 
 export const BackToWorld: Story = { args: { label: 'Back to World' } };
-
-export const GotIt: Story = { args: { label: 'Got it' } };

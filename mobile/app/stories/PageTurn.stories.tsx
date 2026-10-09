@@ -49,5 +49,7 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
     await waitFor(() => expect(curl()).not.toBeNull());
     // Headless Chromium draws slowly: the 500 ms curl ends about 2 s in, as in the app's preview.
     await waitFor(() => expect(curl()).toBeNull(), { timeout: 5000 });
+    // ponytail: no check that Settings still shows after the curl: the known defect throws then and
+    // Storybook replaces the story with its error display. Add it with the PageTurn fix.
   },
 };
