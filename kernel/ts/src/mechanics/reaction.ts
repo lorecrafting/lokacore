@@ -129,7 +129,7 @@ export function sequence(
       if (assigned.expected !== step.value) position++;
     }
   }
-  return accepted(world, 'reacted', ops, events, narration);
+  return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
 
 function assignment(
