@@ -44,3 +44,14 @@
   - Follow-up Beads issue for the PM. Not a finding against #334.
 - (5) Verb lines `space.block` apart: out of scope. The PM logs it.
 - `/code-review medium` is reported in the PR body.
+
+## Fix round 1 (head `72a3a38a`, commits `10b58b65`, `72a3a38a`)
+
+- Verdict: **APPROVE**.
+- R1 fixed: `StatusLine.stories.tsx:80-87` adds a `Position` play. It asserts that a `type.small` position button is `size.touch` tall.
+  - Baseline: the StatusLine and EntityLine stories pass 17/17.
+  - Red control, rerun here: with `minHeight` removed from `Tap`, the play fails with `expected 35 to be 44`.
+- R2 fixed: `BOOK-UI-COMPONENTS.md:15` now says "box is at least `size.touch`". It gives the guaranteed targets as shown box plus uncovered bleed: 28 in a run, 36 for Surface, Worn and Position, 40 for the room title, 44 where the paper around it is free. These match my layout arithmetic. The brief's lines 64-68 agree.
+- Nit (3) fixed: the brief now says the note is 28 (`type.body`), with a footprint of 56 and a hit box of 72. This matches `palette.ts:10` and the `Run` play.
+- Verb-line bullet: the brief says the verb lines touch. Confirmed: `pages.tsx:148` wraps them in one `View`, so they sit 28 apart, and no follow-up is needed.
+- Open: the axe follow-up (open item 4) is for the PM to file.
