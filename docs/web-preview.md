@@ -59,7 +59,8 @@ every story headless (render, play function, axe at error level); CI runs it in 
 The `Live` stories run the real Book over the local authority, restored from a checkpoint save
 (`stories/routes.ts`, written by `npm run stories:views`); they need the dev server's isolation
 headers (and a secure context: `localhost`, not a LAN address), so the smoke skips them. `mise exec -- npm run storybook:live` starts a dev server on a free
-port, runs every Live story and its click-through headless, and stops it (about 50 s warm,
+port, runs every Live story and its click-through headless, then a sidebar switch (one database
+open after it) and a second tab on the same origin (Storybook's sqlite keeps no saves), and stops it (about 50 s warm,
 85 s on a first run, so `book-e2e.yml` runs it nightly rather than the pre-push hook).
 What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).
 `bin/preview_update.sh` brings the preview checkout (`~/dev/lokacore-preview`) to `origin/main`, runs

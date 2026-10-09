@@ -36,7 +36,14 @@ const sqliteWorker: Plugin = {
           )
         : /expo-sqlite\/web\/worker\.ts(\?|$)/.test(id)
           ? rewrite(
-              src,
+              // Storybook keeps no saves: its persistent VFS is in memory, so a second tab need not
+              // open the OPFS handles the first tab holds ("Invalid VFS state", loka-rqv).
+              rewrite(
+                src,
+                id,
+                'AccessHandlePoolVFS.create(VFS_NAME_PERSISTENT',
+                'MemoryVFS.create(VFS_NAME_PERSISTENT',
+              ),
               id,
               /(['"])\.\/wa-sqlite\/wa-sqlite\.wasm\1/,
               "'./wa-sqlite/wa-sqlite.wasm?url'",
