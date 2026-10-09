@@ -41,8 +41,16 @@ try {
       __STORYBOOK_ADDONS_CHANNEL__?: any;
       live: Record<string, string>;
       current?: string;
+      dbs: number;
     };
     w.live = {};
+    // databases this page has open: expo-sqlite asks its worker to open and close each one
+    w.dbs = 0;
+    const post = Worker.prototype.postMessage;
+    Worker.prototype.postMessage = function (this: Worker, m: { type?: string }, ...rest: never[]) {
+      w.dbs += m?.type === 'open' ? 1 : m?.type === 'close' ? -1 : 0;
+      return post.call(this, m, ...rest);
+    };
     const hook = setInterval(() => {
       const channel = w.__STORYBOOK_ADDONS_CHANNEL__;
       if (!channel) return;
@@ -86,8 +94,10 @@ try {
     }
     // loka-0qz: a sidebar switch keeps the preview iframe, its sqlite worker and open databases.
     const [a, b] = live as [(typeof live)[0], (typeof live)[0]];
-    const page = await browser.newPage();
-    await page.addInitScript(watch);
+    // One context, so the second tab below shares this one's origin storage (loka-rqv).
+    const context = await browser.newContext();
+    await context.addInitScript(watch);
+    const page = await context.newPage();
     await page.goto(`${url}/?path=/story/${a.id}`);
     const preview = (await (
       await page.waitForSelector('#storybook-preview-iframe')
@@ -96,9 +106,23 @@ try {
     await preview.evaluate(() => ((window as never as { kept: boolean }).kept = true));
     await page.click(`#${b.id}`);
     const switched = await verdict(preview, b.id);
-    const kept = await preview.evaluate(() => (window as never as { kept?: boolean }).kept);
-    report(`${a.id} then ${b.id}`, kept ? switched : 'iframe reloaded, switch not exercised');
-    await page.close();
+    const { kept, dbs } = await preview.evaluate(() => {
+      const w = window as never as { kept?: boolean; dbs: number };
+      return { kept: w.kept, dbs: w.dbs };
+    });
+    report(
+      `${a.id} then ${b.id}`,
+      !kept
+        ? 'iframe reloaded, switch not exercised'
+        : dbs !== 1
+          ? `${dbs} databases open after the switch, want 1`
+          : switched,
+    );
+    // A second tab on the same origin while the first keeps its sqlite worker (loka-rqv).
+    const second = await context.newPage();
+    await second.goto(`${url}/iframe.html?id=${a.id}&viewMode=story`);
+    report(`${a.id} in a second tab`, await verdict(second.mainFrame(), a.id));
+    await context.close();
   } finally {
     await browser.close();
   }

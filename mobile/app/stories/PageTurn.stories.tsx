@@ -14,7 +14,8 @@ import type { PageTurn as Turn } from '../book/PageTurn.tsx';
 async function loadPageTurn() {
   const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
   await LoadSkiaWeb({ locateFile: () => wasm });
-  return { PageTurn: (await import('../book/PageTurn.tsx')).PageTurn };
+  const { warm } = await import('../book/snapshot');
+  return { PageTurn: (await import('../book/PageTurn.tsx')).PageTurn, warm };
 }
 
 function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>[0]> }) {
@@ -42,7 +43,10 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
   render: (_, { loaded }) => <Turning PageTurn={loaded.PageTurn} />,
   // Continue curls forward to Settings, the arriving page live at once; Start over curls back. A
   // turn with no curl (no picture in time) fails the canvas wait.
-  play: async ({ canvas, canvasElement, userEvent }) => {
+  play: async ({ canvas, canvasElement, userEvent, loaded }) => {
+    // The page's picture is prepared before the turn (BOOK-UI-COMPONENTS.md, Input): a click during
+    // PageTurn's warm-up shares the decoder with it and misses motion.quick under load (loka-v2j).
+    await loaded.warm(canvasElement as never);
     const curl = () => canvasElement.querySelector('canvas');
     const turn = async (button: string, arriving: string | RegExp) => {
       await userEvent.click(canvas.getByRole('button', { name: button }));
