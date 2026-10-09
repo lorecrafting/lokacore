@@ -10,7 +10,7 @@ git init -q
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
 mkdir -p docs mobile/authority/local-story mobile/app/book mobile/app/plugins mobile/app/tests .beads
 mkdir -p kernel/ts/src kernel/ts/test mobile/packages/game-view
-touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/tests/steps.ts mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts mobile/app/package.json mobile/packages/game-view/session.ts
+touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/tests/steps.ts mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts mobile/app/package.json mobile/app/vitest.config.mts mobile/packages/game-view/session.ts
 seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
@@ -31,6 +31,7 @@ echo 1 >> kernel/ts/test/differential_peer.ts; peer=$(c peer)
 echo 1 >> kernel/ts/src/k.ts; src=$(c src)
 echo 1 >> mobile/app/package.json; pkg=$(c pkg)
 echo 1 >> mobile/packages/game-view/session.ts; gv=$(c gv)
+echo 1 >> mobile/app/vitest.config.mts; vc=$(c vc)
 git checkout -q -b other "$base"
 echo 2 >> a.md; other=$(c other)
 git checkout -q -
@@ -70,5 +71,6 @@ t run "$model" "$page" storybook "Book .tsx change runs Storybook smoke"
 t skip "$peer" "$src" storybook "kernel-only change skips Storybook smoke"
 t run "$src" "$pkg" storybook "app package.json change runs Storybook smoke"
 t run "$pkg" "$gv" storybook "game-view change runs Storybook smoke"
+t run "$gv" "$vc" storybook "smoke vitest config change runs Storybook smoke"
 [ "$fail" = 0 ] && echo "ok   ci_scope: metadata and Book lanes, conservative fallback"
 exit "$fail"

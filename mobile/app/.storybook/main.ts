@@ -75,8 +75,6 @@ const config: StorybookConfig = {
     '@storybook/addon-vitest',
     '@storybook/addon-mcp', // agents' /mcp endpoint (docs/web-preview.md#storybook)
   ],
-  // The MCP docs toolset reads this manifest.
-  features: { componentsManifest: true },
   framework: {
     name: '@storybook/react-native-web-vite',
     // Worklets for Reanimated (PageTurn), as babel-preset-expo adds them under Metro.
