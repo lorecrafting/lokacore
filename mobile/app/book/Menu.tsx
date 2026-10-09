@@ -1,12 +1,13 @@
-// NPC/conversation and Contents views use the existing book controls.
-import { useRef } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+// NPC/conversation, thing and Contents views use the existing book controls.
+import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
+import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { Control, Sheet, ThingPage, titleFocus, pageTitleStyle, type Thing } from './pages.tsx';
+import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
+import { ItemDetails } from './skills.tsx';
+import { reason } from './words.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
@@ -26,7 +27,7 @@ function Choice(p: {
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
-    <View style={{ marginTop: space.lg, gap: space.sm }}>
+    <View style={{ gap: space.sm }}>
       {p.choice.riddle?.attempts && (
         <Text style={note(c)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
@@ -73,17 +74,12 @@ export function NpcPage(p: NpcProps) {
   const cards = actions.filter((b) => b.command !== 'use_service');
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
   const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
-  const scroll = useRef<ScrollView>(null);
   return (
-    <ScrollView
-      ref={scroll}
-      style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: space.page, gap: space.sm }} // NpcPage: not yet a Sheet
-      onContentSizeChange={() => p.log.length && scroll.current?.scrollToEnd({ animated: false })}
+    <Page
+      title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
+      scrollToEnd={p.log.length > 0}
+      foot={<Control label="Leave" onPress={leave} />}
     >
-      <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">
-        {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
-      </Text>
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
@@ -101,8 +97,7 @@ export function NpcPage(p: NpcProps) {
         ))}
         <ServiceOptions {...p} actions={actions} />
       </Cards>
-      <Control label="Leave" onPress={leave} />
-    </ScrollView>
+    </Page>
   );
 }
 
@@ -136,24 +131,84 @@ const SECTIONS: [Section, string][] = [
   ['journal', 'Journal'],
   ['settings', 'Settings'],
 ];
-export function ContentsPage(p: { open: (section: Section) => void }) {
+export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
-    <Sheet title="Contents">
-      {SECTIONS.map(([kind, label]) => (
-        <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
-      ))}
-    </Sheet>
+    <Page title="Contents" foot={<Control label="Back to World" onPress={p.world} />}>
+      <View>
+        {SECTIONS.map(([kind, label]) => (
+          <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
+        ))}
+      </View>
+    </Page>
   );
 }
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+
+const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
+  thing?.actions
+    .filter((a) => !a.available && a.reason.code === 'too_heavy')
+    .map((a) => (
+      <Text key={a.action_key} style={note(c)}>
+        {text(a.label)}: {reason('too_heavy')}.
+      </Text>
+    ));
+
+// A container's Inside heading, then its rows as one block.
+const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>
+  p.contents.length > 0 && (
+    <>
+      <SectionTitle>Inside</SectionTitle>
+      <View>
+        {p.contents.map((e) => (
+          <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+        ))}
+      </View>
+    </>
+  );
+
+export function ThingPage(p: {
+  thing?: Thing;
+  text: Say;
+  actions: Button[];
+  log: DetailLine[];
+  press: (b: Button) => void;
+  contents: Thing[];
+  open: (id: string) => void;
+  leave: () => void;
+  back?: () => void;
+}) {
+  const c = usePalette();
+  return (
+    <Page
+      title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
+      foot={
+        <>
+          {p.back && <Control label="Back to container" onPress={p.back} />}
+          <Control label="Leave" onPress={p.leave} />
+        </>
+      }
+    >
+      <ItemDetails thing={p.thing} text={p.text} />
+      <LogLines lines={p.log} />
+      {tooHeavy(c, p.thing, p.text)}
+      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
+      <Cards>
+        {p.actions.map((b) => (
+          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+        ))}
+      </Cards>
+      {inside(p)}
+    </Page>
+  );
+}
 
 export function Item(p: {
   id: string;
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button, detail?: string) => void;
-  open: (p: Page) => void;
+  open: (p: Route) => void;
   world: () => void;
   back?: () => void;
 }) {

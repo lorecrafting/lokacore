@@ -140,7 +140,8 @@ Remote visited links are drawn as known static connections without a current tra
 claim; only exits from the actor's current room show live availability/refusal from
 ordinary Move admission, including D9's Study ingress rule.
 The current-room marker and a level stepper are visible; a room detail names that known
-room and its known exits. An unvisited endpoint, NPC or item is never drawn merely because
+room and its known exits. While a room detail is open, Back to map is the page's nearest return,
+beside Back to World. An unvisited endpoint, NPC or item is never drawn merely because
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
@@ -175,6 +176,10 @@ Detail pages show title/identity, authored description and projected item state,
 chronological event log only when entries exist, then currently offered options in the same
 scrolling content. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
+A page's local returns (Leave, Back to World, Back to board, Back to container, Back to map,
+Close) sit in its page foot, below the scrolling content and above the status line, nearest first;
+offered actions never do. World, a scene, a chapter title, the ancestry choice and combat have no
+foot. A control that opens a child (Resume dream, Continue conversation) stays in the content.
 
 ## Notice-board details
 
@@ -208,7 +213,7 @@ no notice route; scene/combat precedence still applies. Ordinary unclassified na
 continues to follow the existing World recovery rule.
 
 A readable detail's exact-subject recipes appear only in its Notice actions. Available controls
-follow nonempty history and precede Leave; unavailable controls show their real reason.
+follow nonempty history; Leave sits in the page foot; unavailable controls show their real reason.
 Available controls and unavailable notes use the same catalog action-label resolver
 and its existing human-readable fallback. Never display an action TextKey as prose.
 Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
@@ -221,12 +226,13 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 ## NPC dialogue and action details
 
 Tapping an NPC opens full details using its actual projected name, authored description and
-actions. Description comes first. Talk/Leave/other offered actions follow it initially; as
-dialogue grows, the offered controls sit immediately after the latest chronological dialogue/
-event entry **inside** the scrolling content. This supersedes the viewport-bottom dock. The
-ordinary long log remains scrollable, and newly appended results keep current options reachable.
-Same-room NPC actions retain the route, mounted scroll area and animation token; they do not
-flip the book or reset scrolling for each result. There is no overlay or saved transcript.
+actions. Description comes first. Talk and the other offered actions follow it initially; as
+dialogue grows, they sit immediately after the latest chronological dialogue/event entry
+**inside** the scrolling content, and Leave sits in the page foot. This supersedes the
+viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
+current options reachable. Same-room NPC actions retain the route, mounted scroll area and
+animation token; they do not flip the book or reset scrolling for each result. There is no
+overlay or saved transcript.
 
 After a confirmed accepted NPC action changes the actual projected journal, append the neutral
 **Journal updated** event within that NPC's chronological history, visually distinct from

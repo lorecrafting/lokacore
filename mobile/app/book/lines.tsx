@@ -32,33 +32,42 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
 
 // One Text per line: narration in ink, a system line dim italic, a refused line after its tag. The
 // tag is its own Text beside the sentence in a row, since native draws no border on nested Text.
+// The lines are one block of the page, `space.sm` apart; no lines, no block.
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   const c = usePalette();
-  return lines.map((line, i) =>
-    typeof line === 'string' ? (
-      <Text key={i} style={{ ...type.log, color: c.fg }}>
-        {line}
-      </Text>
-    ) : 'event' in line ? (
-      <Text key={i} style={{ ...type.log, color: c.dim, fontStyle: 'italic' }}>
-        {line.text}
-      </Text>
-    ) : (
-      <View key={i} style={{ flexDirection: 'row', alignItems: 'flex-start', columnGap: space.xs }}>
-        <Text
-          style={{
-            ...type.tag,
-            color: c.danger,
-            borderColor: c.danger,
-            borderWidth: size.rule,
-            borderRadius: radius.tag,
-            paddingHorizontal: space.xs,
-          }}
-        >
-          {line.reason}
-        </Text>
-        <Text style={{ ...type.log, color: c.fg, flex: 1 }}>{line.text}</Text>
-      </View>
-    ),
+  if (!lines.length) return null;
+  return (
+    <View style={{ gap: space.sm }}>
+      {lines.map((line, i) =>
+        typeof line === 'string' ? (
+          <Text key={i} style={{ ...type.log, color: c.fg }}>
+            {line}
+          </Text>
+        ) : 'event' in line ? (
+          <Text key={i} style={{ ...type.log, color: c.dim, fontStyle: 'italic' }}>
+            {line.text}
+          </Text>
+        ) : (
+          <View
+            key={i}
+            style={{ flexDirection: 'row', alignItems: 'flex-start', columnGap: space.xs }}
+          >
+            <Text
+              style={{
+                ...type.tag,
+                color: c.danger,
+                borderColor: c.danger,
+                borderWidth: size.rule,
+                borderRadius: radius.tag,
+                paddingHorizontal: space.xs,
+              }}
+            >
+              {line.reason}
+            </Text>
+            <Text style={{ ...type.log, color: c.fg, flex: 1 }}>{line.text}</Text>
+          </View>
+        ),
+      )}
+    </View>
   );
 }

@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Text, View } from 'react-native';
 import { expect, fn } from 'storybook/test';
-import { ActionCard } from '../book/actions.tsx';
+import { ActionCard, Cards } from '../book/actions.tsx';
 import { note, usePalette } from '../book/palette.ts';
 import { button } from './fixtures.ts';
 
@@ -31,11 +31,11 @@ export const TwoLineLabel: Story = {
 const six = ['Take', 'Drop', 'Light', 'Extinguish', 'Fill', 'Pour out'];
 export const ListOfSix: Story = {
   render: (args) => (
-    <View>
+    <Cards>
       {six.map((label) => (
         <ActionCard key={label} b={button(label)} press={args.press} />
       ))}
-    </View>
+    </Cards>
   ),
 };
 

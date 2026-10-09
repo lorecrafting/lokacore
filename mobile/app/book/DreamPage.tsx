@@ -1,12 +1,12 @@
 import type { GameView } from '../../packages/game-view/session.ts';
-import type { Page } from './model.ts';
+import type { Page as Route } from './model.ts';
 // A resumable child of the actual bed, using the existing detail/control grammar.
 import { Text } from 'react-native';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
-import { Control, Sheet } from './pages.tsx';
+import { Control, Page } from './pages.tsx';
 import { note, prose, usePalette } from './palette.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -22,7 +22,7 @@ export function DreamPage(p: {
   if (!dream) return null;
   const buttons = p.screen.buttons.filter((b) => b.detail_id === owner);
   return (
-    <Sheet title={p.screen.text(dream.title)}>
+    <Page title={p.screen.text(dream.title)} foot={<Control label="Close" onPress={p.close} />}>
       <Text style={prose(c)}>{p.screen.text(dream.description)}</Text>
       <LogLines lines={p.screen.detail(owner)} />
       <Text style={prose(c)}>{p.screen.text(dream.line)}</Text>
@@ -35,14 +35,13 @@ export function DreamPage(p: {
           />
         ))}
       </Cards>
-      <Control label="Close" onPress={p.close} />
-    </Sheet>
+    </Page>
   );
 }
 
 export function DreamResume(p: {
   detail: NonNullable<GameView['notices']>[number];
-  open: (page: Page) => void;
+  open: (page: Route) => void;
 }) {
   const c = usePalette();
   const d = p.detail.dream;

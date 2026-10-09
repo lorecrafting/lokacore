@@ -35,6 +35,9 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.stack.map((p: any) => p.id),
     [corpse.id, pelt.id],
   );
+  const foot = ['Back to container', 'Leave'];
+  const shown = h.labels().filter((x) => foot.includes(x));
+  assert.deepEqual(shown, foot); // nearest first
   h.tap('Back to container');
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
@@ -248,7 +251,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
 });
 
 // Breaks: Leave is redundant or closes optimistically, journal cues look like speech, or controls leave the log.
-test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
+test('NPC history has distinct journal events and one confirmed Leave in the foot below the log', () => {
   const h = book();
   h.tap('Old Bram');
   const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
@@ -271,8 +274,13 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   );
   assert.deepEqual(
     controls.filter((n) => n.type === 'Pressable').map((n) => n.props.accessibilityLabel),
-    ["Offer to fetch Bram's lantern", 'Leave'],
+    ["Offer to fetch Bram's lantern"],
   );
+  const page = h.draw(); // preorder: the scroll's subtree follows it, then the foot
+  const end = page.findIndex((n) => n.type === 'ScrollView') + nodes(scroll).length;
+  const leave = (n: any) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave';
+  assert.equal(page.filter(leave).length, 1);
+  assert.ok(page.findIndex(leave) >= end);
   h.tap('Leave');
   assert.equal(h.game.view().view.choice, undefined);
   h.tap('Old Bram');
@@ -448,6 +456,22 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     ['Satchel', 'Lamp'],
   ]);
   assert.deepEqual(groups([entity('lamp', 'item')]), [['Lamp']]);
+});
+
+// Breaks: the Map foot loses Back to map or its clear, or Back to World leaves a page on the stack.
+test('a chosen map place adds Back to map before Back to World', () => {
+  const h = book(bundle('missing_child_v042_hash'));
+  h.tap('Road-born');
+  h.tap('Continue');
+  h.map();
+  const returns = () => h.labels().filter((x) => x.startsWith('Back to'));
+  h.tap('Ferry Landing, current place');
+  assert.deepEqual(returns(), ['Back to map', 'Back to World']);
+  h.tap('Back to map');
+  assert.deepEqual(returns(), ['Back to World']);
+  h.tap('Back to World');
+  assert.deepEqual(h.stack, []);
+  h.sql.close();
 });
 
 // Breaks: a return turns forward or an opened page turns back (BOOK-UI-COMPONENTS.md#page-turn,

@@ -230,7 +230,7 @@ test('the chapter title page leaves only Continue', () => {
   });
   const bottom = book.props.children.props.children[1];
   const [navigation, status] = bottom.type(bottom.props).props.children;
-  assert.equal(navigation, null);
+  assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
   const button = StatusLine(status.props)
     .props.children.flat()
@@ -277,6 +277,7 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
   const character = CharacterPage({
     resources: [pool('hp', 'danger'), pool('pennies', 'danger')],
     text: (key: string) => key,
+    world: () => {},
   });
   assert.deepEqual(
     [character.props.children]

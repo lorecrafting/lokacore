@@ -1,16 +1,15 @@
-import { ItemDetails } from './skills.tsx';
-// The book's room and thing pages and their shared controls (the Contents sections: sections.tsx).
+// The book's page shell, the room page and their shared controls (the Contents sections:
+// sections.tsx; the thing page: Menu.tsx).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain, type group, type Pool, type Thing } from './model.ts';
+import { cap, plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { ActionCard, Cards, VerbLine } from './actions.tsx';
+import { VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { reason } from './words.ts';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -20,9 +19,6 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
-const titleStyle = (c: Palette) => ({ color: c.fg, paddingBottom: space.md });
-export const pageTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.pageTitle });
-export const sectionTitleStyle = (c: Palette) => ({ ...titleStyle(c), ...type.sectionTitle });
 // A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
 // on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
 export const titleFocus = {
@@ -114,59 +110,42 @@ export function RoomPage(p: {
   details: ReactNode;
 }) {
   const c = usePalette();
+  const look = p.g.look;
+  const actions = placeActions(p.view, p.g, p.press); // one list, as the room's lines
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <RoomTitle {...p} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: space.page }}>
-        <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
-        {warnings(c, p.view, p.text)}
-        <Here view={p.view} text={p.text} open={p.open} />
-        {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
-          <Control label="Continue conversation" onPress={p.openChoice} />
-        )}
-        {p.details}
-        {placeActions(p.view, p.g, p.press)}
-        {p.log.length > 0 && (
-          <View style={{ marginTop: space.lg }}>
-            <LogLines lines={p.log} />
-          </View>
-        )}
-      </ScrollView>
-    </View>
-  );
-}
-
-// The room's title; a tap looks.
-function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
-  const title = (
-    <Text
-      {...titleFocus}
-      style={{ ...titleStyle(usePalette()), ...type.roomTitle, textAlign: 'center' }}
+    <Page
+      title={p.text(p.view.place.title.key)}
+      fixedTitle
+      onTitlePress={look && (() => p.press(look))}
     >
-      {p.text(p.view.place.title.key)}
-    </Text>
-  );
-  return (
-    <View style={{ paddingHorizontal: space.page, paddingTop: space.page }}>
-      {p.g.look ? (
-        <Tap label={`${p.text(p.view.place.title.key)}, look`} onPress={() => p.press(p.g.look!)}>
-          {title}
-        </Tap>
-      ) : (
-        title
+      <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+      {warnings(c, p.view, p.text)}
+      <Here view={p.view} text={p.text} open={p.open} />
+      {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
+        <Control label="Continue conversation" onPress={p.openChoice} />
       )}
-    </View>
+      {p.details}
+      {actions.length > 0 && <View>{actions}</View>}
+      {p.log.length > 0 && <LogLines lines={p.log} />}
+    </Page>
   );
 }
 
-const warnings = (c: Palette, view: GameView, text: Say) =>
-  view.exits
-    .filter((e) => e.warning)
-    .map((e) => (
-      <Text key={e.direction} style={note(c)}>
-        {text(e.warning!)}
-      </Text>
-    ));
+// The exit warnings are one block of notes.
+const warnings = (c: Palette, view: GameView, text: Say) => {
+  const shown = view.exits.filter((e) => e.warning);
+  return (
+    shown.length > 0 && (
+      <View>
+        {shown.map((e) => (
+          <Text key={e.direction} style={note(c)}>
+            {text(e.warning!)}
+          </Text>
+        ))}
+      </View>
+    )
+  );
+};
 
 // The place's own actions; a notice's actions stay on its notice page.
 const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
@@ -196,69 +175,99 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   );
   return [npcs, items]
     .filter((group) => group.length > 0)
-    .map((group, i) => (
-      <View
-        key={group[0].kind === 'npc' ? 'npcs' : 'items'}
-        style={i ? { marginTop: space.block } : undefined}
-      >
-        {group.map(line)}
-      </View>
+    .map((group) => (
+      <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
     ));
 }
 
-export function Sheet({ title, children }: { title: string; children: ReactNode }) {
+// One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
+// the scroll), the blocks, and the page foot.
+export function Page(p: {
+  title?: string;
+  fixedTitle?: boolean;
+  onTitlePress?: () => void;
+  scrollToEnd?: boolean;
+  foot?: ReactNode;
+  children: ReactNode;
+}) {
   const c = usePalette();
+  let scroll: ScrollView | null = null; // this render's view: a ref callback, so no hook
+  const title = p.title !== undefined && (
+    <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
+  );
   return (
-    <ScrollView
-      style={{ backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: space.page, gap: space.md }}
-    >
-      <Text {...(title ? titleFocus : {})} style={pageTitleStyle(c)} accessibilityRole="header">
-        {title}
-      </Text>
-      {children}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      {p.fixedTitle && (
+        <View style={{ paddingHorizontal: space.page, paddingTop: space.xl }}>{title}</View>
+      )}
+      <ScrollView
+        ref={(view) => {
+          scroll = view;
+        }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: space.page, gap: space.block }}
+        onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
+      >
+        {!p.fixedTitle && title}
+        {p.children}
+      </ScrollView>
+      {p.foot && <PageFoot>{p.foot}</PageFoot>}
+    </View>
   );
 }
 
-const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
-  thing?.actions
-    .filter((a) => !a.available && a.reason.code === 'too_heavy')
-    .map((a) => (
-      <Text key={a.action_key} style={note(c)}>
-        {text(a.label)}: {reason('too_heavy')}.
-      </Text>
-    ));
+// A header that takes the arriving focus; the room's is fixed, and a tap on it looks.
+function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
+  const heading = (
+    <Text
+      {...titleFocus}
+      accessibilityRole="header"
+      style={{
+        color: usePalette().fg,
+        // a scrolling title is a block: the page's gap alone is its space below
+        ...(p.fixed
+          ? { ...type.roomTitle, textAlign: 'center', paddingBottom: space.md }
+          : type.pageTitle),
+      }}
+    >
+      {p.title}
+    </Text>
+  );
+  return p.onPress ? (
+    <Tap label={`${p.title}, look`} onPress={p.onPress}>
+      {heading}
+    </Tap>
+  ) : (
+    heading
+  );
+}
 
-export function ThingPage(p: {
-  thing?: Thing;
-  text: Say;
-  actions: Button[];
-  log: DetailLine[];
-  press: (b: Button) => void;
-  contents: Thing[];
-  open: (id: string) => void;
-  leave: () => void;
-  back?: () => void;
-}) {
+// The page's local returns, nearest first (BOOK-UI-COMPONENTS.md, PageFoot).
+export function PageFoot({ children }: { children: ReactNode }) {
   const c = usePalette();
   return (
-    <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
-      <ItemDetails thing={p.thing} text={p.text} />
-      <LogLines lines={p.log} />
-      {tooHeavy(c, p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
-      <Cards>
-        {p.actions.map((b) => (
-          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
-        ))}
-      </Cards>
-      {p.back && <Control label="Back to container" onPress={p.back} />}
-      <Control label="Leave" onPress={p.leave} />
-      {p.contents.length > 0 && <Text style={sectionTitleStyle(c)}>Inside</Text>}
-      {p.contents.map((e) => (
-        <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
-      ))}
-    </Sheet>
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        columnGap: space.lg,
+        paddingTop: space.md,
+        paddingHorizontal: space.xl,
+        paddingBottom: space.xl,
+        borderTopWidth: size.rule,
+        borderTopColor: c.line,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
+// A heading inside a page (Inside, Held, Worn, Where).
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <Text accessibilityRole="header" style={{ color: usePalette().fg, ...type.sectionTitle }}>
+      {children}
+    </Text>
   );
 }

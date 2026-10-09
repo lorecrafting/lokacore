@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { Control } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { size } from './tokens.ts';
 
 type Props = { view: GameView; text: (key: string) => string };
+// The chosen room is the Map page's: its foot offers Back to map while one is open.
 type Drawn = NonNullable<GameView['map']>;
 type Room = Drawn['rooms'][number];
-export function DiscoveredMap({ view, text }: Props) {
+export function DiscoveredMap({
+  view,
+  text,
+  selected,
+  select,
+}: Props & { selected: string | null; select: (id: string | null) => void }) {
   const c = usePalette();
   const map = view.map!;
   const current = map.rooms.find((r) => r.id === view.place.id);
   const [level, setLevel] = useState(current?.z ?? 0);
-  const [selected, select] = useState<string | null>(null);
   const levels = [...new Set(map.rooms.map((r) => r.z))].sort((a, b) => a - b);
   const rooms = map.rooms.filter((r) => r.z === level);
   const minimum = (axis: 'x' | 'y') => Math.min(0, ...rooms.map((r) => r[axis]));
@@ -38,7 +42,7 @@ export function DiscoveredMap({ view, text }: Props) {
           {rooms.map((r) => roomButton(c, r, r.id === view.place.id, text, point(r), select))}
         </View>
       </ScrollView>
-      {chosen && roomDetail(c, map, chosen, text, () => select(null))}
+      {chosen && roomDetail(c, map, chosen, text)}
     </View>
   );
 }
@@ -99,7 +103,7 @@ function linkLine(
   );
 }
 
-function roomDetail(c: Palette, map: Drawn, chosen: Room, text: Props['text'], back: () => void) {
+function roomDetail(c: Palette, map: Drawn, chosen: Room, text: Props['text']) {
   return (
     <View>
       <Text style={prose(c)}>{text(chosen.title)}</Text>
@@ -110,7 +114,6 @@ function roomDetail(c: Palette, map: Drawn, chosen: Room, text: Props['text'], b
             {l.direction}: {text(map.rooms.find((r) => r.id === l.to)!.title)}
           </Text>
         ))}
-      <Control label="Back to map" onPress={back} />
     </View>
   );
 }
