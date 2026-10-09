@@ -9,6 +9,12 @@ const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:keyboard-react', shortCircuit: true };
     if (specifier === 'react-native') return { url: 'test:keyboard-native', shortCircuit: true };
     return next(specifier, context);
@@ -41,7 +47,7 @@ registerHooks({
     };
   },
 });
-const { Footer } = await import('./Footer.tsx');
+const { Footer, Status } = await import('./Footer.tsx');
 const { BookView } = await import('./Book.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
@@ -186,13 +192,19 @@ test('Book captures movement keys only on an active World page', (t) => {
   assert.deepEqual(pressed, ['north']);
 });
 
-// Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue
-// (docs/system/book-ui.md, Chapters, scenes and recovery).
+// Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue, or
+// the locked Contents still shows its tappable colours (docs/system/book-ui.md, Chapters, scenes
+// and recovery; BOOK-UI-COMPONENTS.md, Status line).
 test('the chapter title page leaves only Continue', () => {
   const book = BookView({
     screen: {
       buttons: [],
-      view: { place: { id: 'room' }, time: 0, exits: [] },
+      view: {
+        place: { id: 'room' },
+        time: 0,
+        exits: [],
+        resources: [{ resource: { key: 'mv' }, current: 1, maximum: 9, tone: 'danger' }],
+      },
       text: (key: string) => key,
       log: [],
       pending: false,
@@ -210,4 +222,10 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, null);
   assert.equal(status.props.locked, true);
+  const contents = Status(status.props).props.children.find((c: any) => c?.type === 'Pressable');
+  const colours = (e: any): string[] =>
+    !e || typeof e !== 'object'
+      ? []
+      : [e.props?.style?.color, ...[e.props?.children].flat().flatMap(colours)].filter(Boolean);
+  assert.deepEqual(new Set(colours(contents)), new Set(['#645c4f'])); // paper.dim
 });

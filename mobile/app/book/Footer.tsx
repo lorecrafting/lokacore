@@ -240,7 +240,7 @@ export function Status(p: StatusProps) {
         style={{ minHeight: 44, justifyContent: 'center' }}
       >
         <Text style={{ ...small, color: p.locked ? paper.dim : paper.accent }}>
-          {p.resources ? shown(p.resources) : 'character'}
+          {p.resources ? shown(p.resources, p.locked) : 'character'}
         </Text>
       </Pressable>
       {p.pending && (
@@ -252,10 +252,11 @@ export function Status(p: StatusProps) {
   );
 }
 
-// The resources as the status line shows them (coloured by band); its label is model.ts `said`.
-const shown = (rs: readonly Pool[]) =>
+// The resources as the status line shows them (coloured by band; dim while locked); its label is
+// model.ts `said`.
+const shown = (rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: band(r.tone) }}>
+    <Text key={r.resource.key} style={{ color: locked ? paper.dim : band(r.tone) }}>
       {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
     </Text>
   ));
