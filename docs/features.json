@@ -433,10 +433,12 @@
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
+      "DerivedStat",
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/mechanics/attributes/shared.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json"
@@ -444,7 +446,7 @@
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
+    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3)"
   },
   "equipment": {
     "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",

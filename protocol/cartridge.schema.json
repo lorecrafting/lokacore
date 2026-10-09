@@ -1255,6 +1255,22 @@
           ],
           "additionalProperties": false
         },
+        "derived": {
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0). hit_chance and damage need world.combat; carry_grams needs world.carry. NPCs have no attributes and keep their authored profile.",
+          "type": "object",
+          "properties": {
+            "hit_chance": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            },
+            "damage": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            },
+            "carry_grams": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            }
+          },
+          "additionalProperties": false
+        },
         "death": {
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },
@@ -1351,6 +1367,62 @@
             "key": "lantern_resolved"
           },
           "outcome": "carry"
+        }
+      ]
+    },
+    "DerivedStat": {
+      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attributes@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "type": "object",
+      "properties": {
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "per_point": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              },
+              "pivot": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              }
+            },
+            "required": [
+              "attribute",
+              "per_point",
+              "pivot"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "divisor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "terms"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "terms": [
+            {
+              "attribute": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "attribute",
+                "key": "str"
+              },
+              "per_point": 1,
+              "pivot": 10
+            }
+          ],
+          "divisor": 2
         }
       ]
     },
