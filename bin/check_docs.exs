@@ -193,9 +193,10 @@ git_env =
       do: "#{f} runs git init without sourcing bin/lib/clean_git_env.sh"
 
 # Book UI names no look (a token, hex colour, px size or palette/role name): the catalogue holds it.
+# A link anchor (`x.md#facade-rules`) is not a hex colour.
 # The red control passes a planted copy as the extra doc.
 look_re =
-  ~r/\b(type|space|size|radius|motion|opacity|color)\.[a-z]|#[0-9a-fA-F]{6}\b|\b\d+ ?px\b|`(light|dawn|dusk|dark|fg|bg|dim|line|card|action|danger|warning)`/
+  ~r/\b(type|space|size|radius|motion|opacity|color|font|sound)\.[a-z]|(?<![\w(])#[0-9a-fA-F]{6}\b|\b\d+ ?px\b|`(light|dawn|dusk|dark|fg|bg|dim|line|card|action|danger|warning)`/
 
 looks =
   for file <- ["docs/system/book-ui.md" | extra],

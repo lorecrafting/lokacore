@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Text, View } from 'react-native';
 import { contrast, usePalette } from '../book/palette.ts';
-import { color, motion, radius, size, sound, space, type } from '../book/tokens.ts';
+import { color, motion, opacity, radius, size, sound, space, type } from '../book/tokens.ts';
 
 const textRoles = ['fg', 'dim', 'action', 'danger', 'warning'] as const;
 
@@ -18,7 +18,7 @@ function Palettes() {
           >
             <Text style={{ ...type.sectionTitle, color: p.fg }}>{name}</Text>
             {Object.entries(p).map(([role, hex]) => {
-              const ratios = textRoles.includes(role as never)
+              const ratios = (textRoles as readonly string[]).includes(role)
                 ? [contrast(hex, p.bg), contrast(hex, p.card)]
                 : [];
               return (
@@ -76,7 +76,7 @@ function Measures() {
         key={group + name}
         style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}
       >
-        <Text style={{ ...label, minWidth: size.footerRule }}>{`${group}.${name} ${v}`}</Text>
+        <Text style={{ ...label, width: '40%' }}>{`${group}.${name} ${v}`}</Text>
         <View style={{ backgroundColor: c.dim, ...shape(v) }} />
       </View>
     ));
@@ -85,6 +85,7 @@ function Measures() {
       {rows('space', space, (v) => ({ width: v, height: space.md }))}
       {rows('size', size, (v) => ({ width: v, height: space.md }))}
       {rows('radius', radius, (v) => ({ width: size.touch, height: size.touch, borderRadius: v }))}
+      {rows('opacity', opacity, (v) => ({ width: size.touch, height: size.touch, opacity: v }))}
     </View>
   );
 }
