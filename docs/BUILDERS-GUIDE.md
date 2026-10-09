@@ -56,6 +56,24 @@ capability locks, references, placements and capacities, dialogue/quest links, t
 and other content relationships ([compiler checks](system/cartridge.md#compiler)). A
 compiled artifact is checked again when loaded ([loader](system/cartridge.md#artifact-and-loader)).
 
+## Preview an edit
+
+To see a cartridge in the Book on the web, compile it into the author preview, then, in a second
+terminal, start the preview once (from `mobile/app`, `npm run author`; it serves
+http://localhost:19006):
+
+```sh
+mise exec -- bin/loka dev cartridges/ashmere_sampler --watch
+```
+
+Each save of a source file recompiles it; the page reloads with the edit in a few seconds.
+Without `--watch` it compiles once. A failed compile prints its diagnostics and keeps the last
+good cartridge. Each edited cartridge has its own save, so an edit starts a new game and the
+normal preview's save is never touched. Add `?dev=1` to the URL for a control that advances game
+time through the normal elapsed-time path; the world credits none before the ancestry choice.
+Release, test and e2e builds always use the pinned chapter
+([`metro.config.js`](../mobile/app/metro.config.js), [`bin/loka dev`](../kernel/ts/play/author.ts)).
+
 ## Authoring paths and examples
 
 | You want to make… | Source and working example | Engine behavior and limit |

@@ -1,4 +1,5 @@
 // The app bundles code outside its folder: the other mobile modules and the kernel.
+const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { getDefaultConfig } = require('expo/metro-config');
@@ -22,6 +23,24 @@ try {
 } catch {
   delete process.env.EXPO_PUBLIC_KERNEL_COMMIT; // never a stale one: the app reports zero-commit -dirty
 }
-// The transform cache does not see the stamp: keyed on it, a cached App.tsx never keeps an old one.
-config.cacheVersion = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? '';
+// Author preview (docs/BUILDERS-GUIDE.md#preview-an-edit): with LOKA_DEV_CARTRIDGE set (`npm run
+// author`), App.tsx's chapter import is the artifact `bin/loka dev` writes there. Release, test and
+// e2e runs never set it.
+if (process.env.LOKA_DEV_CARTRIDGE) {
+  const devCartridge = path.resolve(__dirname, process.env.LOKA_DEV_CARTRIDGE);
+  if (process.env.NODE_ENV === 'production')
+    throw new Error('LOKA_DEV_CARTRIDGE is set: a release bundle must use the pinned chapter');
+  if (!fs.existsSync(devCartridge))
+    throw new Error(
+      `LOKA_DEV_CARTRIDGE (${process.env.LOKA_DEV_CARTRIDGE}) is missing: run bin/loka dev <cartridge dir> first`,
+    );
+  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE = '1';
+  config.resolver.resolveRequest = (context, name, platform) =>
+    context.originModulePath === path.join(__dirname, 'App.tsx') &&
+    name.endsWith('/missing_child_v042_hash.json')
+      ? { type: 'sourceFile', filePath: devCartridge }
+      : context.resolveRequest(context, name, platform);
+} else delete process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE;
+// The transform cache sees neither inlined value: keyed on both, a cached App.tsx never keeps an old one.
+config.cacheVersion = `${process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? ''}${process.env.LOKA_DEV_CARTRIDGE ? ':dev' : ''}`;
 module.exports = config;
