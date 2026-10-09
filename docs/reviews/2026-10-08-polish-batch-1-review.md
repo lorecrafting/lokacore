@@ -27,3 +27,11 @@
 1. **should-fix** `bin/check_docs.exs:204`: `File.regular?(abs)` silently skips a missing `docs/system/book-ui.md`. The red control passes its planted copy as an extra file, so it never exercises the fixed path. Mutant: the path changed to `book_ui.md`, with `docs_red_controls.sh` all ok (survives). Scenario: book-ui.md is renamed or moved and its inbound links are updated (so `check_docs` passes), and E4 then checks nothing with no error. Fix: drop `File.regular?`, so `File.read!` raises on a missing file.
 2. **nit** `bin/check_docs.exs:199`: the lookbehind `(?<![\w(])` also hides a colour in parentheses. A planted `Card (#2b2b2b).` passes. Excluding only `](#` would keep the anchor fix.
 3. **nit** `docs/BOOK-UI-COMPONENTS.md:106-119`: the designer's row list ends with "Tokens", but the table has no Tokens row (it is a PR open item). The head links the story, so this is for the PM to settle.
+
+## Fix round 1 (fix commit `a4725ef3`, head `a4725ef3`)
+
+- Fix round 1: **APPROVE**.
+- (1) Verified. The `File.regular?` guard is removed (`bin/check_docs.exs:202-206`). Mutant: path changed to `book_ui.md`; `check_docs` exits 1 with `File.Error`. Direct callers: `ci.yml:98`, `check_all.sh:17,55`, `sync_pr.sh:23` and `red_controls.exs:170` run it at the repo root, where book-ui.md exists. The throwaway repo in `docs_red_controls.sh` gets a stub book-ui.md that is linked from its README; all its checks pass (exit 0).
+- (2) Verified. The lookbehind is `(?<!\]\(|\.md)` (`:199`). The red control plants a hex in parentheses, two anchors that read as hex and `44px`, and expects exactly 2 reports (`docs_red_controls.sh:35-40`). Mutant: lookbehind removed; the red control prints `FAIL: look word report`. The real docs still pass (383 docs, 0 broken).
+- (3) Verified. `design-input-batches-1-2-2026-10-08.md:67` now records that Tokens has no row, attributed to the PM.
+- Open: none.
