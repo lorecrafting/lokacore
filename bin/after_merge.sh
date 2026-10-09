@@ -35,11 +35,12 @@ if git ls-remote --exit-code --heads origin "$branch" > /dev/null 2>&1; then
 fi
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git merge-base --is-ancestor "$branch" origin/main || die "$branch is not in origin/main; nothing changed"
 # The record reaches main cherry-picked onto the PR branch (step 5): every commit needs an equivalent there.
-if git rev-parse -q --verify "refs/heads/review-$pr" > /dev/null; then
-  cherry=$(git cherry origin/main "review-$pr") || die "git cherry review-$pr failed; nothing changed"
+review=$(git rev-parse -q --verify "refs/heads/review-$pr") # the sha checked here is the one deleted
+if [ -n "$review" ]; then
+  cherry=$(git cherry origin/main "$review") || die "git cherry review-$pr failed; nothing changed"
   case $cherry in *+*) die "review-$pr is not in origin/main; nothing changed" ;; esac
   # git cherry skips merge commits, whose resolution could hold unmerged content.
-  [ -z "$(git rev-list --merges origin/main.."review-$pr")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
+  [ -z "$(git rev-list --merges origin/main.."$review")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
 fi
 # Copying a dirty export back over main's changes would drop them unless the hook imported them first.
 git diff --quiet -- $j || git diff --quiet HEAD origin/main -- $j || die 'main changed the Beads export and the local one is dirty: merge it by hand'
@@ -55,7 +56,7 @@ br sync --flush-only > /dev/null || die 'br sync --flush-only failed'
 br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git branch -q -d "$branch" || die "$branch is not merged; not deleted"
-! git rev-parse -q --verify "refs/heads/review-$pr" > /dev/null || git branch -q -D "review-$pr" || die "review-$pr not deleted"
+[ -z "$review" ] || git update-ref -d "refs/heads/review-$pr" "$review" || die "review-$pr moved or not deleted"
 [ -z "$remote" ] || git push -q origin --delete "$branch" || die 'remote branch not deleted'
 sh bin/review_index.sh || die 'review index not regenerated'
 git add $j docs/reviews/README.md && { [ -z "$subject" ] || git add docs/ROADMAP.md; } || die 'add failed'

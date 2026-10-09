@@ -14,8 +14,7 @@ import type { PageTurn as Turn } from '../book/PageTurn.tsx';
 async function loadPageTurn() {
   const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
   await LoadSkiaWeb({ locateFile: () => wasm });
-  const { warm } = await import('../book/snapshot');
-  return { PageTurn: (await import('../book/PageTurn.tsx')).PageTurn, warm };
+  return { PageTurn: (await import('../book/PageTurn.tsx')).PageTurn };
 }
 
 function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>[0]> }) {
@@ -38,15 +37,27 @@ function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>
 const meta = { title: 'Book/PageTurn' } satisfies Meta;
 export default meta;
 
+// Every picture decoded while the story is shown; before the first turn, only PageTurn's warm-up.
+const decodes: Promise<void>[] = [];
+
 export const ChapterToSettings: StoryObj<typeof meta> = {
   loaders: [loadPageTurn],
+  beforeEach: () => {
+    decodes.length = 0;
+    const decode = HTMLImageElement.prototype.decode;
+    HTMLImageElement.prototype.decode = function (this: HTMLImageElement) {
+      return decodes[decodes.push(decode.call(this)) - 1]!;
+    };
+    return () => void (HTMLImageElement.prototype.decode = decode);
+  },
   render: (_, { loaded }) => <Turning PageTurn={loaded.PageTurn} />,
   // Continue curls forward to Settings, the arriving page live at once; Start over curls back. A
   // turn with no curl (no picture in time) fails the canvas wait.
-  play: async ({ canvas, canvasElement, userEvent, loaded }) => {
-    // The page's picture is prepared before the turn (BOOK-UI-COMPONENTS.md, Input): a click during
-    // PageTurn's warm-up shares the decoder with it and misses motion.quick under load (loka-v2j).
-    await loaded.warm(canvasElement as never);
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    // PageTurn prepares the page's picture before the turn (BOOK-UI-COMPONENTS.md, Input): wait for
+    // its own warm-up, as a click during it shares the decoder and misses motion.quick under load.
+    await waitFor(() => expect(decodes.length).toBeGreaterThan(0), { timeout: 3000 });
+    await Promise.allSettled(decodes);
     const curl = () => canvasElement.querySelector('canvas');
     const turn = async (button: string, arriving: string | RegExp) => {
       await userEvent.click(canvas.getByRole('button', { name: button }));
