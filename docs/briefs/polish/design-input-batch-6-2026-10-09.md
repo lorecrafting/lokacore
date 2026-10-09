@@ -21,15 +21,16 @@ before Continue). Not adopted: the mock's fleuron `span` (26 px accent, not in t
 subtitle `em` (no live text), the 3.6 s auto-dismiss (Continue stays), the backdrop blur (an effect).
 
 **Layout.** The card is one block, `alignItems: 'center'`, `gap: space.sm`: label (`type.chapterLabel` `dim`,
-centred), title (`type.chapterTitle` `fg`, centred, wrapping, `accessibilityRole="header"`, `useTitleFocus()` as
-`ScenePage` does at `sections.tsx:284`), rule (`View` `size.chapterRule` wide, `size.rule` high, `dim`,
+centred), title (`type.chapterTitle` `fg`, centred, wrapping); label and title sit in one `View accessible
+accessibilityRole="header"` with `useTitleFocus()`, named by its visible text, taking the arriving focus (see
+Accessible name); then the rule (`View` `size.chapterRule` wide, `size.rule` high, `dim`,
 `marginTop: space.sm`). Then `ContinueButton` not stretched (`alignSelf: 'center'`). Status locked and running head as
 today (`Book.tsx:199`, book-ui.md unchanged on that).
 
 **Accessible name** (changed after design review 2026-10-09). The card is not pressable (the mock's `button` is its
 dismiss; the Book's is Continue). Label and title together are the page header: one `View accessible
 accessibilityRole="header"` with `useTitleFocus()`, holding both `Text`s, no `accessibilityLabel`, so its name is its
-visible text in order ("Chapter one, The Missing Child — in progress") and a screen reader arriving on the card hears
+visible text in order, no punctuation added ("Chapter one The Missing Child — in progress") and a screen reader arriving on the card hears
 the label. Continue keeps its name "Continue": the label-in-name rule holds with nothing added.
 
 **Stories.** `stories/ChapterPages.stories.tsx` `ChapterTitle` (generated view) stays and shows the card. Add one
@@ -39,7 +40,7 @@ since the fixture's one title cannot show wrapping. Smoke/axe as every page stor
 **Catalogue row (new, after Continue button; written in this PR).**
 
 ```
-| Chapter card | The chapter title page's one block, centred on the paper (the Page's centred variant): a chapter label in `type.chapterLabel` `dim`, the title in `type.chapterTitle` `fg` (the page header, arriving focus), then a `dim` rule `size.chapterRule` wide and `size.rule` high; label, title and rule `space.sm` apart, the rule `space.sm` further; the mock's `.chapter` without its fleuron, subtitle and auto-dismiss. The Continue button follows as the next block, centred, not stretched. Nothing on it is pressable but Continue. | shown | `stories/ChapterPages.stories.tsx` |
+| Chapter card | The chapter title page's one block, centred on the paper (the Page's centred variant): a chapter label in `type.chapterLabel` `dim`, the title in `type.chapterTitle` `fg`; label and title together are the page header, one accessible node named by its visible text in order ("Chapter one The Missing Child"), with the arriving focus; then a `dim` rule `size.chapterRule` wide and `size.rule` high; label, title and rule `space.sm` apart, the rule `space.sm` further; the mock's `.chapter` without its fleuron, subtitle and auto-dismiss. The Continue button follows as the next block, centred, not stretched. Nothing on it is pressable but Continue. | shown | `stories/ChapterPages.stories.tsx` |
 ```
 
 **book-ui.md** `#chapters-scenes-and-recovery`, one word change: "A chapter title page shows its chapter label,
