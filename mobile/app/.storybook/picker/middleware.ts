@@ -82,7 +82,9 @@ const wellFormed = (pick: unknown): pick is Pick =>
 
 // The session pill: a polish session branch (bin/polish_session.sh) served from this worktree.
 const session = () => {
-  const branch = execFileSync('git', ['branch', '--show-current'], { cwd: root }).toString().trim();
+  const branch =
+    process.env.LOKA_POLISH_SESSION ??
+    execFileSync('git', ['branch', '--show-current'], { cwd: root }).toString().trim();
   return branch.startsWith('polish/session-') ? branch : null;
 };
 const shot = (url: string, res: ServerResponse) => {

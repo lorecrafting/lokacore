@@ -5,7 +5,7 @@ import { Button } from 'storybook/internal/components';
 import { useAddonState } from 'storybook/manager-api';
 import { ADDON_ID, type Feed, type Status } from './events.ts';
 import { OwnerItem, PmCard, chipText, working } from './items.tsx';
-import { clear, event, initial, pin, send, type State } from './state.ts';
+import { clear, event, initial, pin, send, toggle, type State } from './state.ts';
 import { Area, Chip, Column, Composer, Dot, Header, List, Muted, Negative } from './styles.ts';
 
 type Close = { button: React.ReactNode; confirm: boolean; setConfirm: (v: boolean) => void };
@@ -115,6 +115,8 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submit();
+          else if (e.key === 'Escape' && !pending.length && !text)
+            toggle(false); // second Esc
           else if (e.key === 'Escape') (setText(''), clear());
         }}
       />
@@ -139,8 +141,9 @@ export const Panel = () => {
           : 'No dev server: the picker needs `storybook dev`.'}
       </Muted>
     );
-  // One Close batch: the header's and the PM card's open the same inline confirm.
-  const button = (
+  // One Close batch: the header's and the PM card's open the same inline confirm; none without a
+  // session (nothing to close).
+  const button = feed.session && (
     <Button
       size="small"
       variant="outline"

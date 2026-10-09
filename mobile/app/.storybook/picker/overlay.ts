@@ -105,8 +105,9 @@ const describe = (el: Element, key: string): Picked => {
   };
 };
 
-// The crop (box + 24 px, device pixel ratio 2) with html-to-image, loaded on the first pin only, so
-// the build and the smoke never bundle it. Unknown (a WebGL canvas, a font fetch) stays null.
+// The crop (box + 24 px, device pixel ratio 2) with html-to-image, loaded on the first pin only:
+// Vite splits it into its own chunk, which the build still emits but the smoke never loads. Unknown
+// (a WebGL canvas, a font fetch) stays null.
 const crop = async (el: Element): Promise<string | null> => {
   try {
     const { toCanvas } = await import('html-to-image');

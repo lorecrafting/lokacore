@@ -6,3 +6,4 @@ invalid:
   - "const s = { color: '#1EA7FD' };"
   - "const s = { background: '#fff' };"
   - "const s = { background: 'rgba(0, 0, 0, 0.5)' };"
+  - "const s = { border: '1px solid #fff' };"

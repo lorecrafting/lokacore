@@ -24,7 +24,7 @@ const server = spawn(
   ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
   {
     cwd: app,
-    env: { ...process.env, LOKA_POLISH_DIR: dir },
+    env: { ...process.env, LOKA_POLISH_DIR: dir, LOKA_POLISH_SESSION: 'polish/session-test' },
     stdio: ['ignore', 'ignore', 'inherit'],
     detached: true,
   },
@@ -83,9 +83,27 @@ try {
     await page.waitForSelector('button[title="Remove"]'); // the pending chip in the composer
     const after = await boxes(preview);
     if (after.join('|') !== before.join('|')) fail('the overlay moved a story box while picking');
+    // Esc in the composer (focused by the pin): first clears, second turns Pick off.
+    const layer = () =>
+      getComputedStyle(document.querySelector('div[style*="crosshair"]')!).display;
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('button[title="Remove"]', { state: 'detached' });
+    if ((await preview.evaluate(layer)) !== 'block') fail('Pick off after the first Esc');
+    await page.keyboard.press('Escape');
+    await preview
+      .waitForFunction(
+        () =>
+          document.querySelector<HTMLElement>('div[style*="crosshair"]')!.style.display === 'none',
+        undefined,
+        { timeout: 5_000 },
+      )
+      .catch(() => fail('Pick still on after Esc in the empty composer'));
+    await page.click('[title="Pick an element (P)"]');
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForSelector('button[title="Remove"]');
     await page.fill('textarea[placeholder="What should change?"]', 'quick: tighten the row');
     await page.keyboard.press('Meta+Enter');
-    await settle(page, 'queued for Beads');
+    await settle(page, 'received'); // the session's first status
     const [pick] = lines('picks.jsonl');
     if (lines('picks.jsonl').length !== 1) fail('want exactly one pick line');
     if (pick.story?.id !== story) fail(`pick story id ${pick.story?.id}, want ${story}`);

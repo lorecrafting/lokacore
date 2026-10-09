@@ -43,8 +43,8 @@ printf "import { openGame } from '../../authority/local-story/session.ts';\nimpo
 echo "export const raw = { color: '#7b2d20', fontSize: 17 };" >> mobile/app/book/red_control.tsx
 echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/packages/game-view/session.ts
 # The picker: a book/ import and a raw colour on the manager side; a third colour in the overlay.
-printf "import { color } from '../../book/tokens.ts';\nexport const raw = { color: '#7b2d20', c: color };\n" > mobile/app/.storybook/picker/red_control.tsx
-echo "export const raw = '#7b2d20';" >> mobile/app/.storybook/picker/overlay.ts
+printf "import { color } from '../../book/tokens.ts';\nexport const raw = { border: '1px solid #7b2d20', c: color };\n" > mobile/app/.storybook/picker/red_control.tsx
+echo 'layer.style.cssText = `background:#7b2d20`;' >> mobile/app/.storybook/picker/overlay.ts
 fi
 if [ "$core_only" -eq 1 ]; then
   out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src 2>&1)

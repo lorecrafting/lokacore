@@ -72,7 +72,9 @@ export const OwnerItem = ({ p, feed }: { p: Pick; feed: Feed }) => {
             {chipText(e)}
           </Chip>
         ))}
-        <Muted as="span">{p.story?.title}</Muted>
+        <Muted as="span">
+          {[p.story?.title, p.palette, p.viewport?.name].filter(Boolean).join(' · ')}
+        </Muted>
       </div>
       {open && <img alt="crop" src={shotUrl(open)} style={{ width: '100%' }} />}
       <div style={{ fontSize: 14, margin: '4px 0' }}>{p.note}</div>

@@ -7,3 +7,4 @@ invalid:
   - "const s = '#7b2d20';"
   - "const s = '#fff';"
   - "const s = 'rgb(30 167 253 / 60%)';"
+  - "box.style.cssText = `background:#ff0000`;"
