@@ -238,7 +238,7 @@ export function Status(p: StatusProps) {
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
       {p.bleeding && (
-        <Text style={{ ...type.small, color: c.action }}>
+        <Text style={{ ...type.small, color: c.danger }}>
           {bleedingLine(p.bleeding, p.time, p.text)}
         </Text>
       )}
