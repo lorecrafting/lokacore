@@ -39,13 +39,28 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
   screen,
   browser,
 }) => {
-  await browser.addInitScript(() => {
+  await browser.addInitScript((seed: number) => {
     const base = Date.now();
     Date.now = () => base + Number(localStorage.getItem('d7-kill-offset') ?? 0);
     Object.defineProperty(performance, 'now', {
       value: () => Number(localStorage.getItem('d7-kill-offset') ?? 0),
     });
-  });
+    // The new game's seed decides the fight: rounds at +150 s and +300 s each hit the 1-hp deer
+    // at 75%, and at its +300 s sight deadline it bounds south even mid-fight, so two misses
+    // (21 of 400 drawn seeds) failed the run. A fixed mulberry32 stream makes the seed the same
+    // every run: stream 1 kills, stream 16 misses twice and shows 'The deer bounds south.'.
+    let s = seed;
+    crypto.getRandomValues = <T extends ArrayBufferView | null>(a: T) => {
+      const words = a as unknown as Uint32Array;
+      for (let i = 0; i < words.length; i++) {
+        s = (s + 0x6d2b79f5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        words[i] = (t ^ (t >>> 14)) >>> 0;
+      }
+      return a;
+    };
+  }, 1);
   await app.clearState();
   await browser.reload();
   await expect(screen.getByText('Choose your ancestry')).toBeVisible();
