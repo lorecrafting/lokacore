@@ -1,5 +1,5 @@
 // NPC/conversation and Contents views use the existing book controls.
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
@@ -16,6 +16,7 @@ import {
   type Thing,
 } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
+import { Riddle } from './Riddle.tsx';
 import { space, type } from './tokens.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -58,52 +59,6 @@ function Choice(p: {
           <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
       })}
-    </View>
-  );
-}
-
-// Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
-// size: allow 45, bounded tile editing and submission share one local buffer
-function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
-  const c = usePalette();
-  const [selected, setSelected] = useState<number[]>([]);
-  const answer = selected.map((i) => p.bank[i]).join('');
-  return (
-    <View>
-      <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.lg }}>
-        {p.bank.map((letter, i) => (
-          <View key={i}>
-            {selected.includes(i) ? (
-              <Text style={note(c)}>{letter}</Text>
-            ) : (
-              <Tap
-                label={`Letter ${letter}, tile ${i + 1}`}
-                onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
-              >
-                <Text style={{ ...prose(c), color: c.action }}>{letter}</Text>
-              </Tap>
-            )}
-          </View>
-        ))}
-      </View>
-      {selected.length > 0 && (
-        <View>
-          <Tap label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))}>
-            <Text style={prose(c)}>Backspace</Text>
-          </Tap>
-          <Tap label="Clear" onPress={() => setSelected([])}>
-            <Text style={prose(c)}>Clear</Text>
-          </Tap>
-          <Act
-            b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
-            press={(b) => {
-              p.press(b);
-              setSelected([]);
-            }}
-          />
-        </View>
-      )}
     </View>
   );
 }

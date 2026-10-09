@@ -3,7 +3,8 @@ import { useRef, useState } from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
-import { Footer, Status } from './Footer.tsx';
+import { Footer } from './Footer.tsx';
+import { StatusLine } from './Status.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -182,7 +183,7 @@ function Bottom(p: BottomProps) {
     <View style={{ padding: 8 }}>
       {!view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
       {!view.ancestry_choices && (
-        <Status
+        <StatusLine
           time={view.time}
           calendar={view.calendar_status}
           resources={view.resources}

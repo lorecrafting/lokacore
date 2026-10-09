@@ -50,7 +50,8 @@ registerHooks({
   },
 });
 const { color } = await import('./tokens.ts');
-const { Footer, Status } = await import('./Footer.tsx');
+const { Footer } = await import('./Footer.tsx');
+const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
 
@@ -228,7 +229,9 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, null);
   assert.equal(status.props.locked, true);
-  const contents = Status(status.props).props.children.find((c: any) => c?.type === 'Pressable');
+  const contents = StatusLine(status.props).props.children.find(
+    (c: any) => c?.type === 'Pressable',
+  );
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
       ? []
@@ -247,7 +250,7 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     tone,
     band: 'hurt',
   });
-  const status = Status({
+  const status = StatusLine({
     time: 0,
     resources: [pool('hp', 'danger'), pool('mv', 'warning'), pool('pennies', 'danger')],
     text: (key: string) => key,
