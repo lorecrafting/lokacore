@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
+- [Review: Storybook current phone and tablet viewports (PR #340)](2026-10-09-storybook-viewports-340-review.md): **PASS**
 - [Review: Storybook MCP addon, Tidewave trial, smoke vitest config move (PR #333)](2026-10-09-storybook-mcp-333-review.md): **APPROVE**
 - [Review: Storybook hardening, PageTurn wait, second tab, Live DB close, after_merge (PR #336)](2026-10-09-storybook-hardening-336-review.md): **APPROVE**
 - [Review: polish batch 6, chapter card and story word Controls (PR #332)](2026-10-09-storybook-b6-332-review.md): **APPROVE WITH NOTES**
