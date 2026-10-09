@@ -154,6 +154,19 @@ const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
       </Text>
     ));
 
+// A container's Inside heading, then its rows as one block.
+const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>
+  p.contents.length > 0 && (
+    <>
+      <SectionTitle>Inside</SectionTitle>
+      <View>
+        {p.contents.map((e) => (
+          <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+        ))}
+      </View>
+    </>
+  );
+
 export function ThingPage(p: {
   thing?: Thing;
   text: Say;
@@ -185,16 +198,7 @@ export function ThingPage(p: {
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
       </Cards>
-      {p.contents.length > 0 && (
-        <>
-          <SectionTitle>Inside</SectionTitle>
-          <View>
-            {p.contents.map((e) => (
-              <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
-            ))}
-          </View>
-        </>
-      )}
+      {inside(p)}
     </Page>
   );
 }

@@ -114,6 +114,15 @@ export function NoticeEntries(p: Props) {
   );
 }
 
+// A ferry notice's fare, or its waiver.
+const fare = (c: Palette, t: NonNullable<Notice['transport']>) => (
+  <Text style={note(c)}>
+    {t.waived
+      ? 'Free passage to recover your belongings on the isle.'
+      : `Fare: ${t.charge === 0 ? 'free' : `${t.charge}p`}.`}
+  </Text>
+);
+
 export function NoticePage(
   p: Props & { page: Extract<Route, { id: string }>; world: () => void; back: () => void },
 ) {
@@ -135,17 +144,11 @@ export function NoticePage(
           .detail(detail.id)
           .filter((line) => typeof line !== 'string' || plain(line) !== description)}
       />
-      {'transport' in detail && detail.transport && (
-        <Text style={note(c)}>
-          {detail.transport.waived
-            ? 'Free passage to recover your belongings on the isle.'
-            : `Fare: ${detail.transport.charge === 0 ? 'free' : `${detail.transport.charge}p`}.`}
-        </Text>
-      )}
-      {board && board.notices.length > 0 && (
+      {'transport' in detail && detail.transport && fare(c, detail.transport)}
+      {!!board?.notices.length && (
         <View>
-          {board.notices.map((notice) => (
-            <NoticeLink key={notice.id} {...p} notice={notice} />
+          {board.notices.map((n) => (
+            <NoticeLink key={n.id} {...p} notice={n} />
           ))}
         </View>
       )}

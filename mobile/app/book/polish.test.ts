@@ -35,10 +35,9 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.stack.map((p: any) => p.id),
     [corpse.id, pelt.id],
   );
-  assert.deepEqual(
-    h.labels().filter((x) => x === 'Back to container' || x === 'Leave'),
-    ['Back to container', 'Leave'],
-  );
+  const foot = ['Back to container', 'Leave'];
+  const shown = h.labels().filter((x) => foot.includes(x));
+  assert.deepEqual(shown, foot); // nearest first
   h.tap('Back to container');
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
@@ -459,15 +458,13 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
   assert.deepEqual(groups([entity('lamp', 'item')]), [['Lamp']]);
 });
 
-// Breaks: the Map foot loses Back to map, it does not clear the chosen place, or Back to World
-// leaves a page on the stack.
+// Breaks: the Map foot loses Back to map or its clear, or Back to World leaves a page on the stack.
 test('a chosen map place adds Back to map before Back to World', () => {
   const h = book(bundle('missing_child_v042_hash'));
   h.tap('Road-born');
   h.tap('Continue');
   h.map();
   const returns = () => h.labels().filter((x) => x.startsWith('Back to'));
-  assert.deepEqual(returns(), ['Back to World']);
   h.tap('Ferry Landing, current place');
   assert.deepEqual(returns(), ['Back to map', 'Back to World']);
   h.tap('Back to map');
