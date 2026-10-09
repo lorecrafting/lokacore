@@ -40,7 +40,8 @@ concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
 Below the description, present players and NPCs have their own paragraph/list, and
-loose room items have a separate paragraph/list. Each projected subject can open its
+loose room items have a separate paragraph/list, NPCs first. Every entity that is not an
+NPC or player goes in the item list, so none is dropped or listed twice. Each projected subject can open its
 own detail. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is
@@ -293,6 +294,8 @@ storage, travel and other quest actions remain available under their normal rule
 A declared chapter opens a title page on launch and on index change, once per presenter session.
 A modal scene takes precedence: only its persisted current line and offered Continue appear;
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
+title page shows its title and Continue only: no Back to World, and Contents and position are
+locked as in a scene. A chapter
 title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
@@ -365,7 +368,9 @@ its Shell callback; [App lifecycle](architecture.md#elapsed-session-driver) owns
 The session snapshots only validated bounded invocation data, including target_ids and input,
 so caller mutation cannot change the retained attempt or its completion context. During
 catching_up, a different identified intent returns conflict while the original attempt and
-status remain retained; a matching retry uses its original identity/context. Pending unknown
+status remain retained; a matching retry uses its original identity/context.
+A conflict, invalid or unauthorized reply logs one plain sentence, never the reply kind or a
+code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pending unknown
 save retries keep the existing original-attempt behavior for any subsequent press.
 
 ## Live combat response (M6-A)

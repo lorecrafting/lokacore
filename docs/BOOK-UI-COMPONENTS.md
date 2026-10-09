@@ -33,7 +33,7 @@ words remain in the cartridge; Book owns layout and navigation.
 |---|---|---|
 | Paper, typography and tone | [`paper.ts`](../mobile/app/book/paper.ts), `prose`, `titleStyle`, `note` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Live palette and text styles until the polish phase moves them to the [design tokens](#design-tokens). |
 | Touch and action controls | `Tap`, `Act`, `Leave` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Accessible touch target, confirmed offered action and local return. |
-| Page shell and navigation | `BookView`/`Body` in [`Book.tsx`](../mobile/app/book/Book.tsx), `Page`/`pagesAfter` in [`model.ts`](../mobile/app/book/model.ts), `Turn` | World/detail stack, foreground precedence, return and transition. |
+| Page shell and navigation | `BookView`/`Body` in [`Book.tsx`](../mobile/app/book/Book.tsx), `Page`/`pagesAfter` in [`model.ts`](../mobile/app/book/model.ts), `PageTurn` | World/detail stack, foreground precedence, return and transition. |
 | Shared reading layout | `Sheet`, `RoomPage`, `ThingPage` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Scrolling identity, prose, history and action list. |
 | NPC and choice | `NpcPage`/`NpcDetail` in [`Menu.tsx`](../mobile/app/book/Menu.tsx) | Dialogue, quests, shop offers and exact speaker-local results. |
 | Board and notice | `NoticeEntries`/`NoticePage` in [`notices.tsx`](../mobile/app/book/notices.tsx) | Board → notice → board → World and confirmed Read on entry. |
@@ -109,9 +109,9 @@ these; a new component needs a real consumer and its entry here in the same slic
 | Control | Local navigation that is not an offered action (Leave, Back to World, Back to board, Back to container, Back to map, Close, Resume dream, Continue conversation, Got it, Start over): `type.control` in `fg`, at least `size.touch` both ways. A section return sits centred below a `line` hairline. | enabled; disabled: `dim` at `opacity.disabled` | `Leave`/`Tap` [`pages.tsx:35`](../mobile/app/book/pages.tsx#L35), `Back` [`Book.tsx:318`](../mobile/app/book/Book.tsx#L318). Polish: these are drawn in four styles today. |
 | Log line | `type.log`. Narration in ink; a system line (Journal updated, a detail note) in `dim` italic; a refused line starts with a reason tag (`type.tag`, `danger`, `size.rule` border, `radius.tag`). A speech line (a `size.speechBar` `line` bar, `space.lg` indent, the speaker in `type.speaker`) waits until the log projects a speaker. | none | room log [`pages.tsx:118`](../mobile/app/book/pages.tsx#L118); detail history [`pages.tsx:168`](../mobile/app/book/pages.tsx#L168) and [`Menu.tsx:143`](../mobile/app/book/Menu.tsx#L143), one renderer twice |
 | Footer | Two `line` hairlines `size.footerRule` wide flanking the minimap (`size.minimap` at rest, zoom per [minimap rules](system/book-ui.md#minimap-map-and-presentation-controls)), `motion.quick`. The first-run tip is an `fg` bubble with `bg` text (`type.small`) and a Got it control. | at rest, held, tip shown | `Footer` [`Footer.tsx:35`](../mobile/app/book/Footer.tsx#L35) |
-| Status line | One centred line in `type.small` `dim`, items joined by " · ": time, position, bleeding, resources. Resource keys in `type.label`; each value coloured by its band. Position and resources are controls. | enabled; locked (scene, combat): `dim`, not pressable; pending: "save not confirmed" | `Status` [`Footer.tsx:192`](../mobile/app/book/Footer.tsx#L192). Polish: the locked Contents button still shows `action`. |
+| Status line | One centred line in `type.small` `dim`, items joined by " · ": time, position, bleeding, resources. Resource keys in `type.label`; each value coloured by its band. Position and resources are controls. | enabled; locked (scene, combat, chapter title page): `dim`, not pressable, the Contents button included; pending: "save not confirmed" | `Status` [`Footer.tsx:192`](../mobile/app/book/Footer.tsx#L192) |
 | Letter tile | `card` fill, `line` border, `radius.card`, `size.touch` square, `type.tile`. | free; used: `opacity.disabled`, not pressable | `Riddle` [`Menu.tsx:67`](../mobile/app/book/Menu.tsx#L67). Polish: tiles are narrower than 44 today. |
-| Page turn | See [Page turn](#page-turn). | turning, settled | `Turn` [`Turn.tsx:6`](../mobile/app/book/Turn.tsx#L6) |
+| Page turn | See [Page turn](#page-turn). | turning, settled | `PageTurn` [`PageTurn.tsx`](../mobile/app/book/PageTurn.tsx) |
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips, shop price rows and scene pick cards.
@@ -120,16 +120,24 @@ chips, shop price rows and scene pick cards.
 
 [`page-curl.sksl`](../mobile/app/book/page-curl.sksl) is the single source of the curl: one Skia
 runtime shader that web (CanvasKit) and device (Skia) both run through
-`@shopify/react-native-skia`. Its uniforms are the leaving and arriving page images, page size,
-eased progress, direction and the paper colour; there is no second CSS or WebGL curl.
+`@shopify/react-native-skia`. Its uniforms are the leaving page's picture, page size, eased
+progress, direction and the paper colour, which is the shown palette's `bg` (light or dark)
+passed in by the driver. The curl draws over the live arriving page: it paints the leaf and,
+where the arriving page shows, only the roll's shadow, never a picture of the arriving page.
+There is no second CSS or WebGL curl.
 
 - **Direction.** A page that opens turns forward (`direction` 1); a return turns back (-1),
   as the [presentation rule](system/book-ui.md#minimap-map-and-presentation-controls) says.
   Stable-route updates do not turn.
 - **Timing.** `motion.turn` (about 500 ms, tuned on a device): the driver eases progress 0 to 1
-  over its duration with its easing. A new turn replaces a running one.
-- **Input.** The arriving page is live from the first frame; the curl is a picture over it that
-  takes no touches, so input is never blocked.
+  over its duration with its easing. A new turn replaces a running one. Every `motion.*.easing`
+  name is one the driver knows; an unknown name is an error, never a silent default.
+- **Input.** The arriving page is live from the first frame, opens scrolled to its top, and
+  focus moves to its title. The leaving page and the curl take no touch, keyboard or
+  screen-reader focus, so input is never blocked and nothing hidden is announced. The leaving
+  page's picture is prepared before the turn, so the first web turn curls too. If the picture is still not ready within `motion.quick`, the page changes at once
+  without a curl (the sound still plays); the leaving page never covers the arriving page
+  longer than that.
 - **Reduced motion.** When the system asks for reduced motion, the pages cross-fade over
   `motion.fade` instead, with no curl.
 - **Sound.** The paper page-turn sound plays on every page turn at `sound.pageTurn.volume`,
