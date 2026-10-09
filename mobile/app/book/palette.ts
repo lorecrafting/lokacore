@@ -73,14 +73,14 @@ function mix(a: Palette, b: Palette, t: number): Palette {
 // (the Book is the web document), its colour reset in place as the shown palette changes; a device
 // has no ring.
 let ring: HTMLStyleElement | undefined;
-export function useFocusRing(c: Palette) {
+export function useFocusRing(c: Palette | undefined) {
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined' || !c) return;
     ring ??= document.head.appendChild(document.createElement('style'));
     ring.textContent ||= `:focus-visible{outline:${size.focus}px solid var(--focus);outline-offset:${size.focus}px}`;
     // One property write per fade frame, not a stylesheet reparse.
     document.documentElement.style.setProperty('--focus', c.action);
-  }, [c.action]);
+  }, [c?.action]);
 }
 
 // The Book's palette: the shown one, with the web focus ring in its colour.

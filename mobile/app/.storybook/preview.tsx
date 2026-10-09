@@ -58,9 +58,9 @@ const preview: Preview = {
     }
   },
   decorators: [
-    (Story, { globals }) => {
+    (Story, { globals, title }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;
-      useFocusRing(c);
+      useFocusRing(title === 'Live' ? undefined : c); // a Live Book rings in its own palette
       return (
         <PaletteContext.Provider value={c}>
           {/* The page's paper, so axe measures contrast against the real background. */}
