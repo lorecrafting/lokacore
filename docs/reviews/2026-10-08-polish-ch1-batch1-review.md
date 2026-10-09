@@ -22,5 +22,5 @@
 ## Findings
 
 1. **nit** `kernel/ts/src/mechanics/expedition/shared.ts:75`: `findIndex` takes the first route edge into `shelter_room`, but the loader pins only `route[2]` (`content/cartridge_expedition.ts:71`, `lib/loka/content/expedition.ex:115`). A route start→shelter→x→shelter loads and offers shelter at cursor 1, where the old literal used 3. Fix: `const shelter = 3; // route[2].to, pinned by the loader` or reject `shelter_room` at `route[0..1]` in both loaders.
-2. **question** `mobile/app/App.web.tsx:13`: the whole web app now waits on CanvasKit; a wasm load failure (e.g. Safari Lockdown Mode, which disables WebAssembly) leaves a blank page with no SaveError. Intended, or should the Book fall back to an uncurled turn?
+2. **question** `mobile/app/App.web.tsx:12`: the whole web app now waits on CanvasKit; a wasm load failure (e.g. Safari Lockdown Mode, which disables WebAssembly) leaves a blank page with no SaveError. Intended, or should the Book fall back to an uncurled turn?
 3. **nit** `mobile/app/sqlite-web-worker.test.ts`: no unit test catches dropping the buffer cache; only the 5-minute `steady_play.e2e.ts` does. Acceptable as is.
