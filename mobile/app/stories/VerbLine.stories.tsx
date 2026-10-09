@@ -13,6 +13,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks: the verb line is not a button, or a press loses its Button.
 export const One: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Rest by the fire' }));

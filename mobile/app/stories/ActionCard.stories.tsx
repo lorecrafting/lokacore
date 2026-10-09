@@ -14,6 +14,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks: the card is not a button, or a press loses its Button (the offer's token and input).
 export const Short: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Ask about the ferry' }));

@@ -17,6 +17,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks: the whole line is not one button named by `label`, or a press is dropped.
 export const NpcWithCarriedNote: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: args.label }));

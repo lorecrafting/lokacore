@@ -11,6 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks: the continue button is not a button named by its label, or a press is dropped.
 export const Chapter: Story = {
   play: async ({ canvas, args, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));

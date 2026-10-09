@@ -17,6 +17,7 @@ export const SystemLine: Story = {
   args: { lines: ['You read the notice.', { text: 'Journal updated.', event: true }] },
 };
 
+// Breaks: the reason tag dropped or merged into the sentence.
 export const RefusedWithTag: Story = {
   args: { lines: [{ kind: 'refused', reason: 'locked', text: 'The way west is locked.' }] },
   play: async ({ canvas }) => {
