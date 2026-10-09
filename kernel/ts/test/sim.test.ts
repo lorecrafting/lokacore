@@ -1,3 +1,4 @@
+// size: allow 520, the --cartridge artifact runs and its reproduce line join the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI (500 elsewhere),
 // each step keeping every registered invariant; determinism in and across processes; and red

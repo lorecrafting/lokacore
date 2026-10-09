@@ -15,12 +15,14 @@ export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
   `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
+// Book UI Conditions details: seconds under two minutes, whole minutes from there.
+const dur = (s: number) => (s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`);
 export const conditionLine = (
   c: NonNullable<GameView['conditions']>[number],
   time: number,
   text: Say,
 ) =>
-  `${text(c.label)} · ${Math.max(0, c.ends_at - time)}s remaining · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${c.tick_every}s`;
+  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`;
 export const expeditionLine = (
   e: NonNullable<GameView['journal'][number]['expedition']>,
   text: Say,

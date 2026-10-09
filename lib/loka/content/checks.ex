@@ -180,12 +180,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"effect" => e} = n, m) when is_binary(e),
     do: n |> Map.delete("effect") |> expand(m) |> Map.put("effect", ref(e, "bleed", m))
 
-  def expand(%{"cures" => cures} = e, m) when is_list(cures),
-    do:
-      e
-      |> Map.delete("cures")
-      |> expand(m)
-      |> Map.put("cures", Enum.map(cures, &ref(&1, "status", m)))
+  def expand(%{"cures" => c} = e, m) when is_list(c),
+    do: Map.put(expand(Map.delete(e, "cures"), m), "cures", Enum.map(c, &ref(&1, "status", m)))
 
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))

@@ -1,4 +1,11 @@
-import type { Command, DeltaOp, JobId } from '../../contracts.gen.ts';
+import type {
+  Command,
+  DefinitionRef,
+  DeltaOp,
+  EntityId,
+  JobId,
+  StatusRow,
+} from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
@@ -8,6 +15,7 @@ import { adjust, level, resourceSpec } from '../resource.ts';
 import { currentStatus, endStatus, specOf } from './shared.ts';
 
 /** A due status tick or expiry on the player's body; an obsolete job completes harmlessly. */
+// size: allow 52, one due job saturates the tick, expires, or runs the fatal death return
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
@@ -56,21 +64,31 @@ export function runStatus(
   if (expired) return accepted<never>(world, 'job_ran', ops, [], [{ key: spec.narration.expired }]);
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
   const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : row.next_tick_at;
-  const successor = mint() as JobId;
-  ops.push({
+  ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
+  return accepted<never>(world, 'job_ran', ops, [], by ? [{ key: spec.narration.tick }] : []);
+}
+
+// The row's next job, due at the earlier of its next tick and its end.
+const successor = (
+  body: EntityId,
+  status: DefinitionRef,
+  row: StatusRow & { active: true },
+  next_tick_at: number,
+  job_id: JobId,
+): DeltaOp[] => [
+  {
     op: 'status.transition',
     writer_group: 0,
     body_id: body,
     status,
     expected: row,
-    value: { ...row, next_tick_at, job_id: successor },
-  });
-  ops.push({
+    value: { ...row, next_tick_at, job_id },
+  },
+  {
     op: 'job.schedule',
     writer_group: 0,
-    job_id: successor,
+    job_id,
     job: status,
     due_time: Math.min(next_tick_at, row.ends_at),
-  });
-  return accepted<never>(world, 'job_ran', ops, [], by ? [{ key: spec.narration.tick }] : []);
-}
+  },
+];

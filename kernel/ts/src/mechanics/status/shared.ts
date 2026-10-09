@@ -51,6 +51,7 @@ export const endStatus = (
 });
 
 /** Apply or refresh `status` on `body` at the world's clock; unknown statuses change nothing. */
+// size: allow 43, a first application writes the row and schedules its job; a refresh writes only the end
 export function applyStatus(
   world: World,
   body: EntityId,

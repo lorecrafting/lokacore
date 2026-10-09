@@ -65,6 +65,7 @@ export function StatusLine(p: StatusProps) {
       <Text
         key={`${x.label}-${i}`}
         style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
+        accessibilityLabel={conditionLine(x, p.time, p.text).replaceAll(' · ', ', ')}
       >
         {conditionLine(x, p.time, p.text)}
       </Text>

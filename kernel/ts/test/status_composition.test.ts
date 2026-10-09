@@ -4,8 +4,9 @@ import { compose } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
-// Breaks: a stale expected row, a shortened end, a generation jump, a past end or a non-body
-// target composes, or a refresh or successor loses its generation.
+// Breaks: a stale expected row, a shortened end, a generation jump or change, a past end or tick,
+// inactive over inactive, or a non-body target composes, or a refresh or successor loses its
+// generation.
 test('literal status composition cases', () => {
   for (const c of read('protocol/fixtures/status_composition.json').cases)
     assert.deepEqual(compose(c.state, { ops: c.ops }), c.expected, c.id);

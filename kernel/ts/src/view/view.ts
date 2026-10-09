@@ -62,6 +62,7 @@ import { activeStatuses } from '../mechanics/status/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
+// size: allow 49, one projection lists every GameView section, conditions included
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];

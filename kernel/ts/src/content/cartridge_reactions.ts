@@ -36,7 +36,7 @@ export const uses = (c: Obj) =>
     ),
   ]) as ['definition' | 'event', string, string][];
 
-// size: allow 52, finite reaction API and typed suppression references stay in one ordered check
+// size: allow 53, finite reaction API, typed suppression and status references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);

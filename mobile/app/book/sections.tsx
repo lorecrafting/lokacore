@@ -1,6 +1,6 @@
 // The Contents sections (Character, Ancestry, Journal, Carrying, Map, Settings) and the chapter
 // and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-// size: allow 315, the chapter card joins its chapter and scene pages here (design-input-batch-6 §1: no new file)
+// size: allow 320, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file)
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -47,7 +47,7 @@ export function CharacterPage(
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
       {p.view?.conditions?.map((x, i) => (
         <Text key={`${x.label}-${i}`} style={prose(c)}>
-          {p.text(x.label)}
+          {cap(p.text(x.label))}
         </Text>
       ))}
       <SkillDetails view={p.view} text={p.text} />
