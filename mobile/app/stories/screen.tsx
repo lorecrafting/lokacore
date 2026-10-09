@@ -21,25 +21,37 @@ export type Saved = {
   details: Record<string, DetailLine[]>;
 };
 const table: Record<string, string> = chapter.value.text;
-const { text, label } = sayers({ text: (key: string) => table[key] } as Game);
+type Words = Record<string, string>;
 
-/** The presenter's screen for a saved view; `shell` sets a shell state (pending, a fault). */
-export const screenFrom = (saved: Saved, shell: Partial<Screen> = {}): Screen => ({
-  view: saved.view,
-  text,
-  label,
-  buttons: buttonsOf(saved.view, label, text),
-  log: saved.log,
-  combatLog: saved.combatLog,
-  detail: (id: string) => saved.details[id] ?? [],
-  pending: false,
-  catchingUp: false,
-  fault: undefined,
-  returnWorld: undefined,
-  returnDetail: undefined,
-  confirmedRead: undefined,
-  ...shell,
-});
+/** The presenter's screen for a saved view; `shell` sets a shell state (pending, a fault), `words`
+ * overrides the text table's words by key (the story's Controls). */
+export const screenFrom = (
+  saved: Saved,
+  shell: Partial<Screen> = {},
+  words: Words = {},
+): Screen => {
+  const { text, label } = sayers({ text: (key: string) => words[key] ?? table[key] } as Game);
+  return {
+    view: saved.view,
+    text,
+    label,
+    buttons: buttonsOf(saved.view, label, text),
+    log: saved.log,
+    combatLog: saved.combatLog,
+    detail: (id: string) => saved.details[id] ?? [],
+    pending: false,
+    catchingUp: false,
+    fault: undefined,
+    returnWorld: undefined,
+    returnDetail: undefined,
+    confirmedRead: undefined,
+    ...shell,
+  };
+};
+
+const missing = (key: string): never => {
+  throw new Error(`No text for ${key}`);
+};
 
 // PageTurn (inside BookView) builds its shader at import, so the Book loads after CanvasKit.
 const loadBook = async () => {
@@ -49,17 +61,25 @@ const loadBook = async () => {
 };
 
 /** A whole-page story: the saved view in a phone-high frame, every press a spy. The status clock
- * (e.g. "18:00 · dusk") is the saved view's; the toolbar palette repaints the page, not the hour. */
-export const pageStory = (saved: unknown, shell?: Partial<Screen>): StoryObj => ({
+ * (e.g. "18:00 · dusk") is the saved view's; the toolbar palette repaints the page, not the hour.
+ * The `words` Control rewords any text key; `keys` pre-fill it with the table's words. Limit:
+ * already-narrated lines (log, details, combat log) are strings, not keys, so it cannot reword them. */
+export const pageStory = (
+  saved: unknown,
+  shell?: Partial<Screen>,
+  keys: string[] = [],
+): StoryObj => ({
+  args: { words: Object.fromEntries(keys.map((k) => [k, table[k] ?? missing(k)])) },
+  argTypes: { words: { control: 'object' } },
   loaders: [loadBook],
-  render: (_, { loaded, globals }) => {
+  render: (args, { loaded, globals }) => {
     const { BookView } = loaded as { BookView: typeof View_ };
     const view = saved as Saved;
     return (
       <View style={{ height: '100vh' as never }}>
         <BookView
           palette={color[globals.palette as keyof typeof color] ?? color.light}
-          screen={screenFrom(view, shell)}
+          screen={screenFrom(view, shell, (args as { words?: Words | null }).words ?? {})}
           stack={view.stack}
           flip={{ turn: 0, dir: 1 }}
           go={fn()}

@@ -306,7 +306,7 @@ A declared chapter opens a title page on launch and on index change, once per pr
 A modal scene takes precedence: only its persisted current line, offered Continue and the
 [running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
-title page shows its title, Continue and the running head only: no Back to World, and Contents and position are
+title page shows its chapter label, title, Continue and the running head only: no Back to World, and Contents and position are
 locked as in a scene. A chapter
 title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.

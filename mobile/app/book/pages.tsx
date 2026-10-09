@@ -207,7 +207,7 @@ export function Page(p: {
   fixedTitle?: boolean;
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
-  centred?: boolean; // a page with no game behind it (the save error) centres its blocks vertically
+  centred?: boolean; // centres the blocks vertically: the save error, the chapter card
   foot?: ReactNode;
   children: ReactNode;
 }) {

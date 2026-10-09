@@ -26,10 +26,11 @@ Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). Provisional local or
    draft PR: run touched-layer type/compile checks and focused behavior tests; the full
    active line runs on the accumulated head. Hosted PR:
-   run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)); the pre-push hook is the
+   run `mise exec -- bin/check_all.sh` once ([CHECKS](../../docs/CHECKS.md)) and quote its last line (`check_all: PASS` or `check_all: FAIL <step>`) in the handoff; the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
-   planted violation that fails.
-2. Self-review the diff once: `/code-review medium` on the branch
+   planted violation that fails. Any label, accessible-name or exported-symbol change runs the
+   full `npm test` of that package before handoff.
+2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a

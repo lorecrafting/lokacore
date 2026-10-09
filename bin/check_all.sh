@@ -9,19 +9,26 @@ cd "$(dirname "$0")/.."
 export MIX_ENV=test
 # The dot reporter keeps the node test output to a line; failures still print in full.
 export TEST_REPORTER=dot
-m() { mise exec -- "$@"; }
+# The last line is the verdict developers quote: `check_all: PASS` or `check_all: FAIL <step>`.
+# The step goes through a file because some steps run in subshells.
+stepf=$(mktemp)
+step() { echo "$*" > "$stepf"; }
+verdict() { [ $1 = 0 ] && echo "check_all: PASS" || echo "check_all: FAIL $(cat "$stepf")"; rm -f "$stepf"; }
+trap 'verdict $?' EXIT
+m() { step "$@"; mise exec -- "$@"; }
 # A full pass on a clean tree is recorded so pre-push can skip rerunning it unchanged.
 tree() { [ -z "$(git status --porcelain --untracked-files=all)" ] && git rev-parse HEAD^{tree}; }
 start=$(tree || true)
 if [ "${1-}" = --metadata ]; then
   m elixir bin/check_docs.exs
   m bin/docs_red_controls.sh
-  python3 bin/check_beads_export.py
-  sh bin/beads_red_controls.sh
+  m python3 bin/check_beads_export.py
+  m sh bin/beads_red_controls.sh
   exit 0
 fi
 # One heavy run at a time across worktrees (pre-push execs this script): a second run waits.
 . bin/check_lock.sh
+trap 'rc=$?; verdict $rc; rm -rf "$lock"' EXIT # check_lock.sh set its own EXIT trap
 # Every lint rule over the whole tree (pre-commit sees only staged files); first, as it needs no deps.
 m ast-grep scan --error . mobile/app/.storybook # hidden directories are skipped unless named
 m mix deps.get --check-locked
@@ -41,17 +48,18 @@ m bin/docs_only_red_controls.sh
 m bin/integration_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
-python3 bin/check_beads_export.py
-sh bin/beads_red_controls.sh
+m python3 bin/check_beads_export.py
+m sh bin/beads_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts mobile/app; do
-  [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
+  step "$d node_modules"; [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
 (cd mobile/app && m npm test)
 m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
+step prettier
 git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check
 [ -z "${1-}" ] && [ -n "$start" ] && [ "$(tree || true)" = "$start" ] && echo "$start" > "$(git rev-parse --git-path loka-checked-tree)"
 true
