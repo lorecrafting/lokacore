@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: polish batches 4+5, page and live stories, E5, fidelity polish (PR #330)](2026-10-09-polish-batch4-5-review.md): **APPROVE**
 - [Review: polish batch 3, Page shell, PageFoot and E1 (PR #329)](2026-10-09-polish-batch3-review.md): **APPROVE**
+- [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
 - [Review: pre-polish final (PR #324)](2026-10-08-prepolish-final-review.md): **APPROVE WITH NOTES**
 - [Review: pre-polish batch 2 (code fixes)](2026-10-08-prepolish-batch2-review.md): **APPROVE**
