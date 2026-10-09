@@ -6,6 +6,28 @@ import { prose, usePalette } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
 import { space } from './tokens.ts';
 
+type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+
+function Foes({ view, text, combatLog }: Pick<Screen, 'view' | 'text' | 'combatLog'>) {
+  const c = usePalette();
+  const combat = view.combat!;
+  return (
+    <>
+      {combat.active_opponents?.map((opponent) => (
+        <Text key={opponent.id} style={prose(c)}>
+          {text(opponent.name)}
+          {opponent.id === combat.opponent_id ? ' (your target)' : ''}
+        </Text>
+      ))}
+      {combatLog.map((line, i) => (
+        <Text key={i} style={prose(c)}>
+          {line}
+        </Text>
+      ))}
+    </>
+  );
+}
+
 export function Combat(p: {
   screen: ReturnType<ReturnType<typeof presenter>['screen']>;
   g: ReturnType<typeof group>;
@@ -26,17 +48,7 @@ export function Combat(p: {
         {view.bleeding && (
           <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
         )}
-        {view.combat.active_opponents?.map((opponent) => (
-          <Text key={opponent.id} style={prose(c)}>
-            {text(opponent.name)}
-            {opponent.id === view.combat!.opponent_id ? ' (your target)' : ''}
-          </Text>
-        ))}
-        {combatLog.map((line, i) => (
-          <Text key={i} style={prose(c)}>
-            {line}
-          </Text>
-        ))}
+        <Foes view={view} text={text} combatLog={combatLog} />
         {stand && <Act b={stand} press={p.press} />}
         {p.g.look && <Act b={p.g.look} press={p.press} />}
         {p.g.flee.map((b) => (

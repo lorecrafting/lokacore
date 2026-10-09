@@ -32,18 +32,23 @@ const top = () => {
 // A tap's page and its save land after the 160 ms fade; an instant read waits this long first.
 const settle = () => new Promise((r) => setTimeout(r, 250));
 
-function recorder(route: string, title: string, { app, screen, browser }: Fixtures) {
-  const dir = new URL('../.walkthrough/steps/', import.meta.url);
-  mkdirSync(dir, { recursive: true });
-  const steps: object[] = [];
-  const note = async (action: string) => {
-    await settle();
-    const label = `${route}-${String(steps.length + 1).padStart(3, '0')}`;
-    const page = await browser.evaluate(top);
-    steps.push({ action, title: page.title, time: page.time, shot: await app.screenshot(label) });
-    writeFileSync(new URL(`${route}.json`, dir), JSON.stringify({ title, steps }, null, 1));
-  };
-  type Locator = ReturnType<Screen['getByRole']>;
+// A riddle answer on the letter tiles ("Letter L, tile 5"), each tile used once, then Submit.
+const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
+  await settle();
+  const tiles = (await browser.evaluate(top)).buttons.filter((b) => b?.startsWith('Letter '));
+  for (const letter of word) {
+    const tile = tiles.find((t) => t?.startsWith(`Letter ${letter},`));
+    if (!tile) throw new Error(`walk dead end: no tile for ${letter} in ${word}`);
+    tiles.splice(tiles.indexOf(tile), 1);
+    await walked.getByRole('button', tile).tap();
+  }
+  await walked.getByRole('button', 'Submit').tap();
+};
+
+type Locator = ReturnType<Screen['getByRole']>;
+
+// The screen whose taps first wait for the control, then log a step.
+function narrated(screen: Screen, browser: Browser, note: (action: string) => Promise<void>) {
   const wrap = (locator: Locator, name: unknown): Locator =>
     new Proxy(locator, {
       get(target, key) {
@@ -73,18 +78,22 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
         ? (...args: Parameters<Screen['getByRole']>) => wrap(target.getByRole(...args), args[1])
         : Reflect.get(target, key),
   }) as Screen;
-  // A riddle answer on the letter tiles ("Letter L, tile 5"), each tile used once, then Submit.
-  const spell = async (word: string) => {
+  return walked;
+}
+
+function recorder(route: string, title: string, { app, screen, browser }: Fixtures) {
+  const dir = new URL('../.walkthrough/steps/', import.meta.url);
+  mkdirSync(dir, { recursive: true });
+  const steps: object[] = [];
+  const note = async (action: string) => {
     await settle();
-    const tiles = (await browser.evaluate(top)).buttons.filter((b) => b?.startsWith('Letter '));
-    for (const letter of word) {
-      const tile = tiles.find((t) => t?.startsWith(`Letter ${letter},`));
-      if (!tile) throw new Error(`walk dead end: no tile for ${letter} in ${word}`);
-      tiles.splice(tiles.indexOf(tile), 1);
-      await walked.getByRole('button', tile).tap();
-    }
-    await walked.getByRole('button', 'Submit').tap();
+    const label = `${route}-${String(steps.length + 1).padStart(3, '0')}`;
+    const page = await browser.evaluate(top);
+    steps.push({ action, title: page.title, time: page.time, shot: await app.screenshot(label) });
+    writeFileSync(new URL(`${route}.json`, dir), JSON.stringify({ title, steps }, null, 1));
   };
+  const walked = narrated(screen, browser, note);
+  const spell = spellOn(walked, browser);
   return {
     app,
     spell,
@@ -143,51 +152,61 @@ const ENDINGS = [
   ['stays', 'fox'],
   ['lost', 'prior'],
 ] as const;
+type Child = (typeof ENDINGS)[number][0];
+
+const search = async (screen: Screen) => {
+  await talk(screen, 'Elspeth', 'Will you look around the Green for a sign of Wren?');
+  await moves(screen, 'north', 'north');
+  await screen.getByRole('button', 'a fox drawing, open').tap();
+  await screen.getByRole('button', 'Take a fox drawing').tap();
+  await moves(screen, 'south', 'south');
+  await talk(screen, 'Elspeth', 'I found this drawing on the Green.');
+  await moves(screen, 'south', 'south');
+  await screen.getByRole('button', 'Tracks').tap();
+  await screen.getByRole('button', 'Study tracks').tap();
+  await screen.getByRole('button', 'Leave').tap();
+};
+
+const childReturn = async (r: Walk, child: Child) => {
+  const { screen } = r;
+  await moves(screen, 'south', 'south');
+  await talk(screen, 'Vesper', '“Wren, your mother is looking for you.”');
+  await screen.getByRole('button', 'Vesper, open').tap();
+  await screen.getByRole('button', 'Talk to Vesper').last().tap();
+  await r.spell('LANTERN');
+  await screen.getByRole('button', 'Leave').tap();
+  if (child === 'stays')
+    await talk(screen, 'Vesper', '“I’ll take your message to Elspeth. Wren can stay.”');
+  else await talk(screen, 'Wren', '“Come with me. I’ll take you back to Elspeth.”');
+  await moves(screen, 'north', 'north', 'north', 'north');
+  await talk(
+    screen,
+    'Elspeth',
+    child === 'stays' ? 'Give Elspeth Vesper’s message.' : 'Bring Wren to his mother.',
+  );
+};
+
+const bell = async (screen: Screen, child: Child, allegiance: string) => {
+  await moves(screen, ...Array(child === 'lost' ? 7 : 5).fill('north'));
+  await talk(screen, 'Prior Aldric', '“I’ll ring the bell.”');
+  await moves(screen, 'up', 'up');
+  await screen.getByRole('button', 'Chapel bell').tap();
+  await screen
+    .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
+    .tap();
+  await scene(screen);
+  // The bell's scene ends back on the Chapel bell page.
+  await screen.getByRole('button', 'Leave').tap();
+  await moves(screen, 'down', 'down', 'south', 'south', 'south');
+};
+
 for (const [child, allegiance] of ENDINGS)
   walk(`1-main-${child}-${allegiance}`, `Main route: Wren ${child}, ${allegiance}`, async (r) => {
     const { screen } = r;
     await begin({ app: r.app, screen }, 'Fen-born');
-    // search
-    await talk(screen, 'Elspeth', 'Will you look around the Green for a sign of Wren?');
-    await moves(screen, 'north', 'north');
-    await screen.getByRole('button', 'a fox drawing, open').tap();
-    await screen.getByRole('button', 'Take a fox drawing').tap();
-    await moves(screen, 'south', 'south');
-    await talk(screen, 'Elspeth', 'I found this drawing on the Green.');
-    await moves(screen, 'south', 'south');
-    await screen.getByRole('button', 'Tracks').tap();
-    await screen.getByRole('button', 'Study tracks').tap();
-    await screen.getByRole('button', 'Leave').tap();
-    if (child !== 'lost') {
-      // childReturn(child)
-      await moves(screen, 'south', 'south');
-      await talk(screen, 'Vesper', '“Wren, your mother is looking for you.”');
-      await screen.getByRole('button', 'Vesper, open').tap();
-      await screen.getByRole('button', 'Talk to Vesper').last().tap();
-      await r.spell('LANTERN');
-      await screen.getByRole('button', 'Leave').tap();
-      if (child === 'stays')
-        await talk(screen, 'Vesper', '“I’ll take your message to Elspeth. Wren can stay.”');
-      else await talk(screen, 'Wren', '“Come with me. I’ll take you back to Elspeth.”');
-      await moves(screen, 'north', 'north', 'north', 'north');
-      await talk(
-        screen,
-        'Elspeth',
-        child === 'stays' ? 'Give Elspeth Vesper’s message.' : 'Bring Wren to his mother.',
-      );
-    }
-    // bell(allegiance, lost)
-    await moves(screen, ...Array(child === 'lost' ? 7 : 5).fill('north'));
-    await talk(screen, 'Prior Aldric', '“I’ll ring the bell.”');
-    await moves(screen, 'up', 'up');
-    await screen.getByRole('button', 'Chapel bell').tap();
-    await screen
-      .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
-      .tap();
-    await scene(screen);
-    // The bell's scene ends back on the Chapel bell page.
-    await screen.getByRole('button', 'Leave').tap();
-    await moves(screen, 'down', 'down', 'south', 'south', 'south');
+    await search(screen);
+    if (child !== 'lost') await childReturn(r, child);
+    await bell(screen, child, allegiance);
     // the epilogue at the market cross
     await screen.getByRole('button', 'Begin epilogue').tap();
     await scene(screen);
