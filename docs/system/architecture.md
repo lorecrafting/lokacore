@@ -238,8 +238,8 @@ Every check, its planted violation and the CI workflows: [CHECKS.md](../CHECKS.m
 During the [mobile verification pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
 automated gates cover the Elixir and TypeScript kernels, including the Node game simulator,
 and documentation. Native builds, Hermes mobile bundles and mobile source checks are deferred.
-`bin/check_all.sh` is the local line and what pre-push runs (`.githooks/pre-push`, TypeScript
-checks only when a pushed ref touches TypeScript inputs).
+Hosted CI on every pushed head is the gate ([two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md));
+`bin/check_all.sh` mirrors it for an occasional full local run.
 
 ## Elapsed session driver
 

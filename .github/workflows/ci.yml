@@ -1,10 +1,18 @@
 name: ci
 
-# Pre-production: nightly on main and by hand only (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md).
+# Pre-production: every push to a branch, nightly on main and by hand; a green run on the exact
+# head is the merge gate (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md).
 on:
+  push:
+    branches-ignore: [main]
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
+    inputs:
+      full:
+        description: also run the e1-recorder job (about 6 minutes)
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -59,7 +67,6 @@ jobs:
       - run: ast-grep test --skip-snapshot-tests
       - run: ast-grep scan --error . mobile/app/.storybook # as bin/check_all.sh: whole tree, every rule
       - run: bin/lint_red_controls.sh --core-only
-      - run: bin/docs_only_red_controls.sh
       - run: bin/integration_red_controls.sh
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
@@ -70,7 +77,7 @@ jobs:
       - run: bin/docs_red_controls.sh
       - run: python3 bin/check_beads_export.py && sh bin/beads_red_controls.sh
 
-  # The 10,000 fresh sequences (CI is set), in parallel with the typescript job, which skips sim.test.ts.
+  # The 10,000 fresh sequences (CI is set), in parallel with the kernel job, which skips sim.test.ts.
   sim:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -81,6 +88,8 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: kernel/ts/package-lock.json
       - run: npm ci --no-audit --no-fund && npm run test:sim
         working-directory: kernel/ts
       - if: failure()
@@ -92,8 +101,10 @@ jobs:
 
   # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout.
+  # tree, so its artifact and output stay outside the checkout. Nightly and on a `full` dispatch
+  # only (about 6 minutes); ci-green accepts it skipped.
   e1-recorder:
+    if: github.event_name == 'schedule' || inputs.full
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -109,9 +120,11 @@ jobs:
           echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
           node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
 
-  typescript:
+  # Kernel typecheck and unit tests (sim.test.ts runs in the sim job). The chapter fixtures compile the
+  # real authored cartridge with mix.
+  kernel:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # 3 min before the mobile suite (67 s wall, 327 s CPU locally)
+    timeout-minutes: 15
     env:
       MIX_ENV: test
     steps:
@@ -121,7 +134,8 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
-      # The ferry fixture compiles the real authored chapter in this job.
+          cache: npm
+          cache-dependency-path: kernel/ts/package-lock.json
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
           otp-version: '28.4'
@@ -130,26 +144,59 @@ jobs:
       - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
-      # Local-story authority (saves, faults, start-over) and Book tests.
+      - run: bin/kernel_red_controls.sh
+      - if: failure() # a failing run's game trace (ADR-075 §2) or fault corpus
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: game-trace-kernel
+          path: tmp/obs/game_trace/
+          if-no-files-found: ignore
+
+  # Local-story authority (saves, faults, start-over) and Book tests (67 s wall, 327 s CPU locally);
+  # its fixtures also compile the chapter with mix. Prettier and the size gates ride along.
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mobile/app/package-lock.json
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
+        with:
+          otp-version: '28.4'
+          elixir-version: '1.20.4'
+          version-type: strict
+      - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm test
         working-directory: mobile/app
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - run: node bin/check_ts_size.mjs
       - run: bin/ts_size_red_controls.sh
-      - run: bin/kernel_red_controls.sh
-      - if: failure() # a failing run's game trace (ADR-075 §2), fault corpus or simulator
+      - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: game-trace
+          name: game-trace-mobile
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
-  # The run's one verdict: fails unless every job succeeded.
+  # The run's one verdict: fails unless every job succeeded; only e1-recorder may be skipped.
   ci-green:
-    needs: [e1-recorder, elixir, lint, sim, typescript]
+    needs: [e1-recorder, elixir, lint, sim, kernel, mobile]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+      - if: >-
+          contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+          || needs.elixir.result == 'skipped' || needs.lint.result == 'skipped' || needs.sim.result == 'skipped'
+          || needs.kernel.result == 'skipped' || needs.mobile.result == 'skipped'
         run: exit 1

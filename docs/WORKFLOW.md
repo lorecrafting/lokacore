@@ -25,6 +25,8 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text); in a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
 
+The PM also sets each spawn's `effort`: low for a Sonnet nit, high for a reviewer or Fable design
+work, the default otherwise ([two-lane CI record](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 An authored brief narrows exploration but never makes save, receipt or protocol work
 mechanical. A brief pastes `ast-grep outline` signatures of the files the developer must touch, not whole files ([owner decision](decisions/owner-decision-agent-tooling-2026-10-08.md)). Run independent agents in the background and in parallel (one message,
 several spawns); resume an agent with `SendMessage` only for its own scoped fix or
@@ -80,21 +82,24 @@ Report at the end of the slice, not at every step.
    catches that break.
 3. **Build and self-review (developer).** Implement, check and self-review as
    [`developer.md`](../.claude/agents/developer.md) says, in the developer's own worktree, never the
-   main checkout; the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)
-   makes the final local publication run (with the Storybook smoke for Book or story changes); a slice that changes an interaction flow also runs `npm run test:e2e` in `mobile/app`. A PR that adds or changes a schema also runs the
-   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
+   main checkout. Locally only the focused tests the diff touches; hosted CI on the pushed head is
+   the final run ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A PR that adds or changes a schema also runs the
+   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. Commit, then publish
    per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
-4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push went
-   through the pre-push hook (the [gate](decisions/owner-decision-preproduction-gate-2026-10-08.md))
-   and starts review right away, without waiting for hosted CI; for
+4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push started
+   `ci.yml` and `book-e2e.yml` on the head (`gh run list --branch <branch>`) and starts review
+   right away, without waiting for them; for
    provisional local work it verifies the focused-check evidence and can spawn
    review after the local merge. Then it spawns a *fresh* `reviewer`
    with the PR number (or local branch, base and exact head), the brief and the cited sections. The reviewer derives the
    requirements from them before reading the diff, checks the [composition record](system/architecture.md#building-mechanics-by-composition)
    against the actual consumer and diff, checks changed actions' exact offered invocations
    against keyed admission, and tests the tests by breaking
-   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, regenerates
-   [the index](reviews/README.md) with `bin/review_index.sh`, and returns the findings.
+   the logic temporarily. For a slice that changes save, protocol or kernel contracts it writes
+   `docs/reviews/<date>-<slice>-review.md` and regenerates [the index](reviews/README.md) with
+   `bin/review_index.sh`; every other slice (polish, toolbox, docs) gets its findings as PR
+   comments and no record ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+   It returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
    developer, whose context is intact, while that context is small
    (the threshold is in [Claude Code specifics](#token-hygiene)); past that, or after a PM
@@ -104,10 +109,10 @@ Report at the end of the slice, not at every step.
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
    resolved by the PM in the integration checkout (merge, never rebase; the union driver covers the decisions list) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
-   open finding list, not just the new ones (a resumed agent drops earlier directives). The
-   PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
-   force-pushes, fixes or disputes each finding with a reason, and reruns the checks once.
-   A published branch uses the pre-push hook as its final run and pushes; a local draft
+   open finding list, not just the new ones (a resumed agent drops earlier directives). When a
+   record exists, the PM passes the reviewer's record sha (kept as local branch `review-<N>`) and the developer cherry-picks it before fixing, so the fix push carries it (no fix: the PM's sync or merge push carries it, and the PM deletes `review-<N>` after the merge); the developer never
+   force-pushes, fixes or disputes each finding with a reason, and reruns the focused checks once.
+   A published branch pushes (hosted CI reruns on the new head); a local draft
    keeps the fixed commits and review record until publication.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
    the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
@@ -118,13 +123,10 @@ Report at the end of the slice, not at every step.
    diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
-   APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, which passed the
-   pre-push hook ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
-   A `toolbox/*` branch skips the pre-push checks, so "passed the hook" above does not apply to it; its gate is a green hosted run on the exact head ([record](decisions/owner-decision-hosted-ci-toolbox-2026-10-09.md)).
-   Hosted CI runs nightly on `main` and by hand; a PR that touches save, protocol or kernel code,
-   and the release candidate and E3, merge only after `gh workflow run ci.yml --ref <branch>` and
-   `gh workflow run book-e2e.yml --ref <branch>` both end green on that head. A red nightly is
-   the next session's first job.
+   APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
+   `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
+   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Merge `main` into the
+   branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    The owner, or the PM when the owner asks or for status-only commits (ROADMAP status lines,
@@ -181,13 +183,13 @@ No source merge or CI gate depends on `br`; the export check guards the JSONL.
 ## Delivery lanes
 <a id="local-edit-loop"></a>
 
-The brief names the lane. Sequential or dependent slices share one draft branch by default: each is reviewed on its exact draft head without CI, the PM marks it ready once, and the final review runs on the ready head. All three end in step 7's gate on the pushed head.
+The brief names the lane. Sequential or dependent slices share one draft branch by default: each is reviewed on its exact draft head, the PM marks it ready once, and the final review runs on the ready head. All three end in step 7's gate on the pushed head.
 
 | Lane | Use | Developer | Review | Merge |
 |---|---|---|---|---|
-| Hosted PR | a slice that must merge alone, or a single fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer right after the push (step 4) | step 7 |
+| Hosted PR | a slice that must merge alone, or a single fix | focused tests; pushes and opens a ready PR; hosted CI on the head is the final run | fresh reviewer right after the push (step 4) | step 7 |
 | Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | each slice or batch on its exact head while the PR is a draft; the PM marks it ready before the final review on the publication head ([step 7](#loop)) | step 7 on the ready head |
-| Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: full local checks and red controls once on its head, every review closed, then step 7 |
+| Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: every review closed, hosted CI green on its head, then step 7 |
 
 Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
 one push per wave, not per small change. Collect tracker, process and docs changes into one
@@ -245,8 +247,8 @@ value, a new token or component, hierarchy, typography, colour or composition, s
 feel request): designer on Fable. Sonnet hands a nit that needs a token or rule change to Fable; the
 owner forces either with a `fable:` or `quick:` prefix.
 The owner's "Close batch", or a PM suggestion, ends the batch: with five or more Sonnet nits, Fable
-skims their diffs once; `bin/polish_session.sh close` pushes (one pre-push hook) and opens the PR;
-one Opus `reviewer` quick pass on it; the PM merges. Batches stay open liberally; close early only for a critical
+skims their diffs once; `bin/polish_session.sh close` pushes and opens the PR;
+one Opus `reviewer` quick pass as PR comments; the PM merges on green hosted runs. Batches stay open liberally; close early only for a critical
 item or too much complexity. Mechanics, save, protocol or engine items leave the session as Beads issues.
 
 ## Token hygiene
@@ -255,7 +257,9 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- At most two agents run `bin/check_all.sh`, smoke or a pre-push at once; the PM queues the rest (load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
+- The PM spawns a new agent only while `uptime` load is under 8, up to three or four at once; no agent
+  runs the full `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1: hosted
+  CI does ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
 - Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion
   notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
@@ -343,7 +347,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   serving the owner's [live preview](web-preview.md) (loka-4xl).
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
-- For a hosted PR, the reviewer commits only its record in a detached worktree
+- For a contract slice's record (save, protocol or kernel contracts), the reviewer commits only its record in a detached worktree
   at `origin/<branch>`, runs `git branch -f review-<N> HEAD` to keep the commit, hands back the sha and removes the worktree; the developer's fix push or the PM's merge commit carries it, with no standalone record push. During local development, the reviewer commits
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then

@@ -161,8 +161,7 @@ and not repeated here.
 
 ## Process
 
-- During pre-production, metadata-only changes skip engine and browser checks (pre-push lanes since the [merge gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md)) and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
-- During pre-production, no PR runs hosted CI on its own: CI runs nightly on `main` and by hand ([owner decision](../decisions/owner-decision-preproduction-gate-2026-10-08.md); drafts before it: [record](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+- During pre-production, hosted CI runs on every pushed branch head, nightly on `main` and by hand, and a green run on the exact head is the merge gate; no local pre-push checks, no check lock, no agent-count cap (load under 8 instead), focused tests only on the M1; review records only for save, protocol or kernel contract slices ([owner decision](../decisions/owner-decision-two-lane-ci-2026-10-09.md); earlier lanes: [scope](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md), [gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md), [drafts](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
 - Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
@@ -190,9 +189,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Mechanics PRs use one fresh independent reviewer by default; a second opinion
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
-- Merge: APPROVE or APPROVE WITH NOTES with nothing open on a head that passed the pre-push hook;
-  hosted CI runs nightly and by hand, and must be green first for save, protocol or kernel PRs, the
-  release candidate and E3 ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM
+- Merge: APPROVE or APPROVE WITH NOTES with nothing open on a head whose hosted runs are green
+  ([record](../decisions/owner-decision-two-lane-ci-2026-10-09.md)); the PM
   merges PRs ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); admins (the owner, or
   the PM when asked or for status-only commits) may push to `main` or merge directly, never for
   unreviewed code or past a red check ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM runs a slice to its
