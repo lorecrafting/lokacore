@@ -768,6 +768,14 @@
         },
         "narration": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "cures": {
+          "description": "Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active.",
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1
         }
       },
       "required": [

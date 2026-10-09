@@ -70,6 +70,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Food.check(manifest, defs, v2),
       Loka.Content.Bleed.check(manifest, defs, v2),
+      Loka.Content.Status.check(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
       Loka.Content.Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
@@ -188,7 +189,8 @@ defmodule Loka.Content.Compiler do
     {"population_bundle", :population_bundle, "PopulationBundle"},
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
-    {"bleed", :bleed, "BleedDefinition"}
+    {"bleed", :bleed, "BleedDefinition"},
+    {"status", :status, "StatusDefinition"}
   ]
 
   defp definitions(files, m) do

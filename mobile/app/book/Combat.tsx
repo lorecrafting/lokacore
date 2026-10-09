@@ -1,6 +1,6 @@
 // A full reading page with the offered actions following its combat history.
 import { Text, View } from 'react-native';
-import { bleedingLine, type group } from './model.ts';
+import { bleedingLine, conditionLine, type group } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
 import { Page, RunningHead } from './pages.tsx';
@@ -20,6 +20,11 @@ function Fight({ view, text }: Pick<Screen, 'view' | 'text'>) {
       {view.bleeding && (
         <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
       )}
+      {view.conditions?.map((x) => (
+        <Text key={x.label} style={prose(c)}>
+          {conditionLine(x, view.time, text)}
+        </Text>
+      ))}
       {combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}

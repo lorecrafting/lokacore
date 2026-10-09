@@ -12,6 +12,7 @@ import { refusal } from '../../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { adjust, level, resourceRef, resourceSpec } from '../resource.ts';
+import { currentStatus, endStatus } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'eat' }>;
 export function availability(world: World, p: Payload, steps: Steps, action: Key) {
@@ -36,7 +37,12 @@ export function transition(
     current = level(world, body, edible.resource),
     spec = resourceSpec(world, body, edible.resource);
   if (current === undefined || !spec) return { code: 'precondition_failed' };
-  if (current >= spec.maximum) return { code: 'invalid_state' };
+  const cured = (edible.cures ?? []).flatMap((status) => {
+    const row = currentStatus(world, body, status);
+    return row ? [endStatus(body, status, row, 0)] : [];
+  });
+  const by = Math.min(edible.amount, spec.maximum - current);
+  if (by <= 0 && cured.length === 0) return { code: 'invalid_state' };
   return {
     edible,
     ops: [
@@ -47,7 +53,8 @@ export function transition(
         source_id: body,
         destination_id: world.consumed,
       },
-      adjust(world, body, edible.resource, Math.min(edible.amount, spec.maximum - current), {}).op,
+      ...(by > 0 ? [adjust(world, body, edible.resource, by, {}).op] : []),
+      ...cured,
     ],
   };
 }

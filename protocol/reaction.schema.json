@@ -175,6 +175,16 @@
                 },
                 "required": ["op", "plan", "duration"],
                 "additionalProperties": false
+              },
+              {
+                "description": "Apply one authored status (toolbox row 1) to the acting character's body at the cause's time; an active one is refreshed.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "status.apply" },
+                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op", "status"],
+                "additionalProperties": false
               }
             ]
           }

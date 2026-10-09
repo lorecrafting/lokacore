@@ -15,6 +15,12 @@ export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
   `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
+export const conditionLine = (
+  c: NonNullable<GameView['conditions']>[number],
+  time: number,
+  text: Say,
+) =>
+  `${text(c.label)} · ${Math.max(0, c.ends_at - time)}s remaining · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${c.tick_every}s`;
 export const expeditionLine = (
   e: NonNullable<GameView['journal'][number]['expedition']>,
   text: Say,

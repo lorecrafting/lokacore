@@ -2,7 +2,7 @@
 import type { ReactElement } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bleedingLine, branch, said, toneOf, type Pool } from './model.ts';
+import { bleedingLine, branch, conditionLine, said, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
@@ -15,6 +15,7 @@ type StatusProps = {
   calendar?: GameView['calendar_status'];
   resources?: readonly Pool[];
   bleeding?: GameView['bleeding'];
+  conditions?: GameView['conditions'];
   position?: GameView['position'];
   text: (key: string) => string;
   locked: boolean;
@@ -60,6 +61,11 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
+    ...(p.conditions ?? []).map((x) => (
+      <Text key={x.label} style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}>
+        {conditionLine(x, p.time, p.text)}
+      </Text>
+    )),
     <Contents key="contents" {...p} />,
   ].filter(Boolean);
   return (

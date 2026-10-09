@@ -9,10 +9,12 @@ import type {
   EventPayload,
   FactValue,
   ReactionRule,
+  TextKey,
 } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import {
   accepted,
+  bodyOf,
   event,
   refString,
   type Decision,
@@ -26,6 +28,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
+import { applyStatus, specOf } from './status/shared.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
 
@@ -79,6 +82,7 @@ export function sequence(
   const activated = new Set<string>();
   const ops: DeltaOp[] = [];
   const events: DomainEvent[] = [];
+  const narration: { key: TextKey }[] = [];
   let position = 0;
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
@@ -113,13 +117,19 @@ export function sequence(
         );
     } else if (step.op === 'population.suppress') {
       ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
+    } else if (step.op === 'status.apply') {
+      const body = bodyOf(then, actor);
+      if (!body) return { kind: 'fault', code: 'precondition_failed' };
+      ops.push(...applyStatus(then, body, step.status, group, mint));
+      const label = specOf(then, step.status)?.narration.applied;
+      if (label) narration.push({ key: label });
     } else {
       const assigned = assignment(world, actor, step, group, set);
       ops.push(assigned);
       if (assigned.expected !== step.value) position++;
     }
   }
-  return accepted(world, 'reacted', ops, events);
+  return accepted(world, 'reacted', ops, events, narration);
 }
 
 function assignment(

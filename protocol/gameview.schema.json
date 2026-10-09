@@ -1266,6 +1266,14 @@
         "bleeding": {
           "$ref": "gameview.schema.json#/$defs/BleedingView"
         },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/ConditionView"
+          },
+          "minItems": 1,
+          "description": "Active timed statuses on the body (toolbox row 1), in canonical status order; absent when none. C5 bleeding keeps its own field."
+        },
         "water": {
           "$ref": "water.schema.json#/$defs/WaterView"
         },
@@ -2526,6 +2534,53 @@
         "ends_at",
         "next_tick_at",
         "hp_loss",
+        "tick_every"
+      ],
+      "additionalProperties": false
+    },
+    "ConditionView": {
+      "description": "One active body status: its authored label, end, next tick and per-tick resource change.",
+      "examples": [
+        {
+          "label": "condition.poisoned",
+          "ends_at": 400,
+          "next_tick_at": 160,
+          "resource": "hp",
+          "per_tick": -1,
+          "tick_every": 60
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "ends_at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "next_tick_at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "resource": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "per_tick": {
+          "type": "integer",
+          "minimum": -2147483647,
+          "maximum": 2147483647
+        },
+        "tick_every": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "label",
+        "ends_at",
+        "next_tick_at",
+        "resource",
+        "per_tick",
         "tick_every"
       ],
       "additionalProperties": false

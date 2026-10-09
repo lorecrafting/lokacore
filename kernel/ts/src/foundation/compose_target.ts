@@ -13,6 +13,8 @@ export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'population.control' || op.op === 'population.slot') return populationTarget(op);
   if (op.op === 'crow.transition') return { kind: 'crow', plan: op.plan, slot: op.slot };
   if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
+  if (op.op === 'status.transition')
+    return { kind: 'status', body_id: op.body_id, status: op.status };
   if (op.op === 'time.advance') return { kind: 'clock' };
   switch (op.op) {
     case 'visit.record':

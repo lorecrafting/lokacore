@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "shrine"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "blessing"
+    }
+  ]
+}

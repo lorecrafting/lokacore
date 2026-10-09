@@ -1,0 +1,626 @@
+{
+  "description": "Hand-written toolbox row 1 composition answers: a status row is keyed by its body and status target, keeps one generation while active, never shortens its end, and tombstones inactive. No kernel supplies expected values. Changes are listed in canonical target-key order.",
+  "cases": [
+    {
+      "id": "first-generation",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "a0000000-0000-4000-8000-000000000007",
+          "job": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "due_time": 160
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              }
+            },
+            "value": {
+              "active": true,
+              "generation": 1,
+              "ends_at": 400,
+              "next_tick_at": 160,
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              },
+              "due_time": 160,
+              "status": "pending"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-expected-refused",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "refresh-cannot-shorten-end",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          },
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 300,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "refresh-extends-end-keeps-job",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          },
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 500,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              }
+            },
+            "value": {
+              "active": true,
+              "generation": 1,
+              "ends_at": 500,
+              "next_tick_at": 160,
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "successor-after-due-tick",
+      "state": {
+        "clock": 160,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        },
+        "jobs": {
+          "a0000000-0000-4000-8000-000000000007": {
+            "job": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            },
+            "due_time": 160,
+            "status": "pending"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "job.complete",
+          "writer_group": 0,
+          "job_id": "a0000000-0000-4000-8000-000000000007"
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          },
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 220,
+            "job_id": "a0000000-0000-4000-8000-000000000008"
+          }
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "a0000000-0000-4000-8000-000000000008",
+          "job": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "due_time": 220
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              }
+            },
+            "value": {
+              "active": true,
+              "generation": 1,
+              "ends_at": 400,
+              "next_tick_at": 220,
+              "job_id": "a0000000-0000-4000-8000-000000000008"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              },
+              "due_time": 160,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000008"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              },
+              "due_time": 220,
+              "status": "pending"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "expiry-tombstone",
+      "state": {
+        "clock": 400,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          },
+          "value": {
+            "active": false,
+            "generation": 1
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              }
+            },
+            "value": {
+              "active": false,
+              "generation": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "generation-jump-refused",
+      "state": {
+        "clock": 500,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "statuses": {
+          "{\"body_id\":\"a0000000-0000-4000-8000-000000000002\",\"kind\":\"status\",\"status\":{\"cartridge_id\":\"status_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"poison\",\"kind\":\"status\"}}": {
+            "active": false,
+            "generation": 1
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": {
+            "active": false,
+            "generation": 1
+          },
+          "value": {
+            "active": true,
+            "generation": 3,
+            "ends_at": 800,
+            "next_tick_at": 560,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "past-end-refused",
+      "state": {
+        "clock": 500,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 500,
+            "next_tick_at": 500,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "not-a-body-refused",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "npc"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "poison"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000007"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

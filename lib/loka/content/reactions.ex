@@ -99,6 +99,9 @@ defmodule Loka.Content.Reactions do
       typed ++ pack ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
   end
 
+  defp consequence(rel, {%{"op" => "status.apply"} = s, i}, _, ctx),
+    do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
+
   defp consequence(rel, {s, i}, _, ctx),
     do:
       owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++

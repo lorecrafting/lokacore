@@ -45,6 +45,11 @@ export function CharacterPage(
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
+      {p.view?.conditions?.map((x) => (
+        <Text key={x.label} style={prose(c)}>
+          {p.text(x.label)}
+        </Text>
+      ))}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose(c), color: band(c, toneOf(r)) }}>

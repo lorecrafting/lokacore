@@ -12,6 +12,7 @@ valid:
   - "import { moveSequence } from './sequence.ts';"
   - "import { roundSequence } from '../combat/round.ts';"
   - "import { runBleed } from '../bleed/job.ts';"
+  - "import { runStatus } from '../status/job.ts';"
   - "import { flee } from './flee.ts';"
   - "import { exchangeTransfers } from './exchange.ts';"
   - "import { decideHarvest } from './harvest.ts';"

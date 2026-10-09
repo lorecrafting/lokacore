@@ -203,6 +203,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, overlay} = ctx),
     do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon, overlay)
 
+  defp apply_op(%{"op" => "status.transition"} = op, t, {state, horizon, _} = ctx),
+    do: Loka.Core.ComposeStatus.transition(op, read(t, ctx), state, horizon)
+
   defp apply_op(%{"op" => "encounter.open"} = op, t, {state, _, _} = ctx),
     do:
       Loka.Core.ComposeEncounter.open(
@@ -291,6 +294,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "bleed", "body_id" => b}, s), do: section(s, "bleeds")[b]
+  defp base(%{"kind" => "status"} = t, s), do: section(s, "statuses")[key(t)]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
 

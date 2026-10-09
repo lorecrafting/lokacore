@@ -1,0 +1,12 @@
+{
+  "duration": 3600,
+  "tick_every": 600,
+  "resource": "mv",
+  "per_tick": 5,
+  "label": "condition.blessed",
+  "narration": {
+    "applied": "narration.blessing.applied",
+    "tick": "narration.blessing.tick",
+    "expired": "narration.blessing.expired"
+  }
+}

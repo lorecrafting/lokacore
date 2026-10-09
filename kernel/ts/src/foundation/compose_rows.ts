@@ -38,6 +38,8 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'jobs'), t.job_id);
     case 'bleed':
       return get(section(s, 'bleeds'), t.body_id);
+    case 'status':
+      return get(section(s, 'statuses'), key(t));
     case 'encounter':
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':

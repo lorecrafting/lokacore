@@ -177,6 +177,7 @@ The compiled cartridge, its artifact file and the compiler and loader diagnostic
 - **PopulationBundle**: One NPC, directly held item and public NPC corpse template for a bounded population.
 - **PopulationPlan**: One fixed-slot, two-room bounded population with an owned wander and replacement job.
 - **SkillDefinition**: An acquired skill with authored display text and a policy for current qualification.
+- **StatusDefinition**: Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick.
 - **StoryPointDefinition**: A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.
 - **TopicDefinition**: A declared localized topic mapped to its player Boolean knowledge fact.
 - **WorldSettings**: The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.
@@ -292,6 +293,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `population.slot`
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
   - `bleed.transition`: Checked transition of one body bleed generation.
+  - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -321,6 +323,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `population_plan`
   - `population_slot`
   - `bleed`
+  - `status`
   - `water`
   - `expedition`
   - `visit`
@@ -329,6 +332,9 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
+- **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.
+  - `true`
+  - `false`
 - **VisitedRoom**: One actor’s committed room visit; keyed by actor and room.
 - **WriterGroup**: Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.
 
@@ -454,6 +460,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **CombatView**: The current encounter and visible opponent presented to the player.
+- **ConditionView**: One active body status: its authored label, end, next tick and per-tick resource change.
 - **ContentView**: An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
 - **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
 - **DreamView**: Bed-local saved checkpoint; safe exact offers never replace ordinary World or dialogue.

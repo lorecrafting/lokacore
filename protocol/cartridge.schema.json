@@ -326,6 +326,12 @@
                 "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
               }
             },
+            "statuses": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
+              }
+            },
             "map_positions": {
               "type": "array",
               "items": {
@@ -2072,6 +2078,87 @@
         "duration",
         "tick_every",
         "hp_loss",
+        "narration"
+      ],
+      "additionalProperties": false
+    },
+    "StatusDefinition": {
+      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick.",
+      "examples": [
+        {
+          "key": "poison",
+          "duration": 300,
+          "tick_every": 60,
+          "resource": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "per_tick": -1,
+          "label": "condition.poisoned",
+          "narration": {
+            "applied": "narration.poison.applied",
+            "tick": "narration.poison.tick",
+            "expired": "narration.poison.expired"
+          }
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "tick_every": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "per_tick": {
+          "type": "integer",
+          "minimum": -2147483647,
+          "maximum": 2147483647,
+          "description": "Signed; never 0 (compiler and loader SCHEMA_VIOLATION)."
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "narration": {
+          "type": "object",
+          "properties": {
+            "applied": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "tick": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "expired": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "applied",
+            "tick",
+            "expired"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "key",
+        "duration",
+        "tick_every",
+        "resource",
+        "per_tick",
+        "label",
         "narration"
       ],
       "additionalProperties": false
