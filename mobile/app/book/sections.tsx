@@ -1,5 +1,6 @@
 // The Contents sections (Character, Ancestry, Journal, Carrying, Map, Settings) and the chapter
 // and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
+// size: allow 315, the chapter card joins its chapter and scene pages here (design-input-batch-6 §1: no new file)
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';

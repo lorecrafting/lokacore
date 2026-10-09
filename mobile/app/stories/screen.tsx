@@ -79,7 +79,7 @@ export const pageStory = (
       <View style={{ height: '100vh' as never }}>
         <BookView
           palette={color[globals.palette as keyof typeof color] ?? color.light}
-          screen={screenFrom(view, shell, (args as { words: Words }).words)}
+          screen={screenFrom(view, shell, (args as { words?: Words | null }).words ?? {})}
           stack={view.stack}
           flip={{ turn: 0, dir: 1 }}
           go={fn()}
