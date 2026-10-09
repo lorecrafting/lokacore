@@ -24,3 +24,15 @@
 1. **nit** `kernel/ts/src/mechanics/expedition/shared.ts:75`: `findIndex` takes the first route edge into `shelter_room`, but the loader pins only `route[2]` (`content/cartridge_expedition.ts:71`, `lib/loka/content/expedition.ex:115`). A route start→shelter→x→shelter loads and offers shelter at cursor 1, where the old literal used 3. Fix: `const shelter = 3; // route[2].to, pinned by the loader` or reject `shelter_room` at `route[0..1]` in both loaders.
 2. **question** `mobile/app/App.web.tsx:12`: the whole web app now waits on CanvasKit; a wasm load failure (e.g. Safari Lockdown Mode, which disables WebAssembly) leaves a blank page with no SaveError. Intended, or should the Book fall back to an uncurled turn?
 3. **nit** `mobile/app/sqlite-web-worker.test.ts`: no unit test catches dropping the buffer cache; only the 5-minute `steady_play.e2e.ts` does. Acceptable as is.
+
+## Fix round 1 (head `aac1b9f9`)
+
+Scoped to the fix commits and their direct callers.
+
+- R1 `760e915f`: `shelter = 3` matches the `route[2].to` pin in both loaders (`content/cartridge_expedition.ts:71`, `expedition.ex:115`). The new `c6_expedition.test.ts` test fails when `findIndex` is put back (2 pass, 1 fail). Its world sets `route[0].to = shelter_room`. That world would fail the loader's chain check (`cartridge_expedition.ts:56-60`, `route[1].from` is no longer `route[0].to`), so the test exercises `refused` directly. That is enough, because the cursor rule does not depend on the chain. Resolved.
+- R2 `58b45ddf`, `aac1b9f9`: `page_turn.e2e.ts` passes 4 of 4. Removing the `.catch` in `App.web.tsx` makes the no-CanvasKit test fail. Building the shader at module load (eager `Skia.RuntimeEffect.Make`) also makes it fail (blank page, 60 s timeout). Callers: `snapshot.web.ts` rejects with no CanvasKit, and `warm` and `PageTurn` both handle that rejection. `Curl` mounts only once a picture exists. Resolved.
+- D1 `ece000ab`: the bleeding line uses `c.danger`, which the palette contrast test covers. D2 `46b6576a`: `detail` never returns raw text; `presenter.test.ts` passes 12 of 12. Its only caller is `SaveError.tsx:19`. Resolved.
+- F1 `ebc20054`, `d9091784`: the test still covers kill, hide, Take, then reload. With seed stream 1 it passes 2 of 2. With stream 16 it fails, and its failure screen shows "The deer bounds south." That confirms the explanation that the deer flees at the deadline. Two misses at 25% each give 6.25%, which agrees with the observed 21 of 400. The first deer test keeps a drawn seed. Resolved.
+- Nits `bf9ffca6`: `space.page` = 24 and `size.touch` = 44, the same values as before; the imports are present.
+
+Fix round 1: **APPROVE**.
