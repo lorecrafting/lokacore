@@ -196,6 +196,7 @@ export function Page(p: {
   fixedTitle?: boolean;
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
+  centred?: boolean; // a page with no game behind it (the save error) centres its blocks vertically
   foot?: ReactNode;
   children: ReactNode;
 }) {
@@ -214,7 +215,11 @@ export function Page(p: {
           scroll = view;
         }}
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: space.page, gap: space.block }}
+        contentContainerStyle={{
+          padding: space.page,
+          gap: space.block,
+          ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
+        }}
         onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
       >
         {!p.fixedTitle && title}

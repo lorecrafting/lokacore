@@ -20,7 +20,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
   return (
     <PaletteContext value={paper}>
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-        <Page title={PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}>
+        <Page centred title={PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}>
           {why ? <Text style={note(paper)}>{why}</Text> : null}
           {failed.startOver && <Control label="Start over" onPress={startOver} />}
         </Page>
