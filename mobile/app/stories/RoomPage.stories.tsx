@@ -20,11 +20,24 @@ const meta: Meta = {
 export default meta;
 
 export const FirstRoom: StoryObj = {
-  ...pageStory(RoomFirstView),
+  ...pageStory(RoomFirstView, undefined, [
+    'room.ferry_landing.title',
+    'room.ferry_landing.description',
+  ]),
   name: 'First room',
   // At launch no title takes focus, so no ring before keyboard use (BOOK-UI-COMPONENTS.md Focus).
   play: async ({ canvasElement }) =>
     expect(canvasElement.contains(document.activeElement)).toBe(false),
+};
+// Breaks: the page's words come from the text table alone, so the Controls panel rewords nothing.
+export const Reworded: StoryObj = {
+  ...pageStory(RoomFirstView),
+  name: 'Reworded',
+  args: { words: { 'room.ferry_landing.description': 'A reworded landing, set in the panel.' } },
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('A reworded landing, set in the panel.')).toBeVisible();
+    await expect(canvas.queryByText(/Reeds crowd/)).toBeNull();
+  },
 };
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
 export const WithNotices: StoryObj = { ...pageStory(RoomNoticesView), name: 'With notices' };

@@ -16,6 +16,11 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
       .replace(/^./, (a) => a.toUpperCase()),
 });
 
+// The chapter card's label from the view's zero-based declaration index (protocol.md, `chapter`).
+// ponytail: words to twelve; a later chapter shows its numeral.
+const COUNT = 'one two three four five six seven eight nine ten eleven twelve'.split(' ');
+export const chapterLabel = (index: number) => `Chapter ${COUNT[index] ?? index + 1}`;
+
 /**
  * The line under the save-error headline, never a raw code or exception text: a Start over that is
  * not confirmed gets its words, an empty message or one that is only the kind none (the headline

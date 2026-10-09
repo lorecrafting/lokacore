@@ -9,6 +9,7 @@ import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette } from './palette.ts';
 import { space } from './tokens.ts';
+import { chapterLabel } from './words.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -67,7 +68,13 @@ function PageBody(p: BodyProps) {
   if (view.scene)
     return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)
-    return <ChapterPage title={text(view.chapter.title)} done={p.chapterDone} />;
+    return (
+      <ChapterPage
+        label={chapterLabel(view.chapter.index)}
+        title={text(view.chapter.title)}
+        done={p.chapterDone}
+      />
+    );
   if (!page) return <WorldPage {...p} />;
   if (page.kind === 'dialogue' || npcPage(page, view))
     return (

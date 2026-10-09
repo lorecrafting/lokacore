@@ -61,7 +61,8 @@ Report at the end of the slice, not at every step.
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
-   protocol change with new behavior). Obsolete development fixtures may be updated under the
+   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and every brief states the
+   handoff threshold up front ([Claude Code specifics](#token-hygiene)). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted, one home per kind: a slice brief and its design input
    live in that slice's Beads issue notes (`br update <id> --append-notes`); `docs/briefs/` holds only

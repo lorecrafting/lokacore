@@ -104,3 +104,6 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
   not navigation or gestures.
 - An agent-device `scroll` can start its pan on the footer's map joystick and walk the
   character (R6P Polish note 5). Scroll the page with `gesture pan` from a point in the text.
+- A story test of an override must plant a value the default cannot produce (polish batch 6): the
+  `words` Control's pre-fill is the text table's own words, so a play test expecting them passes with the
+  override removed. `stories/RoomPage.stories.tsx` `Reworded` plants a sentence that is not in the table.
