@@ -2,10 +2,12 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import type { StorybookConfig } from '@storybook/react-native-web-vite';
-import { mergeConfig, type Plugin } from 'vite';
+import tidewave from 'tidewave/vite-plugin';
+import { mergeConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const fromExpo = createRequire(createRequire(import.meta.url).resolve('expo'));
 const expoAsset = fromExpo.resolve('expo-asset');
+const tidewaveVersion: string = createRequire(import.meta.url)('tidewave/package.json').version;
 
 // expo-sqlite's web worker as Metro serves it (SQLiteModule.ts): a module worker Vite transforms,
 // its wasm import a URL. ponytail: dev server only; a static build would need the worker bundled.
@@ -67,6 +69,21 @@ const plugins: Plugin[] = [
   },
 ];
 
+// Vite runs in middleware mode under Storybook: no httpServer for Tidewave's browser websocket
+// (browser_eval) and no port for its default origin check, so hand it Storybook's own server.
+const tidewaveOnStorybook = (): Plugin => {
+  const plugin = tidewave({ allowedOrigins: ['//localhost', '//127.0.0.1'] });
+  const configureServer = plugin.configureServer as (server: ViteDevServer) => Promise<void>;
+  return {
+    ...plugin,
+    configureServer: (server) => {
+      const { hmr } = server.config.server;
+      const httpServer = typeof hmr === 'object' ? hmr.server : undefined;
+      return configureServer(Object.create(server, { httpServer: { value: httpServer } }));
+    },
+  };
+};
+
 const config: StorybookConfig = {
   stories: ['../stories/*.mdx', '../stories/*.stories.tsx'],
   addons: [
@@ -83,10 +100,33 @@ const config: StorybookConfig = {
   core: { disableTelemetry: true, disableWhatsNewNotifications: true, crossOriginIsolated: true },
   // The manager chrome uses the Book's fonts too (manager.ts): one font file for both documents.
   managerHead: (head) => head + readFileSync(new URL('preview-head.html', import.meta.url), 'utf8'),
+  // Storybook serves iframe.html before Vite's middlewares, so Tidewave cannot inject its toolbar.
+  // ponytail: copies tidewave 0.9.0's internal tidewaveConfigMeta shape; recheck on upgrade.
+  previewHead: (head, { configType, port }) =>
+    configType !== 'DEVELOPMENT'
+      ? head
+      : `${head}<meta name="tidewave:config" content="${JSON.stringify({
+          tidewave: {
+            project_name: 'loka-app',
+            framework_type: 'vite',
+            tidewave_version: tidewaveVersion,
+            team: {},
+            local_port: port,
+            local_scheme: 'http',
+            tmp_dir: 'tmp',
+          },
+          root: process.cwd(),
+          wsl_distro: null,
+          framework: {},
+        })
+          .replaceAll('&', '&amp;')
+          .replaceAll('"', '&quot;')}" />
+<script async type="module" src="https://tidewave.ai/tc/toolbar.js"></script>`,
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
-  viteFinal: (config) =>
+  viteFinal: (config, { configType }) =>
     mergeConfig(config, {
-      plugins,
+      // Tidewave spike (loka-zs7): `storybook dev` only, not the build or the vitest smoke.
+      plugins: configType === 'DEVELOPMENT' ? [...plugins, tidewaveOnStorybook()] : plugins,
       // expo-modules-core's src imports declare-only classes for its global types (Metro drops them).
       optimizeDeps: { rolldownOptions: { shimMissingExports: true, plugins: [sqliteWorker] } },
     }),
