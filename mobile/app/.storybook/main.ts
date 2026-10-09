@@ -1,4 +1,5 @@
 // Web Storybook for the Book UI (Beads loka-bhb): the real components under react-native-web.
+import { readFileSync } from 'node:fs';
 import type { StorybookConfig } from '@storybook/react-native-web-vite';
 import { mergeConfig, type Plugin } from 'vite';
 
@@ -28,14 +29,16 @@ const plugins: Plugin[] = [
 ];
 
 const config: StorybookConfig = {
-  stories: ['../stories/*.stories.tsx'],
-  addons: ['@storybook/addon-a11y', '@storybook/addon-vitest'],
+  stories: ['../stories/*.mdx', '../stories/*.stories.tsx'],
+  addons: ['@storybook/addon-a11y', '@storybook/addon-docs', '@storybook/addon-vitest'],
   framework: {
     name: '@storybook/react-native-web-vite',
     // Worklets for Reanimated (PageTurn), as babel-preset-expo adds them under Metro.
     options: { pluginReactOptions: { babel: { plugins: ['react-native-worklets/plugin'] } } },
   },
   core: { disableTelemetry: true, disableWhatsNewNotifications: true },
+  // The manager chrome uses the Book's fonts too (manager.ts): one font file for both documents.
+  managerHead: (head) => head + readFileSync(new URL('preview-head.html', import.meta.url), 'utf8'),
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
   viteFinal: (config) => mergeConfig(config, { plugins }),
 };

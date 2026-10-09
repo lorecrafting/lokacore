@@ -76,20 +76,16 @@ Settings retains Start over and its confirmation/error handling, and holds the
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp. Band colours
-(`warning`, `danger`) mark only the condition pools hp, ma and mv; pennies and any other count
-always show in the normal tone, never `warning` or `danger`. With a cartridge calendar, status shows the confirmed day and displayed time,
+palette without presenter thresholds. Status shows the hp band phrase only on hp. Band tones
+mark only the condition pools hp, ma and mv; pennies and any other count show plain. With a cartridge calendar, status shows the confirmed day and displayed time,
 plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
-The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows the confirmed GameView
-solar phase, never the device's light or dark setting: phase `day` shows `light`, `dawn` shows
-`dawn`, `dusk` shows `dusk`, `night` shows `dark`; any other phase, or a cartridge without a
-calendar, shows `light`. The phase names are the cartridge's solar cuts; the Book reads the label
-and computes no hours. On a phase change the whole Book changes to the new palette per the
-[palette motion rule](../BOOK-UI-COMPONENTS.md#design-tokens) (cross-fade or at once). There is no Settings override
+The Book's look follows the confirmed GameView solar phase per the
+[palette rule](../BOOK-UI-COMPONENTS.md#design-tokens); the Book reads the phase label and computes
+no hours. There is no Settings override
 ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
@@ -123,7 +119,7 @@ rule never refreshes an already-sent invocation or weakens authority freshness/a
 
 ## Minimap, Map and presentation controls
 
-The World endpaper minimap sits between hairlines: a center dot, existing compass paths/rings,
+The World endpaper minimap sits in the footer: a center dot, existing compass paths/rings,
 barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging highlights an
 existing direction and releasing attempts that exit. Returning to center cancels; a short tap
 opens Map; a terminated gesture walks nowhere. Release keeps the action/context captured at
@@ -162,12 +158,8 @@ controls and dialogs keep their keys; handled movement keys do not scroll the pa
 Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
 NPC results and direct position changes are stable-route exceptions below. The turn's form,
 reduced-motion fallback and sound follow the [page-turn entry](../BOOK-UI-COMPONENTS.md#page-turn);
-it never delays or blocks input. Explicit button labels/roles, section headings and a minimum
-44px touch target in both axes remain. Colours, fonts and sizes come from the
-[design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). World minimap and status stay outside the
+it never delays or blocks input. Explicit button labels/roles and section headings remain. World minimap and status stay outside the
 body scroll, respecting the safe area.
-Implementation details live in [book](../../mobile/app/book/Book.tsx),
-[pages](../../mobile/app/book/pages.tsx) and [tokens](../../mobile/app/book/tokens.ts).
 
 ## Detail-page order
 
@@ -229,7 +221,7 @@ Same-room NPC actions retain the route, mounted scroll area and animation token;
 flip the book or reset scrolling for each result. There is no overlay or saved transcript.
 
 After a confirmed accepted NPC action changes the actual projected journal, append the neutral
-italic **Journal updated** event within that NPC's chronological history, visually distinct from
+**Journal updated** event within that NPC's chronological history, visually distinct from
 authored dialogue. Preserve meaningful authored narration. Pending/refused/stale/fault results
 add no false event; rerenders and receipt retry do not duplicate it. This is local presenter
 metadata, not story prose, a new game event or transcript persistence.
@@ -317,7 +309,7 @@ invocation retries the original attempt before acting on its new button, preserv
 NPC/item context. Fault details remain visible with Start over recovery. Settings Start over
 requires destructive confirmation; failure retains the existing game/retry, while successful
 replacement remounts the book. Save-open errors expose only existing permitted recovery. The
-save-error screen shows the `light` palette (no GameView, so no phase), a headline and at most
+save-error screen has no GameView, so no phase; it shows a headline and at most
 one plain sentence under it, never a raw kind or code and never the headline repeated; the
 browser's save-file lock reads "Loka is already open in another tab."
 [words](../../mobile/app/book/words.ts) owns the sentences. Those

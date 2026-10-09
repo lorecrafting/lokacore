@@ -29,6 +29,13 @@ done
 if [ "$(echo "$out" | grep -c '^broken anchor')" != 4 ]; then echo "FAIL: good anchor reported\n$out"; exit 1; fi
 echo "ok   docs: broken anchors"
 
+# Look words: a copy of book-ui.md (which passes) with a planted px size fails on that line only.
+cp docs/system/book-ui.md "$D/book-ui.md"; echo 'Each pressable is 44px.' >> "$D/book-ui.md"
+n=$(wc -l < "$D/book-ui.md" | tr -d ' ')
+if out=$(elixir bin/check_docs.exs AGENTS.md "$D/book-ui.md" 2>&1); then echo "FAIL: check_docs passed a planted look word"; exit 1; fi
+if [ "$(echo "$out" | grep -c 'names a look')" != 1 ] || ! echo "$out" | grep -qF "book-ui.md:$n names a look (44px)"; then echo "FAIL: look word report\n$out"; exit 1; fi
+echo "ok   docs: book-ui.md names no look"
+
 # Review records: a throwaway repo with the real generator. A record the README does not list
 # (stale index) must fail; after bin/review_index.sh it passes; a badly named record fails.
 R=$(mktemp -d "${TMPDIR:-/tmp}/reviews.XXXXXX")

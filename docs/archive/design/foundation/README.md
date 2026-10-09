@@ -1,12 +1,12 @@
 # Book design foundation (2026-10-07)
 
-The design system's base: [tokens](../../../mobile/app/book/tokens.ts), the
-[component catalogue and page-turn rules](../../BOOK-UI-COMPONENTS.md#design-tokens), the
-[page curl shader](../../../mobile/app/book/page-curl.sksl) and the [specimen](specimen.html).
+The design system's base: [tokens](../../../../mobile/app/book/tokens.ts), the
+[component catalogue and page-turn rules](../../../BOOK-UI-COMPONENTS.md#design-tokens), the
+[page curl shader](../../../../mobile/app/book/page-curl.sksl) and the [specimen](specimen.html).
 The owner approved it as spec and sample alongside E2; applying it in app code is the
-[polish phase's](../../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) job.
+[polish phase's](../../../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) job.
 Owner direction (paraphrased): take the base design from the
-[Chapter 1 mock](../ui-exploration/chapter-one-playable.html) with every effect off, plus its
+[Chapter 1 mock](../../../design/ui-exploration/chapter-one-playable.html) with every effect off, plus its
 page curl and paper sound; the mock overrides live values where they differ; interaction
 rules do not change. This page is the audit and the mock-against-live record.
 
@@ -89,7 +89,7 @@ drawer, chips and shop rows have no live consumer.
 4. A unit test: in `color.light` and `color.dark`, each text role (`fg`, `dim`, `action`,
    `danger`, `warning`) meets WCAG 4.5:1 on both `bg` and `card`.
 5. A Node test: `specimen.html` inlines `page-curl.sksl` verbatim and its `PALETTES` equal
-   `tokens.ts` `color` (the specimen mirrors both).
+   `tokens.ts` `color` (the specimen mirrors both). Dropped 2026-10-08 with the specimen (Storybook plan, E).
 6. A compile check: `page-curl.sksl` compiles with `RuntimeEffect.Make` once
    `canvaskit-wasm` is a dependency.
 
@@ -97,7 +97,7 @@ Each needs a red control in its slice.
 
 ## Owner questions (taste): closed
 
-All eight are answered in the [owner decision](../../decisions/owner-decision-design-foundation-2026-10-07.md):
+All eight are answered in the [owner decision](../../../decisions/owner-decision-design-foundation-2026-10-07.md):
 (1) day and night follow in-game time, no Settings override for now, no moon palette;
 (2) dark `warning` is burnt orange; (3) the running head shows the current quest objective, no
 new words; (4) IM Fell English SC is chosen for bundling; (5) action cards replace accent text links;
@@ -123,6 +123,6 @@ a recorded CC0 sample is found.
 - **Running head.** Which active quest's objective shows when several are active needs a
   GameView answer.
 
-Spec change to note: [Book UI](../../system/book-ui.md#minimap-map-and-presentation-controls)
+Spec change to note: [Book UI](../../../system/book-ui.md#minimap-map-and-presentation-controls)
 now asks for 44px touch targets in both axes, not only height; the riddle tiles fail it
 today, and Settings gains a Sound on/off control (PM addition for accessibility; spec only until the polish phase).

@@ -192,9 +192,23 @@ git_env =
       not String.match?(text, ~r{^\. "\$\(dirname "\$0"\)/lib/clean_git_env\.sh"$}m),
       do: "#{f} runs git init without sourcing bin/lib/clean_git_env.sh"
 
+# Book UI names no look (a token, hex colour, px size or palette/role name): the catalogue holds it.
+# The red control passes a planted copy as the extra doc.
+look_re =
+  ~r/\b(type|space|size|radius|motion|opacity|color)\.[a-z]|#[0-9a-fA-F]{6}\b|\b\d+ ?px\b|`(light|dawn|dusk|dark|fg|bg|dim|line|card|action|danger|warning)`/
+
+looks =
+  for file <- ["docs/system/book-ui.md" | extra],
+      abs = Path.expand(file, root),
+      File.regular?(abs),
+      {text, n} <- abs |> File.read!() |> String.split("\n") |> Enum.with_index(1),
+      [hit | _] <- [Regex.run(look_re, text)],
+      do: "#{file}:#{n} names a look (#{hit}): move it to docs/BOOK-UI-COMPONENTS.md"
+
 problems =
   Enum.sort(broken) ++
-    Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ names ++ index ++ git_env
+    Enum.sort(anchors) ++
+    Enum.sort(orphans) ++ over ++ pointers ++ names ++ index ++ git_env ++ looks
 
 Enum.each(problems, &IO.puts/1)
 
