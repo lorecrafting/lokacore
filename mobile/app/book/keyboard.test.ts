@@ -277,6 +277,7 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
   const character = CharacterPage({
     resources: [pool('hp', 'danger'), pool('pennies', 'danger')],
     text: (key: string) => key,
+    world: () => {},
   });
   assert.deepEqual(
     [character.props.children]

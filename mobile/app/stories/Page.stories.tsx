@@ -86,6 +86,7 @@ export const NoRunningHead: Story = {
   },
 };
 
+// Breaks: a section heading is not a header (SectionTitle loses its role).
 export const WithSectionHeadings: Story = {
   args: {
     title: 'Equipment & Inventory',
@@ -105,6 +106,7 @@ export const WithSectionHeadings: Story = {
   },
 };
 
+// Breaks: a long authored title loses its header role.
 export const LongTitle: Story = {
   args: { title: 'The Ferryman’s Notice of Passage across the Flooded Causeway at Low Water' },
   play: async ({ canvas }) => {
@@ -169,11 +171,13 @@ export const ScrollToEnd: Story = {
   },
 };
 
+// Breaks: Page drops its foot, so the page loses its return.
+const leave = fn();
 export const WithFoot: Story = {
-  args: { title: 'Old Bram', foot: <Control label="Leave" onPress={fn()} /> },
-  play: async ({ canvas, args, userEvent }) => {
+  args: { title: 'Old Bram', foot: <Control label="Leave" onPress={leave} /> },
+  play: async ({ canvas, userEvent }) => {
+    leave.mockClear(); // a module spy: Storybook resets only top-level arg spies
     await userEvent.click(canvas.getByRole('button', { name: 'Leave' }));
-    const leave = (args.foot as { props: { onPress: () => void } }).props.onPress;
     await expect(leave).toHaveBeenCalledTimes(1);
   },
 };

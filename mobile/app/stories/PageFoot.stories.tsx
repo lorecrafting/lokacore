@@ -16,6 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks: the foot draws a return twice or drops its press.
 export const OneReturn: Story = {
   args: { back: undefined },
   play: async ({ canvas, args, userEvent }) => {

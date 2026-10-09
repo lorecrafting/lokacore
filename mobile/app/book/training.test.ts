@@ -191,14 +191,14 @@ test('Book interaction teaches swords then dodge in Tobin detail and recovers ea
       .buttons.some((b) => b.action_key === 'tobin_swords' || b.action_key === 'tobin_dodge'),
   );
   assert.ok(
-    words(CharacterPage({ view: book.screen().view, text: book.screen().text })).includes(
-      'Swords — qualified; STR at least 10',
-    ),
+    words(
+      CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
+    ).includes('Swords — qualified; STR at least 10'),
   );
   assert.ok(
-    words(CharacterPage({ view: book.screen().view, text: book.screen().text })).includes(
-      'Dodge — qualified; DEX at least 10',
-    ),
+    words(
+      CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
+    ).includes('Dodge — qualified; DEX at least 10'),
   );
 });
 // Breaks: moving to the shared item detail component silently drops confirmed fuel or invents ignition.

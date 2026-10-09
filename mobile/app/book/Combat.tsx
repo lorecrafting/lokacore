@@ -1,5 +1,5 @@
 // A full reading page with the offered actions following its combat history.
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { bleedingLine, type group } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
@@ -35,7 +35,8 @@ export function Combat(p: {
   if (!view.combat) return null;
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
-    <>
+    // Paper behind the running head too: the leaving page fades over the arriving one.
+    <View style={{ backgroundColor: c.bg, flex: 1 }}>
       <RunningHead view={view} text={text} />
       <Page title="Combat">
         <Text style={prose(c)}>{text(view.combat.name)}</Text>
@@ -54,6 +55,6 @@ export function Combat(p: {
           ))}
         </Cards>
       </Page>
-    </>
+    </View>
   );
 }

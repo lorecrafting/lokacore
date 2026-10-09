@@ -25,14 +25,15 @@ const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages
 test('every catalogue Story file exists', () => {
   const rows = read('../../docs/BOOK-UI-COMPONENTS.md')
     .split('\n')
-    .filter((line) => line.startsWith('| ') && !line.startsWith('| Room page |')); // batch 4 adds its story
+    .filter((line) => line.startsWith('| '));
   const missing = rows.flatMap((row) => {
     const story = row.split('|').at(-2)!;
     return [...story.matchAll(/`stories\/(\w+)\.stories\.tsx`/g)]
       .filter(([, name]) => !stories.includes(`${name}.stories.tsx`))
       .map(([file]) => `${row.split('|')[1].trim()}: ${file}`);
   });
-  assert.deepEqual(missing, []);
+  // batch 4 adds this story; the test then fails until the entry goes.
+  assert.deepEqual(missing, ['Room page: `stories/RoomPage.stories.tsx`']);
 });
 
 test('every exported component has a story that imports it', () => {
@@ -49,7 +50,7 @@ test('every exported component has a story that imports it', () => {
     (f) => f.endsWith('.tsx') && !(f in EXEMPT_FILES),
   );
   const missing = files.flatMap((file) =>
-    [...read(`book/${file}`).matchAll(/^export function ([A-Z]\w*)/gm)]
+    [...read(`book/${file}`).matchAll(/^export (?:default )?(?:function|const) ([A-Z]\w*)/gm)]
       .map(([, name]) => name)
       .filter((name) => !(name in EXEMPT) && !imports.includes(`${file.slice(0, -4)}:${name}`))
       .map((name) => `${file}: ${name}`),
