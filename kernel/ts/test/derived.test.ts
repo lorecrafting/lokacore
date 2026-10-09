@@ -151,6 +151,16 @@ test('the loader refuses each unsound derived table', () => {
     [(c) => delete c.world.carry, 'SCHEMA_VIOLATION', `${at}.carry_grams`],
     [
       (c) => {
+        delete c.manifest.requires.capabilities.attributes;
+        delete c.lock.capabilities.attributes;
+        delete c.attributes;
+        delete c.ancestries;
+      },
+      'UNDECLARED_CAPABILITY',
+      at,
+    ],
+    [
+      (c) => {
         delete c.world.combat;
         delete c.npcs['derived_sampler@0.0.1:npc/dummy'].attack;
         delete c.world.derived.carry_grams;

@@ -1,6 +1,6 @@
 defmodule Loka.Content.Derived do
   @moduledoc "Checks toolbox row 2 derived-stat tables (world.derived); twin of cartridge_derived.ts."
-  import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   @needs %{"hit_chance" => "combat", "damage" => "combat", "carry_grams" => "carry"}
@@ -28,20 +28,29 @@ defmodule Loka.Content.Derived do
   end
 
   defp gate(m) do
-    [major, minor] =
+    version =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
     api =
-      if major > 1 or (major == 1 and minor >= 39),
-        do: [],
-        else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
+      if version < [1, 39],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
 
     cap =
       if m["requires"]["capabilities"]["attributes"] == 1,
         do: [],
-        else: [diag("UNDECLARED_CAPABILITY", at("cartridge.json", ["world", "derived"]))]
+        else: [
+          diag(
+            "UNDECLARED_CAPABILITY",
+            "cartridge.world.derived",
+            %{"capability" => "attributes"},
+            [
+              "attributes@1"
+            ]
+          )
+        ]
 
     api ++ cap
   end

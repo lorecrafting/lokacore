@@ -12,7 +12,7 @@ defmodule Loka.ContentDerivedTest do
       {&put_in(&1, terms.("damage") ++ ["attribute"], "luck"),
        {"UNRESOLVED_REFERENCE", "cartridge.world.derived.damage.terms[0].attribute"}},
       {&put_in(&1, ["requires", "kernel_api", "at_least"], "1.38"),
-       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"}},
+       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {&update_in(&1, ["world"], fn w -> Map.delete(w, "carry") end),
        {"SCHEMA_VIOLATION", "cartridge.world.derived.carry_grams"}},
       {&update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),
