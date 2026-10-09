@@ -65,7 +65,7 @@ Report at the end of the slice, not at every step.
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted (the issue's Beads notes, `br update <id> --append-notes`,
    or `docs/briefs/`); a scratchpad copy is only a working file. Beads text uses repo-relative paths and worktree names,
-   never absolute or home-relative paths. Before ruling on or briefing an owner-approved item, read the owner's
+   never absolute or home-relative paths. Before ruling on an owner-approved item, read the owner's
    approval note and cite it, not the proposal text. Link process rules (AGENTS.md,
    WORKFLOW sections, the role files), never copy them; write out only the slice's own rules.
    Add a timebox only for open-ended work:
