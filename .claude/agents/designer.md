@@ -10,6 +10,7 @@ Read `AGENTS.md` (Simplicity; each fact lives in one place) and, in `docs/WORKFL
 Book interaction delivery, Token hygiene, Git hygiene and Review stance. Your sources are
 `docs/BOOK-UI-COMPONENTS.md`, `docs/system/book-ui.md` (read its head and heading list (`grep '^## ' docs/system/book-ui.md`),
 then only the sections the slice touches) and `docs/design/`. Link to them; never copy them.
+To see a component live, use Storybook's MCP endpoint and the Chrome extension ([web preview](../../docs/web-preview.md#storybook)).
 
 You own and are the single writer of the design system: tokens (color, type, spacing,
 motion, light/dark), the component catalogue with states and rules, and the interaction

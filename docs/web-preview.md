@@ -50,8 +50,9 @@ The current suite contains one deterministic saved-move-after-reload check. It i
 ## Storybook
 
 The Book UI's components and pages render in Storybook from `mobile/app`:
-`mise exec -- npm run storybook` serves **http://localhost:6006** on every interface, so a phone
-on the same network opens `http://<this computer's LAN address>:6006`. The toolbar picks the
+`mise exec -- npm run storybook` serves **http://localhost:6006** on this computer only; for a phone
+session, `mise exec -- npm run storybook:lan` serves every interface, so a phone on the same network
+opens `http://<this computer's LAN address>:6006` (and reaches `/mcp` too). The toolbar picks the
 palette and a phone viewport. `mise exec -- npm run storybook:smoke` type-checks, builds and runs
 every story headless (render, play function, axe at error level); CI runs it in `book-e2e.yml`
 ([checks](CHECKS.md)). Install its browser once with `mise exec -- npx playwright install chromium`.
@@ -61,3 +62,14 @@ headers (and a secure context: `localhost`, not a LAN address), so the smoke ski
 port, runs every Live story and its click-through headless, and stops it (about 50 s warm,
 85 s on a first run, so `book-e2e.yml` runs it nightly rather than the pre-push hook).
 What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).
+
+**Agents** ([owner decision](decisions/owner-decision-storybook-mcp-2026-10-09.md)): the dev server
+answers MCP at `/mcp` (`@storybook/addon-mcp`): list and read components and stories, story-writing
+instructions, previews, and `test-run` (play function and axe for chosen stories; it runs outside
+the check lock, so not during a smoke or `bin/check_all.sh`). The repo's
+`.mcp.json` points Claude Code at the owner's http://localhost:6006/mcp (approve it once per
+machine). Those tools see only the checkout that server serves, so an agent testing its own
+worktree runs Storybook on another port and calls that port's `/mcp` instead. For the browser
+console and clicks, use the Claude in Chrome extension on the same URL. Trial: `storybook dev`
+also loads the Tidewave toolbar below each story (a hosted script, 10 free prompts a month) and
+serves Tidewave's MCP at `/tidewave/mcp`, also in `.mcp.json`; the build and smoke leave it out.
