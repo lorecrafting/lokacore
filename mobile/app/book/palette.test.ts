@@ -23,7 +23,7 @@ export const useEffect = (f, deps) => globalThis.hook.effect(f, deps);`,
         }
       : next(url, c),
 });
-const { paletteOf, useShownPalette } = await import('./palette.ts');
+const { contrast, paletteOf, useShownPalette } = await import('./palette.ts');
 
 // Breaks: a phase shows the wrong palette, an unknown or inherited name ('constructor') or a world
 // without a calendar shows anything but light (docs/system/book-ui.md#world-and-status-entry).
@@ -40,23 +40,11 @@ test('the solar phase name picks the palette', () => {
     assert.equal(paletteOf(solar).bg, bg, String(solar));
 });
 
-// WCAG 2 contrast ratio of two #rrggbb colours.
-const luminance = (hex: string) => {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-};
-const contrast = (a: string, b: string) => {
-  const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m);
-  return (x + 0.05) / (y + 0.05);
-};
-
 // Breaks: a palette value that leaves a text role under 4.5:1 on its paper or card
 // (docs/BOOK-UI-COMPONENTS.md#design-tokens).
 test('every text role is at least 4.5:1 on bg and card in every palette', () => {
   assert.equal(contrast('#000000', '#ffffff').toFixed(0), '21');
+  assert.equal(contrast('#ffffff', '#ff0000').toFixed(2), '4.00'); // WCAG's red on white
   for (const [name, p] of Object.entries(color))
     for (const role of ['fg', 'dim', 'action', 'danger', 'warning'] as const)
       for (const paper of ['bg', 'card'] as const)

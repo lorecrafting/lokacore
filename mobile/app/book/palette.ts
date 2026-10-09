@@ -53,6 +53,11 @@ const lum = (hex: string) =>
     .map((v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
     .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
 const dark = (p: Palette) => lum(p.fg) > lum(p.bg); // light ink on dark paper
+// WCAG 2 contrast ratio of two #rrggbb colours (the token test and the Tokens story).
+export const contrast = (a: string, b: string) => {
+  const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+  return (x + 0.05) / (y + 0.05);
+};
 const hex = (n: number) => Math.round(n).toString(16).padStart(2, '0');
 function mix(a: Palette, b: Palette, t: number): Palette {
   const out = { ...b };

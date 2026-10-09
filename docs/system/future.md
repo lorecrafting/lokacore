@@ -36,7 +36,7 @@ Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
   [§R8](../archive/spec/14-implementation-plan.md#r8--living-world-capability-pack),
   [§R10](../archive/spec/14-implementation-plan.md#r10--first-real-offline-cartridge);
   acceptance scenarios [15](../archive/spec/15-acceptance-scenarios.md).
-- Touch UI: [room view](../design/room-view/README.md) GameView needs; the chosen direction.
+- Touch UI: [room view](../archive/design/room-view/README.md) GameView needs; the chosen direction.
 
 - **Later chapter mechanics**: [archived Barrow King / King's Road quest-consumer queues](../archive/LATER-MECHANICS.md), superseded by the [mechanics toolbox](../MECHANICS-TOOLBOX.md); five conflicts have [selected future policies](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md).
 

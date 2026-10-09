@@ -6,7 +6,7 @@ can verify it against the chat.
 The PM put three points to the owner before building SM2; the owner chose the recommended answer
 on each:
 
-- **What SM2 is.** The owner's book-style UI ([room view](../../design/room-view/README.md)) on the
+- **What SM2 is.** The owner's book-style UI ([room view](../design/room-view/README.md)) on the
   iPhone over the existing smoke controller and the bundled items cartridge, with all six panes
   (room, map, character, journal, carrying, settings). A prototype to tweak, not the R6P gate. Its
   departures from [00 §4.10](../spec/00-first-cartridge-design.md#410-touch-interface) (map joystick,
