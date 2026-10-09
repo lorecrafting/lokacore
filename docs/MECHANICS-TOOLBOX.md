@@ -25,6 +25,8 @@ Done when all four hold (Beads `loka-va9`, `loka-51b`):
    override `Date.now`); the player [fixed-time rule](decisions/owner-decision-fixed-time-2026-10-03.md) stays.
 4. The browser walkthrough (`mobile/app`: `npm run walkthrough`) and the headless simulator
    (`kernel/ts/test/sim.ts`) each run on a sampler cartridge, proven once on `ashmere_sampler`.
+   Done (batch M1): `LOKA_WALK=<id>` and `--cartridge <artifact>`
+   ([how](BUILDERS-GUIDE.md#preview-an-edit)).
 
 ## Already in the engine
 

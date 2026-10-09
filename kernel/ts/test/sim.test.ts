@@ -4,7 +4,7 @@
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -205,10 +205,40 @@ test('a seed gives byte-identical steps twice in one process and in another proc
     seeds.map((s) => simulate(s).digest),
     digests,
   );
-  const r = spawnSync('node', [new URL('sim.ts', import.meta.url).pathname, ...seeds.map(String)], {
-    encoding: 'utf8',
-  });
-  assert.equal(r.stdout, seeds.map((s, i) => `${s} ${digests[i]}\n`).join(''), r.stderr);
+  const r = spawnSync('node', [SIM, ...seeds.map(String)], { encoding: 'utf8' });
+  const named = seeds.map(
+    (s, i) => `${s} ${simulate(s).loaded.cartridge.manifest.id} ${digests[i]}\n`,
+  );
+  assert.equal(r.stdout, named.join(''), r.stderr);
+});
+
+const SIM = new URL('sim.ts', import.meta.url).pathname;
+// Breaks: `--cartridge` is ignored, so the seeds run on the seed-picked fixture set (seeds 1-8
+// pick seven other cartridges, the coverage test above), or a forged content hash is accepted.
+test('--cartridge runs every seed on that artifact and refuses a forged one', () => {
+  const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
+  const dir = mkdtempSync(join(tmpdir(), 'loka-sim-'));
+  after(() => rmSync(dir, { recursive: true, force: true }));
+  const eight = ['1', '2', '3', '4', '5', '6', '7', '8'];
+  const cli = (name: string, sha256: string) => {
+    writeFileSync(join(dir, name), `{"cartridge":${kat.canonical},"content_hash":"${sha256}"}`);
+    return spawnSync('node', [SIM, '--cartridge', join(dir, name), ...eight], { encoding: 'utf8' });
+  };
+  const r = cli('sampler.json', kat.sha256);
+  assert.equal(r.status, 0, r.stderr);
+  const named = r.stdout
+    .trim()
+    .split('\n')
+    .map((l) => l.split(' ').slice(0, 2).join(' '));
+  assert.deepEqual(
+    named,
+    eight.map((s) => `${s} ashmere_sampler`),
+    r.stdout,
+  );
+  const forged = cli('forged.json', '0'.repeat(64));
+  assert.notEqual(forged.status, 0);
+  assert.match(forged.stderr, /cartridge refused/);
+  assert.equal(forged.stdout, '');
 });
 
 const planted = (k: Partial<Kernel>): Kernel => ({ ...KERNEL, ...k });
