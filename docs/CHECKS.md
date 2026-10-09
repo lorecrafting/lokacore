@@ -16,7 +16,9 @@ their rules and red controls remain available for resumption.
   (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) rules and paths. The paused mobile rules
   (`lint/rules/mobile-*.yml`: [mobile import rules](system/architecture.md#mobile-import-rules), session
   contracts, no display text in the authority, renderer imports, which allow Skia, Reanimated and Worklets
-  for the page curl) keep their cases. Rule
+  for the page curl; `mobile-book-raw-values`: no raw hex colour or numeric `fontSize` in
+  `mobile/app/book/*.tsx`, only [design tokens](BOOK-UI-COMPONENTS.md#design-tokens), a designer one-off
+  marked `ast-grep-ignore`) keep their cases and run in pre-commit on staged `mobile/` files. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)

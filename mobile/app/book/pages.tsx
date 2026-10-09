@@ -7,7 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
-import { font, space } from './tokens.ts';
+import { font, space, type } from './tokens.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -20,6 +20,7 @@ export const band = (c: Palette, tone: Pool['tone']): string =>
 
 export const titleStyle = (c: Palette) => ({
   fontFamily: font.head,
+  // ast-grep-ignore: mobile-book-raw-values (one-off for the designer: no token for a 26 section title)
   fontSize: 26,
   color: c.fg,
   paddingBottom: 10,
@@ -176,7 +177,7 @@ export function Sheet({ title, children }: { title: string; children: ReactNode 
     <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ padding: 24, gap: 8 }}>
       <Text
         {...(title ? titleFocus : {})}
-        style={{ ...titleStyle(c), fontSize: 32 }}
+        style={{ ...titleStyle(c), ...type.pageTitle }}
         accessibilityRole="header"
       >
         {title}

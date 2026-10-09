@@ -16,6 +16,7 @@ import {
   type Thing,
 } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
+import { type } from './tokens.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
@@ -136,7 +137,11 @@ export function NpcPage(p: NpcProps) {
         if (p.log.length) scroll.current?.scrollToEnd({ animated: false });
       }}
     >
-      <Text {...titleFocus} style={{ ...titleStyle(c), fontSize: 32 }} accessibilityRole="header">
+      <Text
+        {...titleFocus}
+        style={{ ...titleStyle(c), ...type.pageTitle }}
+        accessibilityRole="header"
+      >
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
       {description && <Text style={prose(c)}>{plain(p.text(description))}</Text>}
