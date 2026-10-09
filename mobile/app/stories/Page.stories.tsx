@@ -108,6 +108,15 @@ export const WithSectionHeadings: Story = {
   },
 };
 
+// Breaks: the save error's headline sticks to the top of an otherwise empty paper.
+export const Centred: Story = {
+  args: { title: 'The save is damaged and cannot be read.', centred: true, foot: undefined },
+  play: async ({ canvas }) => {
+    const title = canvas.getByRole('heading').getBoundingClientRect();
+    expect(title.top).toBeGreaterThan(window.innerHeight / 4);
+  },
+};
+
 // Breaks: a long authored title loses its header role.
 export const LongTitle: Story = {
   args: { title: 'The Ferryman’s Notice of Passage across the Flooded Causeway at Low Water' },

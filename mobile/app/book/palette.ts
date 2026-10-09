@@ -77,7 +77,9 @@ export function useFocusRing(c: Palette) {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     ring ??= document.head.appendChild(document.createElement('style'));
-    ring.textContent = `:focus-visible{outline:${size.focus}px solid ${c.action};outline-offset:${size.focus}px}`;
+    ring.textContent ||= `:focus-visible{outline:${size.focus}px solid var(--focus);outline-offset:${size.focus}px}`;
+    // One property write per fade frame, not a stylesheet reparse.
+    document.documentElement.style.setProperty('--focus', c.action);
   }, [c.action]);
 }
 
