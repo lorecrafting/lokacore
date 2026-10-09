@@ -91,7 +91,7 @@ async function readTwice(
   label: string,
   text: string,
 ) {
-  await screen.getByRole('button', label).tap();
+  await screen.getByRole('button', `${label}, open`).tap();
   await expect(screen.getByText(text)).toBeVisible();
   await screen.getByRole('button', 'Leave').tap();
   await reopen({ app, screen });

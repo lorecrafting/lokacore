@@ -34,7 +34,7 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
   await go('south', 'Reed Path');
   await go('south', 'Reed Bank');
   await go('west', 'Willow Shade');
-  await screen.getByRole('button', 'Fenwort Patch').tap();
+  await screen.getByRole('button', /^Fenwort Patch \(\d+\), open$/).tap();
   await screen.getByRole('button', 'Gather carefully (2 herbs)').tap();
   await expect(screen.getByText('You carefully gather two sprigs of fenwort.')).toBeVisible();
   await app.restart();

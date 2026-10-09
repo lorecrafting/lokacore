@@ -103,7 +103,7 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
 }
 
 const talk = async (screen: Screen, npc: string, ...choices: string[]) => {
-  await screen.getByRole('button', `${npc}, open`).tap();
+  await screen.getByRole('button', new RegExp(`^${npc} is here\\.`)).tap();
   for (const choice of choices) {
     await screen.getByRole('button', `Talk to ${npc}`).last().tap();
     await screen.getByRole('button', choice).tap();
@@ -157,7 +157,7 @@ type Child = (typeof ENDINGS)[number][0];
 const search = async (screen: Screen) => {
   await talk(screen, 'Elspeth', 'Will you look around the Green for a sign of Wren?');
   await moves(screen, 'north', 'north');
-  await screen.getByRole('button', 'a fox drawing, open').tap();
+  await screen.getByRole('button', 'A fox drawing is here., open').tap();
   await screen.getByRole('button', 'Take a fox drawing').tap();
   await moves(screen, 'south', 'south');
   await talk(screen, 'Elspeth', 'I found this drawing on the Green.');
@@ -190,7 +190,7 @@ const bell = async (screen: Screen, child: Child, allegiance: string) => {
   await moves(screen, ...Array(child === 'lost' ? 7 : 5).fill('north'));
   await talk(screen, 'Prior Aldric', '“I’ll ring the bell.”');
   await moves(screen, 'up', 'up');
-  await screen.getByRole('button', 'Chapel bell').tap();
+  await screen.getByRole('button', 'Chapel bell, open').tap();
   await screen
     .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
     .tap();
