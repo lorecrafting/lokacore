@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
+- [Review: pre-polish final (PR #324)](2026-10-08-prepolish-final-review.md): **APPROVE WITH NOTES**
 - [Review: pre-polish batch 2 (code fixes)](2026-10-08-prepolish-batch2-review.md): **APPROVE**
 - [Review: pre-polish batch 1 (process, scripts, CI)](2026-10-08-prepolish-batch1-review.md): **CHANGES REQUIRED**
 - [Pre-polish audit B: save and persistence (2026-10-08)](2026-10-08-prepolish-audit-save.md)
