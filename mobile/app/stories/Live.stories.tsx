@@ -2,7 +2,7 @@
 // save restored from a checkpoint stories/scenarios.ts wrote from stories/routes.ts, so a click
 // runs real rules.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { openDatabaseAsync } from 'expo-sqlite';
+import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import chapter from '../../../protocol/fixtures/missing_child_v042_hash.json';
@@ -10,7 +10,7 @@ import { openGame } from '../../authority/local-story/session.ts';
 import { webDb } from '../sqlite-web.ts';
 import type Book from '../book/Book.tsx';
 
-type Loaded = { Book: typeof Book; game: ReturnType<typeof openGame> };
+type Loaded = { Book: typeof Book; game: ReturnType<typeof openGame>; db: SQLiteDatabase };
 
 const live = (checkpoint: string) => async (): Promise<Loaded> => {
   const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
@@ -26,7 +26,7 @@ const live = (checkpoint: string) => async (): Promise<Loaded> => {
     kernel_version: `loka-kernel@${'0'.repeat(40)}-dirty`,
     time: { wall: () => wall_ms, monotonic: () => 0 },
   });
-  return { Book: BookC, game };
+  return { Book: BookC, game, db };
 };
 
 const meta = {
@@ -34,6 +34,11 @@ const meta = {
   // checkpoints: stories/routes.ts, written by npm run stories:views
   // isolation headers (SharedArrayBuffer for the sqlite worker) are not served by a static build
   tags: ['!test'],
+  // runs after the loaders; its cleanup when the story is left or remounted closes this story's database
+  beforeEach:
+    ({ loaded }) =>
+    () =>
+      (loaded as Loaded).db.closeAsync(),
   render: (_, { loaded }) => {
     const { Book, game } = loaded as Loaded;
     return (

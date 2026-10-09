@@ -162,6 +162,17 @@ grep -qx 'sync --flush-only' "$R.br" && grep -qx 'close loka-a --reason Merged #
 amk; head=$(git rev-parse HEAD)
 (cd "$M" && git checkout -q -b pr origin/pr && echo late > late && git add late && git commit -qm late && git push -q origin pr)
 am remote-ahead 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge remote-ahead: changed something'
+# Break: a record cherry-picked onto the PR branch (step 5, so review-7 itself never reaches main) is
+# refused, or its deletion fails after the pull and close.
+amk; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; git checkout -q main
+(cd "$M" && git checkout -q -b pr2 origin/pr && echo rec > rec && git add rec && git commit -qm picked && git push -q origin pr2:pr \
+  && git checkout -q main && git merge -q --no-ff pr2 -m merge2 && git push -q origin main)
+am cherry-picked 0
+! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
+# Break: a merge on review-7 whose resolution main lacks is invisible to git cherry and deleted.
+amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; git merge -q --no-ff origin/main -m mrg
+echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
+am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor
