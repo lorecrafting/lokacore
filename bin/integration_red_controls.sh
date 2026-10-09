@@ -169,6 +169,10 @@ amk; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; 
   && git checkout -q main && git merge -q --no-ff pr2 -m merge2 && git push -q origin main)
 am cherry-picked 0
 ! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
+# Break: a merge on review-7 whose resolution main lacks is invisible to git cherry and deleted.
+amk; head=$(git rev-parse HEAD); git checkout -q review-7; git fetch -q origin; git merge -q --no-ff origin/main -m mrg
+echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q main
+am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
 # --- mutate.sh -----------------------------------------------------------------------------
 # a.txt holds x=1 (tested by `grep`) and y=1 (untested). Break: a restore that leaves a mutant in
 # place, an apply that silently does nothing (every mutant would read as SURVIVED), a survivor

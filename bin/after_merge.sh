@@ -38,6 +38,8 @@ fi
 if git rev-parse -q --verify "refs/heads/review-$pr" > /dev/null; then
   cherry=$(git cherry origin/main "review-$pr") || die "git cherry review-$pr failed; nothing changed"
   case $cherry in *+*) die "review-$pr is not in origin/main; nothing changed" ;; esac
+  # git cherry skips merge commits, whose resolution could hold unmerged content.
+  [ -z "$(git rev-list --merges origin/main.."review-$pr")" ] || die "review-$pr has a merge not in origin/main; nothing changed"
 fi
 # Copying a dirty export back over main's changes would drop them unless the hook imported them first.
 git diff --quiet -- $j || git diff --quiet HEAD origin/main -- $j || die 'main changed the Beads export and the local one is dirty: merge it by hand'
