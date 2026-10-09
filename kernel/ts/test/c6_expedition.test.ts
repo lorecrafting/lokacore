@@ -10,6 +10,7 @@ import {
   type World,
 } from '../src/index.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { refused } from '../src/mechanics/expedition/shared.ts';
 import { read } from './read.ts';
 
 const artifact = read('protocol/fixtures/missing_child_v041_hash.json');
@@ -142,4 +143,33 @@ test('departure fails only the attempt and Restart immediately binds a new ident
   assert.equal(a.attempt()?.cursor, 0);
   assert.notEqual(a.attempt()?.attempt_id, first);
   assert.equal(a.view().time, 82800);
+});
+
+// Breaks: the shelter cursor is the first route edge into shelter_room, not route[2] the loaders pin.
+test('shelter is offered after route[2] even when an earlier edge enters shelter_room', () => {
+  const a = setup(18);
+  a.command({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' });
+  a.command({ type: 'flee' });
+  for (const title of ['room.adder_nest.title', 'room.hound_run.title'])
+    if (a.view().place.title.key === title) a.command({ type: 'move', direction: 'west' });
+  a.command({ type: 'move', direction: 'west' });
+  a.command({ type: 'move', direction: 'south' });
+  const { quest_instance_id, attempt_id, cursor } = a.attempt()!;
+  assert.equal(cursor, 3);
+  const w = a.world();
+  const [key, quest] = Object.entries(w.cartridge.quests!).find(([, q]) => q.expedition)!;
+  const spec = quest.expedition!;
+  const route = [{ ...spec.route[0]!, to: spec.shelter_room }, ...spec.route.slice(1)];
+  const early = {
+    ...w,
+    cartridge: {
+      ...w.cartridge,
+      quests: { ...w.cartridge.quests, [key]: { ...quest, expedition: { ...spec, route } } },
+    },
+  } as World;
+  const shelter = a.detail('marsh_shelter');
+  const offer = (c: number) =>
+    refused(early, w.character, 'shelter', shelter, quest_instance_id, attempt_id, c);
+  assert.equal(offer(3), undefined);
+  assert.equal(offer(1), 'invalid_state');
 });
