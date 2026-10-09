@@ -469,3 +469,26 @@ test('a dusk GameView draws the Book in the dusk palette', () => {
   const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 22); // the room title
   assert.equal(title.props.style.color, '#f1ddc2');
 });
+
+// Breaks: a readable whose read text is its own description (Chapter 1's well) shows that
+// sentence twice on its page, or a different read line is dropped with it.
+test('a notice page shows its description once and every other read line', async () => {
+  const { NoticePage } = await import('./notices.tsx');
+  const well = 'A rope and bucket hang over clear, cold well water.';
+  const shown = nodes(
+    NoticePage({
+      screen: {
+        view: { notices: [{ id: 'well', title: 'The well', description: well }] },
+        text: (key: string) => key,
+        detail: () => [well, 'You read it twice.'],
+      },
+      page: { kind: 'notice', id: 'well' },
+      open: () => {},
+      press: () => {},
+      world: () => {},
+    } as any),
+  )
+    .filter((n) => n.type === 'Text')
+    .map(words);
+  assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'Leave']);
+});

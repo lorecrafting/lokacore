@@ -124,15 +124,20 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       : undefined;
   const detail = board ?? noticesOf(p.screen.view).find((n) => n.id === p.page.id);
   if (!detail) return null;
+  const description = plain(p.screen.text(detail.description));
   return (
     <Sheet title={p.screen.text(detail.title)}>
-      <Text style={prose(c)}>{plain(p.screen.text(detail.description))}</Text>
+      <Text style={prose(c)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
-      {p.screen.detail(detail.id).map((line, i) => (
-        <Text key={i} style={prose(c)}>
-          {typeof line === 'string' ? line : line.text}
-        </Text>
-      ))}
+      {/* A read whose text is the description (the well) adds nothing the page does not show. */}
+      {p.screen
+        .detail(detail.id)
+        .filter((line) => line !== description)
+        .map((line, i) => (
+          <Text key={i} style={prose(c)}>
+            {typeof line === 'string' ? line : line.text}
+          </Text>
+        ))}
       {'transport' in detail && detail.transport && (
         <Text style={note(c)}>
           {detail.transport.waived
