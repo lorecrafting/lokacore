@@ -37,7 +37,7 @@ if (process.env.LOKA_DEV_CARTRIDGE) {
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE = '1';
   config.resolver.resolveRequest = (context, name, platform) =>
     context.originModulePath === path.join(__dirname, 'App.tsx') &&
-    name.endsWith('/missing_child_v042_hash.json')
+    /\/protocol\/fixtures\/[^/]+\.json$/.test(name)
       ? { type: 'sourceFile', filePath: devCartridge }
       : context.resolveRequest(context, name, platform);
 } else delete process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE;

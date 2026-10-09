@@ -25,7 +25,8 @@ test('git failing drops an inherited stamp', () => {
 });
 
 // Breaks: the author preview's switch is inverted or ignored, so a release, test or e2e bundle plays
-// the dev artifact, or the author preview keeps playing the pinned chapter.
+// the dev artifact, or the author preview keeps playing the pinned chapter, or a production bundle
+// takes the dev artifact.
 test('only LOKA_DEV_CARTRIDGE points the app at the dev artifact', () => {
   const dev = join(mkdtempSync(join(tmpdir(), 'loka-dev-')), 'current.json');
   writeFileSync(dev, '{}');
@@ -46,4 +47,5 @@ test('only LOKA_DEV_CARTRIDGE points the app at the dev artifact', () => {
     type: 'sourceFile',
     filePath: dev,
   });
+  assert.throws(() => resolved({ LOKA_DEV_CARTRIDGE: dev, NODE_ENV: 'production' }));
 });
