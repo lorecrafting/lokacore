@@ -15,6 +15,12 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    // No Reanimated in node: the palette switches at once, as under reduced motion.
+    if (specifier === './fade.ts')
+      return {
+        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
+        shortCircuit: true,
+      };
     if (specifier === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -68,6 +74,16 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Footer') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     return nodes(element.type(element.props));
+  }
+  // A context element (the Book's palette) provides its value to the components below it.
+  if (element.type?.$$typeof === Symbol.for('react.context')) {
+    const outer = element.type._currentValue;
+    element.type._currentValue = element.props.value;
+    try {
+      return [element, ...nodes(element.props.children)];
+    } finally {
+      element.type._currentValue = outer;
+    }
   }
   return [element, ...nodes(element.props?.children)];
 }

@@ -14,6 +14,12 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    // No Reanimated in node: the palette switches at once, as under reduced motion.
+    if (specifier === './fade.ts')
+      return {
+        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
+        shortCircuit: true,
+      };
     if (specifier === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -52,6 +58,7 @@ registerHooks({
     };
   },
 });
+const { color } = await import('./tokens.ts');
 const { default: Book, BookView } = await import('./Book.tsx');
 
 // Expand the persistent shell; page contents, native map and animation have separate tests.
@@ -129,6 +136,7 @@ test('combat component shows the exact active pack and marks the current primary
   const screen = presenter(game(current)).screen();
   const drawn = nodes(
     BookView({
+      palette: color.light,
       screen,
       stack: [],
       flip: { turn: 0, dir: 1 },
@@ -170,6 +178,7 @@ test('combat page lists offered controls vertically below history in one scroll'
   for (const stack of [[], [{ kind: 'contents' }], [{ kind: 'thing', id: 'rat' }]] as Page[][]) {
     const drawn = nodes(
       BookView({
+        palette: color.light,
         screen,
         stack,
         flip: { turn: 0, dir: 1 },

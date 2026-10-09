@@ -17,6 +17,12 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    // No Reanimated in node: the palette switches at once, as under reduced motion.
+    if (s === './fade.ts')
+      return {
+        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
+        shortCircuit: true,
+      };
     if (s === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -165,7 +171,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       assert.deepEqual(draw().props.screen.detail(id), []);
       game.pulse('active');
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
       slots.length = 0;
       cleanups.length = 0;
       a.reopen();
@@ -173,14 +179,14 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       const cold = draw();
       assert.ok(!cold.props.stack.some((p) => ['thing', 'carrying'].includes(p.kind)));
       if (cold.props.stack.some((p) => p.kind === 'chapter')) {
-        const chapter = BookView(cold.props).props.children[0].props.children;
+        const chapter = BookView(cold.props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
       }
       assert.deepEqual(draw().props.stack, []);
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);
       assert.equal(game.lastNarration()?.detail_id, undefined);
     } finally {
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
       a.sql.close();
       rmSync(dir, { recursive: true, force: true });
     }

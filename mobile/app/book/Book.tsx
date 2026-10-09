@@ -15,7 +15,8 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { usePalette } from './palette.ts';
+import { usePaletteCurve } from './fade.ts';
+import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
 import { type } from './tokens.ts';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
@@ -90,6 +91,8 @@ export default function Book(p: BookProps) {
   current.current = { stack, view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
+  // Confirmed GameView only (game.view() never shows a pending attempt): its solar phase's palette.
+  const palette = useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve());
   const go = (next: Page[], dir: 1 | -1) => {
     const view = pr.screen().view;
     next = pagesAfter(next, view, view);
@@ -102,6 +105,7 @@ export default function Book(p: BookProps) {
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
+      palette={palette}
       screen={screen}
       stack={stack}
       flip={flip}
@@ -115,6 +119,7 @@ export default function Book(p: BookProps) {
 }
 
 type ViewProps = {
+  palette: Palette;
   screen: Screen;
   stack: Page[];
   flip: { turn: number; dir: 1 | -1 };
@@ -126,7 +131,7 @@ type ViewProps = {
 };
 
 export function BookView(p: ViewProps) {
-  const c = usePalette();
+  const c = p.palette;
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
@@ -140,16 +145,18 @@ export function BookView(p: ViewProps) {
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-      <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-        {p.screen.view.combat ? (
-          <Combat screen={p.screen} g={g} press={p.press} />
-        ) : (
-          <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
-        )}
-      </PageTurn>
-      <Bottom {...ctx} page={page} />
-    </SafeAreaView>
+    <PaletteContext value={c}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
+        <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
+          {p.screen.view.combat ? (
+            <Combat screen={p.screen} g={g} press={p.press} />
+          ) : (
+            <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
+          )}
+        </PageTurn>
+        <Bottom {...ctx} page={page} />
+      </SafeAreaView>
+    </PaletteContext>
   );
 }
 

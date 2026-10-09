@@ -13,6 +13,12 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    // No Reanimated in node: the palette switches at once, as under reduced motion.
+    if (s === './fade.ts')
+      return {
+        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
+        shortCircuit: true,
+      };
     if (s === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -220,11 +226,11 @@ for (const settlement of ['pulse', 'title press'])
       };
       assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
       if (settlement === 'title press') {
-        const chapter = BookView(draw().props).props.children[0].props.children;
+        const chapter = BookView(draw().props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
         assert.deepEqual(draw().props.stack, []);
         a.fault.reads = false;
-        const world = BookView(draw().props).props.children[0].props.children;
+        const world = BookView(draw().props).props.children.props.children[0].props.children;
         nodes(world)
           .find(
             (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Look, Scriptorium',
@@ -236,7 +242,7 @@ for (const settlement of ['pulse', 'title press'])
         assert.equal(a.game.pulse('active').kind, 'ready');
         const settled = draw();
         assert.equal(settled.props.stack.at(-1).kind, 'chapter');
-        const chapter = BookView(settled.props).props.children[0].props.children;
+        const chapter = BookView(settled.props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
@@ -248,7 +254,7 @@ for (const settlement of ['pulse', 'title press'])
       draw().props.go([], -1);
       a.game.pulse('active');
       assert.deepEqual(draw().props.stack, []);
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
     }
     delete (globalThis as any).d2Hooks;
   });

@@ -458,3 +458,14 @@ test('opening a page turns forward and Back to World turns back', () => {
   assert.equal(dir(), 1);
   h.sql.close();
 });
+
+// Breaks: the Book ignores the confirmed solar phase, or a component reads a fixed palette instead
+// of the one the Book provides. Chapter 1 opens at 18:00, its `dusk` cut.
+test('a dusk GameView draws the Book in the dusk palette', () => {
+  const h = book(bundle('missing_child_v030_hash'));
+  assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
+  const drawn = h.draw();
+  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2b1e16');
+  const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 26);
+  assert.equal(title.props.style.color, '#f1ddc2');
+});

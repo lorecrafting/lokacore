@@ -10,6 +10,12 @@ const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    // No Reanimated in node: the palette switches at once, as under reduced motion.
+    if (specifier === './fade.ts')
+      return {
+        url: 'data:text/javascript,export const usePaletteCurve=()=>undefined',
+        shortCircuit: true,
+      };
     if (specifier === './PageTurn.tsx')
       return {
         url: 'data:text/javascript,export function PageTurn(p){return p.children}',
@@ -47,6 +53,7 @@ registerHooks({
     };
   },
 });
+const { color } = await import('./tokens.ts');
 const { Footer, Status } = await import('./Footer.tsx');
 const { BookView } = await import('./Book.tsx');
 
@@ -161,6 +168,7 @@ test('Book captures movement keys only on an active World page', (t) => {
     listeners.clear();
     const current = { ...screen, ...change, view: { ...screen.view, ...(change.view as object) } };
     const book = BookView({
+      palette: color.light,
       screen: current as any,
       stack: stack as any,
       flip: { turn: 0, dir: 1 },
@@ -170,7 +178,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children[1];
+    const bottom = book.props.children.props.children[1];
     const footer = bottom
       .type(bottom.props)
       .props.children.find((child: any) => child?.type === Footer);
@@ -197,6 +205,7 @@ test('Book captures movement keys only on an active World page', (t) => {
 // and recovery; BOOK-UI-COMPONENTS.md, Status line).
 test('the chapter title page leaves only Continue', () => {
   const book = BookView({
+    palette: color.light,
     screen: {
       buttons: [],
       view: {
@@ -218,7 +227,7 @@ test('the chapter title page leaves only Continue', () => {
     startOver: () => {},
     shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
   });
-  const bottom = book.props.children[1];
+  const bottom = book.props.children.props.children[1];
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, null);
   assert.equal(status.props.locked, true);
