@@ -4,20 +4,12 @@ import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
-import {
-  Act,
-  Leave,
-  logLines,
-  Sheet,
-  Tap,
-  ThingPage,
-  titleFocus,
-  pageTitleStyle,
-  type Thing,
-} from './pages.tsx';
+import { ActionCard } from './actions.tsx';
+import { EntityLine, LogLines } from './lines.tsx';
+import { Control, Sheet, ThingPage, titleFocus, pageTitleStyle, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
-import { space, type } from './tokens.ts';
+import { space } from './tokens.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
@@ -34,7 +26,7 @@ function Choice(p: {
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
-    <View style={{ marginTop: 12 }}>
+    <View style={{ marginTop: space.lg }}>
       {p.choice.riddle?.attempts && (
         <Text style={note(c)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
@@ -54,7 +46,7 @@ function Choice(p: {
               press={p.press}
             />
           );
-        if (b) return <Act key={o.choice_id} b={b} press={p.press} />;
+        if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} />;
         return (
           <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
@@ -79,6 +71,7 @@ export function NpcPage(p: NpcProps) {
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const actions = p.npc ? p.g.on(p.npc.id) : [];
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
+  const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
   const scroll = useRef<ScrollView>(null);
   const description = p.npc?.description;
   return (
@@ -95,7 +88,7 @@ export function NpcPage(p: NpcProps) {
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}
-      {logLines(c, p.log)}
+      <LogLines lines={p.log} />
       {npcSkills(c, p)}
       {!choice && !actions.length && !p.log.length && (
         <Text style={note(c)}>Nothing to do here.</Text>
@@ -105,10 +98,10 @@ export function NpcPage(p: NpcProps) {
       {actions
         .filter((b) => b.command !== 'use_service')
         .map((b) => (
-          <Act key={b.label} b={b} press={p.press} />
+          <ActionCard key={b.label} b={b} press={p.press} />
         ))}
       <ServiceOptions {...p} actions={actions} />
-      <Leave leave={close ? () => p.press({ ...close, label: 'Leave' }) : p.leave} />
+      <Control label="Leave" onPress={leave} />
     </ScrollView>
   );
 }
@@ -144,13 +137,10 @@ const SECTIONS: [Section, string][] = [
   ['settings', 'Settings'],
 ];
 export function ContentsPage(p: { open: (section: Section) => void }) {
-  const c = usePalette();
   return (
     <Sheet title="Contents">
       {SECTIONS.map(([kind, label]) => (
-        <Tap key={kind} label={label} onPress={() => p.open(kind)}>
-          <Text style={{ ...prose(c), color: c.action }}>{label}</Text>
-        </Tap>
+        <EntityLine key={kind} name={label} label={label} onPress={() => p.open(kind)} />
       ))}
     </Sheet>
   );
@@ -210,7 +200,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
   return offers?.map((s) => {
     const b = p.actions.find((b) => b.action_key === s.action.action_key);
     return b ? (
-      <Act key={s.service.key} b={b} press={p.press} />
+      <ActionCard key={s.service.key} b={b} press={p.press} />
     ) : (
       <Text key={s.service.key} style={note(c)}>
         {p.text(s.label)}: {s.price}p

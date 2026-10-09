@@ -7,6 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
+import type { DetailLine } from './presenter.ts';
 import { Control } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
@@ -16,7 +17,7 @@ type Props = {
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
-  refused: (line: string) => void; // a drag toward a closed exit: its line for the log
+  refused: (line: DetailLine) => void; // a drag toward a closed exit: its line for the log
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
 };

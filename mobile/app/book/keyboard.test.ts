@@ -4,6 +4,7 @@ import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { fadeStub } from './__tests__/fade-stub.ts';
+import type { DetailLine } from './presenter.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -106,7 +107,7 @@ function browser(t: { after: (cleanup: () => void) => void }) {
 test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
-  const refusals: string[] = [];
+  const refusals: DetailLine[] = [];
   const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
     direction,
     available: true,
@@ -116,7 +117,7 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
-    refused: (line: string) => refusals.push(line),
+    refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
   });
@@ -135,7 +136,9 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
   assert.equal(key('ArrowUp'), true);
   assert.equal(walked.length, 6);
-  assert.deepEqual(refusals, ['The way north is closed.']);
+  assert.deepEqual(refusals, [
+    { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },
+  ]);
 });
 
 // Breaks: Book installs a World keyboard handler while a detail or save state owns input.

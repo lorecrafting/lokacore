@@ -12,11 +12,14 @@ import {
   type group,
   type Thing,
 } from './model.ts';
-import type { Button } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { SkillDetails } from './skills.tsx';
-import { Act, band, Control, sectionTitleStyle, Sheet, Tap } from './pages.tsx';
+import { space } from './tokens.ts';
+import { ActionCard, ContinueButton } from './actions.tsx';
+import { EntityLine, LogLines } from './lines.tsx';
+import { band, Control, sectionTitleStyle, Sheet } from './pages.tsx';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -68,7 +71,7 @@ export function AncestryPage(p: {
         return (
           <View key={choice.key}>
             <Text style={prose(c)}>{p.text(choice.description)}</Text>
-            {button && <Act b={button} press={p.press} />}
+            {button && <ActionCard b={button} press={p.press} />}
           </View>
         );
       })}
@@ -126,18 +129,23 @@ export function CarryingPage(p: {
       <Text style={sectionTitleStyle(c)}>Held</Text>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
       {p.items.map((e) => (
-        <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
-          <Text style={prose(c)}>{p.text(e.name)}</Text>
-        </Tap>
+        <EntityLine
+          key={e.id}
+          name={p.text(e.name)}
+          label={`${p.text(e.name)}, open`}
+          onPress={() => p.open(e.id)}
+        />
       ))}
       {(p.equipment?.length ?? 0) > 0 && <Text style={sectionTitleStyle(c)}>Worn</Text>}
       {p.equipment?.map(({ slot, item }) => (
         <View key={slot}>
           <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
           {item ? (
-            <Tap label={`${p.text(item.name)}, open`} onPress={() => p.open(item.id)}>
-              <Text style={{ ...prose(c), color: c.action }}>{p.text(item.name)}</Text>
-            </Tap>
+            <EntityLine
+              name={p.text(item.name)}
+              label={`${p.text(item.name)}, open`}
+              onPress={() => p.open(item.id)}
+            />
           ) : (
             <Text style={note(c)}>Empty</Text>
           )}
@@ -153,9 +161,9 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
   return p.view.exits.map((e) => {
     const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
     return (
-      <View key={e.direction} style={{ marginTop: 12 }}>
+      <View key={e.direction} style={{ marginTop: space.lg }}>
         {move ? (
-          <Act b={move} press={p.press} />
+          <ActionCard b={move} press={p.press} />
         ) : (
           <Text style={note(c)}>
             {cap(e.direction)}
@@ -168,7 +176,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
           </Text>
         )}
         {p.g.door(e.direction).map((b) => (
-          <Act key={b.action_key} b={b} press={p.press} />
+          <ActionCard key={b.action_key} b={b} press={p.press} />
         ))}
         {e.sight && (
           <Text style={note(c)}>
@@ -190,16 +198,12 @@ export function MapPage(p: {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
-  log?: readonly string[];
+  log?: readonly DetailLine[];
 }) {
   const c = usePalette();
   return (
     <Sheet title="Map">
-      {p.log?.map((line, i) => (
-        <Text key={i} style={prose(c)}>
-          {line}
-        </Text>
-      ))}
+      {p.log && <LogLines lines={p.log} />}
       {p.view.map && <DiscoveredMap view={p.view} text={p.text} />}
       <Text style={prose(c)}>Current place: {p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note(c)}>No way out is known.</Text>}
@@ -208,14 +212,14 @@ export function MapPage(p: {
         view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
       />
       {p.g.place.map((b) => (
-        <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+        <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
       {p.view.known_npcs?.length ? <Text style={sectionTitleStyle(c)}>Where</Text> : null}
       {(p.view.known_npcs ?? []).map((n) =>
         p.g
           .on(n.id)
           .filter((b) => b.action_key === 'where')
-          .map((b) => <Act key={n.id} b={b} press={p.press} />),
+          .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
       )}
     </Sheet>
   );
@@ -231,12 +235,9 @@ export function SettingsPage({ startOver }: { startOver: () => void }) {
 }
 
 export function ChapterPage(p: { title: string; done: () => void }) {
-  const c = usePalette();
   return (
     <Sheet title={p.title}>
-      <Tap label="Continue" onPress={p.done}>
-        <Text style={{ ...prose(c), color: c.action }}>Continue</Text>
-      </Tap>
+      <ContinueButton label="Continue" onPress={p.done} />
     </Sheet>
   );
 }
@@ -251,7 +252,7 @@ export function ScenePage(p: {
   return (
     <Sheet title="">
       <Text style={prose(c)}>{plain(p.text(p.scene.line))}</Text>
-      {p.next && <Act b={p.next} press={p.press} />}
+      {p.next && <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />}
     </Sheet>
   );
 }

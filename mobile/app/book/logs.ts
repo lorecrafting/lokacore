@@ -29,9 +29,11 @@ export function narrationLines(
   });
 }
 
-export type DetailLine = string | { text: string; event: true };
+// A refused line (a barred exit) leads with its reason tag (BOOK-UI-COMPONENTS.md, Log line).
+export type DetailLine =
+  string | { text: string; event: true } | { kind: 'refused'; reason: string; text: string };
 export type Logs = {
-  log: string[];
+  log: DetailLine[];
   combatLog: string[];
   details: Map<string, DetailLine[]>;
   retry?: { button: Button; detail?: string; item?: string; invocation?: string };

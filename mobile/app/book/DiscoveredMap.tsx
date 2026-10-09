@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { Control } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
+import { size } from './tokens.ts';
 
 type Props = { view: GameView; text: (key: string) => string };
 type Drawn = NonNullable<GameView['map']>;
@@ -47,7 +49,7 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <Pressable
         accessibilityRole="button"
-        style={{ minHeight: 44, minWidth: 44 }}
+        style={{ minHeight: size.touch, minWidth: size.touch }}
         accessibilityLabel="Previous map level"
         disabled={index <= 0}
         onPress={() => step(levels[index - 1])}
@@ -57,7 +59,7 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
       <Text style={prose(c)}>Level {level}</Text>
       <Pressable
         accessibilityRole="button"
-        style={{ minHeight: 44, minWidth: 44 }}
+        style={{ minHeight: size.touch, minWidth: size.touch }}
         accessibilityLabel="Next map level"
         disabled={index >= levels.length - 1}
         onPress={() => step(levels[index + 1])}
@@ -108,14 +110,7 @@ function roomDetail(c: Palette, map: Drawn, chosen: Room, text: Props['text'], b
             {l.direction}: {text(map.rooms.find((r) => r.id === l.to)!.title)}
           </Text>
         ))}
-      <Pressable
-        accessibilityRole="button"
-        style={{ minHeight: 44 }}
-        accessibilityLabel="Back to map"
-        onPress={back}
-      >
-        <Text style={prose(c)}>Back to map</Text>
-      </Pressable>
+      <Control label="Back to map" onPress={back} />
     </View>
   );
 }

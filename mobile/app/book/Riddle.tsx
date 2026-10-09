@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { Button } from './presenter.ts';
-import { Act, Control } from './pages.tsx';
+import { ActionCard } from './actions.tsx';
+import { Control } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import { opacity, radius, size, space, type } from './tokens.ts';
 
@@ -31,7 +32,7 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
             <Control label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))} />
             <Control label="Clear" onPress={() => setSelected([])} />
           </View>
-          <Act
+          <ActionCard
             b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
             press={(b) => {
               p.press(b);

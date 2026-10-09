@@ -6,7 +6,7 @@ import type {
   Intent,
   Key,
 } from '../../packages/game-view/session.ts';
-import type { Button } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
 import { commandOf } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { reason, SENTENCE } from './words.ts';
@@ -112,12 +112,17 @@ type Offered =
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
-export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
-  e.available
-    ? ''
-    : e.reason.message
-      ? text(e.reason.message.key)
-      : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`);
+// A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
+export const refused = (
+  e: Extract<GameView['exits'][number], { available: false }>,
+  text: (key: string) => string,
+): DetailLine => ({
+  kind: 'refused',
+  reason: reason(e.reason.code),
+  text: e.reason.message
+    ? text(e.reason.message.key)
+    : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`),
+});
 
 export const absent = (v: GameView) =>
   !v.choice || v.entities.some((e) => e.id === v.choice!.speaker_id)

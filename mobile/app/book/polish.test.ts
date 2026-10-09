@@ -430,7 +430,8 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     )
       .filter(
         (n) =>
-          n.type === 'View' && [n.props.children].flat().every((c: any) => c?.type?.name === 'Tap'),
+          n.type === 'View' &&
+          [n.props.children].flat().every((c: any) => c?.type?.name === 'EntityLine'),
       )
       .map((n) => [n.props.children].flat().map((c: any) => c.props.label));
   const room = [

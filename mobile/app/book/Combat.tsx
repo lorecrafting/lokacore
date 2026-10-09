@@ -1,7 +1,9 @@
 // A full reading page with the offered actions following its combat history.
 import { ScrollView, Text, View } from 'react-native';
 import { bleedingLine, type group } from './model.ts';
-import { Act, pageTitleStyle, RunningHead, titleFocus } from './pages.tsx';
+import { ActionCard } from './actions.tsx';
+import { LogLines } from './lines.tsx';
+import { pageTitleStyle, RunningHead, titleFocus } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
 import { space } from './tokens.ts';
@@ -19,11 +21,7 @@ function Foes({ view, text, combatLog }: Pick<Screen, 'view' | 'text' | 'combatL
           {opponent.id === combat.opponent_id ? ' (your target)' : ''}
         </Text>
       ))}
-      {combatLog.map((line, i) => (
-        <Text key={i} style={prose(c)}>
-          {line}
-        </Text>
-      ))}
+      <LogLines lines={combatLog} />
     </>
   );
 }
@@ -49,13 +47,13 @@ export function Combat(p: {
           <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
         )}
         <Foes view={view} text={text} combatLog={combatLog} />
-        {stand && <Act b={stand} press={p.press} />}
-        {p.g.look && <Act b={p.g.look} press={p.press} />}
+        {stand && <ActionCard b={stand} press={p.press} />}
+        {p.g.look && <ActionCard b={p.g.look} press={p.press} />}
         {p.g.flee.map((b) => (
-          <Act key={b.label} b={b} press={p.press} />
+          <ActionCard key={b.label} b={b} press={p.press} />
         ))}
         {p.g.bandage.map((b) => (
-          <Act key={b.target_ids[0]} b={b} press={p.press} />
+          <ActionCard key={b.target_ids[0]} b={b} press={p.press} />
         ))}
       </ScrollView>
     </View>
