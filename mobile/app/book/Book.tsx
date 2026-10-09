@@ -17,7 +17,7 @@ import {
   type Page,
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
-import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
+import { PaletteContext, paletteOf, useBookPalette, usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
@@ -105,7 +105,7 @@ export default function Book(p: BookProps) {
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
-      palette={useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
+      palette={useBookPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
       screen={screen}
       stack={stack}
       flip={flip}

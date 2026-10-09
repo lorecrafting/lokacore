@@ -1,12 +1,17 @@
 import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { PaletteContext } from '../book/palette.ts';
+import { PaletteContext, useFocusRing } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
 
-const phone = (name: string, width: number, height: number) => ({
+const device = (
+  name: string,
+  width: number,
+  height: number,
+  type: 'mobile' | 'tablet' = 'mobile',
+) => ({
   name,
   styles: { width: `${width}px`, height: `${height}px` },
-  type: 'mobile' as const,
+  type,
 });
 
 const preview: Preview = {
@@ -24,11 +29,34 @@ const preview: Preview = {
   initialGlobals: { palette: 'light', viewport: { value: 'iphone11', isRotated: false } },
   parameters: {
     layout: 'fullscreen',
+    options: {
+      storySort: {
+        order: [
+          'Docs',
+          'Book',
+          'Pages',
+          [
+            'Room',
+            'NPC',
+            'Notices',
+            'Item',
+            'Combat',
+            'Map',
+            'Sections',
+            'Chapter and scene',
+            'Recovery',
+          ],
+          'Live',
+        ],
+      },
+    },
     viewport: {
       options: {
-        iphone11: phone('iPhone 11', 414, 896),
-        iphoneSE: phone('iPhone SE', 375, 667),
-        pixel7: phone('Pixel 7', 412, 915),
+        iphone11: device('iPhone 11', 414, 896),
+        iphoneSE: device('iPhone SE', 375, 667),
+        pixel7: device('Pixel 7', 412, 915),
+        // one tablet check: the centred page width and the footer rules
+        ipadMini: device('iPad mini', 744, 1133, 'tablet'),
       },
     },
     // Fail the smoke on any axe violation, colour contrast included.
@@ -50,8 +78,10 @@ const preview: Preview = {
     }
   },
   decorators: [
-    (Story, { globals }) => {
+    (Story, { globals, title }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;
+      // A Live Book and SaveError ring in their own palette.
+      useFocusRing(title === 'Live' || title === 'Pages/Recovery' ? undefined : c);
       return (
         <PaletteContext.Provider value={c}>
           {/* The page's paper, so axe measures contrast against the real background. */}

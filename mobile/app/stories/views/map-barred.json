@@ -1,0 +1,441 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.chapel_steps.title",
+     "x": 0,
+     "y": -8,
+     "z": 0
+    },
+    {
+     "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "title": "room.well_lane.title",
+     "x": 0,
+     "y": -2,
+     "z": 0
+    },
+    {
+     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "title": "room.ferry_landing.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "id": "609faefb-5552-8610-86e8-4b614753ee04",
+     "title": "room.north_gate.title",
+     "x": 0,
+     "y": -6,
+     "z": 0
+    },
+    {
+     "id": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "title": "room.village_green.title",
+     "x": 0,
+     "y": -4,
+     "z": 0
+    }
+   ],
+   "links": [
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
+     "direction": "south"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "direction": "north"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "south"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "north"
+    },
+    {
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "direction": "south"
+    },
+    {
+     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
+     "direction": "north"
+    },
+    {
+     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "south"
+    }
+   ]
+  },
+  "known_npcs": [
+   {
+    "id": "35681e5c-d0e0-8a6b-bd0e-f5e9bb9e3d34",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "593cde40-19af-8308-aa99-da8ce3ba202a",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "bandage"
+    },
+    "label": "skill.bandage.label",
+    "requirement": "skill.bandage.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "dodge"
+    },
+    "label": "skill.dodge.label",
+    "requirement": "skill.dodge.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "haggle"
+    },
+    "label": "skill.haggle.label",
+    "requirement": "skill.haggle.requirement",
+    "acquired": true,
+    "qualified": true,
+    "usable": true
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "herbalism"
+    },
+    "label": "skill.herbalism.label",
+    "requirement": "skill.herbalism.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swim"
+    },
+    "label": "skill.swim.label",
+    "requirement": "skill.swim.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swords"
+    },
+    "label": "skill.swords.label",
+    "requirement": "skill.swords.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "con"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 11
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "int"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "per"
+    },
+    "value": 5
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "spi"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "ancestry": "road_born",
+  "topics": [],
+  "place": {
+   "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+   "title": {
+    "key": "room.chapel_steps.title"
+   },
+   "description": {
+    "key": "room.chapel_steps.description"
+   }
+  },
+  "exits": [
+   {
+    "available": false,
+    "direction": "north",
+    "door": {
+     "name": "barrier.chapel_door.short",
+     "state": "closed",
+     "actions": [
+      {
+       "available": true,
+       "action_key": "knock",
+       "label": "action.knock",
+       "target": {
+        "kind": "none"
+       },
+       "input": [
+        "direction"
+       ]
+      },
+      {
+       "available": true,
+       "action_key": "open",
+       "label": "action.open",
+       "target": {
+        "kind": "none"
+       },
+       "input": [
+        "direction"
+       ]
+      }
+     ]
+    },
+    "reason": {
+     "code": "exit_closed"
+    }
+   },
+   {
+    "available": true,
+    "direction": "south",
+    "sight": {
+     "room": "609faefb-5552-8610-86e8-4b614753ee04",
+     "title": "room.north_gate.title",
+     "entities": []
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "entities": [],
+  "inventory": [],
+  "equipment": [
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "light"
+   },
+   {
+    "slot": "off_hand"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [],
+  "chapter": {
+   "index": 0,
+   "title": "chapter.missing_child"
+  },
+  "time": 64800,
+  "calendar_status": {
+   "day": 1,
+   "hour": 18,
+   "subdivision": 0,
+   "solar": "dusk",
+   "lunar": "new"
+  },
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 96,
+    "maximum": 100,
+    "band": "steady",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 20,
+    "maximum": 1000,
+    "band": "dying",
+    "tone": "danger"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "map"
+  }
+ ],
+ "log": [
+  "Closed."
+ ],
+ "combatLog": [],
+ "details": {}
+}

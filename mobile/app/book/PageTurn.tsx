@@ -36,6 +36,7 @@ import {
 import curl from './page-curl.sksl';
 import { easing } from './easing.ts';
 import { motion } from './tokens.ts';
+import { titleContext, titleFocus } from './pages.tsx';
 import { snapshot, warm } from './snapshot';
 
 // Made at the first curl: without CanvasKit on web no picture is taken, so no curl is drawn.
@@ -63,32 +64,37 @@ export function PageTurn(p: Props) {
   const [leaving, setLeaving] = useLeaving(p);
   const { progress, page } = useMotion(p.turn, leaving, setLeaving, reduced);
   const fade = useAnimatedStyle(() => ({ opacity: reduced ? 1 - progress.value : 1 }));
+  // An arriving page's title takes focus only after a turn (pages.tsx titleFocus).
+  const titles = useRef(titleFocus()).current;
+  titles.turned = p.turn > 0;
   // Both pages are the same keyed element type, so the leaving page keeps its mounted instance.
   return (
-    <View
-      style={{ flex: 1 }}
-      onLayout={({ nativeEvent: { layout: l } }) => setSize({ width: l.width, height: l.height })}
-    >
-      {[
-        <Animated.View key={p.turn} ref={page(p.turn)} collapsable={false} style={{ flex: 1 }}>
-          {p.children}
-        </Animated.View>,
-        leaving && !leaving.image && (
-          <Animated.View key={leaving.turn} {...over} style={[over.style, fade]}>
-            {leaving.page}
-          </Animated.View>
-        ),
-      ]}
-      {leaving?.image && (
-        <Curl
-          image={leaving.image}
-          dir={leaving.dir}
-          paper={p.paper}
-          size={size}
-          progress={progress}
-        />
-      )}
-    </View>
+    <titleContext.Provider value={titles}>
+      <View
+        style={{ flex: 1 }}
+        onLayout={({ nativeEvent: { layout: l } }) => setSize({ width: l.width, height: l.height })}
+      >
+        {[
+          <Animated.View key={p.turn} ref={page(p.turn)} collapsable={false} style={{ flex: 1 }}>
+            {p.children}
+          </Animated.View>,
+          leaving && !leaving.image && (
+            <Animated.View key={leaving.turn} {...over} style={[over.style, fade]}>
+              {leaving.page}
+            </Animated.View>
+          ),
+        ]}
+        {leaving?.image && (
+          <Curl
+            image={leaving.image}
+            dir={leaving.dir}
+            paper={p.paper}
+            size={size}
+            progress={progress}
+          />
+        )}
+      </View>
+    </titleContext.Provider>
   );
 }
 

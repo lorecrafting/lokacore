@@ -3,5 +3,5 @@
   "extends": "../tsconfig.json",
   "compilerOptions": { "types": ["vite/client"] },
   "include": ["*.ts", "*.mts", "*.tsx", "../stories", "../book/sksl.d.ts"],
-  "exclude": []
+  "exclude": [] // the app's excludes 'stories'
 }

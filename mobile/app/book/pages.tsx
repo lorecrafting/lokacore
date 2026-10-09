@@ -1,7 +1,7 @@
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool } from './model.ts';
@@ -19,16 +19,27 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
-// A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
-// on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
-export const titleFocus = {
-  ref: (title: (Text & { focus?: () => void }) | null) => {
-    if (!title) return;
-    title.focus?.();
-    AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
-  },
+// A page's title takes focus as its page arrives by a turn (BOOK-UI-COMPONENTS.md#page-turn):
+// keyboard focus on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
+// The first page (launch, a story) takes none, so no ring shows before keyboard use. One ref per
+// Book, read as each title mounts, so the page a turn leaves behind is not focused again.
+type Title = (Text & { focus?: () => void }) | null;
+export function titleFocus() {
+  const box = {
+    turned: false,
+    ref: (title: Title) => {
+      if (!title || !box.turned) return;
+      title.focus?.();
+      AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
+    },
+  };
+  return box;
+}
+export const titleContext = createContext(titleFocus());
+export const useTitleFocus = () => ({
+  ref: useContext(titleContext).ref,
   ...({ tabIndex: -1 } as object),
-};
+});
 
 export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   return (
@@ -118,7 +129,16 @@ export function RoomPage(p: {
       fixedTitle
       onTitlePress={look && (() => p.press(look))}
     >
-      <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+      <View style={{ gap: space.lg }}>
+        {plain(p.text(p.view.place.description.key))
+          .trim()
+          .split(/\s*\n\s*\n\s*/) // a blank line in the authored text is a paragraph break
+          .map((paragraph, i) => (
+            <Text key={i} style={prose(c)}>
+              {paragraph}
+            </Text>
+          ))}
+      </View>
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
@@ -187,6 +207,7 @@ export function Page(p: {
   fixedTitle?: boolean;
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
+  centred?: boolean; // a page with no game behind it (the save error) centres its blocks vertically
   foot?: ReactNode;
   children: ReactNode;
 }) {
@@ -205,7 +226,11 @@ export function Page(p: {
           scroll = view;
         }}
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: space.page, gap: space.block }}
+        contentContainerStyle={{
+          padding: space.page,
+          gap: space.block,
+          ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
+        }}
         onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
       >
         {!p.fixedTitle && title}
@@ -220,7 +245,7 @@ export function Page(p: {
 function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
   const heading = (
     <Text
-      {...titleFocus}
+      {...useTitleFocus()}
       accessibilityRole="header"
       style={{
         color: usePalette().fg,

@@ -64,12 +64,15 @@ export const bundle = (name = 'containers_cartridge_sampler_hash') =>
 export const fixture = bundle();
 
 // Expand pure components only. Native animation and map gestures are exercised in Simulator review.
+let owner: unknown; // the component whose hooks run now: a slot another component held starts fresh
+// ponytail: keyed by type, not instance, and state only (effects: Book's alone today); key by element if a story needs it.
 export function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
+    owner = element.type;
     return nodes(element.type(element.props));
   }
   // A context element (the Book's palette) provides its value to the components below it.
@@ -91,7 +94,12 @@ export const words = (element: any): string =>
       ? String(element)
       : words(element?.props?.children ?? []);
 
-export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
+// `newId`: stories/scenarios.ts seeds it so a replayed route writes the same rows.
+export function book(
+  cartridge = fixture,
+  existing?: ReturnType<typeof elapsedHost>,
+  newId: () => string = randomUUID,
+) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };
   let failedNarrationAfter: number | undefined;
@@ -99,15 +107,15 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
     existing?.game ??
     openGame(
       {
-        execSync: (s) => sql.exec(s),
+        execSync: (s: string) => sql.exec(s),
         isInTransactionSync: () => sql.isTransaction,
-        runSync: (s, ...p) => sql.prepare(s).run(...p),
-        getFirstSync: (s, ...p) => sql.prepare(s).get(...p) ?? null,
-        getAllSync: (s, ...p) => sql.prepare(s).all(...p),
+        runSync: (s: string, ...p: never[]) => sql.prepare(s).run(...p),
+        getFirstSync: (s: string, ...p: never[]) => sql.prepare(s).get(...p) ?? null,
+        getAllSync: (s: string, ...p: never[]) => sql.prepare(s).all(...p),
       } as never,
       cartridge,
       {
-        newId: randomUUID,
+        newId,
         kernel_version: `loka-kernel@${'0'.repeat(40)}`,
         time: { wall: () => clock.wall, monotonic: () => clock.mono },
       },
@@ -122,6 +130,7 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
     return narration(command_id);
   };
   const state: any[] = [];
+  const owners: unknown[] = [];
   let slot = 0;
   const effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
   const queued: (() => void)[] = [];
@@ -137,7 +146,10 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
   };
   const useState = (initial: any) => {
     const i = slot++;
-    if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
+    if (owners[i] !== owner) {
+      owners[i] = owner;
+      state[i] = typeof initial === 'function' ? initial() : initial;
+    }
     return [
       state[i],
       (v: any) => {
@@ -147,6 +159,7 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
   };
   const draw = () => {
     slot = 0;
+    owner = Book;
     (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
     (globalThis as any)[Symbol.for('loka-book-test-effect')] = useEffect;
     const rendered = nodes(

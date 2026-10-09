@@ -1,0 +1,734 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "title": "room.reed_path.title",
+     "x": 0,
+     "y": 2,
+     "z": 0
+    },
+    {
+     "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "title": "room.well_lane.title",
+     "x": 0,
+     "y": -2,
+     "z": 0
+    },
+    {
+     "id": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "title": "room.reed_bank.title",
+     "x": 0,
+     "y": 4,
+     "z": 0
+    },
+    {
+     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "title": "room.ferry_landing.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "id": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "title": "room.village_green.title",
+     "x": 0,
+     "y": -4,
+     "z": 0
+    },
+    {
+     "id": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "title": "room.mire_crossing.title",
+     "x": 0,
+     "y": 6,
+     "z": 0
+    },
+    {
+     "id": "d68b48e6-93a5-8899-81ec-808f7be333f8",
+     "title": "room.fox_hollow.title",
+     "x": 0,
+     "y": 8,
+     "z": 0
+    }
+   ],
+   "links": [
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "north"
+    },
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "south"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "direction": "north"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "south"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "north"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "direction": "south"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "north"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "south"
+    },
+    {
+     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "south"
+    },
+    {
+     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "north"
+    },
+    {
+     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "to": "d68b48e6-93a5-8899-81ec-808f7be333f8",
+     "direction": "south"
+    },
+    {
+     "from": "d68b48e6-93a5-8899-81ec-808f7be333f8",
+     "to": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "direction": "north"
+    }
+   ]
+  },
+  "known_npcs": [
+   {
+    "id": "35681e5c-d0e0-8a6b-bd0e-f5e9bb9e3d34",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "593cde40-19af-8308-aa99-da8ce3ba202a",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "b45f7385-6cf5-800d-b604-1dc7bab19891",
+    "name": "npc.vesper.short"
+   },
+   {
+    "id": "e1f06e4a-2ae6-8f75-bb0b-b0a2e8370be0",
+    "name": "npc.wren.short"
+   },
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "bandage"
+    },
+    "label": "skill.bandage.label",
+    "requirement": "skill.bandage.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "dodge"
+    },
+    "label": "skill.dodge.label",
+    "requirement": "skill.dodge.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "haggle"
+    },
+    "label": "skill.haggle.label",
+    "requirement": "skill.haggle.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "herbalism"
+    },
+    "label": "skill.herbalism.label",
+    "requirement": "skill.herbalism.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swim"
+    },
+    "label": "skill.swim.label",
+    "requirement": "skill.swim.requirement",
+    "acquired": true,
+    "qualified": true,
+    "usable": true
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swords"
+    },
+    "label": "skill.swords.label",
+    "requirement": "skill.swords.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "con"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "int"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "per"
+    },
+    "value": 6
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "spi"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "ancestry": "fen_born",
+  "topics": [],
+  "place": {
+   "id": "d68b48e6-93a5-8899-81ec-808f7be333f8",
+   "title": {
+    "key": "room.fox_hollow.title"
+   },
+   "description": {
+    "key": "room.fox_hollow.description"
+   }
+  },
+  "exits": [
+   {
+    "available": true,
+    "direction": "down",
+    "sight": {
+     "room": "05f6aca0-79cd-83fe-8096-bae95b0730e8",
+     "title": "room.fox_den_deep.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "north",
+    "sight": {
+     "room": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "title": "room.mire_crossing.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "west",
+    "sight": {
+     "room": "ff864ad5-cd56-80c8-9392-dc88bdc28fd2",
+     "title": "room.black_pool.title",
+     "entities": []
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "action_key": "read",
+    "label": "actions.read_hollow",
+    "target": {
+     "kind": "entity",
+     "scopes": [
+      "inspectable_details"
+     ]
+    },
+    "input": [],
+    "target_ids": [
+     "bb12a796-8060-8b15-bf03-cb94459ded6e"
+    ],
+    "available": true
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "bb12a796-8060-8b15-bf03-cb94459ded6e",
+    "title": "detail.hollow.title",
+    "description": "detail.hollow.description"
+   }
+  ],
+  "entities": [
+   {
+    "id": "b45f7385-6cf5-800d-b604-1dc7bab19891",
+    "name": "npc.vesper.short",
+    "description": "npc.vesper.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "a0_d9_vesper_fox",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a0_d9_vesper_prior",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a_vesper_meeting",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "b_vesper_riddle",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "c_vesper_answered",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "vesper",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e1f06e4a-2ae6-8f75-bb0b-b0a2e8370be0",
+    "name": "npc.wren.short",
+    "description": "npc.wren.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "a_wren_escort",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "b_wren_rejoin",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "wren",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ]
+   }
+  ],
+  "inventory": [
+   {
+    "id": "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+    "name": "item.fox_drawing.short",
+    "description": "item.fox_drawing.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     }
+    ]
+   }
+  ],
+  "equipment": [
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "light"
+   },
+   {
+    "slot": "off_hand"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "first_lead",
+     "kind": "quest"
+    },
+    "state": "resolved",
+    "title": "quest.first_lead.title",
+    "journal": "quest.first_lead.resolved"
+   },
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "missing_child",
+     "kind": "quest"
+    },
+    "state": "active",
+    "title": "quest.missing_child.title",
+    "journal": "quest.missing_child.met"
+   }
+  ],
+  "chapter": {
+   "index": 0,
+   "title": "chapter.missing_child"
+  },
+  "time": 64800,
+  "calendar_status": {
+   "day": 1,
+   "hour": 18,
+   "subdivision": 0,
+   "solar": "dusk",
+   "lunar": "new"
+  },
+  "choice": {
+   "continuation_id": "4d6bf5c0-ee43-8b5b-990f-d7daf359a814",
+   "prompt": {
+    "key": "dialogue.b_vesper_riddle.prompt"
+   },
+   "speaker_id": "b45f7385-6cf5-800d-b604-1dc7bab19891",
+   "closable": true,
+   "riddle": {
+    "choice_id": "answer",
+    "bank": [
+     "R",
+     "N",
+     "A",
+     "O",
+     "L",
+     "T",
+     "E",
+     "N",
+     "S"
+    ]
+   },
+   "choices": [
+    {
+     "available": true,
+     "choice_id": "answer",
+     "label": "dialogue.b_vesper_riddle.answer"
+    }
+   ]
+  },
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 92,
+    "maximum": 100,
+    "band": "steady",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 20,
+    "maximum": 1000,
+    "band": "dying",
+    "tone": "danger"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "thing",
+   "id": "b45f7385-6cf5-800d-b604-1dc7bab19891"
+  }
+ ],
+ "log": [],
+ "combatLog": [],
+ "details": {
+  "b45f7385-6cf5-800d-b604-1dc7bab19891": [
+   "“You followed the tracks,” the stranger says. “I am Vesper. And this is Wren.” The boy looks up at his name.",
+   "Wren nods. “I know. Vesper was showing me the fox paths.” You have found him alive, here in the hollow.",
+   {
+    "text": "Journal updated",
+    "event": true
+   },
+   "Vesper lays out letter tiles. “I carry a flame behind glass. Held in a hand, I guide a traveller through darkness. What am I?”"
+  ]
+ }
+}

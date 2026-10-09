@@ -1,0 +1,646 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
+     "title": "room.chandler.title",
+     "x": -2,
+     "y": -2,
+     "z": 0
+    },
+    {
+     "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "title": "room.well_lane.title",
+     "x": 0,
+     "y": -2,
+     "z": 0
+    },
+    {
+     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "title": "room.ferry_landing.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    }
+   ],
+   "links": [
+    {
+     "from": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "east"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "south"
+    },
+    {
+     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "to": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
+     "direction": "west"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "direction": "north"
+    }
+   ]
+  },
+  "known_npcs": [
+   {
+    "id": "bea306fb-2b58-847c-a4e0-045f9d13b739",
+    "name": "npc.peg.short"
+   },
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "bandage"
+    },
+    "label": "skill.bandage.label",
+    "requirement": "skill.bandage.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "dodge"
+    },
+    "label": "skill.dodge.label",
+    "requirement": "skill.dodge.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "haggle"
+    },
+    "label": "skill.haggle.label",
+    "requirement": "skill.haggle.requirement",
+    "acquired": true,
+    "qualified": true,
+    "usable": true
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "herbalism"
+    },
+    "label": "skill.herbalism.label",
+    "requirement": "skill.herbalism.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swim"
+    },
+    "label": "skill.swim.label",
+    "requirement": "skill.swim.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swords"
+    },
+    "label": "skill.swords.label",
+    "requirement": "skill.swords.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "con"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 11
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "int"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "per"
+    },
+    "value": 5
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "spi"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "ancestry": "road_born",
+  "topics": [],
+  "place": {
+   "id": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
+   "title": {
+    "key": "room.chandler.title"
+   },
+   "description": {
+    "key": "room.chandler.description"
+   }
+  },
+  "exits": [
+   {
+    "available": true,
+    "direction": "down",
+    "sight": {
+     "room": "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
+     "title": "room.chandler_storeroom.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "east",
+    "sight": {
+     "room": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "title": "room.well_lane.title",
+     "entities": []
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "bea306fb-2b58-847c-a4e0-045f9d13b739",
+    "name": "npc.peg.short",
+    "description": "npc.peg.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "a_peg_debt",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": false,
+      "action_key": "peg_haggle",
+      "label": "peg.haggle.choice",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ],
+    "shop": [
+     {
+      "item_id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+      "name": "item.torch.short",
+      "buy": {
+       "price": 2,
+       "available": false,
+       "reason": "not_owned"
+      },
+      "sell": {
+       "price": 1,
+       "available": true
+      }
+     },
+     {
+      "item_id": "619363b4-697f-8e0d-ae4a-5208a285a460",
+      "name": "item.lamp_oil.short",
+      "buy": {
+       "price": 1,
+       "available": true
+      },
+      "sell": {
+       "price": 1,
+       "available": false,
+       "reason": "not_owned"
+      }
+     },
+     {
+      "item_id": "c02e04c1-54a8-850e-ac17-20b61b7c9630",
+      "name": "item.waterskin.short",
+      "buy": {
+       "price": 3,
+       "available": true
+      },
+      "sell": {
+       "price": 2,
+       "available": false,
+       "reason": "not_owned"
+      }
+     },
+     {
+      "item_id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+      "name": "item.satchel.short",
+      "buy": {
+       "price": 4,
+       "available": false,
+       "reason": "not_owned"
+      },
+      "sell": {
+       "price": 2,
+       "available": true
+      }
+     },
+     {
+      "item_id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
+      "name": "item.iron_sword.short",
+      "buy": {
+       "price": 7,
+       "available": true
+      },
+      "sell": {
+       "price": 4,
+       "available": false,
+       "reason": "not_owned"
+      }
+     },
+     {
+      "item_id": "ab0ecc27-da55-8e79-a207-6e4cb55436c9",
+      "name": "item.wooden_shield.short",
+      "buy": {
+       "price": 3,
+       "available": true
+      },
+      "sell": {
+       "price": 2,
+       "available": false,
+       "reason": "not_owned"
+      }
+     },
+     {
+      "item_id": "30c00822-6fb5-833d-a05e-7787134bea59",
+      "name": "item.spare_waterskin.short",
+      "buy": {
+       "price": 3,
+       "available": true
+      },
+      "sell": {
+       "price": 2,
+       "available": false,
+       "reason": "not_owned"
+      }
+     }
+    ]
+   },
+   {
+    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
+    "name": "item.leather_boots.short",
+    "description": "item.leather_boots.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "take",
+      "label": "action.take",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     }
+    ]
+   }
+  ],
+  "inventory": [
+   {
+    "id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+    "name": "item.satchel.short",
+    "description": "item.satchel.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     }
+    ]
+   },
+   {
+    "id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+    "name": "item.torch.short",
+    "description": "item.torch.description",
+    "kind": "item",
+    "slot": "light",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "drop",
+      "label": "action.drop",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     },
+     {
+      "available": true,
+      "action_key": "ignite",
+      "command": "ignite",
+      "label": "action.ignite",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56"
+      ]
+     },
+     {
+      "available": true,
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      ]
+     },
+     {
+      "available": true,
+      "action_key": "wear",
+      "label": "action.wear",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": []
+     }
+    ],
+    "fuel": {
+     "remaining": 7200,
+     "capacity": 7200,
+     "lit": false
+    }
+   }
+  ],
+  "equipment": [
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "light"
+   },
+   {
+    "slot": "off_hand"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [],
+  "chapter": {
+   "index": 0,
+   "title": "chapter.missing_child"
+  },
+  "time": 64800,
+  "calendar_status": {
+   "day": 1,
+   "hour": 18,
+   "subdivision": 0,
+   "solar": "dusk",
+   "lunar": "new"
+  },
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 98,
+    "maximum": 100,
+    "band": "steady",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 14,
+    "maximum": 1000,
+    "band": "dying",
+    "tone": "danger"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "contents"
+  },
+  {
+   "kind": "carrying"
+  },
+  {
+   "kind": "thing",
+   "id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56"
+  }
+ ],
+ "log": [],
+ "combatLog": [],
+ "details": {}
+}

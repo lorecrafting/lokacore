@@ -124,7 +124,7 @@ their rules and red controls remain available for resumption.
   `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`), superseded runs on a ref cancelled;
   no pull request or push triggers ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)). `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), then `npm run storybook:smoke` (every story renders, its play
-  passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
+  passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)), then `npm run storybook:live` (every Live story and its click-through on the dev server); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has
   one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed,
   was cancelled or skipped ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
