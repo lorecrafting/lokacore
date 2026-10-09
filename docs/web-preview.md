@@ -69,4 +69,6 @@ the check lock, so not during a smoke or `bin/check_all.sh`). The repo's
 `.mcp.json` points Claude Code at the owner's http://localhost:6006/mcp (approve it once per
 machine). Those tools see only the checkout that server serves, so an agent testing its own
 worktree runs Storybook on another port and calls that port's `/mcp` instead. For the browser
-console and clicks, use the Claude in Chrome extension on the same URL.
+console and clicks, use the Claude in Chrome extension on the same URL. Trial: `storybook dev`
+also loads the Tidewave toolbar below each story (a hosted script, 10 free prompts a month) and
+serves Tidewave's MCP at `/tidewave/mcp`, also in `.mcp.json`; the build and smoke leave it out.

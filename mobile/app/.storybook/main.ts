@@ -140,7 +140,7 @@ const config: StorybookConfig = {
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
   viteFinal: (config, { configType }) =>
     mergeConfig(config, {
-      // Tidewave spike (loka-zs7): `storybook dev` only, not the build or the vitest smoke.
+      // Tidewave (docs/web-preview.md#storybook): `storybook dev` only, not the build or the vitest smoke.
       plugins: configType === 'DEVELOPMENT' ? [...plugins, tidewaveOnStorybook()] : plugins,
       // expo-modules-core's src imports declare-only classes for its global types (Metro drops them).
       optimizeDeps: { rolldownOptions: { shimMissingExports: true, plugins: [sqliteWorker] } },
