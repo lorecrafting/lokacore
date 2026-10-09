@@ -111,7 +111,7 @@ test('strength 5 cannot lift the anvil on any carry path; strength 15 can', () =
 });
 
 // Breaks: the player profile ignores the hit or damage table (base 75% and 4 damage), or loses the
-// clamp at 0 so a negative damage bonus heals the target.
+// clamp at 0 so a negative damage bonus heals the target, or applies the bonus to the NPC.
 test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0', () => {
   const hp = (w: World) => level(w, dummy(w), resourceRef(w, 'hp'));
   const round = (w: World) =>
@@ -126,7 +126,10 @@ test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0
   const blind = structuredClone(content) as any; // base chance 0: only the +100 bonus hits
   blind.world.combat.player_attack.chance = 0;
   blind.world.derived.hit_chance.terms[0].per_point = 20;
-  assert.equal(hp(round(chosen('strong', blind))), 14);
+  const fought = round(chosen('strong', blind));
+  assert.equal(hp(fought), 14);
+  // The dummy's own 0% profile takes no bonus: leaked, it would hit for 3.
+  assert.equal(level(fought, fought.body, resourceRef(fought, 'hp')), 10);
   const weak = structuredClone(content) as any;
   weak.world.derived.damage.terms[0].per_point = -10;
   assert.equal(hp(round(chosen('strong', weak))), 20);
