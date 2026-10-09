@@ -46,3 +46,13 @@ The runner also accepts `--video retain-on-failure` to keep recordings only for 
 ([official e2e debugging guide](https://e2e.tester.army/docs/debugging)). The deterministic suite needs no model. Exploratory tests that use agent actions require an already authorized provider or subscription, or a local model. The official e2e overview describes the distinction between exact steps and model-driven agent steps.
 
 The current suite contains one deterministic saved-move-after-reload check. It is setup proof for the browser runner, not chapter route/UI coverage. Chapter closure follows the [browser E2E loop](decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md).
+
+## Storybook
+
+The Book UI's components and pages render in Storybook from `mobile/app`:
+`mise exec -- npm run storybook` serves **http://localhost:6006** on every interface, so a phone
+on the same network opens `http://<this computer's LAN address>:6006`. The toolbar picks the
+palette and a phone viewport. `mise exec -- npm run storybook:smoke` type-checks, builds and runs
+every story headless (render, play function, axe at error level); CI runs it in `book-e2e.yml`
+([checks](CHECKS.md)). Install its browser once with `mise exec -- npx playwright install chromium`.
+What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).

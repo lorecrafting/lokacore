@@ -27,6 +27,8 @@ Owner's words (paraphrased):
   director.
 - Model: Opus.
 
+The model line is superseded for the polish phase by [designer on Fable](owner-decision-designer-fable-2026-10-08.md).
+
 ## Effect
 
 - [`.claude/agents/designer.md`](../../.claude/agents/designer.md) defines the role;

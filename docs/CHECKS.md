@@ -116,7 +116,8 @@ their rules and red controls remain available for resumption.
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
   ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
-  (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled
+  (see [preview command](web-preview.md)), then `npm run storybook:smoke` (every story renders, its play
+  passes, axe at `test: 'error'`; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. `main` requires
   one gate job per workflow, `ci-green` and `book-e2e-green` (`if: always()`): each fails unless
   its `changes` job succeeded and no other job failed or was cancelled, so a skipped scoped job

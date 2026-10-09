@@ -51,7 +51,7 @@ Duplicates still live: accent text link drawn inline 14x (`pages.tsx:93,102,129,
 | Target (file) | Props | States | Built from / consumers to convert |
 |---|---|---|---|
 | `Control` (pages.tsx) | label, onPress, disabled? | enabled, disabled | exists; add disabled. Convert `Leave`, Back to container (`pages.tsx:278`), Close/Resume dream, Continue conversation (`pages.tsx:128`), Got it (`Footer.tsx:134`), Backspace/Clear (`Menu.tsx:88`), level stepper/Back to map (`DiscoveredMap.tsx`) |
-| `PageFoot` (pages.tsx) | children | one | the mock's `.pg-foot`: hairline + centred Controls; consumers `Bottom` (`Book.tsx:206`), every detail's Leave/Back (pending G3) |
+| `PageFoot` (pages.tsx) | children | one | the mock's `.pg-foot`: hairline + centred Controls; consumers `Bottom` (`Book.tsx:206`), every detail's Leave/Back (G3: yes) |
 | `ActionCard` (pages.tsx) | label, onPress, note? | available | `Act` on detail pages, `Choice` answers, notice offers (`notices.tsx:161`), dream, Ways, Combat responses, Submit; unavailable stays a `note` line |
 | `VerbLine` (pages.tsx) | label, onPress | available | `Act` on the room (place actions, water Surface in `Body.tsx:44`) |
 | `ContinueButton` (pages.tsx) | label, onPress | available | `ChapterPage`, `ScenePage` |
@@ -110,7 +110,7 @@ Chapter 1 is frozen, so they are stable; CI regenerates and diffs (E5).
 14. Old-style numerals in footer/status (`fontVariant: ['oldstyle-nums']` on `type.small`) → token.
 15. Focus ring: mock 2 px accent outline on `:focus-visible`; live none → `size.focus` token, web only.
 16. Minimap at night reads as a "+" (loka-49n) → MapDrawing stroke opacity per palette (drawing exempt from tokens, but colour must be a role).
-17. Chapter card (small caps label, large title, 80 px rule) → pending G4.
+17. Chapter card (small caps label, large title, 80 px rule) → G4: the card.
 Effects lab adds nothing that is not an effect (`x-paper` grain/edges, `x-ink` shadows, lamp glow,
 moon palette, `x-curl` is adopted): stays out until an owner decision.
 
@@ -137,7 +137,9 @@ Dropped: foundation check 5 (specimen mirrors tokens) with the specimen.
 | 5 | Fidelity polish D1-D16 by token/component, owner polishes in Storybook | 2a, 2b | M | with 4 |
 | 6 | Owner-decided extras (chapter card, eyebrow) | G | S each | – |
 
-## G. Owner decisions (recommendation first)
+## G. Owner decisions (answered)
+
+All five answered with the recommendation: owner 2026-10-08, 'yes go with the recs' (source: Beads loka-bhb notes).
 
 1. **Where rules live**: one catalogue table in `BOOK-UI-COMPONENTS.md`, embedded in Storybook (recommend); or per-component MDX in Storybook (splits rules over 13 files agents read raw).
 2. **Archive the explorations**: moodboard, 8 galleries, room-view README, foundation README, specimen.html → `docs/archive/design/`; keep only the two references and the decisions (recommend yes; git keeps history).

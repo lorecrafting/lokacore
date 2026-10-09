@@ -75,8 +75,7 @@ export function Control(p: { label: string; onPress: () => void; disabled?: bool
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
+      disabled={disabled} // also sets accessibilityState.disabled (aria-disabled on web)
       onPress={onPress}
       style={{
         minHeight: size.touch,
