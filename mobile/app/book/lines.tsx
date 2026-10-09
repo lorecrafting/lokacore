@@ -31,7 +31,7 @@ export function EntityLine(p: {
       ) : (
         <Text style={{ ...prose(c), ...named }}>{p.name}</Text>
       )}
-      {p.note && <Text style={note(c)}>{p.note}</Text>}
+      {p.note ? <Text style={note(c)}>{p.note}</Text> : null /* '' is no bare string on native */}
     </Tap>
   );
 }

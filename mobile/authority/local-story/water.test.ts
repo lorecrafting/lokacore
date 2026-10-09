@@ -356,10 +356,10 @@ test('Book projects warning, confirmed remaining time, free Surface and selected
   book.press(recovery);
   assert.ok(book.screen().log.join(' ').includes('You recover'));
   assert.ok(book.screen().log.join(' ').includes('trunk'));
-  const once = book.screen().log.filter((s) => s.includes('You recover'));
+  const once = book.screen().log.filter((s) => typeof s === 'string' && s.includes('You recover'));
   book.press(recovery);
   assert.deepEqual(
-    book.screen().log.filter((s) => s.includes('You recover')),
+    book.screen().log.filter((s) => typeof s === 'string' && s.includes('You recover')),
     once,
   );
   a.reopen();

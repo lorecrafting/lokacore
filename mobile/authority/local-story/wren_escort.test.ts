@@ -243,7 +243,7 @@ test('real SQLite rescue reopens start, death separation, Rejoin and terminal wi
   a = setup(path);
   assert.equal(a.lines('wren', startLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => s.includes(startLine)),
+    a.book.screen().log.some((s) => typeof s === 'string' && s.includes(startLine)),
     false,
   );
   a.move('north', 'north', 'north', 'north');
@@ -285,7 +285,7 @@ test('real SQLite rescue reopens start, death separation, Rejoin and terminal wi
   a = setup(path);
   assert.equal(a.lines('wren', rejoinLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => s.includes(rejoinLine)),
+    a.book.screen().log.some((s) => typeof s === 'string' && s.includes(rejoinLine)),
     false,
   );
   a.move('up', 'west', 'south');

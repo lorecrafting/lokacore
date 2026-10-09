@@ -171,7 +171,7 @@ test('original message branch and terminal reopen with their own NPC narration a
   assert.equal(a.view().choice, undefined);
   assert.equal(a.lines('vesper', vesperLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => s.includes(vesperLine)),
+    a.book.screen().log.some((s) => typeof s === 'string' && s.includes(vesperLine)),
     false,
   );
   a.terminal();
@@ -190,7 +190,7 @@ test('original message branch and terminal reopen with their own NPC narration a
   a = setup(path);
   assert.equal(a.lines('elspeth', elspethLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => s.includes(elspethLine)),
+    a.book.screen().log.some((s) => typeof s === 'string' && s.includes(elspethLine)),
     false,
   );
   assert.equal(a.row('containers', message), ids['npc/elspeth']);
