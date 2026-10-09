@@ -1,12 +1,13 @@
 import { Text, View } from 'react-native';
 import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
-import { group, conversation, npcPage, type Page } from './model.ts';
+import { group, conversation, npcPage, plain, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
 import { Act, RoomPage } from './pages.tsx';
 import { note, usePalette } from './palette.ts';
+import { space, type } from './tokens.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -35,8 +36,25 @@ export function Body(p: BodyProps) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
+  // The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
+  // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+  const quest = p.screen.view.journal?.find(
+    (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
+  );
   return (
     <View style={{ flex: 1 }}>
+      {quest && (
+        <Text
+          style={{
+            ...type.runningHead,
+            color: c.dim,
+            paddingHorizontal: space.page,
+            paddingTop: space.page,
+          }}
+        >
+          {plain(p.screen.text(quest.journal!))}
+        </Text>
+      )}
       {water && (
         <View style={{ paddingHorizontal: 24 }}>
           <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>

@@ -295,7 +295,8 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
     { text: 'Journal updated', event: true },
   ]);
   const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
-  assert.deepEqual(h.text().slice(0, 2), [
+  assert.deepEqual(h.text().slice(0, 3), [
+    "Find Bram's lantern.", // the running head: the accepted quest's journal text
     'Old Bram',
     'A ferryman with rope-scarred hands and a coat that has never been dry.',
   ]);
@@ -491,4 +492,22 @@ test('a notice page shows its description once and every other read line', async
     .filter((n) => n.type === 'Text')
     .map(words);
   assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'Leave']);
+});
+
+// Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
+// before any quest is active (BOOK-UI-COMPONENTS.md, Page).
+test('the running head shows the active quest objective on room and NPC pages', () => {
+  const head = 'Look for a sign of Wren on Village Green.'; // quest.first_lead.active
+  const h = book(bundle('missing_child_v042_hash'));
+  h.tap('Fen-born');
+  if (h.labels().includes('Continue')) h.tap('Continue');
+  assert.equal(h.text().includes(head), false);
+  h.tap('Elspeth, open');
+  h.tap('Talk to Elspeth');
+  h.tap('Will you look around the Green for a sign of Wren?');
+  assert.ok(h.text().includes(head));
+  h.tap('Leave');
+  assert.ok(h.text().includes('Ferry Landing'));
+  assert.ok(h.text().includes(head));
+  h.sql.close();
 });
