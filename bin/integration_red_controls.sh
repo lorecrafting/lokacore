@@ -254,7 +254,8 @@ grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: ru
 # the owner's. Stub mise logs each call and turns a server command into a listener that keeps its
 # argv, so a decoy "storybook" on 7099 dies if a script stops processes by name. Breaks: a process
 # found by name is killed, a lockfile compare is dropped (ci every time), a second run restarts,
-# a dirty preview or session is changed, close does not push, open the PR or serve the preview again.
+# a dirty preview or session is changed, preview_update takes a served session, close does not push,
+# open the PR or serve the preview again, close restarts more than Storybook, a closed session restarts.
 # Plant the by-name break as `pkill -f loka-stub`: a bare `pkill -f storybook` kills the owner's Storybook.
 mkdir "$tmp/srv"
 cat > "$tmp/srv/mise" <<'SH'
@@ -269,10 +270,12 @@ case $* in
 esac
 exec perl -MIO::Socket::INET -e 'my $s = IO::Socket::INET->new(LocalAddr => "127.0.0.1", LocalPort => shift, Listen => 1, ReuseAddr => 1) or die "listen: $!"; sleep 120' "$port" loka-stub "$@"
 SH
-printf '#!/bin/sh\necho "$*" >> "$GH_LOG"\n[ "$1 $2" = "pr create" ] && echo https://pr/1\n' > "$tmp/srv/gh"
+printf '#!/bin/sh\necho "$*" >> "$GH_LOG"\n[ "$1 $2" != "pr create" ] || echo https://pr/1\n' > "$tmp/srv/gh"
 chmod +x "$tmp/srv/mise" "$tmp/srv/gh"
 export LOKA_SB_PORT=7006 LOKA_PREVIEW_PORT=7019 LOKA_METRO_PORT=7020 LOKA_EXPO_PORT=7081 PATH="$tmp/srv:$PATH"
-for p in 7006 7019 7020 7081 7099; do [ -z "$(lsof -t -iTCP:$p -sTCP:LISTEN)" ] || bad "port $p busy before the preview cases"; done
+busy=; for p in 7006 7019 7020 7081 7099; do [ -z "$(lsof -t -iTCP:$p -sTCP:LISTEN)" ] || busy="$busy $p"; done
+# Never stop a server this harness did not start (an agent's own Storybook may sit on 7006).
+if [ -n "$busy" ]; then bad "ports$busy busy: preview cases skipped"; else
 pid() { lsof -t -iTCP:"$1" -sTCP:LISTEN | head -n 1; }
 cwd() { lsof -a -p "$(pid "$1")" -d cwd -Fn | sed -n 's/^n//p'; }
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2> /dev/null; git checkout -qb main
@@ -298,15 +301,19 @@ run preview_update.sh '' lockfile 0
 [ "$(git -C "$P" rev-parse HEAD)" = "$(git rev-parse HEAD)" ] && [ "$(grep 'npm ci' "$R.mise")" = "$P/mobile/app npm ci --no-audit --no-fund" ] \
   || { bad 'preview_update lockfile: not at origin/main, or ci outside mobile/app'; cat "$R.mise"; }
 day=polish/session-$(date +%F); git push -q origin "main:refs/heads/$day"
-run polish_session.sh start start 0; S=$(cd "$R.session" && pwd -P)
+web=$(pid 7019); expo=$(pid 7081); run polish_session.sh start start 0; S=$(cd "$R.session" 2> /dev/null && pwd -P) || S=$R.session
 [ "$(cwd 7006)" = "$S/mobile/app" ] && [ "$(git -C "$S" branch --show-current)" = "$day-2" ] && grep -q 'mix deps.get' "$R.mise" \
   || bad 'polish_session start: not served from the session, wrong branch, or no deps'
 sb=$(pid 7006); run polish_session.sh start start-again 0
 [ "$(pid 7006)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
+run preview_update.sh '' during-session 1; [ "$(pid 7006)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
 touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid 7006)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
 git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak; run polish_session.sh close close 0
 git ls-remote --exit-code --heads origin "$day-2" > /dev/null && grep -q '^pr create' "$R.gh" && [ "$(cwd 7006)" = "$P/mobile/app" ] \
   || { bad 'polish_session close: not pushed, no PR, or the preview not served again'; cat "$R.gh"; }
+[ "$(pid 7019)" = "$web" ] && [ "$(pid 7081)" = "$expo" ] || bad 'polish_session close: restarted the web preview or Expo'
+run polish_session.sh start after-close 1
 kill "$decoy" 2> /dev/null || bad 'a stop by name killed the decoy on 7099'
 for p in 7006 7019 7081; do kill $(pid $p) 2> /dev/null || true; done
+fi
 exit $fail

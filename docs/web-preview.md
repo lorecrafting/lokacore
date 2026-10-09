@@ -62,12 +62,11 @@ headers (and a secure context: `localhost`, not a LAN address), so the smoke ski
 port, runs every Live story and its click-through headless, and stops it (about 50 s warm,
 85 s on a first run, so `book-e2e.yml` runs it nightly rather than the pre-push hook).
 What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).
-`bin/preview_update.sh` brings the preview checkout (`~/dev/lokacore-preview`) to `origin/main`,
-runs `npm ci` only where a `package-lock.json` changed, and restarts Storybook, the web preview and (if
-it was running) Expo on 8081, stopping only the PIDs listening on those ports; when already current
-it restarts nothing. `bin/polish_session.sh start|close` serves a [live polish session](WORKFLOW.md#live-polish-session)
-branch on 6006 instead, then pushes it, opens its PR and serves the preview again. `LOKA_SB_PORT`,
-`LOKA_PREVIEW_PORT`, `LOKA_METRO_PORT` and `LOKA_EXPO_PORT` move every port (tests use 7006 and up).
+`bin/preview_update.sh` brings the preview checkout (`~/dev/lokacore-preview`) to `origin/main`, runs
+`npm ci` only for a changed `package-lock.json` and restarts Storybook, the web preview and (if running) Expo on
+8081 by listening PID; servers already serving it keep running. `bin/polish_session.sh start|close` serves a
+[live polish session](WORKFLOW.md#live-polish-session) on 6006, then pushes it, opens its PR and serves the
+preview again. `LOKA_SB_PORT`, `LOKA_PREVIEW_PORT`, `LOKA_METRO_PORT` and `LOKA_EXPO_PORT` move the ports.
 
 **Agents** ([owner decision](decisions/owner-decision-storybook-mcp-2026-10-09.md)): the dev server
 answers MCP at `/mcp` (`@storybook/addon-mcp`): list and read components and stories, story-writing
