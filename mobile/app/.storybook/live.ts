@@ -28,28 +28,31 @@ try {
       .catch(() => undefined);
   }
   const live = Object.values(index.entries).filter((e) => e.title === 'Live' && e.type === 'story');
-  if (live.length === 0) throw new Error('no Live stories in the index');
+  if (live.length < 2) throw new Error('fewer than two Live stories in the index');
   const browser = await chromium.launch();
-  // The preview's own verdict per story: storyFinished's status, with the last play or render error.
+  // The preview's own verdict per story: its first play or render error, else storyFinished's status.
   const watch = () => {
     const w = window as never as {
       __STORYBOOK_ADDONS_CHANNEL__?: any;
-      live?: object;
-      why?: string;
+      live: Record<string, string>;
+      current?: string;
     };
     w.live = {};
     const hook = setInterval(() => {
       const channel = w.__STORYBOOK_ADDONS_CHANNEL__;
       if (!channel) return;
       clearInterval(hook);
-      const fail = (why: string) => (e: { message?: string }) => (w.why = `${why}: ${e.message}`);
+      const fail = (why: string) => (e: { message?: string }) =>
+        (w.live[w.current!] ??= `${why}: ${e.message}`);
+      channel.on('storyRenderPhaseChanged', (e: { newPhase: string; storyId: string }) => {
+        if (e.newPhase === 'preparing') w.current = e.storyId; // a torn-down story's late phases keep out
+      });
       channel.on('playFunctionThrewException', fail('play'));
       channel.on('storyThrewException', fail('render'));
       channel.on('storyErrored', fail('errored'));
-      channel.on('storyFinished', (r: { storyId: string; status: string }) =>
-        Object.assign(w.live!, {
-          [r.storyId]: r.status === 'success' ? 'success' : (w.why ?? r.status),
-        }),
+      channel.on(
+        'storyFinished',
+        (r: { storyId: string; status: string }) => (w.live[r.storyId] ??= r.status),
       );
     }, 10);
   };
@@ -98,6 +101,6 @@ try {
   if (server.exitCode === null) process.kill(-server.pid!, 'SIGTERM'); // else keep its error
 }
 if (failed.length) {
-  console.error(`storybook:live: ${failed.length} Live stories failed`);
+  console.error(`storybook:live: ${failed.length} Live checks failed`);
   process.exit(1);
 }
