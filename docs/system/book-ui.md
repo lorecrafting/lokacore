@@ -83,11 +83,13 @@ time after actions, elapsed delivery and reopen, without settling elapsed on ren
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
-The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows confirmed GameView in-game
-time, never the device's light or dark setting: `light` from the cartridge's dawn hour until its
-dusk hour, `dark` otherwise, switching when confirmed time crosses either hour. Dawn and dusk are
-cartridge world values; a cartridge that authors none shows `light`. There is no Settings
-override ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
+The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows the confirmed GameView
+solar phase, never the device's light or dark setting: phase `day` shows `light`, `dawn` shows
+`dawn`, `dusk` shows `dusk`, `night` shows `dark`; any other phase, or a cartridge without a
+calendar, shows `light`. The phase names are the cartridge's solar cuts; the Book reads the label
+and computes no hours. On a phase change the whole Book cross-fades to the new palette over
+`motion.palette`; under reduced motion it switches at once. There is no Settings override
+([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
 the next currently offered legal action in standing → sitting → resting → sleeping → standing

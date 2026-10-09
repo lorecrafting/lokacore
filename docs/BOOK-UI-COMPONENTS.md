@@ -72,13 +72,14 @@ off, consolidated; the [foundation notes](design/foundation/README.md) list each
 against the live one and the [specimen](design/foundation/specimen.html) shows them. Live code
 still reads [`paper.ts`](../mobile/app/book/paper.ts) until the polish phase moves every import.
 
-- **Colour.** Two complete palettes, `light` (the paper by day) and `dark` (the mock's unlit
-  paper, without its glow), with the same roles: `bg`, `fg` (ink), `dim`, `line`, `card`,
-  `action`, `danger`, `warning`. Use roles, never a hex value. `action` marks what can be
-  pressed; `danger` and `warning` are the projected bands, barred ways and refusal tags, never
-  decoration. The text roles (`fg`, `dim`, `action`, `danger`, `warning`) are each at least
-  4.5:1 on `bg` and on `card` in both palettes; `line` is a hairline, not text. Which palette
-  shows follows in-game time, per the [day and night rule](system/book-ui.md#world-and-status-entry).
+- **Colour.** Four complete palettes with the same roles: `light` (the paper by day), `dawn`
+  (a cool grey-blue paper), `dusk` (a warm umber page with lamp ink) and `dark` (the mock's unlit
+  paper, without its glow). Roles: `bg`, `fg` (ink), `dim`, `line`, `card`, `action`, `danger`,
+  `warning`. Use roles, never a hex value. `action` marks what can be pressed; `danger` and
+  `warning` are the projected bands, barred ways and refusal tags, never decoration. The text
+  roles (`fg`, `dim`, `action`, `danger`, `warning`) are each at least 4.5:1 on `bg` and on
+  `card` in every palette; `line` is a hairline, not text. Which palette shows follows the
+  in-game solar phase, per the [day and night rule](system/book-ui.md#world-and-status-entry).
 - **Type.** IM Fell English for titles and letter tiles, EB Garamond for prose, logs and status,
   IM Fell English SC (chosen; its bundling is noted in `tokens.ts`) for small-caps controls,
   tags and the running head. Use a named style
@@ -88,7 +89,8 @@ still reads [`paper.ts`](../mobile/app/book/paper.ts) until the polish phase mov
   (`MapDrawing`, `DiscoveredMap` layout, `joystick`) is exempt: its numbers are a drawing,
   not spacing.
 - **Motion and sound.** Only the plain state changes in `motion` and the page turn's sound;
-  no decorative animation. Effects from the mock's Effects panel and its "Archive, not in
+  no decorative animation. `motion.palette` is the slow cross-fade between palettes (light
+  changes need more than `motion.fade`); reduced motion switches palettes at once. Effects from the mock's Effects panel and its "Archive, not in
   v1" group have no tokens and wait for their own owner decisions.
 
 ## Component catalogue
@@ -121,7 +123,7 @@ chips, shop price rows and scene pick cards.
 [`page-curl.sksl`](../mobile/app/book/page-curl.sksl) is the single source of the curl: one Skia
 runtime shader that web (CanvasKit) and device (Skia) both run through
 `@shopify/react-native-skia`. Its uniforms are the leaving page's picture, page size, eased
-progress, direction and the paper colour, which is the shown palette's `bg` (light or dark)
+progress, direction and the paper colour, which is the shown palette's `bg`
 passed in by the driver. The curl draws over the live arriving page: it paints the leaf and,
 where the arriving page shows, only the roll's shadow, never a picture of the arriving page.
 There is no second CSS or WebGL curl.

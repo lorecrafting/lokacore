@@ -15,7 +15,7 @@ rules do not change. This page is the audit and the mock-against-live record.
 - **Raw colours:** 6 hex literals, all in [`paper.ts`](../../../mobile/app/book/paper.ts); none elsewhere.
 - **Raw numeric style literals:** 57 in 10 files outside `paper.ts` (`Footer.tsx` 18, `pages.tsx` 11,
   `DiscoveredMap.tsx` 10, `Book.tsx` 5, `Menu.tsx` 4, `MapDrawing.tsx` 4, `SaveError.tsx` 2,
-  `Body.tsx`, `Combat.tsx`, `Turn.tsx` 1 each). About 18 are drawing geometry (`MapDrawing`,
+  `Body.tsx`, `Combat.tsx`, `Turn.tsx` (now `PageTurn.tsx`) 1 each). About 18 are drawing geometry (`MapDrawing`,
   the Map's room cards, the footer label placement) and stay exempt. Six font-style literals
   (italic, weight 500, small caps, underline).
 - **Sizes in use:** font 15, 17, 18, 22, 26, 32; spacing 5, 8, 10, 12, 14, 24; durations 160, 320.
@@ -34,7 +34,7 @@ rules do not change. This page is the audit and the mock-against-live record.
   3. The locked status Contents button (`Footer.tsx:225`) keeps the accent colour.
   4. Riddle letter tiles (`Menu.tsx:79`) are one glyph wide, under 44px across.
   5. `ScenePage` passes an empty title (`pages.tsx:420`), so it draws an empty header.
-  6. `Turn` (`Turn.tsx:9`) ignores the system's reduced-motion setting.
+  6. `Turn` (`Turn.tsx:9`, since replaced by `PageTurn.tsx`) ignored the system's reduced-motion setting.
 
 No defect changes what a tap does, navigation or returns; each item above is presentation
 for the polish phase.

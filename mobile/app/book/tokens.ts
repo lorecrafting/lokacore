@@ -16,9 +16,7 @@ const light = {
 };
 
 // The mock's unlit/lamp paper (`.ph.unlit,.ph.lamp`), without its glow; `warning` is a burnt orange
-// apart from `action`. Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg`
-// and on `card` in both palettes; `line` is a hairline, not text. Which palette shows: in-game
-// time, docs/system/book-ui.md#world-and-status-entry.
+// apart from `action`.
 const dark: typeof light = {
   bg: '#0c0b09',
   fg: '#ecdfc3',
@@ -30,7 +28,33 @@ const dark: typeof light = {
   warning: '#d0712a',
 };
 
-export const color = { light, dark };
+// Twilight: dawn a cool grey-blue paper with dark ink, dusk a warm umber page with lamp ink.
+// Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg` and on `card` in all
+// four palettes; `line` is a hairline, not text. Which palette shows: the in-game solar phase,
+// docs/system/book-ui.md#world-and-status-entry.
+const dawn: typeof light = {
+  bg: '#d5d9da',
+  fg: '#1c2128',
+  dim: '#4e5662',
+  line: '#b3bbc0',
+  card: '#cbd1d4',
+  action: '#7b2d20',
+  danger: '#7b2d20',
+  warning: '#6f4a10',
+};
+
+const dusk: typeof light = {
+  bg: '#2b1e16',
+  fg: '#f1ddc2',
+  dim: '#bfa58a',
+  line: '#4a3729',
+  card: '#36271d',
+  action: '#f0b462',
+  danger: '#f2a07f',
+  warning: '#e2894a',
+};
+
+export const color = { light, dawn, dusk, dark };
 
 // Bundled family names (OFL files in ./fonts). `caps` (IM Fell English SC) is chosen; the polish
 // phase adds its OFL file to ./fonts and loads it with the others through expo-font.
@@ -81,6 +105,7 @@ export const motion = {
   quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
+  palette: { duration: 1500, easing: 'inOutQuad' }, // cross-fade on a solar phase change; owner tunes in preview
 };
 
 // The paper page-turn sound, on by default, off in Settings. The mock's synthesised `pageSound` plays
