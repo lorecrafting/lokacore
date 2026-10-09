@@ -387,7 +387,7 @@ test('a notice page shows its description once and every other read line', async
 });
 
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
-// before any quest is active (BOOK-UI-COMPONENTS.md, Page).
+// before any quest is active, or repeats on the Journal page (BOOK-UI-COMPONENTS.md, Page).
 test('the running head shows the active quest objective on room and NPC pages', () => {
   const head = 'Look for a sign of Wren on Village Green.'; // quest.first_lead.active
   const h = book(bundle('missing_child_v042_hash'));
@@ -401,5 +401,8 @@ test('the running head shows the active quest objective on room and NPC pages', 
   h.tap('Leave');
   assert.ok(h.text().includes('Ferry Landing'));
   assert.ok(h.text().includes(head));
+  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap('Journal');
+  assert.equal(h.text().filter((t) => t === head).length, 1); // the entry, not a head as well
   h.sql.close();
 });

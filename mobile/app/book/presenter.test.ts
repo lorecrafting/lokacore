@@ -284,6 +284,7 @@ test('the save-error line says a pending start over in words and shows any other
   assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
   const missing = 'pinned_release_missing';
   assert.equal(detail({ ...failed, kind: missing, message: missing }), undefined);
+  assert.equal(detail(failed), undefined); // no message: no line, never a bare ''
   const lock =
     'Access Handles cannot be created if there is another open Access Handle or Writable stream associated with the same file.';
   assert.equal(detail({ ...failed, message: lock }), 'Loka is already open in another tab.');
