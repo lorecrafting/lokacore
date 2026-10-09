@@ -24,13 +24,22 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { Canvas, Fill, ImageShader, Shader, Skia, type SkImage } from '@shopify/react-native-skia';
+import {
+  Canvas,
+  Fill,
+  ImageShader,
+  Shader,
+  Skia,
+  type SkImage,
+  type SkRuntimeEffect,
+} from '@shopify/react-native-skia';
 import curl from './page-curl.sksl';
 import { easing } from './easing.ts';
 import { motion } from './tokens.ts';
 import { snapshot, warm } from './snapshot';
 
-const effect = Skia.RuntimeEffect.Make(curl)!;
+// Made at the first curl: without CanvasKit on web no picture is taken, so no curl is drawn.
+let effect: SkRuntimeEffect | undefined;
 // Over the arriving page, taking no touch, keyboard or screen-reader focus: `inert` is
 // react-native-web's (aria-hidden alone leaves its buttons tabbable); the others are the device's.
 const over = {
@@ -166,6 +175,7 @@ function Curl(p: {
   progress: SharedValue<number>;
 }) {
   const paper = useMemo(() => Array.from(Skia.Color(p.paper)).slice(0, 3), [p.paper]);
+  effect ??= Skia.RuntimeEffect.Make(curl)!;
   const uniforms = useDerivedValue(() => ({
     size: [p.size.width, p.size.height],
     progress: p.progress.value,

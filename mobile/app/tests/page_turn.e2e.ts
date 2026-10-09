@@ -149,3 +149,22 @@ test('the curl turns forward from the right and back from the left, with only a 
   expect(back).toMatchObject({ left: 0, right: 255 });
   expect(back.mirrored).toBe(forward.shadow);
 });
+
+// Breaks: a failed CanvasKit load (no WebAssembly, as in Safari Lockdown Mode, or a failed fetch)
+// leaves a blank page instead of a Book whose pages change without a curl.
+test('without CanvasKit the pages change with no curl', async ({ app, screen, browser }) => {
+  await browser.addInitScript(() => {
+    const load = window.fetch.bind(window);
+    window.fetch = (input, init) =>
+      String(input instanceof Request ? input.url : input).includes('canvaskit')
+        ? Promise.reject(new TypeError('blocked'))
+        : load(input, init);
+  });
+  await app.open('/?preview=page-turn');
+  await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
+  expect(await browser.evaluate(() => 'CanvasKit' in globalThis)).toBe(false);
+  const args = { from: 'Continue', to: 'Start over' };
+  expect(await browser.evaluate(turn, args)).toMatchObject({ curl: false, hit: true });
+  await app.open('/'); // the app itself, not only the preview
+  await expect(screen.getByText('Choose your ancestry')).toBeVisible({ timeout: COLD });
+});

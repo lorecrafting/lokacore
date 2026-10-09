@@ -17,9 +17,10 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
 });
 
 /**
- * The line under the save-error headline, never a raw code: a Start over that is not confirmed
- * gets its words, an empty message or one that is only the kind none (the headline says it), the browser's
- * save-file lock a sentence. ponytail: the lock is matched on Chrome's OPFS message text.
+ * The line under the save-error headline, never a raw code or exception text: a Start over that is
+ * not confirmed gets its words, an empty message or one that is only the kind none (the headline
+ * says it), the browser's save-file lock a sentence, any other message one plain sentence.
+ * ponytail: the lock is matched on Chrome's OPFS message text.
  */
 export const detail = (f: Failed) =>
   f.code === 'start_over_pending'
@@ -28,7 +29,9 @@ export const detail = (f: Failed) =>
       ? undefined
       : /Access Handles? cannot be created/.test(f.message)
         ? 'Loka is already open in another tab.'
-        : f.message || undefined;
+        : f.message
+          ? 'The save could not be opened.'
+          : undefined;
 
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).

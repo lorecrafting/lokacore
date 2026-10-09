@@ -277,11 +277,11 @@ test('the log stops growing in one room, its last line the latest answer', () =>
 
 // Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed
 // one hiding its own message behind "not confirmed"; a bare kind code or the browser's raw OPFS
-// lock message shown to the player.
-test('the save-error line says a pending start over in words and shows any other message', () => {
+// lock message or any other raw exception text shown to the player.
+test('the save-error line says a pending start over in words and never shows a raw message', () => {
   const failed = { message: '', startOver: true };
   assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'Start over was not confirmed.');
-  assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
+  assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'The save could not be opened.');
   const missing = 'pinned_release_missing';
   assert.equal(detail({ ...failed, kind: missing, message: missing }), undefined);
   assert.equal(detail(failed), undefined); // no message: no line, never a bare ''

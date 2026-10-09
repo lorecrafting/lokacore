@@ -130,7 +130,7 @@ export function NpcPage(p: NpcProps) {
     <ScrollView
       ref={scroll}
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ padding: 24 }}
+      contentContainerStyle={{ padding: space.page }}
       onContentSizeChange={() => p.log.length && scroll.current?.scrollToEnd({ animated: false })}
     >
       <Text {...titleFocus} style={pageTitleStyle(c)} accessibilityRole="header">

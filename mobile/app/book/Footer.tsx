@@ -238,7 +238,7 @@ export function Status(p: StatusProps) {
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
       {p.bleeding && (
-        <Text style={{ ...type.small, color: c.action }}>
+        <Text style={{ ...type.small, color: c.danger }}>
           {bleedingLine(p.bleeding, p.time, p.text)}
         </Text>
       )}
@@ -247,7 +247,7 @@ export function Status(p: StatusProps) {
         accessibilityRole="button"
         accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
         onPress={p.open}
-        style={{ minHeight: 44, justifyContent: 'center' }}
+        style={{ minHeight: size.touch, justifyContent: 'center' }}
       >
         <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>
           {p.resources ? shown(c, p.resources, p.locked) : 'character'}

@@ -121,7 +121,7 @@ export function RoomPage(p: {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <RoomTitle {...p} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: space.page }}>
         <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
         {warnings(c, p.view, p.text)}
         <Here view={p.view} text={p.text} open={p.open} />
@@ -149,7 +149,7 @@ function RoomTitle(p: { view: GameView; text: Say; g: Grouped; press: (b: Button
     </Text>
   );
   return (
-    <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+    <View style={{ paddingHorizontal: space.page, paddingTop: space.page }}>
       {p.g.look ? (
         <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
           {title}
@@ -219,7 +219,10 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
   const c = usePalette();
   return (
-    <ScrollView style={{ backgroundColor: c.bg }} contentContainerStyle={{ padding: 24, gap: 8 }}>
+    <ScrollView
+      style={{ backgroundColor: c.bg }}
+      contentContainerStyle={{ padding: space.page, gap: 8 }}
+    >
       <Text {...(title ? titleFocus : {})} style={pageTitleStyle(c)} accessibilityRole="header">
         {title}
       </Text>
