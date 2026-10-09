@@ -58,7 +58,7 @@ jobs:
       - run: npx e2e-web install chromium --with-deps
       - run: npm run test:e2e
       # Every Storybook story renders, its play function and axe (test: 'error') pass (CHECKS.md).
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npm run storybook:smoke
       - if: failure()
         name: Redact browser failure diagnostics

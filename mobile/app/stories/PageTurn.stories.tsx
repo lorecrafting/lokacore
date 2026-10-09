@@ -39,18 +39,19 @@ export default meta;
 export const ChapterToSettings: StoryObj<typeof meta> = {
   loaders: [loadPageTurn],
   render: (_, { loaded }) => <Turning PageTurn={loaded.PageTurn} />,
-  // Continue curls forward to Settings, the arriving page live at once. A turn with no curl (no
-  // picture in time) fails the canvas wait. ponytail: the back turn (Start over) is not driven: the
-  // known PageTurn defect (see .storybook/vitest.config.mts) leaves the story root empty when a
-  // curl ends, in the smoke run.
+  // Continue curls forward to Settings, the arriving page live at once; Start over curls back. A
+  // turn with no curl (no picture in time) fails the canvas wait.
   play: async ({ canvas, canvasElement, userEvent }) => {
     const curl = () => canvasElement.querySelector('canvas');
-    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
-    await expect(await canvas.findByRole('heading', { name: 'Settings' })).toBeVisible();
-    await waitFor(() => expect(curl()).not.toBeNull());
-    // Headless Chromium draws slowly: the 500 ms curl ends about 2 s in, as in the app's preview.
-    await waitFor(() => expect(curl()).toBeNull(), { timeout: 5000 });
-    // ponytail: no check that Settings still shows after the curl: in the smoke run the story root
-    // is empty then. Add it, and the back turn, with the PageTurn fix.
+    const turn = async (button: string, arriving: string) => {
+      await userEvent.click(canvas.getByRole('button', { name: button }));
+      await expect(await canvas.findByRole('heading', { name: arriving })).toBeVisible();
+      await waitFor(() => expect(curl()).not.toBeNull());
+      // Headless Chromium draws slowly: the 500 ms curl ends about 2 s in, as in the app's preview.
+      await waitFor(() => expect(curl()).toBeNull(), { timeout: 5000 });
+      await expect(canvas.getByRole('heading', { name: arriving })).toBeVisible();
+    };
+    await turn('Continue', 'Settings');
+    await turn('Start over', 'Chapter One');
   },
 };
