@@ -24,6 +24,7 @@ import { SaveError } from './SaveError';
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
 export const fonts = {
   IMFellEnglish: require('./book/fonts/IMFellEnglish.ttf'),
+  IMFellEnglishSC: require('./book/fonts/IMFellEnglishSC.ttf'),
   EBGaramond: require('./book/fonts/EBGaramond.ttf'),
 };
 

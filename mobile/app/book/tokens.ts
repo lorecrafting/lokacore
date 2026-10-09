@@ -55,8 +55,7 @@ const dusk: typeof light = {
 
 export const color = { light, dawn, dusk, dark };
 
-// Bundled family names (OFL files in ./fonts). `caps` (IM Fell English SC) is chosen; the polish
-// phase adds its OFL file to ./fonts and loads it with the others through expo-font.
+// Bundled family names (OFL files in ./fonts), loaded by App.tsx `fonts` through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
 
 // Text styles without colour; a component adds a colour from the palette.

@@ -262,7 +262,9 @@ export function Status(p: StatusProps) {
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
     <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, r.tone) }}>
-      {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
+      {i ? '  ' : ''}
+      <Text style={type.label}>{r.resource.key}</Text>
+      {` ${r.current}/${r.maximum}`}
     </Text>
   ));
 
