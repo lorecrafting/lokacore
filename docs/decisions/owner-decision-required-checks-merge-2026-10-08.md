@@ -1,5 +1,7 @@
 # Owner decision: merge on GitHub required checks — 2026-10-08
 
+Superseded 2026-10-08 by the [pre-production merge gate](owner-decision-preproduction-gate-2026-10-08.md).
+
 (paraphrased) Switch from the merge queue script to GitHub branch protection with required checks
 and auto-merge, and keep a backdoor so the owner or PM can merge or push directly for quick
 pre-production work.

@@ -48,9 +48,9 @@ sy rerun 0; git fetch -q origin; [ "$(git rev-parse HEAD)" = "$(git rev-parse or
 # branch off a pushed main. Break: a *.test.ts-only push runs the full line, or source/peer edits
 # get the short lanes.
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-git checkout -qb main; mkdir -p .githooks bin kernel/ts/test; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" bin/
+git checkout -qb main; mkdir -p .githooks bin kernel/ts/test mobile/app/book; cp "$bin/../.githooks/pre-push" .githooks/; cp "$bin/ci_scope.sh" bin/
 printf '#!/bin/sh\necho "lane=$*" > "%s/lane"\n' "$R.d" > bin/check_all.sh; mkdir "$R.d"; chmod +x bin/*.sh .githooks/pre-push
-touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts; git add . && git commit -qm base && git push -q origin main
+touch a.md kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts mobile/app/book/p.tsx; git add . && git commit -qm base && git push -q origin main
 git config core.hooksPath .githooks
 pp() { # <case> <file> <want-args>
   git checkout -q -b "$1" main; echo 1 >> "$2"; git commit -qam "$1"; rm -f "$R.d/lane"
@@ -66,6 +66,18 @@ for b in p2:kernel/ts/test/differential_peer.ts t2:kernel/ts/test/k.test.ts; do
 done; rm -f "$R.d/lane"
 capped git push -q origin p2 t2 > /dev/null 2>&1 || bad 'pre-push two refs: push failed'
 [ "$(cat "$R.d/lane" 2>/dev/null)" = "lane=" ] || bad "pre-push two refs: $(cat "$R.d/lane" 2>/dev/null), want lane="
+# Break: a Book change skips the Storybook smoke, or a non-Book change runs it (stub mise logs it).
+mkdir -p "$R.d/bin"; printf '#!/bin/sh\necho "$(basename "$PWD") $*" >> "%s/smoke"\n' "$R.d" > "$R.d/bin/mise"; chmod +x "$R.d/bin/mise"
+PATH="$R.d/bin:$PATH" pp book mobile/app/book/p.tsx ''
+PATH="$R.d/bin:$PATH" pp docs2 a.md --metadata
+[ "$(cat "$R.d/smoke" 2>/dev/null)" = "app exec -- npm run storybook:smoke" ] || bad "pre-push smoke: got '$(cat "$R.d/smoke" 2>/dev/null)', want one run for the Book push"
+# Break: a dirty tracked file is pushed after checks of a tree nobody committed; an untracked file blocks.
+git checkout -q -b dirty main; echo 1 >> a.md; git commit -qam dirty; echo 2 >> a.md; rm -f "$R.d/lane"
+if capped git push -q origin dirty > /dev/null 2>&1; then bad 'pre-push dirty: pushed with a modified tracked file'; fi
+[ ! -e "$R.d/lane" ] || bad 'pre-push dirty: checks ran'
+git checkout -q a.md; touch untracked.tmp
+capped git push -q origin dirty > /dev/null 2>&1 || bad 'pre-push untracked: an untracked file blocked the push'
+rm -f untracked.tmp
 # --- check_all.sh lock --------------------------------------------------------------------
 # Stub mise logs each call. Break: a second run overlaps a live holder instead of waiting, a dead
 # holder's lock blocks forever, or the lock outlives the run.
@@ -219,4 +231,21 @@ grep -qxF "worktree $wt" out && grep -qx 'stashes: 1' out && grep -qx 'merged re
   && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh "$R.wt/bin/session_status.sh" > out 2>&1 || true
 if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout listed from a linked worktree'; fi
+# Break: a red nightly prints nothing or reads as green, a running one reads as red, a missing one
+# prints a blank. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
+mkdir -p "$tmp/gh"; cat > "$tmp/gh/gh" <<'SH'
+#!/bin/sh
+[ "$1 $2" = "run list" ] || exit 1
+case $* in *ci.yml*) json=$CI ;; *) json=$E2E ;; esac
+while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; shift; done
+printf '%s\n' "$json" | jq -r "$q"
+SH
+chmod +x "$tmp/gh/gh"
+CI='[{"conclusion":"failure","status":"completed","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e.yml no scheduled run yet' out \
+  || { bad 'session_status nightly: red or missing run misreported'; sed -n '/Nightly/,/Housekeeping/p' out; }
+CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
 exit $fail
