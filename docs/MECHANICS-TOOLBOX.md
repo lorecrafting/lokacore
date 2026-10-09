@@ -124,6 +124,7 @@ have / partial / missing per the audit. Ids in parentheses are the
   ([test rules](../AGENTS.md#writing-tests-every-change-every-agent)).
 - **Review:** one fresh Opus reviewer; findings as PR comments; no `docs/reviews` record, review
   index or second opinion. Fix rounds as in the workflow.
+- **Gate:** `toolbox/*` pushes skip the local checks; the PM runs `gh workflow run ci.yml --ref <branch>` and `book-e2e.yml` once per batch head and merges only on green for that exact head (`--match-head-commit`), after the verdict ([record](decisions/owner-decision-hosted-ci-toolbox-2026-10-09.md)).
 - **Merge:** the PM merges after the verdict ([gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)); no ROADMAP status commit.
 
 ## How to pick the next item

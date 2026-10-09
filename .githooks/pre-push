@@ -4,14 +4,18 @@
 # Book, story or Storybook config changes also run `npm run storybook:smoke` first (never alongside npm test).
 # The checks run on the working tree, so a dirty tracked file refuses the push (the merge gate,
 # docs/decisions/owner-decision-preproduction-gate-2026-10-08.md); untracked files are ignored.
+# Pushes of only toolbox/* branches skip every check: hosted CI on the exact head is their gate
+# (docs/decisions/owner-decision-hosted-ci-toolbox-2026-10-09.md).
 # ponytail: the tree may still differ from a pushed ref that is not HEAD; push the checked-out branch.
 scope=metadata
 smoke=0
 seen=0
 deleted=0
-while read -r _ local _ remote; do
+other=0
+while read -r _ local ref remote; do
   case $local in *[!0]*) ;; *) deleted=1; continue ;; esac # branch deletion
   seen=1
+  case $ref in refs/heads/toolbox/*) ;; *) other=1 ;; esac
   case $remote in
     *[!0]*) ;;
     *) remote=$1/main # new branch: trust the local main only if the remote agrees
@@ -25,6 +29,7 @@ while read -r _ local _ remote; do
 done
 [ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
 [ "$seen" = 1 ] || { scope=full; smoke=1; }
+[ "$other" = 1 ] || { echo "pre-push: toolbox/* branch, hosted CI is the gate (gh workflow run ci.yml --ref <branch>); no local checks"; exit 0; }
 git diff --quiet HEAD -- || { echo "pre-push: commit or stash tracked changes first (the checks run on the working tree)"; exit 1; }
 # Under check_all's lock, so the smoke never runs beside another worktree's npm test.
 [ "$smoke" = 0 ] || (. bin/check_lock.sh && cd mobile/app && mise exec -- npm run storybook:smoke) || exit 1
