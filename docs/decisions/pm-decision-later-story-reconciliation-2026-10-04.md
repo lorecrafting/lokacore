@@ -10,7 +10,7 @@ is now merged in [PR #136](https://github.com/lorecrafting/lokacore/pull/136);
 its original research/formula alternatives remain historical. This decision changes future planning
 only, without changing installed contracts, the active M1–M23 sequence or archive text.
 
-The [provisional queues](../LATER-MECHANICS.md) own candidate boundaries and acceptance;
+The [provisional queues](../archive/LATER-MECHANICS.md) (archived; superseded by the [mechanics toolbox](../MECHANICS-TOOLBOX.md)) owned candidate boundaries and acceptance;
 [the ending table](../LATER-ENDINGS.md) owns exact ending selectors, semantic text,
 ports/defaults and proof limits. Unspecified numeric tuning and registered encodings wait
 for their actual consuming briefs. Literal narrative text is review copy, not a claim of
