@@ -56,6 +56,8 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
   await go(screen, 'west', 'Willow Shade');
   await screen.getByRole('button', 'a deer, open').tap();
   await screen.getByRole('button', /Attack/).tap();
+  // The Combat page shows only a confirmed Attack; reopening before it loses the attack.
+  await expect(screen.getByText('Combat')).toBeVisible();
   await browser.evaluate(() => {
     localStorage.setItem('d7-kill-offset', String(6_500));
     return true;
