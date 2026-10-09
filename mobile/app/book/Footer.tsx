@@ -257,11 +257,17 @@ export function Status(p: StatusProps) {
   );
 }
 
-// The resources as the status line shows them (coloured by band; dim while locked); its label is
-// model.ts `said`.
+// The resources as the status line shows them (band colours on the condition pools only, never
+// pennies: book-ui.md#world-and-status-entry; dim while locked); its label is model.ts `said`.
+const pools = ['hp', 'ma', 'mv'];
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, r.tone) }}>
+    <Text
+      key={r.resource.key}
+      style={{
+        color: locked ? c.dim : band(c, pools.includes(r.resource.key) ? r.tone : 'normal'),
+      }}
+    >
       {i ? '  ' : ''}
       <Text style={type.label}>{r.resource.key}</Text>
       {` ${r.current}/${r.maximum}`}

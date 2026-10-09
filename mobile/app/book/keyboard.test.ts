@@ -234,3 +234,33 @@ test('the chapter title page leaves only Continue', () => {
       : [e.props?.style?.color, ...[e.props?.children].flat().flatMap(colours)].filter(Boolean);
   assert.deepEqual(new Set(colours(contents)), new Set(['#645c4f'])); // paper.dim
 });
+
+// Breaks: pennies (or any count) take a band colour, or the condition pools lose theirs
+// (docs/system/book-ui.md#world-and-status-entry: band colours only on hp, ma and mv).
+test('status band colours mark hp, ma and mv only, never pennies', () => {
+  const pool = (key: string, tone: string) => ({
+    resource: { key },
+    current: 1,
+    maximum: 9,
+    tone,
+    band: 'hurt',
+  });
+  const status = Status({
+    time: 0,
+    resources: [pool('hp', 'danger'), pool('mv', 'warning'), pool('pennies', 'danger')],
+    text: (key: string) => key,
+    locked: false,
+    pending: false,
+    open: () => {},
+  } as any);
+  const contents = status.props.children.find((c: any) => c?.type === 'Pressable');
+  const shown = contents.props.children.props.children.map((t: any) => [
+    t.key,
+    t.props.style.color,
+  ]);
+  assert.deepEqual(shown, [
+    ['hp', '#7b2d20'], // paper.danger
+    ['mv', '#845512'], // paper.warning
+    ['pennies', '#241f19'], // paper.fg
+  ]);
+});
