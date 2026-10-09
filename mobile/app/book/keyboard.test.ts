@@ -185,3 +185,29 @@ test('Book captures movement keys only on an active World page', (t) => {
     assert.equal(attempt({}, [page]), false);
   assert.deepEqual(pressed, ['north']);
 });
+
+// Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue
+// (docs/system/book-ui.md, Chapters, scenes and recovery).
+test('the chapter title page leaves only Continue', () => {
+  const book = BookView({
+    screen: {
+      buttons: [],
+      view: { place: { id: 'room' }, time: 0, exits: [] },
+      text: (key: string) => key,
+      log: [],
+      pending: false,
+      catchingUp: false,
+    } as any,
+    stack: [{ kind: 'chapter' }],
+    flip: { turn: 0, dir: 1 },
+    go: () => {},
+    press: () => {},
+    refused: () => {},
+    startOver: () => {},
+    shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
+  });
+  const bottom = book.props.children[1];
+  const [navigation, status] = bottom.type(bottom.props).props.children;
+  assert.equal(navigation, null);
+  assert.equal(status.props.locked, true);
+});

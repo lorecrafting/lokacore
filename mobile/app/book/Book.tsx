@@ -182,7 +182,7 @@ function Bottom(p: BottomProps) {
           bleeding={view.bleeding}
           position={view.position}
           text={text}
-          locked={!!view.scene || !!view.combat}
+          locked={!!view.scene || !!view.combat || p.page?.kind === 'chapter'}
           openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
@@ -194,8 +194,8 @@ function Bottom(p: BottomProps) {
   );
 }
 
-// On a page, its Back (detail, dialogue, dream and open notice pages keep their own Leave);
-// on the world, the footer.
+// On a page, its Back (detail, dialogue, dream and open notice pages keep their own Leave; the
+// chapter title page has only its Continue); on the world, the footer.
 function navigation(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   const notice = p.page?.kind === 'notice' ? p.page.id : undefined;
@@ -203,6 +203,7 @@ function navigation(p: BottomProps) {
     p.page.kind === 'thing' ||
     p.page.kind === 'dialogue' ||
     p.page.kind === 'dream' ||
+    p.page.kind === 'chapter' ||
     (notice && view.notices?.some((n) => n.id === notice)) ? null : (
       <Back
         label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}

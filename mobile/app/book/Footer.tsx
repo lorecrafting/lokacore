@@ -240,7 +240,7 @@ export function Status(p: StatusProps) {
         onPress={p.open}
         style={{ minHeight: 44, justifyContent: 'center' }}
       >
-        <Text style={{ ...small, color: paper.accent }}>
+        <Text style={{ ...small, color: p.locked ? paper.dim : paper.accent }}>
           {p.resources ? shown(p.resources) : 'character'}
         </Text>
       </Pressable>
