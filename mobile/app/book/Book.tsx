@@ -17,7 +17,14 @@ import {
   type Page,
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
-import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
+import {
+  PaletteContext,
+  paletteOf,
+  useFocusRing,
+  usePalette,
+  useShownPalette,
+  type Palette,
+} from './palette.ts';
 import { size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
@@ -77,6 +84,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   }
 }
 
+// size: allow 42, the shown palette feeds both the view and the web focus ring
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState<Page[]>(() => [
@@ -103,9 +111,11 @@ export default function Book(p: BookProps) {
   const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
   const refused = (line: DetailLine) => (screen.log.push(line), redraw((n) => n + 1));
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
+  const palette = useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve());
+  useFocusRing(palette);
   return (
     <BookView
-      palette={useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
+      palette={palette}
       screen={screen}
       stack={stack}
       flip={flip}

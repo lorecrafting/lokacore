@@ -145,14 +145,21 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
-const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
-  thing?.actions
-    .filter((a) => !a.available && a.reason.code === 'too_heavy')
-    .map((a) => (
-      <Text key={a.action_key} style={note(c)}>
-        {text(a.label)}: {reason('too_heavy')}.
-      </Text>
-    ));
+// The too-heavy notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
+const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) => {
+  const heavy = thing?.actions.filter((a) => !a.available && a.reason.code === 'too_heavy') ?? [];
+  return (
+    heavy.length > 0 && (
+      <View>
+        {heavy.map((a) => (
+          <Text key={a.action_key} style={note(c)}>
+            {text(a.label)}: {reason('too_heavy')}.
+          </Text>
+        ))}
+      </View>
+    )
+  );
+};
 
 // A container's Inside heading, then its rows as one block.
 const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>

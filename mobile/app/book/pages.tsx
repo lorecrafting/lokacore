@@ -118,7 +118,15 @@ export function RoomPage(p: {
       fixedTitle
       onTitlePress={look && (() => p.press(look))}
     >
-      <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+      <View style={{ gap: space.lg }}>
+        {plain(p.text(p.view.place.description.key))
+          .split(/\n\s*\n/) // a blank line in the authored text is a paragraph break
+          .map((paragraph, i) => (
+            <Text key={i} style={prose(c)}>
+              {paragraph}
+            </Text>
+          ))}
+      </View>
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (

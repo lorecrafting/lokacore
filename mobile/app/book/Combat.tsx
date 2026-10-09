@@ -14,12 +14,17 @@ function Foes({ view, text, combatLog }: Pick<Screen, 'view' | 'text' | 'combatL
   const combat = view.combat!;
   return (
     <>
-      {combat.active_opponents?.map((opponent) => (
-        <Text key={opponent.id} style={prose(c)}>
-          {text(opponent.name)}
-          {opponent.id === combat.opponent_id ? ' (your target)' : ''}
-        </Text>
-      ))}
+      {combat.active_opponents?.length ? (
+        <View>
+          {/* one block: the opponents are a run of lines of one kind (BOOK-UI-COMPONENTS.md, Page) */}
+          {combat.active_opponents.map((opponent) => (
+            <Text key={opponent.id} style={prose(c)}>
+              {text(opponent.name)}
+              {opponent.id === combat.opponent_id ? ' (your target)' : ''}
+            </Text>
+          ))}
+        </View>
+      ) : null}
       <LogLines lines={combatLog} />
     </>
   );

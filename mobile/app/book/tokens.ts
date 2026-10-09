@@ -97,6 +97,7 @@ export const size = {
   speechBar: 2,
   minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
+  focus: 2, // the web keyboard focus ring: its outline width and its offset
 };
 
 export const radius = { tag: 3, card: 10 };
