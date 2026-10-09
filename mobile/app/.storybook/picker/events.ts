@@ -5,11 +5,13 @@ export const PANEL_ID = `${ADDON_ID}/panel`;
 export const TOOL_ID = `${ADDON_ID}/tool`;
 
 // Channel events. Manager -> preview: PICK {on}, PINS {keys} (pinned order, so the chip numbers).
-// Preview -> manager: PIN {element, add}, SHOT {key, png}.
+// Preview -> manager: READY (the overlay loaded; the manager answers PICK), PIN {element, add},
+// SHOT {key, png}.
 export const PICK = `${ADDON_ID}/pick`;
 export const PINS = `${ADDON_ID}/pins`;
 export const PIN = `${ADDON_ID}/pin`;
 export const SHOT = `${ADDON_ID}/shot`;
+export const READY = `${ADDON_ID}/ready`;
 
 // Served by the middleware (dev server only, loopback only).
 export const ROUTE = '/polish';

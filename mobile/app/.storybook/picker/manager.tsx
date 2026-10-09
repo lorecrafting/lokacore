@@ -5,7 +5,8 @@ import React from 'react';
 import { AddonPanel, IconButton } from 'storybook/internal/components';
 import { addons, types, useAddonState } from 'storybook/manager-api';
 import { ADDON_ID, PANEL_ID, TOOL_ID } from './events.ts';
-import { Panel, working } from './panel.tsx';
+import { working } from './items.tsx';
+import { Panel } from './panel.tsx';
 import { init, initial, toggle, type State } from './state.ts';
 
 const Tool = () => {

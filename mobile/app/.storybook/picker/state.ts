@@ -9,14 +9,21 @@ import {
   PICK,
   PIN,
   PINS,
+  READY,
   ROUTE,
   SHOT,
   type Feed,
   type Picked,
 } from './events.ts';
 
-export type State = { on: boolean; pending: Picked[]; feed: Feed | null; focus: number };
-export const initial: State = { on: false, pending: [], feed: null, focus: 0 };
+export type State = {
+  on: boolean;
+  pending: Picked[];
+  feed: Feed | null;
+  denied: boolean; // the queue answered 403: not a loopback request (storybook:lan on a phone)
+  focus: number;
+};
+export const initial: State = { on: false, pending: [], feed: null, denied: false, focus: 0 };
 let api: API;
 const update = (f: (s: State) => Partial<State>) =>
   api.setAddonState<State>(ADDON_ID, (s = initial) => ({ ...s, ...f(s) }));
@@ -52,12 +59,12 @@ const post = (body: object) =>
     body: JSON.stringify(body),
   });
 export const poll = async () => {
-  const feed = await fetch(`${ROUTE}/status`)
-    .then((r) => (r.ok ? (r.json() as Promise<Feed>) : null))
-    .catch(() => null);
-  void update(() => ({ feed }));
+  const r = await fetch(`${ROUTE}/status`).catch(() => null);
+  const feed = r?.ok ? ((await r.json()) as Feed) : null;
+  void update(() => ({ feed, denied: r?.status === 403 }));
 };
-export const send = async (note: string, pending: Picked[]) => {
+// Null when the queue took it; else why not (the composer keeps the text and pins).
+export const send = async (note: string, pending: Picked[]): Promise<string | null> => {
   const { id, title, name } = api.getCurrentStoryData() as {
     id: string;
     title: string;
@@ -68,15 +75,18 @@ export const send = async (note: string, pending: Picked[]) => {
     options?: Record<string, { name: string; styles: { width: string; height: string } }>;
   }>('viewport')?.options;
   const v = globals.viewport?.value ? options?.[globals.viewport.value] : undefined;
-  await post({
+  const r = await post({
     note,
     story: { id, title: `${title}/${name}` },
     palette: globals.palette ?? null,
     viewport: v ? { name: v.name, ...v.styles } : null,
     elements: pending,
-  });
+  }).catch((e: Error) => e);
+  if (r instanceof Error) return r.message;
+  if (!r.ok) return `${r.status} ${await r.text().catch(() => '')}`.trim();
   clear();
   await poll();
+  return null;
 };
 export const event = async (type: 'close' | 'keep-going') => {
   await post({ type });
@@ -96,6 +106,9 @@ const key = (e: { key: string; altKey: boolean; ctrlKey: boolean; metaKey: boole
 export const init = (a: API) => {
   api = a;
   channel().on(PIN, pin);
+  channel().on(READY, () =>
+    channel().emit(PICK, { on: (api.getAddonState<State>(ADDON_ID) ?? initial).on }),
+  );
   channel().on(STORY_CHANGED, clear); // pinned nodes are gone with the story
   channel().on(SHOT, ({ key, png }: { key: string; png: string | null }) =>
     update(({ pending }) => ({ pending: pending.map((p) => (p.key === key ? { ...p, png } : p)) })),

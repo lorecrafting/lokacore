@@ -2,7 +2,7 @@
 // on, a hover outline with a component-chain chip, numbered pins. It adds nothing to the story's
 // layout and never imports book/. Loaded by .storybook/preview.tsx.
 import { addons } from 'storybook/preview-api';
-import { PICK, PIN, PINS, SHOT, type Box, type Picked } from './events.ts';
+import { PICK, PIN, PINS, READY, SHOT, type Box, type Picked } from './events.ts';
 
 const BLUE = '#1EA7FD'; // Storybook blue, apart from every Book palette
 const WHITE = '#FFFFFF';
@@ -161,3 +161,4 @@ channel.on(PINS, ({ keys }: { keys: string[] }) => {
     p.mark.style.background = `${BLUE}1F`; // 12 % fill
   }
 });
+channel.emit(READY, {}); // a preview reload while Pick is on gets its layer back

@@ -14,12 +14,18 @@ import { ROUTE, type Pick, type Picked } from './events.ts';
 const root = fileURLToPath(new URL('../../../../', import.meta.url)); // the served worktree
 const dir = process.env.LOKA_POLISH_DIR ?? `${root}.polish`;
 const LOOPBACK = /^(localhost|127\.0\.0\.1|\[::1\])$/;
-const host = (value: string | undefined) => value?.replace(/:\d+$/, '');
+const host = (value: string | undefined) => value?.replace(/:\d+$/, '') ?? '';
+const originHost = (origin: string) => {
+  try {
+    return new URL(origin).host;
+  } catch {
+    return ''; // `Origin: null` or malformed: refused
+  }
+};
 const loopback = (req: IncomingMessage) => {
   const origin = req.headers.origin;
   return (
-    LOOPBACK.test(host(req.headers.host) ?? '') &&
-    (!origin || LOOPBACK.test(host(new URL(origin).host) ?? ''))
+    LOOPBACK.test(host(req.headers.host)) && (!origin || LOOPBACK.test(host(originHost(origin))))
   );
 };
 
@@ -58,52 +64,71 @@ const body = (req: IncomingMessage) =>
     req.on('error', reject);
   });
 
-// Each element's crop goes to a file; the pick line keeps its path (relative to the worktree).
+// Each element's crop goes to a file; the pick line keeps its path (relative to the worktree). A
+// re-pinned element (a follow-up) has no crop of its own and keeps its old path.
 const store = (id: string, elements: Picked[] = []) =>
   elements.map(({ png, ...el }, i) => {
-    if (!png) return { ...el, shot: null };
+    if (typeof png !== 'string') return { ...el, shot: el.shot ?? null };
     mkdirSync(`${dir}/shots`, { recursive: true });
     writeFileSync(`${dir}/shots/${id}-${i}.png`, Buffer.from(png.split(',')[1] ?? '', 'base64'));
     return { ...el, shot: `.polish/shots/${id}-${i}.png` };
   });
 
+const wellFormed = (pick: unknown): pick is Pick =>
+  typeof pick === 'object' &&
+  pick !== null &&
+  (!('elements' in pick) || Array.isArray(pick.elements)) &&
+  ((pick as Pick).elements ?? []).every((e) => typeof e === 'object' && e !== null);
+
+// The session pill: a polish session branch (bin/polish_session.sh) served from this worktree.
+const session = () => {
+  const branch = execFileSync('git', ['branch', '--show-current'], { cwd: root }).toString().trim();
+  return branch.startsWith('polish/session-') ? branch : null;
+};
+const shot = (url: string, res: ServerResponse) => {
+  const file = `${dir}${url}`;
+  if (!existsSync(file)) return json(res, 404, { error: 'no shot' });
+  res.writeHead(200, { 'content-type': 'image/png' });
+  res.end(readFileSync(file));
+};
+const pick = async (req: IncomingMessage, res: ServerResponse) => {
+  let pick: unknown;
+  try {
+    pick = JSON.parse(await body(req));
+  } catch (e) {
+    return json(res, 400, { error: (e as Error).message });
+  }
+  if (!wellFormed(pick)) return json(res, 400, { error: 'not a pick' });
+  const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  const line = { ...pick, id, time: Date.now(), elements: store(id, pick.elements) };
+  if (pick.type) delete (line as { elements?: unknown }).elements;
+  append(`${dir}/picks.jsonl`, line);
+  json(res, 200, { id });
+};
+const handle =
+  (session: string | null) =>
+  async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+    if (!loopback(req)) return json(res, 403, { error: 'loopback only' });
+    const url = req.url ?? '';
+    if (req.method === 'GET' && url === '/status')
+      return json(res, 200, {
+        session,
+        picks: lines(`${dir}/picks.jsonl`),
+        status: lines(`${dir}/status.jsonl`),
+      });
+    if (req.method === 'GET' && /^\/shots\/[\w-]+\.png$/.test(url)) return shot(url, res);
+    if (req.method === 'POST' && url === '/picks') return pick(req, res);
+    next();
+  };
+
 export const polishQueue = (): Plugin => ({
   name: 'loka-polish-queue',
+  // Pre-bundled now, so the first pin's import never triggers a dep re-optimisation reload.
+  config: () => ({ optimizeDeps: { include: ['html-to-image'] } }),
   configureServer(server) {
-    // The session pill: a polish session branch (bin/polish_session.sh) served from this worktree.
-    const branch = execFileSync('git', ['branch', '--show-current'], { cwd: root })
-      .toString()
-      .trim();
-    const session = branch.startsWith('polish/session-') ? branch : null;
-    server.middlewares.use(ROUTE, async (req, res, next) => {
-      if (!loopback(req)) return json(res, 403, { error: 'loopback only' });
-      const url = req.url ?? '';
-      if (req.method === 'GET' && url === '/status')
-        return json(res, 200, {
-          session,
-          picks: lines(`${dir}/picks.jsonl`),
-          status: lines(`${dir}/status.jsonl`),
-        });
-      if (req.method === 'GET' && /^\/shots\/[\w-]+\.png$/.test(url)) {
-        const file = `${dir}${url}`;
-        if (!existsSync(file)) return json(res, 404, { error: 'no shot' });
-        res.writeHead(200, { 'content-type': 'image/png' });
-        return res.end(readFileSync(file));
-      }
-      if (req.method === 'POST' && url === '/picks') {
-        let pick: Pick;
-        try {
-          pick = JSON.parse(await body(req));
-        } catch (e) {
-          return json(res, 400, { error: (e as Error).message });
-        }
-        const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-        const line = { ...pick, id, time: Date.now(), elements: store(id, pick.elements) };
-        if (pick.type) delete (line as { elements?: unknown }).elements;
-        append(`${dir}/picks.jsonl`, line);
-        return json(res, 200, { id });
-      }
-      next();
-    });
+    const route = handle(session());
+    server.middlewares.use(ROUTE, (req, res, next) =>
+      route(req, res, next).catch((e: Error) => json(res, 500, { error: e.message })),
+    );
   },
 });

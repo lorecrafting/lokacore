@@ -1,8 +1,8 @@
 Turn the picks waiting in the Loka picker queue into Beads issues (outside a live polish session;
 docs/web-preview.md, Polish queue).
 
-1. Find the served worktree: `bin/polish_status.sh` resolves it by Storybook's port; read its
-   `.polish/picks.jsonl` and `.polish/status.jsonl`. A pick is waiting when it has no `type` and no
+1. `bin/polish_status.sh dir` prints the served worktree's queue directory (by Storybook's port);
+   read its `picks.jsonl` and `status.jsonl`. A pick is waiting when it has no `type` and no
    status line with its `id`.
 2. For each waiting pick, create one issue with `bin/br_create.sh "<first line of the note>" -t task
    -l ui-feedback -d "<description>"`. The description holds, verbatim: the owner's note, then per
