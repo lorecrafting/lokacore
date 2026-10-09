@@ -76,8 +76,9 @@ Settings retains Start over and its confirmation/error handling, and holds the
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp and colors every
-projected resource. With a cartridge calendar, status shows the confirmed day and displayed time,
+palette without presenter thresholds. Status shows the hp band phrase only on hp. Band colours
+(`warning`, `danger`) mark only the condition pools hp, ma and mv; pennies and any other count
+always show in the normal tone, never `warning` or `danger`. With a cartridge calendar, status shows the confirmed day and displayed time,
 plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
@@ -87,8 +88,8 @@ The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows the confirm
 solar phase, never the device's light or dark setting: phase `day` shows `light`, `dawn` shows
 `dawn`, `dusk` shows `dusk`, `night` shows `dark`; any other phase, or a cartridge without a
 calendar, shows `light`. The phase names are the cartridge's solar cuts; the Book reads the label
-and computes no hours. On a phase change the whole Book cross-fades to the new palette over
-`motion.palette`; under reduced motion it switches at once. There is no Settings override
+and computes no hours. On a phase change the whole Book changes to the new palette per the
+[palette motion rule](../BOOK-UI-COMPONENTS.md#design-tokens) (cross-fade or at once). There is no Settings override
 ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes

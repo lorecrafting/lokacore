@@ -89,7 +89,15 @@ against the live one and the [specimen](design/foundation/specimen.html) shows t
   not spacing.
 - **Motion and sound.** Only the plain state changes in `motion` and the page turn's sound;
   no decorative animation. `motion.palette` is the slow cross-fade between palettes (light
-  changes need more than `motion.fade`); reduced motion switches palettes at once. Effects from the mock's Effects panel and its "Archive, not in
+  changes need more than `motion.fade`). Text stays readable through a change: every frame
+  keeps each text role at least 4.5:1 on `bg` and `card`. So a palette change cross-fades
+  only when ink and paper keep their polarity (ink darker than paper in both palettes, or
+  lighter in both: `light`/`dawn`, `dusk`/`dark`); every polarity flip (`light`/`dawn` to
+  `dusk`/`dark` or back, including a skipped phase) switches at once, as under reduced
+  motion. No fade of either kind can pass a flip: ink and paper must cross in luminance.
+  Shape: `useShownPalette` interpolates every role linearly per frame (no layers, no opacity)
+  and calls `setShown(target)` at once when there is no curve or when
+  `lum(fg) < lum(bg)` differs between the shown palette and the target. Effects from the mock's Effects panel and its "Archive, not in
   v1" group have no tokens and wait for their own owner decisions.
 
 ## Component catalogue
@@ -110,7 +118,7 @@ these; a new component needs a real consumer and its entry here in the same slic
 | Control | Local navigation that is not an offered action (Leave, Back to World, Back to board, Back to container, Back to map, Close, Resume dream, Continue conversation, Got it, Start over): `type.control` in `fg`, at least `size.touch` both ways. A section return sits centred below a `line` hairline. | enabled; disabled: `dim` at `opacity.disabled` | `Leave`/`Tap` [`pages.tsx:35`](../mobile/app/book/pages.tsx#L35), `Back` [`Book.tsx:318`](../mobile/app/book/Book.tsx#L318). Polish: these are drawn in four styles today. |
 | Log line | `type.log`. Narration in ink; a system line (Journal updated, a detail note) in `dim` italic; a refused line starts with a reason tag (`type.tag`, `danger`, `size.rule` border, `radius.tag`). A speech line (a `size.speechBar` `line` bar, `space.lg` indent, the speaker in `type.speaker`) waits until the log projects a speaker. | none | room log [`pages.tsx:118`](../mobile/app/book/pages.tsx#L118); detail history [`pages.tsx:168`](../mobile/app/book/pages.tsx#L168) and [`Menu.tsx:143`](../mobile/app/book/Menu.tsx#L143), one renderer twice |
 | Footer | Two `line` hairlines `size.footerRule` wide flanking the minimap (`size.minimap` at rest, zoom per [minimap rules](system/book-ui.md#minimap-map-and-presentation-controls)), `motion.quick`. The first-run tip is an `fg` bubble with `bg` text (`type.small`) and a Got it control. | at rest, held, tip shown | `Footer` [`Footer.tsx:35`](../mobile/app/book/Footer.tsx#L35) |
-| Status line | One centred line in `type.small` `dim`, items joined by " · ": time, position, bleeding, resources. Resource keys in `type.label`; each value coloured by its band. Position and resources are controls. | enabled; locked (scene, combat, chapter title page): `dim`, not pressable, the Contents button included; pending: "save not confirmed" | `Status` [`Footer.tsx:192`](../mobile/app/book/Footer.tsx#L192) |
+| Status line | One centred line in `type.small` `dim`, items joined by " · ": time, position, bleeding, resources. Resource keys in `type.label`; band colours per the [status rule](system/book-ui.md#world-and-status-entry). Position and resources are controls. | enabled; locked (scene, combat, chapter title page): `dim`, not pressable, the Contents button included; pending: "save not confirmed" | `Status` [`Footer.tsx:192`](../mobile/app/book/Footer.tsx#L192) |
 | Letter tile | `card` fill, `line` border, `radius.card`, `size.touch` square, `type.tile`. | free; used: `opacity.disabled`, not pressable | `Riddle` [`Menu.tsx:67`](../mobile/app/book/Menu.tsx#L67). Polish: tiles are narrower than 44 today. |
 | Page turn | See [Page turn](#page-turn). | turning, settled | `PageTurn` [`PageTurn.tsx`](../mobile/app/book/PageTurn.tsx) |
 
