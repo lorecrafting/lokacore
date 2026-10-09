@@ -35,6 +35,7 @@ const config: StorybookConfig = {
     // Worklets for Reanimated (PageTurn), as babel-preset-expo adds them under Metro.
     options: { pluginReactOptions: { babel: { plugins: ['react-native-worklets/plugin'] } } },
   },
+  core: { disableTelemetry: true, disableWhatsNewNotifications: true },
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
   viteFinal: (config) => mergeConfig(config, { plugins }),
 };

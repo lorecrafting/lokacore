@@ -41,7 +41,8 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
   render: (_, { loaded }) => <Turning PageTurn={loaded.PageTurn} />,
   // Continue curls forward to Settings, the arriving page live at once. A turn with no curl (no
   // picture in time) fails the canvas wait. ponytail: the back turn (Start over) is not driven: the
-  // known PageTurn defect (see .storybook/vitest.config.mts) blanks the story when a curl ends.
+  // known PageTurn defect (see .storybook/vitest.config.mts) leaves the story root empty when a
+  // curl ends, in the smoke run.
   play: async ({ canvas, canvasElement, userEvent }) => {
     const curl = () => canvasElement.querySelector('canvas');
     await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
@@ -49,7 +50,7 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
     await waitFor(() => expect(curl()).not.toBeNull());
     // Headless Chromium draws slowly: the 500 ms curl ends about 2 s in, as in the app's preview.
     await waitFor(() => expect(curl()).toBeNull(), { timeout: 5000 });
-    // ponytail: no check that Settings still shows after the curl: the known defect throws then and
-    // Storybook replaces the story with its error display. Add it with the PageTurn fix.
+    // ponytail: no check that Settings still shows after the curl: in the smoke run the story root
+    // is empty then. Add it, and the back turn, with the PageTurn fix.
   },
 };
