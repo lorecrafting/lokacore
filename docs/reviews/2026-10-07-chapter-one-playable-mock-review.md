@@ -1,7 +1,7 @@
 # Chapter one playable mock restore: independent review
 
 - PR: [#293](https://github.com/lorecrafting/lokacore/pull/293), branch `docs/chapter-one-playable-mock`, exact head `fd9939e7`.
-- Scope: docs only (`README.md`, `docs/design/ui-exploration/README.md`, `chapter-one-playable.html`). Governing: [AGENTS.md](../../AGENTS.md) privacy rules, [room view README](../design/room-view/README.md), [Book UI](../system/book-ui.md).
+- Scope: docs only (`README.md`, `docs/design/ui-exploration/README.md`, `chapter-one-playable.html`). Governing: [AGENTS.md](../../AGENTS.md) privacy rules, [room view README](../archive/design/room-view/README.md), [Book UI](../system/book-ui.md).
 - Verdict: **APPROVE WITH NOTES**.
 
 ## Must be true

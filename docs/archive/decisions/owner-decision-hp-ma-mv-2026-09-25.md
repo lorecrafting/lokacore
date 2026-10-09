@@ -21,7 +21,7 @@ The PM then asked three multiple-choice questions (summaries); the owner's answe
 - Default maximums for a new character?
   > The mockup's 300/120/200 (Recommended)
 
-  (hp 300, ma 120, mv 200, as on the chosen [room view](../../design/room-view/README.md)
+  (hp 300, ma 120, mv 200, as on the chosen [room view](../design/room-view/README.md)
   status line; a cartridge can override them.)
 
 The PM then reported what it could and could not confirm about LegendMUD and DikuMUD
