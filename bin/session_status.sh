@@ -16,8 +16,8 @@ echo "## Nightly hosted CI on main"
 # A red nightly is the session's first job (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md); gh failing prints nothing.
 for wf in ci.yml book-e2e.yml; do
   run=$(gh run list --workflow "$wf" --branch main --event schedule --limit 1 --json conclusion,status,headSha,url \
-    --jq '.[] | "\(if .conclusion == "" then .status else .conclusion end) \(.headSha[:8]) \(.url)"' 2>/dev/null) || continue
-  case $run in success*|in_progress*|queued*|"") ;; *) run="$run (red: fix first)" ;; esac
+    --jq '.[] | "\(if .status == "completed" then .conclusion else .status end) \(.headSha[:8]) \(.url)"' 2>/dev/null) || continue
+  case $run in success*|in_progress*|queued*|waiting*|pending*|requested*|"") ;; *) run="$run (red: fix first)" ;; esac
   echo "$wf ${run:-no scheduled run yet}"
 done
 echo "## Housekeeping queue"

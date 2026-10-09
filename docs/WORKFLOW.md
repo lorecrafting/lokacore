@@ -116,7 +116,7 @@ Report at the end of the slice, not at every step.
    fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
    diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
-7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`) once the verdict is
+7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, which passed the
    pre-push hook ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
    Hosted CI runs nightly on `main` and by hand; a PR that touches save, protocol or kernel code,
@@ -188,7 +188,7 @@ The brief names the lane. Sequential or dependent slices share one draft branch 
 | Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: full local checks and red controls once on its head, every review closed, then step 7 |
 
 Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
-one CI run per wave, not per small change. Collect tracker, process and docs changes into one
+one push per wave, not per small change. Collect tracker, process and docs changes into one
 housekeeping PR per session, or into the next real PR.
 
 Provisional local lane: one integration owner for local `main`; source branches, plans and reviews

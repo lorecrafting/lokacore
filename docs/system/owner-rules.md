@@ -161,8 +161,8 @@ and not repeated here.
 
 ## Process
 
-- During pre-production, metadata-only changes skip engine and browser jobs and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
-- During pre-production, draft PRs run no hosted CI until marked ready for review ([owner decision](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+- During pre-production, metadata-only changes skip engine and browser checks (pre-push lanes since the [merge gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md)) and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
+- During pre-production, no PR runs hosted CI on its own: CI runs nightly on `main` and by hand ([owner decision](../decisions/owner-decision-preproduction-gate-2026-10-08.md); drafts before it: [record](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
 - Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 

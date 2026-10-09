@@ -24,9 +24,8 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
 - Under heavy parallel agent load (load average about 50 on the M1) three Elixir content
   tests hit the 60 s ExUnit timeout and passed on retry: check load before treating such a
   timeout as a failure, and limit parallel heavy runs.
-- Pushing to a draft and then marking it ready races: the superseded-run cancel hit the real CI
-  run on that head (2026-10-08). A cancelled run fails the `ci-green` or `book-e2e-green` gate
-  and needs a manual `gh run rerun <id>`; mark ready first to avoid the race.
+- A cancelled run fails the `ci-green` or `book-e2e-green` gate and needs a manual
+  `gh run rerun <id>`; runs on one ref share a concurrency group, so a second dispatch cancels the first.
 - Enforce a rule with a hook or check only when a script can decide it, a miss is costly and
   misses have been seen; never hook a judgment rule. Prose otherwise ([workflow step 7](../WORKFLOW.md#loop)).
 - A new delta operation kind needs handling in the independent precondition checker: production committed an expedition Start that independent replay rejected (`delta_preconditions_hold`) because the checker lacked `expedition.transition`. Replay every new operation through the independent checker before trusting a green authority run ([night-watch blocker](https://github.com/lorecrafting/lokacore/tree/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-06-e1-night-watch)).

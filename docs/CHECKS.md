@@ -91,7 +91,7 @@ their rules and red controls remain available for resumption.
   `.ts`/`.tsx` (mobile tests run `App.tsx`) and local-story authority/save code, runs the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
-  lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
+  lane (pre-push only) also skips `*.test.ts` files, so a push whose code
   changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
   stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
   tests run its peers.
