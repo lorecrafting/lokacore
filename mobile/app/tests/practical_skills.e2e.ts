@@ -1,5 +1,9 @@
-import { test } from '@e2e-dev/web';
+import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
+import { reducedMotion } from './steps.ts';
+
+// Long walks: the pages cross-fade (steps.ts reducedMotion).
+beforeEach(({ browser }) => reducedMotion(browser));
 
 // Break: loaded browser Book loses Sedge's lesson, careful alias input, two-herb result or refresh.
 test('Sedge lesson leads to careful Harvest and survives browser reload', async ({

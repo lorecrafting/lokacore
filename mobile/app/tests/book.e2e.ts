@@ -1,6 +1,9 @@
-import { test } from '@e2e-dev/web';
+import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
-import { begin, go, reopen, type Screen } from './steps.ts';
+import { begin, go, reopen, type Screen, reducedMotion } from './steps.ts';
+
+// Long walks: the pages cross-fade (steps.ts reducedMotion).
+beforeEach(({ browser }) => reducedMotion(browser));
 
 // Break: the Book shows a confirmed move, but browser SQLite reopens at the previous room.
 test('Book keeps a confirmed move across reload', async ({ app, screen }) => {
