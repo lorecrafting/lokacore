@@ -1,5 +1,5 @@
 // Conversation rows of the Polish panel (design input section 2): an owner item with its status,
-// a PM suggest-close card.
+// a PM suggest-close card, a PM log line, the activity line.
 import React, { useEffect, useState } from 'react';
 import { Button } from 'storybook/internal/components';
 import { ROUTE, type Feed, type Pick, type Picked, type Status } from './events.ts';
@@ -115,7 +115,8 @@ export const Activity = ({ feed }: { feed: Feed }) => {
     .map((p) => latest(feed, p.id))
     .filter((s) => s?.state === 'working')
     .sort((a, b) => a!.time - b!.time)
-    .at(-1)!;
+    .at(-1);
+  if (!last) return null;
   const s = Math.max(0, Math.round((Date.now() - last.time) / 1000));
   const age = s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
   return (

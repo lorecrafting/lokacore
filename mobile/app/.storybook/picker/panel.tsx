@@ -48,7 +48,7 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
   // PM log lines stay; a suggest-close card goes once answered.
   const cards = feed.status.filter(
     (s): s is Extract<Status, { type: string }> =>
-      'type' in s && (s.type === 'log' || s.time > answered),
+      'type' in s && (s.type === 'log' || (s.type === 'suggest-close' && s.time > answered)),
   );
   const rows = [...feed.picks.filter((p) => !p.type), ...cards].sort((a, b) => a.time - b.time);
   return (
@@ -65,9 +65,9 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
           request without picking.
         </Muted>
       )}
-      {rows.map((r) =>
+      {rows.map((r, i) =>
         r.type === 'log' ? (
-          <LogLine key={`log-${r.time}`} text={r.text} />
+          <LogLine key={`log-${r.time}-${i}`} text={r.text} />
         ) : r.type === 'suggest-close' ? (
           <PmCard key={`card-${r.time}`} reason={r.reason} close={close.button} />
         ) : (
@@ -99,12 +99,14 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
   const [text, setText] = useState('');
   const [failed, setFailed] = useState<string | null>(null);
   const area = useRef<HTMLTextAreaElement>(null);
+  const busy = useRef(false); // a held or double Enter sends once
   useEffect(() => {
     if (focus) area.current?.focus(); // on a pick, not on mount
   }, [focus]);
   const submit = async () => {
-    if (!text.trim() && !pending.length) return;
-    const why = await send(text, pending);
+    if (busy.current || (!text.trim() && !pending.length)) return;
+    busy.current = true;
+    const why = await send(text, pending).finally(() => (busy.current = false));
     setFailed(why);
     if (!why) setText('');
   };
@@ -118,7 +120,8 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
         placeholder="What should change?"
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
-          if (e.nativeEvent.isComposing) return; // IME: Enter picks the candidate
+          // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             void submit();
