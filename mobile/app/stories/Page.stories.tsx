@@ -93,8 +93,10 @@ export const WithSectionHeadings: Story = {
     children: (
       <>
         <SectionTitle>Held</SectionTitle>
-        <EntityLine name="a torch" onPress={() => {}} />
-        <EntityLine name="a wool cloak" onPress={() => {}} />
+        <View>
+          <EntityLine name="a torch" onPress={() => {}} />
+          <EntityLine name="a wool cloak" onPress={() => {}} />
+        </View>
         <SectionTitle>Worn</SectionTitle>
         <EntityLine name="a leather cap" onPress={() => {}} />
       </>

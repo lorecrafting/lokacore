@@ -133,20 +133,30 @@ export function CarryingPage(p: {
     <Page title="Equipment & Inventory" foot={home(p.world)}>
       <SectionTitle>Held</SectionTitle>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
-      {p.items.map((e) => (
-        <EntityLine key={e.id} name={p.text(e.name)} onPress={() => p.open(e.id)} />
-      ))}
-      {(p.equipment?.length ?? 0) > 0 && <SectionTitle>Worn</SectionTitle>}
-      {p.equipment?.map(({ slot, item }) => (
-        <View key={slot}>
-          <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
-          {item ? (
-            <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
-          ) : (
-            <Text style={note(c)}>Empty</Text>
-          )}
+      {p.items.length > 0 && (
+        <View>
+          {p.items.map((e) => (
+            <EntityLine key={e.id} name={p.text(e.name)} onPress={() => p.open(e.id)} />
+          ))}
         </View>
-      ))}
+      )}
+      {(p.equipment?.length ?? 0) > 0 && (
+        <>
+          <SectionTitle>Worn</SectionTitle>
+          <View>
+            {p.equipment!.map(({ slot, item }) => (
+              <View key={slot}>
+                <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
+                {item ? (
+                  <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
+                ) : (
+                  <Text style={note(c)}>Empty</Text>
+                )}
+              </View>
+            ))}
+          </View>
+        </>
+      )}
     </Page>
   );
 }

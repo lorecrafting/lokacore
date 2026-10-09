@@ -134,9 +134,11 @@ const SECTIONS: [Section, string][] = [
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
     <Page title="Contents" foot={<Control label="Back to World" onPress={p.world} />}>
-      {SECTIONS.map(([kind, label]) => (
-        <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
-      ))}
+      <View>
+        {SECTIONS.map(([kind, label]) => (
+          <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
+        ))}
+      </View>
     </Page>
   );
 }
@@ -184,9 +186,13 @@ export function ThingPage(p: {
         ))}
       </Cards>
       {p.contents.length > 0 && <SectionTitle>Inside</SectionTitle>}
-      {p.contents.map((e) => (
-        <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
-      ))}
+      {p.contents.length > 0 && (
+        <View>
+          {p.contents.map((e) => (
+            <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+          ))}
+        </View>
+      )}
     </Page>
   );
 }

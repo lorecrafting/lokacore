@@ -132,14 +132,21 @@ export function RoomPage(p: {
   );
 }
 
-const warnings = (c: Palette, view: GameView, text: Say) =>
-  view.exits
-    .filter((e) => e.warning)
-    .map((e) => (
-      <Text key={e.direction} style={note(c)}>
-        {text(e.warning!)}
-      </Text>
-    ));
+// The exit warnings are one block of notes.
+const warnings = (c: Palette, view: GameView, text: Say) => {
+  const shown = view.exits.filter((e) => e.warning);
+  return (
+    shown.length > 0 && (
+      <View>
+        {shown.map((e) => (
+          <Text key={e.direction} style={note(c)}>
+            {text(e.warning!)}
+          </Text>
+        ))}
+      </View>
+    )
+  );
+};
 
 // The place's own actions; a notice's actions stay on its notice page.
 const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
@@ -217,8 +224,11 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
       {...titleFocus}
       accessibilityRole="header"
       style={{
-        ...titleStyle(usePalette()),
-        ...(p.fixed ? { ...type.roomTitle, textAlign: 'center' } : type.pageTitle),
+        color: usePalette().fg,
+        // a scrolling title is a block: the page's gap alone is its space below
+        ...(p.fixed
+          ? { ...type.roomTitle, textAlign: 'center', paddingBottom: space.md }
+          : type.pageTitle),
       }}
     >
       {p.title}
