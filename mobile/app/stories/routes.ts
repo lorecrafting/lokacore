@@ -75,7 +75,8 @@ const spell =
   (b) => {
     const tiles = b.labels().filter((l) => /^., tile \d+$/.test(l));
     for (const letter of word) {
-      const tile = tiles.find((t) => t.startsWith(`${letter},`))!;
+      const tile = tiles.find((t) => t.startsWith(`${letter},`));
+      if (!tile) throw new Error(`no ${letter} tile left for ${word}`);
       tiles.splice(tiles.indexOf(tile), 1);
       b.tap(tile);
     }

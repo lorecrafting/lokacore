@@ -78,13 +78,11 @@ export const VesperRiddle: StoryObj = {
     // the riddle's tiles, one per letter, then Submit (walkthrough/chapter1.walk.ts spellOn)
     const spell = async (word: string) => {
       const tiles = (await page.findAllByLabelText(/^., tile \d+$/)).map((t) => t.ariaLabel ?? '');
-      for (const letter of word)
-        await tap(
-          tiles.splice(
-            tiles.findIndex((t) => t[0] === letter),
-            1,
-          )[0]!,
-        );
+      for (const letter of word) {
+        const i = tiles.findIndex((t) => t[0] === letter);
+        if (i < 0) throw new Error(`no ${letter} tile left for ${word}`);
+        await tap(tiles.splice(i, 1)[0]!);
+      }
       await tap('Submit');
     };
     await tap(/^Vesper is here\./);

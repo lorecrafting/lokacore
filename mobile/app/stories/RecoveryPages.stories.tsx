@@ -11,8 +11,9 @@ export default meta;
 const failed = (
   kind: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing',
   message: string,
+  startOver = true, // never for a newer app's save or a lock (session.ts offered)
 ) => ({
-  render: () => <SaveError failed={{ kind, message, startOver: true }} startOver={fn()} />,
+  render: () => <SaveError failed={{ kind, message, startOver }} startOver={fn()} />,
 });
 
 export const SaveErrorRelease: StoryObj = {
@@ -20,7 +21,7 @@ export const SaveErrorRelease: StoryObj = {
   name: 'Save error: release missing',
 };
 export const SaveErrorFormat: StoryObj = {
-  ...failed('unsupported_save_format', 'unsupported_save_format'),
+  ...failed('unsupported_save_format', 'unsupported_save_format', false),
   name: 'Save error: format',
 };
 export const SaveErrorCorrupt: StoryObj = {
@@ -31,6 +32,7 @@ export const SaveErrorLocked: StoryObj = {
   ...failed(
     'save_corrupt',
     'Access Handles cannot be created if there is another open Access Handle',
+    false,
   ),
   name: 'Save error: lock sentence',
 };

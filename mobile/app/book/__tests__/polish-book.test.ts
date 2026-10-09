@@ -65,6 +65,7 @@ export const fixture = bundle();
 
 // Expand pure components only. Native animation and map gestures are exercised in Simulator review.
 let owner: unknown; // the component whose hooks run now: a slot another component held starts fresh
+// ponytail: keyed by type, not instance, and state only (effects: Book's alone today); key by element if a story needs it.
 export function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];

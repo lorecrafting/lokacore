@@ -63,7 +63,7 @@ try {
     await browser.close();
   }
 } finally {
-  process.kill(-server.pid!, 'SIGTERM');
+  if (server.exitCode === null) process.kill(-server.pid!, 'SIGTERM'); // else keep its error
 }
 if (failed.length) {
   console.error(`storybook:live: ${failed.length} Live stories failed`);
