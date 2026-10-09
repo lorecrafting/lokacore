@@ -142,8 +142,13 @@ export function NoticePage(
             : `Fare: ${detail.transport.charge === 0 ? 'free' : `${detail.transport.charge}p`}.`}
         </Text>
       )}
-      {board &&
-        board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
+      {board && board.notices.length > 0 && (
+        <View>
+          {board.notices.map((notice) => (
+            <NoticeLink key={notice.id} {...p} notice={notice} />
+          ))}
+        </View>
+      )}
       <Cards>
         {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
           offerControl(c, p, detail.id, o),

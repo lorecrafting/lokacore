@@ -185,13 +185,15 @@ export function ThingPage(p: {
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
       </Cards>
-      {p.contents.length > 0 && <SectionTitle>Inside</SectionTitle>}
       {p.contents.length > 0 && (
-        <View>
-          {p.contents.map((e) => (
-            <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
-          ))}
-        </View>
+        <>
+          <SectionTitle>Inside</SectionTitle>
+          <View>
+            {p.contents.map((e) => (
+              <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+            ))}
+          </View>
+        </>
       )}
     </Page>
   );
