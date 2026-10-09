@@ -64,7 +64,7 @@ freshness token: E4 must not ban the word.
   (2a/2b delete their notes). Row names and files: Page, RoomPage, FixtureLink (no story: "none
   until a projection consumer"), EntityLine, VerbLine, ActionCard, ContinueButton, Control,
   LogLines, Footer, StatusLine, Tip (new row, split from Footer: the bubble is its own component),
-  LetterTile, PageTurn, Tokens.
+  LetterTile, PageTurn (Tokens is not a component: no row; PM 2026-10-08).
 - Add the Tip row: "First-run tip: an `fg` bubble (`radius.card`, `space.md`/`space.lg` padding,
   centred, within `space.page` of each edge) with `bg` text in `type.small` and a Got it Control
   drawn on ink (label `bg`). State: shown." Remove the tip sentence from the Footer row; add to

@@ -29,20 +29,24 @@ done
 if [ "$(echo "$out" | grep -c '^broken anchor')" != 4 ]; then echo "FAIL: good anchor reported\n$out"; exit 1; fi
 echo "ok   docs: broken anchors"
 
-# Look words: a copy of book-ui.md (which passes) with a planted px size fails on that line only.
-cp docs/system/book-ui.md "$D/book-ui.md"; echo 'Each pressable is 44px.' >> "$D/book-ui.md"
+# Look words: a copy of book-ui.md (which passes) with a planted px size and a hex in parentheses
+# fails on those two lines only; link anchors that read as hex pass.
+cp docs/system/book-ui.md "$D/book-ui.md"
+printf 'Card (#2b2b2b).\n[a](#facade-rules) [b](x.md#decade-one)\nEach pressable is 44px.\n' >> "$D/book-ui.md"
 n=$(wc -l < "$D/book-ui.md" | tr -d ' ')
 if out=$(elixir bin/check_docs.exs AGENTS.md "$D/book-ui.md" 2>&1); then echo "FAIL: check_docs passed a planted look word"; exit 1; fi
-if [ "$(echo "$out" | grep -c 'names a look')" != 1 ] || ! echo "$out" | grep -qF "book-ui.md:$n names a look (44px)"; then echo "FAIL: look word report\n$out"; exit 1; fi
+if [ "$(echo "$out" | grep -c 'names a look')" != 2 ] || ! echo "$out" | grep -qF "book-ui.md:$n names a look (44px)" ||
+  ! echo "$out" | grep -qF "book-ui.md:$((n - 2)) names a look (#2b2b2b)"; then echo "FAIL: look word report\n$out"; exit 1; fi
 echo "ok   docs: book-ui.md names no look"
 
 # Review records: a throwaway repo with the real generator. A record the README does not list
 # (stale index) must fail; after bin/review_index.sh it passes; a badly named record fails.
 R=$(mktemp -d "${TMPDIR:-/tmp}/reviews.XXXXXX")
 trap 'rm -rf "$P" "$D" "$R"' EXIT
-mkdir -p "$R/bin" "$R/docs/reviews" "$R/docs/decisions"
+mkdir -p "$R/bin" "$R/docs/reviews" "$R/docs/decisions" "$R/docs/system"
 cp bin/check_docs.exs bin/review_index.sh "$R/bin/"
-printf '[a](AGENTS.md) [r](docs/reviews/README.md) [d](docs/decisions/README.md)\n' > "$R/README.md"
+printf '[a](AGENTS.md) [r](docs/reviews/README.md) [d](docs/decisions/README.md) [b](docs/system/book-ui.md)\n' > "$R/README.md"
+printf '# B\n' > "$R/docs/system/book-ui.md"
 printf '# A\n' > "$R/AGENTS.md"
 printf '# D\n' > "$R/docs/decisions/README.md"; printf "# M\n" > "$R/docs/decisions/owner-decision-move-forward-2026-10-07.md"; printf -- "- [m](owner-decision-move-forward-2026-10-07.md)\n" >> "$R/docs/decisions/README.md"
 printf '# Rec\nVerdict **CHANGES REQUIRED**\nFix round 1: **APPROVE**\n' > "$R/docs/reviews/2026-01-01-x-review.md"
