@@ -36,7 +36,7 @@ test('Where touch sends exact identity and labels here, saved last seen and unkn
     (s) => s,
     (s) => s,
   ).find((b) => b.action_key === 'where')!;
-  assert.equal(button.label, 'Where Ash');
+  assert.equal(button.label, 'Ask where Ash is');
   assert.deepEqual(intentOf(button), { action_key: 'where', target_ids: ['ash'], input: {} });
   assert.deepEqual(group([button]).on('ash'), [button]);
   assert.equal(
