@@ -14,6 +14,7 @@ import {
   plain,
   refused,
   said,
+  sky,
   type Pool,
   why,
 } from './model.ts';
@@ -199,5 +200,26 @@ test('the status line shows the double hour as its earthly branch', () => {
   assert.deepEqual(
     [at(22, 59), at(23), at(0, 59), at(1), at(24 + 6)],
     ['亥', '子', '子', '丑', '卯'],
+  );
+});
+
+// Breaks: a sun phase shown as a moon, a moon glyph lit on the wrong side (◐ waxes, ◑ wanes), a
+// night without a lunar phase or an unknown phase losing its fallback (the earthly branch).
+test('the status line shows the sky as the sun by day and the moon by its phase at night', () => {
+  assert.deepEqual([sky('dawn'), sky('day'), sky('dusk')], ['☼', '☀\uFE0E', '☉']);
+  const moons = ['new', 'waxing_crescent', 'first_quarter', 'waxing_gibbous', 'full'];
+  assert.deepEqual(
+    moons.map((m) => sky('night', m)),
+    ['●', '☽', '◐', '◐', '○'],
+  );
+  const waning = ['waning_gibbous', 'last_quarter', 'waning_crescent'];
+  assert.deepEqual(
+    waning.map((m) => sky('night', m)),
+    ['◑', '◑', '☾'],
+  );
+  assert.equal(sky('night'), '☾');
+  assert.deepEqual(
+    [sky('grain_rain', 'full'), sky(undefined, 'full'), sky()],
+    [undefined, undefined, undefined],
   );
 });

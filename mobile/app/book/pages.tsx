@@ -41,14 +41,20 @@ export const useTitleFocus = () => ({
   ...({ tabIndex: -1 } as object),
 });
 
-export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
+export function Tap(p: {
+  label: string;
+  onPress: () => void;
+  children: ReactNode;
+  shrink?: boolean; // may give up width in a row (the status position truncates)
+}) {
   const bleed = { paddingVertical: space.md, marginVertical: -space.md }; // hit area, no shown space
+  const shrink = p.shrink ? { flexShrink: 1, minWidth: 0 } : {};
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
       onPress={p.onPress}
-      style={{ minHeight: size.touch, justifyContent: 'center', ...bleed }}
+      style={{ minHeight: size.touch, justifyContent: 'center', ...bleed, ...shrink }}
     >
       {p.children}
     </Pressable>

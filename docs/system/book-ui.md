@@ -76,9 +76,13 @@ Settings retains Start over and its confirmation/error handling, and holds the
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp. Band tones
-mark only the condition pools hp, ma and mv; pennies and any other count show plain. With a cartridge calendar, status shows the confirmed day and displayed time,
-plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
+palette without presenter thresholds. Status shows the hp band phrase only on hp. The status line
+shows only the condition pools hp, ma and mv, with their band tones; pennies and any other count
+stay off the status line and show plain in Character (owner, polish pick mv1j35ltxddx). With a
+cartridge calendar, status shows the sky as one glyph from the confirmed solar and lunar phase
+labels (the sun by its phase while up, the moon by its phase at night, per the catalogue's
+[Status line](../BOOK-UI-COMPONENTS.md#component-catalogue)); the confirmed day, displayed time
+and phase words are its accessible label, not shown. It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).

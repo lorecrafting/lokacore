@@ -1,5 +1,6 @@
 // StatusLine: the one centred line under the footer (BOOK-UI-COMPONENTS.md, Status line).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import { View } from 'react-native';
 import { expect, fn } from 'storybook/test';
 import { size } from '../book/tokens.ts';
 import type { Pool } from '../book/model.ts';
@@ -33,9 +34,52 @@ export const Plain: Story = {
   },
 };
 
-export const Calendar: Story = {
+// The sky glyph carries the time in words as its label; the day and hour are not shown.
+export const Dusk: Story = {
   args: {
-    calendar: { day: 3, hour: 6, subdivision: 5, solar: 'grain_rain', lunar: 'waxing_crescent' },
+    calendar: { day: 3, hour: 18, subdivision: 5, solar: 'dusk', lunar: 'waxing_crescent' },
+  },
+  play: async ({ canvas }) => {
+    const glyph = canvas.getByLabelText('day 3, 18:05, dusk, waxing crescent moon');
+    await expect(glyph).toHaveTextContent('☉');
+    await expect(canvas.queryByText(/day 3/)).toBeNull();
+  },
+};
+
+// Every sky glyph the catalogue names (BOOK-UI-COMPONENTS.md, Status line): the sun by its phase,
+// the moon by its phase at night, the earthly branch for a phase the Book does not know.
+const skies: [string, string?][] = [
+  ['dawn'],
+  ['day'],
+  ['dusk'],
+  ['night', 'new'],
+  ['night', 'waxing_crescent'],
+  ['night', 'first_quarter'],
+  ['night', 'waxing_gibbous'],
+  ['night', 'full'],
+  ['night', 'waning_gibbous'],
+  ['night', 'last_quarter'],
+  ['night', 'waning_crescent'],
+  ['night'],
+  ['grain_rain'],
+];
+export const Sky: Story = {
+  args: { position: 'standing' as never },
+  render: (args) => (
+    <View>
+      {skies.map(([solar, lunar]) => (
+        <StatusLine
+          key={`${solar}-${lunar}`}
+          {...args}
+          calendar={{ day: 1, hour: 12, subdivision: 0, solar, lunar } as never}
+        />
+      ))}
+    </View>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByLabelText('day 1, 12:00, night, full moon')).toHaveTextContent('○');
+    await expect(canvas.getByLabelText('day 1, 12:00, night')).toHaveTextContent('☾');
+    await expect(canvas.getByLabelText('day 1, 12:00, grain rain')).toHaveTextContent('子'); // time: 3
   },
 };
 
@@ -60,9 +104,22 @@ export const Bleeding: Story = {
   },
 };
 
-// Pennies carry a band tone in the data; the line shows them in ink (model.ts toneOf).
-export const PenniesNormal: Story = {
+// Pennies stay off the status line (book-ui.md#world-and-status-entry): not shown, not in the name.
+export const Pennies: Story = {
   args: { resources: [...rested, pool('pennies', 12, 999, 'danger')] },
+  play: async ({ canvas }) => {
+    const name = 'hp 30/30 ma 10/10 mv 60/60; hp normal; opens Contents';
+    await expect(canvas.getByRole('button', { name })).toBeVisible();
+    await expect(canvas.queryByText(/pennies/)).toBeNull();
+  },
+};
+
+// A cartridge whose only pool is a count: the button says "character".
+export const OnlyPennies: Story = {
+  args: { resources: [pool('pennies', 12, 999)] },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('button', { name: 'character; opens Contents' })).toBeVisible();
+  },
 };
 
 export const Locked: Story = {
@@ -76,6 +133,25 @@ export const Locked: Story = {
 };
 
 export const Pending: Story = { args: { pending: true } };
+
+// The narrowest phone with everything on the line: one line, the pools whole, the rest cut.
+export const Narrow: Story = {
+  globals: { viewport: { value: 'galaxyS25', isRotated: false } },
+  args: {
+    calendar: { day: 3, hour: 23, subdivision: 0, solar: 'night', lunar: 'full' },
+    position: 'sleeping' as never,
+    openPosition: fn(),
+    bleeding: Bleeding.args!.bleeding,
+  },
+  play: async ({ canvas, canvasElement }) => {
+    const stats = canvas.getByRole('button', { name: /opens Contents$/ });
+    const position = canvas.getByRole('button', { name: 'sleeping, change position' });
+    await expect(stats.getBoundingClientRect().right).toBeLessThanOrEqual(
+      canvasElement.getBoundingClientRect().right,
+    );
+    await expect(position.getBoundingClientRect().height).toBe(size.touch); // one line
+  },
+};
 
 // Breaks: Tap loses its minHeight; a type.small position reaches size.touch by minHeight alone.
 export const Position: Story = {

@@ -108,9 +108,12 @@ export const PegShop: StoryObj = {
     const { page, tap } = await opened(canvasElement);
     await tap(/^Peg Harrow is here\./);
     await tap('Buy a torch — 2p');
-    await page.findByLabelText(/pennies 4\//); // the status line paid
     await page.findByText(/^an iron sword: Buy 7p \(/); // 7p over 4p: a note, not a Buy
     await tap('Leave');
+    await tap(/; opens Contents$/);
+    await tap('Character, open');
+    await page.findByText(/^pennies  4 \//); // paid; pennies stay off the status line
+    await tap('Back to World');
     await tap(/; opens Contents$/);
     await tap('Equipment & Inventory, open');
     await page.findByLabelText('a torch, open');

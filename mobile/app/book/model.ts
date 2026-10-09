@@ -133,9 +133,32 @@ export const absent = (v: GameView) =>
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Pool = NonNullable<GameView['resources']>[number];
-// Band colours mark only the condition pools, never pennies (book-ui.md#world-and-status-entry).
-export const toneOf = (r: Pool) =>
-  ['hp', 'ma', 'mv'].includes(r.resource.key) ? r.tone : 'normal';
+// The condition pools: the status line shows these alone and bands them; pennies and any other
+// count stay off the line and show plain in Character (book-ui.md#world-and-status-entry).
+const CONDITIONS = ['hp', 'ma', 'mv'];
+export const toneOf = (r: Pool) => (CONDITIONS.includes(r.resource.key) ? r.tone : 'normal');
+export const pools = (rs?: readonly Pool[]) => {
+  const shown = rs?.filter((r) => CONDITIONS.includes(r.resource.key));
+  return shown?.length ? shown : undefined;
+};
+
+// The sky as one glyph (BOOK-UI-COMPONENTS.md, Status line): the sun by its phase while it is up,
+// the moon by its phase at night; undefined for any other phase, so the earthly branch shows.
+// ☀ carries U+FE0E so no platform draws it as an emoji. Ink is the dark side of the moon: ○ full,
+// ● new; ☽ ◐ wax lit on the right, ◑ ☾ wane lit on the left.
+const SUN: Record<string, string> = { dawn: '☼', day: '☀\uFE0E', dusk: '☉' };
+const MOON: Record<string, string> = {
+  new: '●',
+  waxing_crescent: '☽',
+  first_quarter: '◐',
+  waxing_gibbous: '◐',
+  full: '○',
+  waning_gibbous: '◑',
+  last_quarter: '◑',
+  waning_crescent: '☾',
+};
+export const sky = (solar?: string, lunar?: string) =>
+  solar === 'night' ? (MOON[lunar!] ?? '☾') : SUN[solar!];
 export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
   const key = `band.${r.band}`;
   const phrase = text(key);
