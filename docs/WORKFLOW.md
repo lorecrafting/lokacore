@@ -120,6 +120,7 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, which passed the
    pre-push hook ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
+   A `toolbox/*` branch skips the pre-push checks; its gate is a green hosted run on the exact head ([record](decisions/owner-decision-hosted-ci-toolbox-2026-10-09.md)).
    Hosted CI runs nightly on `main` and by hand; a PR that touches save, protocol or kernel code,
    and the release candidate and E3, merge only after `gh workflow run ci.yml --ref <branch>` and
    `gh workflow run book-e2e.yml --ref <branch>` both end green on that head. A red nightly is
