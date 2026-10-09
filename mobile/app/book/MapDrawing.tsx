@@ -95,7 +95,9 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
         border={exit.available ? c.fg : c.action}
         dashed={!exit.available}
       />
+      {/* Part of the drawing, not the Map button's shown text (book-ui.md, Label in name). */}
       <Text
+        aria-hidden
         style={{
           position: 'absolute',
           left: (x - 8) * U,

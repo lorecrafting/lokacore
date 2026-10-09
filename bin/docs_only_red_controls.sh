@@ -9,8 +9,8 @@ cd "$d"
 git init -q
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
 mkdir -p docs mobile/authority/local-story mobile/app/book mobile/app/plugins mobile/app/tests .beads
-mkdir -p kernel/ts/src kernel/ts/test
-touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/tests/steps.ts mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts
+mkdir -p kernel/ts/src kernel/ts/test mobile/packages/game-view
+touch kernel/ts/src/k.ts kernel/ts/test/k.test.ts kernel/ts/test/differential_peer.ts a.md docs/x.md docs/features.json docs/features.gen.md .beads/issues.jsonl mobile/app/plugins/p.js mobile/app/tests/steps.ts mobile/app/App.tsx mobile/app/book/Page.tsx mobile/app/book/model.ts mobile/authority/local-story/store.ts mobile/app/package.json mobile/packages/game-view/session.ts
 seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
@@ -29,6 +29,8 @@ git mv code.ts code.md; ren=$(c rename)
 echo 1 >> kernel/ts/test/k.test.ts && echo 1 >> a.md; tests=$(c tests)
 echo 1 >> kernel/ts/test/differential_peer.ts; peer=$(c peer)
 echo 1 >> kernel/ts/src/k.ts; src=$(c src)
+echo 1 >> mobile/app/package.json; pkg=$(c pkg)
+echo 1 >> mobile/packages/game-view/session.ts; gv=$(c gv)
 git checkout -q -b other "$base"
 echo 2 >> a.md; other=$(c other)
 git checkout -q -
@@ -63,34 +65,10 @@ t run "$ren" "$tests" code "*.test.ts still runs the code lane"
 t run "$tests" "$peer" elixir "a kernel/ts/test peer changed"
 t run "$peer" "$src" elixir "kernel source changed"
 t run "$ren" "$src" elixir "test plus source in range"
-# bin/ci_base.sh: a fake gh applies the real jq predicate to controlled job records.
-ci=$(dirname "$script")/ci_base.sh
-cat > fakegh <<'SH'
-#!/bin/sh
-n=$(cat "$CNT" 2>/dev/null || echo 0)
-echo $((n + 1)) > "$CNT"
-[ "$((n + 1))" = "${FAIL_AT-0}" ] && exit 1
-case $2 in
-  */jobs) case $ANSWER in
-    browser) json='{"jobs":[{"name":"browser","conclusion":"success"}]}' ;;
-    skipped) json='{"jobs":[{"name":"browser","conclusion":"skipped"}]}' ;;
-    failed) json='{"jobs":[{"name":"browser","conclusion":"failure"}]}' ;;
-    recorderfailed) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"},{"name":"e1-recorder","conclusion":"failure"}]}' ;;
-    *) json='{"jobs":[{"name":"elixir","conclusion":"success"},{"name":"typescript","conclusion":"success"},{"name":"sim","conclusion":"success"},{"name":"e1-recorder","conclusion":"success"}]}' ;;
-  esac ;;
-  *) json='{"workflow_runs":[{"id":7}]}' ;;
-esac
-printf '%s\n' "$json" | jq -r "$4"
-SH
-chmod +x fakegh
-b() { rm -f cnt; got=$(GH=$PWD/fakegh CNT=$PWD/cnt REPO=o/r FAIL_AT=$2 ANSWER=${5-$3} "$ci" "$ren" "$3"); [ "$got" = "$1" ] || { echo "FAIL ci_base $4: want '$1', got '$got'"; fail=1; }; }
-b "$gen" 0 code "code jobs green on parent"
-b "" 1 code "error listing runs"
-b "" 2 code "error reading jobs"
-b "" 0 code "failed recorder is not a green baseline" recorderfailed
-b "$gen" 0 browser "browser green on parent"
-b "" 2 browser "browser API error"
-b "" 0 browser "skipped browser is not a green baseline" skipped
-b "" 0 browser "failed browser is not a green baseline" failed
+# Break: the pre-push Storybook smoke skips a Book change or runs for a kernel-only one.
+t run "$model" "$page" storybook "Book .tsx change runs Storybook smoke"
+t skip "$peer" "$src" storybook "kernel-only change skips Storybook smoke"
+t run "$src" "$pkg" storybook "app package.json change runs Storybook smoke"
+t run "$pkg" "$gv" storybook "game-view change runs Storybook smoke"
 [ "$fail" = 0 ] && echo "ok   ci_scope: metadata and Book lanes, conservative fallback"
 exit "$fail"

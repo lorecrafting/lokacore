@@ -21,13 +21,13 @@ test('authored ancestries keep their chapter effects and choice across browser r
     await expect(screen.getByText('Choose your ancestry')).toBeVisible();
     await screen.getByRole('button', choice).tap();
     await screen.getByRole('button', 'Continue').tap();
-    await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
+    await expect(screen.getByRole('button', 'Ferry Landing, look')).toBeVisible();
     await ancestryRoute(screen, choice);
-    await screen.getByRole('button', /^Contents, Character/).tap();
-    await screen.getByRole('button', 'Character').tap();
+    await screen.getByRole('button', /; opens Contents$/).tap();
+    await screen.getByRole('button', 'Character, open').tap();
     await expect(screen.getByText(stat).first()).toBeVisible();
     await reopen({ app, screen });
-    await expect(screen.getByRole('button', /^Look,/)).toBeVisible();
+    await expect(screen.getByRole('button', /, look$/)).toBeVisible();
     await expect(screen.getByText('Choose your ancestry')).not.toBeVisible();
   }
 });
@@ -42,7 +42,7 @@ async function ancestryRoute(screen: Screen, choice: string) {
   } else if (choice === 'Road-born') {
     await go(screen, 'north', 'Well Lane');
     await go(screen, 'west', 'Chandler');
-    await screen.getByRole('button', /Peg Harrow, open/).tap();
+    await screen.getByRole('button', /^Peg Harrow is here\./).tap();
     await expect(screen.getByText(/a torch: Buy 2p/)).toBeVisible();
     await screen.getByRole('button', 'Buy a torch — 2p').tap();
     await expect(

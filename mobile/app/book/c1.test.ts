@@ -148,7 +148,7 @@ test('band phrases and the hp accessibility label use the cartridge catalog', ()
   } as Pool;
   const text = (key: string) => (key === 'band.winded' ? 'needs a breath' : key);
   assert.equal(bandPhrase(hp, text), 'needs a breath');
-  assert.equal(said([hp], text), 'Character, hp 4 of 10, needs a breath');
+  assert.equal(said([hp], text), 'hp 4/10; hp needs a breath');
   assert.equal(
     bandPhrase(hp, () => undefined),
     'winded',

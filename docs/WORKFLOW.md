@@ -80,11 +80,12 @@ Report at the end of the slice, not at every step.
 3. **Build and self-review (developer).** Implement, check and self-review as
    [`developer.md`](../.claude/agents/developer.md) says, in the developer's own worktree, never the
    main checkout; the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)
-   makes the final local publication run. A PR that adds or changes a schema also runs the
+   makes the final local publication run (with the Storybook smoke for Book or story changes); a slice that changes an interaction flow also runs `npm run test:e2e` in `mobile/app`. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
    per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
-4. **Verify and review.** PM does not relay claims: for a hosted PR it confirms CI
-   is green on the pushed commit (or reruns the check line) before review; for
+4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push went
+   through the pre-push hook (the [gate](decisions/owner-decision-preproduction-gate-2026-10-08.md))
+   and starts review right away, without waiting for hosted CI; for
    provisional local work it verifies the focused-check evidence and can spawn
    review after the local merge. Then it spawns a *fresh* `reviewer`
    with the PR number (or local branch, base and exact head), the brief and the cited sections. The reviewer derives the
@@ -115,35 +116,18 @@ Report at the end of the slice, not at every step.
    fix gets no re-review agent: it is batched into the next fix or dropped, and the PM checks the
    diff is comment- or doc-only. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
-7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
-   NOTES with nothing open, every required hosted CI check is present and green on the
-   published head, and every job started on that head has completed successfully
-   ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
-   [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
-   A draft PR runs no hosted CI and its skipped jobs read as passing, so mark it ready
-   before the final review ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
-   A PR that conflicts with `main` gets no hosted CI, so auto-merge would sit silently: after the last of several close merges, run
+7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
+   APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, which passed the
+   pre-push hook ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
+   Hosted CI runs nightly on `main` and by hand; a PR that touches save, protocol or kernel code,
+   and the release candidate and E3, merge only after `gh workflow run ci.yml --ref <branch>` and
+   `gh workflow run book-e2e.yml --ref <branch>` both end green on that head. A red nightly is
+   the next session's first job.
+   After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
-   Only the PM arms auto-merge, and only after the final APPROVE or APPROVE WITH NOTES verdict on the exact head
-   `<sha>`: `gh pr merge <N> --auto --merge --match-head-commit <sha>`. GitHub merges when the
-   required checks `ci-green` and `book-e2e-green` pass on the head it then has, so nobody waits on
-   hosted CI. GitHub keeps auto-merge armed after a later push, so `--match-head-commit` does not
-   guard later pushes. After arming, the only commits allowed on the branch are the PM's own
-   post-verdict commits (a `main` merge, an index line); they need only green CI on the new head,
-   and the PM puts them in one push. If such a commit moves the head off the armed `<sha>` and the PR does not merge, re-arm on the new head. Any other push first disarms auto-merge
-   (`gh pr merge <N> --disable-auto`) and sends the PR back to the reviewer; re-arm after the new
-   verdict. Each gate fails unless its workflow's `changes` job succeeded (so a draft run never
-   passes) and no job failed or was cancelled. A cancelled run fails the gate: rerun it
-   (`gh run rerun <id>`) and auto-merge proceeds
-   ([owner decision](decisions/owner-decision-required-checks-merge-2026-10-08.md)).
-   One-time setup, applied by the PM right after the PR that added the gates merges and before the
-   next merge: branch protection on `main` requiring status checks `ci-green` and
-   `book-e2e-green`, `enforce_admins` off, and the repository setting "allow auto-merge" on.
-   Because `enforce_admins` is off, branch protection does not bind admins: the owner, or the PM
-   when the owner asks or for status-only commits (ROADMAP status lines, Beads export, decisions index
-   lines), may push to `main` directly or merge with `--admin`; never for unreviewed code or to
-   bypass a red check. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
-   ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
+   The owner, or the PM when the owner asks or for status-only commits (ROADMAP status lines,
+   Beads export, decisions index lines), may push to `main` directly, or merge with `--admin`
+   while GitHub still requires checks; never for unreviewed code or past a red check. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    `bin/after_merge.sh <PR> <beads-id> ["ROADMAP status: ..."]` does that bookkeeping after the PM's
@@ -195,16 +179,16 @@ No source merge or CI gate depends on `br`; the export check guards the JSONL.
 ## Delivery lanes
 <a id="local-edit-loop"></a>
 
-The brief names the lane. Sequential or dependent slices share one draft branch by default: each is reviewed on its exact draft head without CI, the PM marks it ready once, and the final review runs on the ready head. All three end in step 7's gate on the published head.
+The brief names the lane. Sequential or dependent slices share one draft branch by default: each is reviewed on its exact draft head without CI, the PM marks it ready once, and the final review runs on the ready head. All three end in step 7's gate on the pushed head.
 
 | Lane | Use | Developer | Review | Merge |
 |---|---|---|---|---|
-| Hosted PR | a slice that must merge alone, or a single fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer once CI is green on the pushed head (step 4) | step 7 |
-| Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | each slice or batch on its exact head while the PR is a draft; the PM marks it ready before the final review on the publication head, so CI runs ([step 7](#loop)) | step 7 on the ready head |
+| Hosted PR | a slice that must merge alone, or a single fix | `bin/check_all.sh` once; the pre-push hook is the final run; pushes and opens a ready PR | fresh reviewer right after the push (step 4) | step 7 |
+| Draft PR, batched pushes | a long-lived milestone branch (such as E1), or the session's housekeeping PR | focused checks; commits accumulate; the branch is pushed once per wave as a checkpoint | each slice or batch on its exact head while the PR is a draft; the PM marks it ready before the final review on the publication head ([step 7](#loop)) | step 7 on the ready head |
 | Provisional local | units that can merge into local `main` before review ([fast lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)) | touched-layer type/compile checks and focused tests; hands branch and exact head to the PM without pushing | fresh reviewer on the exact head, in its own worktree, in parallel with later work | publish the accumulated local `main`: full local checks and red controls once on its head, every review closed, then step 7 |
 
 Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
-one CI run per wave, not per small change. Collect tracker, process and docs changes into one
+one push per wave, not per small change. Collect tracker, process and docs changes into one
 housekeeping PR per session, or into the next real PR.
 
 Provisional local lane: one integration owner for local `main`; source branches, plans and reviews

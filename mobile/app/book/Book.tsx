@@ -3,7 +3,8 @@ import { useRef, useState } from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
-import { Footer, Status } from './Footer.tsx';
+import { Footer } from './Footer.tsx';
+import { StatusLine } from './Status.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -17,9 +18,9 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
-import { type } from './tokens.ts';
+import { size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
-import { presenter, type Button } from './presenter.ts';
+import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
 import { PageTurn } from './PageTurn.tsx';
@@ -100,7 +101,7 @@ export default function Book(p: BookProps) {
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
   const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
-  const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
+  const refused = (line: DetailLine) => (screen.log.push(line), redraw((n) => n + 1));
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
@@ -124,7 +125,7 @@ type ViewProps = {
   flip: { turn: number; dir: 1 | -1 };
   go: (pages: Page[], dir: 1 | -1) => void;
   press: (b: Button, detail?: string) => void;
-  refused: (line: string) => void;
+  refused: (line: DetailLine) => void;
   startOver: () => void;
   shell: Shell;
 };
@@ -165,7 +166,7 @@ type BottomProps = {
   g: ReturnType<typeof group>;
   press: (b: Button) => void;
   walk: (direction: string) => void;
-  refused: (line: string) => void;
+  refused: (line: DetailLine) => void;
   open: (p: Page) => void;
   page?: Page;
   world: () => void;
@@ -179,10 +180,18 @@ function Bottom(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   const position = nextPosition(view.position, p.g.position);
   return (
-    <View style={{ padding: 8 }}>
+    <View
+      style={{
+        paddingTop: space.sm,
+        paddingHorizontal: space.xl,
+        paddingBottom: space.lg,
+        borderTopWidth: size.rule,
+        borderTopColor: c.line,
+      }}
+    >
       {!view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
       {!view.ancestry_choices && (
-        <Status
+        <StatusLine
           time={view.time}
           calendar={view.calendar_status}
           resources={view.resources}

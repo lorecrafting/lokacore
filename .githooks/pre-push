@@ -1,8 +1,12 @@
 #!/bin/sh
 # Metadata and mobile assets/config (bin/ci_scope.sh code lane) use the short lane; a push whose
 # other changes are only *.test.ts files skips mix test and credo; everything else runs the full line.
-# ponytail: the checks run on the working tree, not the pushed commits; CI checks those.
+# Book, story or Storybook config changes also run `npm run storybook:smoke` first (never alongside npm test).
+# The checks run on the working tree, so a dirty tracked file refuses the push (the merge gate,
+# docs/decisions/owner-decision-preproduction-gate-2026-10-08.md); untracked files are ignored.
+# ponytail: the tree may still differ from a pushed ref that is not HEAD; push the checked-out branch.
 scope=metadata
+smoke=0
 seen=0
 deleted=0
 while read -r _ local _ remote; do
@@ -13,13 +17,17 @@ while read -r _ local _ remote; do
     *) remote=$1/main # new branch: trust the local main only if the remote agrees
        tracked=$(git rev-parse -q --verify "$remote" 2>/dev/null)
        advertised=$(git ls-remote "$2" refs/heads/main 2>/dev/null | cut -f1)
-       [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { scope=full; continue; } ;;
+       [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { scope=full; smoke=1; continue; } ;;
   esac
+  [ "$(bin/ci_scope.sh "$remote" "$local" storybook)" = skip ] || smoke=1
   [ "$(bin/ci_scope.sh "$remote" "$local" code)" = skip ] && continue
   [ "$(bin/ci_scope.sh "$remote" "$local" elixir)" = skip ] && [ "$scope" != full ] && scope=tests || scope=full
 done
 [ "$seen" = 1 ] || [ "$deleted" = 0 ] || exit 0 # deletions only: nothing to check
-[ "$seen" = 1 ] || scope=full
+[ "$seen" = 1 ] || { scope=full; smoke=1; }
+git diff --quiet HEAD -- || { echo "pre-push: commit or stash tracked changes first (the checks run on the working tree)"; exit 1; }
+# Under check_all's lock, so the smoke never runs beside another worktree's npm test.
+[ "$smoke" = 0 ] || (. bin/check_lock.sh && cd mobile/app && mise exec -- npm run storybook:smoke) || exit 1
 passed=$(cat "$(git rev-parse --git-path loka-checked-tree)" 2>/dev/null || true)
 if [ -n "$passed" ] && [ -z "$(git status --porcelain --untracked-files=all)" ] && [ "$(git rev-parse HEAD^{tree})" = "$passed" ]; then
   echo "pre-push: bin/check_all.sh already passed on this clean tree"; exit 0

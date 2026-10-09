@@ -229,7 +229,7 @@ for (const settlement of ['pulse', 'title press'])
         const world = BookView(draw().props).props.children.props.children[0].props.children;
         nodes(world)
           .find(
-            (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Look, Scriptorium',
+            (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Scriptorium, look',
           )!
           .props.onPress();
         assert.equal(a.game.pending(), false);

@@ -4,6 +4,7 @@ import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { fadeStub } from './__tests__/fade-stub.ts';
+import type { DetailLine } from './presenter.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -50,7 +51,8 @@ registerHooks({
   },
 });
 const { color } = await import('./tokens.ts');
-const { Footer, Status } = await import('./Footer.tsx');
+const { Footer } = await import('./Footer.tsx');
+const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
 
@@ -105,7 +107,7 @@ function browser(t: { after: (cleanup: () => void) => void }) {
 test('web keyboard uses offered exits and keeps focused controls', (t) => {
   const { key, Target } = browser(t);
   const walked: string[] = [];
-  const refusals: string[] = [];
+  const refusals: DetailLine[] = [];
   const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
     direction,
     available: true,
@@ -115,7 +117,7 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
     exits,
     text: (key: string) => key,
     go: (direction: string) => walked.push(direction),
-    refused: (line: string) => refusals.push(line),
+    refused: (line: DetailLine) => refusals.push(line),
     openMap: () => {},
     learned: { seen: () => true, see: () => {} },
   });
@@ -134,7 +136,9 @@ test('web keyboard uses offered exits and keeps focused controls', (t) => {
   exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
   assert.equal(key('ArrowUp'), true);
   assert.equal(walked.length, 6);
-  assert.deepEqual(refusals, ['The way north is closed.']);
+  assert.deepEqual(refusals, [
+    { kind: 'refused', reason: 'closed', text: 'The way north is closed.' },
+  ]);
 });
 
 // Breaks: Book installs a World keyboard handler while a detail or save state owns input.
@@ -228,7 +232,10 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, null);
   assert.equal(status.props.locked, true);
-  const contents = Status(status.props).props.children.find((c: any) => c?.type === 'Pressable');
+  const button = StatusLine(status.props)
+    .props.children.flat()
+    .find((c: any) => c?.key === 'contents').props.children[1]; // its " · " group: dot, button
+  const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
       ? []
@@ -247,7 +254,7 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     tone,
     band: 'hurt',
   });
-  const status = Status({
+  const status = StatusLine({
     time: 0,
     resources: [pool('hp', 'danger'), pool('mv', 'warning'), pool('pennies', 'danger')],
     text: (key: string) => key,
@@ -255,7 +262,9 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     pending: false,
     open: () => {},
   } as any);
-  const contents = status.props.children.find((c: any) => c?.type === 'Pressable');
+  const button = status.props.children.flat().find((c: any) => c?.key === 'contents').props
+    .children[1];
+  const contents = button.type(button.props);
   const shown = contents.props.children.props.children.map((t: any) => [
     t.key,
     t.props.style.color,

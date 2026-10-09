@@ -124,7 +124,7 @@ have / partial / missing per the audit. Ids in parentheses are the
   ([test rules](../AGENTS.md#writing-tests-every-change-every-agent)).
 - **Review:** one fresh Opus reviewer; findings as PR comments; no `docs/reviews` record, review
   index or second opinion. Fix rounds as in the workflow.
-- **Merge:** auto-merge on green after the verdict; no ROADMAP status commit.
+- **Merge:** the PM merges after the verdict ([gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)); no ROADMAP status commit.
 
 ## How to pick the next item
 

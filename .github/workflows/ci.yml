@@ -1,10 +1,9 @@
 name: ci
 
+# Pre-production: nightly on main and by hand only (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md).
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main]
+  schedule:
+    - cron: '0 10 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -15,34 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  changes:
-    # Draft PRs run no hosted CI; downstream jobs skip with this one (CHECKS.md).
-    if: github.event.pull_request.draft != true
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      skip: ${{ steps.docs.outputs.skip }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      # A missing green code ancestor or API error runs everything; lint runs unless the PR is a draft.
-      - id: docs
-        run: |
-          base=$(bin/ci_base.sh "$HEAD" code)
-          echo "skip=$([ "$(bin/ci_scope.sh "$base" "$HEAD" code)" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-
   elixir:
-    needs: changes
-    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -74,7 +46,6 @@ jobs:
       - run: elixir bin/red_controls.exs
 
   lint:
-    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -101,8 +72,6 @@ jobs:
 
   # The 10,000 fresh sequences (CI is set), in parallel with the typescript job, which skips sim.test.ts.
   sim:
-    needs: changes
-    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -125,8 +94,6 @@ jobs:
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
   # tree, so its artifact and output stay outside the checkout.
   e1-recorder:
-    needs: changes
-    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -143,8 +110,6 @@ jobs:
           node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
 
   typescript:
-    needs: changes
-    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15 # 3 min before the mobile suite (67 s wall, 327 s CPU locally)
     env:
@@ -179,12 +144,12 @@ jobs:
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
-  # The one check `main` requires. Skipped scoped jobs pass; a draft (changes skipped) fails.
+  # The run's one verdict: fails unless every job succeeded.
   ci-green:
-    needs: [changes, e1-recorder, elixir, lint, sim, typescript]
+    needs: [e1-recorder, elixir, lint, sim, typescript]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - if: needs.changes.result != 'success' || contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
         run: exit 1

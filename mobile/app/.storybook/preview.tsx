@@ -34,6 +34,21 @@ const preview: Preview = {
     // Fail the smoke on any axe violation, colour contrast included.
     a11y: { test: 'error' },
   },
+  // Label in name (book-ui.md): every button's accessible name starts with its shown text (a run of
+  // whitespace as one space); a button that shows no text (the minimap at rest, whose stair words
+  // are aria-hidden drawing) is skipped.
+  afterEach: ({ canvasElement }) => {
+    const words = (s: string) => s.replace(/\s+/g, ' ').trim();
+    for (const b of canvasElement.querySelectorAll<HTMLElement>('[role="button"], button')) {
+      const hidden = [...b.querySelectorAll<HTMLElement>('[aria-hidden="true"]')];
+      hidden.forEach((n) => (n.style.display = 'none'));
+      const shown = words(b.innerText); // innerText: laid-out lines, so blocks keep their break
+      hidden.forEach((n) => (n.style.display = ''));
+      const name = words(b.getAttribute('aria-label') ?? shown);
+      if (shown && !name.startsWith(shown))
+        throw new Error(`label in name: "${name}" does not start with "${shown}"`);
+    }
+  },
   decorators: [
     (Story, { globals }) => {
       const c = color[globals.palette as keyof typeof color] ?? color.light;

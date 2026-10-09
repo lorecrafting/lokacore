@@ -20,7 +20,7 @@ const top = () => {
   return {
     title:
       shown('[role="heading"]').at(-1)?.textContent ??
-      shown('[aria-label^="Look, "]').at(-1)?.getAttribute('aria-label')?.slice(6) ??
+      shown('[aria-label$=", look"]').at(-1)?.getAttribute('aria-label')?.slice(0, -6) ??
       '',
     time: shown('[aria-label^="day "]').at(-1)?.getAttribute('aria-label') ?? '',
     buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label')),
@@ -32,12 +32,12 @@ const top = () => {
 // A tap's page and its save land after the 160 ms fade; an instant read waits this long first.
 const settle = () => new Promise((r) => setTimeout(r, 250));
 
-// A riddle answer on the letter tiles ("Letter L, tile 5"), each tile used once, then Submit.
+// A riddle answer on the letter tiles ("L, tile 5"), each tile used once, then Submit.
 const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
   await settle();
-  const tiles = (await browser.evaluate(top)).buttons.filter((b) => b?.startsWith('Letter '));
+  const tiles = (await browser.evaluate(top)).buttons.filter((b) => /^., tile \d+$/.test(b ?? ''));
   for (const letter of word) {
-    const tile = tiles.find((t) => t?.startsWith(`Letter ${letter},`));
+    const tile = tiles.find((t) => t?.startsWith(`${letter},`));
     if (!tile) throw new Error(`walk dead end: no tile for ${letter} in ${word}`);
     tiles.splice(tiles.indexOf(tile), 1);
     await walked.getByRole('button', tile).tap();
@@ -103,7 +103,7 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
 }
 
 const talk = async (screen: Screen, npc: string, ...choices: string[]) => {
-  await screen.getByRole('button', `${npc}, open`).tap();
+  await screen.getByRole('button', new RegExp(`^${npc} is here\\.`)).tap();
   for (const choice of choices) {
     await screen.getByRole('button', `Talk to ${npc}`).last().tap();
     await screen.getByRole('button', choice).tap();
@@ -157,12 +157,12 @@ type Child = (typeof ENDINGS)[number][0];
 const search = async (screen: Screen) => {
   await talk(screen, 'Elspeth', 'Will you look around the Green for a sign of Wren?');
   await moves(screen, 'north', 'north');
-  await screen.getByRole('button', 'a fox drawing, open').tap();
+  await screen.getByRole('button', 'A fox drawing is here., open').tap();
   await screen.getByRole('button', 'Take a fox drawing').tap();
   await moves(screen, 'south', 'south');
   await talk(screen, 'Elspeth', 'I found this drawing on the Green.');
   await moves(screen, 'south', 'south');
-  await screen.getByRole('button', 'Tracks').tap();
+  await screen.getByRole('button', 'Tracks, open').tap();
   await screen.getByRole('button', 'Study tracks').tap();
   await screen.getByRole('button', 'Leave').tap();
 };
@@ -171,7 +171,7 @@ const childReturn = async (r: Walk, child: Child) => {
   const { screen } = r;
   await moves(screen, 'south', 'south');
   await talk(screen, 'Vesper', '“Wren, your mother is looking for you.”');
-  await screen.getByRole('button', 'Vesper, open').tap();
+  await screen.getByRole('button', /^Vesper is here\./).tap();
   await screen.getByRole('button', 'Talk to Vesper').last().tap();
   await r.spell('LANTERN');
   await screen.getByRole('button', 'Leave').tap();
@@ -190,7 +190,7 @@ const bell = async (screen: Screen, child: Child, allegiance: string) => {
   await moves(screen, ...Array(child === 'lost' ? 7 : 5).fill('north'));
   await talk(screen, 'Prior Aldric', '“I’ll ring the bell.”');
   await moves(screen, 'up', 'up');
-  await screen.getByRole('button', 'Chapel bell').tap();
+  await screen.getByRole('button', 'Chapel bell, open').tap();
   await screen
     .getByRole('button', allegiance === 'prior' ? 'Ring bell' : 'Leave the bell silent')
     .tap();
@@ -231,11 +231,11 @@ walk('3-lantern-dream', 'Side quest: a room at the Lantern, follow the fox', asy
   const { screen } = r;
   await begin({ app: r.app, screen }, 'Road-born');
   await moves(screen, 'north', 'east');
-  await screen.getByRole('button', 'Widow Maud, open').tap();
+  await screen.getByRole('button', /^Widow Maud is here\./).tap();
   await screen.getByRole('button', 'Rent room — 3p').tap();
   await screen.getByRole('button', 'Leave').tap();
   await moves(screen, 'up');
-  await screen.getByRole('button', 'Bed').tap();
+  await screen.getByRole('button', 'Bed, open').tap();
   await screen.getByRole('button', 'Rest').tap();
   await scene(screen);
   await screen.getByRole('button', 'Follow the fox').tap();
@@ -248,20 +248,20 @@ walk('4-wisp-ward', 'Side quest: the wisp ward', async (r) => {
   const { screen } = r;
   await begin({ app: r.app, screen }, 'Road-born');
   await moves(screen, 'south', 'south', 'south', 'east');
-  await screen.getByRole('button', 'Marsh glow').tap(); // opening the glow seeks the wisp
+  await screen.getByRole('button', 'Marsh glow, open').tap(); // opening the glow seeks the wisp
   await screen.getByRole('button', 'Leave').tap();
-  await screen.getByRole('button', 'Wisp, open').tap();
+  await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Speak to Wisp Wisp').tap();
   await screen.getByRole('button', 'Accept the riddle').tap();
   await screen.getByRole('button', 'Leave').tap();
-  await screen.getByRole('button', 'Wisp, open').tap();
+  await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   for (const wrong of ['EDIT', 'DIET', 'TIED']) await r.spell(wrong);
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   await r.spell('TIDE');
   await screen.getByRole('button', 'Leave').tap();
   await moves(screen, 'west', ...Array(8).fill('north'));
-  await screen.getByRole('button', 'Prior Aldric, open').tap();
+  await screen.getByRole('button', /^Prior Aldric is here\./).tap();
   await screen.getByRole('button', 'Ask about ward Prior Aldric').tap();
   await screen.getByRole('button', 'Discuss the ward').tap();
   await screen.getByRole('button', 'Leave').tap();

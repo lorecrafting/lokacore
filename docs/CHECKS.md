@@ -1,7 +1,8 @@
 # Checks
 
-The active checks run in CI; pre-push runs the relevant local lane selected by
-[`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md).
+The active checks run in CI nightly and by hand; pre-push runs the relevant local lane selected by
+[`bin/ci_scope.sh`](../bin/ci_scope.sh) under the [pre-production check decision](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md),
+and is the merge gate with review ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)).
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records measured costs and retained risks.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption.
@@ -18,7 +19,7 @@ their rules and red controls remain available for resumption.
   contracts, no display text in the authority, renderer imports, which allow Skia, Reanimated and Worklets
   for the page curl; `mobile-book-raw-values`: no raw hex colour or numeric `fontSize` in
   `mobile/app/book/*.tsx`, `mobile/app/SaveError.tsx` or `mobile/app/App*.tsx`, only [design tokens](BOOK-UI-COMPONENTS.md#design-tokens), a designer one-off
-  marked `ast-grep-ignore`) keep their cases and run in pre-commit on staged `mobile/` files. Rule
+  marked `ast-grep-ignore`) keep their cases; `bin/check_all.sh` scans the whole tree with every rule, pre-commit the staged files. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
@@ -90,14 +91,18 @@ their rules and red controls remain available for resumption.
   `.ts`/`.tsx` (mobile tests run `App.tsx`) and local-story authority/save code, runs the broad code lane. The browser lane runs
   for both mobile app and authority changes. All other
   changes, missing/non-ancestor bases, renames from code, and empty diffs say `run`. The `elixir`
-  lane (pre-push only; hosted CI unchanged) also skips `*.test.ts` files, so a push whose code
+  lane (pre-push only) also skips `*.test.ts` files, so a push whose code
   changes are only those runs `bin/check_all.sh --no-mix-test` (no `mix test` or credo; `mix compile`
   stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
   tests run its peers.
-  `bin/ci_base.sh` finds the newest ancestor with the relevant jobs actually green; API errors
-  force `run`. PR and main pushes use the same classifier. `lint` runs on every non-draft event; browser jobs
-  skipped by scope remain visibly skipped. `bin/docs_only_red_controls.sh` plants both positive
-  and unsafe-skip cases, including a local-story save edit and API errors.
+  The `storybook` lane (pre-push only) runs for `mobile/app/book/`, `mobile/app/stories/`,
+  `mobile/app/.storybook/`, `mobile/app/package*.json` or `mobile/packages/game-view/` changes: the hook
+  then runs `npm run storybook:smoke` in `mobile/app` under the `bin/check_all.sh` lock (`bin/check_lock.sh`)
+  before `bin/check_all.sh`, never alongside `npm test`. The hook refuses a push while tracked files
+  have uncommitted changes, since its checks read the working tree. The full browser e2e is not in
+  pre-push: a slice that changes an interaction flow runs `npm run test:e2e` in `mobile/app`.
+  Hosted CI does not classify: every scheduled or dispatched run runs every job.
+  `bin/docs_only_red_controls.sh` plants both positive and unsafe-skip cases, including a local-story save edit.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
@@ -108,22 +113,21 @@ their rules and red controls remain available for resumption.
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
   pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
   a dead holder's lock is taken over, the lock is removed at exit. It pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,
-  a peer or mixed push the full line) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
+  a peer or mixed push the full line, only a Book push runs the Storybook smoke, a dirty tracked file refuses the push and an untracked one does not) and runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
-  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not).
+  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes.
-- CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
-  cancelled; on a draft PR every job skips until it is marked ready, and `workflow_dispatch` runs a draft by hand
-  ([owner decision](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)); `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
+- CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run nightly on `main` (10:00 UTC) and by
+  `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`), superseded runs on a ref cancelled;
+  no pull request or push triggers ([pre-production gate](decisions/owner-decision-preproduction-gate-2026-10-08.md)). `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), then `npm run storybook:smoke` (every story renders, its play
-  passes, axe at `test: 'error'`; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
-  in GitHub and retain only manual triggers in source for eventual resumption. `main` requires
-  one gate job per workflow, `ci-green` and `book-e2e-green` (`if: always()`): each fails unless
-  its `changes` job succeeded and no other job failed or was cancelled, so a skipped scoped job
-  passes and a draft run fails ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
+  passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)); `mobile.yml` and `mobile-bundle.yml` are disabled
+  in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has
+  one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed,
+  was cancelled or skipped ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
@@ -132,4 +136,3 @@ their rules and red controls remain available for resumption.
   on the selected v042 artifact, rebuilt from `protocol/fixtures/missing_child_v042_hash.json` and sha-checked, and
   fails on a pending obligation, a gap or a failed case (about 6 minutes). It is not in
   `bin/check_all.sh`: that line has no area lanes, so it would add those minutes to every run.
-  The code lane's green baseline (`bin/ci_base.sh`) includes it.

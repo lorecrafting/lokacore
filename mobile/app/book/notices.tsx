@@ -3,7 +3,9 @@ import { DreamResume } from './DreamPage.tsx';
 import { Text } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type Page } from './model.ts';
-import { Leave, Sheet, Tap } from './pages.tsx';
+import { ActionCard, Cards } from './actions.tsx';
+import { EntityLine, LogLines } from './lines.tsx';
+import { Control, Sheet } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 
@@ -71,23 +73,20 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const offer = noticeOffer(screen.view, notice.id);
   if (notice.bed || notice.transport || notice.remaining !== undefined)
     return (
-      <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
-        <Text style={{ ...prose(c), color: c.action }}>
-          {title}
-          {notice.remaining === undefined ? '' : ` (${notice.remaining})`}
-        </Text>
-      </Tap>
+      <EntityLine
+        name={title}
+        rest={notice.remaining === undefined ? undefined : ` (${notice.remaining})`}
+        onPress={() => p.open({ kind: 'notice', id: notice.id })}
+      />
     );
   return b ? (
-    <Tap
-      label={title}
+    <EntityLine
+      name={title}
       onPress={() => {
         p.open({ kind: 'notice', id: notice.id });
         p.press(b, notice.id);
       }}
-    >
-      <Text style={{ ...prose(c), color: c.action }}>{title}</Text>
-    </Tap>
+    />
   ) : (
     <Text style={note(c)}>
       {title}
@@ -97,17 +96,14 @@ function NoticeLink(p: Props & { notice: Notice }) {
 }
 
 export function NoticeEntries(p: Props) {
-  const c = usePalette();
   return (
     <>
       {(p.screen.view.notice_boards ?? []).map((board) => (
-        <Tap
+        <EntityLine
           key={board.id}
-          label={p.screen.text(board.title)}
+          name={p.screen.text(board.title)}
           onPress={() => p.open({ kind: 'board', id: board.id })}
-        >
-          <Text style={{ ...prose(c), color: c.action }}>{p.screen.text(board.title)}</Text>
-        </Tap>
+        />
       ))}
       {(p.screen.view.notices ?? []).map((notice) => (
         <NoticeLink key={notice.id} {...p} notice={notice} />
@@ -130,14 +126,11 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       <Text style={prose(c)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
-      {p.screen
-        .detail(detail.id)
-        .filter((line) => typeof line !== 'string' || plain(line) !== description)
-        .map((line, i) => (
-          <Text key={i} style={prose(c)}>
-            {typeof line === 'string' ? line : line.text}
-          </Text>
-        ))}
+      <LogLines
+        lines={p.screen
+          .detail(detail.id)
+          .filter((line) => typeof line !== 'string' || plain(line) !== description)}
+      />
       {'transport' in detail && detail.transport && (
         <Text style={note(c)}>
           {detail.transport.waived
@@ -147,12 +140,15 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       )}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
-      {!board &&
-        ('actions' in detail ? (detail.actions ?? []) : []).map((offer) =>
-          offerControl(c, p, detail.id, offer),
+      <Cards>
+        {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
+          offerControl(c, p, detail.id, o),
         )}
+      </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
-      {p.screen.view.notices?.some((n) => n.id === detail.id) && <Leave leave={p.world} />}
+      {p.screen.view.notices?.some((n) => n.id === detail.id) && (
+        <Control label="Leave" onPress={p.world} />
+      )}
     </Sheet>
   );
 }
@@ -166,13 +162,11 @@ function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
       JSON.stringify(b.target_ids) === JSON.stringify(offer.target_ids ?? []),
   );
   return button ? (
-    <Tap
+    <ActionCard
       key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
-      label={button.label}
-      onPress={() => p.press(button, id)}
-    >
-      <Text style={{ ...prose(c), color: c.action }}>{button.label}</Text>
-    </Tap>
+      b={button}
+      press={(b) => p.press(b, id)}
+    />
   ) : !offer.available ? (
     <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note(c)}>
       {p.screen.label(offer.label)}: {why(offer, p.screen.text)}

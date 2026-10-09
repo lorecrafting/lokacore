@@ -6,7 +6,7 @@ test('hound Attack shows admitted helpers on the Combat page', async ({ app, scr
   const go = async (direction: string, room: string) => {
     await screen.getByRole('button', 'Map').tap();
     await screen.getByRole('button', `Go ${direction}`).tap();
-    await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
+    await expect(screen.getByRole('button', `${room}, look`)).toBeVisible();
   };
   await app.clearState();
   await screen.getByRole('button', 'Fey-touched').tap();
@@ -15,7 +15,7 @@ test('hound Attack shows admitted helpers on the Combat page', async ({ app, scr
   await go('south', 'Reed Bank');
   await go('east', 'Hound Run');
   await screen
-    .getByRole('button', /a fen hound, open/)
+    .getByRole('button', /^A fen hound is here\./)
     .first()
     .tap();
   await screen.getByRole('button', /Attack/).tap();

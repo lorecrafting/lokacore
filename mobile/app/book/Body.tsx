@@ -5,7 +5,8 @@ import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
 import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
-import { Act, RoomPage, RunningHead } from './pages.tsx';
+import { VerbLine } from './actions.tsx';
+import { RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette } from './palette.ts';
 import { space } from './tokens.ts';
 import {
@@ -42,7 +43,7 @@ export function Body(p: BodyProps) {
       {water && (
         <View style={{ paddingHorizontal: space.page }}>
           <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>
-          {surface && <Act b={surface} press={p.press} />}
+          {surface && <VerbLine b={surface} press={p.press} />}
         </View>
       )}
       <PageBody {...p} />

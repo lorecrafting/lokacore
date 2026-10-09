@@ -34,24 +34,24 @@ export async function begin(
   await app.clearState();
   await screen.getByRole('button', ancestry).tap();
   await screen.getByRole('button', 'Continue').tap();
-  await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
+  await expect(screen.getByRole('button', 'Ferry Landing, look')).toBeVisible();
 }
 
 // One step by the Map page; with a room, the step must arrive there.
 export async function go(screen: Screen, direction: string, room?: string) {
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', `Go ${direction}`).tap();
-  if (room) await expect(screen.getByRole('button', `Look, ${room}`)).toBeVisible();
+  if (room) await expect(screen.getByRole('button', `${room}, look`)).toBeVisible();
 }
 
 export async function inventory(screen: Screen) {
-  await screen.getByRole('button', /^Contents, Character/).tap();
-  await screen.getByRole('button', 'Equipment & Inventory').tap();
+  await screen.getByRole('button', /; opens Contents$/).tap();
+  await screen.getByRole('button', 'Equipment & Inventory, open').tap();
 }
 
 // At the Chandler: buy a torch from Peg for 3p and light it.
 export async function litTorch(screen: Screen) {
-  await screen.getByRole('button', /Peg Harrow, open/).tap();
+  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Buy a torch — 3p').tap();
   await screen.getByRole('button', 'Leave').tap();
   await inventory(screen);

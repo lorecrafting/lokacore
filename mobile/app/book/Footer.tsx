@@ -2,25 +2,36 @@
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, PanResponder, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
+import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { bleedingLine, branch, refused, said, toneOf, why, type Hint, type Pool } from './model.ts';
-import { band, Tap } from './pages.tsx';
+import { refused, why, type Hint } from './model.ts';
+import type { DetailLine } from './presenter.ts';
+import { Control } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
-import { size, type } from './tokens.ts';
+import { motion, radius, size, space, type } from './tokens.ts';
 
 type Props = {
   keyboardEnabled: boolean;
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
-  refused: (line: string) => void; // a drag toward a closed exit: its line for the log
+  refused: (line: DetailLine) => void; // a drag toward a closed exit: its line for the log
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
 };
-const rule = (c: Palette) => ({ flex: 1, height: 1, backgroundColor: c.line });
+const rule = (c: Palette) => ({
+  width: size.footerRule,
+  height: size.rule,
+  backgroundColor: c.line,
+});
+const row = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  columnGap: space.sm,
+} as const;
 const keys: Record<string, string> = {
   ArrowUp: 'north',
   ArrowDown: 'south',
@@ -56,11 +67,11 @@ export function Footer(p: Props) {
   return (
     <View>
       {tip && <Tip dismiss={learn} />}
-      <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
+      <View style={row}>
         <View style={rule(c)} />
         <View
-          style={{ width: 56, height: 56, zIndex: 1 }} // above the rules: the zoomed map covers them
-          {...readerActions(p.exits, (d) => walk(d, p), openMap)}
+          style={{ width: size.minimap, height: size.minimap, zIndex: 1 }} // above the rules: the zoomed map covers them
+          {...readerActions(p.exits, said, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
@@ -119,43 +130,40 @@ function responder(
   setKnob: (k: { x: number; y: number }) => void,
 ) {
   const to = (v: number) =>
-    Animated.timing(zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
+    Animated.timing(zoom, {
+      toValue: v,
+      duration: motion.quick.duration,
+      useNativeDriver: true,
+    }).start();
   return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => setKnob({ x, y }) }));
 }
 
-function Tip({ dismiss }: { dismiss: () => void }) {
+// The first-run tip: an `fg` bubble, its words in `bg`, Got it right-aligned inside it.
+export function Tip({ dismiss }: { dismiss: () => void }) {
   const c = usePalette();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ ...type.small, color: c.dim, flexShrink: 1, textAlign: 'center' }}>
+    <View
+      style={{
+        backgroundColor: c.fg,
+        borderRadius: radius.card,
+        paddingVertical: space.md,
+        paddingHorizontal: space.lg,
+        alignSelf: 'center',
+        marginHorizontal: space.page,
+      }}
+    >
+      <Text style={{ ...type.small, color: c.bg }}>
         Hold the map and drag toward a path to walk; tap it to open the map.
       </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Got it"
-        onPress={dismiss}
-        style={{
-          minHeight: size.touch,
-          minWidth: 64,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ ...type.control, color: c.fg }}>got it</Text>
-      </Pressable>
+      <View style={{ alignItems: 'flex-end' }}>
+        <Control label="Got it" onPress={dismiss} onInk />
+      </View>
     </View>
   );
 }
 
 // The lit exit's name (and why it is closed), or a closed exit's reason after release, on the side
-// opposite the drag (joystick.ts `sideOf`); 44 px from the middle clears the zoomed exit rings.
-const AWAY = 28 + 14 * ZOOM + 8;
-const SPOT = {
-  above: { bottom: AWAY, left: -120, right: -120, textAlign: 'center' },
-  below: { top: AWAY, left: -120, right: -120, textAlign: 'center' },
-  left: { top: 19, right: AWAY, width: 120, textAlign: 'right' },
-  right: { top: 19, left: AWAY, width: 120, textAlign: 'left' },
-} as const;
+// opposite the drag (joystick.ts `sideOf`, placed by `SPOT`).
 function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
   const c = usePalette();
   return (
@@ -174,13 +182,14 @@ function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
 // action ("Go north") that walks (a closed one announces its reason). No touch targets to collide.
 function readerActions(
   exits: Props['exits'],
+  said: string, // shown inside the button while dragging: it leads the name (WCAG 2.5.3)
   walk: (direction: string) => void,
   openMap: () => void,
 ) {
   return {
     accessible: true,
     accessibilityRole: 'button' as const,
-    accessibilityLabel: 'Map',
+    accessibilityLabel: said ? `${said}, Map` : 'Map',
     accessibilityActions: [
       { name: 'activate' },
       ...exits.map((x) => ({ name: x.direction, label: `Go ${x.direction}` })),
@@ -188,108 +197,4 @@ function readerActions(
     onAccessibilityAction: (a: { nativeEvent: { actionName: string } }) =>
       a.nativeEvent.actionName === 'activate' ? openMap() : walk(a.nativeEvent.actionName),
   };
-}
-
-// One line: the time as its earthly branch, then the resource button, which shows the body's
-// resources coloured by band when GameView carries them (the room-view status line, an owner-
-// ruled departure) and opens Contents, the index of the existing book sections.
-type StatusProps = {
-  time: number;
-  calendar?: GameView['calendar_status'];
-  resources?: readonly Pool[];
-  bleeding?: GameView['bleeding'];
-  position?: GameView['position'];
-  text: (key: string) => string;
-  locked: boolean;
-  pending: boolean;
-  open: () => void;
-  openPosition?: () => void;
-};
-
-const statusRow = {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  alignItems: 'center',
-  columnGap: 14,
-} as const;
-
-// The calendar as one line: day and hour, then the solar term and the moon when the world has them.
-const calendarLine = (calendar: StatusProps['calendar']) =>
-  calendar &&
-  [
-    `day ${calendar.day}, ${String(calendar.hour).padStart(2, '0')}:${String(calendar.subdivision).padStart(2, '0')}`,
-    calendar.solar?.replaceAll('_', ' '),
-    calendar.lunar && `${calendar.lunar.replaceAll('_', ' ')} moon`,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-export function Status(p: StatusProps) {
-  const c = usePalette();
-  const time = calendarLine(p.calendar);
-  return (
-    <View style={statusRow}>
-      <Text
-        style={{ ...type.small, color: c.dim }}
-        accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}
-      >
-        {time ?? branch(p.time).glyph}
-      </Text>
-      {p.position && <Position value={p.position} open={p.openPosition} />}
-      {p.bleeding && (
-        <Text style={{ ...type.small, color: c.danger }}>
-          {bleedingLine(p.bleeding, p.time, p.text)}
-        </Text>
-      )}
-      <Pressable
-        disabled={p.locked}
-        accessibilityRole="button"
-        accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
-        onPress={p.open}
-        style={{ minHeight: size.touch, justifyContent: 'center' }}
-      >
-        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>
-          {p.resources ? shown(c, p.resources, p.locked) : 'character'}
-        </Text>
-      </Pressable>
-      {p.pending && (
-        <Text style={{ ...type.small, color: c.dim, width: '100%', textAlign: 'center' }}>
-          save not confirmed
-        </Text>
-      )}
-    </View>
-  );
-}
-
-// The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
-// locked); its label is model.ts `said`.
-const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
-  rs.map((r, i) => (
-    <Text
-      key={r.resource.key}
-      style={{
-        color: locked ? c.dim : band(c, toneOf(r)),
-      }}
-    >
-      {i ? '  ' : ''}
-      <Text style={type.label}>{r.resource.key}</Text>
-      {` ${r.current}/${r.maximum}`}
-    </Text>
-  ));
-
-function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
-  const c = usePalette();
-  const words = (
-    <Text style={{ ...type.small, color: c.dim }} accessibilityLabel={`Position, ${p.value}`}>
-      {p.value}
-    </Text>
-  );
-  return p.open ? (
-    <Tap label={`Position, ${p.value}`} onPress={p.open}>
-      {words}
-    </Tap>
-  ) : (
-    words
-  );
 }

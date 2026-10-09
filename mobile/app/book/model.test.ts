@@ -99,7 +99,7 @@ test('the character label says the hp band and no other', () => {
     ({ resource: { key }, current, maximum, band, tone: 'normal' }) as Pool;
   assert.equal(
     said([pool('hp', 20, 20, 'perfect_health'), pool('ma', 100, 100, 'perfect_health')]),
-    'Character, hp 20 of 20, perfect health, ma 100 of 100',
+    'hp 20/20 ma 100/100; hp perfect health',
   );
 });
 
@@ -125,12 +125,13 @@ test('a restored choice opens its actual speaker detail or retained conversation
 });
 
 // Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason
-// sentence wrapped in the frame ("The way east is The causeway is flooded.."), or a title cased wrong.
+// sentence wrapped in the frame ("The way east is The causeway is flooded.."), a refused line without
+// its reason tag (the code word, even beside a cartridge sentence), or a title cased wrong.
 test("a closed exit's log line and a capitalised title", () => {
   const west = { available: false, direction: 'west', reason: { code: 'exit_locked' } } as never;
-  assert.equal(
+  assert.deepEqual(
     refused(west, (k) => k),
-    'The way west is locked.',
+    { kind: 'refused', reason: 'locked', text: 'The way west is locked.' },
   );
   const flooded = { key: 'The causeway is flooded.' };
   const east = {
@@ -138,9 +139,9 @@ test("a closed exit's log line and a capitalised title", () => {
     direction: 'east',
     reason: { code: 'exit_locked', message: flooded },
   };
-  assert.equal(
+  assert.deepEqual(
     refused(east as never, (k) => k),
-    'The causeway is flooded.',
+    { kind: 'refused', reason: 'locked', text: 'The causeway is flooded.' },
   );
   assert.equal(cap('a brass lantern'), 'A brass lantern');
 });
@@ -149,9 +150,9 @@ test("a closed exit's log line and a capitalised title", () => {
 // insufficient resource.") or wraps its own sentence in the frame; the exit's note shows the code.
 test('a move refused at 0 MV says the body is too exhausted', () => {
   const north = { available: false, direction: 'north', reason: { code: 'insufficient_resource' } };
-  assert.equal(
+  assert.deepEqual(
     refused(north as never, (k) => k),
-    'You are too exhausted.',
+    { kind: 'refused', reason: 'too exhausted', text: 'You are too exhausted.' },
   );
   assert.equal(
     why(north as never, (k) => k),

@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { CONTENTS, control } from './__tests__/control.test.ts';
 import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url),
@@ -136,13 +137,7 @@ function preview(input = bundle, path = ':memory:') {
     draw()
       .filter((n) => n.type === 'Pressable' && !n.props.disabled)
       .map((n) => n.props.accessibilityLabel);
-  const tap = (label: string) => {
-    const b = draw().find(
-      (n) => n.type === 'Pressable' && !n.props.disabled && n.props.accessibilityLabel === label,
-    );
-    assert.ok(b, label);
-    b.props.onPress();
-  };
+  const tap = (shown: string | RegExp) => control(draw(), shown).props.onPress();
   const text = () =>
     draw()
       .filter((n) => n.type === 'Text')
@@ -336,7 +331,7 @@ test('long elapsed redraw retains board route and a real room change prunes it',
   a.tap('Back to board');
   const captured = a
     .draw()
-    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Lost tin whistle');
+    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Lost tin whistle, open');
   const route = a.stack();
   a.clock.wall += 71000;
   a.clock.mono += 71000;
@@ -345,9 +340,7 @@ test('long elapsed redraw retains board route and a real room change prunes it',
   assert.deepEqual(a.stack(), route);
   captured.props.onPress();
   assert.equal(a.presenter().screen().detail(whistle).length, 2);
-  a.draw()
-    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel.startsWith('Contents,'))
-    .props.onPress();
+  a.tap(CONTENTS);
   a.tap('Map');
   a.tap('Go west');
   a.draw();
@@ -419,7 +412,7 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
     a.draw();
   }
   const before = storyRows(a);
-  a.tap('Elspeth, open');
+  a.tap('Elspeth');
   assert.equal(a.stack().at(-1).id, elspeth);
   assert.ok(a.text().some((s) => s.includes('her eyes search every face')));
   for (const [label, key, answer] of [
@@ -468,7 +461,7 @@ test('Q1 drawing opens full item detail with Take and local Leave', (t) => {
   a.walk('north');
   a.walk('north');
   const before = receipts(a.sql);
-  a.tap('a fox drawing, open');
+  a.tap('A fox drawing');
   assert.deepEqual(a.text().slice(0, 4), [
     'A fox drawing',
     "A child's charcoal drawing shows a fox among tall reeds. The paper is creased and muddy. There is no name on it.",
@@ -479,7 +472,7 @@ test('Q1 drawing opens full item detail with Take and local Leave', (t) => {
   a.tap('Leave');
   assert.deepEqual(a.stack(), []);
   assert.equal(receipts(a.sql), before);
-  a.tap('a fox drawing, open');
+  a.tap('A fox drawing');
   a.tap('Take a fox drawing');
   assert.deepEqual(a.stack(), []);
   assert.ok(a.text().includes('You pick up a fox drawing.'));
@@ -544,7 +537,7 @@ test('Study is a detail-only empty-target control after Read/history and refresh
   const a = preview();
   t.after(() => a.sql.close());
   startSearch(a);
-  assert.ok(a.labels().includes('Tracks'));
+  assert.ok(a.labels().includes('Tracks, open'));
   assert.ok(!a.labels().includes('Study tracks'));
   const study = a
     .presenter()

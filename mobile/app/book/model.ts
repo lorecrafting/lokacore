@@ -6,7 +6,7 @@ import type {
   Intent,
   Key,
 } from '../../packages/game-view/session.ts';
-import type { Button } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
 import { commandOf } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { reason, SENTENCE } from './words.ts';
@@ -112,12 +112,17 @@ type Offered =
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
-export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
-  e.available
-    ? ''
-    : e.reason.message
-      ? text(e.reason.message.key)
-      : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`);
+// A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
+export const refused = (
+  e: Extract<GameView['exits'][number], { available: false }>,
+  text: (key: string) => string,
+): DetailLine => ({
+  kind: 'refused',
+  reason: reason(e.reason.code),
+  text: e.reason.message
+    ? text(e.reason.message.key)
+    : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`),
+});
 
 export const absent = (v: GameView) =>
   !v.choice || v.entities.some((e) => e.id === v.choice!.speaker_id)
@@ -131,7 +136,6 @@ export type Pool = NonNullable<GameView['resources']>[number];
 // Band colours mark only the condition pools, never pennies (book-ui.md#world-and-status-entry).
 export const toneOf = (r: Pool) =>
   ['hp', 'ma', 'mv'].includes(r.resource.key) ? r.tone : 'normal';
-const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
   const key = `band.${r.band}`;
   const phrase = text(key);
@@ -141,7 +145,10 @@ export const said = (
   rs: readonly Pool[],
   text: (key: string) => string | undefined = () => undefined,
 ) =>
-  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
+  [
+    rs.map((r) => `${r.resource.key} ${r.current}/${r.maximum}`).join(' '),
+    ...rs.filter((r) => r.resource.key === 'hp').map((r) => `hp ${bandPhrase(r, text)}`),
+  ].join('; ');
 
 // Logical seconds: 子 spans 23:00–01:00; English double-hour names serve VoiceOver.
 const ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ');

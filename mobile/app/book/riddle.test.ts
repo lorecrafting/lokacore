@@ -146,6 +146,9 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     assert.ok(b, label);
     b.props.onPress();
   };
+  const used = (label: string) =>
+    draw().find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === label)!.props
+      .disabled;
   const initial = text();
   assert.ok(
     initial.indexOf(bundle.value.text['npc.vesper.description']) <
@@ -156,31 +159,33 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
       initial.indexOf('Choose letters to answer.'),
   );
   assert.deepEqual(
-    labels().filter((s) => s.startsWith('Letter ')),
+    labels().filter((s) => /^., tile \d+$/.test(s)),
     [
-      'Letter R, tile 1',
-      'Letter N, tile 2',
-      'Letter A, tile 3',
-      'Letter O, tile 4',
-      'Letter L, tile 5',
-      'Letter T, tile 6',
-      'Letter E, tile 7',
-      'Letter N, tile 8',
-      'Letter S, tile 9',
+      'R, tile 1',
+      'N, tile 2',
+      'A, tile 3',
+      'O, tile 4',
+      'L, tile 5',
+      'T, tile 6',
+      'E, tile 7',
+      'N, tile 8',
+      'S, tile 9',
     ],
   );
   assert.ok(!labels().includes('Submit'));
-  tap('Letter N, tile 2');
-  tap('Letter N, tile 8');
+  tap('N, tile 2');
+  tap('N, tile 8');
   assert.ok(text().includes('NN'));
-  assert.ok(!labels().includes('Letter N, tile 2'));
+  // A used tile keeps its place, disabled; a second pick of it does not add a letter.
+  assert.equal(used('N, tile 2'), true);
+  tap('N, tile 2');
+  assert.ok(!text().includes('NNN'));
   tap('Backspace');
   assert.ok(text().includes('N'));
-  assert.ok(labels().includes('Letter N, tile 8'));
+  assert.equal(used('N, tile 8'), false);
   tap('Clear');
   assert.ok(!labels().includes('Submit'));
-  for (const label of ['S, tile 9', 'T, tile 6', 'O, tile 4', 'N, tile 2', 'E, tile 7'])
-    tap(`Letter ${label}`);
+  for (const label of ['S, tile 9', 'T, tile 6', 'O, tile 4', 'N, tile 2', 'E, tile 7']) tap(label);
   tap('Submit');
   assert.ok(text().includes(bundle.value.text['narration.vesper_wrong']));
   assert.ok(!book.screen().log.includes(bundle.value.text['narration.vesper_wrong']));
@@ -197,10 +202,10 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     'R, tile 1',
     'N, tile 8',
   ])
-    tap(`Letter ${label}`);
+    tap(label);
   tap('Submit');
   assert.ok(text().includes(bundle.value.text['narration.b_vesper_riddle']));
-  assert.ok(!labels().some((s) => s.startsWith('Letter ')));
+  assert.ok(!labels().some((s) => /^., tile \d+$/.test(s)));
   assert.equal(
     a.game.view().view.journal.find((q) => q.quest.key === 'missing_child')!.state,
     'active',

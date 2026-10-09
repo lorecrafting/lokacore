@@ -21,7 +21,7 @@ test('a held crow coin survives browser reload and Shoo returns it once', async 
   await reopen({ app, screen });
   const carrier = screen.getByRole(
     'button',
-    'a crow, The crow grips an old coin in its beak., open',
+    'A crow is here. The crow grips an old coin in its beak., open',
   );
   await expect(carrier).toBeVisible();
   await app.screenshot('crow-held-before-refresh');
@@ -30,12 +30,12 @@ test('a held crow coin survives browser reload and Shoo returns it once', async 
   await app.screenshot('crow-held-after-refresh');
   await shoo(screen, carrier);
   await screen.getByRole('button', 'Leave').tap();
-  await expect(screen.getByRole('button', 'old coin, open')).toBeVisible();
+  await expect(screen.getByRole('button', 'Old coin is here., open')).toBeVisible();
   await expect(carrier).not.toBeVisible();
   await reopen({ app, screen });
-  await expect(screen.getByRole('button', 'old coin, open')).toBeVisible();
+  await expect(screen.getByRole('button', 'Old coin is here., open')).toBeVisible();
   await expect(carrier).not.toBeVisible();
-  await screen.getByRole('button', 'old coin, open').tap();
+  await screen.getByRole('button', 'Old coin is here., open').tap();
   await screen.getByRole('button', 'Take old coin').tap();
   await inventory(screen);
   await expect(screen.getByRole('button', 'old coin, open')).toBeVisible();
@@ -68,7 +68,7 @@ async function dropWellCoin(screen: Screen) {
   await go(screen, 'east');
   await go(screen, 'down');
   await go(screen, 'down');
-  await screen.getByRole('button', 'old coin, open').tap();
+  await screen.getByRole('button', 'Old coin is here., open').tap();
   await screen.getByRole('button', 'Take old coin').tap();
   await screen.getByRole('button', 'Surface (free)').tap();
   await go(screen, 'up');

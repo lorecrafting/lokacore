@@ -161,6 +161,14 @@ reduced-motion fallback and sound follow the [page-turn entry](../BOOK-UI-COMPON
 it never delays or blocks input. Explicit button labels/roles and section headings remain. World minimap and status stay outside the
 body scroll, respecting the safe area.
 
+Label in name (WCAG 2.5.3, PM decision 2026-10-08): a control's accessible name starts with its
+shown text exactly as rendered (a run of whitespace counts as one space; nothing precedes it),
+then a comma and what the tap does or where it goes: an entity, notice, board, Contents or
+section row ends ", open"; the room title ", look"; the position word ", change position"; the
+resources end "; opens Contents" after the hp band phrase. A control that shows no text (the
+minimap at rest, "Map") names its destination alone, and the lit exit leads the name while a drag
+shows it. A control whose shown text is its whole name (Leave, Got it, an action card) adds nothing.
+
 ## Detail-page order
 
 Detail pages show title/identity, authored description and projected item state, then their
@@ -783,7 +791,7 @@ presentation to the actual current context and preserves its checkpoint.
 
 The shared implementation uses the existing bed notice detail and one nested
 `dream` page keyed by that same real detail ID. Resume and Close edit only the
-Book page stack; the dream uses existing Sheet/Act/Leave controls and its own
+Book page stack; the dream uses the existing page shell, action cards and Close/Leave controls and its own
 receipt-bound detail history. Live first-Rest confirmation may open that nested
 page; after the ordinary chapter Continue, a cold start retains World and offers Resume at the real bed. A scene-owned
 choice uses its own projected options, never the ordinary conversation page.

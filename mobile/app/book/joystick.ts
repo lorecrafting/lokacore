@@ -1,6 +1,14 @@
 // Which exit a drag on the footer map points at. Units are map units: the minimap is 44 wide at
 // rest and the zoomed map draws one unit as ZOOM pixels, so a drag in zoomed pixels / ZOOM is in units.
 export const ZOOM = 2.6;
+/** Where the footer's said line sits for each `sideOf` side; 44 px from the middle clears the zoomed exit rings. */
+const AWAY = 28 + 14 * ZOOM + 8;
+export const SPOT = {
+  above: { bottom: AWAY, left: -120, right: -120, textAlign: 'center' },
+  below: { top: AWAY, left: -120, right: -120, textAlign: 'center' },
+  left: { top: 19, right: AWAY, width: 120, textAlign: 'right' },
+  right: { top: 19, left: AWAY, width: 120, textAlign: 'left' },
+} as const;
 /** Drags shorter than this from the middle point at nothing: dragging back to the middle cancels. */
 export const CANCEL = 6;
 /** The four compass exits, clockwise degrees from north; a drag in the 90-degree quadrant around one points at it. */

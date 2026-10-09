@@ -99,7 +99,9 @@ test('file-backed riddle cold opens before, after wrong and after success with e
   assert.deepEqual(a.row(), row);
   assert.equal(a.game.lastNarration()!.detail_id, ids['npc/vesper']);
   assert.equal(
-    a.book.screen().log.some((line) => line.includes('Try the letters')),
+    a.book
+      .screen()
+      .log.some((line) => typeof line === 'string' && line.includes('Try the letters')),
     false,
   );
   const saved = a.sql.prepare('SELECT * FROM receipt ORDER BY revision DESC LIMIT 1').get()!;
@@ -156,7 +158,7 @@ test('file-backed riddle cold opens before, after wrong and after success with e
   assert.equal(a.game.lastNarration()!.detail_id, ids['npc/vesper']);
   assert.equal(a.book.screen().detail(ids['npc/vesper']).length, 1);
   assert.equal(
-    a.book.screen().log.some((line) => line.includes('Well answered')),
+    a.book.screen().log.some((line) => typeof line === 'string' && line.includes('Well answered')),
     false,
   );
   a.sql.close();
