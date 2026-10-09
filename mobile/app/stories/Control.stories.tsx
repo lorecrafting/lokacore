@@ -30,3 +30,13 @@ export const Disabled: Story = {
     await expect(args.onPress).not.toHaveBeenCalled();
   },
 };
+
+// The rest of the catalogue's Control labels.
+export const Leave: Story = { args: { label: 'Leave' } };
+export const BackToBoard: Story = { args: { label: 'Back to board' } };
+export const BackToContainer: Story = { args: { label: 'Back to container' } };
+export const BackToMap: Story = { args: { label: 'Back to map' } };
+export const Close: Story = { args: { label: 'Close' } };
+export const ResumeDream: Story = { args: { label: 'Resume dream' } };
+export const ContinueConversation: Story = { args: { label: 'Continue conversation' } };
+export const GotIt: Story = { args: { label: 'Got it' } };
