@@ -1,5 +1,8 @@
 #!/bin/sh
 # Loka's command line. `loka play <artifact> [script | --replay <transcript>]`: kernel/ts/play.
-[ "${1-}" = play ] || { echo "usage: bin/loka play <artifact> [script | --replay <transcript>]" >&2; exit 2; }
-shift
-exec node "$(dirname "$0")/../kernel/ts/play/main.ts" "$@"
+# `loka dev <cartridge dir> [--watch]`: the author preview's artifact, kernel/ts/play/author.ts.
+case "${1-}" in
+play) shift; exec node "$(dirname "$0")/../kernel/ts/play/main.ts" "$@" ;;
+dev) shift; exec node "$(dirname "$0")/../kernel/ts/play/author.ts" "$@" ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev <cartridge dir> [--watch]" >&2; exit 2 ;;
+esac
