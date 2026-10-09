@@ -63,13 +63,13 @@ export const type = {
   body: { fontFamily: font.body, fontSize: 18, lineHeight: 28 }, // prose, entity lines, actions
   log: { fontFamily: font.body, fontSize: 17, lineHeight: 26 }, // event log and detail history
   small: { fontFamily: font.body, fontSize: 13, lineHeight: 19 }, // status line, the tip
-  roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 },
+  roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 }, // the room's fixed Look title
   pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 }, // every page, Combat's included
   sectionTitle: { fontFamily: font.caps, fontSize: 23, lineHeight: 25, letterSpacing: 0.5 }, // Inside, Held, Worn; the mock's h2
   runningHead: { fontFamily: font.caps, fontSize: 12, letterSpacing: 1.7 }, // the quest objective
   control: { fontFamily: font.caps, fontSize: 14, letterSpacing: 1.1 }, // Back, Back to World, Got it, Start over
   tag: { fontFamily: font.caps, fontSize: 13, letterSpacing: 0.7 }, // a refusal's reason tag
-  label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // hp/ma/mv in the status
+  label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // every resource key in the status
   speaker: { fontFamily: font.caps, fontSize: 17, letterSpacing: 0.5 }, // a speech line's name
   tile: { fontFamily: font.head, fontSize: 23 }, // a riddle letter on a touch-sized card
 };
@@ -101,7 +101,7 @@ export const opacity = { disabled: 0.45 };
 
 // Plain state changes only. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion.
 export const motion = {
-  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return
+  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
   palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)

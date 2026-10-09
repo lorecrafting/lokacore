@@ -148,7 +148,8 @@ room and its known exits. An unvisited endpoint, NPC or item is never drawn mere
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
-become `here`, and a stale observation is never phrased as a current location.
+become `here`, and a stale observation is never phrased as a current location. Each known
+NPC's Where control reads "Ask where <name> is".
 Knock appears on the actual local door's context card and uses its exact direction and
 freshness token. It leaves that card and Map reachable after its reply.
 
@@ -191,7 +192,8 @@ are not actionable. Neither English labels nor cartridge internals determine mem
 
 Tapping a notice pushes its detail and invokes that captured offer. Its title and selected
 description precede the confirmed message and any nonempty detail-local history, then
-options. Entry shows the message immediately when Read confirms; no second Read option is
+options. Entry shows the message immediately when Read confirms, unless its plain text is the
+description already shown (the well), which is not shown twice; no second Read option is
 shown. A pending entry can be retried by returning and opening it again. Body text comes only
 from confirmed Read narration; pending, refused, stale and replayed attempts never invent or
 duplicate it. Back to board pops to the board, then Back to World clears the board. Opening
@@ -295,9 +297,10 @@ storage, travel and other quest actions remain available under their normal rule
 ## Chapters, scenes and recovery
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.
-A modal scene takes precedence: only its persisted current line and offered Continue appear;
+A modal scene takes precedence: only its persisted current line, offered Continue and the
+[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
-title page shows its title and Continue only: no Back to World, and Contents and position are
+title page shows its title, Continue and the running head only: no Back to World, and Contents and position are
 locked as in a scene. A chapter
 title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
@@ -313,7 +316,11 @@ Pending save status says save not confirmed; no unconfirmed result is presented 
 invocation retries the original attempt before acting on its new button, preserving original
 NPC/item context. Fault details remain visible with Start over recovery. Settings Start over
 requires destructive confirmation; failure retains the existing game/retry, while successful
-replacement remounts the book. Save-open errors expose only existing permitted recovery. Those
+replacement remounts the book. Save-open errors expose only existing permitted recovery. The
+save-error screen shows the `light` palette (no GameView, so no phase), a headline and at most
+one plain sentence under it, never a raw kind or code and never the headline repeated; the
+browser's save-file lock reads "Loka is already open in another tab."
+[words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
 
