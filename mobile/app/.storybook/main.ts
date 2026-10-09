@@ -2,12 +2,14 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import type { StorybookConfig } from '@storybook/react-native-web-vite';
-import tidewave from 'tidewave/vite-plugin';
 import { mergeConfig, type Plugin, type ViteDevServer } from 'vite';
 
 const fromExpo = createRequire(createRequire(import.meta.url).resolve('expo'));
 const expoAsset = fromExpo.resolve('expo-asset');
 const tidewaveVersion: string = createRequire(import.meta.url)('tidewave/package.json').version;
+// Tidewave only under `storybook dev`: addon-vitest (smoke, MCP test-run) also loads this config
+// as DEVELOPMENT, so its VITEST flag excludes it there.
+const withTidewave = (configType?: string) => configType === 'DEVELOPMENT' && !process.env.VITEST;
 
 // expo-sqlite's web worker as Metro serves it (SQLiteModule.ts): a module worker Vite transforms,
 // its wasm import a URL. ponytail: dev server only; a static build would need the worker bundled.
@@ -71,8 +73,9 @@ const plugins: Plugin[] = [
 
 // Vite runs in middleware mode under Storybook: no httpServer for Tidewave's browser websocket
 // (browser_eval) and no port for its default origin check, so hand it Storybook's own server.
-const tidewaveOnStorybook = (): Plugin => {
-  const plugin = tidewave({ allowedOrigins: ['//localhost', '//127.0.0.1'] });
+const tidewaveOnStorybook = async (port?: number): Promise<Plugin> => {
+  const { default: tidewave } = await import('tidewave/vite-plugin'); // patches console on import
+  const plugin = tidewave({ allowedOrigins: [`//localhost:${port}`, `//127.0.0.1:${port}`] });
   const configureServer = plugin.configureServer as (server: ViteDevServer) => Promise<void>;
   return {
     ...plugin,
@@ -104,7 +107,7 @@ const config: StorybookConfig = {
   // ponytail: the window.name opt-in below relies on tidewave.ai's toolbar.js as of 2026-10-09.
   // ponytail: copies tidewave 0.9.0's internal tidewaveConfigMeta shape; recheck on upgrade.
   previewHead: (head, { configType, port }) =>
-    configType !== 'DEVELOPMENT'
+    !withTidewave(configType)
       ? head
       : `${head}<meta name="tidewave:config" content="${JSON.stringify({
           tidewave: {
@@ -138,10 +141,10 @@ const config: StorybookConfig = {
 </script>
 <script async type="module" src="https://tidewave.ai/tc/toolbar.js"></script>`,
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
-  viteFinal: (config, { configType }) =>
+  viteFinal: async (config, { configType, port }) =>
     mergeConfig(config, {
-      // Tidewave (docs/web-preview.md#storybook): `storybook dev` only, not the build or the vitest smoke.
-      plugins: configType === 'DEVELOPMENT' ? [...plugins, tidewaveOnStorybook()] : plugins,
+      // Tidewave (docs/web-preview.md#storybook)
+      plugins: withTidewave(configType) ? [...plugins, await tidewaveOnStorybook(port)] : plugins,
       // expo-modules-core's src imports declare-only classes for its global types (Metro drops them).
       optimizeDeps: { rolldownOptions: { shimMissingExports: true, plugins: [sqliteWorker] } },
     }),
