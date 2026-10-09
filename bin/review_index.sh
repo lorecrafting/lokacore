@@ -22,6 +22,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 HEAD
   for f in $(ls docs/reviews | grep -v '^README\.md$' | sort -r); do
     title=$(head -1 "docs/reviews/$f" | sed 's/^#* *//')
+    # ponytail: the last verdict word anywhere wins; quote verdicts in findings in lower case, end a
+    # record with its final verdict. Upgrade to a Verdict: field if mislabels recur.
     verdict=$(grep -oE 'APPROVE WITH NOTES|CHANGES REQUIRED|PASS WITH NOTES|APPROVE|PASS' "docs/reviews/$f" | tail -1 || true)
     echo "- [$title]($f)${verdict:+: **$verdict**}"
   done

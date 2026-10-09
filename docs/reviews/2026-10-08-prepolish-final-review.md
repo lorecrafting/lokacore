@@ -39,3 +39,5 @@
    a `Fix round` line, and keep the red control at `docs_red_controls.sh`. Or reword `:62` and make that a rule.
 
 Final verdict: **APPROVE WITH NOTES**
+
+PM disposition (2026-10-08): finding fixed by rewording the quoted verdict in the batch 1 record and closing it with its final verdict; `bin/review_index.sh` keeps the last-word rule with a ponytail note (a line-filter heuristic mislabelled ~40 older records). Comment/doc-only, no re-review.

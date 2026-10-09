@@ -59,4 +59,6 @@ problem dropped in `check_docs.exs`; the `origin/<branch>` ancestor check in `af
 
 New finding:
 
-1. should-fix `bin/review_index.sh:26`: the index shows each record's first verdict, which is usually round 1. Merged, approved work therefore reads **CHANGES REQUIRED**. That happens on 26 lines of the generated README (for example `2026-10-08-forged-guards-review.md` and `2026-10-08-e1-recorder-in-ci-review.md`). The owner asked for the record's verdict, and the index is the only place it is summarized. Fix: take the last verdict word (`tail -1`), or the last line containing "Verdict"; keep the red-control line assertion.
+1. should-fix `bin/review_index.sh:26`: the index shows each record's first verdict, which is usually round 1. Merged, approved work therefore reads as changes-required. That happens on 26 lines of the generated README (for example `2026-10-08-forged-guards-review.md` and `2026-10-08-e1-recorder-in-ci-review.md`). The owner asked for the record's verdict, and the index is the only place it is summarized. Fix: take the last verdict word (`tail -1`), or the last line containing "Verdict"; keep the red-control line assertion.
+
+PM disposition (2026-10-08): fixed in `da8a9eb3` (last verdict word); final verdict of this record: **APPROVE WITH NOTES**.

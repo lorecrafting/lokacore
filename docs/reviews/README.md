@@ -13,7 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Skia page-curl spike (PR #308)](2026-10-08-skia-page-curl-spike-review.md): **APPROVE**
 - [Review: pre-polish final (PR #324)](2026-10-08-prepolish-final-review.md): **APPROVE WITH NOTES**
 - [Review: pre-polish batch 2 (code fixes)](2026-10-08-prepolish-batch2-review.md): **APPROVE**
-- [Review: pre-polish batch 1 (process, scripts, CI)](2026-10-08-prepolish-batch1-review.md): **CHANGES REQUIRED**
+- [Review: pre-polish batch 1 (process, scripts, CI)](2026-10-08-prepolish-batch1-review.md): **APPROVE WITH NOTES**
 - [Pre-polish audit B: save and persistence (2026-10-08)](2026-10-08-prepolish-audit-save.md)
 - [Pre-polish audit C: protocol / portable foundation / Elixir (2026-10-08)](2026-10-08-prepolish-audit-protocol.md)
 - [Pre-polish audit A: kernel (loka-v9q)](2026-10-08-prepolish-audit-kernel.md)
