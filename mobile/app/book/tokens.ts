@@ -95,7 +95,6 @@ export const size = {
   card: 48, // action card minimum height
   rule: 1, // hairline
   speechBar: 2,
-  underline: 1.5, // fixture and entity links
   minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
 };
