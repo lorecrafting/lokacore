@@ -110,6 +110,16 @@ test('strength 5 cannot lift the anvil on any carry path; strength 15 can', () =
   }
 });
 
+// Breaks: the ceiling loses its floor at 0, so a carry bonus below -max_grams makes it negative
+// and every Take fails as precondition_failed instead of admitting weightless items.
+test('a carry bonus below -max_grams floors the ceiling at 0 g', () => {
+  const crushed = structuredClone(content) as any; // strength 5: 4000 * (5 - 10) = -20000
+  crushed.world.derived.carry_grams.terms[0].per_point = 4000;
+  const w = chosen('nimble', crushed);
+  assert.equal(carryingAdded(w, w.body, 0, { n: 0 }), undefined);
+  assert.equal(carryingAdded(w, w.body, 1, { n: 0 }), 'too_heavy');
+});
+
 // Breaks: the player profile ignores the hit or damage table (base 75% and 4 damage), or loses the
 // clamp at 0 so a negative damage bonus heals the target, or applies the bonus to the NPC.
 test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0', () => {
@@ -170,6 +180,16 @@ test('the loader refuses each unsound derived table', () => {
       },
       'SCHEMA_VIOLATION',
       `${at}.damage`,
+    ],
+    [
+      (c) => {
+        delete c.world.combat;
+        delete c.npcs['derived_sampler@0.0.1:npc/dummy'].attack;
+        delete c.world.derived.damage;
+        delete c.world.derived.carry_grams;
+      },
+      'SCHEMA_VIOLATION',
+      `${at}.hit_chance`,
     ],
   ];
   for (const [change, code, path] of rows) {

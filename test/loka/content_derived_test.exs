@@ -3,7 +3,8 @@ defmodule Loka.ContentDerivedTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/derived_sampler")}
 
   # Breaks: a derived table naming no attribute, lacking attributes@1, an old API floor, or
-  # modifying a stat whose combat or carry settings are absent compiles.
+  # modifying a stat whose combat or carry settings are absent compiles
+  # (hit_chance and damage need world.combat, carry_grams world.carry).
   test "derived tables keep their references, owner and settings", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     terms = &["world", "derived", &1, "terms", Access.at(0)]
@@ -15,6 +16,10 @@ defmodule Loka.ContentDerivedTest do
        {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {&update_in(&1, ["world"], fn w -> Map.delete(w, "carry") end),
        {"SCHEMA_VIOLATION", "cartridge.world.derived.carry_grams"}},
+      {&update_in(&1, ["world"], fn w -> Map.delete(w, "combat") end),
+       {"SCHEMA_VIOLATION", "cartridge.world.derived.hit_chance"}},
+      {&update_in(&1, ["world"], fn w -> Map.delete(w, "combat") end),
+       {"SCHEMA_VIOLATION", "cartridge.world.derived.damage"}},
       {&update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "attributes") end),
        {"UNDECLARED_CAPABILITY", "cartridge.world.derived"}}
     ]
