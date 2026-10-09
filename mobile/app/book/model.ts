@@ -131,7 +131,6 @@ export type Pool = NonNullable<GameView['resources']>[number];
 // Band colours mark only the condition pools, never pennies (book-ui.md#world-and-status-entry).
 export const toneOf = (r: Pool) =>
   ['hp', 'ma', 'mv'].includes(r.resource.key) ? r.tone : 'normal';
-const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
   const key = `band.${r.band}`;
   const phrase = text(key);
@@ -141,7 +140,10 @@ export const said = (
   rs: readonly Pool[],
   text: (key: string) => string | undefined = () => undefined,
 ) =>
-  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
+  [
+    rs.map((r) => `${r.resource.key} ${r.current}/${r.maximum}`).join(', '),
+    ...rs.filter((r) => r.resource.key === 'hp').map((r) => `hp ${bandPhrase(r, text)}`),
+  ].join('; ');
 
 // Logical seconds: 子 spans 23:00–01:00; English double-hour names serve VoiceOver.
 const ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ');

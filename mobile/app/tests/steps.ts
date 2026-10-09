@@ -45,7 +45,7 @@ export async function go(screen: Screen, direction: string, room?: string) {
 }
 
 export async function inventory(screen: Screen) {
-  await screen.getByRole('button', /^Contents, Character/).tap();
+  await screen.getByRole('button', /opens Contents, Character$/).tap();
   await screen.getByRole('button', 'Equipment & Inventory').tap();
 }
 

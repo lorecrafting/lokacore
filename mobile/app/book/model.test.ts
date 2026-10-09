@@ -99,7 +99,7 @@ test('the character label says the hp band and no other', () => {
     ({ resource: { key }, current, maximum, band, tone: 'normal' }) as Pool;
   assert.equal(
     said([pool('hp', 20, 20, 'perfect_health'), pool('ma', 100, 100, 'perfect_health')]),
-    'Character, hp 20 of 20, perfect health, ma 100 of 100',
+    'hp 20/20, ma 100/100; hp perfect health',
   );
 });
 

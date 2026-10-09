@@ -88,29 +88,25 @@ function Contents(p: StatusProps) {
     <Pressable
       disabled={p.locked}
       accessibilityRole="button"
-      accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
+      // Label in name (WCAG 2.5.3): the visible text first, then where it goes.
+      accessibilityLabel={`${p.resources ? said(p.resources, p.text) : 'character'}; opens Contents, Character`}
       onPress={p.open}
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
-      {p.resources ? (
-        <View style={{ flexDirection: 'row', columnGap: space.sm }}>
-          {shown(c, p.resources, p.locked)}
-        </View>
-      ) : (
-        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>character</Text>
-      )}
+      <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>
+        {p.resources ? shown(c, p.resources, p.locked) : 'character'}
+      </Text>
     </Pressable>
   );
 }
 
-// The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
+// Spaces between resources, not a margin: the shown text must read as words, so it can lead the
+// button's name (WCAG 2.5.3). The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`.
 const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
-  rs.map((r) => (
-    <Text
-      key={r.resource.key}
-      style={{ ...type.small, color: locked ? c.dim : band(c, toneOf(r)) }}
-    >
+  rs.map((r, i) => (
+    <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
+      {i ? '  ' : ''}
       <Text style={type.label}>{r.resource.key}</Text>
       {` ${r.current}/${r.maximum}`}
     </Text>

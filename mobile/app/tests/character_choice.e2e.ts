@@ -23,7 +23,7 @@ test('authored ancestries keep their chapter effects and choice across browser r
     await screen.getByRole('button', 'Continue').tap();
     await expect(screen.getByRole('button', 'Look, Ferry Landing')).toBeVisible();
     await ancestryRoute(screen, choice);
-    await screen.getByRole('button', /^Contents, Character/).tap();
+    await screen.getByRole('button', /opens Contents, Character$/).tap();
     await screen.getByRole('button', 'Character').tap();
     await expect(screen.getByText(stat).first()).toBeVisible();
     await reopen({ app, screen });

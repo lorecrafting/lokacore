@@ -65,7 +65,7 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   app,
   screen,
 }) => {
-  const money = () => screen.getByRole('button', /Contents, Character,.*pennies 18 of 1000/);
+  const money = () => screen.getByRole('button', /pennies 18\/1000.*opens Contents, Character$/);
   await begin({ app, screen }, 'Fey-touched');
   await go(screen, 'west', 'Boathouse');
   await screen.getByRole('button', 'Rope ferry').tap();

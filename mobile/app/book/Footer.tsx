@@ -70,7 +70,7 @@ export function Footer(p: Props) {
         <View style={rule(c)} />
         <View
           style={{ width: size.minimap, height: size.minimap, zIndex: 1 }} // above the rules: the zoomed map covers them
-          {...readerActions(p.exits, (d) => walk(d, p), openMap)}
+          {...readerActions(p.exits, said, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
@@ -181,13 +181,14 @@ function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
 // action ("Go north") that walks (a closed one announces its reason). No touch targets to collide.
 function readerActions(
   exits: Props['exits'],
+  said: string, // shown inside the button while dragging: it leads the name (WCAG 2.5.3)
   walk: (direction: string) => void,
   openMap: () => void,
 ) {
   return {
     accessible: true,
     accessibilityRole: 'button' as const,
-    accessibilityLabel: 'Map',
+    accessibilityLabel: said ? `${said}, Map` : 'Map',
     accessibilityActions: [
       { name: 'activate' },
       ...exits.map((x) => ({ name: x.direction, label: `Go ${x.direction}` })),

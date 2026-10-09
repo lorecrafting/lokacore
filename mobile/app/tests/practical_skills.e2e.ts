@@ -67,7 +67,7 @@ test('Peg lesson discounts an actual purchase after browser reload', async ({ ap
   ).toBeVisible();
   await app.restart();
   await screen.getByRole('button', 'Continue').tap();
-  await screen.getByRole('button', /^Contents, Character/).tap();
+  await screen.getByRole('button', /opens Contents, Character$/).tap();
   await screen.getByRole('button', 'Equipment & Inventory').tap();
   await expect(screen.getByRole('button', 'a torch, open')).toBeVisible();
 });

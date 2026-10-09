@@ -25,7 +25,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Plain: Story = {
   play: async ({ canvas, args, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: /^Contents/ }));
+    // Label in name: the shown text leads, then the hp band and where it goes.
+    const name = 'hp 30/30, ma 10/10, mv 60/60; hp normal; opens Contents, Character';
+    await userEvent.click(canvas.getByRole('button', { name }));
     await expect(args.open).toHaveBeenCalledTimes(1);
   },
 };
@@ -65,7 +67,7 @@ export const PenniesNormal: Story = {
 export const Locked: Story = {
   args: { locked: true },
   play: async ({ canvas, args, userEvent }) => {
-    const contents = canvas.getByRole('button', { name: /^Contents/ });
+    const contents = canvas.getByRole('button', { name: /opens Contents/ });
     await expect(contents).toHaveAttribute('aria-disabled', 'true');
     await userEvent.setup({ pointerEventsCheck: 0 }).click(contents);
     await expect(args.open).not.toHaveBeenCalled();

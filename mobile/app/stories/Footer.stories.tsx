@@ -26,7 +26,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Rest: Story = {};
 
-// Press and hold the map: it zooms to full size; nothing walks or opens until release.
+// Press and hold the map: it zooms to full size and a drag lights a path; nothing walks or opens
+// until release.
 export const Held: Story = {
   play: async ({ canvas, args }) => {
     const map = canvas.getByRole('button', { name: 'Map' });
@@ -35,6 +36,9 @@ export const Held: Story = {
     // RN web's responder takes mouse events; user-event's pointer sequence never reached it.
     fireEvent.mouseDown(map, { button: 0, buttons: 1 });
     await waitFor(() => expect(drawing.style.transform).toBe('scale(1)'));
+    // Drag up: north lights; its shown name leads the button's name (axe: label in name).
+    fireEvent.mouseMove(map, { buttons: 1, clientY: -40 });
+    await expect(await canvas.findByRole('button', { name: /^north, Map$/ })).toBeVisible();
     await expect(args.go).not.toHaveBeenCalled();
     await expect(args.openMap).not.toHaveBeenCalled();
   },
