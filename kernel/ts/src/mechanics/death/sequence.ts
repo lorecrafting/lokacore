@@ -15,6 +15,7 @@ import { key } from '../../foundation/compose.ts';
 import { leave } from '../water/shared.ts';
 import { died as crowDied } from '../crow/behavior.ts';
 import { clearBleed } from '../bleed/shared.ts';
+import { clearStatuses } from '../status/shared.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
@@ -176,6 +177,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const room_id = world.state.containers[victim_id];
   const ops: DeltaOp[] = [
     ...clearBleed(world, victim_id).map((op) => ({ ...op, writer_group })),
+    ...clearStatuses(world, victim_id, writer_group),
     ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),

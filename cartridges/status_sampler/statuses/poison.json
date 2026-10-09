@@ -1,0 +1,12 @@
+{
+  "duration": 300,
+  "tick_every": 60,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.poisoned",
+  "narration": {
+    "applied": "narration.poison.applied",
+    "tick": "narration.poison.tick",
+    "expired": "narration.poison.expired"
+  }
+}

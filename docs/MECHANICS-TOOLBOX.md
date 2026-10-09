@@ -25,6 +25,8 @@ Done when all four hold (Beads `loka-va9`, `loka-51b`):
    override `Date.now`); the player [fixed-time rule](decisions/owner-decision-fixed-time-2026-10-03.md) stays.
 4. The browser walkthrough (`mobile/app`: `npm run walkthrough`) and the headless simulator
    (`kernel/ts/test/sim.ts`) each run on a sampler cartridge, proven once on `ashmere_sampler`.
+   Done (batch M1): `LOKA_WALK=<id>` and `--cartridge <artifact>`
+   ([how](BUILDERS-GUIDE.md#preview-an-edit)).
 
 ## Already in the engine
 
@@ -62,8 +64,8 @@ have / partial / missing per the audit. Ids in parentheses are the
 
 | # | Mechanic | Today | Size | Depends on | Reuse | Sampler | Status |
 |---|---|---|---|---|---|---|---|
-| 1 | Status effects over time: poison, disease, buffs, regen modifiers, timed expiry | partial: only bleed (`mechanics/bleed/`); "no generic status interpreter" | M | – | `mechanics/bleed/job.ts` timed job and consumption; `mechanics/resource.ts` rates | poison dart room drains HP per tick; antidote ends it; buff shrine raises a rate for an hour | todo |
-| 2 | Stats derived from attributes: hit, damage, HP, carry from str/dex/con | partial: `stat_compare` gates only (`mechanics/policy.ts`); no attribute reader in combat | M | – | `mechanics/attributes/shared.ts`; `mechanics/combat/round_attack.ts` profile; `mechanics/containment/shared.ts` carry | two dummies, str 5 vs 15, hand-fixed damage and carry differ | todo |
+| 1 | Status effects over time: poison, disease, buffs, regen modifiers, timed expiry | partial: only bleed (`mechanics/bleed/`); "no generic status interpreter" | M | – | `mechanics/bleed/job.ts` timed job and consumption; `mechanics/resource.ts` rates | poison dart room drains HP per tick; antidote ends it; buff shrine raises a rate for an hour | done (batch M1): `cartridges/status_sampler`, [rules](system/mechanics.md#status-effects-over-time-toolbox-row-1); a buff is a signed per-tick amount, true regen-rate modifiers deferred (PM 2026-10-09) |
+| 2 | Stats derived from attributes: hit, damage, HP, carry from str/dex/con | partial: `stat_compare` gates only (`mechanics/policy.ts`); no attribute reader in combat | M | – | `mechanics/attributes/shared.ts`; `mechanics/combat/round_attack.ts` profile; `mechanics/containment/shared.ts` carry | two dummies, str 5 vs 15, hand-fixed damage and carry differ | done (batch M1): `cartridges/derived_sampler`, [rules](system/mechanics.md#stats-derived-from-attributes-toolbox-row-2); hit, damage and carry; HP max split to `loka-kgd.8` (PM 2026-10-09) |
 | 3 | Item slots and affects (C2-M05): finger slots, granted modifiers | partial: slots capacity 1, no affects (`mechanics/equipment/rule.ts`) | M | 1, 2 | `mechanics/equipment/rule.ts` | ring of +2 per on either finger; remove restores | todo |
 | 4 | Experience and levelling | missing | M | 2 | `mechanics/combat/credit.ts` death credit; `mechanics/fact.ts` int facts; quest reward writers | three rat kills reach level 2 and grant one attribute point | todo |
 | 5 | Skill growth by use | missing: skills are bool facts (`mechanics/skills.ts`) | S | 2 | `mechanics/skills.ts`; `mechanics/action_recipe/rule.ts` check | five pick attempts raise `pick` until a harder lock opens | todo |

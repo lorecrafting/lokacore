@@ -326,6 +326,12 @@
                 "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
               }
             },
+            "statuses": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
+              }
+            },
             "map_positions": {
               "type": "array",
               "items": {
@@ -1249,6 +1255,22 @@
           ],
           "additionalProperties": false
         },
+        "derived": {
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0). hit_chance and damage need world.combat; carry_grams needs world.carry. NPCs have no attributes and keep their authored profile.",
+          "type": "object",
+          "properties": {
+            "hit_chance": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            },
+            "damage": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            },
+            "carry_grams": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            }
+          },
+          "additionalProperties": false
+        },
         "death": {
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },
@@ -1345,6 +1367,62 @@
             "key": "lantern_resolved"
           },
           "outcome": "carry"
+        }
+      ]
+    },
+    "DerivedStat": {
+      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attributes@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "type": "object",
+      "properties": {
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "per_point": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              },
+              "pivot": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              }
+            },
+            "required": [
+              "attribute",
+              "per_point",
+              "pivot"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "divisor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "terms"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "terms": [
+            {
+              "attribute": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "attribute",
+                "key": "str"
+              },
+              "per_point": 1,
+              "pivot": 10
+            }
+          ],
+          "divisor": 2
         }
       ]
     },
@@ -2072,6 +2150,87 @@
         "duration",
         "tick_every",
         "hp_loss",
+        "narration"
+      ],
+      "additionalProperties": false
+    },
+    "StatusDefinition": {
+      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick.",
+      "examples": [
+        {
+          "key": "poison",
+          "duration": 300,
+          "tick_every": 60,
+          "resource": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "per_tick": -1,
+          "label": "condition.poisoned",
+          "narration": {
+            "applied": "narration.poison.applied",
+            "tick": "narration.poison.tick",
+            "expired": "narration.poison.expired"
+          }
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "tick_every": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "per_tick": {
+          "type": "integer",
+          "minimum": -2147483647,
+          "maximum": 2147483647,
+          "description": "Signed; never 0 (compiler and loader SCHEMA_VIOLATION)."
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "narration": {
+          "type": "object",
+          "properties": {
+            "applied": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "tick": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "expired": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "applied",
+            "tick",
+            "expired"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "key",
+        "duration",
+        "tick_every",
+        "resource",
+        "per_tick",
+        "label",
         "narration"
       ],
       "additionalProperties": false

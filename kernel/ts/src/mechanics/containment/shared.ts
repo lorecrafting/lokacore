@@ -7,6 +7,7 @@ import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 import { refString } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
+import { derived } from '../attributes/shared.ts';
 
 type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
 type Context = {
@@ -47,6 +48,14 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
   }
 }
 
+/** The Take ceiling; the player's is moved by the derived carry_grams table (mechanics.md). */
+function ceiling(world: World, body: EntityId) {
+  const max = world.cartridge.world?.carry?.max_grams;
+  const table = world.cartridge.world?.derived?.carry_grams;
+  if (!table || body !== world.body || !Number.isSafeInteger(max) || max! < 0) return max;
+  return Math.max(0, add(max!, derived(world, world.character, table)));
+}
+
 export const load = (world: World, body: EntityId, steps: Steps) =>
   total({ world, body, steps, totals: new Map(), owned: new Map() }, body);
 
@@ -54,7 +63,7 @@ export const load = (world: World, body: EntityId, steps: Steps) =>
 export function carrying(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const setting = world.cartridge.world?.carry;
   if (setting === undefined) return (_item: EntityId): Failure | undefined => undefined;
-  const max = setting.max_grams;
+  const max = ceiling(world, body);
   const context: Context = { world, body, steps, totals: new Map(), owned: new Map() };
   return (item: EntityId): Failure | undefined => {
     if (!Number.isSafeInteger(max) || max === undefined || max < 0) return 'precondition_failed';
@@ -236,12 +245,12 @@ export function carryingExchange(
   if (net <= 0) return;
   const load = total(context, body);
   if (typeof load === 'string') return load;
-  return add(load, net) > setting.max_grams ? ('too_heavy' as const) : undefined;
+  return add(load, net) > ceiling(world, body)! ? ('too_heavy' as const) : undefined;
 }
 
 /** Positive acquisition within existing custody (Fill), without a second stored load. */
 export function carryingAdded(world: World, body: EntityId, grams: number, steps: Steps) {
-  const max = world.cartridge.world?.carry?.max_grams;
+  const max = ceiling(world, body);
   if (max === undefined) return;
   if (!Number.isSafeInteger(max) || max < 0) return 'precondition_failed' as const;
   const load = total({ world, body, steps, totals: new Map(), owned: new Map() }, body);

@@ -1,0 +1,67 @@
+{
+  "api_version": "loka/v3",
+  "id": "status_sampler",
+  "version": "0.0.1",
+  "title": "Status Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.38",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "fact": 1,
+      "policy": 1,
+      "reaction": 1,
+      "status": 1,
+      "food": 1,
+      "schedule": 1,
+      "death": 1,
+      "behavior": 1,
+      "description_variant": 1,
+      "calendar": 1,
+      "position": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "hall",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "hall",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    }
+  }
+}

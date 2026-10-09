@@ -15,6 +15,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
+import { derived } from '../attributes/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
@@ -191,9 +192,20 @@ function attackProfile(
   if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
   if (!player) return npc.attack;
   const weapon = equipped(world, row.body_id, 'wield')?.weapon;
-  return weapon && status(world, row.character_id, weapon.skill, r.steps).usable
-    ? weapon.attack
-    : world.cartridge.world!.combat!.player_attack;
+  const base =
+    weapon && status(world, row.character_id, weapon.skill, r.steps).usable
+      ? weapon.attack
+      : world.cartridge.world!.combat!.player_attack;
+  const table = world.cartridge.world?.derived;
+  if (!table) return base;
+  const hit = derived(world, row.character_id, table.hit_chance);
+  const damage = derived(world, row.character_id, table.damage);
+  return {
+    ...base,
+    chance: Math.min(100, Math.max(0, add(base.chance, hit))),
+    damage_min: Math.max(0, add(base.damage_min, damage)),
+    damage_max: Math.max(0, add(base.damage_max, damage)),
+  };
 }
 
 function defend(world: World, row: EncounterRow, r: Round): 'dodge' | 'block' | undefined {

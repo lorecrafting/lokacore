@@ -15,7 +15,7 @@ defmodule Loka.Content.Ancestries do
 
   def check(nil, _, _, _), do: []
 
-  def check(manifest, defs, {_, settings}, text) do
+  def check(manifest, defs, {_, settings} = located, text) do
     ancestries = settings["ancestries"] || %{}
 
     empty =
@@ -23,7 +23,9 @@ defmodule Loka.Content.Ancestries do
         do: [diag("SCHEMA_VIOLATION", at("cartridge.json", ["ancestries"]))],
         else: []
 
+    # attributes@1 owns both cartridge.json settings: ancestries and derived-stat tables.
     empty ++
+      Loka.Content.Derived.check(manifest, defs, located) ++
       Enum.flat_map(ancestries, fn {key, choice} ->
         one(manifest, defs, text, key, choice)
       end)

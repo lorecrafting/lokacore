@@ -27,6 +27,7 @@ import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
+import { runStatus } from '../status/job.ts';
 
 import { runSight } from '../population/behavior.ts';
 
@@ -39,6 +40,7 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
+    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     if (row.job.kind === 'population_bundle')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);

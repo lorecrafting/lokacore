@@ -194,6 +194,7 @@ function Bottom(p: BottomProps) {
           calendar={view.calendar_status}
           resources={view.resources}
           bleeding={view.bleeding}
+          conditions={view.conditions}
           position={view.position}
           text={text}
           locked={!!view.scene || !!view.combat || p.page?.kind === 'chapter'}

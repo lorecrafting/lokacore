@@ -433,10 +433,12 @@
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
+      "DerivedStat",
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/mechanics/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/mechanics/attributes/shared.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json"
@@ -444,7 +446,7 @@
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
+    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3)"
   },
   "equipment": {
     "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",
@@ -898,6 +900,35 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "Chapter 1 C5 one hound bleed, exact held bandage cure and managed elapsed replay; provisional release pin"
+  },
+  "status": {
+    "spec": "docs/system/mechanics.md Status effects over time (toolbox row 1); docs/system/protocol.md Status composition",
+    "contracts": [
+      "StatusRow",
+      "StatusDefinition",
+      "ConditionView",
+      "ItemEdible",
+      "ReactionRule",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/status/shared.ts",
+      "kernel/ts/src/mechanics/status/job.ts",
+      "kernel/ts/src/content/cartridge_status.ts",
+      "kernel/ts/src/foundation/compose_status.ts",
+      "lib/loka/content/status.ex",
+      "lib/loka/core/compose_status.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/status_composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "Toolbox row 1 status sampler: timed statuses, ticks, expiry, cure by Eat and fatal return"
   },
   "water": {
     "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md D6 water movement and corpse selection",

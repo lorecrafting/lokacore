@@ -1371,6 +1371,46 @@
           "additionalProperties": false
         },
         {
+          "description": "Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status.transition"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "delta.schema.json#/$defs/StatusRow"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "delta.schema.json#/$defs/StatusRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "body_id",
+            "status",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
           "type": "object",
           "properties": {
             "op": {
@@ -2048,6 +2088,26 @@
           "type": "object",
           "properties": {
             "kind": {
+              "const": "status"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "kind",
+            "body_id",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
               "const": "water"
             },
             "actor_id": {
@@ -2323,6 +2383,65 @@
             "active",
             "effect",
             "source_id",
+            "ends_at",
+            "next_tick_at",
+            "job_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "active": {
+              "const": false
+            },
+            "generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "active",
+            "generation"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StatusRow": {
+      "description": "One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.",
+      "examples": [
+        {
+          "generation": 1,
+          "active": false
+        }
+      ],
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "active": {
+              "const": true
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "next_tick_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "job_id": {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            }
+          },
+          "required": [
+            "generation",
+            "active",
             "ends_at",
             "next_tick_at",
             "job_id"

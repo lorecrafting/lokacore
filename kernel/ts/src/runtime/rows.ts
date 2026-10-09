@@ -36,6 +36,7 @@ const SECTIONS: Readonly<
     | 'population_slots'
     | 'crows'
     | 'bleeds'
+    | 'statuses'
   >
 > = {
   visit: 'visited_rooms',
@@ -60,6 +61,7 @@ const SECTIONS: Readonly<
   quest: 'quests',
   job: 'jobs',
   bleed: 'bleeds',
+  status: 'statuses',
   choice: 'choices',
 };
 

@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "anvil"
+  ],
+  "short": "item.anvil.short",
+  "room_line": "item.anvil.room",
+  "description": "item.anvil.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 8000
+}

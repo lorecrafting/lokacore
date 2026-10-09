@@ -1,13 +1,35 @@
 // `npm run walkthrough`: plays Chapter 1 routes at a phone size under reduced motion and
-// screenshots every page for the polish contact sheet (walkthrough/sheet.ts). Not a test suite.
+// screenshots every page for the polish contact sheet (walkthrough/sheet.cjs). Not a test suite.
+// `LOKA_WALK=<cartridge id>` plays walkthrough/<id>.walk.ts on the author preview's artifact
+// instead (compile it first: `bin/loka dev cartridges/<id>`, docs/BUILDERS-GUIDE.md#preview-an-edit).
 import { web } from '@e2e-dev/web';
 import type { E2EConfig } from 'e2e';
+// @ts-expect-error the app has no Node types; the e2e runner is Node
+import { existsSync, readFileSync } from 'node:fs';
 
 // Port 0: the runner assigns a free port per run, so concurrent runs never share one.
 const port = process.env.LOKA_PREVIEW_PORT ?? '0';
+const cartridge = process.env.LOKA_WALK || undefined;
+if (cartridge) {
+  // The route must play the cartridge the preview holds, not an earlier `bin/loka dev` build
+  // of another cartridge.
+  const current = '.dev-cartridge/current.json';
+  if (!existsSync(current))
+    throw new Error(
+      `LOKA_WALK=${cartridge}, but no ${current}: run bin/loka dev cartridges/${cartridge}`,
+    );
+  const held = JSON.parse(readFileSync(current, 'utf8')) as {
+    canonical: string;
+  };
+  const id = (JSON.parse(held.canonical) as { manifest: { id: string } }).manifest.id;
+  if (id !== cartridge)
+    throw new Error(
+      `LOKA_WALK=${cartridge}, but the author preview holds ${id}: run bin/loka dev cartridges/${cartridge}`,
+    );
+}
 
 export default {
-  tests: ['walkthrough/*.walk.ts'],
+  tests: [`walkthrough/${cartridge ?? 'chapter1'}.walk.ts`],
   output: '.walkthrough',
   timeout: 480_000,
   trace: 'off',
@@ -34,6 +56,7 @@ export default {
           env: {
             LOKA_PREVIEW_PORT: '{port}',
             LOKA_METRO_PORT: process.env.LOKA_METRO_PORT ?? '0',
+            ...(cartridge && { LOKA_DEV_CARTRIDGE: '.dev-cartridge/current.json' }),
           },
           startupTimeout: 120_000,
         },
