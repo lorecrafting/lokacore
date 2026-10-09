@@ -10,7 +10,7 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: per the [routing table](#work-routing). | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for E2–E3 gate closures (E1: see the fix re-check row). | independent review, review record |
-| Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Fable for the polish phase ([owner decision](decisions/owner-decision-designer-fable-2026-10-08.md)) | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
+| Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus; Fable for the polish phase ([owner decision](decisions/owner-decision-designer-fable-2026-10-08.md)) | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
