@@ -1,11 +1,13 @@
-// NPC/conversation and Contents views use the existing book controls.
+// NPC/conversation, thing and Contents views use the existing book controls.
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { Control, Page, ThingPage, type Thing } from './pages.tsx';
+import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
+import { ItemDetails } from './skills.tsx';
+import { reason } from './words.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
@@ -140,6 +142,54 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 }
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+
+const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
+  thing?.actions
+    .filter((a) => !a.available && a.reason.code === 'too_heavy')
+    .map((a) => (
+      <Text key={a.action_key} style={note(c)}>
+        {text(a.label)}: {reason('too_heavy')}.
+      </Text>
+    ));
+
+export function ThingPage(p: {
+  thing?: Thing;
+  text: Say;
+  actions: Button[];
+  log: DetailLine[];
+  press: (b: Button) => void;
+  contents: Thing[];
+  open: (id: string) => void;
+  leave: () => void;
+  back?: () => void;
+}) {
+  const c = usePalette();
+  return (
+    <Page
+      title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
+      foot={
+        <>
+          {p.back && <Control label="Back to container" onPress={p.back} />}
+          <Control label="Leave" onPress={p.leave} />
+        </>
+      }
+    >
+      <ItemDetails thing={p.thing} text={p.text} />
+      <LogLines lines={p.log} />
+      {tooHeavy(c, p.thing, p.text)}
+      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
+      <Cards>
+        {p.actions.map((b) => (
+          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+        ))}
+      </Cards>
+      {p.contents.length > 0 && <SectionTitle>Inside</SectionTitle>}
+      {p.contents.map((e) => (
+        <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
+      ))}
+    </Page>
+  );
+}
 
 export function Item(p: {
   id: string;

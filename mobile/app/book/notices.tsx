@@ -126,18 +126,7 @@ export function NoticePage(
   if (!detail) return null;
   const description = plain(p.screen.text(detail.description));
   return (
-    <Page
-      title={p.screen.text(detail.title)}
-      foot={
-        board ? (
-          <Control label="Back to World" onPress={p.world} />
-        ) : p.screen.view.notices?.some((n) => n.id === detail.id) ? (
-          <Control label="Leave" onPress={p.world} />
-        ) : (
-          <Control label="Back to board" onPress={p.back} />
-        )
-      }
-    >
+    <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
@@ -163,6 +152,14 @@ export function NoticePage(
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
     </Page>
   );
+}
+
+// A board returns to World, a standalone notice leaves to it, a board's notice returns to its board.
+function foot(p: Props & { world: () => void; back: () => void }, board: boolean, id: string) {
+  if (board) return <Control label="Back to World" onPress={p.world} />;
+  if (p.screen.view.notices?.some((n) => n.id === id))
+    return <Control label="Leave" onPress={p.world} />;
+  return <Control label="Back to board" onPress={p.back} />;
 }
 
 // A notice's offered action: its live button, or why it is unavailable.

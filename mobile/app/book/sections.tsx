@@ -83,18 +83,11 @@ export function AncestryPage(p: {
   );
 }
 
-export function JournalPage({
-  view,
-  text,
-  world,
-}: {
-  view: GameView;
-  text: Say;
-  world: () => void;
-}) {
+export function JournalPage(p: { view: GameView; text: Say; world: () => void }) {
+  const { view, text } = p;
   const c = usePalette();
   return (
-    <Page title="Journal" foot={home(world)}>
+    <Page title="Journal" foot={home(p.world)}>
       {view.journal.length === 0 && <Text style={note(c)}>Nothing written yet.</Text>}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
@@ -232,18 +225,25 @@ export function MapPage(p: {
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
       </Cards>
-      {p.view.known_npcs?.length ? <SectionTitle>Where</SectionTitle> : null}
-      <Cards>
-        {(p.view.known_npcs ?? []).map((n) =>
-          p.g
-            .on(n.id)
-            .filter((b) => b.action_key === 'where')
-            .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
-        )}
-      </Cards>
+      {where(p)}
     </Page>
   );
 }
+
+// Where each known NPC is: its offered Where action.
+const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) => (
+  <>
+    {p.view.known_npcs?.length ? <SectionTitle>Where</SectionTitle> : null}
+    <Cards>
+      {(p.view.known_npcs ?? []).map((n) =>
+        p.g
+          .on(n.id)
+          .filter((b) => b.action_key === 'where')
+          .map((b) => <ActionCard key={n.id} b={b} press={p.press} />),
+      )}
+    </Cards>
+  </>
+);
 
 // `startOver` asks first: it destroys the save (the shell's confirm). Nothing else lives here yet.
 export function SettingsPage(p: { startOver: () => void; world: () => void }) {

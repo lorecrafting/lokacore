@@ -11,9 +11,11 @@ const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('
 // Not drawn on their own: each with its reason.
 const EXEMPT: Record<string, string> = {
   Tap: 'shown through VerbLine and the room title',
+  SkillDetails: 'a block of the Character page; batch 4 shows it there',
+  ItemDetails: 'a block of the Thing page; batch 4 shows it there',
   // batch 4 empties this list: whole pages get stories from screenFrom
   ...Object.fromEntries(
-    'RoomPage ThingPage SkillDetails ItemDetails NpcPage ContentsPage Item NpcDetail CharacterPage AncestryPage JournalPage CarryingPage MapPage SettingsPage ChapterPage ScenePage NoticePage NoticeEntries DreamPage DreamResume Combat DiscoveredMap Body BookView Book'
+    'RoomPage ThingPage NpcPage ContentsPage Item NpcDetail CharacterPage AncestryPage JournalPage CarryingPage MapPage SettingsPage ChapterPage ScenePage NoticePage NoticeEntries DreamPage DreamResume Combat DiscoveredMap Body BookView Book'
       .split(' ')
       .map((name) => [name, 'whole page, batch 4']),
   ),

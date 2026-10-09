@@ -1,16 +1,15 @@
-import { ItemDetails } from './skills.tsx';
-// The book's room and thing pages and their shared controls (the Contents sections: sections.tsx).
+// The book's page shell, the room page and their shared controls (the Contents sections:
+// sections.tsx; the thing page: Menu.tsx).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain, type group, type Pool, type Thing } from './model.ts';
+import { cap, plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { ActionCard, Cards, VerbLine } from './actions.tsx';
+import { VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
-import { reason } from './words.ts';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -187,24 +186,8 @@ export function Page(p: {
 }) {
   const c = usePalette();
   let scroll: ScrollView | null = null; // this render's view: a ref callback, so no hook
-  const heading = p.title !== undefined && (
-    <Text
-      {...titleFocus}
-      accessibilityRole="header"
-      style={{
-        ...titleStyle(c),
-        ...(p.fixedTitle ? { ...type.roomTitle, textAlign: 'center' } : type.pageTitle),
-      }}
-    >
-      {p.title}
-    </Text>
-  );
-  const title = p.onTitlePress ? (
-    <Tap label={`${p.title}, look`} onPress={p.onTitlePress}>
-      {heading}
-    </Tap>
-  ) : (
-    heading
+  const title = p.title !== undefined && (
+    <Title title={p.title} fixed={p.fixedTitle} onPress={p.onTitlePress} />
   );
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -224,6 +207,29 @@ export function Page(p: {
       </ScrollView>
       {p.foot && <PageFoot>{p.foot}</PageFoot>}
     </View>
+  );
+}
+
+// A header that takes the arriving focus; the room's is fixed, and a tap on it looks.
+function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
+  const heading = (
+    <Text
+      {...titleFocus}
+      accessibilityRole="header"
+      style={{
+        ...titleStyle(usePalette()),
+        ...(p.fixed ? { ...type.roomTitle, textAlign: 'center' } : type.pageTitle),
+      }}
+    >
+      {p.title}
+    </Text>
+  );
+  return p.onPress ? (
+    <Tap label={`${p.title}, look`} onPress={p.onPress}>
+      {heading}
+    </Tap>
+  ) : (
+    heading
   );
 }
 
@@ -254,53 +260,5 @@ export function SectionTitle({ children }: { children: ReactNode }) {
     <Text accessibilityRole="header" style={{ ...titleStyle(usePalette()), ...type.sectionTitle }}>
       {children}
     </Text>
-  );
-}
-
-const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) =>
-  thing?.actions
-    .filter((a) => !a.available && a.reason.code === 'too_heavy')
-    .map((a) => (
-      <Text key={a.action_key} style={note(c)}>
-        {text(a.label)}: {reason('too_heavy')}.
-      </Text>
-    ));
-
-export function ThingPage(p: {
-  thing?: Thing;
-  text: Say;
-  actions: Button[];
-  log: DetailLine[];
-  press: (b: Button) => void;
-  contents: Thing[];
-  open: (id: string) => void;
-  leave: () => void;
-  back?: () => void;
-}) {
-  const c = usePalette();
-  return (
-    <Page
-      title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
-      foot={
-        <>
-          {p.back && <Control label="Back to container" onPress={p.back} />}
-          <Control label="Leave" onPress={p.leave} />
-        </>
-      }
-    >
-      <ItemDetails thing={p.thing} text={p.text} />
-      <LogLines lines={p.log} />
-      {tooHeavy(c, p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
-      <Cards>
-        {p.actions.map((b) => (
-          <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
-        ))}
-      </Cards>
-      {p.contents.length > 0 && <SectionTitle>Inside</SectionTitle>}
-      {p.contents.map((e) => (
-        <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
-      ))}
-    </Page>
   );
 }
