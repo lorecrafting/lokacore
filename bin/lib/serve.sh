@@ -31,7 +31,7 @@ stale() { for d in "$1" "$1/kernel/ts" "$1/mobile/app"; do fresh "$d" || return 
 npm_ci() { # <checkout>: npm ci only where package-lock.json changed since the last ci there
   for d in "$1" "$1/kernel/ts" "$1/mobile/app"; do
     fresh "$d" && continue
-    (cd "$d" && mise exec -- npm ci --no-audit --no-fund) || die "npm ci failed in $d"
+    (cd "$d" && mise exec -- npm ci --no-audit --no-fund) || die "npm ci failed in $d; no server was stopped"
     cksum < "$d/package-lock.json" > "$d/node_modules/.loka-lock-cksum"
   done
 }

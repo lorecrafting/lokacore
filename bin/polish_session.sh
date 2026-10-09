@@ -49,7 +49,6 @@ close)
     [ -n "$url" ] || url=$(cd "$wt" && $GH pr create --base main --head "$b" --fill) || die 'gh pr create failed'
     echo "$me: PR $url"
   fi
-  stop_port "$SB_PORT"
-  "$bin/preview_update.sh" ;;
+  "$bin/preview_update.sh" --end-session ;;
 *) echo "usage: $0 start|close" >&2; exit 2 ;;
 esac
