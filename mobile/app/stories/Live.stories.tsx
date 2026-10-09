@@ -106,7 +106,7 @@ export const PegShop: StoryObj = {
     await page.findByLabelText(/pennies 18\//); // the status line paid
     await tap('Leave');
     await tap(/; opens Contents$/);
-    await tap('Equipment & Inventory');
+    await tap('Equipment & Inventory, open');
     await page.findByLabelText('a torch, open');
   },
 };
