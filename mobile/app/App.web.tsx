@@ -5,10 +5,12 @@ import { lazy, Suspense } from 'react';
 // @ts-expect-error a wasm asset is its URL
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm';
 
-const skia = async () => {
-  const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
-  await LoadSkiaWeb({ locateFile: () => wasm });
-};
+// No CanvasKit (no WebAssembly, a failed wasm load): the app still opens and its pages change
+// without a curl (BOOK-UI-COMPONENTS Page turn), never a blank page.
+const skia = () =>
+  import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb')
+    .then(({ LoadSkiaWeb }) => LoadSkiaWeb({ locateFile: () => wasm }))
+    .catch(() => {});
 const App = lazy(() => skia().then(() => import('./web-app.ts')));
 const Preview = lazy(() => skia().then(() => import('./page-turn-preview.tsx')));
 
