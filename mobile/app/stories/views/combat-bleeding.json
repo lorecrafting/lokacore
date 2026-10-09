@@ -1,0 +1,432 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "title": "room.reed_path.title",
+     "x": 0,
+     "y": 2,
+     "z": 0
+    },
+    {
+     "id": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "title": "room.reed_bank.title",
+     "x": 0,
+     "y": 4,
+     "z": 0
+    },
+    {
+     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "title": "room.ferry_landing.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "id": "b59d54de-ea10-84e1-964c-16d1c776e738",
+     "title": "room.hound_run.title",
+     "x": 2,
+     "y": 4,
+     "z": 0
+    }
+   ],
+   "links": [
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "north"
+    },
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "south"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "b59d54de-ea10-84e1-964c-16d1c776e738",
+     "direction": "east"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "north"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "south"
+    },
+    {
+     "from": "b59d54de-ea10-84e1-964c-16d1c776e738",
+     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "west"
+    }
+   ]
+  },
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "bandage"
+    },
+    "label": "skill.bandage.label",
+    "requirement": "skill.bandage.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "dodge"
+    },
+    "label": "skill.dodge.label",
+    "requirement": "skill.dodge.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "haggle"
+    },
+    "label": "skill.haggle.label",
+    "requirement": "skill.haggle.requirement",
+    "acquired": true,
+    "qualified": true,
+    "usable": true
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "herbalism"
+    },
+    "label": "skill.herbalism.label",
+    "requirement": "skill.herbalism.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swim"
+    },
+    "label": "skill.swim.label",
+    "requirement": "skill.swim.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swords"
+    },
+    "label": "skill.swords.label",
+    "requirement": "skill.swords.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "con"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 11
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "int"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "per"
+    },
+    "value": 5
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "spi"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "ancestry": "road_born",
+  "topics": [],
+  "combat": {
+   "encounter_id": "cc8c0ac8-1db8-8faa-8275-633a862a9d3a",
+   "opponent_id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
+   "name": "npc.fen_hound.short",
+   "active_opponents": [
+    {
+     "id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
+     "name": "npc.fen_hound.short"
+    },
+    {
+     "id": "5e617e36-9453-88b2-8eba-006d8a54747b",
+     "name": "npc.fen_hound.short"
+    },
+    {
+     "id": "c3f1e7f3-1f5e-8f0f-906f-387e9fcd61ad",
+     "name": "npc.fen_hound.short"
+    },
+    {
+     "id": "fb97c65c-afa0-8d52-9528-de163b1baa45",
+     "name": "npc.fen_hound.short"
+    }
+   ]
+  },
+  "bleeding": {
+   "label": "condition.bleeding",
+   "generation": 1,
+   "ends_at": 65550,
+   "next_tick_at": 65350,
+   "hp_loss": 1,
+   "tick_every": 100
+  },
+  "place": {
+   "id": "b59d54de-ea10-84e1-964c-16d1c776e738",
+   "title": {
+    "key": "room.hound_run.title"
+   },
+   "description": {
+    "key": "room.hound_run.description"
+   }
+  },
+  "exits": [
+   {
+    "available": false,
+    "direction": "east",
+    "sight": {
+     "room": "1a7c3699-2844-8a55-b29f-eac079c7bf50",
+     "title": "room.adder_nest.title",
+     "entities": []
+    },
+    "reason": {
+     "code": "invalid_state"
+    }
+   },
+   {
+    "available": false,
+    "direction": "west",
+    "sight": {
+     "room": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "title": "room.reed_bank.title",
+     "entities": [
+      {
+       "id": "f6fc60a2-0eb4-8a50-8ed8-38cd3dbd0f1a",
+       "name": "item.boot.short",
+       "kind": "item"
+      }
+     ]
+    },
+    "reason": {
+     "code": "invalid_state"
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "flee",
+    "label": "action.flee",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "entities": [
+   {
+    "id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
+    "name": "npc.fen_hound.short",
+    "description": "npc.fen_hound.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "5e617e36-9453-88b2-8eba-006d8a54747b",
+    "name": "npc.fen_hound.short",
+    "description": "npc.fen_hound.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "c3f1e7f3-1f5e-8f0f-906f-387e9fcd61ad",
+    "name": "npc.fen_hound.short",
+    "description": "npc.fen_hound.description",
+    "kind": "npc",
+    "actions": []
+   },
+   {
+    "id": "fb97c65c-afa0-8d52-9528-de163b1baa45",
+    "name": "npc.fen_hound.short",
+    "description": "npc.fen_hound.description",
+    "kind": "npc",
+    "actions": []
+   }
+  ],
+  "inventory": [],
+  "equipment": [
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "light"
+   },
+   {
+    "slot": "off_hand"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [],
+  "chapter": {
+   "index": 0,
+   "title": "chapter.missing_child"
+  },
+  "time": 65250,
+  "calendar_status": {
+   "day": 1,
+   "hour": 18,
+   "subdivision": 7,
+   "solar": "dusk",
+   "lunar": "new"
+  },
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 4,
+    "maximum": 10,
+    "band": "bleeding_freely",
+    "tone": "warning"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 99,
+    "maximum": 100,
+    "band": "steady",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 20,
+    "maximum": 1000,
+    "band": "dying",
+    "tone": "danger"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "combat"
+  }
+ ],
+ "log": [],
+ "combatLog": [
+  "Another fen hound turns to defend its pack. Another fen hound turns to defend its pack. Another fen hound turns to defend its pack.",
+  "Your blow strikes the beast squarely. The beast sinks its teeth into you. The hound tears your skin. The wound begins to bleed.",
+  "Blood seeps from the wound.",
+  "The beast sinks its teeth into you. The beast darts clear of your blow. The hound opens the wound again.",
+  "Blood seeps from the wound.",
+  "The beast darts clear of your blow. The beast sinks its teeth into you. The hound opens the wound again. Blood seeps from the wound."
+ ],
+ "details": {}
+}

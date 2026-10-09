@@ -1,0 +1,556 @@
+{
+ "view": {
+  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+  "map": {
+   "rooms": [
+    {
+     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "title": "room.ferry_landing.title",
+     "x": 0,
+     "y": 0,
+     "z": 0
+    }
+   ],
+   "links": []
+  },
+  "known_npcs": [
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
+  "skills": [
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "bandage"
+    },
+    "label": "skill.bandage.label",
+    "requirement": "skill.bandage.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "dodge"
+    },
+    "label": "skill.dodge.label",
+    "requirement": "skill.dodge.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "haggle"
+    },
+    "label": "skill.haggle.label",
+    "requirement": "skill.haggle.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "herbalism"
+    },
+    "label": "skill.herbalism.label",
+    "requirement": "skill.herbalism.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swim"
+    },
+    "label": "skill.swim.label",
+    "requirement": "skill.swim.requirement",
+    "acquired": true,
+    "qualified": true,
+    "usable": true
+   },
+   {
+    "skill": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "skill",
+     "key": "swords"
+    },
+    "label": "skill.swords.label",
+    "requirement": "skill.swords.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false
+   }
+  ],
+  "attributes": [
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "con"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "dex"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "int"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "per"
+    },
+    "value": 6
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "spi"
+    },
+    "value": 10
+   },
+   {
+    "attribute": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "attribute",
+     "key": "str"
+    },
+    "value": 10
+   }
+  ],
+  "ancestry": "fen_born",
+  "topics": [],
+  "place": {
+   "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+   "title": {
+    "key": "room.ferry_landing.title"
+   },
+   "description": {
+    "key": "room.ferry_landing.description"
+   }
+  },
+  "exits": [
+   {
+    "available": true,
+    "direction": "north",
+    "sight": {
+     "room": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "title": "room.well_lane.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "south",
+    "sight": {
+     "room": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "title": "room.reed_path.title",
+     "entities": []
+    }
+   },
+   {
+    "available": true,
+    "direction": "west",
+    "sight": {
+     "room": "6a70d262-b6ea-8b64-9809-ec7f79d1521e",
+     "title": "room.boathouse.title",
+     "entities": []
+    }
+   }
+  ],
+  "actions": [
+   {
+    "available": true,
+    "action_key": "look",
+    "label": "action.look",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "action_key": "read",
+    "label": "actions.read_notice",
+    "target": {
+     "kind": "entity",
+     "scopes": [
+      "inspectable_details"
+     ]
+    },
+    "input": [],
+    "target_ids": [
+     "d56fa105-a2b8-8760-a46c-d0c78dbed920"
+    ],
+    "available": true
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "scan",
+    "label": "action.scan",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "d56fa105-a2b8-8760-a46c-d0c78dbed920",
+    "title": "detail.notice.title",
+    "description": "detail.notice.description"
+   }
+  ],
+  "entities": [
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short",
+    "description": "npc.elspeth.description",
+    "kind": "npc",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "a0_d9_elspeth_lost_prior",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a0_d9_elspeth_rescued_fox",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a0_d9_elspeth_rescued_prior",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a0_d9_elspeth_stays_fox",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a0_d9_elspeth_stays_prior",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a_elspeth_lost",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a_elspeth_report",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a_elspeth_rescue",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "a_elspeth_return",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "b_elspeth_rescued",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "b_elspeth_stays",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": true,
+      "action_key": "elspeth",
+      "label": "action.talk",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": []
+     }
+    ]
+   }
+  ],
+  "inventory": [],
+  "equipment": [
+   {
+    "slot": "cloak"
+   },
+   {
+    "slot": "light"
+   },
+   {
+    "slot": "off_hand"
+   },
+   {
+    "slot": "wield"
+   }
+  ],
+  "position": "standing",
+  "journal": [],
+  "chapter": {
+   "index": 0,
+   "title": "chapter.missing_child"
+  },
+  "time": 64800,
+  "calendar_status": {
+   "day": 1,
+   "hour": 18,
+   "subdivision": 0,
+   "solar": "dusk",
+   "lunar": "new"
+  },
+  "resources": [
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "hp"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "ma"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "mv"
+    },
+    "current": 100,
+    "maximum": 100,
+    "band": "mv_ready",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "kind": "resource",
+     "key": "pennies"
+    },
+    "current": 20,
+    "maximum": 1000,
+    "band": "dying",
+    "tone": "danger"
+   }
+  ]
+ },
+ "stack": [
+  {
+   "kind": "contents"
+  },
+  {
+   "kind": "character"
+  }
+ ],
+ "log": [],
+ "combatLog": [],
+ "details": {}
+}

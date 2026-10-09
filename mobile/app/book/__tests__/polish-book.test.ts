@@ -91,7 +91,12 @@ export const words = (element: any): string =>
       ? String(element)
       : words(element?.props?.children ?? []);
 
-export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
+// `newId`: stories/scenarios.ts seeds it so a replayed route writes the same rows.
+export function book(
+  cartridge = fixture,
+  existing?: ReturnType<typeof elapsedHost>,
+  newId: () => string = randomUUID,
+) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };
   let failedNarrationAfter: number | undefined;
@@ -107,7 +112,7 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
       } as never,
       cartridge,
       {
-        newId: randomUUID,
+        newId,
         kernel_version: `loka-kernel@${'0'.repeat(40)}`,
         time: { wall: () => clock.wall, monotonic: () => clock.mono },
       },

@@ -9,17 +9,7 @@ const read = (path: string) => readFileSync(new URL(path, app), 'utf8');
 const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.stories.tsx'));
 
 // Not drawn on their own: each with its reason.
-const EXEMPT: Record<string, string> = {
-  Tap: 'shown through VerbLine and the room title',
-  // batch 4 empties this list: whole pages get stories from screenFrom
-  SkillDetails: 'a block of the Character page; batch 4 shows it there',
-  ItemDetails: 'a block of the Thing page; batch 4 shows it there',
-  ...Object.fromEntries(
-    'RoomPage ThingPage NpcPage ContentsPage Item NpcDetail CharacterPage AncestryPage JournalPage CarryingPage MapPage SettingsPage ChapterPage ScenePage NoticePage NoticeEntries DreamPage DreamResume Combat DiscoveredMap Body BookView Book'
-      .split(' ')
-      .map((name) => [name, 'whole page, batch 4']),
-  ),
-};
+const EXEMPT: Record<string, string> = { Tap: 'shown through VerbLine and the room title' };
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
 test('every catalogue Story file exists', () => {
@@ -32,18 +22,19 @@ test('every catalogue Story file exists', () => {
       .filter(([, name]) => !stories.includes(`${name}.stories.tsx`))
       .map(([file]) => `${row.split('|')[1].trim()}: ${file}`);
   });
-  // batch 4 adds this story; the test then fails until the entry goes.
-  assert.deepEqual(missing, ['Room page: `stories/RoomPage.stories.tsx`']);
+  assert.deepEqual(missing, []);
 });
 
+// A story or a story helper (stories/screen.tsx) imports it, named or as the default.
 test('every exported component has a story that imports it', () => {
-  const imports = stories.flatMap((story) =>
+  const sources = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.tsx'));
+  const imports = sources.flatMap((story) =>
     [
       ...read(`stories/${story}`).matchAll(
-        /import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+'\.\.\/book\/(\w+)\.tsx'/g,
+        /import\s+(?:type\s+)?(?:\{([^}]*)\}|(\w+))\s+from\s+'\.\.\/book\/(\w+)\.tsx'/g,
       ),
-    ].flatMap(([, names, file]) =>
-      names.split(',').map((n) => `${file}:${n.trim().split(/\s+as\s+/)[0]}`),
+    ].flatMap(([, names, fallback, file]) =>
+      (names ?? fallback!).split(',').map((n) => `${file}:${n.trim().split(/\s+as\s+/)[0]}`),
     ),
   );
   const files = readdirSync(new URL('book/', app)).filter(

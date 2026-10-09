@@ -9,20 +9,34 @@ const expoAsset = fromExpo.resolve('expo-asset');
 
 // expo-sqlite's web worker as Metro serves it (SQLiteModule.ts): a module worker Vite transforms,
 // its wasm import a URL. ponytail: dev server only; a static build would need the worker bundled.
+// Each rewrite throws when its text is gone (an expo-sqlite upgrade), like patch-sqlite-web.cjs.
+const rewrite = (src: string, id: string, from: string | RegExp, to: string) => {
+  if (src.includes(to.replace('$&', ''))) return src; // the dep pre-bundle already rewrote it
+  const out = src.replace(from, to);
+  if (out === src) throw new Error(`expo-sqlite-worker: ${id} no longer contains ${from}`);
+  return out;
+};
 const sqliteWorker: Plugin = {
   name: 'expo-sqlite-worker',
   transform: (src, id) =>
     // wa-sqlite.js is an Emscripten UMD file; the worker imports its default
     /expo-sqlite\/web\/wa-sqlite\/wa-sqlite\.js(\?|$)/.test(id)
-      ? `${src}\nexport default Module;`
-      : id.includes('expo-sqlite')
-        ? src
-            .replace(
-              "new Worker(new URL('./worker', window.location.href))",
-              "new Worker('/node_modules/expo-sqlite/web/worker.ts', { type: 'module' })",
+      ? rewrite(src, id, /^var Module=[^]*$/, '$&\nexport default Module;')
+      : /expo-sqlite\/web\/SQLiteModule\.ts(\?|$)/.test(id)
+        ? rewrite(
+            src,
+            id,
+            /new Worker\(new URL\((['"])\.\/worker\1, window\.location\.href\)\)/,
+            "new Worker('/node_modules/expo-sqlite/web/worker.ts', { type: 'module' })",
+          )
+        : /expo-sqlite\/web\/worker\.ts(\?|$)/.test(id)
+          ? rewrite(
+              src,
+              id,
+              /(['"])\.\/wa-sqlite\/wa-sqlite\.wasm\1/,
+              "'./wa-sqlite/wa-sqlite.wasm?url'",
             )
-            .replace(/(['"])\.\/wa-sqlite\/wa-sqlite\.wasm\1/, "'./wa-sqlite/wa-sqlite.wasm?url'")
-        : undefined,
+          : undefined,
 };
 
 const plugins: Plugin[] = [

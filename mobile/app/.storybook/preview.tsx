@@ -3,10 +3,15 @@ import { View } from 'react-native';
 import { PaletteContext } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
 
-const phone = (name: string, width: number, height: number) => ({
+const device = (
+  name: string,
+  width: number,
+  height: number,
+  type: 'mobile' | 'tablet' = 'mobile',
+) => ({
   name,
   styles: { width: `${width}px`, height: `${height}px` },
-  type: 'mobile' as const,
+  type,
 });
 
 const preview: Preview = {
@@ -24,11 +29,14 @@ const preview: Preview = {
   initialGlobals: { palette: 'light', viewport: { value: 'iphone11', isRotated: false } },
   parameters: {
     layout: 'fullscreen',
+    options: { storySort: { order: ['Docs', 'Book', 'Pages', 'Live'] } },
     viewport: {
       options: {
-        iphone11: phone('iPhone 11', 414, 896),
-        iphoneSE: phone('iPhone SE', 375, 667),
-        pixel7: phone('Pixel 7', 412, 915),
+        iphone11: device('iPhone 11', 414, 896),
+        iphoneSE: device('iPhone SE', 375, 667),
+        pixel7: device('Pixel 7', 412, 915),
+        // one tablet check: the centred page width and the footer rules
+        ipadMini: device('iPad mini', 744, 1133, 'tablet'),
       },
     },
     // Fail the smoke on any axe violation, colour contrast included.

@@ -5,7 +5,7 @@ import { Riddle } from '../book/Riddle.tsx';
 import { button } from './fixtures.ts';
 
 const meta = {
-  title: 'Book/Riddle',
+  title: 'Book/LetterTile/Riddle',
   component: Riddle,
   args: { bank: [...'RNAOLTENSWID'], button: button('answer'), press: fn() },
 } satisfies Meta<typeof Riddle>;

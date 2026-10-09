@@ -33,7 +33,7 @@ D10 Map/Where/Knock; the [current bundled chapter](system/cartridge.md#current-b
 owns the release/API/hash/ID pins. **E3 and release-candidate certification are not planned: Chapter 1 is [frozen as a mechanics sample](decisions/owner-decision-mechanics-toolbox-2026-10-08.md).** E2, the R9C interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
 The [original order](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) (E1, E2,
 polish, release-candidate certification, E3) now ends after the polish phase.
-The polish phase's [Storybook plan](briefs/polish/storybook-plan-2026-10-08.md) is adopted; the owner answered its decisions G1-G5 with the recommendations (2026-10-08). Designer input for batches 1 and 2: [design input](briefs/polish/design-input-batches-1-2-2026-10-08.md). Batch 3: [design input](briefs/polish/design-input-batch-3-2026-10-09.md).
+The polish phase's [Storybook plan](briefs/polish/storybook-plan-2026-10-08.md) is adopted; the owner answered its decisions G1-G5 with the recommendations (2026-10-08). Designer input for batches 1 and 2: [design input](briefs/polish/design-input-batches-1-2-2026-10-08.md). Batch 3: [design input](briefs/polish/design-input-batch-3-2026-10-09.md). Batch 4: [design input](briefs/polish/design-input-batch-4-2026-10-09.md).
 The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
