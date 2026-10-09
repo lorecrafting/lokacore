@@ -21,12 +21,18 @@ import { openStory } from './authority.ts';
 import { elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-status-save-'));
+const saves = mkdtempSync(join(tmpdir(), 'loka-status-saves-'));
 const file = join(scratch, 'artifact.json');
-execFileSync('mix', ['loka.compile', 'cartridges/status_sampler', file], {
-  cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-  stdio: 'pipe',
-});
-const artifact = JSON.parse(readFileSync(file, 'utf8'));
+let artifact;
+try {
+  execFileSync('mix', ['loka.compile', 'cartridges/status_sampler', file], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    stdio: 'pipe',
+  });
+  artifact = JSON.parse(readFileSync(file, 'utf8'));
+} finally {
+  rmSync(scratch, { recursive: true });
+}
 const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
 if (!loaded.ok) throw new Error(JSON.stringify(loaded));
 const bundle = { canonical: encode(artifact.cartridge), sha256: artifact.content_hash as string };
@@ -41,10 +47,11 @@ const hp = (w: World) => level(w, w.body, resourceRef(w, 'hp'));
 
 // Breaks: the statuses section is not persisted or rebuilt on reopen; a failed or uncertain tick or
 // cure COMMIT adopts half of hp, status row, job or custody; a lost acknowledgement applies twice.
-test('status tick and cure survive reopen, failed and lost COMMIT, and replay once', () => {
+test('status tick and cure survive reopen, failed and lost COMMIT, and replay once', (t) => {
+  t.after(() => rmSync(saves, { recursive: true, force: true }));
   for (const action of ['tick', 'cure'] as const)
     for (const kind of ['failed', 'lost'] as const) {
-      const path = join(scratch, `${action}-${kind}.db`);
+      const path = join(saves, `${action}-${kind}.db`);
       let p = elapsedHost(path, undefined, bundle);
       const open = () => {
         const s = openStory(p.db, releases, p.host);
@@ -104,5 +111,4 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
       assert.equal(receipts(p.sql), before + 1, action + kind);
       p.sql.close();
     }
-  rmSync(scratch, { recursive: true });
 });

@@ -20,11 +20,18 @@ function Fight({ view, text }: Pick<Screen, 'view' | 'text'>) {
       {view.bleeding && (
         <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
       )}
-      {view.conditions?.map((x, i) => (
-        <Text key={`${x.label}-${i}`} style={prose(c)}>
-          {conditionLine(x, view.time, text)}
-        </Text>
-      ))}
+      {view.conditions?.map((x, i) => {
+        const line = conditionLine(x, view.time, text);
+        return (
+          <Text
+            key={`${x.label}-${i}`}
+            style={prose(c)}
+            accessibilityLabel={line.replaceAll(' · ', ', ')}
+          >
+            {line}
+          </Text>
+        );
+      })}
       {combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}

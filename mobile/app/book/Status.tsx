@@ -44,6 +44,7 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
     .filter(Boolean)
     .join(' · ');
 
+// size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const time = calendarLine(p.calendar);
@@ -61,15 +62,18 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
-    ...(p.conditions ?? []).map((x, i) => (
-      <Text
-        key={`${x.label}-${i}`}
-        style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
-        accessibilityLabel={conditionLine(x, p.time, p.text).replaceAll(' · ', ', ')}
-      >
-        {conditionLine(x, p.time, p.text)}
-      </Text>
-    )),
+    ...(p.conditions ?? []).map((x, i) => {
+      const line = conditionLine(x, p.time, p.text);
+      return (
+        <Text
+          key={`${x.label}-${i}`}
+          style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
+          accessibilityLabel={line.replaceAll(' · ', ', ')}
+        >
+          {line}
+        </Text>
+      );
+    }),
     <Contents key="contents" {...p} />,
   ].filter(Boolean);
   return (

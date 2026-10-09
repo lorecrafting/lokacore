@@ -1,4 +1,4 @@
-# size: allow 328, ancestry, static map and status source wiring join the existing compiler boundary
+# size: allow 333, ancestry, static map and status source wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -68,8 +68,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
-      Loka.Content.Food.check(manifest, defs, v2),
-      Loka.Content.Bleed.check(manifest, defs, v2),
+      timed_checks(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
       Loka.Content.Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
@@ -86,10 +85,16 @@ defmodule Loka.Content.Compiler do
     ])
   end
 
+  # Food, bleed and status in their original order, one call to keep `checks` within ABC.
+  defp timed_checks(manifest, defs, v2),
+    do:
+      Loka.Content.Food.check(manifest, defs, v2) ++
+        Loka.Content.Bleed.check(manifest, defs, v2) ++
+        Loka.Content.Status.check(manifest, defs, v2)
+
   defp final_checks(manifest, defs, v2, located, registry),
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
-        Loka.Content.Status.check(manifest, defs, v2) ++
         Position.check(manifest, defs) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{}))
