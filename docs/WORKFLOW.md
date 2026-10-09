@@ -240,6 +240,12 @@ cross-page visual consistency pass; it does not defer broken interaction flows
 ([owner decision](decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 A slice that changes what the player sees consults the [designer](decisions/owner-decision-designer-role-2026-10-07.md) for its brief, its Book UI spec text and its review.
 
+In the [polish lane](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) the developer
+uses existing tokens and components only, and tells the PM when an owner item needs a new one.
+Before each polish checkpoint a designer reads the batch's commits, writes each item's rule into
+[Book UI](system/book-ui.md), [BOOK-UI-COMPONENTS.md](BOOK-UI-COMPONENTS.md) or a token, and flags
+one-offs; then a fresh designer does the design review.
+
 ## Token hygiene
 
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
