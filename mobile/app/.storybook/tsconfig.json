@@ -1,0 +1,7 @@
+// Storybook's types pull in Node's, which the app's tsconfig keeps out (tests/page_turn.e2e.ts).
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "types": ["vite/client"] },
+  "include": ["*.ts", "*.mts", "*.tsx", "../stories", "../book/sksl.d.ts"],
+  "exclude": []
+}
