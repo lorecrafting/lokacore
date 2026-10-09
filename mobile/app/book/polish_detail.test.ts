@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
-import { book, bundle, fixture } from './__tests__/polish-book.test.ts';
+import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: an unconfirmed Take leaves the detail or announces success; retry loses its original
 // target name or leaves Map open; a queued stale Take reopens its obsolete detail.
@@ -361,4 +361,45 @@ test('self-luminous Notice invokes its projected targetless recipe and retains t
     h.unmount();
     h.sql.close();
   }
+});
+
+// Breaks: a readable whose read text is its own description (Chapter 1's well) shows that
+// sentence twice on its page, or a different read line is dropped with it.
+test('a notice page shows its description once and every other read line', async () => {
+  const { NoticePage } = await import('./notices.tsx');
+  const well = 'A rope and bucket hang over clear, cold well water.';
+  const shown = nodes(
+    NoticePage({
+      screen: {
+        view: { notices: [{ id: 'well', title: 'The well', description: well }] },
+        text: (key: string) => key,
+        detail: () => [well, 'You read it twice.'],
+      },
+      page: { kind: 'notice', id: 'well' },
+      open: () => {},
+      press: () => {},
+      world: () => {},
+    } as any),
+  )
+    .filter((n) => n.type === 'Text')
+    .map(words);
+  assert.deepEqual(shown, ['The well', well, 'You read it twice.', 'Leave']);
+});
+
+// Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
+// before any quest is active (BOOK-UI-COMPONENTS.md, Page).
+test('the running head shows the active quest objective on room and NPC pages', () => {
+  const head = 'Look for a sign of Wren on Village Green.'; // quest.first_lead.active
+  const h = book(bundle('missing_child_v042_hash'));
+  h.tap('Fen-born');
+  if (h.labels().includes('Continue')) h.tap('Continue');
+  assert.equal(h.text().includes(head), false);
+  h.tap('Elspeth, open');
+  h.tap('Talk to Elspeth');
+  h.tap('Will you look around the Green for a sign of Wren?');
+  assert.ok(h.text().includes(head));
+  h.tap('Leave');
+  assert.ok(h.text().includes('Ferry Landing'));
+  assert.ok(h.text().includes(head));
+  h.sql.close();
 });
