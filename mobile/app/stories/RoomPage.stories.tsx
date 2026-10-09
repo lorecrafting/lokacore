@@ -9,6 +9,7 @@ import RoomNpcsItemsView from './views/room-npcs-items.json';
 import RoomNoticesView from './views/room-notices.json';
 import RoomLongLogView from './views/room-long-log.json';
 import RoomAtNightView from './views/room-at-night.json';
+import RoomRefusalView from './views/room-refusal.json';
 
 const meta: Meta = {
   title: 'Pages/Room',
@@ -21,6 +22,7 @@ export const FirstRoom: StoryObj = { ...pageStory(RoomFirstView), name: 'First r
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
 export const WithNotices: StoryObj = { ...pageStory(RoomNoticesView), name: 'With notices' };
 export const LongLog: StoryObj = { ...pageStory(RoomLongLogView), name: 'Long log' };
+export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Refusal line' };
 export const AtNight: StoryObj = {
   ...pageStory(RoomAtNightView),
   name: 'At night',

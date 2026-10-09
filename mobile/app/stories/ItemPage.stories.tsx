@@ -5,6 +5,8 @@ import { ItemDetails } from '../book/skills.tsx';
 import { pageStory } from './screen.tsx';
 import ItemPlainView from './views/item-plain.json';
 import ItemTooHeavyView from './views/item-too-heavy.json';
+import ItemContainerView from './views/item-container.json';
+import ItemFuelView from './views/item-fuel.json';
 
 const meta: Meta = {
   title: 'Pages/Item',
@@ -14,4 +16,9 @@ const meta: Meta = {
 export default meta;
 
 export const Plain: StoryObj = { ...pageStory(ItemPlainView), name: 'Plain' };
+export const ContainerWithInside: StoryObj = {
+  ...pageStory(ItemContainerView),
+  name: 'Container with Inside',
+};
+export const Fuel: StoryObj = { ...pageStory(ItemFuelView), name: 'Fuel' };
 export const TooHeavy: StoryObj = { ...pageStory(ItemTooHeavyView), name: 'Too heavy' };

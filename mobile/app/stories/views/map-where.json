@@ -4,17 +4,10 @@
   "map": {
    "rooms": [
     {
-     "id": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "title": "room.willow_shade.title",
-     "x": -2,
-     "y": 4,
-     "z": 0
-    },
-    {
-     "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "title": "room.reed_path.title",
+     "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.chapel_steps.title",
      "x": 0,
-     "y": 2,
+     "y": -8,
      "z": 0
     },
     {
@@ -25,17 +18,17 @@
      "z": 0
     },
     {
-     "id": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "title": "room.reed_bank.title",
-     "x": 0,
-     "y": 4,
-     "z": 0
-    },
-    {
      "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
      "title": "room.ferry_landing.title",
      "x": 0,
      "y": 0,
+     "z": 0
+    },
+    {
+     "id": "609faefb-5552-8610-86e8-4b614753ee04",
+     "title": "room.north_gate.title",
+     "x": 0,
+     "y": -6,
      "z": 0
     },
     {
@@ -44,41 +37,12 @@
      "x": 0,
      "y": -4,
      "z": 0
-    },
-    {
-     "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "title": "room.oak_branches.title",
-     "x": -2,
-     "y": 6,
-     "z": 1
-    },
-    {
-     "id": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "x": -2,
-     "y": 6,
-     "z": 0
     }
    ],
    "links": [
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "direction": "east"
-    },
-    {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "south"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "direction": "north"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
      "direction": "south"
     },
     {
@@ -92,47 +56,46 @@
      "direction": "south"
     },
     {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "direction": "north"
-    },
-    {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "west"
-    },
-    {
      "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
      "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "direction": "north"
     },
     {
-     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
      "direction": "south"
+    },
+    {
+     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
+     "direction": "north"
     },
     {
      "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
      "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "direction": "south"
-    },
-    {
-     "from": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "down"
-    },
-    {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "north"
-    },
-    {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "direction": "up"
     }
    ]
   },
+  "known_npcs": [
+   {
+    "id": "35681e5c-d0e0-8a6b-bd0e-f5e9bb9e3d34",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "593cde40-19af-8308-aa99-da8ce3ba202a",
+    "name": "npc.crow.short"
+   },
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
   "skills": [
    {
     "skill": {
@@ -271,62 +234,66 @@
   ],
   "ancestry": "road_born",
   "topics": [],
-  "combat": {
-   "encounter_id": "edbe85e0-4afe-85ff-9376-2f8012a74e51",
-   "opponent_id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-   "name": "npc.crow.short"
-  },
   "place": {
-   "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
+   "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
    "title": {
-    "key": "room.oak_branches.title"
+    "key": "room.chapel_steps.title"
    },
    "description": {
-    "key": "room.oak_branches.description"
+    "key": "room.chapel_steps.description"
    }
   },
   "exits": [
    {
     "available": false,
-    "direction": "down",
-    "sight": {
-     "room": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "entities": [
+    "direction": "north",
+    "door": {
+     "name": "barrier.chapel_door.short",
+     "state": "closed",
+     "actions": [
       {
-       "id": "515ae065-0916-84db-9f13-345580da21be",
-       "name": "npc.crow.short",
-       "kind": "npc"
+       "available": true,
+       "action_key": "knock",
+       "label": "action.knock",
+       "target": {
+        "kind": "none"
+       },
+       "input": [
+        "direction"
+       ]
       },
       {
-       "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
-       "name": "npc.oak_deer.short",
-       "kind": "npc"
+       "available": true,
+       "action_key": "open",
+       "label": "action.open",
+       "target": {
+        "kind": "none"
+       },
+       "input": [
+        "direction"
+       ]
       }
      ]
     },
     "reason": {
-     "code": "invalid_state"
+     "code": "exit_closed"
     }
    },
    {
-    "available": false,
-    "direction": "up",
+    "available": true,
+    "direction": "south",
     "sight": {
-     "room": "7d88a524-5246-885e-a937-f6be4219ad48",
-     "title": "room.oak_crown.title",
+     "room": "609faefb-5552-8610-86e8-4b614753ee04",
+     "title": "room.north_gate.title",
      "entities": []
-    },
-    "reason": {
-     "code": "invalid_state"
     }
    }
   ],
   "actions": [
    {
     "available": true,
-    "action_key": "flee",
-    "label": "action.flee",
+    "action_key": "look",
+    "label": "action.look",
     "target": {
      "kind": "none"
     },
@@ -334,8 +301,19 @@
    },
    {
     "available": true,
-    "action_key": "look",
-    "label": "action.look",
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
     "target": {
      "kind": "none"
     },
@@ -349,25 +327,27 @@
      "kind": "none"
     },
     "input": []
-   }
-  ],
-  "entities": [
-   {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "item.crow_nest.short",
-    "description": "item.crow_nest.description",
-    "kind": "item",
-    "state": "open",
-    "actions": []
    },
    {
-    "id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-    "name": "npc.crow.short",
-    "description": "npc.crow.description",
-    "kind": "npc",
-    "actions": []
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
    }
   ],
+  "entities": [],
   "inventory": [],
   "equipment": [
    {
@@ -429,7 +409,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 91,
+    "current": 96,
     "maximum": 100,
     "band": "steady",
     "tone": "normal"
@@ -450,10 +430,13 @@
  },
  "stack": [
   {
-   "kind": "combat"
+   "kind": "map"
   }
  ],
- "log": [],
+ "log": [
+  "Closed.",
+  "Elspeth: last seen at Ferry Landing at 64800s."
+ ],
  "combatLog": [],
  "details": {}
 }

@@ -14,6 +14,7 @@ import JournalView from './views/journal.json';
 import CarryingEmptyView from './views/carrying-empty.json';
 import CarryingHeldView from './views/carrying-held.json';
 import CharacterUnknownView from './views/character-unknown.json';
+import CharacterFullView from './views/character-full.json';
 import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
 import AncestryView from './views/ancestry.json';
@@ -39,6 +40,7 @@ export const CharacterUnknown: StoryObj = {
   ...pageStory(CharacterUnknownView),
   name: 'Character unknown',
 };
+export const CharacterFull: StoryObj = { ...pageStory(CharacterFullView), name: 'Character full' };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
 export const Ancestry: StoryObj = { ...pageStory(AncestryView), name: 'Ancestry' };

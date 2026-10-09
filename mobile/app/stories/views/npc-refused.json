@@ -4,24 +4,10 @@
   "map": {
    "rooms": [
     {
-     "id": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "title": "room.willow_shade.title",
-     "x": -2,
-     "y": 4,
-     "z": 0
-    },
-    {
      "id": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
      "title": "room.reed_path.title",
      "x": 0,
      "y": 2,
-     "z": 0
-    },
-    {
-     "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "title": "room.well_lane.title",
-     "x": 0,
-     "y": -2,
      "z": 0
     },
     {
@@ -39,100 +25,73 @@
      "z": 0
     },
     {
-     "id": "6514913d-4eee-8eae-857e-c5bd36d48735",
-     "title": "room.village_green.title",
+     "id": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "title": "room.mire_crossing.title",
      "x": 0,
-     "y": -4,
+     "y": 6,
      "z": 0
     },
     {
-     "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "title": "room.oak_branches.title",
-     "x": -2,
-     "y": 6,
-     "z": 1
-    },
-    {
-     "id": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "x": -2,
+     "id": "b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462",
+     "title": "room.marsh_light.title",
+     "x": 2,
      "y": 6,
      "z": 0
     }
    ],
    "links": [
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "direction": "north"
+    },
+    {
+     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
      "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "south"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "north"
+    },
+    {
+     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "to": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "direction": "south"
+    },
+    {
+     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "direction": "south"
+    },
+    {
+     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
+     "to": "b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462",
      "direction": "east"
     },
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "south"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "direction": "north"
-    },
-    {
-     "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
+     "from": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
      "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "direction": "south"
-    },
-    {
-     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
      "direction": "north"
     },
     {
-     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "direction": "south"
-    },
-    {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "direction": "north"
-    },
-    {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
+     "from": "b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462",
+     "to": "7a1941ef-f5c1-8d29-9d98-a148ea7e0d64",
      "direction": "west"
-    },
-    {
-     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "direction": "north"
-    },
-    {
-     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "to": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
-     "direction": "south"
-    },
-    {
-     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
-     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "direction": "south"
-    },
-    {
-     "from": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "down"
-    },
-    {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "north"
-    },
-    {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "direction": "up"
     }
    ]
   },
+  "known_npcs": [
+   {
+    "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
+    "name": "npc.wisp.short"
+   },
+   {
+    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
+    "name": "npc.elspeth.short"
+   }
+  ],
   "skills": [
    {
     "skill": {
@@ -271,62 +230,30 @@
   ],
   "ancestry": "road_born",
   "topics": [],
-  "combat": {
-   "encounter_id": "edbe85e0-4afe-85ff-9376-2f8012a74e51",
-   "opponent_id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-   "name": "npc.crow.short"
-  },
   "place": {
-   "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
+   "id": "b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462",
    "title": {
-    "key": "room.oak_branches.title"
+    "key": "room.marsh_light.title"
    },
    "description": {
-    "key": "room.oak_branches.description"
+    "key": "room.marsh_light.dark"
    }
   },
   "exits": [
    {
-    "available": false,
-    "direction": "down",
-    "sight": {
-     "room": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "entities": [
-      {
-       "id": "515ae065-0916-84db-9f13-345580da21be",
-       "name": "npc.crow.short",
-       "kind": "npc"
-      },
-      {
-       "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
-       "name": "npc.oak_deer.short",
-       "kind": "npc"
-      }
-     ]
-    },
-    "reason": {
-     "code": "invalid_state"
-    }
+    "available": true,
+    "direction": "south"
    },
    {
-    "available": false,
-    "direction": "up",
-    "sight": {
-     "room": "7d88a524-5246-885e-a937-f6be4219ad48",
-     "title": "room.oak_crown.title",
-     "entities": []
-    },
-    "reason": {
-     "code": "invalid_state"
-    }
+    "available": true,
+    "direction": "west"
    }
   ],
   "actions": [
    {
     "available": true,
-    "action_key": "flee",
-    "label": "action.flee",
+    "action_key": "look",
+    "label": "action.look",
     "target": {
      "kind": "none"
     },
@@ -334,8 +261,19 @@
    },
    {
     "available": true,
-    "action_key": "look",
-    "label": "action.look",
+    "action_key": "move",
+    "label": "action.move",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "direction"
+    ]
+   },
+   {
+    "available": true,
+    "action_key": "rest",
+    "label": "action.rest",
     "target": {
      "kind": "none"
     },
@@ -349,23 +287,85 @@
      "kind": "none"
     },
     "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sit",
+    "label": "action.sit",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   },
+   {
+    "available": true,
+    "action_key": "sleep",
+    "label": "action.sleep",
+    "target": {
+     "kind": "none"
+    },
+    "input": []
+   }
+  ],
+  "notices": [
+   {
+    "id": "9c59c35a-a2b2-89d8-ad5c-7e43bf6a7c5a",
+    "title": "detail.glow.title",
+    "description": "detail.glow.description",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "seek_wisp",
+      "label": "actions.seek_wisp",
+      "target": {
+       "kind": "none"
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ]
    }
   ],
   "entities": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "item.crow_nest.short",
-    "description": "item.crow_nest.description",
-    "kind": "item",
-    "state": "open",
-    "actions": []
-   },
-   {
-    "id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-    "name": "npc.crow.short",
-    "description": "npc.crow.description",
+    "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
+    "name": "npc.wisp.short",
+    "description": "npc.wisp.description",
     "kind": "npc",
-    "actions": []
+    "actions": [
+     {
+      "available": false,
+      "action_key": "a_wisp_offer",
+      "label": "actions.accept_wisp",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     },
+     {
+      "available": false,
+      "action_key": "b_wisp_riddle",
+      "label": "actions.ask_wisp",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_occupants"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "invalid_state"
+      }
+     }
+    ]
    }
   ],
   "inventory": [],
@@ -384,7 +384,19 @@
    }
   ],
   "position": "standing",
-  "journal": [],
+  "journal": [
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "wisp_ward",
+     "kind": "quest"
+    },
+    "state": "active",
+    "title": "quest.wisp_ward.title",
+    "journal": "quest.wisp_ward.active"
+   }
+  ],
   "chapter": {
    "index": 0,
    "title": "chapter.missing_child"
@@ -396,6 +408,34 @@
    "subdivision": 0,
    "solar": "dusk",
    "lunar": "new"
+  },
+  "choice": {
+   "continuation_id": "1ed79936-52db-808c-b281-9f881e6e199d",
+   "prompt": {
+    "key": "dialogue.wisp.riddle"
+   },
+   "speaker_id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8",
+   "closable": true,
+   "riddle": {
+    "choice_id": "answer",
+    "bank": [
+     "T",
+     "I",
+     "D",
+     "E"
+    ],
+    "attempts": {
+     "count": 1,
+     "limit": 3
+    }
+   },
+   "choices": [
+    {
+     "available": true,
+     "choice_id": "answer",
+     "label": "dialogue.wisp.answer"
+    }
+   ]
   },
   "resources": [
    {
@@ -429,7 +469,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 91,
+    "current": 96,
     "maximum": 100,
     "band": "steady",
     "tone": "normal"
@@ -450,10 +490,24 @@
  },
  "stack": [
   {
-   "kind": "combat"
+   "kind": "thing",
+   "id": "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8"
   }
  ],
- "log": [],
+ "log": [
+  "Wisp arrives."
+ ],
  "combatLog": [],
- "details": {}
+ "details": {
+  "695264ac-d0fd-8ff9-a2ce-a5bc68ecd3e8": [
+   "The wisp offers a riddle and a ward for its answer. Will you accept?",
+   "The wisp waits for your answer.",
+   {
+    "text": "Journal updated",
+    "event": true
+   },
+   "Keep any carried light doused. I come and go, yet never leave the shore. What am I?",
+   "The wisp dims. That is not the answer."
+  ]
+ }
 }

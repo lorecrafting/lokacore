@@ -4,10 +4,10 @@
   "map": {
    "rooms": [
     {
-     "id": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "title": "room.willow_shade.title",
-     "x": -2,
-     "y": 4,
+     "id": "2ef35eee-f837-8b28-bea7-9748a332940a",
+     "title": "room.chapel_nave.title",
+     "x": 0,
+     "y": -10,
      "z": 0
     },
     {
@@ -15,6 +15,13 @@
      "title": "room.reed_path.title",
      "x": 0,
      "y": 2,
+     "z": 0
+    },
+    {
+     "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.chapel_steps.title",
+     "x": 0,
+     "y": -8,
      "z": 0
     },
     {
@@ -39,6 +46,13 @@
      "z": 0
     },
     {
+     "id": "609faefb-5552-8610-86e8-4b614753ee04",
+     "title": "room.north_gate.title",
+     "x": 0,
+     "y": -6,
+     "z": 0
+    },
+    {
      "id": "6514913d-4eee-8eae-857e-c5bd36d48735",
      "title": "room.village_green.title",
      "x": 0,
@@ -46,30 +60,30 @@
      "z": 0
     },
     {
-     "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "title": "room.oak_branches.title",
-     "x": -2,
-     "y": 6,
-     "z": 1
+     "id": "91fde0fc-dd14-846f-826e-245e45d16ec7",
+     "title": "room.belfry.title",
+     "x": 0,
+     "y": -10,
+     "z": 2
     },
     {
-     "id": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "x": -2,
-     "y": 6,
-     "z": 0
+     "id": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+     "title": "room.bell_tower.title",
+     "x": 0,
+     "y": -10,
+     "z": 1
     }
    ],
    "links": [
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "direction": "east"
+     "from": "2ef35eee-f837-8b28-bea7-9748a332940a",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
     },
     {
-     "from": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "direction": "south"
+     "from": "2ef35eee-f837-8b28-bea7-9748a332940a",
+     "to": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+     "direction": "up"
     },
     {
      "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
@@ -79,6 +93,16 @@
     {
      "from": "430c67c1-8c95-8bc2-8fae-84e23a486c3e",
      "to": "4c1926fa-026d-84bf-bed4-42760d1553dd",
+     "direction": "south"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "2ef35eee-f837-8b28-bea7-9748a332940a",
+     "direction": "north"
+    },
+    {
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
      "direction": "south"
     },
     {
@@ -97,11 +121,6 @@
      "direction": "north"
     },
     {
-     "from": "4c1926fa-026d-84bf-bed4-42760d1553dd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "west"
-    },
-    {
      "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
      "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "direction": "north"
@@ -112,23 +131,38 @@
      "direction": "south"
     },
     {
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "north"
+    },
+    {
+     "from": "609faefb-5552-8610-86e8-4b614753ee04",
+     "to": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "direction": "south"
+    },
+    {
+     "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
+     "to": "609faefb-5552-8610-86e8-4b614753ee04",
+     "direction": "north"
+    },
+    {
      "from": "6514913d-4eee-8eae-857e-c5bd36d48735",
      "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
      "direction": "south"
     },
     {
-     "from": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
-     "to": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
+     "from": "91fde0fc-dd14-846f-826e-245e45d16ec7",
+     "to": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
      "direction": "down"
     },
     {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "35b6cc9c-b7d1-893b-9ba7-29c5447b8074",
-     "direction": "north"
+     "from": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+     "to": "2ef35eee-f837-8b28-bea7-9748a332940a",
+     "direction": "down"
     },
     {
-     "from": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "to": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
+     "from": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+     "to": "91fde0fc-dd14-846f-826e-245e45d16ec7",
      "direction": "up"
     }
    ]
@@ -169,9 +203,9 @@
     },
     "label": "skill.haggle.label",
     "requirement": "skill.haggle.requirement",
-    "acquired": true,
+    "acquired": false,
     "qualified": true,
-    "usable": true
+    "usable": false
    },
    {
     "skill": {
@@ -195,9 +229,9 @@
     },
     "label": "skill.swim.label",
     "requirement": "skill.swim.requirement",
-    "acquired": false,
+    "acquired": true,
     "qualified": true,
-    "usable": false
+    "usable": true
    },
    {
     "skill": {
@@ -230,7 +264,7 @@
      "kind": "attribute",
      "key": "dex"
     },
-    "value": 11
+    "value": 10
    },
    {
     "attribute": {
@@ -248,7 +282,7 @@
      "kind": "attribute",
      "key": "per"
     },
-    "value": 5
+    "value": 6
    },
    {
     "attribute": {
@@ -269,20 +303,15 @@
     "value": 10
    }
   ],
-  "ancestry": "road_born",
+  "ancestry": "fen_born",
   "topics": [],
-  "combat": {
-   "encounter_id": "edbe85e0-4afe-85ff-9376-2f8012a74e51",
-   "opponent_id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-   "name": "npc.crow.short"
-  },
   "place": {
-   "id": "7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0",
+   "id": "91fde0fc-dd14-846f-826e-245e45d16ec7",
    "title": {
-    "key": "room.oak_branches.title"
+    "key": "room.belfry.title"
    },
    "description": {
-    "key": "room.oak_branches.description"
+    "key": "room.belfry.description"
    }
   },
   "exits": [
@@ -290,85 +319,58 @@
     "available": false,
     "direction": "down",
     "sight": {
-     "room": "d7e286c7-c344-8eef-8aa6-94a781d448bd",
-     "title": "room.drowned_oak.title",
-     "entities": [
-      {
-       "id": "515ae065-0916-84db-9f13-345580da21be",
-       "name": "npc.crow.short",
-       "kind": "npc"
-      },
-      {
-       "id": "7b70b331-f633-8ced-ad66-27ed17089d2a",
-       "name": "npc.oak_deer.short",
-       "kind": "npc"
-      }
-     ]
+     "room": "953a909b-3a29-8c5c-9e3f-4105b9a47c4b",
+     "title": "room.bell_tower.title",
+     "entities": []
     },
     "reason": {
-     "code": "invalid_state"
+     "code": "unsupported_capability"
     }
    },
    {
     "available": false,
     "direction": "up",
     "sight": {
-     "room": "7d88a524-5246-885e-a937-f6be4219ad48",
-     "title": "room.oak_crown.title",
+     "room": "aee0aa7b-c6a9-8407-98aa-26c5384f4bea",
+     "title": "room.spire.title",
      "entities": []
     },
     "reason": {
-     "code": "invalid_state"
+     "code": "unsupported_capability"
     }
    }
   ],
   "actions": [
    {
     "available": true,
-    "action_key": "flee",
-    "label": "action.flee",
+    "action_key": "continue",
+    "label": "action.continue",
     "target": {
      "kind": "none"
     },
-    "input": []
-   },
-   {
-    "available": true,
-    "action_key": "look",
-    "label": "action.look",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
-   },
-   {
-    "available": true,
-    "action_key": "scan",
-    "label": "action.scan",
-    "target": {
-     "kind": "none"
-    },
-    "input": []
+    "input": [
+     "scene",
+     "line"
+    ]
    }
   ],
-  "entities": [
+  "notices": [
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "item.crow_nest.short",
-    "description": "item.crow_nest.description",
+    "id": "dc0af619-e9bf-881e-8f32-9098160c25f4",
+    "title": "detail.bell.title",
+    "description": "detail.bell.description"
+   }
+  ],
+  "entities": [],
+  "inventory": [
+   {
+    "id": "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+    "name": "item.fox_drawing.short",
+    "description": "item.fox_drawing.description",
     "kind": "item",
-    "state": "open",
-    "actions": []
-   },
-   {
-    "id": "04dac7ba-1545-88b2-8e8c-44ab156be014",
-    "name": "npc.crow.short",
-    "description": "npc.crow.description",
-    "kind": "npc",
     "actions": []
    }
   ],
-  "inventory": [],
   "equipment": [
    {
     "slot": "cloak"
@@ -384,10 +386,55 @@
    }
   ],
   "position": "standing",
-  "journal": [],
+  "journal": [
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "bell_of_ashmere",
+     "kind": "quest"
+    },
+    "state": "resolved",
+    "title": "quest.bell.title",
+    "journal": "quest.bell.prior"
+   },
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "first_lead",
+     "kind": "quest"
+    },
+    "state": "resolved",
+    "title": "quest.first_lead.title",
+    "journal": "quest.first_lead.resolved"
+   },
+   {
+    "quest": {
+     "cartridge_id": "ashmere_missing_child",
+     "cartridge_version": "0.0.42",
+     "key": "missing_child",
+     "kind": "quest"
+    },
+    "state": "failed",
+    "title": "quest.missing_child.title",
+    "journal": "quest.missing_child.lost"
+   }
+  ],
   "chapter": {
    "index": 0,
    "title": "chapter.missing_child"
+  },
+  "scene": {
+   "scene": {
+    "cartridge_id": "ashmere_missing_child",
+    "cartridge_version": "0.0.42",
+    "kind": "scene",
+    "key": "bell_rung"
+   },
+   "line": "scene.bell_rung.bell",
+   "index": 1,
+   "count": 3
   },
   "time": 64800,
   "calendar_status": {
@@ -429,7 +476,7 @@
      "kind": "resource",
      "key": "mv"
     },
-    "current": 91,
+    "current": 85,
     "maximum": 100,
     "band": "steady",
     "tone": "normal"
@@ -450,10 +497,16 @@
  },
  "stack": [
   {
-   "kind": "combat"
+   "kind": "notice",
+   "id": "dc0af619-e9bf-881e-8f32-9098160c25f4"
   }
  ],
  "log": [],
  "combatLog": [],
- "details": {}
+ "details": {
+  "dc0af619-e9bf-881e-8f32-9098160c25f4": [
+   "Letters worn by years circle the rim: ASHMERE. The bell carries across Ashmere and the public priory rooms.",
+   "You pull the rope. The bell answers with a deep note that rolls over Ashmere and the priory. The bell carries across Ashmere."
+  ]
+ }
 }
