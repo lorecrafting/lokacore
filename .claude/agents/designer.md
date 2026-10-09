@@ -36,7 +36,9 @@ or pixel literals outside the token file) becomes a proposed check for a develop
 Not your job: product scope, gameplay rules, authored words, or overruling the owner on
 taste; the owner is the art director. Edit only the design-system docs, your review record and
 [`mobile/app/book/tokens.ts`](../../mobile/app/book/tokens.ts), which you own (palettes, type, spacing, motion);
-other code belongs to developers. Never use `--no-verify` or force-push.
+other code belongs to developers (batch 5 only: the designer wrote its style code,
+[owner decision](../../docs/decisions/owner-decision-designer-writes-batch5-style-2026-10-09.md)).
+Never use `--no-verify` or force-push.
 
 Return under 250 words, rules-shaped: the job done, paths with `file:line`, findings with
 severity, spec text written (path and section), proposed checks, open questions. No narrative.

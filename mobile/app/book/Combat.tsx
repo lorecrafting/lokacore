@@ -9,19 +9,24 @@ import type { presenter, Button } from './presenter.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
-function Foes({ view, text, combatLog }: Pick<Screen, 'view' | 'text' | 'combatLog'>) {
+// The fight's state: its name, your bleeding and the opponents, one block of touching lines
+// (a run of one kind, like the mock's entity lines; BOOK-UI-COMPONENTS.md, Page).
+function Fight({ view, text }: Pick<Screen, 'view' | 'text'>) {
   const c = usePalette();
   const combat = view.combat!;
   return (
-    <>
+    <View>
+      <Text style={prose(c)}>{text(combat.name)}</Text>
+      {view.bleeding && (
+        <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
+      )}
       {combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}
           {opponent.id === combat.opponent_id ? ' (your target)' : ''}
         </Text>
       ))}
-      <LogLines lines={combatLog} />
-    </>
+    </View>
   );
 }
 
@@ -39,11 +44,8 @@ export function Combat(p: {
     <View style={{ backgroundColor: c.bg, flex: 1 }}>
       <RunningHead view={view} text={text} />
       <Page title="Combat">
-        <Text style={prose(c)}>{text(view.combat.name)}</Text>
-        {view.bleeding && (
-          <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
-        )}
-        <Foes view={view} text={text} combatLog={combatLog} />
+        <Fight view={view} text={text} />
+        <LogLines lines={combatLog} />
         <Cards>
           {stand && <ActionCard b={stand} press={p.press} />}
           {p.g.look && <ActionCard b={p.g.look} press={p.press} />}

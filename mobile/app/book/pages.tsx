@@ -118,7 +118,16 @@ export function RoomPage(p: {
       fixedTitle
       onTitlePress={look && (() => p.press(look))}
     >
-      <Text style={prose(c)}>{plain(p.text(p.view.place.description.key))}</Text>
+      <View style={{ gap: space.lg }}>
+        {plain(p.text(p.view.place.description.key))
+          .trim()
+          .split(/\s*\n\s*\n\s*/) // a blank line in the authored text is a paragraph break
+          .map((paragraph, i) => (
+            <Text key={i} style={prose(c)}>
+              {paragraph}
+            </Text>
+          ))}
+      </View>
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
@@ -187,6 +196,7 @@ export function Page(p: {
   fixedTitle?: boolean;
   onTitlePress?: () => void;
   scrollToEnd?: boolean;
+  centred?: boolean; // a page with no game behind it (the save error) centres its blocks vertically
   foot?: ReactNode;
   children: ReactNode;
 }) {
@@ -205,7 +215,11 @@ export function Page(p: {
           scroll = view;
         }}
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: space.page, gap: space.block }}
+        contentContainerStyle={{
+          padding: space.page,
+          gap: space.block,
+          ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
+        }}
         onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
       >
         {!p.fixedTitle && title}

@@ -13,9 +13,12 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
   const [selected, setSelected] = useState<number[]>([]);
   const answer = selected.map((i) => p.bank[i]).join('');
   return (
-    <View>
+    // the answer, the bank and the controls, as the mock's `.word`, `.bankl` and `.rrow`
+    <View style={{ gap: space.block }}>
       <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+      <View
+        style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm }}
+      >
         {p.bank.map((letter, i) => (
           <LetterTile
             key={i}

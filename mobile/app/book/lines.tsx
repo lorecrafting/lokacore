@@ -50,7 +50,7 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
         ) : (
           <View
             key={i}
-            style={{ flexDirection: 'row', alignItems: 'flex-start', columnGap: space.xs }}
+            style={{ flexDirection: 'row', alignItems: 'baseline', columnGap: space.xs }}
           >
             <Text
               style={{

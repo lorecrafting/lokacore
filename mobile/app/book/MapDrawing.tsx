@@ -61,21 +61,24 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   const v = [Math.sin(a), -Math.cos(a)];
   const at = (n: number) => [v[0] * n, v[1] * n];
   const w = on ? 1.8 : 0.9;
+  // Colour roles (BOOK-UI-COMPONENTS.md, Footer): a path at rest in `dim`, the lit one in `fg`
+  // (ink, as you are), a barred way in `danger`; so at night the exits no longer read as a "+".
+  const ink = on ? c.fg : c.dim;
   if (exit.available)
     return (
       <>
-        <Line from={at(YOU)} to={at(STEP - RING)} color={c.fg} w={w} />
-        <Disc x={at(STEP)[0]} y={at(STEP)[1]} r={RING} fill={on ? c.fg : c.bg} border={c.fg} />
+        <Line from={at(YOU)} to={at(STEP - RING)} color={ink} w={w} />
+        <Disc x={at(STEP)[0]} y={at(STEP)[1]} r={RING} fill={on ? c.fg : c.bg} border={ink} />
       </>
     );
   const [x, y] = at(STEP * 0.6);
   return (
     <>
-      <Line from={at(YOU)} to={[x, y]} color={c.action} w={w} />
+      <Line from={at(YOU)} to={[x, y]} color={c.danger} w={w} />
       <Line
         from={[x - v[1] * 1.6, y + v[0] * 1.6]}
         to={[x + v[1] * 1.6, y - v[0] * 1.6]}
-        color={c.action}
+        color={c.danger}
       />
     </>
   );
@@ -92,7 +95,7 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
         y={y}
         r={NODE}
         fill={on ? c.fg : c.bg}
-        border={exit.available ? c.fg : c.action}
+        border={!exit.available ? c.danger : on ? c.fg : c.dim}
         dashed={!exit.available}
       />
       {/* Part of the drawing, not the Map button's shown text (book-ui.md, Label in name). */}
