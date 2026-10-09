@@ -23,3 +23,29 @@ test('git failing drops an inherited stamp', () => {
   );
   assert.equal(out, '""');
 });
+
+// Breaks: the author preview's switch is inverted or ignored, so a release, test or e2e bundle plays
+// the dev artifact, or the author preview keeps playing the pinned chapter, or a production bundle
+// takes the dev artifact.
+test('only LOKA_DEV_CARTRIDGE points the app at the dev artifact', () => {
+  const dev = join(mkdtempSync(join(tmpdir(), 'loka-dev-')), 'current.json');
+  writeFileSync(dev, '{}');
+  const resolved = (env: Record<string, string>) =>
+    execFileSync(
+      process.execPath,
+      [
+        '-e',
+        `const { resolver } = require('./metro.config.js');
+         const context = { originModulePath: require('path').resolve('App.tsx'), resolveRequest: () => 'pinned' };
+         const name = '../../protocol/fixtures/missing_child_v042_hash.json';
+         process.stdout.write(JSON.stringify(resolver.resolveRequest?.(context, name, 'web') ?? 'pinned'));`,
+      ],
+      { cwd: import.meta.dirname, encoding: 'utf8', env: { PATH: process.env.PATH, ...env } },
+    );
+  assert.equal(resolved({}), '"pinned"');
+  assert.deepEqual(JSON.parse(resolved({ LOKA_DEV_CARTRIDGE: dev })), {
+    type: 'sourceFile',
+    filePath: dev,
+  });
+  assert.throws(() => resolved({ LOKA_DEV_CARTRIDGE: dev, NODE_ENV: 'production' }));
+});

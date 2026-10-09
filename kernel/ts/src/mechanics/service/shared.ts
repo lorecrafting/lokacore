@@ -37,13 +37,13 @@ export function transition(
   const service = boundService(world, p, body);
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
+  const benefit = service.benefit;
+  if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
+    return serviceRefusal('invalid_state', 'service.already_paid');
   const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
-  const benefit = service.benefit;
   let ops: readonly DeltaOp[] = paid.ops;
   if (benefit.kind === 'entitlement') {
-    if (value(world, p.actor_id, benefit.fact) !== false)
-      return serviceRefusal('invalid_state', 'service.already_paid');
     const start = { ops, position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
     ops = assigned(world, p.actor_id, start, grant, 'service').ops;

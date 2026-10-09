@@ -6,8 +6,10 @@
   "scripts": {
     "postinstall": "node patch-sqlite-web.cjs",
     "web:preview": "node preview-server.cjs",
+    "author": "LOKA_DEV_CARTRIDGE=.dev-cartridge/current.json node preview-server.cjs",
     "pretest:e2e": "node patch-sqlite-web.cjs && node --test sqlite-web-worker.test.ts",
     "test:e2e": "E2E_TELEMETRY_DISABLED=1 e2e run",
+    "walkthrough": "rm -rf .walkthrough/steps && node patch-sqlite-web.cjs && E2E_TELEMETRY_DISABLED=1 e2e run --config walkthrough.config.ts; s=$?; node walkthrough/sheet.cjs; exit $s",
     "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"../authority/**/*.test.ts\" \"book/*.test.ts\" \"*.test.ts\""
   },
   "engines": {

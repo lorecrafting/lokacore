@@ -92,7 +92,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...doors,
     ...heldButtons(v, button, projected, names, text),
     ...(v.known_npcs ?? []).map((n) => ({
-      label: `Where ${text(n.name)}`,
+      label: `Ask where ${text(n.name)} is`,
       action_key: 'where',
       target_ids: [n.id],
       input: {},

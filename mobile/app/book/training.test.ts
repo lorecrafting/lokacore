@@ -22,14 +22,14 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useRef=v=>({current:v});`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useRef=v=>({current:v});`,
       };
     if (url === 'test:training-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView';",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

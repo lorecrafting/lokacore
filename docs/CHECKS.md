@@ -16,7 +16,9 @@ their rules and red controls remain available for resumption.
   (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) rules and paths. The paused mobile rules
   (`lint/rules/mobile-*.yml`: [mobile import rules](system/architecture.md#mobile-import-rules), session
   contracts, no display text in the authority, renderer imports, which allow Skia, Reanimated and Worklets
-  for the page curl) keep their cases. Rule
+  for the page curl; `mobile-book-raw-values`: no raw hex colour or numeric `fontSize` in
+  `mobile/app/book/*.tsx`, `mobile/app/SaveError.tsx` or `mobile/app/App*.tsx`, only [design tokens](BOOK-UI-COMPONENTS.md#design-tokens), a designer one-off
+  marked `ast-grep-ignore`) keep their cases and run in pre-commit on staged `mobile/` files. Rule
   modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
@@ -67,7 +69,9 @@ their rules and red controls remain available for resumption.
   `docs/decisions/README.md` has exactly one index line per record (catches a union merge that
   duplicated a twice-edited line, or a missing line); `docs/reviews/README.md` equals the output of
   `bin/review_index.sh` (title and final verdict per record) and each record is named
-  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name).
+  `<YYYY-MM-DD>-<slug>.md` (`bin/docs_red_controls.sh` plants a stale index and a bad name);
+  a `bin/*.sh` that runs `git init` sources `bin/lib/clean_git_env.sh`, so a hook's `GIT_DIR` cannot
+  send a throwaway repo's writes into the real one (it plants a harness without the line).
 - `python3 bin/check_beads_export.py`: a tracked Beads JSONL row cannot carry a
   nonempty `source_repo_path` or a local machine path; all 33 Chapter 1 plan
   slices must appear exactly once with unique issue IDs, while supplemental
@@ -98,7 +102,7 @@ their rules and red controls remain available for resumption.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
   PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit.
-  It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared).
+  It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared; a local path in the new row warns but still creates).
   It also holds `bin/check_all.sh`'s lock (one heavy run at a time across worktrees, also for
   pre-push; `--metadata` takes none): a live holder makes a second run wait ("waiting for <pid>"),
   a dead holder's lock is taken over, the lock is removed at exit. It pushes through the real pre-push hook (a `*.test.ts`-only push gets `--no-mix-test`,

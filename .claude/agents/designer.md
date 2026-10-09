@@ -34,8 +34,8 @@ Per call, do the one job the PM asks for:
 Prefer checks over opinions: a rule that can be checked mechanically (for example no raw hex
 or pixel literals outside the token file) becomes a proposed check for a developer slice.
 Not your job: product scope, gameplay rules, authored words, or overruling the owner on
-taste; the owner is the art director. Edit only the design-system docs, your review record and the token file (path named
-when the polish work creates it);
+taste; the owner is the art director. Edit only the design-system docs, your review record and
+[`mobile/app/book/tokens.ts`](../../mobile/app/book/tokens.ts), which you own (palettes, type, spacing, motion);
 other code belongs to developers. Never use `--no-verify` or force-push.
 
 Return under 250 words, rules-shaped: the job done, paths with `file:line`, findings with

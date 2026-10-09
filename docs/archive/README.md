@@ -8,5 +8,7 @@ each file stays because something current still cites it. The current system is 
 - [decisions/](../decisions/README.md): older ADR texts and owner decision records still in force or
   named by `protocol/`, code, lint or tests, indexed by the live decisions index.
 - [ROADMAP.md](ROADMAP.md): the R0–R6 stage rows; a protocol schema names it.
+- [LATER-MECHANICS.md](LATER-MECHANICS.md): the story-bound C2/C3/CC mechanic queues, superseded by the
+  [mechanics toolbox](../MECHANICS-TOOLBOX.md); its acceptance seams are still cited.
 
 Everything else archived on 2026-10-07 is at [the last commit that held it](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive).

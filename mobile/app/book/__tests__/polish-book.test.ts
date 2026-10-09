@@ -8,12 +8,20 @@ import { DatabaseSync } from 'node:sqlite';
 import { pathToFileURL } from 'node:url';
 import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { fadeStub } from './fade-stub.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './fade.ts') return fadeStub;
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:book-state', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:native-hosts', shortCircuit: true }
@@ -24,7 +32,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0]; export const useEffect = (f,d) => globalThis[Symbol.for('loka-book-test-effect')](f,d);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0]; export const useEffect = (f,d) => globalThis[Symbol.for('loka-book-test-effect')](f,d);`,
       };
     if (url === 'test:native-hosts')
       return {
@@ -60,8 +68,18 @@ export function nodes(element: any): any[] {
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
-    if (element.type.name === 'Turn') return [element, ...nodes(element.props.children)];
+    if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     return nodes(element.type(element.props));
+  }
+  // A context element (the Book's palette) provides its value to the components below it.
+  if (element.type?.$$typeof === Symbol.for('react.context')) {
+    const outer = element.type._currentValue;
+    element.type._currentValue = element.props.value;
+    try {
+      return [element, ...nodes(element.props.children)];
+    } finally {
+      element.type._currentValue = outer;
+    }
   }
   return [element, ...nodes(element.props?.children)];
 }

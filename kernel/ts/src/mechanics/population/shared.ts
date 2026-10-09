@@ -23,6 +23,7 @@ import { closeEncounter, engaged } from '../combat/shared.ts';
 import { add } from '../../foundation/int.ts';
 import { birth } from './birth.ts';
 import { planRef } from './refs.ts';
+import { hourOf } from '../calendar.ts';
 import { births, wanders, type Plan, type Slots } from './settle.ts';
 
 export function suppressed(world: World, plan: DefinitionRef, at = world.state.clock) {
@@ -96,9 +97,7 @@ function initialOps(
   mint: Mint,
   occurrence_id: CommandId,
 ): DeltaOp[] {
-  const hour =
-    Math.floor(world.state.clock / world.cartridge.calendar!.units_per_hour!) %
-    world.cartridge.calendar!.hours_per_day!;
+  const hour = hourOf(world.cartridge, world.state.clock);
   const count =
     hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
   const ops = genesisSlots(world, ref, plan.cap, count, occurrence_id, mint);
@@ -237,8 +236,7 @@ function resumePopulation(
 }
 
 function targetAt(world: World, plan: Plan, at: number) {
-  const calendar = world.cartridge.calendar!;
-  const hour = Math.floor(at / calendar.units_per_hour!) % calendar.hours_per_day!;
+  const hour = hourOf(world.cartridge, at);
   return hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
 }
 function slotRows(world: World, plan: DefinitionRef, cap: number): Slots {

@@ -2,8 +2,7 @@
 # Run the PM scripts (sync_pr, after_merge, br_create, check_all lock, pre-push lanes, mutate,
 # session_status) in throwaway repos with stubs; each case names the break it catches.
 set -eu
-# A git hook exports GIT_DIR and friends: without this the fixtures would land in the real repository.
-unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
+. "$(dirname "$0")/lib/clean_git_env.sh"
 export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t
 bin=$(cd "$(dirname "$0")" && pwd)
 tmp=$(mktemp -d)
@@ -92,12 +91,19 @@ MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh --no-mix-test 
 MISE_LOG=$R.log PATH="$tmp/stub:$PATH" capped sh bin/check_all.sh > "$R.out" 2>&1 || bad 'check_all record: full run failed'
 [ "$(cat "$rec" 2>/dev/null)" = "$(git rev-parse HEAD^{tree})" ] || bad 'check_all record: a full pass did not record the tree'
 # --- br_create.sh -----------------------------------------------------------------------
-# Stub br logs each call; create prints a new id. Break: the path is not cleared, or on the wrong id.
-printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; esac\n' > "$tmp/br-create"
+# Stub br logs each call; create prints a new id, show prints $SHOW. Break: the path is not cleared,
+# or on the wrong id; a local path in the new row is not warned about, refuses the create, or a
+# linked issue's path is blamed on the new row.
+printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in create) echo loka-n1 ;; show) echo "$SHOW" ;; esac\n' > "$tmp/br-create"
 mkdir "$tmp/brstub"; mv "$tmp/br-create" "$tmp/brstub/br"; chmod +x "$tmp/brstub/br"
-got=$(BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title') || bad 'br_create: failed'
-[ "$got" = loka-n1 ] && [ "$(tail -1 "$tmp/br.log")" = 'update loka-n1 --source-repo lokacore --source-repo-path ' ] \
-  || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
+for show in '[{"notes":"see bin/x.sh","dependents":[{"title":"/Users/x"}]}]' '[{"notes":"see ~/dev/x"}]'; do
+  : > "$tmp/br.log"
+  got=$(SHOW=$show BR_LOG=$tmp/br.log PATH="$tmp/brstub:$PATH" capped sh "$bin/br_create.sh" -l housekeeping 'A title' 2> "$tmp/br.err") || bad "br_create: failed on $show"
+  [ "$got" = loka-n1 ] && [ "$(tail -2 "$tmp/br.log" | tr '\n' '|')" = 'update loka-n1 --source-repo lokacore --source-repo-path |show loka-n1 --json|' ] \
+    || { bad "br_create: printed '$got'; br calls:"; cat "$tmp/br.log"; }
+  case $show in *'~/'*) grep -q 'loka-n1 text has an absolute or home-relative path' "$tmp/br.err" || bad 'br_create: no local-path warning' ;;
+    *) [ ! -s "$tmp/br.err" ] || { bad 'br_create: warned on a repo-relative path'; cat "$tmp/br.err"; } ;; esac
+done
 # --- after_merge.sh ------------------------------------------------------------------------
 # Bare origin; branch pr (worktree, review-7 on its tip) is merged on origin/main by another clone,
 # local main is behind with a dirty Beads export. Stub gh reports $PR_STATE; stub br close appends

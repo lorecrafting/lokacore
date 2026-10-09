@@ -6,12 +6,20 @@ import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { dreamBundle as bundle } from '../../authority/local-story/__tests__/dream-host.test.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url),
   ts = require('typescript'),
   react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './fade.ts') return fadeStub;
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:dream-state', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:dream-native', shortCircuit: true }
@@ -22,7 +30,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState=v=>globalThis[Symbol.for('dream-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('dream-effect')](f,d);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('dream-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('dream-effect')](f,d);`,
       };
     if (url === 'test:dream-native')
       return {
@@ -52,7 +60,7 @@ function nodes(e: any): any[] {
   if (!e || typeof e !== 'object') return [];
   if (typeof e.type === 'function') {
     if (e.type.name === 'Footer') return [e];
-    if (e.type.name === 'Turn') return [e, ...nodes(e.props.children)];
+    if (e.type.name === 'PageTurn') return [e, ...nodes(e.props.children)];
     return nodes(e.type(e.props));
   }
   return [e, ...nodes(e.props?.children)];

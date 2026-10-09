@@ -1,11 +1,15 @@
-import { test } from '@e2e-dev/web';
+import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
-import { go, inventory, litTorch, reopen, type Screen } from './steps.ts';
+import { go, inventory, litTorch, reopen, type Screen, reducedMotion, settled } from './steps.ts';
+
+// Long walks: the pages cross-fade (steps.ts reducedMotion).
+beforeEach(({ browser }) => reducedMotion(browser));
 
 // Breaks: the actual swim lesson, either bottom route, detail countdown or free Surface is lost in the browser Book.
 test('both water bottoms keep lit loot and a free Surface across browser reload', async ({
   app,
   screen,
+  browser,
 }) => {
   await app.clearState();
   await screen.getByRole('button', 'Fey-touched').tap();
@@ -23,9 +27,11 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await screen.getByRole('button', 'old coin, open').tap();
   await expect(screen.getByText(/A worn coin, green with age/)).toBeVisible();
+  await settled(browser); // the room page, with its own countdown, fades out
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Look, Well Bottom')).toBeVisible();
+  await settled(browser);
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
   await screen.getByRole('button', 'Surface (free)').tap();
   await expect(screen.getByRole('button', 'Look, Well Shaft')).toBeVisible();

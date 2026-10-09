@@ -12,7 +12,7 @@ valid:
   - "import { restoredLogs } from './logs.ts';"
   - "import { useState } from 'react';"
   - "import { Pressable, Text } from 'react-native';"
-  - "import { P } from './book/paper.ts';"
+  - "import { P } from './book/palette.ts';"
   - "import { hint } from './model.ts';"
   - "import type { Game } from '../../packages/game-view/session.ts';"
   - "import type { Failed } from '../packages/game-view/session.ts';"

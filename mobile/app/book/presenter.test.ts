@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { presenter } from './presenter.ts';
-import { detail } from './words.ts';
+import { comings, detail } from './words.ts';
 
 const VIEW = {
   actions: [],
@@ -276,11 +276,18 @@ test('the log stops growing in one room, its last line the latest answer', () =>
 });
 
 // Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed
-// one hiding its own message behind "not confirmed".
-test('the save-error line says a pending start over in words and shows any other message', () => {
+// one hiding its own message behind "not confirmed"; a bare kind code or the browser's raw OPFS
+// lock message or any other raw exception text shown to the player.
+test('the save-error line says a pending start over in words and never shows a raw message', () => {
   const failed = { message: '', startOver: true };
-  assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'start over not confirmed');
-  assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
+  assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'Start over was not confirmed.');
+  assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'The save could not be opened.');
+  const missing = 'pinned_release_missing';
+  assert.equal(detail({ ...failed, kind: missing, message: missing }), undefined);
+  assert.equal(detail(failed), undefined); // no message: no line, never a bare ''
+  const lock =
+    'Access Handles cannot be created if there is another open Access Handle or Writable stream associated with the same file.';
+  assert.equal(detail({ ...failed, message: lock }), 'Loka is already open in another tab.');
 });
 
 // Break: failed recovery of receipt routing falls back to showing combat prose in World.
@@ -355,4 +362,17 @@ test('combat receipt history is once-only when completion follows an already dis
   }
   assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'The marsh rat falls.']);
   assert.deepEqual(p.screen().log, []);
+});
+
+// Breaks: an NPC whose cartridge name starts lower case ("a crow") leaves or arrives mid-sentence.
+test('a coming or going starts its sentence with a capital', () => {
+  const at = (...names: string[]) =>
+    ({
+      place: { id: 'green' },
+      entities: names.map((name) => ({ id: name, name, kind: 'npc' })),
+    }) as unknown as GameView;
+  assert.deepEqual(
+    comings(at('a crow'), at('a fox'), (s) => s),
+    ['A crow leaves.', 'A fox arrives.'],
+  );
 });

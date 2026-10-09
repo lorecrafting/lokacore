@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import {
   loadCartridge,
@@ -19,19 +20,30 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { buttonsOf, group } from '../../app/book/model.ts';
 
 const ts = createRequire(new URL('../../app/package.json', import.meta.url))('typescript');
+const react = pathToFileURL(
+  createRequire(new URL('../../app/package.json', import.meta.url)).resolve('react'),
+).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // Components are called outside React: the palette context reads its default (light).
+    if (specifier === 'react') return { url: 'test:maud-react', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:maud-native-hosts', shortCircuit: true }
       : next(specifier, context);
   },
   load(url, context, next) {
+    if (url === 'test:maud-react')
+      return {
+        format: 'module',
+        shortCircuit: true,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue;`,
+      };
     if (url === 'test:maud-native-hosts')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView';",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

@@ -181,9 +181,20 @@ index =
       n != 1,
       do: "#{readme}: #{name} has #{n} index lines, want 1"
 
+# A bin/*.sh that runs git init sources bin/lib/clean_git_env.sh: a hook's GIT_DIR would
+# otherwise send the throwaway repo's writes into the real one.
+git_env =
+  for f <- tracked,
+      Path.dirname(f) == "bin" and Path.extname(f) == ".sh",
+      File.regular?(Path.join(root, f)),
+      text = File.read!(Path.join(root, f)),
+      String.match?(text, ~r/\bgit init\b/),
+      not String.match?(text, ~r{^\. "\$\(dirname "\$0"\)/lib/clean_git_env\.sh"$}m),
+      do: "#{f} runs git init without sourcing bin/lib/clean_git_env.sh"
+
 problems =
   Enum.sort(broken) ++
-    Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ names ++ index
+    Enum.sort(anchors) ++ Enum.sort(orphans) ++ over ++ pointers ++ names ++ index ++ git_env
 
 Enum.each(problems, &IO.puts/1)
 

@@ -1,7 +1,10 @@
-import { test } from '@e2e-dev/web';
+import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import type { TestFixtures } from 'e2e';
-import { go, litTorch, reopen, type Screen } from './steps.ts';
+import { go, litTorch, reopen, type Screen, reducedMotion } from './steps.ts';
+
+// Long walks: the pages cross-fade (steps.ts reducedMotion).
+beforeEach(({ browser }) => reducedMotion(browser));
 
 const LEDGER =
   'Grain received, flour delivered. Hob has balanced every line; a note in the margin reads: Mind the loose board upstairs.';

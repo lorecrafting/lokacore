@@ -21,7 +21,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState=v=>globalThis[Symbol.for('riddle-state')](v); export const useRef=v=>({current:v});`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('riddle-state')](v); export const useRef=v=>({current:v});`,
       };
     if (url === 'test:riddle-native')
       return {

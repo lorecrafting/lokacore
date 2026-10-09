@@ -11,11 +11,19 @@ import { openGame } from '../../authority/local-story/session.ts';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (s === './fade.ts') return fadeStub;
+    if (s === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (s === 'react') return { url: 'test:d4-react', shortCircuit: true };
     return s === 'react-native' ? { url: 'test:d4-native', shortCircuit: true } : next(s, c);
   },
@@ -24,7 +32,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis.d4Hooks.state(v); export const useRef = v => globalThis.d4Hooks.ref(v); export const useEffect = f => globalThis.d4Hooks.effect(f);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d4Hooks.state(v); export const useRef = v => globalThis.d4Hooks.ref(v); export const useEffect = f => globalThis.d4Hooks.effect(f);`,
       };
     if (url === 'test:d4-native')
       return {
@@ -159,7 +167,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       assert.deepEqual(draw().props.screen.detail(id), []);
       game.pulse('active');
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
       slots.length = 0;
       cleanups.length = 0;
       a.reopen();
@@ -167,14 +175,14 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       const cold = draw();
       assert.ok(!cold.props.stack.some((p) => ['thing', 'carrying'].includes(p.kind)));
       if (cold.props.stack.some((p) => p.kind === 'chapter')) {
-        const chapter = BookView(cold.props).props.children[0].props.children;
+        const chapter = BookView(cold.props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
       }
       assert.deepEqual(draw().props.stack, []);
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);
       assert.equal(game.lastNarration()?.detail_id, undefined);
     } finally {
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
       a.sql.close();
       rmSync(dir, { recursive: true, force: true });
     }

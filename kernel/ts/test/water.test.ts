@@ -11,7 +11,8 @@ import { resourceRef, level } from '../src/mechanics/resource.ts';
 import { movementPlan } from '../src/mechanics/movement/sequence.ts';
 import { expiry } from '../src/mechanics/water/expiry.ts';
 import { allocator } from '../src/runtime/decision.ts';
-import type { Command, Key } from '../src/contracts.gen.ts';
+import { recover } from '../src/mechanics/containment/recovery.ts';
+import { LIMITS, type Command, type Key } from '../src/contracts.gen.ts';
 
 const scoped = (w: World, fact: object) =>
   key({ kind: 'fact', fact, scope: { kind: 'player', character_id: w.character } });
@@ -286,6 +287,28 @@ test('Chapel recovery selects only actual owned bottom corpses and permits force
   const recovered = green(run(carrying, { type: 'recover_corpse', corpse_id: corpse }, 3));
   assert.equal(recovered.state.containers[coin], w.body);
   assert.equal(recovered.state.containers[trunk], w.body);
+});
+
+// Breaks: malformed corpse custody or an exhausted query budget is refused with a receipt instead of faulting (audit A5).
+test('Chapel recovery faults on a non-item corpse root and on query_steps exhaustion', () => {
+  const w = load(learned(fresh()), 6000),
+    dead = green(until(green(run(w, { type: 'move', direction: 'down' })), 70800, 2));
+  const corpse = Object.entries(dead.state.created!).find(([, i]) => i.origin.kind === 'death')![0];
+  const npc = Object.keys(dead.entities).find(
+    (id) => id !== dead.body && dead.entities[id].kind !== 'item',
+  )!;
+  const malformed = {
+    ...dead,
+    state: { ...dead.state, containers: { ...dead.state.containers, [npc]: corpse } },
+  } as World;
+  const r = run(malformed, { type: 'recover_corpse', corpse_id: corpse }, 3);
+  assert.deepEqual(r.decision, { kind: 'fault', code: 'precondition_failed' });
+  assert.equal(r.world, malformed);
+  const p = { type: 'recover_corpse', actor_id: dead.character, corpse_id: corpse } as never;
+  assert.deepEqual(recover(dead, p, { n: LIMITS.query_steps }), {
+    kind: 'fault',
+    code: 'budget_exceeded',
+  });
 });
 
 // Breaks: Pool Bottom lacks the real dark container/loot consumer, loot bypasses B4, or Take/Surface renews or debits the dive.

@@ -1,0 +1,15 @@
+id: mobile-book-raw-values
+language: tsx
+severity: error
+message: 'A Book colour or font size comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette) or a `type` style, never a raw hex colour or numeric fontSize.'
+files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx]
+# tokens.ts is .ts, so outside this glob. A computed size (MapDrawing's `3.6 * U`) is a drawing, not a
+# literal, and passes.
+rule:
+  any:
+    - kind: string_fragment
+      regex: '^#[0-9a-fA-F]{3,8}$'
+    - kind: number
+      inside:
+        kind: pair
+        has: { field: key, regex: '^fontSize$' }

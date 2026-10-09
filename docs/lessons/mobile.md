@@ -14,8 +14,10 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
   worker request, so open asynchronously before the existing synchronous authority calls.
   Its worker also writes a sync result's byte length through `Uint8Array.set(Uint32Array)`,
   truncating responses over 255 bytes, and serializes Error objects without their messages,
-  hiding SQLite corruption from Start over. `mobile/app/patch-sqlite-web.cjs` guards and fixes
-  that installed web file; remove the workaround only after browser action/reopen and
+  hiding SQLite corruption from Start over; it also allocated a 1 MB SharedArrayBuffer per sync
+  call, exhausting Chrome's array-buffer memory within 30 s of play (the patch reuses one per
+  worker). `mobile/app/patch-sqlite-web.cjs` guards and fixes that installed web file; remove
+  the workaround only after browser action/reopen and
   corrupt-save recovery proofs on an updated SDK. The local page needs COOP/COEP headers
   for SharedArrayBuffer.
 - expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS

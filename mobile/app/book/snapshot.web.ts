@@ -53,3 +53,11 @@ export async function snapshot(view: View) {
   await image.decode();
   return Skia.Image.MakeImageFromNativeBuffer(image);
 }
+
+// One throwaway picture ahead of the first turn: fetches and inlines the fonts and wakes the image
+// decoder, so the first turn's picture is ready within motion.quick and the first web turn curls too.
+export const warm = (view: View) =>
+  snapshot(view).then(
+    (image) => image?.dispose(),
+    () => {}, // the turn itself retries; its fallback is the page changing without a curl
+  );

@@ -101,7 +101,7 @@ test('an invalid press before a save does not make the next id collide after a r
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   const a = processOn(path);
   at(a.game).press({ label: 'bad', action_key: 'NOT A KEY', target_ids: [], input: {} });
-  assert.deepEqual(a.now().log, ['(invalid)']);
+  assert.deepEqual(a.now().log, ["That can't be done."]);
   a.press('Take a leather satchel');
   a.sql.close();
   const b = processOn(path);

@@ -2,7 +2,6 @@
 // sound. Rules, states and consumers: docs/BOOK-UI-COMPONENTS.md#design-tokens. Values are the
 // Chapter 1 mock's base page with every effect off (docs/design/ui-exploration/chapter-one-playable.html,
 // `.ph`), consolidated; docs/design/foundation/README.md lists mock against live.
-// ponytail: paper.ts still feeds the live Book; the polish phase moves its imports here and deletes it.
 
 const light = {
   bg: '#ebe6d7', // the paper
@@ -16,9 +15,7 @@ const light = {
 };
 
 // The mock's unlit/lamp paper (`.ph.unlit,.ph.lamp`), without its glow; `warning` is a burnt orange
-// apart from `action`. Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg`
-// and on `card` in both palettes; `line` is a hairline, not text. Which palette shows: in-game
-// time, docs/system/book-ui.md#world-and-status-entry.
+// apart from `action`.
 const dark: typeof light = {
   bg: '#0c0b09',
   fg: '#ecdfc3',
@@ -30,10 +27,35 @@ const dark: typeof light = {
   warning: '#d0712a',
 };
 
-export const color = { light, dark };
+// Twilight: dawn a cool grey-blue paper with dark ink, dusk a warm umber page with lamp ink.
+// Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg` and on `card` in all
+// four palettes; `line` is a hairline, not text. Which palette shows: the in-game solar phase,
+// docs/system/book-ui.md#world-and-status-entry.
+const dawn: typeof light = {
+  bg: '#d5d9da',
+  fg: '#1c2128',
+  dim: '#4e5662',
+  line: '#b3bbc0',
+  card: '#cbd1d4',
+  action: '#7b2d20',
+  danger: '#7b2d20',
+  warning: '#6f4a10',
+};
 
-// Bundled family names (OFL files in ./fonts). `caps` (IM Fell English SC) is chosen; the polish
-// phase adds its OFL file to ./fonts and loads it with the others through expo-font.
+const dusk: typeof light = {
+  bg: '#2b1e16',
+  fg: '#f1ddc2',
+  dim: '#bfa58a',
+  line: '#4a3729',
+  card: '#36271d',
+  action: '#f0b462',
+  danger: '#f2a07f',
+  warning: '#e2894a',
+};
+
+export const color = { light, dawn, dusk, dark };
+
+// Bundled family names (OFL files in ./fonts), loaded by App.tsx `fonts` through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
 
 // Text styles without colour; a component adds a colour from the palette.
@@ -41,12 +63,13 @@ export const type = {
   body: { fontFamily: font.body, fontSize: 18, lineHeight: 28 }, // prose, entity lines, actions
   log: { fontFamily: font.body, fontSize: 17, lineHeight: 26 }, // event log and detail history
   small: { fontFamily: font.body, fontSize: 13, lineHeight: 19 }, // status line, the tip
-  roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 },
-  pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 },
+  roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 }, // the room's fixed Look title
+  pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 }, // every page, Combat's included
+  sectionTitle: { fontFamily: font.caps, fontSize: 23, lineHeight: 25, letterSpacing: 0.5 }, // Inside, Held, Worn; the mock's h2
   runningHead: { fontFamily: font.caps, fontSize: 12, letterSpacing: 1.7 }, // the quest objective
-  control: { fontFamily: font.caps, fontSize: 14, letterSpacing: 1.1 }, // Back to World, Got it
+  control: { fontFamily: font.caps, fontSize: 14, letterSpacing: 1.1 }, // Back, Back to World, Got it, Start over
   tag: { fontFamily: font.caps, fontSize: 13, letterSpacing: 0.7 }, // a refusal's reason tag
-  label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // hp/ma/mv in the status
+  label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // every resource key in the status
   speaker: { fontFamily: font.caps, fontSize: 17, letterSpacing: 0.5 }, // a speech line's name
   tile: { fontFamily: font.head, fontSize: 23 }, // a riddle letter on a touch-sized card
 };
@@ -78,9 +101,10 @@ export const opacity = { disabled: 0.45 };
 
 // Plain state changes only. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion.
 export const motion = {
-  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return
+  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
+  palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)
 };
 
 // The paper page-turn sound, on by default, off in Settings. The mock's synthesised `pageSound` plays

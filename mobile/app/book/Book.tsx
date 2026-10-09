@@ -1,6 +1,6 @@
 // The Book draws GameView through its presenter; App injects the shell.
 import { useRef, useState } from 'react';
-import { Pressable, SafeAreaView, Text, View } from 'react-native';
+import { SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer, Status } from './Footer.tsx';
@@ -15,11 +15,14 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { body, paper } from './paper.ts';
+import { usePaletteCurve } from './fade.ts';
+import { PaletteContext, paletteOf, usePalette, useShownPalette, type Palette } from './palette.ts';
+import { type } from './tokens.ts';
+import { Control } from './pages.tsx';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
-import { Turn } from './Turn.tsx';
+import { PageTurn } from './PageTurn.tsx';
 import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
@@ -28,8 +31,6 @@ export type Shell = {
   learned: Hint;
   recovered?: (healthy: boolean) => void;
 };
-
-const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
 // original presentation context, and a throw shows its fault beside Start over.
@@ -103,6 +104,7 @@ export default function Book(p: BookProps) {
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
+      palette={useShownPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
       screen={screen}
       stack={stack}
       flip={flip}
@@ -116,6 +118,7 @@ export default function Book(p: BookProps) {
 }
 
 type ViewProps = {
+  palette: Palette;
   screen: Screen;
   stack: Page[];
   flip: { turn: number; dir: 1 | -1 };
@@ -127,6 +130,7 @@ type ViewProps = {
 };
 
 export function BookView(p: ViewProps) {
+  const c = p.palette;
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
@@ -140,16 +144,18 @@ export function BookView(p: ViewProps) {
     back: () => p.go(p.stack.slice(0, -1), -1),
   };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-      <Turn turn={p.flip.turn} dir={p.flip.dir}>
-        {p.screen.view.combat ? (
-          <Combat screen={p.screen} g={g} press={p.press} />
-        ) : (
-          <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
-        )}
-      </Turn>
-      <Bottom {...ctx} page={page} />
-    </SafeAreaView>
+    <PaletteContext value={c}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
+        <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
+          {p.screen.view.combat ? (
+            <Combat screen={p.screen} g={g} press={p.press} />
+          ) : (
+            <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
+          )}
+        </PageTurn>
+        <Bottom {...ctx} page={page} />
+      </SafeAreaView>
+    </PaletteContext>
   );
 }
 
@@ -169,6 +175,7 @@ type BottomProps = {
 };
 
 function Bottom(p: BottomProps) {
+  const c = usePalette();
   const { view, text, pending, fault } = p.screen;
   const position = nextPosition(view.position, p.g.position);
   return (
@@ -182,20 +189,20 @@ function Bottom(p: BottomProps) {
           bleeding={view.bleeding}
           position={view.position}
           text={text}
-          locked={!!view.scene || !!view.combat}
+          locked={!!view.scene || !!view.combat || p.page?.kind === 'chapter'}
           openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
         />
       )}
-      {p.screen.catchingUp && <Text style={{ ...small, color: paper.dim }}>Catching up…</Text>}
+      {p.screen.catchingUp && <Text style={{ ...type.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
 }
 
-// On a page, its Back (detail, dialogue, dream and open notice pages keep their own Leave);
-// on the world, the footer.
+// On a page, its Back (detail, dialogue, dream and open notice pages keep their own Leave; the
+// chapter title page has only its Continue); on the world, the footer.
 function navigation(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   const notice = p.page?.kind === 'notice' ? p.page.id : undefined;
@@ -203,8 +210,9 @@ function navigation(p: BottomProps) {
     p.page.kind === 'thing' ||
     p.page.kind === 'dialogue' ||
     p.page.kind === 'dream' ||
+    p.page.kind === 'chapter' ||
     (notice && view.notices?.some((n) => n.id === notice)) ? null : (
-      <Back
+      <Control
         label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}
         onPress={p.page.kind === 'notice' || p.page.kind === 'board' ? p.back : p.world}
       />
@@ -228,30 +236,11 @@ type Screen = ReturnType<Presenter['screen']>;
 // that any press still sends (03 §14).
 // The message sits outside the button: its accessibilityLabel replaces the children it reads.
 function Fault(p: { fault: string; startOver: () => void }) {
+  const c = usePalette();
   return (
     <View style={{ alignItems: 'center' }}>
-      <Text style={{ ...small, color: paper.dim }}>{p.fault}</Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Start over"
-        onPress={p.startOver}
-        style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
-      >
-        <Text style={{ ...small, color: paper.accent }}>start over</Text>
-      </Pressable>
+      <Text style={{ ...type.small, color: c.dim }}>{p.fault}</Text>
+      <Control label="Start over" onPress={p.startOver} />
     </View>
-  );
-}
-
-function Back({ onPress, label }: { onPress: () => void; label: string }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
-    >
-      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>{label}</Text>
-    </Pressable>
   );
 }

@@ -7,11 +7,19 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { group, pagesAfter, restoredItemPages } from './model.ts';
 import { presenter } from './presenter.ts';
 import { ids, openChestBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (s === './fade.ts') return fadeStub;
+    if (s === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (s === 'react') return { url: 'test:d2-react', shortCircuit: true };
     return s === 'react-native' ? { url: 'test:d2-native', shortCircuit: true } : next(s, c);
   },
@@ -20,7 +28,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis.d2Hooks.state(v); export const useRef = v => globalThis.d2Hooks.ref(v); export const useEffect = f => globalThis.d2Hooks.effect(f);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d2Hooks.state(v); export const useRef = v => globalThis.d2Hooks.ref(v); export const useEffect = f => globalThis.d2Hooks.effect(f);`,
       };
     if (url === 'test:d2-native')
       return {
@@ -214,11 +222,11 @@ for (const settlement of ['pulse', 'title press'])
       };
       assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
       if (settlement === 'title press') {
-        const chapter = BookView(draw().props).props.children[0].props.children;
+        const chapter = BookView(draw().props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
         assert.deepEqual(draw().props.stack, []);
         a.fault.reads = false;
-        const world = BookView(draw().props).props.children[0].props.children;
+        const world = BookView(draw().props).props.children.props.children[0].props.children;
         nodes(world)
           .find(
             (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Look, Scriptorium',
@@ -230,7 +238,7 @@ for (const settlement of ['pulse', 'title press'])
         assert.equal(a.game.pulse('active').kind, 'ready');
         const settled = draw();
         assert.equal(settled.props.stack.at(-1).kind, 'chapter');
-        const chapter = BookView(settled.props).props.children[0].props.children;
+        const chapter = BookView(settled.props).props.children.props.children[0].props.children;
         chapter.props.chapterDone();
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
@@ -242,7 +250,7 @@ for (const settlement of ['pulse', 'title press'])
       draw().props.go([], -1);
       a.game.pulse('active');
       assert.deepEqual(draw().props.stack, []);
-      cleanups.forEach((f) => f());
+      cleanups.forEach((f) => f?.());
     }
     delete (globalThis as any).d2Hooks;
   });

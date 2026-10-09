@@ -128,6 +128,9 @@ export const absent = (v: GameView) =>
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Pool = NonNullable<GameView['resources']>[number];
+// Band colours mark only the condition pools, never pennies (book-ui.md#world-and-status-entry).
+export const toneOf = (r: Pool) =>
+  ['hp', 'ma', 'mv'].includes(r.resource.key) ? r.tone : 'normal';
 const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
   const key = `band.${r.band}`;

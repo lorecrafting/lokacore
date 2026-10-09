@@ -1,0 +1,9 @@
+id: mobile-book-raw-values
+valid:
+  - "const s = { ...type.body, color: c.fg };"
+  - "const s = { fontSize: 3.6 * U };"
+  - "const t = '#1 in the list';"
+invalid:
+  - "const s = { color: '#7b2d20' };"
+  - "<View style={{ backgroundColor: \"#fff\" }} />"
+  - "const s = { ...type.small, fontSize: 17 };"

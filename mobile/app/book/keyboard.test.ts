@@ -3,12 +3,20 @@ import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './fade.ts') return fadeStub;
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:keyboard-react', shortCircuit: true };
     if (specifier === 'react-native') return { url: 'test:keyboard-native', shortCircuit: true };
     return next(specifier, context);
@@ -18,7 +26,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
       };
     if (url === 'test:keyboard-native')
       return {
@@ -41,8 +49,10 @@ registerHooks({
     };
   },
 });
-const { Footer } = await import('./Footer.tsx');
+const { color } = await import('./tokens.ts');
+const { Footer, Status } = await import('./Footer.tsx');
 const { BookView } = await import('./Book.tsx');
+const { CharacterPage } = await import('./sections.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -155,6 +165,7 @@ test('Book captures movement keys only on an active World page', (t) => {
     listeners.clear();
     const current = { ...screen, ...change, view: { ...screen.view, ...(change.view as object) } };
     const book = BookView({
+      palette: color.light,
       screen: current as any,
       stack: stack as any,
       flip: { turn: 0, dir: 1 },
@@ -164,7 +175,7 @@ test('Book captures movement keys only on an active World page', (t) => {
       startOver: () => {},
       shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
     });
-    const bottom = book.props.children[1];
+    const bottom = book.props.children.props.children[1];
     const footer = bottom
       .type(bottom.props)
       .props.children.find((child: any) => child?.type === Footer);
@@ -184,4 +195,88 @@ test('Book captures movement keys only on an active World page', (t) => {
   for (const page of [{ kind: 'dialogue' }, { kind: 'thing', id: 'npc' }, { kind: 'chapter' }])
     assert.equal(attempt({}, [page]), false);
   assert.deepEqual(pressed, ['north']);
+});
+
+// Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue, or
+// the locked Contents still shows its tappable colours (docs/system/book-ui.md, Chapters, scenes
+// and recovery; BOOK-UI-COMPONENTS.md, Status line).
+test('the chapter title page leaves only Continue', () => {
+  const book = BookView({
+    palette: color.light,
+    screen: {
+      buttons: [],
+      view: {
+        place: { id: 'room' },
+        time: 0,
+        exits: [],
+        resources: [{ resource: { key: 'mv' }, current: 1, maximum: 9, tone: 'danger' }],
+      },
+      text: (key: string) => key,
+      log: [],
+      pending: false,
+      catchingUp: false,
+    } as any,
+    stack: [{ kind: 'chapter' }],
+    flip: { turn: 0, dir: 1 },
+    go: () => {},
+    press: () => {},
+    refused: () => {},
+    startOver: () => {},
+    shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
+  });
+  const bottom = book.props.children.props.children[1];
+  const [navigation, status] = bottom.type(bottom.props).props.children;
+  assert.equal(navigation, null);
+  assert.equal(status.props.locked, true);
+  const contents = Status(status.props).props.children.find((c: any) => c?.type === 'Pressable');
+  const colours = (e: any): string[] =>
+    !e || typeof e !== 'object'
+      ? []
+      : [e.props?.style?.color, ...[e.props?.children].flat().flatMap(colours)].filter(Boolean);
+  assert.deepEqual(new Set(colours(contents)), new Set(['#645c4f'])); // paper.dim
+});
+
+// Breaks: pennies (or any count) take a band colour on the status line or the Character page, or
+// the condition pools lose theirs
+// (docs/system/book-ui.md#world-and-status-entry: band colours only on hp, ma and mv).
+test('status and Character band colours mark hp, ma and mv only, never pennies', () => {
+  const pool = (key: string, tone: string) => ({
+    resource: { key },
+    current: 1,
+    maximum: 9,
+    tone,
+    band: 'hurt',
+  });
+  const status = Status({
+    time: 0,
+    resources: [pool('hp', 'danger'), pool('mv', 'warning'), pool('pennies', 'danger')],
+    text: (key: string) => key,
+    locked: false,
+    pending: false,
+    open: () => {},
+  } as any);
+  const contents = status.props.children.find((c: any) => c?.type === 'Pressable');
+  const shown = contents.props.children.props.children.map((t: any) => [
+    t.key,
+    t.props.style.color,
+  ]);
+  assert.deepEqual(shown, [
+    ['hp', '#7b2d20'], // paper.danger
+    ['mv', '#845512'], // paper.warning
+    ['pennies', '#241f19'], // paper.fg
+  ]);
+  const character = CharacterPage({
+    resources: [pool('hp', 'danger'), pool('pennies', 'danger')],
+    text: (key: string) => key,
+  });
+  assert.deepEqual(
+    [character.props.children]
+      .flat(2)
+      .filter((t: any) => t?.key)
+      .map((t: any) => [t.key, t.props.style.color]),
+    [
+      ['hp', '#7b2d20'], // paper.danger
+      ['pennies', '#241f19'], // paper.fg
+    ],
+  );
 });

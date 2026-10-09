@@ -1,6 +1,9 @@
-import { test } from '@e2e-dev/web';
+import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
-import { go, reopen, type Screen } from './steps.ts';
+import { go, reopen, type Screen, reducedMotion } from './steps.ts';
+
+// Long walks: the pages cross-fade (steps.ts reducedMotion).
+beforeEach(({ browser }) => reducedMotion(browser));
 
 // Breaks: an inherited Swim/Haggle or dark-sight effect is lost in the Book, or a confirmed
 // ancestry/value disappears on reload and reopens the once-only picker.

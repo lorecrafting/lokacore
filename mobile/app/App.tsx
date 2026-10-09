@@ -3,7 +3,7 @@
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Platform } from 'react-native';
+import { Alert, AppState, Button, Platform, TextInput, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import {
@@ -24,6 +24,7 @@ import { SaveError } from './SaveError';
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
 export const fonts = {
   IMFellEnglish: require('./book/fonts/IMFellEnglish.ttf'),
+  IMFellEnglishSC: require('./book/fonts/IMFellEnglishSC.ttf'),
   EBGaramond: require('./book/fonts/EBGaramond.ttf'),
 };
 
@@ -35,7 +36,14 @@ export const fonts = {
 // empty file rather than replaying it, so nothing else needs deleting.
 // The chapter has its own save; earlier development story saves stay on the phone untouched.
 // ponytail: no story picker until the approved release needs one.
-const NAME = 'loka-ashmere-missing-child.db';
+// The author preview (metro.config.js) keeps one save per edited cartridge's hash: an edit starts
+// fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is
+// deleted. ponytail: those dev saves pile up in the browser; clear the site's data to drop them.
+const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
+if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
+const NAME = devCartridge
+  ? `loka-dev-${chapter.sha256.slice(0, 16)}.db`
+  : 'loka-ashmere-missing-child.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
 const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;
@@ -45,7 +53,17 @@ const g = globalThis as {
   loka_session?: ReturnType<typeof localSession>;
   loka_web_opening?: Promise<ReturnType<typeof localSession>>;
   loka_clock_cleanup?: () => void;
+  loka_dev_hash?: string;
+  loka_dev_skew?: number; // ms the dev clock control has moved both host clocks forward
 };
+// An edited cartridge replaces the open game: the cached session still plays the old one.
+if (
+  devCartridge &&
+  Platform.OS === 'web' &&
+  (g.loka_dev_hash ??= chapter.sha256) !== chapter.sha256
+)
+  location.reload();
+const skew = () => g.loka_dev_skew ?? 0;
 const createSession = (open: () => Db) =>
   (g.loka_session ??= localSession(
     open,
@@ -63,7 +81,7 @@ const createSession = (open: () => Db) =>
         Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
       kernel_version,
       random: getRandomValues,
-      time: { wall: () => Date.now(), monotonic: () => performance.now() },
+      time: { wall: () => Date.now() + skew(), monotonic: () => performance.now() + skew() },
     },
   ));
 let session = g.loka_session;
@@ -188,6 +206,33 @@ function useWebSession() {
   return session;
 }
 
+// Author preview only (`?dev=1`; never the pinned save): moves both host clocks forward by game minutes at the
+// cartridge's rate, so the kernel's own elapsed path delivers the time (none before D11 selection).
+const devClock =
+  devCartridge && Platform.OS === 'web' && new URLSearchParams(location.search).get('dev') === '1';
+type Manifest = { manifest: { time_policy?: { rate: number } } };
+function DevClock() {
+  const [minutes, setMinutes] = useState('60');
+  const advance = () => {
+    const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
+    const m = Number(minutes);
+    if (rate && Number.isSafeInteger(m) && m > 0)
+      g.loka_dev_skew = skew() + Math.ceil((m * 60_000) / rate);
+  };
+  return (
+    <View style={{ position: 'absolute', top: 4, right: 4, flexDirection: 'row', gap: 4 }}>
+      <TextInput
+        aria-label="Game minutes"
+        inputMode="numeric"
+        value={minutes}
+        onChangeText={setMinutes}
+        style={{ width: 56, borderWidth: 1, backgroundColor: 'white' }}
+      />
+      <Button title="Advance game minutes" onPress={advance} />
+    </View>
+  );
+}
+
 export default function App() {
   const activeSession = useWebSession();
   const [loaded, fontError] = useFonts(fonts);
@@ -217,5 +262,13 @@ export default function App() {
     return (
       <SaveError failed={activeSession.failed()!} startOver={() => shell.confirm(startOver)} />
     );
-  return <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
+  const book = <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
+  return devClock ? (
+    <>
+      {book}
+      <DevClock />
+    </>
+  ) : (
+    book
+  );
 }

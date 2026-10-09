@@ -40,7 +40,8 @@ concealed fixture or exit text until the game reveals it; the Book cannot hide
 an authored phrase after receiving it.
 
 Below the description, present players and NPCs have their own paragraph/list, and
-loose room items have a separate paragraph/list. Each projected subject can open its
+loose room items have a separate paragraph/list, NPCs first. Every entity that is not an
+NPC or player goes in the item list, so none is dropped or listed twice. Each projected subject can open its
 own detail. An item's Take option appears only when currently offered; an NPC or
 player uses its own offered interactions. Omit an empty group. Player presence is a
 future projection; the current Book has NPCs and items only. This distinction is
@@ -75,18 +76,21 @@ Settings retains Start over and its confirmation/error handling, and holds the
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp and colors every
-projected resource. With a cartridge calendar, status shows the confirmed day and displayed time,
+palette without presenter thresholds. Status shows the hp band phrase only on hp. Band colours
+(`warning`, `danger`) mark only the condition pools hp, ma and mv; pennies and any other count
+always show in the normal tone, never `warning` or `danger`. With a cartridge calendar, status shows the confirmed day and displayed time,
 plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
-The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows confirmed GameView in-game
-time, never the device's light or dark setting: `light` from the cartridge's dawn hour until its
-dusk hour, `dark` otherwise, switching when confirmed time crosses either hour. Dawn and dusk are
-cartridge world values; a cartridge that authors none shows `light`. There is no Settings
-override ([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
+The Book's [palette](../BOOK-UI-COMPONENTS.md#design-tokens) follows the confirmed GameView
+solar phase, never the device's light or dark setting: phase `day` shows `light`, `dawn` shows
+`dawn`, `dusk` shows `dusk`, `night` shows `dark`; any other phase, or a cartridge without a
+calendar, shows `light`. The phase names are the cartridge's solar cuts; the Book reads the label
+and computes no hours. On a phase change the whole Book changes to the new palette per the
+[palette motion rule](../BOOK-UI-COMPONENTS.md#design-tokens) (cross-fade or at once). There is no Settings override
+([owner decision](../decisions/owner-decision-design-foundation-2026-10-07.md)).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
@@ -144,7 +148,8 @@ room and its known exits. An unvisited endpoint, NPC or item is never drawn mere
 the cartridge contains it or adjacent sight names it. Existing current-room exit and door
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
-become `here`, and a stale observation is never phrased as a current location.
+become `here`, and a stale observation is never phrased as a current location. Each known
+NPC's Where control reads "Ask where <name> is".
 Knock appears on the actual local door's context card and uses its exact direction and
 freshness token. It leaves that card and Map reachable after its reply.
 
@@ -187,7 +192,8 @@ are not actionable. Neither English labels nor cartridge internals determine mem
 
 Tapping a notice pushes its detail and invokes that captured offer. Its title and selected
 description precede the confirmed message and any nonempty detail-local history, then
-options. Entry shows the message immediately when Read confirms; no second Read option is
+options. Entry shows the message immediately when Read confirms, unless its plain text is the
+description already shown (the well), which is not shown twice; no second Read option is
 shown. A pending entry can be retried by returning and opening it again. Body text comes only
 from confirmed Read narration; pending, refused, stale and replayed attempts never invent or
 duplicate it. Back to board pops to the board, then Back to World clears the board. Opening
@@ -291,8 +297,11 @@ storage, travel and other quest actions remain available under their normal rule
 ## Chapters, scenes and recovery
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.
-A modal scene takes precedence: only its persisted current line and offered Continue appear;
+A modal scene takes precedence: only its persisted current line, offered Continue and the
+[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
+title page shows its title, Continue and the running head only: no Back to World, and Contents and position are
+locked as in a scene. A chapter
 title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
@@ -307,7 +316,11 @@ Pending save status says save not confirmed; no unconfirmed result is presented 
 invocation retries the original attempt before acting on its new button, preserving original
 NPC/item context. Fault details remain visible with Start over recovery. Settings Start over
 requires destructive confirmation; failure retains the existing game/retry, while successful
-replacement remounts the book. Save-open errors expose only existing permitted recovery. Those
+replacement remounts the book. Save-open errors expose only existing permitted recovery. The
+save-error screen shows the `light` palette (no GameView, so no phase), a headline and at most
+one plain sentence under it, never a raw kind or code and never the headline repeated; the
+browser's save-file lock reads "Loka is already open in another tab."
+[words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
 
@@ -365,7 +378,9 @@ its Shell callback; [App lifecycle](architecture.md#elapsed-session-driver) owns
 The session snapshots only validated bounded invocation data, including target_ids and input,
 so caller mutation cannot change the retained attempt or its completion context. During
 catching_up, a different identified intent returns conflict while the original attempt and
-status remain retained; a matching retry uses its original identity/context. Pending unknown
+status remain retained; a matching retry uses its original identity/context.
+A conflict, invalid or unauthorized reply logs one plain sentence, never the reply kind or a
+code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pending unknown
 save retries keep the existing original-attempt behavior for any subsequent press.
 
 ## Live combat response (M6-A)

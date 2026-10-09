@@ -38,7 +38,7 @@ Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
   acceptance scenarios [15](../archive/spec/15-acceptance-scenarios.md).
 - Touch UI: [room view](../design/room-view/README.md) GameView needs; the chosen direction.
 
-- **Later chapter mechanics**: [provisional Barrow King / King's Road quest-consumer queues](../LATER-MECHANICS.md); lookahead after Missing Child, not installed contracts; five conflicts have [selected future policies](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md).
+- **Later chapter mechanics**: [archived Barrow King / King's Road quest-consumer queues](../archive/LATER-MECHANICS.md), superseded by the [mechanics toolbox](../MECHANICS-TOOLBOX.md); five conflicts have [selected future policies](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md).
 
 ## Authoring and certification
 

@@ -6,9 +6,10 @@ import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { bleedingLine, branch, refused, said, why, type Hint, type Pool } from './model.ts';
+import { bleedingLine, branch, refused, said, toneOf, why, type Hint, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
-import { body, paper } from './paper.ts';
+import { usePalette, type Palette } from './palette.ts';
+import { size, type } from './tokens.ts';
 
 type Props = {
   keyboardEnabled: boolean;
@@ -19,8 +20,7 @@ type Props = {
   openMap: () => void;
   learned: Hint; // the shell's first-run store: the tip shows until the first walk or map tap
 };
-const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
-const rule = { flex: 1, height: 1, backgroundColor: paper.line };
+const rule = (c: Palette) => ({ flex: 1, height: 1, backgroundColor: c.line });
 const keys: Record<string, string> = {
   ArrowUp: 'north',
   ArrowDown: 'south',
@@ -33,6 +33,7 @@ const keys: Record<string, string> = {
 // ponytail: react-native-web's announceForAccessibility is a no-op; a web build needs a live region.
 // A walk keeps the action/context from `at` (drag start); the presenter revalidates its token.
 export function Footer(p: Props) {
+  const c = usePalette();
   const [lit, setLit] = useState<string | null>(null);
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
   const [tip, setTip] = useState(() => !p.learned.seen());
@@ -56,7 +57,7 @@ export function Footer(p: Props) {
     <View>
       {tip && <Tip dismiss={learn} />}
       <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
-        <View style={rule} />
+        <View style={rule(c)} />
         <View
           style={{ width: 56, height: 56, zIndex: 1 }} // above the rules: the zoomed map covers them
           {...readerActions(p.exits, (d) => walk(d, p), openMap)}
@@ -65,7 +66,7 @@ export function Footer(p: Props) {
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
           <Said text={said} side={sideOf(lit)} />
         </View>
-        <View style={rule} />
+        <View style={rule(c)} />
       </View>
     </View>
   );
@@ -123,18 +124,24 @@ function responder(
 }
 
 function Tip({ dismiss }: { dismiss: () => void }) {
+  const c = usePalette();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ ...small, color: paper.dim, flexShrink: 1, textAlign: 'center' }}>
+      <Text style={{ ...type.small, color: c.dim, flexShrink: 1, textAlign: 'center' }}>
         Hold the map and drag toward a path to walk; tap it to open the map.
       </Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Got it"
         onPress={dismiss}
-        style={{ minHeight: 44, minWidth: 64, justifyContent: 'center', alignItems: 'center' }}
+        style={{
+          minHeight: size.touch,
+          minWidth: 64,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
       >
-        <Text style={{ ...small, color: paper.accent }}>got it</Text>
+        <Text style={{ ...type.control, color: c.fg }}>got it</Text>
       </Pressable>
     </View>
   );
@@ -150,11 +157,12 @@ const SPOT = {
   right: { top: 19, left: AWAY, width: 120, textAlign: 'left' },
 } as const;
 function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
+  const c = usePalette();
   return (
     text !== '' && (
       <Text
         pointerEvents="none"
-        style={{ ...small, position: 'absolute', ...SPOT[side], color: paper.fg }}
+        style={{ ...type.small, position: 'absolute', ...SPOT[side], color: c.fg }}
       >
         {text}
       </Text>
@@ -218,18 +226,19 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
     .join(' · ');
 
 export function Status(p: StatusProps) {
+  const c = usePalette();
   const time = calendarLine(p.calendar);
   return (
     <View style={statusRow}>
       <Text
-        style={{ ...small, color: paper.dim }}
+        style={{ ...type.small, color: c.dim }}
         accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}
       >
         {time ?? branch(p.time).glyph}
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
       {p.bleeding && (
-        <Text style={{ ...small, color: paper.accent }}>
+        <Text style={{ ...type.small, color: c.danger }}>
           {bleedingLine(p.bleeding, p.time, p.text)}
         </Text>
       )}
@@ -238,14 +247,14 @@ export function Status(p: StatusProps) {
         accessibilityRole="button"
         accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
         onPress={p.open}
-        style={{ minHeight: 44, justifyContent: 'center' }}
+        style={{ minHeight: size.touch, justifyContent: 'center' }}
       >
-        <Text style={{ ...small, color: paper.accent }}>
-          {p.resources ? shown(p.resources) : 'character'}
+        <Text style={{ ...type.small, color: p.locked ? c.dim : c.action }}>
+          {p.resources ? shown(c, p.resources, p.locked) : 'character'}
         </Text>
       </Pressable>
       {p.pending && (
-        <Text style={{ ...small, color: paper.dim, width: '100%', textAlign: 'center' }}>
+        <Text style={{ ...type.small, color: c.dim, width: '100%', textAlign: 'center' }}>
           save not confirmed
         </Text>
       )}
@@ -253,17 +262,26 @@ export function Status(p: StatusProps) {
   );
 }
 
-// The resources as the status line shows them (coloured by band); its label is model.ts `said`.
-const shown = (rs: readonly Pool[]) =>
+// The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
+// locked); its label is model.ts `said`.
+const shown = (c: Palette, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: band(r.tone) }}>
-      {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
+    <Text
+      key={r.resource.key}
+      style={{
+        color: locked ? c.dim : band(c, toneOf(r)),
+      }}
+    >
+      {i ? '  ' : ''}
+      <Text style={type.label}>{r.resource.key}</Text>
+      {` ${r.current}/${r.maximum}`}
     </Text>
   ));
 
 function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
+  const c = usePalette();
   const words = (
-    <Text style={{ ...small, color: paper.dim }} accessibilityLabel={`Position, ${p.value}`}>
+    <Text style={{ ...type.small, color: c.dim }} accessibilityLabel={`Position, ${p.value}`}>
       {p.value}
     </Text>
   );

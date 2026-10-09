@@ -16,9 +16,22 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
       .replace(/^./, (a) => a.toUpperCase()),
 });
 
-/** The line under the save-error headline: a Start over that is not confirmed gets its words. */
+/**
+ * The line under the save-error headline, never a raw code or exception text: a Start over that is
+ * not confirmed gets its words, an empty message or one that is only the kind none (the headline
+ * says it), the browser's save-file lock a sentence, any other message one plain sentence.
+ * ponytail: the lock is matched on Chrome's OPFS message text.
+ */
 export const detail = (f: Failed) =>
-  f.code === 'start_over_pending' ? 'start over not confirmed' : f.message;
+  f.code === 'start_over_pending'
+    ? 'Start over was not confirmed.'
+    : f.message === f.kind
+      ? undefined
+      : /Access Handles? cannot be created/.test(f.message)
+        ? 'Loka is already open in another tab.'
+        : f.message
+          ? 'The save could not be opened.'
+          : undefined;
 
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
@@ -59,11 +72,18 @@ type Say = (key: string) => string;
 export const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
   lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
 
+// A press that changed nothing, as one plain sentence (book-ui.md, Shared elapsed status).
+const UNDONE: Partial<Record<Reply['kind'], string>> = {
+  conflict: 'The book is still catching up; try again.',
+  invalid: "That can't be done.",
+  unauthorized: "That isn't yours to do.",
+};
+
 // What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
 // command, else the refusal in words. Never a raw outcome code.
 export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string): string {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
-  if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
+  if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
     const { code } = d.error; // the same sentence as a refused drag (model.ts `refused`)
@@ -86,6 +106,8 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
+const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());
+
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
 // still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
 export function comings(was: GameView, now: GameView, text: Say): string[] {
@@ -95,7 +117,7 @@ export function comings(was: GameView, now: GameView, text: Say): string[] {
   return [
     ...gone(was, now)
       .filter((e) => e.id !== was.combat?.opponent_id)
-      .map((e) => `${text(e.name)} leaves.`),
-    ...gone(now, was).map((e) => `${text(e.name)} arrives.`),
+      .map((e) => `${sentence(text(e.name))} leaves.`),
+    ...gone(now, was).map((e) => `${sentence(text(e.name))} arrives.`),
   ];
 }

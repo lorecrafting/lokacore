@@ -68,7 +68,7 @@ From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "ave
 - **Schema sizes**: aliases/keywords/variants 16, recipe sequence 16, costs 8, room details 64, actions 64, narration lines 64, entity capacity max 1024, target_ids 8, ResourceInt 32-bit bounds, ARTIFACT_MAX_BYTES 4 MiB; lib/loka/content/checks.ex:24 `@enclosing 3` (nesting depth bookkeeping).
 - **Mechanism tables**: COMPASS (runtime/decision.ts:205, from room.schema), barrier `MOVES` transitions (kernel/ts/src/mechanics/barrier/rule.ts:39-44), check order (target, cooldown, costs, check), target `normalize` stop-words (target.ts).
 - **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; mobile/authority/local-story/invocation.ts:177 `*1000` (µs); session.ts:22 ID_PREFIX.
-- **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, Turn.tsx, Book.tsx, pages.tsx sizes, paper.ts colours.
+- **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, PageTurn.tsx and page-curl.sksl, Book.tsx, pages.tsx sizes, tokens.ts colours.
 - **Test-only**: all `*.test.ts` seeds and fixtures (faults.test.ts SEEDS, saves.test.ts SEED, etc.).
 
 ## 3. Presenters baking world values

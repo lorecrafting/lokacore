@@ -248,7 +248,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
 test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
   const h = book();
   h.tap('Old Bram, open');
-  const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
+  const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const entered = turn();
   assert.deepEqual(h.text().slice(0, 2), [
     'Old Bram',
@@ -295,7 +295,8 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
     { text: 'Journal updated', event: true },
   ]);
   const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
-  assert.deepEqual(h.text().slice(0, 2), [
+  assert.deepEqual(h.text().slice(0, 3), [
+    "Find Bram's lantern.", // the running head: the accepted quest's journal text
     'Old Bram',
     'A ferryman with rope-scarred hands and a coat that has never been dry.',
   ]);
@@ -325,7 +326,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
 // Breaks: direct cycling opens a page, flips World, skips a legal state or reuses a new freshness token.
 test('only World position taps directly cycle the offered states with captured freshness', () => {
   const h = book();
-  const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
+  const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'Position, standing');
   for (const [from, to] of [
     ['standing', 'sitting'],
@@ -335,7 +336,7 @@ test('only World position taps directly cycle the offered states with captured f
   ]) {
     h.tap(`Position, ${from}`);
     assert.equal(h.game.view().view.position, to);
-    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
+    assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
     assert.ok(h.labels().includes('Old Bram, open'));
   }
   const token = h.game.view().token;
@@ -403,4 +404,69 @@ test('pending ancestry keeps its choices pressable and a later press retries the
   assert.equal(h.game.view().view.ancestry_choices, undefined);
   assert.equal(h.game.view().view.ancestry, 'fen_born');
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
+});
+
+// Breaks: NPCs and loose items share one "is here" list, an NPC is listed among the items or
+// dropped, or an empty NPC group leaves its own block (book-ui.md, World and status entry).
+test('the room lists NPCs first, then every other entity as items, empty groups omitted', async () => {
+  const { RoomPage } = await import('./pages.tsx');
+  const entity = (id: string, kind: string) => ({ id, kind, name: id });
+  const groups = (entities: object[]) =>
+    nodes(
+      RoomPage({
+        view: {
+          place: { title: { key: 'Room' }, description: { key: 'A room.' } },
+          exits: [],
+          entities,
+        },
+        text: (key: string) => key,
+        log: [],
+        g: { place: [] },
+        press: () => {},
+        open: () => {},
+        openChoice: () => {},
+        details: null,
+      } as any),
+    )
+      .filter(
+        (n) =>
+          n.type === 'View' && [n.props.children].flat().every((c: any) => c?.type?.name === 'Tap'),
+      )
+      .map((n) => [n.props.children].flat().map((c: any) => c.props.label));
+  const room = [
+    entity('satchel', 'item'),
+    entity('ash', 'npc'),
+    entity('lamp', 'item'),
+    entity('wren', 'npc'),
+  ];
+  assert.deepEqual(groups(room), [
+    ['ash, open', 'wren, open'],
+    ['satchel, open', 'lamp, open'],
+  ]);
+  assert.deepEqual(groups([entity('lamp', 'item')]), [['lamp, open']]);
+});
+
+// Breaks: a return turns forward or an opened page turns back (BOOK-UI-COMPONENTS.md#page-turn,
+// Direction).
+test('opening a page turns forward and Back to World turns back', () => {
+  const h = book();
+  const dir = () => h.draw().find((n) => n.type.name === 'PageTurn').props.dir;
+  const contents = () => h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  contents();
+  h.tap('Back to World');
+  assert.equal(dir(), -1);
+  contents();
+  assert.equal(dir(), 1);
+  h.sql.close();
+});
+
+// Breaks: the Book ignores the confirmed solar phase, or a component reads a fixed palette instead
+// of the one the Book provides. Chapter 1 opens at 18:00, its `dusk` cut.
+test('a dusk GameView draws the Book in the dusk palette', () => {
+  const h = book(bundle('missing_child_v030_hash'));
+  assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
+  const drawn = h.draw();
+  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2b1e16');
+  const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 22); // the room title
+  assert.equal(title.props.style.color, '#f1ddc2');
 });
