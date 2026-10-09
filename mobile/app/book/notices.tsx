@@ -76,14 +76,14 @@ function NoticeLink(p: Props & { notice: Notice }) {
       <EntityLine
         name={title}
         rest={notice.remaining === undefined ? undefined : ` (${notice.remaining})`}
-        label={title}
+        suffix=", open"
         onPress={() => p.open({ kind: 'notice', id: notice.id })}
       />
     );
   return b ? (
     <EntityLine
       name={title}
-      label={title}
+      suffix=", open"
       onPress={() => {
         p.open({ kind: 'notice', id: notice.id });
         p.press(b, notice.id);
@@ -104,7 +104,6 @@ export function NoticeEntries(p: Props) {
         <EntityLine
           key={board.id}
           name={p.screen.text(board.title)}
-          label={p.screen.text(board.title)}
           onPress={() => p.open({ kind: 'board', id: board.id })}
         />
       ))}

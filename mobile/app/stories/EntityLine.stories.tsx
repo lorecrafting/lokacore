@@ -10,23 +10,25 @@ const meta = {
     name: 'Bram the ferryman',
     rest: ' is here.',
     note: 'He carries a long pole.',
-    label: 'Bram the ferryman, He carries a long pole., open',
+    suffix: ', open',
     onPress: fn(),
   },
 } satisfies Meta<typeof EntityLine>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Breaks: the whole line is not one button named by `label`, or a press is dropped.
+// Breaks: the whole line is not one button whose name leads with its shown text (name, rest, note)
+// then the suffix, or a press is dropped.
 export const NpcWithCarriedNote: Story = {
   play: async ({ canvas, args, userEvent }) => {
-    await userEvent.click(canvas.getByRole('button', { name: args.label }));
+    const name = 'Bram the ferryman is here. He carries a long pole., open';
+    await userEvent.click(canvas.getByRole('button', { name }));
     await expect(args.onPress).toHaveBeenCalledTimes(1);
   },
 };
 
 export const Item: Story = {
-  args: { name: 'A brass lantern', note: undefined, label: 'a brass lantern, open' },
+  args: { name: 'A brass lantern', note: undefined },
 };
 
 export const Held: Story = {
@@ -34,12 +36,11 @@ export const Held: Story = {
     name: 'a brass lantern',
     rest: undefined,
     note: undefined,
-    label: 'a brass lantern, open',
   },
 };
 
 export const Worn: Story = {
-  args: { name: 'a wool cloak', rest: undefined, note: undefined, label: 'a wool cloak, open' },
+  args: { name: 'a wool cloak', rest: undefined, note: undefined },
 };
 
 export const Inside: Story = {
@@ -47,14 +48,13 @@ export const Inside: Story = {
     name: 'A tallow candle',
     rest: undefined,
     note: undefined,
-    label: 'a tallow candle, open',
   },
 };
 
 export const NoticeWithRemainingCount: Story = {
-  args: { name: 'Ferry passage', rest: ' (3)', note: undefined, label: 'Ferry passage' },
+  args: { name: 'Ferry passage', rest: ' (3)', note: undefined },
 };
 
 export const ContentsRow: Story = {
-  args: { name: 'Character', rest: undefined, note: undefined, label: 'Character' },
+  args: { name: 'Character', rest: undefined, note: undefined, suffix: undefined },
 };

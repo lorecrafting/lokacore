@@ -39,14 +39,14 @@ test('a visible deer leaves Willow Shade after the sight deadline and stays gone
   await go(screen, 'south', 'Reed Path');
   await go(screen, 'south', 'Reed Bank');
   await go(screen, 'west', 'Willow Shade');
-  await expect(screen.getByRole('button', 'a deer, open')).toBeVisible();
+  await expect(screen.getByRole('button', 'A deer is here., open')).toBeVisible();
   await browser.evaluate(() => {
     localStorage.setItem('d7-clock-offset', String(7_000));
     return true;
   });
   await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Look, Willow Shade')).toBeVisible();
-  await expect(screen.getByRole('button', 'a deer, open')).not.toBeVisible();
+  await expect(screen.getByRole('button', 'A deer is here., open')).not.toBeVisible();
 });
 
 // Breaks: a killed deer shows no original corpse hide or the confirmed Take disappears on Book reload.
@@ -68,7 +68,7 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
   await go(screen, 'south', 'Reed Path');
   await go(screen, 'south', 'Reed Bank');
   await go(screen, 'west', 'Willow Shade');
-  await screen.getByRole('button', 'a deer, open').tap();
+  await screen.getByRole('button', 'A deer is here., open').tap();
   await screen.getByRole('button', /Attack/).tap();
   // The Combat page shows only a confirmed Attack; reopening before it loses the attack.
   await expect(screen.getByText('Combat')).toBeVisible();
@@ -78,8 +78,8 @@ test('a killed deer leaves its one hide for a confirmed Take across reload', asy
   });
   await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Look, Willow Shade')).toBeVisible();
-  await expect(screen.getByRole('button', /deer corpse, open/)).toBeVisible();
-  await screen.getByRole('button', /deer corpse, open/).tap();
+  await expect(screen.getByRole('button', /deer corpse is here\./)).toBeVisible();
+  await screen.getByRole('button', /deer corpse is here\./).tap();
   await expect(screen.getByRole('button', /deer hide, open/)).toBeVisible();
   await screen.getByRole('button', /deer hide, open/).tap();
   await screen.getByRole('button', /Take a deer hide/).tap();

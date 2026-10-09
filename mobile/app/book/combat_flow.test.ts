@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import { Book, game, nodes, view, words } from './__tests__/combat-book.test.ts';
+import { CONTENTS, control } from './__tests__/control.test.ts';
 import { presenter } from './presenter.ts';
 
 // Break: a dead combat opponent is narrated both as killed and as leaving the room.
@@ -113,11 +114,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
       .map(words);
   return {
     texts,
-    tap: (label: string) => {
-      const control = draw().find((n) => n.props?.accessibilityLabel === label);
-      assert.ok(control, label);
-      control.props.onPress();
-    },
+    tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
     publish: (next: GameView, line?: string) => {
       current = next;
       revision++;
@@ -152,7 +149,7 @@ test('confirmed encounter foregrounds another page and closure or death restores
   for (const ending of ['closed', 'opponent_dead', 'player_dead']) {
     const h = mounted(view({ combat: undefined }));
     try {
-      h.tap('Contents');
+      h.tap(CONTENTS);
       h.tap('Settings');
       assert.ok(h.texts().includes('Settings'));
       h.publish(view(), 'combat.hit');
@@ -213,7 +210,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     decision: { kind: 'accepted', events: [], outcome, narration: key ? [{ key }] : [] },
   });
   try {
-    h.tap('a marsh rat, open');
+    h.tap('A marsh rat');
     h.answer(accepted('attacked', 'combat.hit'), fighting, 'combat.hit');
     h.tap('Attack a marsh rat');
     assert.ok(h.texts().includes('Combat'));

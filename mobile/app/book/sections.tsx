@@ -129,23 +129,14 @@ export function CarryingPage(p: {
       <Text style={sectionTitleStyle(c)}>Held</Text>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
       {p.items.map((e) => (
-        <EntityLine
-          key={e.id}
-          name={p.text(e.name)}
-          label={`${p.text(e.name)}, open`}
-          onPress={() => p.open(e.id)}
-        />
+        <EntityLine key={e.id} name={p.text(e.name)} suffix=", open" onPress={() => p.open(e.id)} />
       ))}
       {(p.equipment?.length ?? 0) > 0 && <Text style={sectionTitleStyle(c)}>Worn</Text>}
       {p.equipment?.map(({ slot, item }) => (
         <View key={slot}>
           <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
           {item ? (
-            <EntityLine
-              name={p.text(item.name)}
-              label={`${p.text(item.name)}, open`}
-              onPress={() => p.open(item.id)}
-            />
+            <EntityLine name={p.text(item.name)} suffix=", open" onPress={() => p.open(item.id)} />
           ) : (
             <Text style={note(c)}>Empty</Text>
           )}

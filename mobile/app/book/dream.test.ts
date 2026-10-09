@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { dreamBundle as bundle } from '../../authority/local-story/__tests__/dream-host.test.ts';
+import { control } from './__tests__/control.test.ts';
 import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url),
@@ -121,13 +122,7 @@ function render(game: ReturnType<typeof openGame>) {
       draw()
         .filter((n) => n.type === 'Text')
         .map((n) => words(n.props.children)),
-    tap(label: string) {
-      const b = draw().find(
-        (n) => n.type === 'Pressable' && !n.props.disabled && n.props.accessibilityLabel === label,
-      );
-      assert.ok(b, `${label}: ${labels()}`);
-      b.props.onPress();
-    },
+    tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
     walk(direction: string) {
       draw()
         .find((n) => n.type.name === 'Footer')
@@ -144,7 +139,7 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   const ui = render(a.game);
   ui.draw();
   ui.tap('Continue');
-  ui.tap('Widow Maud, open');
+  ui.tap('Widow Maud');
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');
@@ -229,7 +224,7 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   const ui = render(a.game);
   ui.draw();
   ui.tap('Continue');
-  ui.tap('Widow Maud, open');
+  ui.tap('Widow Maud');
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');

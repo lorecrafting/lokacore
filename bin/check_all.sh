@@ -36,6 +36,8 @@ done
 echo $$ > "$lock/pid"
 trap 'rm -rf "$lock"' EXIT
 trap 'exit 130' INT TERM
+# Every lint rule over the whole tree (pre-commit sees only staged files); first, as it needs no deps.
+m ast-grep scan --error
 m mix deps.get --check-locked
 m mix format --check-formatted
 m mix compile --warnings-as-errors
@@ -48,7 +50,6 @@ m mix xref graph --label compile-connected --fail-above 0
 m elixir bin/check_size.exs
 m elixir bin/red_controls.exs
 m ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
-m ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
 m bin/lint_red_controls.sh --core-only
 m bin/docs_only_red_controls.sh
 m bin/integration_red_controls.sh

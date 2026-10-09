@@ -15,7 +15,7 @@ test('hound Attack shows admitted helpers on the Combat page', async ({ app, scr
   await go('south', 'Reed Bank');
   await go('east', 'Hound Run');
   await screen
-    .getByRole('button', /a fen hound, open/)
+    .getByRole('button', /^A fen hound is here\./)
     .first()
     .tap();
   await screen.getByRole('button', /Attack/).tap();

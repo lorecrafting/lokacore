@@ -42,7 +42,7 @@ async function ancestryRoute(screen: Screen, choice: string) {
   } else if (choice === 'Road-born') {
     await go(screen, 'north', 'Well Lane');
     await go(screen, 'west', 'Chandler');
-    await screen.getByRole('button', /Peg Harrow, open/).tap();
+    await screen.getByRole('button', /^Peg Harrow is here\./).tap();
     await expect(screen.getByText(/a torch: Buy 2p/)).toBeVisible();
     await screen.getByRole('button', 'Buy a torch — 2p').tap();
     await expect(

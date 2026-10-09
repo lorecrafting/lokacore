@@ -25,7 +25,7 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
   await ferryBack(screen);
   await toWellBottom(screen);
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
-  await screen.getByRole('button', 'old coin, open').tap();
+  await screen.getByRole('button', 'Old coin is here., open').tap();
   await expect(screen.getByText(/A worn coin, green with age/)).toBeVisible();
   await settled(browser); // the room page, with its own countdown, fades out
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
@@ -39,7 +39,7 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
   await go(screen, 'south', 'Ferry Landing');
   await toPoolBottom(screen);
   await expect(screen.getByText(/seconds to surface/)).toBeVisible();
-  await expect(screen.getByRole('button', 'sunken chest, open')).toBeVisible();
+  await expect(screen.getByRole('button', 'Sunken chest is here., open')).toBeVisible();
   await screen.getByRole('button', 'Surface (free)').tap();
   await expect(screen.getByRole('button', 'Look, Black Pool')).toBeVisible();
 });
@@ -57,7 +57,7 @@ test('expired dive returns to Chapel and recovers original belongings once after
   await screen.getByRole('button', 'Continue').tap();
   await go(screen, 'north', 'Well Lane');
   await go(screen, 'west', 'Chandler');
-  await screen.getByRole('button', /Peg Harrow, open/).tap();
+  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Buy a torch — 3p').tap();
   await screen.getByRole('button', 'Leave').tap();
   await go(screen, 'east', 'Well Lane');
@@ -82,10 +82,10 @@ test('expired dive returns to Chapel and recovers original belongings once after
 // From the Ferry Landing: the paid ferry to the isle and Mother Sedge's free swim lesson.
 async function learnSwim(screen: Screen) {
   await go(screen, 'west', 'Boathouse');
-  await screen.getByRole('button', 'Rope ferry').tap();
+  await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Board — 2p').doubleTap();
   await go(screen, 'east', 'Isle Hut');
-  await screen.getByRole('button', 'Mother Sedge, open').tap();
+  await screen.getByRole('button', /^Mother Sedge is here\./).tap();
   await screen.getByRole('button', 'Learn swim — free Mother Sedge').tap();
   await screen.getByRole('button', 'Learn swim — free').tap();
 }
@@ -93,7 +93,7 @@ async function learnSwim(screen: Screen) {
 // From Isle Hut: the free ferry back to the Ferry Landing.
 async function ferryBack(screen: Screen) {
   await go(screen, 'west', 'Fen Isle Landing');
-  await screen.getByRole('button', 'Rope ferry').tap();
+  await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Return — free').tap();
   await go(screen, 'east', 'Ferry Landing');
 }

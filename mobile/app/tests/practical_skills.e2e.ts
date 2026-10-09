@@ -19,16 +19,16 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
   await screen.getByRole('button', 'Fey-touched').tap();
   await screen.getByRole('button', 'Continue').tap();
   await go('west', 'Boathouse');
-  await screen.getByRole('button', 'Rope ferry').tap();
+  await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Board — 2p').doubleTap();
   await go('east', 'Isle Hut');
-  await screen.getByRole('button', 'Mother Sedge, open').tap();
+  await screen.getByRole('button', /^Mother Sedge is here\./).tap();
   await screen.getByRole('button', 'Learn herbalism (2p) Mother Sedge').tap();
   await screen.getByRole('button', 'Learn herbalism (2p)').tap();
   await expect(screen.getByText('You pay 2 pennies and learn herbalism.')).toBeVisible();
   await screen.getByRole('button', 'Leave').tap();
   await go('west', 'Fen Isle Landing');
-  await screen.getByRole('button', 'Rope ferry').tap();
+  await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Return — free').tap();
   await go('east', 'Ferry Landing');
   await go('south', 'Reed Path');
@@ -53,13 +53,13 @@ test('Peg lesson discounts an actual purchase after browser reload', async ({ ap
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go west').tap();
   await expect(screen.getByRole('button', 'Look, Chandler')).toBeVisible();
-  await screen.getByRole('button', /Peg Harrow, open/).tap();
+  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Learn haggle (2p) Peg Harrow').tap();
   await screen.getByRole('button', 'Learn haggle (2p)').tap();
   await expect(screen.getByText('You pay 2 pennies and learn haggle.')).toBeVisible();
   await app.restart();
   await screen.getByRole('button', 'Continue').tap();
-  await screen.getByRole('button', /Peg Harrow, open/).tap();
+  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await expect(screen.getByText(/a torch: Buy 2p/)).toBeVisible();
   await screen.getByRole('button', 'Buy a torch — 2p').tap();
   await expect(

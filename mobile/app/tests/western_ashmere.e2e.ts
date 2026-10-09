@@ -76,10 +76,10 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
     localStorage.setItem('d3-clock-offset', String(864_000));
     return true;
   });
-  await expect(screen.getByRole('button', 'Hob, open')).toBeVisible();
+  await expect(screen.getByRole('button', /^Hob is here\./)).toBeVisible();
   await meetHob(screen);
   await reopen({ app, screen });
-  await screen.getByRole('button', 'Hob, open').tap();
+  await screen.getByRole('button', /^Hob is here\./).tap();
   await heardHob(screen);
   await screen.getByRole('button', 'Leave').first().tap();
   await screen.getByRole('button', 'Leave').tap();
@@ -100,7 +100,7 @@ async function readTwice(
 }
 
 async function meetHob(screen: Screen) {
-  await screen.getByRole('button', 'Hob, open').tap();
+  await screen.getByRole('button', /^Hob is here\./).tap();
   await screen.getByRole('button', 'Talk to Hob').tap();
   await heardHob(screen);
 }

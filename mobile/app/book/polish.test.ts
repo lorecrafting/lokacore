@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { CONTENTS } from './__tests__/control.test.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
@@ -157,7 +158,9 @@ test('room is focused while Map retains directions and every detail returns to t
   const roomScroll = h.draw().find((n) => n.type === 'ScrollView');
   assert.equal(words(roomScroll).includes('Ferry Landing'), false);
   assert.ok(words(roomScroll).includes('Reeds crowd a slick wooden landing'));
-  assert.ok(nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram, open'));
+  assert.ok(
+    nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram is here., open'),
+  );
   assert.ok(h.text().includes('Ferry Landing'));
   const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Look, Ferry Landing');
   assert.ok(drawnLook);
@@ -172,21 +175,21 @@ test('room is focused while Map retains directions and every detail returns to t
   drawnLook.props.onPress(); // this captured title has the pre-Look freshness token
   assert.equal(receipts(), 1);
   assert.deepEqual(h.p.screen().log, ['The page had changed; here it is again.']);
-  assert.ok(h.labels().includes('Old Bram, open'));
+  assert.ok(h.labels().includes('Old Bram is here., open'));
   assert.equal(h.text().includes('North'), false);
   assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
   h.map();
   assert.ok(h.labels().includes('Go north'));
   assert.ok(h.text().includes('Beyond north: Well Lane — a brass lantern.'));
   h.tap('Back to World');
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Equipment & Inventory');
   h.tap('Back to World');
-  assert.ok(h.labels().includes('Old Bram, open'));
+  assert.ok(h.labels().includes('Old Bram is here., open'));
   assert.equal(h.labels().includes('Equipment & Inventory'), false);
   const sections = ['Character', 'Equipment & Inventory', 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
-    h.tap(h.labels().find((label) => label.startsWith('Contents,'))!);
+    h.tap(CONTENTS);
     assert.deepEqual(
       h.labels().filter((label) => sections.includes(label)),
       sections,
@@ -199,7 +202,7 @@ test('room is focused while Map retains directions and every detail returns to t
       [],
     );
     h.tap('Back to World');
-    assert.ok(h.labels().includes('Old Bram, open'));
+    assert.ok(h.labels().includes('Old Bram is here., open'));
   }
   h.sql.close();
 });
@@ -208,7 +211,7 @@ test('room is focused while Map retains directions and every detail returns to t
 // context, or its reason sits inside the Start over button where its label hides it.
 test('a postcommit narration read fault preserves the saved result and clears retry context', () => {
   const h = book();
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   h.tap('Talk to Old Bram');
   const speaker = h.game.view().view.choice!.speaker_id!;
   const result = "You say you'll fetch it. Bram nods toward the path north.";
@@ -238,7 +241,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   );
   assert.equal(h.p.screen().fault, undefined);
   assert.deepEqual(h.p.screen().log, []);
-  h.tap('a brass lantern, open');
+  h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   assert.deepEqual(h.p.screen().log, ['You pick up a brass lantern.']);
   h.sql.close();
@@ -247,7 +250,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
 // Breaks: Leave is redundant or closes optimistically, journal cues look like speech, or controls leave the log.
 test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
   const h = book();
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const entered = turn();
   assert.deepEqual(h.text().slice(0, 2), [
@@ -272,9 +275,9 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   );
   h.tap('Leave');
   assert.equal(h.game.view().view.choice, undefined);
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   h.tap('Talk to Old Bram');
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Map');
   h.tap('Go north'); // local section navigation preserves the pending choice
   h.tap('Continue conversation');
@@ -282,7 +285,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   assert.equal(h.game.view().view.choice, undefined);
   h.map();
   h.tap('Go south');
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   h.tap('Talk to Old Bram');
   const beforeResult = turn();
   h.tap("Offer to fetch Bram's lantern");
@@ -307,7 +310,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   assert.equal(h.text().includes('Journal updated'), false);
   h.map();
   h.tap('Go north');
-  h.tap('a brass lantern, open');
+  h.tap('A brass lantern');
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
   h.clock.wall += 250;
   h.clock.mono += 250;
@@ -315,7 +318,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   drawnTake.props.onPress(); // Breaks: the old-token shortcut keeps an item page after confirmed pickup.
   h.map();
   h.tap('Go south');
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   h.tap('Talk to Old Bram');
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
@@ -337,13 +340,13 @@ test('only World position taps directly cycle the offered states with captured f
     h.tap(`Position, ${from}`);
     assert.equal(h.game.view().view.position, to);
     assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
-    assert.ok(h.labels().includes('Old Bram, open'));
+    assert.ok(h.labels().includes('Old Bram is here., open'));
   }
   const token = h.game.view().token;
   drawn.props.onPress();
   assert.equal(h.game.view().token, token);
   assert.equal(h.game.view().view.position, 'standing');
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Character');
   assert.deepEqual(
     h.labels().filter((s) => ['Stand', 'Sit', 'Rest', 'Sleep'].includes(s)),
@@ -356,7 +359,7 @@ test('only World position taps directly cycle the offered states with captured f
 // Breaks: retrying an NPC's unconfirmed choice from Map forgets its original detail context.
 test('an NPC choice retried from the world keeps its result in the original detail', () => {
   const h = book();
-  h.tap('Old Bram, open');
+  h.tap('Old Bram');
   h.tap('Talk to Old Bram');
   const bram = h.game.view().view.choice!.speaker_id!;
   h.sql.exec('PRAGMA query_only = 1');
@@ -371,7 +374,7 @@ test('an NPC choice retried from the world keeps its result in the original deta
     [],
   );
   h.sql.exec('PRAGMA query_only = 0');
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Map');
   h.tap('Go north'); // GameSession retries the choice, so no move occurs.
   assert.equal(h.game.pending(), false);
@@ -433,7 +436,7 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
           n.type === 'View' &&
           [n.props.children].flat().every((c: any) => c?.type?.name === 'EntityLine'),
       )
-      .map((n) => [n.props.children].flat().map((c: any) => c.props.label));
+      .map((n) => [n.props.children].flat().map((c: any) => c.props.name));
   const room = [
     entity('satchel', 'item'),
     entity('ash', 'npc'),
@@ -441,10 +444,10 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     entity('wren', 'npc'),
   ];
   assert.deepEqual(groups(room), [
-    ['ash, open', 'wren, open'],
-    ['satchel, open', 'lamp, open'],
+    ['Ash', 'Wren'],
+    ['Satchel', 'Lamp'],
   ]);
-  assert.deepEqual(groups([entity('lamp', 'item')]), [['lamp, open']]);
+  assert.deepEqual(groups([entity('lamp', 'item')]), [['Lamp']]);
 });
 
 // Breaks: a return turns forward or an opened page turns back (BOOK-UI-COMPONENTS.md#page-turn,
@@ -452,7 +455,7 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
 test('opening a page turns forward and Back to World turns back', () => {
   const h = book();
   const dir = () => h.draw().find((n) => n.type.name === 'PageTurn').props.dir;
-  const contents = () => h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  const contents = () => h.tap(CONTENTS);
   contents();
   h.tap('Back to World');
   assert.equal(dir(), -1);

@@ -140,7 +140,7 @@ export function ContentsPage(p: { open: (section: Section) => void }) {
   return (
     <Sheet title="Contents">
       {SECTIONS.map(([kind, label]) => (
-        <EntityLine key={kind} name={label} label={label} onPress={() => p.open(kind)} />
+        <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
       ))}
     </Sheet>
   );

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
+import { CONTENTS } from './__tests__/control.test.ts';
 import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: an unconfirmed Take leaves the detail or announces success; retry loses its original
@@ -13,9 +14,9 @@ test('only confirmed pickup returns World, including a retry from another page',
   const h = book();
   h.map();
   h.tap('Go north');
-  h.tap('a brass lantern, open');
+  h.tap('A brass lantern');
   assert.deepEqual(
-    h.labels().filter((s) => !s.startsWith('Contents,')),
+    h.labels().filter((s) => !CONTENTS.test(s)),
     ['Take a brass lantern', 'Leave'],
   );
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
@@ -46,7 +47,7 @@ test('only confirmed pickup returns World, including a retry from another page',
     h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
     1,
   );
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Equipment & Inventory');
   assert.ok(h.text().includes('Held'));
   h.tap('a brass lantern, open');
@@ -62,7 +63,7 @@ test('touch omits incomplete Give but the complete item and recipient command re
   const h = book();
   h.map();
   h.tap('Go north');
-  h.tap('a brass lantern, open');
+  h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   const item = h.game.view().view.inventory[0];
   assert.equal(item.actions.find((a) => a.action_key === 'give')?.available, true);
@@ -96,9 +97,9 @@ test('inventory Drop returns World with one named event only after confirmation'
   const h = book();
   h.map();
   h.tap('Go north');
-  h.tap('a brass lantern, open');
+  h.tap('A brass lantern');
   h.tap('Take a brass lantern');
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Equipment & Inventory');
   h.tap('a brass lantern, open');
   assert.deepEqual(h.text().slice(0, 2), [
@@ -120,7 +121,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.map();
   h.tap('Go south'); // retries Drop without walking
   assert.deepEqual(h.game.view().view.inventory, []);
-  assert.ok(h.labels().includes('a brass lantern, open'));
+  assert.ok(h.labels().includes('A brass lantern is here., open'));
   assert.ok(h.labels().includes('Position, standing'));
   assert.equal(h.labels().includes('Leave'), false);
   assert.equal(h.p.screen().log.at(-1), 'You drop a brass lantern.');
@@ -138,14 +139,14 @@ test('other item actions retain their detail and show their consequences there',
     ),
   );
   const h = book(items);
-  h.tap('a sewing box, open');
+  h.tap('A sewing box');
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
   assert.ok(h.text().includes('Opened.'));
   assert.equal(h.p.screen().log.includes('Opened.'), false);
   h.tap('Leave');
-  assert.ok(h.labels().includes('a sewing box, open'));
+  assert.ok(h.labels().includes('A sewing box is here., open'));
   h.sql.close();
 });
 
@@ -154,7 +155,7 @@ test('other item actions retain their detail and show their consequences there',
 test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips', () => {
   const h = book(bundle('containers_sampler_v010_hash'));
   try {
-    h.tap('Old Bram, open');
+    h.tap('Old Bram');
     h.tap('Talk to Old Bram');
     const speaker = h.game.view().view.choice!.speaker_id!;
     const before = [...h.p.screen().detail(speaker)];
@@ -192,7 +193,7 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     h.clock.mono = 2592000;
     assert.equal(h.game.pulse().kind, 'ready');
     assert.equal(h.game.view().view.time, 194400);
-    assert.ok(h.labels().includes('Old Bram, open'));
+    assert.ok(h.labels().includes('Old Bram is here., open'));
     assert.equal(turn(), worldTurn);
   } finally {
     h.unmount();
@@ -209,7 +210,7 @@ test('delayed Take returns once with its original item name after a conflicting 
     if (u.kind === 'completion') completed.push(u);
   });
   try {
-    h.tap('a brass lantern, open');
+    h.tap('A brass lantern');
     h.clock.wall += 15984000;
     h.clock.mono = 15984000;
     h.tap('Take a brass lantern');
@@ -246,7 +247,7 @@ test('delayed Take returns once with its original item name after a conflicting 
       h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
       1,
     );
-    h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+    h.tap(CONTENTS);
     h.tap('Equipment & Inventory');
     h.tap('a brass lantern, open');
     const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
@@ -269,7 +270,7 @@ test('delayed actual quest completion adds one authored result and Journal updat
     if (u.kind === 'completion') completed.push(u);
   });
   try {
-    h.tap('Old Bram, open');
+    h.tap('Old Bram');
     h.tap('Talk to Old Bram');
     const speaker = h.game.view().view.choice!.speaker_id!;
     h.clock.wall += 15552000;
@@ -306,7 +307,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
     h.tap(`Go ${direction}`);
   };
   const take = (name: string) => {
-    h.tap(`${name}, open`);
+    h.tap(`${name[0].toUpperCase()}${name.slice(1)} is here.`);
     h.tap(`Take ${name}`);
   };
   go('north');
@@ -316,7 +317,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   take('a brass key');
   take('a wool cloak');
   const carrying = () => {
-    h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+    h.tap(CONTENTS);
     h.tap('Equipment & Inventory');
   };
   carrying();
@@ -324,7 +325,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Wear a wool cloak');
   h.tap('Leave');
   go('up');
-  h.tap('an old trunk, open');
+  h.tap('An old trunk');
   assert.ok(h.text().includes('Take: too heavy to carry.'));
   assert.equal(h.labels().includes('Take an old trunk'), false);
   h.tap('Leave');
@@ -333,7 +334,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Remove a wool cloak');
   assert.equal(h.labels().includes('Drop a wool cloak'), true);
   h.tap('Drop a wool cloak');
-  h.tap('an old trunk, open');
+  h.tap('An old trunk');
   assert.equal(
     h.text().some((s) => s.includes('too heavy to carry')),
     false,
@@ -349,7 +350,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
 test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
   const h = book(darkMarshBundle());
   try {
-    assert.ok(h.labels().includes('Marsh glow'));
+    assert.ok(h.labels().includes('Marsh glow, open'));
     h.tap('Marsh glow');
     assert.ok(h.text().includes('You follow the glow and find a wisp waiting above the reeds.'));
     assert.equal(
@@ -394,14 +395,14 @@ test('the running head shows the active quest objective on room and NPC pages', 
   h.tap('Fen-born');
   if (h.labels().includes('Continue')) h.tap('Continue');
   assert.equal(h.text().includes(head), false);
-  h.tap('Elspeth, open');
+  h.tap('Elspeth');
   h.tap('Talk to Elspeth');
   h.tap('Will you look around the Green for a sign of Wren?');
   assert.ok(h.text().includes(head));
   h.tap('Leave');
   assert.ok(h.text().includes('Ferry Landing'));
   assert.ok(h.text().includes(head));
-  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap(CONTENTS);
   h.tap('Journal');
   assert.equal(h.text().filter((t) => t === head).length, 1); // the entry, not a head as well
   h.sql.close();

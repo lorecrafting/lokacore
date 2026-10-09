@@ -184,20 +184,16 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
 function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   const npcs = p.view.entities.filter((e) => e.kind === 'npc');
   const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  const line = (e: GameView['entities'][number]) => {
-    const name = p.text(e.name);
-    const carrying = e.carrying && p.text(e.carrying);
-    return (
-      <EntityLine
-        key={e.id}
-        name={cap(name)}
-        rest=" is here."
-        note={carrying}
-        label={`${name}${carrying ? `, ${carrying}` : ''}, open`}
-        onPress={() => p.open(e.id)}
-      />
-    );
-  };
+  const line = (e: GameView['entities'][number]) => (
+    <EntityLine
+      key={e.id}
+      name={cap(p.text(e.name))}
+      rest=" is here."
+      note={e.carrying && p.text(e.carrying)}
+      suffix=", open"
+      onPress={() => p.open(e.id)}
+    />
+  );
   return [npcs, items]
     .filter((group) => group.length > 0)
     .map((group, i) => (
@@ -262,7 +258,7 @@ export function ThingPage(p: {
         <EntityLine
           key={e.id}
           name={cap(p.text(e.name))}
-          label={`${p.text(e.name)}, open`}
+          suffix=", open"
           onPress={() => p.open(e.id)}
         />
       ))}

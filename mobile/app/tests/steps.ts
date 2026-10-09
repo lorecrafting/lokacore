@@ -51,7 +51,7 @@ export async function inventory(screen: Screen) {
 
 // At the Chandler: buy a torch from Peg for 3p and light it.
 export async function litTorch(screen: Screen) {
-  await screen.getByRole('button', /Peg Harrow, open/).tap();
+  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Buy a torch — 3p').tap();
   await screen.getByRole('button', 'Leave').tap();
   await inventory(screen);

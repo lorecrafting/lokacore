@@ -8,6 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { pathToFileURL } from 'node:url';
 import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { control } from './control.test.ts';
 import { fadeStub } from './fade-stub.ts';
 
 const require = createRequire(import.meta.url);
@@ -160,11 +161,7 @@ export function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHo
   };
   const buttons = () => draw().filter((n) => n.type === 'Pressable' && !n.props.disabled);
   const labels = () => buttons().map((n) => n.props.accessibilityLabel);
-  const tap = (label: string) => {
-    const button = buttons().find((n) => n.props.accessibilityLabel === label);
-    assert.ok(button, label);
-    button.props.onPress();
-  };
+  const tap = (shown: string | RegExp) => control(draw(), shown).props.onPress();
   const map = () => {
     const footer = draw().find((n) => n.type.name === 'Footer');
     assert.ok(footer);

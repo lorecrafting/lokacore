@@ -12,17 +12,20 @@ const named = {
 } as const;
 
 // A row that opens a detail: the name, then `rest` (verbatim, its own spacing), a note below.
-// Without `rest` the name is the line's one Text.
+// Without `rest` the name is the line's one Text. Its accessible name is that shown text, then `suffix`.
 export function EntityLine(p: {
   name: string;
   rest?: string;
   note?: string;
-  label: string;
+  suffix?: string;
   onPress: () => void;
 }) {
   const c = usePalette();
   return (
-    <Tap label={p.label} onPress={p.onPress}>
+    <Tap
+      label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}${p.suffix ?? ''}`}
+      onPress={p.onPress}
+    >
       {p.rest ? (
         <Text style={prose(c)}>
           <Text style={named}>{p.name}</Text>
