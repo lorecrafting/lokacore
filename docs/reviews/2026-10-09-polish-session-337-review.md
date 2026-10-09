@@ -41,3 +41,16 @@
 - **nit**, `bin/integration_red_controls.sh:276-277`. The busy-port check loops over literal numbers, not the exported `LOKA_*` values. A typo in the export line silently falls back to 6006, 19006 and 8081. Checking `$LOKA_SB_PORT` and the other variables would let `set -u` catch it.
 - **nit**, PR body: "close restarts only Storybook" holds only if main has not moved since the last preview sync. Otherwise `preview_update.sh:20-22` restarts the web preview and Expo as well, and the harness never moves main before close.
 - `/code-review medium` result: reported in the PR body.
+
+## Fix round 1 (head `b44d5494`)
+
+- Verdict: **APPROVE WITH NOTES**.
+- Harness at the new head, with ports remapped to 7106-7199: baseline exit 0, and no stub was left listening afterwards.
+- **B1 fixed.** Mutant `[ -z "$expo" ] ||` removed: FAIL `preview_update no-expo: started Expo that was not running`.
+- **S1 fixed differently, accepted.** `preview_update.sh` now runs every refusal, the fetch, the checkout and `npm ci` before it stops any server. `polish_session.sh:52` hands over with `--end-session` instead of stopping Storybook itself.
+  - Mutant `stop_port "$SB_PORT"` before the hand-over: FAIL `polish_session close dirty-preview: no Storybook left serving the session`.
+  - The only failure left after a stop is a server that fails to start. It exits after 120 s and names the log. A restart would fail the same way on that code, so no retry guard is needed.
+- **Direct callers.** `polish_session.sh close` is the only caller of `preview_update.sh`. `--end-session` only skips the session guard.
+- **Trap.** The harness EXIT trap that kills listeners is set only after the busy-port check finds every port free (`integration_red_controls.sh:280-281`), so it never stops a server the harness did not start.
+- **Nits.** `cat` replaces `sed`, there is an EXIT cleanup, the harness reads the `LOKA_*` ports, and the PR body is corrected.
+- **Question, not blocking.** `npm ci` now runs while the preview servers still read that same `node_modules`. If ci fails, they keep running but serve from a half-installed tree until the next successful update.
