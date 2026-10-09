@@ -18,9 +18,11 @@ wait_port() { # <port> up|down, at most 120 s
   die "port $1 still not $2 after 120 s${3:+; log: $3}"
 }
 stop_port() { p=$(listener "$1"); [ -z "$p" ] || { kill $p 2> /dev/null || true; wait_port "$1" down; }; }
-serve() { # <port> <dir> <command...>: start detached in <dir>, wait until it listens
+serve() { # <port> <dir> <command...>: start in <dir>, wait until it listens
   port=$1 log=${TMPDIR:-/tmp}/loka-serve-$1.log
-  (cd "$2" && shift 2 && nohup mise exec -- "$@" > "$log" 2>&1 < /dev/null &)
+  # Own session (setsid), no terminal, stdin closed: the caller's exit or a task runner killing
+  # its process group never takes the server down. Stopped later by its listening PID.
+  (cd "$2" && shift 2 && nohup perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' mise exec -- "$@" > "$log" 2>&1 < /dev/null &)
   wait_port "$port" up "$log"
 }
 serve_storybook() { serve "$SB_PORT" "$1/mobile/app" npm run storybook -- -p "$SB_PORT"; }
