@@ -13,6 +13,12 @@ const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:combat-state', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:combat-hosts', shortCircuit: true }
@@ -54,7 +60,7 @@ function nodes(element: any): any[] {
   if (!element || typeof element !== 'object') return [];
   if (typeof element.type === 'function') {
     if (element.type.name === 'Footer') return [element];
-    if (element.type.name === 'Turn') return [element, ...nodes(element.props.children)];
+    if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
     return nodes(element.type(element.props));
   }
   return [element, ...nodes(element.props?.children)];

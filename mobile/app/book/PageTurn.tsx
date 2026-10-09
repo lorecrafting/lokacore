@@ -1,10 +1,10 @@
-// The Book's page turn (docs/BOOK-UI-COMPONENTS.md#page-turn), Turn.tsx's props; the polish phase
-// swaps it in. The arriving page is live from the first frame. The leaving page stays mounted over
-// it, taking no touches, until its picture is taken; then page-curl.sksl curls that picture away.
-// Reduced motion cross-fades the leaving page instead. On web, import this after CanvasKit loads.
-// ponytail: `arriving` is transparent so the live page shows through; the roll's shadow on it is
-// lost until the shader draws its shadow without sampling the arriving page.
+// The Book's page turn (docs/BOOK-UI-COMPONENTS.md#page-turn). The arriving page is live from the
+// first frame. The leaving page stays mounted over it, hidden from touch, keyboard and screen
+// reader, until its picture is taken (at most motion.quick, else the page just changes); then
+// page-curl.sksl curls that picture away over the live page. Reduced motion cross-fades the leaving
+// page instead. On web, import this after CanvasKit loads.
 import {
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -14,7 +14,6 @@ import {
 } from 'react';
 import { View } from 'react-native';
 import Animated, {
-  Easing,
   ReduceMotion,
   useAnimatedStyle,
   useDerivedValue,
@@ -24,38 +23,27 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import {
-  Canvas,
-  ColorShader,
-  Fill,
-  ImageShader,
-  Shader,
-  Skia,
-  type SkImage,
-} from '@shopify/react-native-skia';
+import { Canvas, Fill, ImageShader, Shader, Skia, type SkImage } from '@shopify/react-native-skia';
 import curl from './page-curl.sksl';
-import { color, motion } from './tokens.ts';
-import { snapshot } from './snapshot';
+import { easing } from './easing.ts';
+import { motion } from './tokens.ts';
+import { snapshot, warm } from './snapshot';
 
 const effect = Skia.RuntimeEffect.Make(curl)!;
-const easings: Record<string, (t: number) => number> = {
-  inOutQuad: Easing.inOut(Easing.quad),
-  linear: Easing.linear,
-};
-// ponytail: the light paper only; the polish phase passes the in-game palette's (book-ui.md).
-const paper = Array.from(Skia.Color(color.light.bg)).slice(0, 3);
+// Over the arriving page, taking no touch, keyboard or screen-reader focus: `inert` is
+// react-native-web's (aria-hidden alone leaves its buttons tabbable); the others are the device's.
 const over = {
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0,
-  pointerEvents: 'none',
+  style: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' },
+  'aria-hidden': true,
+  importantForAccessibility: 'no-hide-descendants',
+  accessibilityElementsHidden: true,
+  ...({ inert: true } as object),
 } as const;
 
 type Leaving = { turn: number; dir: 1 | -1; page: ReactNode; image?: SkImage };
 
-type Props = { turn: number; dir: 1 | -1; children: ReactNode };
+// `paper`: the shown palette's bg, the leaf's back.
+type Props = { turn: number; dir: 1 | -1; paper: string; children: ReactNode };
 type Size = { width: number; height: number };
 type SetLeaving = Dispatch<SetStateAction<Leaving | undefined>>;
 
@@ -63,7 +51,7 @@ export function PageTurn(p: Props) {
   const reduced = useReducedMotion();
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
   const [leaving, setLeaving] = useLeaving(p);
-  const { progress, page } = useMotion(leaving, setLeaving, reduced);
+  const { progress, page } = useMotion(p.turn, leaving, setLeaving, reduced);
   const fade = useAnimatedStyle(() => ({ opacity: reduced ? 1 - progress.value : 1 }));
   // Both pages are the same keyed element type, so the leaving page keeps its mounted instance.
   return (
@@ -76,20 +64,31 @@ export function PageTurn(p: Props) {
           {p.children}
         </Animated.View>,
         leaving && !leaving.image && (
-          <Animated.View key={leaving.turn} style={[over, fade]}>
+          <Animated.View key={leaving.turn} {...over} style={[over.style, fade]}>
             {leaving.page}
           </Animated.View>
         ),
       ]}
       {leaving?.image && (
-        <Curl image={leaving.image} dir={leaving.dir} size={size} progress={progress} />
+        <Curl
+          image={leaving.image}
+          dir={leaving.dir}
+          paper={p.paper}
+          size={size}
+          progress={progress}
+        />
       )}
     </View>
   );
 }
 
 // Takes the leaving page's picture, then curls it (or, under reduced motion, fades the page itself).
-function useMotion(leaving: Leaving | undefined, setLeaving: SetLeaving, reduced: boolean) {
+function useMotion(
+  turn: number,
+  leaving: Leaving | undefined,
+  setLeaving: SetLeaving,
+  reduced: boolean,
+) {
   const progress = useSharedValue(0);
   // Each page's view by turn, from its mount: Reanimated reads a ref prop only when it mounts.
   const pages = useRef(new Map<number, View>()).current;
@@ -97,18 +96,23 @@ function useMotion(leaving: Leaving | undefined, setLeaving: SetLeaving, reduced
     if (view) pages.set(turn, view);
     else pages.delete(turn);
   };
+  // The first page, once mounted, warms the picture-taking so the first turn's picture is quick.
+  useEffect(() => void warm(pages.get(turn)!), []);
   // Before paint, so a new curl or fade never shows the last turn's finished progress for a frame.
   useLayoutEffect(() => {
     if (!leaving) return;
     const timing = leaving.image ? motion.turn : reduced ? motion.fade : undefined;
     if (timing) return animate(progress, timing, leaving, setLeaving);
     let live = true;
+    // No picture in time, or none at all: the page has simply changed.
+    const late = setTimeout(() => setLeaving(undefined), motion.quick.duration);
     snapshot(pages.get(leaving.turn)!).then(
       (image) => (live ? setLeaving(image ? { ...leaving, image } : undefined) : image?.dispose()),
-      () => live && setLeaving(undefined), // no picture: the page has simply changed
+      () => live && setLeaving(undefined),
     );
     return () => {
       live = false;
+      clearTimeout(late);
     };
   }, [leaving, reduced]);
   return { progress, page };
@@ -142,13 +146,20 @@ function animate(
   progress.value = withTiming(
     1,
     // Never: Reanimated would otherwise skip the reduced-motion cross-fade outright.
-    { duration: timing.duration, easing: easings[timing.easing], reduceMotion: ReduceMotion.Never },
+    { duration: timing.duration, easing: easing(timing.easing), reduceMotion: ReduceMotion.Never },
     (done) => done && scheduleOnRN(clear),
   );
   return () => leaving.image?.dispose();
 }
 
-function Curl(p: { image: SkImage; dir: 1 | -1; size: Size; progress: SharedValue<number> }) {
+function Curl(p: {
+  image: SkImage;
+  dir: 1 | -1;
+  paper: string;
+  size: Size;
+  progress: SharedValue<number>;
+}) {
+  const paper = Array.from(Skia.Color(p.paper)).slice(0, 3);
   const uniforms = useDerivedValue(() => ({
     size: [p.size.width, p.size.height],
     progress: p.progress.value,
@@ -156,12 +167,11 @@ function Curl(p: { image: SkImage; dir: 1 | -1; size: Size; progress: SharedValu
     paper,
   }));
   return (
-    <View style={over}>
+    <View {...over}>
       <Canvas style={{ flex: 1 }}>
         <Fill>
           <Shader source={effect} uniforms={uniforms}>
             <ImageShader image={p.image} fit="fill" rect={{ x: 0, y: 0, ...p.size }} />
-            <ColorShader color="transparent" />
           </Shader>
         </Fill>
       </Canvas>

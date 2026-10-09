@@ -248,7 +248,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
 test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
   const h = book();
   h.tap('Old Bram, open');
-  const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
+  const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const entered = turn();
   assert.deepEqual(h.text().slice(0, 2), [
     'Old Bram',
@@ -325,7 +325,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
 // Breaks: direct cycling opens a page, flips World, skips a legal state or reuses a new freshness token.
 test('only World position taps directly cycle the offered states with captured freshness', () => {
   const h = book();
-  const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
+  const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
   const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'Position, standing');
   for (const [from, to] of [
     ['standing', 'sitting'],
@@ -335,7 +335,7 @@ test('only World position taps directly cycle the offered states with captured f
   ]) {
     h.tap(`Position, ${from}`);
     assert.equal(h.game.view().view.position, to);
-    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
+    assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
     assert.ok(h.labels().includes('Old Bram, open'));
   }
   const token = h.game.view().token;
@@ -443,4 +443,18 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
     ['satchel, open', 'lamp, open'],
   ]);
   assert.deepEqual(groups([entity('lamp', 'item')]), [['lamp, open']]);
+});
+
+// Breaks: a return turns forward or an opened page turns back (BOOK-UI-COMPONENTS.md#page-turn,
+// Direction).
+test('opening a page turns forward and Back to World turns back', () => {
+  const h = book();
+  const dir = () => h.draw().find((n) => n.type.name === 'PageTurn').props.dir;
+  const contents = () => h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  contents();
+  h.tap('Back to World');
+  assert.equal(dir(), -1);
+  contents();
+  assert.equal(dir(), 1);
+  h.sql.close();
 });

@@ -12,6 +12,12 @@ const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (s === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (s === 'react') return { url: 'test:d2-react', shortCircuit: true };
     return s === 'react-native' ? { url: 'test:d2-native', shortCircuit: true } : next(s, c);
   },

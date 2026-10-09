@@ -12,6 +12,12 @@ const require = createRequire(import.meta.url),
   react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
+    // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
+    if (specifier === './PageTurn.tsx')
+      return {
+        url: 'data:text/javascript,export function PageTurn(p){return p.children}',
+        shortCircuit: true,
+      };
     if (specifier === 'react') return { url: 'test:dream-state', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:dream-native', shortCircuit: true }
@@ -52,7 +58,7 @@ function nodes(e: any): any[] {
   if (!e || typeof e !== 'object') return [];
   if (typeof e.type === 'function') {
     if (e.type.name === 'Footer') return [e];
-    if (e.type.name === 'Turn') return [e, ...nodes(e.props.children)];
+    if (e.type.name === 'PageTurn') return [e, ...nodes(e.props.children)];
     return nodes(e.type(e.props));
   }
   return [e, ...nodes(e.props?.children)];

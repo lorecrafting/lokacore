@@ -1,7 +1,7 @@
 // A full reading page with the offered actions following its combat history.
 import { ScrollView, Text } from 'react-native';
 import { bleedingLine, type group } from './model.ts';
-import { Act, prose, scrollPaper, titleStyle } from './pages.tsx';
+import { Act, prose, scrollPaper, titleFocus, titleStyle } from './pages.tsx';
 import type { presenter, Button } from './presenter.ts';
 
 export function Combat(p: {
@@ -14,7 +14,7 @@ export function Combat(p: {
   const stand = p.g.position.find((b) => b.action_key === 'stand');
   return (
     <ScrollView style={{ ...scrollPaper, flex: 1 }} contentContainerStyle={{ padding: 24 }}>
-      <Text accessibilityRole="header" style={titleStyle}>
+      <Text {...titleFocus} accessibilityRole="header" style={titleStyle}>
         Combat
       </Text>
       <Text style={prose}>{text(view.combat.name)}</Text>

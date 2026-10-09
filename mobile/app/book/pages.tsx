@@ -3,7 +3,7 @@ import { ItemDetails } from './skills.tsx';
 // The book's room and thing pages and their shared controls (the Contents sections: sections.tsx).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
@@ -21,6 +21,16 @@ export const band = (tone: Pool['tone']): string =>
 
 export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
 export const scrollPaper = { backgroundColor: paper.bg };
+// A page's title takes focus as its page arrives (BOOK-UI-COMPONENTS.md#page-turn): keyboard focus
+// on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
+export const titleFocus = {
+  ref: (title: (Text & { focus?: () => void }) | null) => {
+    if (!title) return;
+    title.focus?.();
+    AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
+  },
+  ...({ tabIndex: -1 } as object),
+};
 
 export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   return (
@@ -64,7 +74,9 @@ export function RoomPage(p: {
   details: ReactNode;
 }) {
   const title = (
-    <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
+    <Text {...titleFocus} style={{ ...titleStyle, textAlign: 'center' }}>
+      {p.text(p.view.place.title.key)}
+    </Text>
   );
   return (
     <View style={{ flex: 1 }}>
@@ -151,7 +163,7 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
     <ScrollView style={scrollPaper} contentContainerStyle={{ padding: 24, gap: 8 }}>
-      <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
+      <Text {...titleFocus} style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {title}
       </Text>
       {children}

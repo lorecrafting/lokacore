@@ -31,7 +31,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView';",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

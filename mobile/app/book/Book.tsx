@@ -19,7 +19,7 @@ import { paper, small } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
-import { Turn } from './Turn.tsx';
+import { PageTurn } from './PageTurn.tsx';
 import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
@@ -139,13 +139,13 @@ export function BookView(p: ViewProps) {
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-      <Turn turn={p.flip.turn} dir={p.flip.dir}>
+      <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={paper.bg}>
         {p.screen.view.combat ? (
           <Combat screen={p.screen} g={g} press={p.press} />
         ) : (
           <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
         )}
-      </Turn>
+      </PageTurn>
       <Bottom {...ctx} page={page} />
     </SafeAreaView>
   );

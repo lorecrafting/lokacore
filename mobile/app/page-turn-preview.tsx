@@ -15,7 +15,7 @@ export default function PageTurnPreview() {
   if (!loaded) return null;
   return (
     <View style={{ flex: 1, backgroundColor: color.light.bg }}>
-      <PageTurn turn={at.turn} dir={at.dir}>
+      <PageTurn turn={at.turn} dir={at.dir} paper={color.light.bg}>
         {at.turn % 2 ? (
           <SettingsPage startOver={() => go(-1)} />
         ) : (

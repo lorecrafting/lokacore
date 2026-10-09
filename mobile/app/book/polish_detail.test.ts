@@ -158,7 +158,7 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     h.tap('Talk to Old Bram');
     const speaker = h.game.view().view.choice!.speaker_id!;
     const before = [...h.p.screen().detail(speaker)];
-    const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
+    const turn = () => h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
     const opened = turn();
     h.clock.wall = 82000;
     h.clock.mono = 72000;
@@ -249,12 +249,12 @@ test('delayed Take returns once with its original item name after a conflicting 
     h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
     h.tap('Equipment & Inventory');
     h.tap('a brass lantern, open');
-    const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
+    const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
     h.clock.wall += 20;
     h.clock.mono += 20;
     h.game.pulse();
     assert.ok(h.labels().includes('Drop a brass lantern'));
-    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
+    assert.equal(h.draw().find((n) => n.type.name === 'PageTurn').props.turn, turn);
   } finally {
     h.unmount();
     h.sql.close();

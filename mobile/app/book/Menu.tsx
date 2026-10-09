@@ -13,6 +13,7 @@ import {
   Sheet,
   Tap,
   ThingPage,
+  titleFocus,
   titleStyle,
   type Thing,
 } from './pages.tsx';
@@ -134,7 +135,7 @@ export function NpcPage(p: NpcProps) {
         if (p.log.length) scroll.current?.scrollToEnd({ animated: false });
       }}
     >
-      <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
+      <Text {...titleFocus} style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
       {description && <Text style={prose}>{plain(p.text(description))}</Text>}
