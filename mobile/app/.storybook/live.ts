@@ -3,7 +3,7 @@
 // story in headless Chromium, fails on a render or play error, and stops the server.
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { chromium } from 'playwright';
+import { chromium, type Frame } from 'playwright';
 
 const port = await new Promise<number>((found) => {
   const probe = createServer().listen(0, () => {
@@ -12,11 +12,16 @@ const port = await new Promise<number>((found) => {
   });
 });
 const url = `http://localhost:${port}`;
-const server = spawn('npx', ['storybook', 'dev', '-p', `${port}`, '--ci', '--no-open'], {
-  cwd: new URL('..', import.meta.url),
-  stdio: ['ignore', 'ignore', 'inherit'],
-  detached: true, // its own process group, stopped whole below
-});
+const server = spawn(
+  'npx',
+  ['storybook', 'dev', '-p', `${port}`, '--host', '127.0.0.1', '--ci', '--no-open'],
+  {
+    cwd: new URL('..', import.meta.url),
+    env: { ...process.env, LOKA_NO_TIDEWAVE: '1' }, // the nightly run tests the Book, not the toolbar
+    stdio: ['ignore', 'ignore', 'inherit'],
+    detached: true, // its own process group, stopped whole below
+  },
+);
 const failed: string[] = [];
 try {
   let index: { entries: Record<string, { id: string; title: string; type: string }> } | undefined;
@@ -28,37 +33,72 @@ try {
       .catch(() => undefined);
   }
   const live = Object.values(index.entries).filter((e) => e.title === 'Live' && e.type === 'story');
-  if (live.length === 0) throw new Error('no Live stories in the index');
+  if (live.length < 2) throw new Error('fewer than two Live stories in the index');
   const browser = await chromium.launch();
+  // The preview's own verdict per story: its first play or render error, else storyFinished's status.
+  const watch = () => {
+    const w = window as never as {
+      __STORYBOOK_ADDONS_CHANNEL__?: any;
+      live: Record<string, string>;
+      current?: string;
+    };
+    w.live = {};
+    const hook = setInterval(() => {
+      const channel = w.__STORYBOOK_ADDONS_CHANNEL__;
+      if (!channel) return;
+      clearInterval(hook);
+      const fail = (why: string) => (e: { message?: string }) =>
+        (w.live[w.current!] ??= `${why}: ${e.message}`);
+      channel.on('storyRenderPhaseChanged', (e: { newPhase: string; storyId: string }) => {
+        if (e.newPhase === 'preparing') w.current = e.storyId; // a torn-down story's late phases keep out
+      });
+      channel.on('playFunctionThrewException', fail('play'));
+      channel.on('storyThrewException', fail('render'));
+      channel.on('storyErrored', fail('errored'));
+      channel.on(
+        'storyFinished',
+        (r: { storyId: string; status: string }) => (w.live[r.storyId] ??= r.status),
+      );
+    }, 10);
+  };
+  const verdict = (frame: Frame, id: string) =>
+    frame
+      .waitForFunction(
+        (id) => (window as never as { live?: Record<string, string> }).live?.[id],
+        id,
+        {
+          timeout: 60_000,
+        },
+      )
+      .then((h) => h.jsonValue() as Promise<string>)
+      .catch((e: Error) => `timed out: ${e.message.split('\n')[0]}`);
+  const report = (id: string, verdict: string) => {
+    console.log(`${verdict === 'success' ? 'ok  ' : 'FAIL'} ${id} ${verdict}`);
+    if (verdict !== 'success') failed.push(id);
+  };
   try {
     for (const { id } of live) {
       const page = await browser.newPage();
-      // The preview's own verdict: a play or render error, else storyFinished's status.
-      await page.addInitScript(() => {
-        const w = window as never as { __STORYBOOK_ADDONS_CHANNEL__?: any; live?: string };
-        const hook = setInterval(() => {
-          const channel = w.__STORYBOOK_ADDONS_CHANNEL__;
-          if (!channel) return;
-          clearInterval(hook);
-          const fail = (why: string) => (e: { message?: string }) =>
-            (w.live = `${why}: ${e.message}`);
-          channel.on('playFunctionThrewException', fail('play'));
-          channel.on('storyThrewException', fail('render'));
-          channel.on('storyErrored', fail('errored'));
-          channel.on('storyFinished', (r: { status: string }) => (w.live ??= r.status));
-        }, 10);
-      });
+      await page.addInitScript(watch);
       await page.goto(`${url}/iframe.html?id=${id}&viewMode=story`);
-      const verdict = await page
-        .waitForFunction(() => (window as never as { live?: string }).live, undefined, {
-          timeout: 60_000,
-        })
-        .then((h) => h.jsonValue())
-        .catch((e: Error) => `timed out: ${e.message.split('\n')[0]}`);
-      console.log(`${verdict === 'success' ? 'ok  ' : 'FAIL'} ${id} ${verdict}`);
-      if (verdict !== 'success') failed.push(id);
+      report(id, await verdict(page.mainFrame(), id));
       await page.close();
     }
+    // loka-0qz: a sidebar switch keeps the preview iframe, its sqlite worker and open databases.
+    const [a, b] = live as [(typeof live)[0], (typeof live)[0]];
+    const page = await browser.newPage();
+    await page.addInitScript(watch);
+    await page.goto(`${url}/?path=/story/${a.id}`);
+    const preview = (await (
+      await page.waitForSelector('#storybook-preview-iframe')
+    ).contentFrame())!;
+    await verdict(preview, a.id); // a's own verdict is above
+    await preview.evaluate(() => ((window as never as { kept: boolean }).kept = true));
+    await page.click(`#${b.id}`);
+    const switched = await verdict(preview, b.id);
+    const kept = await preview.evaluate(() => (window as never as { kept?: boolean }).kept);
+    report(`${a.id} then ${b.id}`, kept ? switched : 'iframe reloaded, switch not exercised');
+    await page.close();
   } finally {
     await browser.close();
   }
@@ -66,6 +106,6 @@ try {
   if (server.exitCode === null) process.kill(-server.pid!, 'SIGTERM'); // else keep its error
 }
 if (failed.length) {
-  console.error(`storybook:live: ${failed.length} Live stories failed`);
+  console.error(`storybook:live: ${failed.length} Live checks failed`);
   process.exit(1);
 }

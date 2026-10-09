@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { presenter } from './presenter.ts';
-import { comings, detail } from './words.ts';
+import { chapterLabel, comings, detail } from './words.ts';
 
 const VIEW = {
   actions: [],
@@ -375,4 +375,12 @@ test('a coming or going starts its sentence with a capital', () => {
     comings(at('a crow'), at('a fox'), (s) => s),
     ['A crow leaves.', 'A fox arrives.'],
   );
+});
+
+// Breaks: the label counts from the zero-based declaration index ("Chapter zero") or a chapter past
+// the words shows "Chapter undefined".
+test('the chapter label names the declaration index counted from one', () => {
+  assert.equal(chapterLabel(0), 'Chapter one');
+  assert.equal(chapterLabel(11), 'Chapter twelve');
+  assert.equal(chapterLabel(12), 'Chapter 13');
 });

@@ -96,7 +96,7 @@ their rules and red controls remain available for resumption.
   stays, kernel tests call `mix loka.compile`); other `kernel/ts/test` files stay inputs because Elixir
   tests run its peers.
   The `storybook` lane (pre-push only) runs for `mobile/app/book/`, `mobile/app/stories/`,
-  `mobile/app/.storybook/`, `mobile/app/package*.json` or `mobile/packages/game-view/` changes: the hook
+  `mobile/app/.storybook/`, `mobile/app/vitest.config.mts`, `mobile/app/package*.json` or `mobile/packages/game-view/` changes: the hook
   then runs `npm run storybook:smoke` in `mobile/app` under the `bin/check_all.sh` lock (`bin/check_lock.sh`)
   before `bin/check_all.sh`, never alongside `npm test`. The hook refuses a push while tracked files
   have uncommitted changes, since its checks read the working tree. The full browser e2e is not in

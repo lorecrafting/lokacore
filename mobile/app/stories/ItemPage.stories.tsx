@@ -15,7 +15,13 @@ const meta: Meta = {
 };
 export default meta;
 
-export const Plain: StoryObj = { ...pageStory(ItemPlainView), name: 'Plain' };
+export const Plain: StoryObj = {
+  ...pageStory(ItemPlainView, undefined, [
+    'item.fox_drawing.short',
+    'item.fox_drawing.description',
+  ]),
+  name: 'Plain',
+};
 export const ContainerWithInside: StoryObj = {
   ...pageStory(ItemContainerView),
   name: 'Container with Inside',

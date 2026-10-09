@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { expect, waitFor } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import { ChapterPage, SettingsPage } from '../book/sections.tsx';
+import { chapterLabel } from '../book/words.ts';
 import { usePalette } from '../book/palette.ts';
 import type { PageTurn as Turn } from '../book/PageTurn.tsx';
 
@@ -26,7 +27,7 @@ function Turning({ PageTurn }: { PageTurn: ComponentType<Parameters<typeof Turn>
         {at.turn % 2 ? (
           <SettingsPage startOver={() => go(-1)} world={() => go(-1)} />
         ) : (
-          <ChapterPage title="Chapter One" done={() => go(1)} />
+          <ChapterPage label={chapterLabel(0)} title="The Missing Child" done={() => go(1)} />
         )}
       </PageTurn>
     </View>
@@ -43,7 +44,7 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
   // turn with no curl (no picture in time) fails the canvas wait.
   play: async ({ canvas, canvasElement, userEvent }) => {
     const curl = () => canvasElement.querySelector('canvas');
-    const turn = async (button: string, arriving: string) => {
+    const turn = async (button: string, arriving: string | RegExp) => {
       await userEvent.click(canvas.getByRole('button', { name: button }));
       await expect(await canvas.findByRole('heading', { name: arriving })).toBeVisible();
       await waitFor(() => expect(curl()).not.toBeNull());
@@ -52,6 +53,6 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
       await expect(canvas.getByRole('heading', { name: arriving })).toBeVisible();
     };
     await turn('Continue', 'Settings');
-    await turn('Start over', 'Chapter One');
+    await turn('Start over', /The Missing Child/);
   },
 };
