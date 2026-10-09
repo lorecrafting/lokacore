@@ -41,5 +41,10 @@ other code belongs to developers (batch 5 only: the designer wrote its style cod
 [owner decision](../../docs/decisions/owner-decision-designer-writes-batch5-style-2026-10-09.md)).
 Never use `--no-verify` or force-push.
 
+**Session mode** ([live polish session](../../docs/WORKFLOW.md#live-polish-session)): in the session
+worktree you may edit style code, tokens and the catalogue line, and you commit each accepted tweak;
+never mechanics, save, protocol or engine code (those go back to the PM as Beads items). You may run
+on Sonnet for a nit; then hand anything needing a token or rule change back for a Fable designer.
+
 Return under 250 words, rules-shaped: the job done, paths with `file:line`, findings with
 severity, spec text written (path and section), proposed checks, open questions. No narrative.

@@ -23,7 +23,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
 | Slice implementation, tests, fix rounds | `developer`, Opus for kernel, save, protocol, cross-layer or contract work; Sonnet for content-only ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus | E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
-| Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text) | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
+| Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text); in a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
 
 An authored brief narrows exploration but never makes save, receipt or protocol work
 mechanical. A brief pastes `ast-grep outline` signatures of the files the developer must touch, not whole files ([owner decision](decisions/owner-decision-agent-tooling-2026-10-08.md)). Run independent agents in the background and in parallel (one message,
@@ -230,6 +230,22 @@ uses existing tokens and components only, and tells the PM when an owner item ne
 Before each polish checkpoint a designer reads the batch's commits, writes each item's rule into
 [Book UI](system/book-ui.md), [BOOK-UI-COMPONENTS.md](BOOK-UI-COMPONENTS.md) or a token, and flags
 one-offs; then a fresh designer does the design review.
+
+### Live polish session
+
+The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026-10-09.md):
+`bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
+style code, tokens and the catalogue line in that worktree, applies each picker prompt at once and
+commits each accepted tweak; the owner's approval in the session is the design review.
+The PM routes each prompt. **Nit** (one place, existing tokens only: which token a style uses,
+alignment, a value inside one component, a label's wording): designer on Sonnet. **Design** (a token
+value, a new token or component, hierarchy, typography, colour or composition, several components, a
+feel request): designer on Fable. Sonnet hands a nit that needs a token or rule change to Fable; the
+owner forces either with a `fable:` or `quick:` prefix.
+The owner's "Close batch", or a PM suggestion, ends the batch: with five or more Sonnet nits, Fable
+skims their diffs once; `bin/polish_session.sh close` pushes (one pre-push hook) and opens the PR;
+one Opus `reviewer` quick pass on it; the PM merges. Batches stay open liberally; close early only for a critical
+item or too much complexity. Mechanics, save, protocol or engine items leave the session as Beads issues.
 
 ## Token hygiene
 

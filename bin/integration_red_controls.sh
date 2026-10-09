@@ -260,4 +260,79 @@ grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
+# --- preview_update.sh, polish_session.sh ----------------------------------------------------------
+# Bare origin with three lockfiles; the preview is a detached clone; ports 7006/7019/7020/7081, never
+# the owner's. Stub mise logs each call and turns a server command into a listener that keeps its
+# argv, so a decoy "storybook" on 7099 dies if a script stops processes by name. Breaks: a process
+# found by name is killed, a lockfile compare is dropped (ci every time), a second run restarts,
+# a dirty preview or session is changed, preview_update takes a served session, close does not push,
+# open the PR or serve the preview again, close restarts more than Storybook, a closed session restarts,
+# a failed close leaves no Storybook, Expo starts though it was not running.
+# Plant the by-name break as `pkill -f loka-stub`: a bare `pkill -f storybook` kills the owner's Storybook.
+mkdir "$tmp/srv"
+cat > "$tmp/srv/mise" <<'SH'
+#!/bin/sh
+shift; [ "$1" = -- ] && shift
+echo "$(pwd -P) $*" >> "$MISE_LOG"
+case $* in
+  *storybook* | *expo*) for a; do port=$a; done ;;
+  *web:preview*) port=$LOKA_PREVIEW_PORT ;;
+  'npm ci'*) mkdir -p node_modules; exit 0 ;;
+  *) exit 0 ;;
+esac
+exec perl -MIO::Socket::INET -e 'my $s = IO::Socket::INET->new(LocalAddr => "127.0.0.1", LocalPort => shift, Listen => 1, ReuseAddr => 1) or die "listen: $!"; sleep 120' "$port" loka-stub "$@"
+SH
+printf '#!/bin/sh\necho "$*" >> "$GH_LOG"\n[ "$1 $2" != "pr create" ] || echo https://pr/1\n' > "$tmp/srv/gh"
+chmod +x "$tmp/srv/mise" "$tmp/srv/gh"
+export LOKA_SB_PORT=7006 LOKA_PREVIEW_PORT=7019 LOKA_METRO_PORT=7020 LOKA_EXPO_PORT=7081 PATH="$tmp/srv:$PATH"
+sbp=$LOKA_SB_PORT wp=$LOKA_PREVIEW_PORT ep=$LOKA_EXPO_PORT dp=7099
+busy=; for p in $sbp $wp $LOKA_METRO_PORT $ep $dp; do [ -z "$(lsof -t -iTCP:$p -sTCP:LISTEN)" ] || busy="$busy $p"; done
+# Never stop a server this harness did not start (an agent's own Storybook may sit on $sbp).
+if [ -n "$busy" ]; then bad "ports$busy busy: preview cases skipped"; else
+trap 'for p in $sbp $wp $LOKA_METRO_PORT $ep $dp; do kill $(lsof -t -iTCP:$p -sTCP:LISTEN) 2> /dev/null || true; done; rm -rf "$tmp"' EXIT
+pid() { lsof -t -iTCP:"$1" -sTCP:LISTEN | head -n 1; }
+cwd() { lsof -a -p "$(pid "$1")" -d cwd -Fn | sed -n 's/^n//p'; }
+O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2> /dev/null; git checkout -qb main
+mkdir -p bin/lib kernel/ts mobile/app; cp "$bin/preview_update.sh" "$bin/polish_session.sh" bin/; cp "$bin/lib/serve.sh" bin/lib/
+for d in . kernel/ts mobile/app; do echo 1 > $d/package-lock.json; done; echo node_modules > .gitignore
+git add . && git commit -qm base && git push -q origin main
+P=$(mktemp -d); git clone -q "$O" "$P" 2> /dev/null; git -C "$P" checkout -q --detach; P=$(cd "$P" && pwd -P)
+export MISE_LOG=$R.mise GH_LOG=$R.gh LOKA_PREVIEW_DIR=$P LOKA_SESSION_DIR=$R.session; : > "$R.mise"; : > "$R.gh"
+(cd "$tmp" && mise exec -- npm run storybook -- -p $dp &); (cd "$tmp" && mise exec -- npx expo start --lan --port $ep &)
+sleep 1; decoy=$(pid $dp); expo=$(pid $ep)
+run() { # <script> <arg|""> <case> <want-rc>
+  rc=0; capped sh "$R/bin/$1" ${2:+"$2"} > "$R.out" 2>&1 || rc=$?
+  [ "$rc" = "$4" ] || { bad "$1 $3: exit $rc, want $4"; cat "$R.out" || true; }
+}
+run preview_update.sh '' first 0
+[ "$(cwd $sbp)" = "$P/mobile/app" ] && [ "$(cwd $wp)" = "$P/mobile/app" ] && [ -n "$(pid $ep)" ] && [ "$(pid $ep)" != "$expo" ] \
+  && [ "$(grep -c 'npm ci' "$R.mise")" = 3 ] || { bad 'preview_update first: not served from the preview, Expo not restarted, or not 3 ci'; cat "$R.mise"; }
+sb=$(pid $sbp); : > "$R.mise"; run preview_update.sh '' again 0
+[ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.mise" ] && grep -q 'already serving' "$R.out" || bad 'preview_update again: restarted or reinstalled'
+touch "$P/x"; run preview_update.sh '' dirty 1; rm "$P/x"; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update dirty: stopped a server'
+echo 2 > mobile/app/package-lock.json; git commit -qam lock; git push -q origin main
+run preview_update.sh '' lockfile 0
+[ "$(git -C "$P" rev-parse HEAD)" = "$(git rev-parse HEAD)" ] && [ "$(grep 'npm ci' "$R.mise")" = "$P/mobile/app npm ci --no-audit --no-fund" ] \
+  || { bad 'preview_update lockfile: not at origin/main, or ci outside mobile/app'; cat "$R.mise"; }
+day=polish/session-$(date +%F); git push -q origin "main:refs/heads/$day"
+web=$(pid $wp); expo=$(pid $ep); run polish_session.sh start start 0; S=$(cd "$R.session" 2> /dev/null && pwd -P) || S=$R.session
+[ "$(cwd $sbp)" = "$S/mobile/app" ] && [ "$(git -C "$S" branch --show-current)" = "$day-2" ] && grep -q 'mix deps.get' "$R.mise" \
+  || bad 'polish_session start: not served from the session, wrong branch, or no deps'
+sb=$(pid $sbp); run polish_session.sh start start-again 0
+[ "$(pid $sbp)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
+run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
+touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
+git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
+touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
+[ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session close dirty-preview: no Storybook left serving the session'
+run polish_session.sh close close 0
+git ls-remote --exit-code --heads origin "$day-2" > /dev/null && grep -q '^pr create' "$R.gh" && [ "$(cwd $sbp)" = "$P/mobile/app" ] \
+  || { bad 'polish_session close: not pushed, no PR, or the preview not served again'; cat "$R.gh"; }
+[ "$(pid $wp)" = "$web" ] && [ "$(pid $ep)" = "$expo" ] || bad 'polish_session close: restarted the web preview or Expo'
+run polish_session.sh start after-close 1
+kill "$(pid $ep)"; i=0; while [ -n "$(pid $ep)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
+echo 3 > a.txt; git add a.txt; git commit -qm moved; git push -q origin main
+run preview_update.sh '' no-expo 0; [ -z "$(pid $ep)" ] || bad 'preview_update no-expo: started Expo that was not running'
+kill "$decoy" 2> /dev/null || bad 'a stop by name killed the decoy on $dp'
+fi
 exit $fail
