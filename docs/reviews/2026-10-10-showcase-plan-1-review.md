@@ -42,3 +42,27 @@
 
 ## Scope
 No M7 row is needed: the Warden's engage uses combat@1 and G11, both installed. The only engine dependency is loka-j2mo (finding 7), which is filed. Other spot checks pass on M6: garment tags and `wearing`, `status_active`, `npc` entrant filter, `modifies`, deadline `after`, dialogue `check` with `rating`/`npc`, `fact_compare {npc}`, topics and deductions, `recap_after_minutes`, `schedule_cases`, `hidden_until`, `climb`, `sky` four fields, `visited_count`, `alternates`, `opens_when`, `buy_discount.friendly`, `disposition`.
+
+## Re-check of 50191c60 (2026-10-10)
+
+Scope: every finding above, checked against the revised brief and `docs/SHOWCASE.md` (`git diff 9d4ae991 50191c60`), plus the planner's flagged rename of the story-point outcome keys. Verdict: **APPROVE WITH NOTES**. All blockers and should-fix items are resolved; four nits remain.
+
+- **1 resolved.** The objective is now `post_activation_event {item_acquired: letter}`, which stores `objectives_complete` (`quest/lifecycle.ts:216`). Step 10's hints now follow W23: the active hint at +15000 and the `objectives_met` hints counted from the take. 60000 - 15000 = 45000 left at the take, which is correct.
+- **2 resolved.** `nell_rumour` has a single choice, so it does not reopen (`reopens` requires more than one choice, `dialogue/selection.ts:130-131`; my earlier probe failed only through that reopening rule). Its policy also requires `not topic_fire_known`.
+- **3 resolved.** The journal outcome keys are now `deliver`, `burn` and `late`. **Flagged risk, confirmed safe:** a story point's outcome map takes any key. The loader checks only the shape, the dialogue and choice references, duplicate sites and that the dialogue has a quest (`cartridge_dialogues.ts:119-144`). No rule ties an outcome key to a choice id; `ashmere_scene` simply uses the choice ids. The scene triggers were renamed to match (`deliver`/`burn`).
+- **4 resolved.** Slice A's hub has two exits; slice B adds south.
+- **5 resolved.** `pennies` 0..100, start 10.
+- **6 resolved.** No deadline line is claimed, and the recap is pinned by an app test beside `mobile/app/book/recap.test.ts` (matrix row updated).
+- **7 resolved.** The conventions now say every wait spans at most one day, citing loka-j2mo. World steps 8 and 9 use one-day waits.
+- **8 resolved.** No world room is `exposed`; the world tests use days 1 to 4 `clear`.
+- **9 resolved.** The `shore_steps` order is tier, high tide, rain, then season, so step 2's high-tide variant shows. The sandbox variants moved to three details, one cycle each.
+- **Old nits resolved:** `room` required, capabilities, mv wording, matrix rows `pick x force x skill growth` and `schedule cases x sky` added.
+- **Open questions:** settled in the brief as answered.
+
+Remaining nits:
+- brief:293. "a checked choice whose sequence assigns a fact is refused ... in a dialogue with two or more choices" is too broad. Only a fact the save proves by one receipt is refused (a topic's fact; `cartridge_dialogues.ts` `once()`). Read literally, it would forbid `warden_talk`, whose checked choices set `warden_lets_pass` (persuade_sampler precedent).
+- brief:231-236. Steps 2, 3, 5 and 7 still use the label "tide x hidden x night x climb", but the matrix row is now "tide gate x hidden exit x time window x climb".
+- Social steps 10 and 11 add 45000 units of waits. If the accept comes after 11:30 on day 1, step 11 lands on day 2, which is rain, so `soaked` replaces `chilled`. Pin the accept time or the day.
+- The PR body still has no `/code-review` result.
+
+Hosted CI on 50191c60: ci `38084786107`, book-e2e `38084786095`, graph-diff `38084789348`, all success. check_docs: 0 broken.
