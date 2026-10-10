@@ -85,6 +85,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       target_ids: [],
       input: { ancestry: a.key },
     })),
+    ...raiseButtons(v),
     ...placeButtons(v, button),
     ...corpseButtons(v, text),
     ...noticeButtons(v, button, names, text),
@@ -104,6 +105,17 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...asked(v, label),
   ];
 }
+
+// One Raise card per authored attribute while the single raise_attribute action is offered (row 4).
+const raiseButtons = (v: GameView): Press[] =>
+  v.actions.some((a) => a.action_key === 'raise_attribute' && a.available)
+    ? (v.attributes ?? []).map((a) => ({
+        label: `Raise ${a.attribute.key.toUpperCase()}`,
+        action_key: 'raise_attribute',
+        target_ids: [],
+        input: { attribute: a.attribute },
+      }))
+    : [];
 
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {

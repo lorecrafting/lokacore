@@ -1,0 +1,20 @@
+{
+  "room.hall.title": "Fitting Room",
+  "room.hall.description": "A plain room with a long mirror.",
+  "room.hall.sharp": "A plain room with a long mirror. Fine scratches on the glass spell a name.",
+  "item.ring_left.short": "a copper ring",
+  "item.ring_left.room": "A copper [[ring|ring]] lies here.",
+  "item.ring_left.description": "A copper ring. The world looks sharper through it.",
+  "item.ring_right.short": "a silver ring",
+  "item.ring_right.room": "A silver [[ring|ring]] lies here.",
+  "item.ring_right.description": "A silver ring. The world looks sharper through it.",
+  "item.ring_spare.short": "a tin ring",
+  "item.ring_spare.room": "A tin [[ring|ring]] lies here.",
+  "item.ring_spare.description": "A tin ring. The world looks sharper through it.",
+  "item.belt.short": "a broad belt",
+  "item.belt.room": "A broad [[belt|belt]] hangs on a hook.",
+  "item.belt.description": "A wide leather belt. It braces the back and the chest.",
+  "item.stone.short": "a lifting stone",
+  "item.stone.room": "A round [[stone|stone]] sits on the floor.",
+  "item.stone.description": "A heavy round stone."
+}

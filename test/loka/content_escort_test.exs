@@ -21,6 +21,8 @@ defmodule Loka.ContentEscortTest do
     update(dir, "dialogues/bram.json", fn d ->
       d
       |> Map.delete("quest")
+      # an escort start is a one-shot offer (loka-x6t.5): a second choice would reopen the hub
+      |> update_in(["choices"], &Map.delete(&1, "leave"))
       |> put_in(["choices", "carry", "escort"], %{
         "npc" => "bram",
         "quest" => "lantern",
@@ -92,6 +94,13 @@ defmodule Loka.ContentEscortTest do
              |> put_in(["choices", "carry", "escort", "transition"], "complete")
            end, "OUTCOME_MISMATCH"},
           {"dialogues/bram.json", &Map.put(&1, "quest", "lantern"), "OUTCOME_MISMATCH"},
+          # loka-x6t.5: a start on a dialogue that reopens (a second choice) could repeat
+          {"dialogues/bram.json",
+           &put_in(
+             &1,
+             ["choices", "stay"],
+             Map.take(&1["choices"]["carry"], ["label", "narration"])
+           ), "OUTCOME_MISMATCH"},
           {"dialogues/bram.json",
            &put_in(&1, ["policy", "root"], %{
              "op" => "escort_state",

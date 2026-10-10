@@ -137,6 +137,7 @@ test('actual cellar death separates concurrent Wren, resets patrol, and permits 
   };
   a.ok('elspeth', [npc(fresh, 'elspeth')]);
   choose('accept');
+  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   const drawing = fresh.entityIds['ashmere_missing_child@0.0.24:item/fox_drawing'];
   a.ok('take', [drawing]);

@@ -1,4 +1,4 @@
-// size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// size: allow 730, dialogue@1's rule and loader checks, story points included, share the ferry harness
 // dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
 // close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
 // choice reaches, and the loader's dialogue and story point checks.
@@ -17,6 +17,8 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -370,6 +372,127 @@ test('a choice reaches only a story point naming its own dialogue', () => {
   const story_points = { [`${F}:story_point/x`]: { key: 'x', outcomes: { leave: trigger } } };
   const other = { ...w, cartridge: { ...w.cartridge, story_points } } as unknown as World;
   assert.deepEqual(events(ok(other, choose('leave'), 4).decision).at(-1), [4, 'choice_resolved']);
+});
+
+// Bram's dialogue without its quest (and the story point only a quest dialogue may reach): a hub.
+const hub = (f: (d: any, c: any) => void = () => {}) =>
+  world((c) => {
+    delete c.dialogues[`${F}:dialogue/bram`].quest;
+    delete c.story_points;
+    f(c.dialogues[`${F}:dialogue/bram`], c);
+  });
+const open = (w: World) =>
+  ok(ok(ok(w, accept, 1, ACCEPT).world, take, 2, TAKE).world, talk, 3, TALK).world;
+// Independent Python SHA-256 of ["loka-id-v1", CONTEXT, OTHER, 1]: the choose's next id after its
+// choice_resolved event (ordinal 0).
+const NEXT = '6fa10ef7-a7f3-872b-ad50-6b1193bf75d5';
+
+// Breaks (loka-x6t.5): an answer ending the conversation instead of returning to its hub, the
+// hub row rebinding or reordering roles or choices, or its choice_opened before choice_resolved.
+test('an answer returns to the hub: a fresh pending row re-offers the same choices', () => {
+  const { decision, world: w } = ok(open(hub()), choose('carry'), 4);
+  assert.deepEqual(decision.delta.ops.slice(-2), [
+    {
+      op: 'choice.resolve',
+      writer_group: 0,
+      continuation_id: C,
+      choice_id: 'carry',
+      expected_revision: 3,
+    },
+    {
+      op: 'choice.open',
+      writer_group: 0,
+      continuation_id: NEXT,
+      actor_id: ACTOR,
+      source: ref('dialogue', 'bram'),
+      beat: 'bram',
+      roles: [
+        { role: 'bram', entity_id: BRAM },
+        { role: 'lantern', entity_id: LANTERN },
+      ],
+      choice_ids: ['carry', 'leave'],
+    },
+  ]);
+  assert.deepEqual(events(decision), [
+    [1, 'fact_changed'],
+    [2, 'choice_resolved'],
+    [3, 'choice_opened'],
+  ]);
+  // With no fact_changed (sorted by position) the array order shows: an answer that sets no fact.
+  const bare = ok(open(hub((d) => delete d.choices.carry.sequence)), choose('carry'), 4).decision;
+  assert.deepEqual(events(bare), [
+    [1, 'choice_resolved'],
+    [2, 'choice_opened'],
+  ]);
+  assert.equal(w.state.choices![C]!.status, 'resolved');
+  const view = gameView(w).choice!;
+  assert.deepEqual(
+    [view.continuation_id, view.closable, view.choices.map((o) => [o.choice_id, o.available])],
+    [
+      NEXT,
+      true,
+      [
+        ['carry', true],
+        ['leave', true],
+      ],
+    ],
+  );
+  refused(w, talk, 'invalid_state');
+  assert.equal(gameView(ok(w, close(NEXT), 5).world).choice, undefined);
+});
+
+// Breaks (loka-x6t.5 ruling): an open hub outliving the speaker leaving the room (Bram's
+// scheduled walk to the green), the player's or the speaker's death; the close another op than Leave's.
+test('a hub conversation ends as Leave would once the speaker or the player leaves', () => {
+  const left = ok(open(hub()), wait, 4).world;
+  assert.equal(left.state.containers[BRAM], GREEN);
+  assert.equal(left.state.choices![C]!.status, 'closed');
+  const { decision, world: away } = ok(open(hub()), { type: 'move', direction: 'north' }, 4);
+  assert.deepEqual(decision.delta.ops.at(-1), {
+    op: 'choice.close',
+    writer_group: 1,
+    continuation_id: C,
+  });
+  assert.equal(gameView(away).choice, undefined);
+  // Bram dies where he stands (controlled: HP-bearing, HP row at 0); the next action ends it.
+  const w = open(hub());
+  const hp = key({ kind: 'resource', entity_id: BRAM, resource: resourceRef(w, 'hp') } as never);
+  const dead = structuredClone(w) as any;
+  dead.entities[BRAM].hp = w.cartridge.resources![`${F}:resource/hp`];
+  dead.state.resources[hp] = { value: 0, at: w.state.clock };
+  const { decision: d, world: after } = ok(dead, drop, 4);
+  assert.equal(after.state.containers[BRAM], after.state.containers[BODY]);
+  assert.deepEqual(d.delta.ops.at(-1), { op: 'choice.close', writer_group: 1, continuation_id: C });
+  assert.equal(gameView(after).choice, undefined);
+});
+
+// Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
+// only choice, or a riddle's solved answer.
+test('a single-choice or riddle dialogue ends at its answer', () => {
+  for (const [name, w, answer] of [
+    ['single', hub((d) => delete d.choices.leave), undefined],
+    [
+      'riddle',
+      hub((d, c) => {
+        c.manifest.requires.kernel_api.at_least = '1.9';
+        d.riddle = {
+          choice_id: 'carry',
+          answer: 'lamp',
+          bank: ['L', 'A', 'M', 'P'],
+          wrong: d.prompt,
+        };
+      }),
+      'lamp',
+    ],
+  ] as const) {
+    const { decision, world: after } = ok(
+      open(w),
+      { ...choose('carry'), ...(answer && { answer }) },
+      4,
+    );
+    assert.equal(decision.delta.ops.at(-1)!.op, 'choice.resolve', name);
+    assert.equal(gameView(after).choice, undefined, name);
+  }
 });
 
 // Breaks (06 §37, §43): close mutating the outcome or reaching a story point, or a re-talk

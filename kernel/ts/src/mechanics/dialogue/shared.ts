@@ -1,10 +1,9 @@
 import * as patrol from '../patrol/shared.ts';
-import { pending } from './selection.ts';
+import { apart, pending } from './selection.ts';
 import { validAttempts } from './behavior.ts';
 import { membership } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
-import { living } from '../death/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
 // (mechanics/dialogue/rule.ts), admission (commands/actions.ts) and the GameView (view/view.ts) share: a dialogue's
 // definition, its talk's bound roles, the actor's pending choice, and why a choice of it cannot be
@@ -176,12 +175,7 @@ function roleBlocked(
           return role?.role === 'npc' && same(role.npc, d.npc);
         }) ||
       [option.receive?.from, option.hand_over?.to, option.payment?.from].includes(r.role);
-    if (
-      expected.role === 'npc' &&
-      needed &&
-      (!living(world, r.entity_id) ||
-        world.state.containers[r.entity_id] !== world.state.containers[body!])
-    )
+    if (expected.role === 'npc' && needed && apart(world, r.entity_id, body))
       return 'not_present' as const;
     if (
       expected.role === 'item' &&
@@ -256,7 +250,7 @@ export function choiceView(
   };
 }
 
-export { speaks, spokenBy, talkRefused, talks, pending } from './selection.ts';
+export { speaks, spokenBy, talkRefused, talks, pending, talking, leave } from './selection.ts';
 
 export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */

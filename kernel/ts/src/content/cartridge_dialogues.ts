@@ -29,6 +29,7 @@ import {
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
+import { reopens } from '../mechanics/dialogue/selection.ts';
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.dialogues ?? {}) as Obj).map(([ref, d]) => [
@@ -225,6 +226,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (e.transition === 'complete' ? !same(d.quest, e.quest) : d.quest !== undefined)
       out.push(diag('OUTCOME_MISMATCH', `${path}.escort.quest`));
   }
+  out.push(...once(o, path, d, c));
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);
@@ -237,3 +239,37 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
       ),
   );
 }
+
+// dialogue@1 hub: a dialogue with no quest, no riddle and several choices reopens after an answer,
+// so an answer receiving an item (the player may give it back), granting a topic, assigning a fact
+// topicsSave proves by one receipt or starting an escort could repeat (save proofs count one such
+// receipt): it needs the once-only accept (acceptRefused) or a patrol ending. A hand_over cannot
+// repeat: the NPC keeps the item.
+function once(o: Obj, path: string, d: Obj, c: Obj): Diagnostic[] {
+  if (!reopens(d as never) || o.accept || o.patrol) return [];
+  const proven = proved(c);
+  return [
+    ...(o.receive ? [`${path}.receive`] : []),
+    ...(o.escort?.transition === 'start' ? [`${path}.escort`] : []),
+    ...(o.sequence ?? []).flatMap((s: Obj, i: number) =>
+      s.op === 'topic.grant' || (s.op === 'fact.assign' && proven.has(s.fact?.key))
+        ? [`${path}.sequence[${i}].op`]
+        : [],
+    ),
+  ].map((at) => diag('OUTCOME_MISMATCH', at));
+}
+
+// The fact keys mobile/authority/local-story/topics-save.ts proves by exactly one receipt (by key):
+// topic facts, perception discoveries and bounded riddles' answer assignments.
+const proved = (c: Obj) =>
+  new Set<string>([
+    ...Object.values((c.topics ?? {}) as Obj).map((t) => t.fact?.key),
+    ...Object.values((c.npcs ?? {}) as Obj).map((n) => n.perception?.discovered?.key),
+    ...Object.values((c.dialogues ?? {}) as Obj).flatMap((d) =>
+      d.riddle?.wrong_limit === undefined
+        ? []
+        : (d.choices?.[d.riddle.choice_id]?.sequence ?? [])
+            .filter((s: Obj) => s.op === 'fact.assign')
+            .map((s: Obj) => s.fact?.key),
+    ),
+  ]);

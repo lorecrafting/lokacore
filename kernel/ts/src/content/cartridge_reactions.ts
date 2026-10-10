@@ -20,7 +20,7 @@ export const uses = (c: Obj) =>
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
     ...r.apply.flatMap((s: Obj, i: number) =>
-      s.op === 'population.suppress'
+      s.op === 'population.suppress' || s.op === 'experience.grant'
         ? []
         : [
             [
@@ -81,8 +81,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
-      } else if (s.op !== 'status.apply') {
-        // status.apply references are checked with the status declarations (cartridge_status.ts).
+      } else if (s.op !== 'status.apply' && s.op !== 'experience.grant') {
+        // status.apply and experience.grant are checked with their declarations (status, levelling).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
       }

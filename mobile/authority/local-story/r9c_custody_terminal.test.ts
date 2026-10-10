@@ -200,6 +200,7 @@ function belfry(path: string) {
   a.run('choose_ancestry', [], { ancestry: 'fen_born' });
   a.run('elspeth', [npc('elspeth')]);
   a.choose('accept');
+  a.run('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   a.run('take', [item('fox_drawing')]);
   a.move('south', 'south');

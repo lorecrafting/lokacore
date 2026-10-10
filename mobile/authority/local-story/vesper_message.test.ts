@@ -56,6 +56,7 @@ function setup(path = ':memory:') {
   const offer = () => {
     ok('elspeth', [ids['npc/elspeth']]);
     choose('accept');
+    ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     ok('take', [ids['item/fox_drawing']]);
     move('south', 'south');
@@ -201,6 +202,7 @@ test('original message branch and terminal reopen with their own NPC narration a
   a.ok('b_elspeth_stays', [ids['npc/elspeth']]);
   assert.equal(a.view().choice!.prompt.key, 'dialogue.elspeth_stays.prompt');
   a.choose('directions');
+  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   assert.equal(a.view().place.id, ids['room/village_green']);
   assert.equal(a.view().place.description.key, 'room.village_green.stays');
@@ -547,6 +549,7 @@ test('terminal quest without a message branch refuses reopen and requires explic
   assert.deepEqual(openGame(a.db, bundle, a.host).view().view.journal, []);
   a.ok('elspeth', [ids['npc/elspeth']]);
   a.choose('accept');
+  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   a.ok('take', [ids['item/fox_drawing']]);
   a.move('south', 'south');

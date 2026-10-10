@@ -1,0 +1,284 @@
+{
+  "description": "Hand-written toolbox row 4 composition answers: one levelling row per character, keyed by character id; it composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls; two writes in one proposal chain. No kernel supplies expected values.",
+  "cases": [
+    {
+      "id": "first-write-from-absent",
+      "state": {
+        "clock": 100
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": null,
+          "value": {
+            "experience": 10,
+            "allocated": {}
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "levelling",
+              "character_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "experience": 10,
+              "allocated": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "two-kills-chain-in-one-decision",
+      "state": {
+        "clock": 100,
+        "levelling": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "experience": 10,
+            "allocated": {}
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 10,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 20,
+            "allocated": {}
+          }
+        },
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 20,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 30,
+            "allocated": {}
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "levelling",
+              "character_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "experience": 30,
+              "allocated": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "spend-adds-a-point",
+      "state": {
+        "clock": 100,
+        "levelling": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "experience": 30,
+            "allocated": {}
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 30,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 30,
+            "allocated": {
+              "levelling_sampler@0.0.1:attribute/str": 1
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "levelling",
+              "character_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "experience": 30,
+              "allocated": {
+                "levelling_sampler@0.0.1:attribute/str": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-expected-refused",
+      "state": {
+        "clock": 100,
+        "levelling": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "experience": 30,
+            "allocated": {}
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 10,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 40,
+            "allocated": {}
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "levelling",
+            "character_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "absent-row-expected-refused",
+      "state": {
+        "clock": 100
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 10,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 30,
+            "allocated": {}
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "levelling",
+            "character_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "experience-falls-refused",
+      "state": {
+        "clock": 100,
+        "levelling": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "experience": 30,
+            "allocated": {}
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 30,
+            "allocated": {}
+          },
+          "value": {
+            "experience": 10,
+            "allocated": {}
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "levelling",
+            "character_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "allocated-point-removed-refused",
+      "state": {
+        "clock": 100,
+        "levelling": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "experience": 30,
+            "allocated": {
+              "levelling_sampler@0.0.1:attribute/str": 1
+            }
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "levelling.set",
+          "writer_group": 0,
+          "character_id": "a0000000-0000-4000-8000-000000000001",
+          "expected": {
+            "experience": 30,
+            "allocated": {
+              "levelling_sampler@0.0.1:attribute/str": 1
+            }
+          },
+          "value": {
+            "experience": 30,
+            "allocated": {
+              "levelling_sampler@0.0.1:attribute/con": 1
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "levelling",
+            "character_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    }
+  ]
+}

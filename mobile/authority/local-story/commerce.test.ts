@@ -105,6 +105,7 @@ const shop = (a: ReturnType<typeof setup>, verb = 'buy', price = 3) =>
 function accept(a: ReturnType<typeof setup>) {
   a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
   a.answer('accept_on_time');
+  a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
 }
 function deliver(a: ReturnType<typeof setup>) {
   a.move('east', 'north', 'north', 'north', 'north');

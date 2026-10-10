@@ -10,7 +10,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
-import { add, mul } from '../../foundation/int.ts';
+import { add, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
@@ -203,8 +203,8 @@ function attackProfile(
   return {
     ...base,
     chance: Math.min(100, Math.max(0, add(base.chance, hit))),
-    damage_min: Math.max(0, add(base.damage_min, damage)),
-    damage_max: Math.max(0, add(base.damage_max, damage)),
+    damage_min: Math.max(0, saturate(base.damage_min + damage)),
+    damage_max: Math.max(0, saturate(base.damage_max + damage)),
   };
 }
 

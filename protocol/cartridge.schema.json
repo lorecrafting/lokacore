@@ -1256,7 +1256,7 @@
           "additionalProperties": false
         },
         "derived": {
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0). hit_chance and damage need world.combat; carry_grams needs world.carry. NPCs have no attributes and keep their authored profile.",
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum; kernel_api at least 1.40). hit_chance and damage need world.combat; carry_grams needs world.carry. NPCs have no attributes and keep their authored profile.",
           "type": "object",
           "properties": {
             "hit_chance": {
@@ -1267,8 +1267,62 @@
             },
             "carry_grams": {
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
+            },
+            "hp_max": {
+              "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             }
           },
+          "additionalProperties": false
+        },
+        "levelling": {
+          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attributes@1, kernel_api at least 1.42). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "type": "object",
+          "properties": {
+            "thresholds": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            },
+            "points_per_level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "kills": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "npc": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "experience": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  }
+                },
+                "required": [
+                  "npc",
+                  "experience"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "level_up": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "thresholds",
+            "points_per_level",
+            "level_up"
+          ],
           "additionalProperties": false
         },
         "death": {

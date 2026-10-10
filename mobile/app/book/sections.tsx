@@ -1,6 +1,6 @@
 // The Contents sections (Character, Ancestry, Journal, Carrying, Map, Settings) and the chapter
 // and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-// size: allow 320, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file)
+// size: allow 325, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file); row 4 level, xp and Raise lines
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -17,7 +17,7 @@ import {
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
-import { SkillDetails } from './skills.tsx';
+import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
@@ -29,12 +29,14 @@ type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
 export function CharacterPage(
-  p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'>,
+  p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'> &
+    Parameters<typeof RaiseCards>[0],
 ) {
   const c = usePalette();
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   const resources = p.resources ?? p.view?.resources ?? [];
   const position = p.position ?? p.view?.position;
+  const levelling = p.view?.levelling;
   const known =
     resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
   return (
@@ -44,6 +46,7 @@ export function CharacterPage(
       {p.view?.ancestry && (
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
+      {levelling && <Text style={prose(c)}>{levelLine(levelling)}</Text>}
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
       {p.view?.conditions?.map((x, i) => (
         <Text key={`${x.label}-${i}`} style={prose(c)}>
@@ -56,6 +59,8 @@ export function CharacterPage(
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}
+      {levelling && <Text style={prose(c)}>{xpLine(levelling)}</Text>}
+      <RaiseCards {...p} />
     </Page>
   );
 }
@@ -150,8 +155,8 @@ export function CarryingPage(p: {
         <>
           <SectionTitle>Worn</SectionTitle>
           <View>
-            {p.equipment!.map(({ slot, item }) => (
-              <View key={slot}>
+            {p.equipment!.map(({ slot, item }, i) => (
+              <View key={`${slot}-${i}`}>
                 <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />

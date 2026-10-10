@@ -72,8 +72,7 @@ export function safe(
   if (!body || (level(world, body, resourceRef(world, 'hp')) ?? 0) <= 0) return 'invalid_state';
   if (world.state.containers[body] !== world.roomIds[refString(scene.on.rest.room)])
     return 'not_present';
-  if (engaged(world, body) || running(world, actor) || pending(world, actor))
-    return 'invalid_state';
+  if (engaged(world, body) || running(world, actor)) return 'invalid_state';
 }
 
 export function bound(world: World, actor: CharacterId, scene: Dream, row: ChoiceRow) {
@@ -134,6 +133,7 @@ export function chooseQuery(
   const code = safe(world, p.actor_id, scene, steps);
   if (code) return code;
   if (
+    pending(world, p.actor_id) ||
     value(world, p.actor_id, fact(world, scene)) !== p.dream.line ||
     row.status !== 'pending' ||
     !bound(world, p.actor_id, scene, row) ||

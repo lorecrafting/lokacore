@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "str": {
+      "start": 10
+    },
+    "con": {
+      "start": 10
+    },
+    "per": {
+      "start": 10
+    }
+  }
+}

@@ -69,13 +69,21 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
       a.sql.close();
     }
   }
+  // loka-x6t.5: an open conversation no longer defers the dream; Continue leaves it first, and
+  // the cold reopen agrees (Peg moved beside the bed so walking up does not end it).
   const deferred = dreamHost(join(dir, 'deferred.db'), (c) => {
-    c.npcs[`${prefix}:npc/peg`].room = ref('room', 'drowned_lantern');
+    c.npcs[`${prefix}:npc/peg`].room = ref('room', 'inn_rooms');
   });
   try {
+    deferred.invoke(
+      'rent_lantern_room',
+      { service: ref('service', 'lantern_room'), quoted_price: 3 },
+      [entity(deferred.initial, 'npc', 'maud')],
+    );
+    deferred.invoke('move', { direction: 'up' });
     deferred.invoke('a_peg_debt', {}, [entity(deferred.initial, 'npc', 'peg')]);
     const ordinary = gameView(deferred.story.world()).choice!.continuation_id;
-    deferred.start();
+    deferred.invoke('rest');
     deferred.reopen();
     assert.deepEqual(phase(deferred.story.world()), {
       slept: true,
@@ -84,12 +92,11 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
       quest: 'active',
     });
     assert.equal(gameView(deferred.story.world()).choice!.continuation_id, ordinary);
-    assert.equal(deferred.dream().available, false);
-    deferred.invoke('close_choice', { continuation_id: ordinary });
-    deferred.reopen();
     assert.equal(deferred.dream().available, true);
     deferred.next();
     deferred.reopen();
+    assert.equal(gameView(deferred.story.world()).choice, undefined);
+    assert.equal(deferred.story.world().state.choices![ordinary]!.status, 'closed');
     assert.equal(phase(deferred.story.world()).cursor, 2);
   } finally {
     deferred.sql.close();

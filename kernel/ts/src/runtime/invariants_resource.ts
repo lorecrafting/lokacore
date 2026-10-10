@@ -61,9 +61,23 @@ export function recovered(op: Any, spec: Any, row: Any, now: number): Json | und
 const effectiveSpec = (op: Any, s: Any) =>
   s.entity_resource_specs?.[key(target(op))] ?? s.resource_specs?.[key(op.resource)];
 
+// A resource_maxima entry replaces the maximum; a row at or above it reads as it with no fraction.
+function maximal(op: Any, s: Any, stored: Any): [Any, Any] {
+  const maximum = s.resource_maxima?.[key(target(op))];
+  const authored = effectiveSpec(op, s);
+  if (maximum === undefined || !authored) return [authored, stored];
+  const capped = Number.isInteger(stored?.value) && stored.value >= maximum;
+  return [
+    { ...authored, maximum },
+    capped
+      ? { ...stored, value: maximum, ...('remainder' in stored ? { remainder: 0 } : {}) }
+      : stored,
+  ];
+}
+
 // Legacy rows also retain timestamps in the replay overlay: later ops cannot settle backwards.
-export function resourceAfter(op: Any, s: Any, row: Any, horizon: number): Json | undefined {
-  const spec = effectiveSpec(op, s);
+export function resourceAfter(op: Any, s: Any, stored: Any, horizon: number): Json | undefined {
+  const [spec, row] = maximal(op, s, stored);
   const now = op.at === undefined ? s.clock : op.at;
   if (
     !spec ||

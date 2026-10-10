@@ -14,6 +14,7 @@ export function search(a: CaseHost) {
   a.invoke('choose_ancestry', [], { ancestry: 'fen_born' });
   a.invoke('elspeth', [a.entity('npc', 'elspeth')]);
   a.choose('accept');
+  a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   a.invoke('take', [a.entity('item', 'fox_drawing')]);
   a.move('south', 'south');

@@ -81,6 +81,7 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     directions.forEach((direction) => go('move', [], { direction }));
   go('elspeth', [ids['npc/elspeth']]);
   choose('accept');
+  go('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   move('north', 'north');
   go('take', [ids['item/fox_drawing']]);
   move('south', 'south');

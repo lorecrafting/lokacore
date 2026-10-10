@@ -39,6 +39,7 @@ const peg = (a: CaseHost) => {
   a.invoke('choose_ancestry', [], { ancestry: 'road_born' });
   a.move('north', 'west');
   offer(a, 'a_peg_debt', 'peg', 'accept_on_time', 'chandlers_debt');
+  a.invoke('close_choice'); // Peg's hub stays open after the answer (loka-x6t.5)
 };
 
 // a_wisp_offer is all(light_off, fen_wisp_discovered, not(...)): both other conjuncts are asserted

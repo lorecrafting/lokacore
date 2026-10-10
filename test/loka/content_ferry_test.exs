@@ -282,6 +282,41 @@ defmodule Loka.ContentFerryTest do
     end
   end
 
+  # Breaks (loka-x6t.5, twin of kernel/ts/test/quest_dialogue.test.ts): the compiler admitting, in
+  # a dialogue that reopens after each answer (no quest, two choices), an answer without the
+  # once-only accept that receives an item, which a player could give back and receive again.
+  test "a reopening dialogue rejects a repeatable receive", %{dir: dir} do
+    give = %{
+      "label" => "dialogue.bram.leave",
+      "narration" => "narration.bram.leave",
+      "receive" => %{"item" => "lantern", "from" => "bram"}
+    }
+
+    files = %{
+      "dialogues/bram_offer.json" => %{
+        "npc" => "bram",
+        "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+        "prompt" => "dialogue.bram.prompt",
+        "roles" => %{
+          "bram" => %{"role" => "npc", "npc" => "bram"},
+          "lantern" => %{"role" => "item", "item" => "lantern"}
+        },
+        "choices" => %{
+          "accept" => %{
+            "label" => "quest.lantern.accept",
+            "narration" => "narration.bram.carry",
+            "accept" => "lantern"
+          },
+          "give" => give
+        }
+      }
+    }
+
+    # A receive also raises the ferry's kernel_api floor (KERNEL_API_RANGE_INVALID): not this break.
+    assert {:error, diags} = compile(dir, files)
+    assert d("OUTCOME_MISMATCH", "dialogues/bram_offer.choices.give.receive", %{}) in diags
+  end
+
   # Breaks (23 §3: the compiler validates its trigger, outcome coverage and capability
   # dependencies): the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts):
   # a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes, a dialogue

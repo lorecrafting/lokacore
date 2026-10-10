@@ -1,0 +1,24 @@
+{
+  "title": "quest.cull.title",
+  "offer": {
+    "label": "quest.cull.accept",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    }
+  },
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "den_found",
+        "equals": true
+      }
+    }
+  }
+}

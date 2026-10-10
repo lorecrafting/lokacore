@@ -37,6 +37,7 @@ const SECTIONS: Readonly<
     | 'crows'
     | 'bleeds'
     | 'statuses'
+    | 'levelling'
   >
 > = {
   visit: 'visited_rooms',
@@ -62,6 +63,7 @@ const SECTIONS: Readonly<
   job: 'jobs',
   bleed: 'bleeds',
   status: 'statuses',
+  levelling: 'levelling',
   choice: 'choices',
 };
 
@@ -82,7 +84,7 @@ export const row = (t: MutationTarget) =>
           ? t.body_id
           : t.kind === 'containment' || t.kind === 'entity'
             ? t.entity_id
-            : t.kind === 'character'
+            : t.kind === 'character' || t.kind === 'levelling'
               ? t.character_id
               : t.kind === 'water'
                 ? t.actor_id

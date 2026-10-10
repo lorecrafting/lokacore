@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "den_found"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "cull",
+      "state": "active"
+    }
+  },
+  "apply": [
+    {
+      "op": "quest.resolve",
+      "quest": "cull",
+      "outcome": "done"
+    }
+  ]
+}

@@ -21,7 +21,7 @@ then one slot holder per distinct `slot` some item declares, in slot-key order (
 [equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). NPCs marked `spawn_template`
 and items at `location.in: template` are definitions only at this stage; they receive no
 ordinary instance or placement. A slot holder is an entity inside the body with capacity1;
-it is not in `entities`, so no command targets it and no view lists it. A food-enabled world
+it is not in `entities`, so no command targets it and no view lists it; the `finger` holder has capacity 2. A food-enabled world
 then mints its single roomless terminal [consumed holder](#d4-homes-finite-apples-and-eat-selected-contract).
 Bounded population initialization follows using the same mint sequence: each authored plan
 creates its admitted initial slots/members and optional held loot, then its control job.
@@ -152,19 +152,20 @@ Projection and admission share this pair legality query.
 ## equipment@1 (`kernel/ts/src/mechanics/equipment/rule.ts`)
 
 An item may declare one `slot` (`SlotKey`: `head`, `neck`, `body`, `cloak`, `arms`, `hands`,
-`waist`, `legs`, `feet`, `wield`, `off_hand`, `light`). Worn means inside the body's holder for
+`finger`, `waist`, `legs`, `feet`, `wield`, `off_hand`, `light`). Worn means inside the body's holder for
 that slot ([A fresh world](#a-fresh-world)); wearing and removing reuse `entity.transfer`, with
 no new op and no event. The actor's holders are those whose container is its body.
 `wear {item_id}`: no entity `not_found`, not an item `invalid_target`, already in one of the
 actor's holders `invalid_state`, not directly in the body `not_owned`, no `slot` or no holder
-for it `invalid_target`, the holder occupied `invalid_state`; accepted `worn`, one transfer
+for it `invalid_target`, the holder full (two items for `finger`, one otherwise) `invalid_state`; accepted `worn`, one transfer
 body → holder. `remove {item_id}`: no entity `not_found`, not an item `invalid_target`, directly
 in the body `invalid_state` (not worn), anywhere but one of the actor's holders `not_owned`;
 accepted `removed`, one transfer holder → body. These checks are one read-only function the
 rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
-`has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
-and dual wield, granted modifiers and affects, curses and no-remove items are LATER
-([ROADMAP](../ROADMAP.md)).
+`has_item` climbs containers, so a worn item still counts. A worn item's affects move its
+wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)); when the hp maximum
+is derived, wearing or removing an item with affects first settles hp, as every attribute writer does ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). Slot compatibility
+and dual wield, curses and no-remove items are LATER ([ROADMAP](../ROADMAP.md)).
 
 <a id="position1-kerneltssrcrulespositionts"></a>
 
@@ -274,6 +275,23 @@ events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler));
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
 
+The player body's hp maximum moves with the derived `hp_max` table
+([row 2](#stats-derived-from-attributes-toolbox-row-2); [PM decision](../decisions/pm-decision-derived-pool-max-2026-10-09.md)):
+its effective maximum is the authored `maximum` plus the bonus, saturated to the ResourceInt range and never below `minimum`, read on
+each use and never stored. Every bound above uses it: queries, saturation, costs, regeneration
+(which stops there), the GameView maximum and band, the status tick and the death restore (capped
+at it). The start value is unchanged, so a raised maximum is reached by regeneration. Every writer
+of an attribute change that can move it first settles hp with a zero-amount `resource.adjust` under
+the old maximum, as position@1 does: wear and remove of an item with affects ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)),
+`raise_attribute` ([row 4](#experience-and-levelling-toolbox-row-4)) and `choose_ancestry`
+([D11](#d11-character-choice-selected-contract)), and any later attribute writer (PM ruling 2026-10-09, `loka-kgd.11`), so credit banked while capped is discarded and never granted by the new
+maximum. Composition
+carries it as the non-saved `resource_maxima` map, keyed by the exact canonical resource target,
+in both kernels' composition and independent replay; an entry replaces the spec's `maximum` for
+that target, and a row stored at or above it (the maximum fell since) reads as the maximum with
+a zero remainder, so the next write starts there. Without an entry, a row above `maximum` still fails.
+NPC bodies, other pools and cartridges without `hp_max` are unchanged.
+
 <a id="attributes1"></a>
 
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
@@ -284,8 +302,9 @@ the engine declares no world stats. The installed [D11 writer](#d11-character-ch
 commits `character.select` with the chosen ancestry and complete attribute values in
 `state.characters[CharacterId]`. These values belong to the character, never its replaceable
 body. `attributeValue` reads that character row when present, otherwise the definition start;
-policy, recipe thresholds and skill qualification share this lookup. Actors and cartridges
-without a selected row retain definition starts. No training/equipment attribute writer is installed.
+policy, recipe thresholds and skill qualification share this lookup, which adds the affects of the
+actor's worn items ([row 3](#item-slots-and-affects-toolbox-row-3)). Actors and cartridges
+without a selected row retain definition starts. No training attribute writer is installed.
 `attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
 `not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
 least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
@@ -298,7 +317,7 @@ unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILIT
 
 The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
 
-Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
+Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal, after a zero-amount hp settle when the hp maximum is derived ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
 
 Under the [owner's world-time ruling](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md), world time starts when the player first enters the world: the accepted selection. Before selection, `stepElapsed` refuses trusted elapsed updates as `invalid_state`, as Step refuses ordinary commands, so the clock and due jobs stay at the birth clock. The local driver credits no wall time before selection; credited time starts at the selection invocation's reservation. This supersedes the [2026-10-06 pre-choice elapsed ruling](../decisions/owner-decision-d11-prechoice-elapsed-2026-10-06.md).
 
@@ -370,14 +389,18 @@ rule other than a dialogue choice resolves or fails a quest with an outcome.
 
 `talk {target_id}`: a target that speaks no dialogue `not_found`. A speaker may have several
 dialogues; the talk opens the first, in key order, whose own policy holds: none holding, or the
-actor already having a pending choice, `invalid_state`. Accepted
+actor already in conversation with that speaker, `invalid_state`. A talk to another speaker
+while a conversation is open ends that one first, as Leave would: the same decision's
+`choice.close` of the open row precedes the new `choice.open` (owner ruling 2026-10-09 in Beads
+loka-x6t.5, paraphrased: an open conversation must not block the world;
+`mechanics/dialogue/selection.ts:144`). Accepted
 `choice_opened`: one `choice.open` of a new continuation (ordinal 0 of this command), the
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
 actor's or not offering the choice `invalid_state`; the pinned dialogue policy is
 re-evaluated for that actor at Choose and pending-option projection, refusing
 `invalid_state` when no longer true; a bound NPC not in the room `not_present`;
-a bound item not held `not_owned` (`kernel/ts/src/mechanics/dialogue/shared.ts:66`; the GameView shows the same); then the
+a bound item not held `not_owned` (`kernel/ts/src/mechanics/dialogue/shared.ts:85`; the GameView shows the same); then the
 dialogue's quest resolves (above), or the choice's `accept` activates its quest as
 `accept_quest` does, `invalid_state` when `accept_quest` would be: the actor already has an
 instance, or the quest's offer, if declared, has a policy that fails (the talk-time policy may be
@@ -388,14 +411,41 @@ the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:177`). `close_choice {continuation_id}`: the
-actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
+whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:279`). The conversation then
+returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+to the person's topics; the conversation stays open until Leave the conversation): the same
+decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
+source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer
+ends the conversation instead, opening nothing, when its dialogue resolves a quest (story points
+and scene starts follow only such answers) or declares a riddle, when the answer has a `patrol`
+transition (the speaker sets off on a leg), or when the dialogue has a single choice (one-shot
+offers, lessons, escort starts and single-choice farewells such as "Take your leave";
+`mechanics/dialogue/behavior.ts:72`). A farewell choice in a dialogue with other choices, such as Aldric's "Leave
+Aldric.", returns to the hub like any other answer. The reopened options keep their
+declared availability: an answer whose effects make the dialogue's policy or an option fail shows
+those options unavailable with the usual codes, and Leave the conversation stays offered. A
+riddle's wrong answer keeps its row, as below. `close_choice {continuation_id}`: the
+actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`; it is
+Leave the conversation, offered while any dialogue row is pending (`modal`, `closable: true`).
+A hub conversation (a dialogue that returns to its hub, above) also ends as Leave would, with no
+event, once its actor and speaker no longer share a room or the speaker dies: the player moves
+away or the speaker leaves. The proposal, once composed with its due jobs, appends the
+`choice.close` of each such row in id order (`kernel/ts/src/runtime/proposal.ts:102`,
+`mechanics/dialogue/selection.ts:154`). A one-shot dialogue's row stays pending when either
+leaves, its options `not_present`
+([adverse case](../spec/conformance/adverse-cases.json) `walked-away-rejects-new-choice`).
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
-contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:151`). Only a dialogue's speaker, present in the room,
-offers its talk (`:138`), one per dialogue under the dialogue's key, available while that
+contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:264`). Only a dialogue's speaker, present in the room,
+offers its talk (`mechanics/dialogue/selection.ts:73`), one per dialogue under the dialogue's key, available while that
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
-decision conflict), both `OUTCOME_MISMATCH`.
+decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
+that could repeat must not reach a once-per-lineage save proof: the loader and the compiler
+reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
+of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
+bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
+conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:248`, twin
+`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII
@@ -1410,7 +1460,10 @@ as a running modal scene. Its choice is offered only through its dream detail,
 not as an ordinary pending dialogue choice; it neither blocks another dialogue
 nor overwrites one. Close returns to the real bed/World without a gameplay write.
 A saved checkpoint is resumable only by a living actor at its exact room anchor,
-with no encounter, modal or ordinary pending choice. Travel, damage/return or
+with no encounter or modal. An open ordinary conversation does not block Continue: Continue
+ends it first, as Leave would, in the same decision (owner ruling 2026-10-09, loka-x6t.5;
+`mechanics/scene/sequence.ts:42`); the dream's own choice is still refused while one is open.
+Travel, damage/return or
 another modal makes presentation unavailable, preserves the beat/branch, and
 leaves normal Stand/Flee/movement/recovery available. Return legally and Resume;
 no teleport, immunity, time pause, rerun of first Rest or mandatory dream screen.
@@ -1688,10 +1741,27 @@ At a due job strictly before `ends_at` and not before `next_tick_at`, add `per_t
 
 ## Stats derived from attributes (toolbox row 2)
 
-[Toolbox row 2](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#derived-stat-declarations) govern it; the formula and its limits are the PM decisions in Beads `loka-kgd.3` (2026-10-09). A cartridge may declare a table per derived stat; each table's bonus is `floor(Σ per_point × (value − pivot) / divisor)`, where `value` is the player character's attribute as [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads it on each use (the selected D11 value, otherwise the definition start), the sum is checked integer arithmetic (an overflow faults the action atomically, as combat's checked arithmetic does), and the division rounds toward minus infinity (−5 / 2 is −3). The engine owns the formula; the cartridge owns every number. The bonus is added to the authored number it modifies, then clamped:
+[Toolbox row 2](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#derived-stat-declarations) govern it; the formula and its limits are the PM decisions in Beads `loka-kgd.3` (2026-10-09). A cartridge may declare a table per derived stat; each table's bonus is `floor(Σ per_point × (value − pivot) / divisor)`, where `value` is the player character's attribute as [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads it on each use (the selected D11 value, otherwise the definition start), each term `per_point × (value − pivot)` and then their sum saturate to the ResourceInt range (−2³¹ to 2³¹−1, `protocol/resource.schema.json`), so no read faults, in an action or the GameView (PM ruling in Beads `loka-kgd.8`), and the division rounds toward minus infinity (−5 / 2 is −3). The engine owns the formula; the cartridge owns every number. The bonus is added to the authored number it modifies, then clamped:
 
 - `hit_chance`: the player's attack chance (the usable wielded weapon's, otherwise `combat.player_attack`), clamped to 0..100.
 - `damage`: both `damage_min` and `damage_max` of that profile, each clamped at 0, so the interval keeps its order; a hit whose damage is 0 deals no loss.
 - `carry_grams`: `carry.max_grams` for the player's body, clamped at 0, on every carry path (Take, purchase and dialogue receipt, exchange and harvest, Fill).
+- `hp_max`: the hp pool's `maximum` for the player's body, clamped at the pool's `minimum` ([resource@1](#resource1-kerneltssrcmechanicsresourcets); Beads `loka-kgd.8`).
 
-Nothing is stored: the stats are read at use, so a later attribute writer changes them at once. NPCs have no attributes; their attack profiles and any other body's carrying are unchanged. Hit points are not derived here (Beads `loka-kgd.8`). A cartridge without `world.derived` behaves as before. The sampler's ancestries give strength 15 (strong) and 5 (nimble): with the base chance 75, damage 4 and carry 10000 g, the strong character hits at 100 for 6 and lifts the 8000 g anvil; the nimble one hits at 50 for 1 and cannot lift it. The player sees no new Book line: the Character page already shows the attributes.
+Nothing is stored: the stats are read at use, so a later attribute writer changes them at once. NPCs have no attributes; their attack profiles, hit points and any other body's carrying are unchanged. A cartridge without `world.derived` behaves as before. The sampler's ancestries give strength 15 (strong), 5 (nimble) and constitution 16 (hardy): with the base chance 75, damage 4, carry 10000 g and hp maximum 10, the strong character hits at 100 for 6 and lifts the 8000 g anvil; the nimble one hits at 50 for 1 and cannot lift it; the hardy one starts at hp 10 of 16 and regenerates to 16. The player sees no new Book line: the Character page already shows the attributes and each pool's current and maximum.
+
+## Item slots and affects (toolbox row 3)
+
+[Toolbox row 3](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#item-affect-declarations) and [Book](book-ui.md#worn-affects-details) govern it; the PM decision is in Beads `loka-kgd.10` (2026-10-09). The `finger` slot holds two items; every other slot holds one ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). An item with a slot may declare `affects`, each `{attribute, modifier}`: while the item is worn by the player's body, [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads the attribute as its selected (else starting) value plus the sum of `modifier` over the worn affects naming it; the sum and then the value saturate to the ResourceInt range, as in row 2. Nothing is stored: the D11 selection row stays immutable, the value is derived on each read, and removing the item restores it at once. Every reader sees it: `stat_compare`, recipe `attribute_threshold`, skill qualification and the [derived stats](#stats-derived-from-attributes-toolbox-row-2), including the hp maximum, whose fall on removal follows [resource@1](#resource1-kerneltssrcmechanicsresourcets). The engine owns the mechanic and the two fingers; the cartridge owns every amount. Items worn by NPCs, carried but unworn, or inside a worn container grant nothing. The sampler's copper, silver and tin rings each give PER +2, so two worn rings read PER 14 and reveal the hall's `stat_compare` variant, a third is refused, and its belt gives STR +2 and CON +4: with carry 1000 g at STR 10 and 1000 g per point, the 2500 g stone lifts only while it is worn, and the hp maximum reads 14 instead of 10.
+
+## Experience and levelling (toolbox row 4)
+
+[Toolbox row 4](../MECHANICS-TOOLBOX.md#ranked-toolbox); the PM decision is in Beads `loka-kgd.11` (2026-10-09): class-free (owner 2026-10-08), a new per-character row, the D11 selection row stays immutable. Draft by the developer (`loka-kgd.11` notes); items marked *completion* fill places where the decision was silent.
+
+- **Declaration.** A cartridge may declare `world.levelling`: `thresholds`, the strictly increasing positive experience totals that reach levels 2, 3 and so on; `points_per_level`, the attribute points each level grants (at least 1); `kills`, a list of `{npc, experience}`, the experience a credited kill of that NPC definition grants; `level_up`, the TextKey of the level-up line. Every number is the cartridge's. It needs attributes@1.
+- **Row.** One `levelling` row per character, `{experience, allocated}`, `allocated` mapping an attribute's DefinitionRefString to the points spent on it; absent reads as zero experience and nothing allocated. *Completion:* level and unspent points are derived on read, never stored: level is 1 plus the count of thresholds at or below the experience; unspent is `points_per_level × (level − 1) − Σ allocated`.
+- **Write.** The delta op `levelling.set {character_id, expected, value}` composes, in both kernels, only when the stored row equals `expected` (null when absent) and neither the experience nor any allocated count falls. The story rule keeps Σ allocated within the granted points.
+- **Experience.** Each death the combat credit names for the player character, whose victim definition matches a `kills` entry, adds its experience. The reaction step `experience.grant {amount}` adds `amount` for the acting character, so a quest's `quest_resolved` reaction rewards it. Every experience source in one proposal (each credited kill and each `experience.grant`) adds to one levelling write per character, since the composer refuses a row written by two writer groups. Experience saturates at the ResourceInt maximum.
+- **Spending.** One `raise_attribute` action with an `attribute` input (an authored attribute's DefinitionRef) is offered while unspent points remain; the Book shows one Raise card per authored attribute. It first settles a derived hp maximum ([resource@1](#resource1-kerneltssrcmechanicsresourcets)), then adds one allocated point; with none left nothing is offered, and a forged invocation is refused by keyed admission (the rule also refuses it, `invalid_state`). Replay returns the original receipt.
+- **Reading.** [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads selected (else starting) value plus allocated points plus worn affects (row 3), saturated as in row 2, so every derived stat follows. The GameView carries `{level, experience, next, unspent}` (`next` absent at the top level); reaching a level adds one receipt narration line, the `level_up` text: *completion:* after the whole proposal (root, reactions and jobs) is composed, the last `levelling.set` of the player character in it is compared with the stored row before the step, and the line is appended once at the end of the narration when its level is higher, so a step that crosses two thresholds still adds one line.
+- **Sampler.** `cartridges/levelling_sampler`: three rats grant 10 experience each, thresholds 30 and 100, one point per level; three kills reach level 2 with one point; resolving the den quest grants 20 by `experience.grant`; Raise STR moves the derived damage (STR, divisor 1) and Raise CON the derived hp maximum (CON, hp regenerating 1 per hour) by the cartridge's tables.
