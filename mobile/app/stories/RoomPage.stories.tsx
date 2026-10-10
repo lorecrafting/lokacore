@@ -55,7 +55,8 @@ const cued = (cues: object[]): StoryObj => ({
   ...pageStory({ ...RoomFirstView, view: { ...RoomFirstView.view, cues } }),
   args: { words: Object.fromEntries(Object.entries(senses).filter(([k]) => k.startsWith('cue.'))) },
 });
-// Breaks: the direction phrase is dropped, so a cue next door reads as if it were here.
+// Breaks: the direction phrase is dropped, so a cue next door reads as if it were here; or the
+// cues are reordered, so a farther cue reads before a nearer one.
 export const SenseCues: StoryObj = {
   ...cued([
     { sense: 'sound', text: 'cue.hammering', direction: 'east' },
@@ -64,7 +65,12 @@ export const SenseCues: StoryObj = {
   name: 'Sense cues',
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Hammering from the east')).toBeVisible();
-    await expect(canvas.getByText('The smell of stew from the north')).toBeVisible();
+    const stew = canvas.getByText('The smell of stew from the north');
+    await expect(stew).toBeVisible();
+    const hammering = canvas.getByText('Hammering from the east');
+    await expect(
+      hammering.compareDocumentPosition(stew) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   },
 };
 // Breaks: a cue from the player's own room gets a direction phrase it has none of.
