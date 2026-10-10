@@ -31,11 +31,10 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const P = 'climb_sampler@0.0.1';
 
-// Breaks: the fall ignores the rope (a roped climb still hurts), skips the move or the damage,
-// kills or takes HP below 1, or a plain face (the ledge's up) also falls.
-test('without the rope the climber falls to the ledge for 4 HP, never below 1; with it, unhurt', () => {
+// The player's session over `cartridge`: send a command, read the narration keys, room and HP.
+function session(cartridge: Cartridge) {
   let n = 0;
-  let w: World = newWorld(content, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1f' as never, [1, 2, 3, 4]);
+  let w: World = newWorld(cartridge, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1f' as never, [1, 2, 3, 4]);
   const send = (payload: object) => {
     const r = step(
       w,
@@ -50,8 +49,19 @@ test('without the rope the climber falls to the ledge for 4 HP, never below 1; w
     w = r.world;
     return (r.decision as { narration?: { key: string }[] }).narration?.map((t) => t.key);
   };
-  const at = () => w.rooms[w.state.containers[w.body]].title;
-  const hp = () => level(w, w.body, resourceRef(w, 'hp'));
+  return {
+    send,
+    world: () => w,
+    edit: (change: (x: World) => World) => void (w = change(w)),
+    at: () => w.rooms[w.state.containers[w.body]].title,
+    hp: () => level(w, w.body, resourceRef(w, 'hp')),
+  };
+}
+
+// Breaks: the fall ignores the rope (a roped climb still hurts), skips the move or the damage,
+// kills or takes HP below 1, or a plain face (the ledge's up) also falls.
+test('without the rope the climber falls to the ledge for 4 HP, never below 1; with it, unhurt', () => {
+  const { send, world, at, hp } = session(content);
 
   for (const after of [6, 2, 1, 1]) {
     assert.deepEqual(send({ type: 'move', direction: 'down' }), ['narration.fell']);
@@ -59,9 +69,41 @@ test('without the rope the climber falls to the ledge for 4 HP, never below 1; w
     assert.equal(send({ type: 'move', direction: 'up' }), undefined);
     assert.deepEqual([at(), hp()], ['room.clifftop.title', after]);
   }
-  send({ type: 'take', item_id: w.entityIds[`${P}:item/rope`] });
+  send({ type: 'take', item_id: world().entityIds[`${P}:item/rope`] });
   assert.equal(send({ type: 'move', direction: 'down' }), undefined);
   assert.deepEqual([at(), hp()], ['room.ledge.title', 1]);
+});
+
+// Breaks: only a rope in the hand counts, so a rope carried inside a held pack still drops the climber.
+test('a rope inside a carried pack counts as held', () => {
+  const { send, world, edit, at, hp } = session(content);
+  const rope = world().entityIds[`${P}:item/rope`];
+  const pack = 'pack-under-test' as never; // held() only walks state.containers
+  edit((w) => ({
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [pack]: w.body, [rope]: pack } },
+  }));
+  assert.equal(send({ type: 'move', direction: 'down' }), undefined);
+  assert.deepEqual([at(), hp()], ['room.ledge.title', 10]);
+});
+
+// Breaks: the fall reads HP before the move's fare (a stale `from`, or the fall applied first):
+// 10 - 1 (fare) - 4 (fall) = 5, and the fall's op starts from the post-fare 9.
+test('the fall lands after the move cost', () => {
+  const costly = {
+    ...content,
+    world: {
+      movement: {
+        cost: {
+          resource: resourceRef(newWorld(content, 'x' as never, [1, 2, 3, 4]), 'hp'),
+          amount: 1,
+        },
+      },
+    },
+  } as Cartridge;
+  const { send, at, hp } = session(costly);
+  assert.deepEqual(send({ type: 'move', direction: 'down' }), ['narration.fell']);
+  assert.deepEqual([at(), hp()], ['room.ledge.title', 5]);
 });
 
 // Breaks: the loader drops a climb check, so an unknown item, a missing fell text, a cartridge
