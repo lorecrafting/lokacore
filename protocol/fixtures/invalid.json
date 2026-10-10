@@ -20691,6 +20691,34 @@
     ]
   },
   {
+    "name": "status_apply_npc_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_expired"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "burning"
+          },
+          "npc": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/npc",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
     "name": "npc_immune_empty",
     "contract": "NpcDefinition",
     "value": {

@@ -1,0 +1,17 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "east": {
+      "to": "yard"
+    }
+  },
+  "details": {
+    "hearth": {
+      "aliases": [
+        "hearth"
+      ],
+      "description": "detail.hearth"
+    }
+  }
+}

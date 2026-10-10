@@ -172,9 +172,10 @@ const subject = (cause: DomainEvent, body: EntityId) => {
   return id ?? body;
 };
 
-// A status.apply on its holder: the step's named item's instance, else the event's subject (row
-// G3), once per holder and status in a rule, in the one writer group the holder's status writes
-// share in this advance (status/job.ts statusGroup); only the player's own body hears the applied line.
+// A status.apply on its holder: the step's named item's or (row 42) NPC's instance, else the
+// event's subject (row G3), once per holder and status in a rule, in the one writer group the
+// holder's status writes share in this advance (status/job.ts statusGroup); only the player's own
+// body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
@@ -184,7 +185,8 @@ function statusStep(
   { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
   mint: Mint,
 ) {
-  const holder = step.item ? world.entityIds[refString(step.item)] : subject(cause, body);
+  const named = step.item ?? step.npc;
+  const holder = named ? world.entityIds[refString(named)] : subject(cause, body);
   const once = `${holder}|${refString(step.status)}`;
   if (!holder || applied.has(once)) return { ops: [], narration: [] };
   applied.add(once);

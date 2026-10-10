@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "traveller"
+  ],
+  "short": "npc.traveller.short",
+  "room_line": "npc.traveller.room",
+  "description": "npc.traveller.description",
+  "room": "yard"
+}

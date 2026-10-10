@@ -23,7 +23,7 @@ defmodule Loka.Content.Status do
   end
 
   # Row G3: each NPC's or item's immune list, and whether any API 1.46 field (those, a step naming
-  # an item, a tick or expiry trigger, or a row 2c status modifier) is used.
+  # an item or (row 42) an NPC, a tick or expiry trigger, or a row 2c status modifier) is used.
   defp row_g3(defs) do
     immune =
       for kind <- ~w(npc item),
@@ -38,7 +38,7 @@ defmodule Loka.Content.Status do
   defp trigger?({_, {_, _, %{} = r}}),
     do:
       String.starts_with?(r["on"]["event"], "status_") or
-        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and &1["item"] != nil))
+        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
 
   defp trigger?(_), do: false
 

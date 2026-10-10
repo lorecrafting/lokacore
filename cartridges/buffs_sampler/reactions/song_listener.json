@@ -1,0 +1,20 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "play_song"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "npc_present",
+      "npc": "listener"
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "inspired",
+      "npc": "listener"
+    }
+  ]
+}

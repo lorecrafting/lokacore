@@ -23,7 +23,7 @@ export function status(c: Obj): Diagnostic[] {
       s,
     ]),
   ) as [string, Obj][];
-  const { immune, named, g3 } = rowG3(c);
+  const { immune, named, lone, g3 } = rowG3(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, g3 ? '1.46' : '1.38') < 0 ||
@@ -45,7 +45,7 @@ export function status(c: Obj): Diagnostic[] {
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   for (const [at, ref, table] of named)
     if (!c[table]?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
-  return out;
+  return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at))];
 }
 
 // Row G3: each NPC's or item's immune list entry; each step naming an item and (row 2c) each status
@@ -58,11 +58,17 @@ function rowG3(c: Obj) {
   ) as [string, Obj][];
   const items = Object.entries(c.reactions ?? {}).flatMap(([ref, r]: [string, any]) =>
     (r.apply as Obj[]).flatMap((s, i) =>
-      s.op === 'status.apply' && s.item
-        ? [[`.cartridge.reactions${step(ref)}.apply[${i}].item`, s.item, 'items']]
-        : [],
+      s.op !== 'status.apply'
+        ? []
+        : (['item', 'npc'] as const)
+            .filter((f) => s[f])
+            .map((f) => [`.cartridge.reactions${step(ref)}.apply[${i}].${f}`, s[f], `${f}s`, s]),
     ),
-  ) as [string, Obj, string][];
+  ) as [string, Obj, string, Obj?][];
+  // Row 42: a step names one holder, and a spawn template has no instance to take it.
+  const lone = items.flatMap(([at, ref, table, s]) =>
+    table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s?.item) ? [at] : [],
+  );
   const modifies = Object.entries(c.statuses ?? {}).flatMap(([ref, s]: [string, any]) =>
     ((s.modifies ?? []) as Obj[]).map((m, n) => [
       `.cartridge.statuses${step(ref)}.modifies[${n}].attribute`,
@@ -75,5 +81,5 @@ function rowG3(c: Obj) {
     items.length ||
     modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
-  return { immune, named: [...items, ...modifies], g3 };
+  return { immune, named: [...items, ...modifies], lone, g3 };
 }
