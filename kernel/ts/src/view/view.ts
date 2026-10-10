@@ -34,6 +34,7 @@ import { choiceView } from '../mechanics/dialogue/shared.ts';
 import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
+import { holds } from '../mechanics/policy.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
@@ -85,7 +86,7 @@ export function gameView(world: World): GameView {
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...conditionViews(world),
-    ...cueViews(world, steps),
+    ...cueViews(world, steps, holds),
     place: placeView(world, here, steps),
     exits: exits(world, actions.door, steps),
     actions: actions.place,

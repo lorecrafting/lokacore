@@ -1,5 +1,6 @@
 // sense_cue@1 (toolbox row G6; mechanics.md sense cues): which declared cues reach a room, read by
 // the view (GameView cues) and the cue_perceived policy leaf. Projection only: nothing is stored.
+// The policy evaluator comes in as `holds`, so this module never imports policy (no import cycle).
 import {
   LIMITS,
   type CharacterId,
@@ -13,13 +14,13 @@ import { bodyOf, refString, type Steps, type World } from '../runtime/decision.t
 import { cmp } from '../foundation/validate.ts';
 import { living } from './death/shared.ts';
 import { fuelView } from './light/shared.ts';
-import { exitOf } from './lookups.ts';
-import { hidden } from './movement/shared.ts';
-import { holds } from './policy.ts';
+import { exitOf, hidden } from './lookups.ts';
+import type { holds } from './policy.ts';
 import { specOf } from './status/shared.ts';
 
 type Source = { readonly room: string; readonly cue: Cue };
 type Near = { readonly d: number; readonly direction?: string };
+type Holds = typeof holds;
 const over = (steps: Steps) => ++steps.n > LIMITS.query_steps;
 
 // The room holding `id` (itself when a room), through its containers; one step per hop.
@@ -101,6 +102,7 @@ export function reaching(
   actor: CharacterId,
   room: string,
   steps: Steps,
+  holds: Holds,
   heard?: Source[],
 ) {
   if (!w.cartridge.lock.capabilities.sense_cue) return [];
@@ -114,8 +116,8 @@ export function reaching(
 }
 
 /** GameView cues: those reaching the actor's room, nearest first, then by direction and text. */
-export function cueViews(w: World, steps: Steps) {
-  const cues = reaching(w, w.character, w.state.containers[w.body]!, steps)
+export function cueViews(w: World, steps: Steps, holds: Holds) {
+  const cues = reaching(w, w.character, w.state.containers[w.body]!, steps, holds)
     .sort(
       (a, b) =>
         a.d - b.d || cmp(a.direction ?? '', b.direction ?? '') || cmp(a.cue.text, b.cue.text),
@@ -137,10 +139,11 @@ export function perceived(
   actor: CharacterId,
   p: Extract<Policy, { op: 'cue_perceived' }>,
   ctx: { steps: Steps; cause?: DomainEvent; cue?: true },
+  holds: Holds,
 ) {
   const npc = w.entityIds[refString(p.npc)];
   const room = npc && living(w, npc) ? roomOf(w, npc, ctx.steps) : undefined;
   if (ctx.cue || !room) return false;
-  const cues = reaching(w, actor, room, ctx.steps, outcomeCues(w, actor, ctx.cause));
+  const cues = reaching(w, actor, room, ctx.steps, holds, outcomeCues(w, actor, ctx.cause));
   return cues.some(({ cue }) => cue.sense === p.sense) && ctx.steps.n <= LIMITS.query_steps;
 }

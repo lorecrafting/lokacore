@@ -79,7 +79,7 @@ export function holds(
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
     case 'cue_perceived':
-      return perceived(world, actor, p, ctx);
+      return perceived(world, actor, p, ctx, holds);
     default: {
       const leaf: never = p; // a schema leaf without its case here fails tsc
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
