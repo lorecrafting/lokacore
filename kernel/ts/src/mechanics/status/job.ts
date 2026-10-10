@@ -12,6 +12,7 @@ import type {
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
+import { currentRound } from '../combat/round.ts';
 import { closeEncounter, engaged } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
@@ -170,7 +171,8 @@ const successor = (
 
 // Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
 // in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
-// statusStep, row G3).
+// statusStep, row G3); so does a combat round on its body or opponent, whose hp a status's tick or
+// hp settle (row 2c) also writes.
 export function statusGroup(
   at: World,
   id: JobId,
@@ -178,7 +180,14 @@ export function statusGroup(
   holders: Map<string, number>,
   next: number,
 ) {
-  const held = job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined;
-  if (held && !holders.has(held)) holders.set(held, next);
-  return held ? holders.get(held) : undefined;
+  const round = currentRound(at, id, job);
+  const held = round
+    ? [round.body_id, round.npc_id]
+    : [job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined];
+  const bodies = held.filter((b) => b !== undefined);
+  if (!bodies.length) return undefined;
+  // ponytail: a round whose body and opponent already hold different groups keeps the first.
+  const group = bodies.map((b) => holders.get(b)).find((g) => g !== undefined) ?? next;
+  for (const b of bodies) if (!holders.has(b)) holders.set(b, group);
+  return group;
 }

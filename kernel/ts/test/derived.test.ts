@@ -1,16 +1,10 @@
 // Toolbox row 2 on the compiled derived sampler: strength 5 (nimble) and 15 (strong) move the
 // player's hit chance, damage and carry ceiling by the cartridge's tables.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import type { World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { decide } from '../src/mechanics/attributes/rule.ts';
@@ -19,69 +13,18 @@ import { carryingAdded, carryingExchange } from '../src/mechanics/containment/sh
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
-
-const scratch = mkdtempSync(join(tmpdir(), 'loka-derived-sampler-'));
-let artifact: Uint8Array;
-try {
-  const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', 'cartridges/derived_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
-  artifact = readFileSync(file);
-} finally {
-  rmSync(scratch, { recursive: true });
-}
-const loaded = loadCartridge(artifact, INSTALLED);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const content = loaded.cartridge as Cartridge;
-const anvil = (w: World) => w.entityIds['derived_sampler@0.0.1:item/anvil'];
-const dummy = (w: World) => w.entityIds['derived_sampler@0.0.1:npc/dummy'];
-let n = 0;
-function act(w: World, p: object) {
-  n += 1;
-  return step(
-    w,
-    {
-      id: `dddddddd-5555-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-}
-function play(w: World, p: object): World {
-  const r = act(w, p);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-const chosen = (ancestry: string, c: Cartridge = content) =>
-  play(newWorld(c, '1d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
-    type: 'choose_ancestry',
-    ancestry,
-  });
-function wait(w: World, seconds: number): World {
-  n += 1;
-  const run_id = 'aaaaaaaa-0000-4000-8000-000000000020';
-  const until = w.state.clock + seconds;
-  const r = stepElapsed(
-    w,
-    {
-      id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
-      world_context_id: w.context,
-      payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
-    } as never,
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  if (r.decision.kind === 'accepted')
-    seen.push(
-      ...r.decision.events.map((e) => e.payload.type as string),
-      ...(r.decision.narration ?? []).map((t) => t.key as string),
-    );
-  return r.world;
-}
-const seen: string[] = []; // every elapsed run's event types, then its narration keys
+import {
+  MIGHT,
+  artifact,
+  content,
+  anvil,
+  dummy,
+  act,
+  play,
+  chosen,
+  wait,
+  hpView,
+} from './derived_fixture.ts';
 
 // Breaks: truncation instead of floor (nimble damage -2), a dropped divisor or pivot, or the
 // definition start read instead of the selected value (strong would match nimble).
@@ -153,11 +96,6 @@ test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0
   weak.world.derived.damage.terms[0].per_point = -10;
   assert.equal(hp(round(chosen('strong', weak))), 20);
 });
-
-const hpView = (w: World) => {
-  const { current, maximum } = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
-  return [current, maximum];
-};
 
 // Breaks: resourceSpec or the GameView keeps the authored maximum 10 (hardy shows 10/10 and never
 // regenerates past it), or base() omits resource_maxima so composition refuses a write from 16.
@@ -268,117 +206,6 @@ test('a maximum lowered to 4 reads the start value 10 as 4 and caps the death re
   );
   assert.equal(gameView(fought).place!.title.key, 'room.hall.title'); // died and returned at the shrine
   assert.deepEqual(hpView(fought), [4, 4]);
-});
-
-// Breaks (row 2c): value() ignores an active status's modifies, adds it to another attribute, or
-// keeps it after expiry.
-test("the shrine's might (+3 str for an hour) lifts the strong hit from 6 to 8; expiry restores 6", () => {
-  const hp = (w: World) => level(w, dummy(w), resourceRef(w, 'hp'));
-  const strike = (w: World) =>
-    wait(
-      play(play(w, { type: 'move', direction: 'east' }), { type: 'attack', target_id: dummy(w) }),
-      150,
-    );
-  let w = play(play(chosen('strong'), { type: 'move', direction: 'north' }), {
-    type: 'move',
-    direction: 'south',
-  });
-  assert.equal(hp(strike(w)), 12); // 20 - (4 + floor((18 - 10) / 2))
-  assert.deepEqual(hpView(w), [10, 10]); // might names str only: con 10 keeps the hp maximum
-  w = wait(w, 3000); // might never ticks: its one job is the expiry
-  assert.equal(hp(strike(w)), 12);
-  w = wait(w, 600); // the expiry at application + 3600
-  assert.equal(hp(strike(w)), 14);
-});
-
-const MIGHT = 'derived_sampler@0.0.1:status/might';
-// The sampler with might also giving con `modifier`, and a held-in-hall tonic (hp +2, cures might).
-function mightCon(modifier: number) {
-  const c = structuredClone(content) as any;
-  const str = c.statuses[MIGHT].modifies[0];
-  c.statuses[MIGHT].modifies.push({ attribute: { ...str.attribute, key: 'con' }, modifier });
-  c.lock.capabilities.food = 1;
-  const anvil = c.items['derived_sampler@0.0.1:item/anvil'];
-  const edible = { resource: { ...str.attribute, kind: 'resource', key: 'hp' }, amount: 2 };
-  const cures = [{ ...str.attribute, kind: 'status', key: 'might' }];
-  c.items['derived_sampler@0.0.1:item/tonic'] = {
-    ...anvil,
-    keywords: ['tonic'],
-    mass_grams: 10,
-    edible: { ...edible, cures, label: anvil.short, narration: anvil.short },
-  };
-  return c as Cartridge;
-}
-const tonic = (w: World) => w.entityIds['derived_sampler@0.0.1:item/tonic'];
-const north = { type: 'move', direction: 'north' };
-
-// Breaks (row 2c, as loka-kgd.10 for wear): applying a con-modifying status does not settle hp
-// first, so 4 h idle at the cap banks credit the raised maximum grants at once (16/16).
-test('a status lifting con after 4 h idle at full hp keeps hp 10 of 16, then regenerates', () => {
-  let w = wait(chosen('strong', mightCon(6)), 4 * 3600);
-  assert.deepEqual(hpView(w), [10, 10]);
-  w = play(w, { type: 'move', direction: 'north' });
-  assert.deepEqual(hpView(w), [10, 16]);
-  w = wait(w, 3600); // to the expiry
-  assert.deepEqual(hpView(w), [10, 10]);
-});
-
-// Breaks (row 2c): expiry ends a con-lowering status without the hp settle, so the credit banked
-// under the lowered maximum pays out at once (16/16); or a status without per_tick ticks,
-// narrates a tick, shows a tick part, or expires at its first end after a refresh.
-test('a tickless might with con -6, refreshed at +1800, expires at +5400 with hp 10 of 16', () => {
-  seen.length = 0;
-  let w = play(chosen('hardy', mightCon(-6)), north);
-  const t0 = w.state.clock;
-  assert.deepEqual(hpView(w), [10, 10]);
-  w = wait(w, 1800);
-  w = play(play(w, { type: 'move', direction: 'south' }), north); // refresh: ends at t0 + 5400
-  w = wait(w, t0 + 3600 - w.state.clock); // the first job, at the old end
-  const line = gameView(w).conditions!;
-  assert.deepEqual([line.length, line[0]!.per_tick, line[0]!.ends_at], [1, undefined, t0 + 5400]);
-  assert.deepEqual(hpView(w), [10, 10]);
-  w = wait(w, t0 + 5400 - w.state.clock - 1);
-  assert.equal(gameView(w).conditions?.length, 1);
-  w = wait(w, 1);
-  assert.equal(gameView(w).conditions, undefined);
-  assert.deepEqual(hpView(w), [10, 16]);
-  assert.deepEqual(
-    seen.filter((k) => /status_|might/.test(k)),
-    ['status_expired', 'narration.might.expired'],
-  );
-});
-
-// Breaks (row 2c): a status whose modifiers name no hp_max term still writes the hp settle, so its
-// expiry and the dummy's round on the player's hp in one advance fault (precondition_failed).
-test('might (str only) expiring during a fight at +3600 lets the wait to +3700 pass', () => {
-  const c = structuredClone(content) as any;
-  c.npcs['derived_sampler@0.0.1:npc/dummy'].attack.chance = 100;
-  let w = play(play(chosen('strong', c), north), { type: 'move', direction: 'south' });
-  w = play(wait(w, 3500 - w.state.clock), { type: 'move', direction: 'east' });
-  w = wait(play(w, { type: 'attack', target_id: dummy(w) }), 200);
-  assert.equal(gameView(w).conditions, undefined);
-  assert.ok(level(w, w.body, resourceRef(w, 'hp'))! < 10); // the dummy's rounds landed
-});
-
-// Breaks (row 2c): a cure ends a con-lowering status without the hp settle (an edible eaten at
-// full hp, so it restores nothing), and the hour of regen banked at the cap pays out.
-test('a tonic cures a refreshed might with con -6 after 4000 s at 10 of 10: hp reads 10 of 16', () => {
-  let w = chosen('hardy', mightCon(-6));
-  w = wait(play(play(w, { type: 'take', item_id: tonic(w) }), north), 1800);
-  w = wait(play(play(w, { type: 'move', direction: 'south' }), north), 2200); // ends at +5400
-  w = play(w, { type: 'eat', item_id: tonic(w) });
-  assert.equal(gameView(w).conditions, undefined);
-  assert.deepEqual(hpView(w), [10, 16]);
-});
-
-// Breaks (row 2c): the meal's hp gain precedes the cure's settle, whose stale `from` faults
-// composition (precondition_failed), or the cure leaves the lowered maximum.
-test('a tonic eaten at hp 10 of 13 (might con -3) cures it and restores 2: hp 12 of 16', () => {
-  let w = chosen('hardy', mightCon(-3));
-  w = play(play(w, { type: 'take', item_id: tonic(w) }), north);
-  assert.deepEqual(hpView(w), [10, 13]);
-  w = play(w, { type: 'eat', item_id: tonic(w) });
-  assert.deepEqual(hpView(w), [12, 16]);
 });
 
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,

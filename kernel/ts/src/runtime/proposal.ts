@@ -123,10 +123,13 @@ function farewell(p: P): Admitted | undefined {
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
-// it), or its fault.
+// it), or its fault. After the advance, the rest composes from the base clock with the advance
+// replayed, as adopt composes it, so a job's op `at` its due time lies inside the advance.
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
-    const r = apply(p.at, p.ops.slice(p.applied), false);
+    const done = p.ops.slice(0, p.applied).find((o) => o.op === 'time.advance');
+    const from = done ? { ...p.at, state: { ...p.at.state, clock: p.world.state.clock } } : p.at;
+    const r = apply(from, [...(done ? [done] : []), ...p.ops.slice(p.applied)], false);
     if ('fault' in r) {
       p.limit = r.limit;
       return r.fault as Admitted;
