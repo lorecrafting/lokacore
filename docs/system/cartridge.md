@@ -468,6 +468,18 @@ makes it attackable and supplies its own chance/damage bounds; it requires expli
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
+Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)
+(toolbox row 6a): it needs `kernel_api` at least **1.48**, or the compiler
+(`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`)
+report KERNEL_API_RANGE_INVALID at the manifest's `at_least`. `cartridges/targets_sampler` is the sampler.
+
+Optional `world.combat.allies` lists NPC DefinitionRefs (short keys in source, at least one) that
+fight [beside the player](mechanics.md#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)
+(toolbox row 6b). Each must resolve to an authored NPC (not a `spawn_template`) with an `attack`,
+and the combat narration must name `ally_hit` and `ally_miss`; otherwise SCHEMA_VIOLATION (or
+UNRESOLVED_REFERENCE) at the entry. Allies need `kernel_api` at least **1.48**, under the same
+diagnostic as target choice. `cartridges/targets_sampler`'s yard is the sampler.
+
 Optional `world.death_credit` is a list of `{npc, room, fact}` DefinitionRefs, expanded
 from normal short references. Each NPC/fact appears once; NPC is an authored attackable
 NPC, room its authored room, fact a player Boolean with false default. Runtime binds the
@@ -1473,6 +1485,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>` (`kernel_api` at least **1.46**): an NPC of this cartridge, whose authored instance takes the status. Both kernels refuse an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`) and the lower floor (KERNEL_API_RANGE_INVALID). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
+[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"` (`kernel_api` at least **1.48**): such a status declares no `per_tick` and is exempt from `tick_every < duration`; its `modifies` may not name an attribute the derived hp maximum reads. Both kernels refuse each violation (SCHEMA_VIOLATION at `per_tick` or at `modifies[i].attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/scars_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations
@@ -1547,6 +1561,10 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 [Entity variants](mechanics.md#entity-description-variants-toolbox-row-w6) are optional `TextVariants` lists on an NPC (`short_variants`, `room_line_variants`, `description_variants`) or an item (`short_variants`, `description_variants`; `room_line_variants` are older), each 1 to 16 `DescriptionVariant` whose text keys and touch links are checked as their base field's (a room-line variant links its own entity). A policy may use `status_active {subject: "target", status}` (owner status@1) and `npc_present {npc}` (owner target_resolution@1); `status` and `npc` take short keys, expanded through `Loka.Content.LeafRefs` (an NPC's variants by `lib/loka/content/npc_fields.ex`), and an unresolved one is UNRESOLVED_REFERENCE at that member. A new list or leaf needs `kernel_api` at least **1.46** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in the compiler (`lib/loka/content/variants.ex`) and the loader (`kernel/ts/src/content/cartridge_variants.ts`). Sampler: `cartridges/variants_sampler`.
 
+## Cue declarations
+
+[Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and a recipe outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op) and need `kernel_api` at least **1.48** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`recipes/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Checks.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`, loader `kernel/ts/src/content/cartridge_senses.ts`. Sampler: `cartridges/senses_sampler`.
+
 ## Need declarations
 
 [Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. It needs `kernel_api` at least **1.46**; the compiler (`lib/loka/content/status.ex`) and the loader (`kernel/ts/src/content/cartridge_status.ts`) refuse an unresolved name (UNRESOLVED_REFERENCE at the entry) and the lower floor (KERNEL_API_RANGE_INVALID). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
@@ -1581,3 +1599,7 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 ## Away recap declarations
 
 The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound; `kernel_api` at least **1.47**). The schema refuses a value out of range or not an integer; the compiler (`lib/loka/content/requires.ex`) and the loader (`kernel/ts/src/content/cartridge.ts` `timeStage`) refuse an older API floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.
+
+## Speech declarations
+
+[Social verbs](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half) add one dialogue field and one reaction trigger. A dialogue's optional `keyword` (`SpokenKeyword`: 1 to 32 lowercase ASCII letters, `protocol/dialogue.schema.json`) makes a say or whisper of that word open it; talk never offers it. A reaction trigger `{event: "spoken", npc?, word?, loudness?}` (`protocol/reaction.schema.json`; `npc` a short key, `word` a `SpokenKeyword`, `loudness` one of `whisper`, `say`, `shout`) fires once per hearer (without `npc`, two hearers' writes to one shared fact compose in order; [limits](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half)). Both need `speech@1` (UNDECLARED_CAPABILITY at `dialogues/<key>.keyword` or at the trigger's event) and `kernel_api` at least **1.48** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); a keyword dialogue declaring a `riddle` is OUTCOME_MISMATCH at its `keyword` (the riddle's save proof reads a talk receipt). Compiler `lib/loka/content/keywords.ex` and `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_dialogues.ts` and `cartridge_reactions.ts`. Sampler: `cartridges/speech_sampler`.

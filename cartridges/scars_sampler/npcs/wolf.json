@@ -1,0 +1,33 @@
+{
+  "keywords": [
+    "wolf"
+  ],
+  "short": "npc.wolf.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "scar"
+        }
+      },
+      "description": "npc.wolf.short_scarred"
+    }
+  ],
+  "room_line": "npc.wolf.room",
+  "description": "npc.wolf.description",
+  "room": "den",
+  "hp": {
+    "minimum": 0,
+    "maximum": 30,
+    "start": 30,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 4,
+    "damage_max": 4
+  }
+}

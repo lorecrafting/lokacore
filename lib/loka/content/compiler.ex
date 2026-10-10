@@ -13,7 +13,7 @@ defmodule Loka.Content.Compiler do
     Requires
   }
 
-  alias Loka.Content.{Derived, Entities, Levelling, Position, Resources, Scenes, Water}
+  alias Loka.Content.{Combat, Derived, Entities, Levelling, Position, Resources, Scenes, Water}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -69,7 +69,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
-      timed_checks(manifest, defs, v2),
+      timed_checks(manifest, defs, v2, located),
       Loka.Content.Transports.check(manifest, defs, v2),
       Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
@@ -87,11 +87,11 @@ defmodule Loka.Content.Compiler do
   end
 
   # Food, bleed and status in their original order, one call to keep `checks` within ABC.
-  defp timed_checks(manifest, defs, v2),
+  defp timed_checks(manifest, defs, v2, {_, settings}),
     do:
       Loka.Content.Food.check(manifest, defs, v2) ++
         Loka.Content.Bleed.check(manifest, defs, v2) ++
-        Loka.Content.Status.check(manifest, defs, v2)
+        Loka.Content.Status.check(manifest, defs, v2, settings)
 
   defp final_checks(manifest, defs, v2, located, registry),
     do:
@@ -163,11 +163,11 @@ defmodule Loka.Content.Compiler do
       |> Water.settings(m)
       |> Derived.settings(m)
       |> Levelling.settings(m)
+      |> Combat.settings(m)
       |> Checks.expand(m)
       |> Map.merge(Map.take(extra, ["alternates"]))
 
-  # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
-  # not resolved against it).
+  # text.json is the TextCatalog; nil when absent, :unknown when rejected (keys then unresolved).
   defp text([]), do: {nil, []}
   defp text([{_, :invalid}]), do: {:unknown, []}
 

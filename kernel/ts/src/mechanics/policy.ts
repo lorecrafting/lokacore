@@ -5,7 +5,14 @@ import { illuminated } from './light/shared.ts';
 // variety@1's visited_count, equipment@1's wearing, status@1's status_active, target_resolution@1's
 // npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
-import type { CharacterId, EntityId, Policy, Tag, VersionedPolicy } from '../contracts.gen.ts';
+import type {
+  CharacterId,
+  DomainEvent,
+  EntityId,
+  Policy,
+  Tag,
+  VersionedPolicy,
+} from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
@@ -18,6 +25,7 @@ import { visits } from './knowledge/shared.ts';
 import { value as attributeValue, wearing } from './attributes/shared.ts';
 import { currentStatus } from './status/shared.ts';
 import { living } from './death/shared.ts';
+import { perceived } from './senses.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
@@ -33,7 +41,9 @@ export function holds(
   world: World,
   actor: CharacterId,
   p: Policy,
-  ctx: { target?: EntityId; steps: { n: number } } = { steps: { n: 0 } },
+  ctx: { target?: EntityId; steps: { n: number }; cause?: DomainEvent; cue?: true } = {
+    steps: { n: 0 },
+  },
 ): boolean {
   switch (p.op) {
     case 'all':
@@ -79,6 +89,8 @@ export function holds(
       return ctx.target !== undefined && !!currentStatus(world, ctx.target, p.status);
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
+    case 'cue_perceived':
+      return perceived(world, actor, p, ctx, holds);
     default: {
       const leaf: never = p; // a schema leaf without its case here fails tsc
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);

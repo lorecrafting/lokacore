@@ -111,40 +111,51 @@ export function applyStatus(
   if (!spec || !holds(world, body) || immune(world, body, status)) return [];
   const prior = world.state.statuses?.[statusKey(body, status)];
   const active = prior?.active ? (prior as Active) : undefined;
-  const now = world.state.clock;
-  const ends_at = add(now, spec.duration);
-  const value: Active = active
-    ? { ...active, ends_at }
-    : {
-        active: true,
-        generation: (prior?.generation ?? 0) + 1,
-        ends_at,
-        next_tick_at: spec.per_tick === undefined ? ends_at : add(now, spec.tick_every),
-        job_id: mint() as JobId,
-      };
-  const change: DeltaOp = {
+  const change = (value: StatusRow): DeltaOp => ({
     op: 'status.transition',
     writer_group,
     body_id: body,
     status,
     expected: prior ?? null,
     value,
+  });
+  const generation = (prior?.generation ?? 0) + 1;
+  // A permanent status (row W8) has no end, tick or job (nor an hp_max modifier, so no settle).
+  if (spec.duration === 'permanent') return active ? [] : [change({ active: true, generation })];
+  const now = world.state.clock;
+  const ends_at = add(now, spec.duration);
+  if (active) return [change({ ...active, ends_at })];
+  const next_tick_at = spec.per_tick === undefined ? ends_at : add(now, spec.tick_every);
+  const value = {
+    active: true as const,
+    generation,
+    ends_at,
+    next_tick_at,
+    job_id: mint() as JobId,
   };
-  if (active) return [change];
-  const due_time = Math.min(value.next_tick_at, ends_at);
   const job: DeltaOp = {
     op: 'job.schedule',
     writer_group,
     job_id: value.job_id,
     job: status,
-    due_time,
+    due_time: Math.min(next_tick_at, ends_at),
   };
-  return [...settleFor(world, body, status, writer_group), change, job];
+  return [...settleFor(world, body, status, writer_group), change(value), job];
 }
 
-/** Inactivate every active status on `body` at death (a cure goes through `cureOps`, which settles hp). */
-export const clearStatuses = (world: World, body: EntityId, writer_group: number): DeltaOp[] =>
-  activeStatuses(world, body).map(({ status, row }) => endStatus(body, status, row, writer_group));
+/**
+ * Inactivate every active status on `body` at death, but a permanent one (row W8) on the same-body
+ * return (`returning`); a cure goes through `cureOps`, which settles hp.
+ */
+export const clearStatuses = (
+  world: World,
+  body: EntityId,
+  writer_group: number,
+  returning = false,
+): DeltaOp[] =>
+  activeStatuses(world, body)
+    .filter(({ spec }) => !returning || spec.duration !== 'permanent')
+    .map(({ status, row }) => endStatus(body, status, row, writer_group));
 
 /** End each active status on `body` that `cures` lists, once however often listed (Eat, Drink). */
 export function cureOps(world: World, body: EntityId, cures: readonly DefinitionRef[] = []) {

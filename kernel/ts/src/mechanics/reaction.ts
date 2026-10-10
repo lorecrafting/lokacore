@@ -51,7 +51,7 @@ const FILTERS: Record<string, Match> = {
   room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
   // ponytail: the authored instance only; a created item (a harvested pelt) never matches.
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
-  npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (row W3)
+  npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (W3), the hearer (G9)
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,
@@ -66,6 +66,8 @@ const FILTERS: Record<string, Match> = {
   to: equal('to'),
   hit: equal('hit'),
   status: ref('status'),
+  word: equal('word'),
+  loudness: equal('loudness'),
 };
 
 /**
@@ -108,7 +110,7 @@ export function sequence(
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
   actor = source;
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
-  if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
+  if (rule.when && !holds(then, actor, rule.when.root, { steps, cause })) return undefined;
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
   const applied = new Set<string>();
@@ -144,7 +146,7 @@ export function sequence(
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
-      const assigned = assignment(world, actor, step, group, set, cause);
+      const assigned = assignment(world, actor, step, group, { set, holders }, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;
     }
@@ -166,6 +168,7 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   fact_changed: 'subject_id',
   status_ticked: 'body_id',
   status_expired: 'body_id',
+  spoken: 'entity_id',
 };
 const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
@@ -194,8 +197,9 @@ function statusStep(
   const joined = holders.get(holder) ?? group;
   const ops = applyStatus(world, holder, step.status, joined, mint);
   if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
-  // Only a first application schedules its tick job; a refresh while active is silent (row W25).
-  const first = ops.some((o) => o.op === 'job.schedule');
+  // Only a first application (over no row or an inactive one) is heard; a refresh while active is
+  // silent (row W25), and a permanent status (row W8) opens with no job.
+  const first = ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
   const label = specOf(world, step.status)?.narration.applied;
   return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
 }
@@ -203,13 +207,14 @@ function statusStep(
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
-// fallback); with no such subject the step writes nothing.
+// fallback); with no such subject the step writes nothing. A row an earlier reaction of this
+// advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
   actor: CharacterId,
   step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' | 'fact.adjust' }>,
   group: number,
-  set: Record<string, FactValue>,
+  { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
 ) {
   const named = step.npc ?? step.item;
@@ -223,7 +228,9 @@ function assignment(
     step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
   if (next === undefined) return undefined;
   set[at] = next;
-  return { op: 'fact.assign' as const, writer_group: group, ...target, expected, value: next };
+  const writer_group = holders.get(at) ?? group;
+  holders.set(at, writer_group);
+  return { op: 'fact.assign' as const, writer_group, ...target, expected, value: next };
 }
 
 function terminal(

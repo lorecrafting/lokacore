@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "check_failed",
+    "check": "pick_lock"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "cue_perceived",
+      "npc": "guard",
+      "sense": "sound"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "guard_alerted",
+      "value": true
+    }
+  ]
+}

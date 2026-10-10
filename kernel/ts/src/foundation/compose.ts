@@ -137,6 +137,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':
+    case 'encounter.target':
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);

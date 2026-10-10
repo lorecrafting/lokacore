@@ -18,7 +18,7 @@ import {
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
-import { modal, talks } from '../mechanics/dialogue/shared.ts';
+import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
@@ -27,6 +27,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
+import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
@@ -56,6 +57,8 @@ export type ActionSet = Readonly<Record<string, Offered>>;
 
 // Toolbox row 4: Raise is offered only while the cartridge levels and points remain.
 const points = (world: World, actor: CharacterId) => (levelling(world, actor)?.unspent ?? 0) > 0;
+
+const SPEECH = ['say', 'whisper', 'shout'];
 
 export const needsAncestry = (world: World, actor: CharacterId) =>
   !!world.cartridge.ancestries && !characterChoice(world, actor);
@@ -92,6 +95,8 @@ function engine(world: World): ActionSet {
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
+      // Row G9: no speech while a conversation is open (the speech rule refuses it too).
+      .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
@@ -160,10 +165,18 @@ const fighting = (world: World, actor: CharacterId) => {
 /** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
   const set = composed(world, actor);
-  return fighting(world, actor)
+  const fight = fighting(world, actor);
+  // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among the members still here
+  // (the row's roster is pruned only at round end, rows 6a/6c).
+  const choosing =
+    !!world.cartridge.world?.combat?.target_choice &&
+    (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
+  return fight
     ? Object.fromEntries(
-        Object.entries(set).filter(([, a]) =>
-          ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command),
+        Object.entries(set).filter(
+          ([, a]) =>
+            ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command) ||
+            (a.command === 'attack' && choosing),
         ),
       )
     : set;

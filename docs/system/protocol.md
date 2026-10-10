@@ -66,7 +66,7 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/runtime/world.ts:114`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
+5. **Step** (`kernel/ts/src/runtime/world.ts:117`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
    refuses ordinary player commands as `invalid_state` before ActionSet matching;
    `stepElapsed` (`:162`) applies the same gate to trusted elapsed (`invalid_state`). Otherwise,
    for Step, the capability owning the command type
@@ -77,7 +77,7 @@ storage half):
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
-   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:207`).
+   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:210`).
    The headless GameView/admission check classifies service invocation identity before
    comparing the observed player's offer: a nil CommandId agrees only with
    `permission_denied`; otherwise a foreign world or actor agrees only with
@@ -88,7 +88,8 @@ storage half):
    that changes its fact gets a `fact_changed` at its causal position (`mechanics/fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
    (`kernel/ts/src/mechanics/quest/lifecycle.ts:75`), then each ReactionRule it triggers runs as its own writer group when its
-   `when` holds (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
+   `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
+   joins that reaction's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`runtime/proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
 7. **Adopt** (`runtime/proposal.ts:42`): a `fact.assign` outside its FactSpec faults
@@ -205,7 +206,7 @@ Admission independently revalidates its pair under the decision counter.
 `protocol/invariants.json` registers the active invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/runtime/invariants.ts:34` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:141`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:144`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
@@ -892,6 +893,12 @@ assist/damage verb or a player-forgeable behavior intent. Ordinary non-pack NPC
 admission remains one opponent. Generic state/delta/precondition changes require
 both portable twins, independent literal fixtures, then differential proof.
 
+[Target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a) (toolbox row 6a) adds
+`encounter.target {encounter_id, job_id, expected, npc_id}`, written by Attack only: it composes
+when the row is open, its job is current, `expected` equals the complete row, and `npc_id` is a
+present active member other than the current primary; it changes only `npc_id`. Both kernels
+answer the `target-*` cases of `protocol/fixtures/c4_pack_composition.json`.
+
 For this actual scheduler seam, extend each separately targeted C3 slot with
 nullable `last_flight_at`, initially null and reset to null only on a new generation.
 A successful selected flight sets it to this occurrence's logical clock, checking
@@ -1290,6 +1297,6 @@ Add `shoo {actor_id: CharacterId, crow_id: EntityId}` with exact `ActionInvocati
 
 ## Status composition
 
-[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) add one typed row per holder and status, target `{kind: "status", body_id, status}`, the holder being the player's body or, since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3), an NPC or item, kept in the `statuses` state section under its canonical target text, and the checked `status.transition {body_id, status, expected, value}` delta. The composer refuses the transition when `body_id` is not a known body, NPC or item, `expected` differs from the current row, an active value lacks `ends_at`, `next_tick_at` or `job_id`, has `ends_at` not after the horizon or `next_tick_at` before it, shortens an active row's `ends_at`, changes an active row's generation, opens a generation other than the retained one plus one, or writes inactive over inactive. An inactive value is exactly `{active: false, generation}`. The status tick job is an ordinary unbound `job.schedule` whose `job` is the status definition; it carries no body or generation binding and is never cancelled; the due job finds the active row whose `job_id` it is, and that row's target names the holder. Both kernels answer `protocol/fixtures/status_composition.json`. C5's bleed row, delta and bound job are unchanged.
+[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) add one typed row per holder and status, target `{kind: "status", body_id, status}`, the holder being the player's body or, since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3), an NPC or item, kept in the `statuses` state section under its canonical target text, and the checked `status.transition {body_id, status, expected, value}` delta. The composer refuses the transition when `body_id` is not a known body, NPC or item, `expected` differs from the current row, an active value carries some but not all of `ends_at`, `next_tick_at` and `job_id` (a [permanent](mechanics.md#permanent-statuses-toolbox-row-w8) value is exactly `{active: true, generation}` and never replaces an active timed row, nor a timed one an active permanent row), has `ends_at` not after the horizon or `next_tick_at` before it, shortens an active row's `ends_at`, changes an active row's generation, opens a generation other than the retained one plus one, or writes inactive over inactive. An inactive value is exactly `{active: false, generation}`. The status tick job is an ordinary unbound `job.schedule` whose `job` is the status definition; it carries no body or generation binding and is never cancelled; the due job finds the active row whose `job_id` it is, and that row's target names the holder. Both kernels answer `protocol/fixtures/status_composition.json`. C5's bleed row, delta and bound job are unchanged.
 
 [Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) add one row per character, target `{kind: "levelling", character_id}`, kept in the `levelling` state section under its canonical target text, and the checked `levelling.set {character_id, expected, value}` delta, `value` being `{experience, allocated}` (`LevellingRow`). The composer refuses the write when `expected` differs from the stored row (null when absent), the experience falls, or any allocated count falls. Level and unspent points are never stored; the GameView's `levelling` field carries `{level, experience, next, unspent}` derived on read. Both kernels answer `protocol/fixtures/levelling_composition.json`.

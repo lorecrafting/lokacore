@@ -1,0 +1,24 @@
+{
+  "npc": "elder",
+  "keyword": "ward",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.elder_ward.prompt",
+  "roles": {
+    "elder": {
+      "role": "npc",
+      "npc": "elder"
+    }
+  },
+  "choices": {
+    "thank": {
+      "label": "dialogue.elder_ward.thank",
+      "narration": "narration.elder_ward.thank"
+    }
+  }
+}

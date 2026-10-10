@@ -34,10 +34,11 @@ defmodule Loka.Content.Dialogues do
     Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ wide(defs, settings, ctx)
   end
 
-  # The cartridge-wide checks: the choice-check floor (row 14), story points and chapters.
+  # The cartridge-wide checks: the choice-check floor (row 14), keywords (G9), story points, chapters.
   defp wide(defs, settings, ctx),
     do:
       Loka.Content.ChoiceChecks.floor(ctx.m, defs) ++
+        Loka.Content.Keywords.check(ctx.m, defs, ctx.events) ++
         story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
   # Chapters derive only from unambiguous quest-resolving dialogue choices (mechanics.md).

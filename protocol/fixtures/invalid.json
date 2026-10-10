@@ -17551,48 +17551,6 @@
     "contract": "TimePolicy",
     "value": {
       "profile": "real_elapsed",
-      "rate": 50,
-      "recap_after_minutes": 10081
-    },
-    "errors": [
-      {
-        "path": "/recap_after_minutes",
-        "code": "above_maximum"
-      }
-    ]
-  },
-  {
-    "contract": "TimePolicy",
-    "value": {
-      "profile": "real_elapsed",
-      "rate": 50,
-      "recap_after_minutes": 0
-    },
-    "errors": [
-      {
-        "path": "/recap_after_minutes",
-        "code": "below_minimum"
-      }
-    ]
-  },
-  {
-    "contract": "TimePolicy",
-    "value": {
-      "profile": "real_elapsed",
-      "rate": 50,
-      "recap_after_minutes": 1.5
-    },
-    "errors": [
-      {
-        "path": "/recap_after_minutes",
-        "code": "invalid_type"
-      }
-    ]
-  },
-  {
-    "contract": "TimePolicy",
-    "value": {
-      "profile": "real_elapsed",
       "rate": 1.5
     },
     "errors": [
@@ -21165,300 +21123,6 @@
     ]
   },
   {
-    "name": "schedule_cases_empty",
-    "contract": "ScheduleCases",
-    "value": [],
-    "errors": [
-      {
-        "path": "",
-        "code": "too_few_items"
-      }
-    ]
-  },
-  {
-    "name": "schedule_cases_nine",
-    "contract": "ScheduleCases",
-    "value": [
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      },
-      {
-        "when": {
-          "policy_version": 1,
-          "root": {
-            "op": "fact_compare",
-            "fact": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "fact",
-              "key": "lost"
-            },
-            "equals": true
-          }
-        },
-        "room": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "green"
-        }
-      }
-    ],
-    "errors": [
-      {
-        "path": "",
-        "code": "too_many_items"
-      }
-    ]
-  },
-  {
-    "name": "schedule_case_fields",
-    "contract": "ScheduleCases",
-    "value": [
-      {
-        "goal": "npc.maud.goal",
-        "x": 1
-      }
-    ],
-    "errors": [
-      {
-        "path": "/0/room",
-        "code": "missing_property"
-      },
-      {
-        "path": "/0/when",
-        "code": "missing_property"
-      },
-      {
-        "path": "/0/x",
-        "code": "unknown_property"
-      }
-    ]
-  },
-  {
-    "name": "npc_schedule_cases_hour",
-    "contract": "NpcDefinition",
-    "value": {
-      "key": "maud",
-      "keywords": [
-        "maud"
-      ],
-      "short": "npc.maud.short",
-      "room_line": "npc.maud.room",
-      "description": "npc.maud.description",
-      "room": {
-        "cartridge_id": "c",
-        "cartridge_version": "1.0.0",
-        "kind": "room",
-        "key": "cottage"
-      },
-      "daily_schedule": {
-        "8": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "garden"
-        }
-      },
-      "schedule_cases": {
-        "08": [
-          {
-            "when": {
-              "policy_version": 1,
-              "root": {
-                "op": "fact_compare",
-                "fact": {
-                  "cartridge_id": "c",
-                  "cartridge_version": "1.0.0",
-                  "kind": "fact",
-                  "key": "lost"
-                },
-                "equals": true
-              }
-            },
-            "room": {
-              "cartridge_id": "c",
-              "cartridge_version": "1.0.0",
-              "kind": "room",
-              "key": "green"
-            }
-          }
-        ]
-      }
-    },
-    "errors": [
-      {
-        "path": "/schedule_cases/08",
-        "code": "pattern_mismatch"
-      }
-    ]
-  },
-  {
     "name": "wearing_unknown_tag",
     "contract": "Policy",
     "value": {
@@ -22141,6 +21805,746 @@
     ]
   },
   {
+    "name": "cue_missing_fields",
+    "contract": "Cue",
+    "value": {},
+    "errors": [
+      {
+        "path": "/range",
+        "code": "missing_property"
+      },
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_range_three_unknown_sense",
+    "contract": "Cue",
+    "value": {
+      "sense": "taste",
+      "text": "cue.x",
+      "range": 3
+    },
+    "errors": [
+      {
+        "path": "/range",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "cue_range_negative_extra_field",
+    "contract": "Cue",
+    "value": {
+      "sense": "heat",
+      "text": "cue.x",
+      "range": -1,
+      "loud": true
+    },
+    "errors": [
+      {
+        "path": "/loud",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/range",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "cues_empty",
+    "contract": "Cues",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "cues_five",
+    "contract": "Cues",
+    "value": [
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_missing_fields",
+    "contract": "CueView",
+    "value": {
+      "direction": "east"
+    },
+    "errors": [
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_unknown_sense",
+    "contract": "CueView",
+    "value": {
+      "sense": "sight",
+      "text": "cue.x"
+    },
+    "errors": [
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "cue_perceived_missing_fields",
+    "contract": "Policy",
+    "value": {
+      "op": "cue_perceived"
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      },
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "game_view_cues_empty",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "12121212-3434-4565-8787-909090909090",
+        "title": {
+          "key": "room.ferry_landing.title"
+        },
+        "description": {
+          "key": "room.ferry_landing.description",
+          "bindings": {
+            "time": "clock.dusk"
+          }
+        }
+      },
+      "exits": [
+        {
+          "available": true,
+          "direction": "north"
+        },
+        {
+          "available": false,
+          "direction": "west",
+          "reason": {
+            "code": "exit_locked",
+            "message": {
+              "key": "reason.causeway_flooded"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "available": true,
+          "action_key": "look",
+          "label": "action.look",
+          "target": {
+            "kind": "none"
+          },
+          "input": []
+        },
+        {
+          "available": false,
+          "action_key": "wait",
+          "label": "action.wait",
+          "reason": {
+            "code": "invalid_state"
+          },
+          "target": {
+            "kind": "none"
+          },
+          "input": [
+            "until"
+          ]
+        }
+      ],
+      "entities": [
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "talk",
+              "label": "action.talk",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_occupants"
+                ]
+              },
+              "input": []
+            }
+          ]
+        }
+      ],
+      "inventory": [
+        {
+          "id": "11111111-2222-4333-8444-555555555555",
+          "name": "item.lantern.name",
+          "kind": "item",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "drop",
+              "label": "action.drop",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "inventory"
+                ]
+              },
+              "input": []
+            }
+          ]
+        }
+      ],
+      "position": "standing",
+      "equipment": [
+        {
+          "slot": "head",
+          "item": {
+            "id": "22222222-3333-4444-8555-666666666666",
+            "name": "item.leather_cap.short",
+            "kind": "item",
+            "actions": [
+              {
+                "available": true,
+                "action_key": "remove",
+                "label": "action.remove",
+                "target": {
+                  "kind": "entity",
+                  "scopes": [
+                    "inventory"
+                  ]
+                },
+                "input": []
+              }
+            ]
+          }
+        },
+        {
+          "slot": "light"
+        }
+      ],
+      "journal": [
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title"
+        }
+      ],
+      "time": 18,
+      "chapter": {
+        "index": 0,
+        "title": "chapter.landing"
+      },
+      "cues": []
+    },
+    "errors": [
+      {
+        "path": "/cues",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_extra_field",
+    "contract": "CueView",
+    "value": {
+      "sense": "sound",
+      "text": "cue.x",
+      "loud": true
+    },
+    "errors": [
+      {
+        "path": "/loud",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_perceived_unknown_sense_extra_field",
+    "contract": "Policy",
+    "value": {
+      "op": "cue_perceived",
+      "npc": {
+        "cartridge_id": "senses_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "guard"
+      },
+      "sense": "sight",
+      "extra": 1
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "encounter.target"
+    },
+    "errors": [
+      {
+        "path": "/encounter_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/expected",
+        "code": "missing_property"
+      },
+      {
+        "path": "/job_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/npc_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/writer_group",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "target_choice": false
+    },
+    "errors": [
+      {
+        "path": "/target_choice",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 10081
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 0
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 1.5
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "schedule_cases_empty",
+    "contract": "ScheduleCases",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_cases_nine",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_case_fields",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "goal": "npc.maud.goal",
+        "x": 1
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/room",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/when",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_schedule_cases_hour",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "maud",
+      "keywords": [
+        "maud"
+      ],
+      "short": "npc.maud.short",
+      "room_line": "npc.maud.room",
+      "description": "npc.maud.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "cottage"
+      },
+      "daily_schedule": {
+        "8": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "garden"
+        }
+      },
+      "schedule_cases": {
+        "08": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "fact",
+                  "key": "lost"
+                },
+                "equals": true
+              }
+            },
+            "room": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "green"
+            }
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/schedule_cases/08",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
     "name": "dialogue_check_no_side_kind_key_failure",
     "contract": "DialogueChoice",
     "value": {
@@ -22491,6 +22895,263 @@
       {
         "path": "/deductions/1/from",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "wa rd"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "w0rd"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "shout",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090",
+      "loudness": "say",
+      "word": "Ward"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090",
+      "loudness": "yell"
+    },
+    "errors": [
+      {
+        "path": "/loudness",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "hears",
+      "on": {
+        "event": "spoken",
+        "word": "HELP"
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "whisper",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "ward"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "whisper",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "12121212-3434-4565-8787-909090909090"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "loudness": "say"
+    },
+    "errors": [
+      {
+        "path": "/entity_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090"
+    },
+    "errors": [
+      {
+        "path": "/loudness",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "elder_ward",
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "elder"
+      },
+      "keyword": "Ward",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.elder_ward.prompt",
+      "roles": {
+        "elder": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "elder"
+          }
+        }
+      },
+      "choices": {
+        "thank": {
+          "label": "dialogue.elder_ward.thank",
+          "narration": "narration.elder_ward.thank"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/keyword",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "allies": []
+    },
+    "errors": [
+      {
+        "path": "/allies",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "allies": [
+        "guard"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allies/0",
+        "code": "invalid_type"
       }
     ]
   }

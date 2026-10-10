@@ -1,6 +1,8 @@
-// Entity lines and log lines (BOOK-UI-COMPONENTS.md, Entity line and Log line).
+// Entity lines, the room's Here lines and log lines (BOOK-UI-COMPONENTS.md, Entity line and Log line).
 import { useState } from 'react';
 import { Text, View } from 'react-native';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { cap, cueLine } from './model.ts';
 import { LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
@@ -92,4 +94,38 @@ export function AwayRecap({ lines }: { lines: readonly RecapLine[] }) {
         ))}
     </View>
   );
+}
+
+// NPCs, then every other entity as the room's items; no headings, an empty group omitted
+// (book-ui.md, World and status entry); then the sense cues (book-ui.md, Sense cues details).
+export function Here(p: {
+  view: GameView;
+  text: (key: string) => string;
+  open: (id: string) => void;
+}) {
+  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
+  const items = p.view.entities.filter((e) => e.kind !== 'npc');
+  const line = (e: GameView['entities'][number]) => (
+    <EntityLine
+      key={e.id}
+      name={cap(p.text(e.name))}
+      rest=" is here."
+      note={e.carrying && p.text(e.carrying)}
+      onPress={() => p.open(e.id)}
+    />
+  );
+  return [
+    ...[npcs, items]
+      .filter((group) => group.length > 0)
+      .map((group) => (
+        <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
+      )),
+    p.view.cues && (
+      <View key="cues">
+        {p.view.cues.map((cue, i) => (
+          <Note key={i /* two equal cues are two lines */}>{cueLine(cue, p.text)}</Note>
+        ))}
+      </View>
+    ),
+  ];
 }

@@ -4,12 +4,12 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain, type group, type Pool } from './model.ts';
+import { plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
-import { AwayRecap, EntityLine, LogLines } from './lines.tsx';
+import { AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
@@ -174,27 +174,6 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
         ].some((n) => b.target_ids.includes(n.id)),
     )
     .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
-
-// NPCs, then every other entity as the room's items; no headings, an empty group omitted
-// (book-ui.md, World and status entry).
-function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
-  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
-  const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  const line = (e: GameView['entities'][number]) => (
-    <EntityLine
-      key={e.id}
-      name={cap(p.text(e.name))}
-      rest=" is here."
-      note={e.carrying && p.text(e.carrying)}
-      onPress={() => p.open(e.id)}
-    />
-  );
-  return [npcs, items]
-    .filter((group) => group.length > 0)
-    .map((group) => (
-      <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
-    ));
-}
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
 // the scroll), the blocks, and the page foot.

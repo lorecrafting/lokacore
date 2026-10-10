@@ -12,9 +12,13 @@ import {
   type Accepted,
   type ChoiceRow,
   type Mint,
+  type Steps,
   type World,
+  values,
 } from '../../runtime/decision.ts';
-import { continuationId } from './shared.ts';
+import { bind, choiceIds, continuationId } from './shared.ts';
+import { exchangeRoles } from './exchange.ts';
+import { questOf } from '../lookups.ts';
 import { reopens } from './selection.ts';
 
 export function wrongAnswer(
@@ -101,4 +105,36 @@ export function hub<T extends { kind: string }>(
     delta: { ops: [...a.delta.ops, op] },
     events: [...a.events, opened],
   } as unknown as T;
+}
+
+/** `d`'s choice.open for the command's actor and its choice_opened at position 1 (talk; say and whisper, row G9). */
+export function opening(
+  world: World,
+  command: Parameters<typeof event>[1],
+  mint: Mint,
+  d: DialogueDefinition,
+  steps: Steps,
+) {
+  const p = command.payload;
+  const continuation_id = continuationId(mint);
+  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
+  const op = {
+    op: 'choice.open',
+    writer_group: 0,
+    continuation_id,
+    actor_id: p.actor_id,
+    source: { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key },
+    beat: d.key,
+    roles: [...bind(world, d), ...exchangeRoles(world, p.actor_id, d, steps)],
+    ...(d.quest &&
+      (d.riddle?.wrong_limit !== undefined || values(d.choices).some((o) => o.exchange)) && {
+        quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
+      }),
+    choice_ids: choiceIds(d),
+    ...(d.riddle?.wrong_limit !== undefined && {
+      attempts: { count: 0, limit: d.riddle.wrong_limit },
+    }),
+  } as const;
+  const opened = { type: 'choice_opened', continuation_id } as const;
+  return [op, event(world, command, mint, 1, opened)] as const;
 }

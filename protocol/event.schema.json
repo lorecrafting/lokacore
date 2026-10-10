@@ -154,6 +154,11 @@
         }
       ]
     },
+    "Loudness": {
+      "description": "How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.",
+      "enum": ["whisper", "say", "shout"],
+      "examples": ["shout"]
+    },
     "EventPayload": {
       "description": "The registered event types (04 \u00a78) the R6P proof uses (pre-release-proof.md). A cartridge's custom events are one type, custom_event, named by a DefinitionRef in the cartridge's namespace, so content never emits an engine-owned type (05 \u00a728).",
       "oneOf": [
@@ -749,6 +754,18 @@
           "required": ["type", "quest", "instance_id", "outcome"],
           "additionalProperties": false,
           "description": "Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "spoken" },
+            "entity_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "loudness": { "$ref": "#/$defs/Loudness" },
+            "word": { "$ref": "dialogue.schema.json#/$defs/SpokenKeyword" }
+          },
+          "required": ["type", "entity_id", "loudness"],
+          "additionalProperties": false,
+          "description": "Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent."
         }
       ],
       "examples": [

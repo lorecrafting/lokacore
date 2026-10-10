@@ -17,6 +17,7 @@ defmodule Loka.Content.LeafRefs do
       "has_tag" => %{"item" => "item", "barrier" => "barrier", "room" => "room"},
       "visited_count" => %{"room" => "room"},
       "status_active" => %{"status" => "status"},
-      "npc_present" => %{"npc" => "npc"}
+      "npc_present" => %{"npc" => "npc"},
+      "cue_perceived" => %{"npc" => "npc"}
     }
 end

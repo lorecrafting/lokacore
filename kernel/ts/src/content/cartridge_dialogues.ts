@@ -19,7 +19,8 @@ import { lesson, sequence } from './cartridge_skills.ts';
 // choices, a site no other outcome names (DUPLICATE_DEFINITION), in a dialogue that resolves a
 // quest, so its choice is made once (OUTCOME_MISMATCH). Chapter markers resolve their texts,
 // story points and selected outcomes, with an unconditional opening and unambiguous counted
-// quest/choice triggers (mechanics.md Chapters).
+// quest/choice triggers (mechanics.md Chapters). A keyword dialogue (speech@1, row G9) uses its
+// spoken event, declares no riddle (OUTCOME_MISMATCH at the keyword) and needs kernel_api 1.48.
 import {
   CAPABILITY_OWNERS,
   type DefinitionRef,
@@ -31,6 +32,7 @@ import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { reopens } from '../mechanics/dialogue/selection.ts';
 import { choiceCheck, choiceCheckFloor } from './cartridge_choice_checks.ts';
+import { apiCmp } from './cartridge_installed.ts';
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.dialogues ?? {}) as Obj).map(([ref, d]) => [
@@ -43,6 +45,7 @@ export const uses = (c: Obj) =>
   [
     ...each(c).flatMap(([d, at]) => [
       ['definition', 'dialogue', at],
+      ...(d.keyword ? [['event', 'spoken', `${at}.keyword`]] : []), // speech@1 (row G9)
       ...Object.entries(d.choices as Obj).flatMap(([id, o]) => [
         ...(o.escort ? [['definition', 'escort', `${at}.choices${step(id)}.escort`]] : []),
         ...(o.receive ? [['event', 'item_acquired', `${at}.choices${step(id)}.receive`]] : []),
@@ -74,6 +77,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     if (d.riddle?.wrong_limit !== undefined && !d.quest)
       out.push(diag('OUTCOME_MISMATCH', `${at}.riddle.wrong_limit`));
     if (d.riddle) out.push(...riddle(d, at, checks));
+    if (d.riddle && d.keyword) out.push(diag('OUTCOME_MISMATCH', `${at}.keyword`));
     named(d.npc, 'npc', `${at}.npc`);
     if (d.quest) named(d.quest, 'quest', `${at}.quest`);
     const roles = d.roles as Obj;
@@ -90,8 +94,20 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
-  return [...out, ...choiceCheckFloor(c), ...storyPoints(c, named), ...chapters(c, checks)];
+  return [
+    ...out,
+    ...choiceCheckFloor(c),
+    ...keywordFloor(c),
+    ...storyPoints(c, named),
+    ...chapters(c, checks),
+  ];
 }
+
+// A keyword dialogue (speech@1, row G9) needs kernel_api 1.48.
+const keywordFloor = (c: Obj): Diagnostic[] =>
+  each(c).some(([d]) => d.keyword) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.48') < 0
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 
 function riddle(d: Obj, at: string, { text }: Checks): Diagnostic[] {
   const r = d.riddle,

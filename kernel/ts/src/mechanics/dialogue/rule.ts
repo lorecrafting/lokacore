@@ -1,8 +1,7 @@
 import { chosen } from '../scene/sequence.ts';
 import * as patrol from '../patrol/sequence.ts';
-import { hub, wrongAnswer } from './behavior.ts';
-import { exchangeRoles, exchangeTransfers } from './exchange.ts';
-import { questOf } from '../lookups.ts';
+import { hub, opening, wrongAnswer } from './behavior.ts';
+import { exchangeTransfers } from './exchange.ts';
 // Dialogue lowers bound choices, quest transitions and facts in one writer group.
 import type {
   CharacterId,
@@ -33,9 +32,6 @@ import {
 import {
   blocked,
   answerFits,
-  bind,
-  choiceIds,
-  continuationId,
   definition,
   leave,
   speakerOf,
@@ -73,28 +69,8 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
   if (!speaks(world, p.target_id)) return rejected('not_found');
   const d = spokenBy(world, p.actor_id, p.target_id, steps, p.dialogue);
   if (!d || talking(world, p.actor_id, p.target_id)) return rejected('invalid_state');
-  const continuation_id = continuationId(mint);
-  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
-  const op = {
-    op: 'choice.open',
-    writer_group: 0,
-    continuation_id,
-    actor_id: p.actor_id,
-    source: { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key },
-    beat: d.key,
-    roles: [...bind(world, d), ...exchangeRoles(world, p.actor_id, d, steps)],
-    ...(d.quest &&
-      (d.riddle?.wrong_limit !== undefined || values(d.choices).some((o) => o.exchange)) && {
-        quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
-      }),
-    choice_ids: choiceIds(d),
-    ...(d.riddle?.wrong_limit !== undefined && {
-      attempts: { count: 0, limit: d.riddle.wrong_limit },
-    }),
-  } as const;
-  const opened = { type: 'choice_opened', continuation_id } as const;
-  const ops = [...leave(world, p.actor_id), op];
-  return accepted(world, 'choice_opened', ops, [event(world, command, mint, 1, opened)]);
+  const [op, opened] = opening(world, command, mint, d, steps);
+  return accepted(world, 'choice_opened', [...leave(world, p.actor_id), op], [opened]);
 }
 
 function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {

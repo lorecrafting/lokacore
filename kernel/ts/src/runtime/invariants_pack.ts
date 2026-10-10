@@ -51,7 +51,7 @@ function rotationHolds(op: Any, row: Any, state: Any) {
   );
 }
 
-function memberInitiallyPresent(id: string, room: string, state: Any) {
+export function memberInitiallyPresent(id: string, room: string, state: Any) {
   const origin = state.created?.[id]?.origin;
   const slot =
     origin?.kind === 'spawned' &&

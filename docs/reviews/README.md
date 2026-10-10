@@ -10,6 +10,14 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
+- [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **APPROVE**
+- [Review: toolbox row G9, social verbs say, whisper, shout, engine half (loka-kgd.71)](2026-10-10-toolbox-m7-say-review.md): **APPROVE**
+- [Review: reaction fact writes join the row's earlier writer group (loka-j2mo, toolbox M7)](2026-10-10-toolbox-m7-j2mo-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 6c, several foes with a pack plan (loka-kgd.66)](2026-10-10-toolbox-m7-foes-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row G6 Book half, sense cues on the World page (loka-kgd.65, batch M7)](2026-10-10-toolbox-m7-cues-book-review.md): **APPROVE WITH NOTES**
+- [Review: NPC-vs-NPC damage, allies and kill credit, toolbox row 6b (loka-kgd.68)](2026-10-10-toolbox-m7-allies-review.md): **APPROVE WITH NOTES**
 - [Review: standing and disposition, toolbox rows 15 and G11 (loka-kgd.54)](2026-10-10-toolbox-m6-standing-review.md): **APPROVE**
 - [Review: toolbox row W10, conditional schedules (loka-kgd.56, batch M6)](2026-10-10-toolbox-m6-schedules-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W3, rumour by co-presence (loka-kgd.57, batch M6)](2026-10-10-toolbox-m6-rumour-review.md): **APPROVE WITH NOTES**
@@ -44,6 +52,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
+- [Review: batch M7 final head, combat and senses (PR #366, loka-kgd), Fable batch review](2026-10-10-batch-m7-fable-review.md): **CHANGES REQUIRED**
 - [Review: batch M6, social standing and memory (PR #363, loka-kgd)](2026-10-10-batch-m6-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M4 (PR #358, epic loka-kgd), Fable batch review](2026-10-10-batch-m4-fable-review.md): **APPROVE WITH NOTES**

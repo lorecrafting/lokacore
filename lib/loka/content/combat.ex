@@ -6,6 +6,12 @@ defmodule Loka.Content.Combat do
   @spec expand(map(), map()) :: map()
   def expand(credit, m), do: Map.new(credit, fn {k, v} -> {k, ref(v, k, m)} end)
 
+  @spec settings(map(), map()) :: map()
+  def settings(%{"world" => %{"combat" => %{"allies" => allies}}} = settings, m),
+    do: put_in(settings, ["world", "combat", "allies"], Enum.map(allies, &ref(&1, "npc", m)))
+
+  def settings(settings, _), do: settings
+
   @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
   def check(nil, _, _, _), do: []
   def check(_, _, _, nil), do: []
@@ -15,6 +21,7 @@ defmodule Loka.Content.Combat do
     credit = get_in(settings, ["world", "death_credit"])
 
     settings_errors(combat, settings, m, text) ++
+      allies(combat, m, defs) ++
       npc_profiles(defs, combat) ++
       damage_api(m, defs, combat) ++
       if(credit && !combat, do: [bad("cartridge.world.death_credit")], else: []) ++
@@ -27,8 +34,41 @@ defmodule Loka.Content.Combat do
     if(get_in(settings, ["world", "death"]), do: [], else: [bad("cartridge.world.death")]) ++
       requirements(m) ++
       profile(combat["player_attack"], "cartridge.world.combat.player_attack") ++
-      narration(combat, text)
+      narration(combat, text) ++
+      if((combat["target_choice"] || combat["allies"]) && version(m) < [1, 48],
+        # Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48.
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
   end
+
+  # Toolbox row 6b: each ally is an authored NPC with an attack; allies need their narration.
+  defp allies(%{"allies" => allies} = combat, m, defs) do
+    path = ["world", "combat"]
+
+    ally_narration(combat["narration"], path) ++
+      for {r, i} <- Enum.with_index(allies),
+          error <-
+            reference("cartridge.json", path ++ ["allies"], {i, "npc"}, %{i => r}, m, defs) ++
+              ally(resolve(r, "npc", m, defs), at("cartridge.json", path ++ ["allies", i])),
+          do: error
+  end
+
+  defp allies(_, _, _), do: []
+
+  defp ally_narration(narration, path),
+    do:
+      for(
+        field <- ~w(ally_hit ally_miss),
+        !narration[field],
+        do: bad(at("cartridge.json", path ++ ["narration", field]))
+      )
+
+  defp ally({_, _, %{"attack" => _} = npc}, path),
+    do: if(npc["spawn_template"], do: [bad(path)], else: [])
+
+  defp ally({_, _, _}, path), do: [bad(path)]
+  defp ally(_, _), do: []
 
   defp npc_profiles(defs, combat) do
     for {_, {rel, _, %{"attack" => attack} = npc}} <- defs["npc"],

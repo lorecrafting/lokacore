@@ -15,12 +15,18 @@ defmodule Loka.Core.ComposeStatus do
   defp shape?(_, %{"active" => false} = next, _),
     do: Map.keys(next) |> Enum.sort() == ~w(active generation)
 
-  # An active row keeps its generation; a refresh or successor never shortens the end.
+  # A permanent row (row W8) is its generation alone and never replaces a timed one.
+  defp shape?(prior, next, _) when not is_map_key(next, "job_id"),
+    do: Map.keys(next) |> Enum.sort() == ~w(active generation) and prior["job_id"] == nil
+
+  # An active row keeps its generation; a refresh or successor never shortens the end (and a
+  # permanent row, with no end, never turns timed).
   defp shape?(prior, next, now) do
     is_integer(next["ends_at"]) and next["ends_at"] > now and
       is_integer(next["next_tick_at"]) and next["next_tick_at"] >= now and
       is_binary(next["job_id"]) and
-      (prior["active"] != true or next["ends_at"] >= prior["ends_at"])
+      (prior["active"] != true or
+         (is_integer(prior["ends_at"]) and next["ends_at"] >= prior["ends_at"]))
   end
 
   defp generation?(%{"active" => true} = prior, next),

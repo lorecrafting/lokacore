@@ -1,0 +1,59 @@
+{
+  "label": "actions.pick_lock",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "storeroom",
+    "detail": "lock"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "check": {
+    "key": "pick_lock",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "lock_picked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_lock.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_lock.failure"
+      },
+      "cues": [
+        {
+          "sense": "sound",
+          "text": "cue.rattle",
+          "range": 1,
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "lock_picked",
+              "equals": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

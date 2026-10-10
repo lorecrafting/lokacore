@@ -79,6 +79,7 @@ const knows = (w: World, npc: string) =>
     npc: ref('npc', npc),
     equals: true,
   } as Policy);
+const TELLS = `${C}:reaction/tells_innkeeper`;
 const talk = (w: World) => run(w, { type: 'talk', target_id: w.entityIds[`${C}:npc/innkeeper`] });
 
 // Breaks: an NPC's schedule jump firing no entity_entered_room reaction (so nobody learns), the
@@ -88,11 +89,39 @@ test('the innkeeper knows about the mill by evening because Ada walked through t
   assert.notEqual(talk(w).decision.kind, 'accepted');
   w = play(play(w, move('east')), until(16, 30)); // Ada passed the mill at 16:00
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
-  // Ada walked through the inn at 17:00, the player in the square (two waits; one wait across both
-  // hours also runs each hour since loka-qi0r).
+  // Ada walked through the inn at 17:00, the player in the square.
   w = play(play(w, until(17, 30)), until(18, 30));
   assert.equal(knows(w, 'innkeeper'), true);
   assert.equal(talk(play(w, move('west'))).decision.kind, 'accepted');
+});
+
+// Breaks: a reaction's second write to a fact row in one advance taking a new writer group
+// (conflicting_write, loka-j2mo), or keeping the latest group rather than the first (faults on
+// the third write): Ada passes the mill and the inn on three days of one wait.
+test('one wait over three days equals hour-by-hour play', () => {
+  const day = (w: World, d: number) => [16, 17, 18].reduce((v, h) => play(v, until(h + d, 30)), w);
+  const hourly = day(day(day(fresh(), 0), 24), 48);
+  const once = play(fresh(), until(66, 30));
+  assert.deepEqual([knows(once, 'ada'), knows(once, 'innkeeper')], [true, true]);
+  const rows = (w: World) => [w.state.facts, w.state.containers];
+  assert.deepEqual(rows(once), rows(hourly));
+});
+
+// Breaks: two NPCs firing one reaction in one advance write the innkeeper's row in two writer
+// groups (conflicting_write, loka-j2mo); any entrant tells, and both enter the inn at 17:00.
+test('two NPCs firing one reaction in one wait commit', () => {
+  const r = load((c) => {
+    delete c.reactions[TELLS].on.npc;
+    const room = (key: string) => ref('room', key);
+    c.npcs[`${C}:npc/innkeeper`].daily_schedule = { 16: room('square'), 17: room('inn') };
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = newWorld(
+    r.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1],
+  );
+  assert.equal(knows(play(w, until(17, 30)), 'innkeeper'), true);
 });
 
 // Breaks: the rumour spreads on anyone entering the inn while Ada knows, with Ada elsewhere (a
@@ -102,7 +131,6 @@ test('the player entering the inn while Ada is away carries nothing', () => {
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
 });
 
-const TELLS = `${C}:reaction/tells_innkeeper`;
 // Row W2's own 1.47 uses removed, so only the entrant filter needs the floor.
 const plain = (c: any) => {
   delete c.facts[`${C}:fact/knows_mill`].per_subject;

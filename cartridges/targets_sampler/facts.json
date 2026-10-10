@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "raider_slain": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The raider in the yard died to the player or the player's ally."
+    }
+  }
+}

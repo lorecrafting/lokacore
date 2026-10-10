@@ -474,7 +474,29 @@
     "key": "sense_cue",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "cue"
+    ],
+    "events": [],
+    "policies": [
+      "cue_perceived"
+    ]
+  },
+  {
+    "key": "speech",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "say",
+      "whisper",
+      "shout"
+    ],
+    "events": [
+      "spoken"
+    ]
   },
   {
     "key": "escort",

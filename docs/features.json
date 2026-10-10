@@ -1,4 +1,29 @@
 {
+  "speech": {
+    "spec": "docs/system/mechanics.md Social verbs (toolbox row G9)",
+    "contracts": ["CommandPayload", "EventPayload", "DialogueDefinition", "ReactionRule"],
+    "fixtures": ["protocol/fixtures/speech_sampler_hash.json", "protocol/fixtures/invalid.json"],
+    "invariants": ["gameview_agrees_with_admission"],
+    "implemented_in": "Toolbox row G9 engine half (loka-kgd.71): say, whisper and shout one word; one spoken event per hearer, a shout through the G6 walk at depth 1; a keyword opens its dialogue"
+  },
+  "sense_cue": {
+    "spec": "docs/system/mechanics.md Senses (toolbox row G6)",
+    "contracts": [
+      "Cue",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/senses.ts",
+      "lib/loka/content/cues.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/invalid.json"
+    ],
+    "invariants": [
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "Toolbox row G6 senses sampler: cues in GameView with direction, cue_perceived for NPC reactions to recipe outcomes"
+  },
   "movement": {
     "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.1 scan, §4.10",
     "contracts": [

@@ -35,6 +35,8 @@ import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
+import { cueParts } from './cartridge_senses.ts';
+import { holders } from './cartridge_holders.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -100,7 +102,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
-  return out;
+  return [...out, ...cueParts(c)];
 }
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
@@ -121,7 +123,7 @@ export function nodes(c: Obj): [Obj, string][] {
       walk(r.policy.root, `.cartridge.recipes${step(ref)}.policy.root`),
     ),
     ...parts(c).flatMap(([k, v, at]) =>
-      k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
+      k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
     ...[...questPolicies(c), ...dispositions(c)].flatMap(([p, at]) => walk(p, at)),
     ...cases(c).flatMap(([k, at]) => walk(k.when.root, `${at}.when.root`)),
@@ -148,6 +150,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
   readable: ['label', 'text', 'title'],
+  cue: ['text'],
 };
 
 // Shared reference, fact-type and text-catalog checks append diagnostics to `out`.
@@ -298,39 +301,3 @@ const npcRooms = (c: Obj): [Obj, string][] =>
       `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
     ]),
   ]);
-// Items and NPCs start in containers that form no cycle (CONTAINMENT_CYCLE, at each item on
-// one) and hold at most their capacity (CAPACITY_EXCEEDED).
-function holders(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  const items: Obj = c.items ?? {};
-  const inside = (i?: Obj) => (i?.location.in === 'item' ? refString(i.location.item) : undefined);
-  const held: Record<string, number> = {};
-  for (const [ref, i] of Object.entries(items)) {
-    const path = `.cartridge.items${step(ref)}`;
-    if (i.container !== true)
-      for (const field of ['capacity', 'barrier'])
-        if (i[field] !== undefined)
-          out.push(diag('SCHEMA_VIOLATION', `${path}.${field}`, { error: 'invalid_value' }));
-    const holder = items[inside(i) ?? ''];
-    if (holder && holder.container !== true)
-      out.push(diag('SCHEMA_VIOLATION', `${path}.location.item`, { error: 'invalid_value' }));
-    if (i.location.in === 'template') continue;
-    const at = refString(i.location[i.location.in]);
-    held[at] = (held[at] ?? 0) + 1;
-    let up = inside(i);
-    for (let n = 0; up !== undefined && up !== ref && n < Object.keys(items).length; n++)
-      up = inside(items[up]);
-    if (up === ref)
-      out.push(diag('CONTAINMENT_CYCLE', `.cartridge.items${step(ref)}.location.item`));
-  }
-  for (const map of ['npcs', 'items'])
-    for (const [ref, h] of Object.entries((c[map] ?? {}) as Obj))
-      if (h.capacity !== undefined && (held[ref] ?? 0) > h.capacity)
-        out.push(
-          diag('CAPACITY_EXCEEDED', `.cartridge.${map}${step(ref)}.capacity`, {
-            capacity: h.capacity,
-            held: held[ref],
-          }),
-        );
-  return out;
-}

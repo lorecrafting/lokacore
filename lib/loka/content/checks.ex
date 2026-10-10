@@ -22,6 +22,11 @@ defmodule Loka.Content.Checks do
   def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
     do: Loka.Content.Population.expand(value, m)
 
+  # Toolbox row G6: a definition's cues, whatever clause expands the rest of it (an NPC or a
+  # status does not recurse), so a short reference in a cue's condition always expands.
+  def expand(%{"cues" => c} = d, m) when is_list(c),
+    do: Map.put(expand(Map.delete(d, "cues"), m), "cues", expand(c, m))
+
   def expand(%{"op" => "population.suppress", "plan" => plan} = step, m),
     do: Map.put(step, "plan", ref(plan, "population", m))
 
@@ -320,6 +325,7 @@ defmodule Loka.Content.Checks do
 
     entry(m, entry, defs) ++
       texts(defs, text) ++
+      Loka.Content.Cues.check(m, defs, text, registry, trees(defs)) ++
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
@@ -401,22 +407,23 @@ defmodule Loka.Content.Checks do
 
   defp uses(m, defs, owners) do
     required = {m["requires"]["capabilities"], owners}
-    actions = for {_, {rel, [], a}} <- defs["action"], do: {rel, a}
 
-    Enum.flat_map(actions, fn {rel, a} ->
+    Enum.flat_map(actions(defs), fn {rel, a} ->
       command(rel, a["command"], required, m["time_policy"] != nil)
     end) ++
       Enum.flat_map(
-        trees(defs, actions),
+        trees(defs),
         &Loka.Content.Policies.tree(&1, {m, defs, required})
       )
   end
 
-  # Every located policy root from the source definitions.
-  defp trees(defs, actions) do
+  defp actions(defs), do: for({_, {rel, [], a}} <- defs["action"], do: {rel, a})
+
+  # Every located policy root from the source definitions (twin of the TS loader's nodes/1).
+  defp trees(defs) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
-      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}),
+      for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),
       RoomParts.conditions(defs),
       Entities.conditions(defs),
       Recipes.conditions(defs),
@@ -424,7 +431,8 @@ defmodule Loka.Content.Checks do
       Reactions.conditions(defs),
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs),
-      Loka.Content.Barriers.conditions(defs)
+      Loka.Content.Barriers.conditions(defs),
+      Loka.Content.Cues.conditions(defs)
     ])
   end
 

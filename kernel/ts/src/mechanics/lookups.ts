@@ -1,5 +1,6 @@
-// Read-only lookups over a World shared by rules and the GameView: a room's exits, a barrier's
-// state, custody (what is in reach) and an actor's quest instance. Split from runtime/decision.ts (c1-equipment).
+// Read-only lookups over a World shared by rules and the GameView: a room's exits (and whether one
+// is hidden), a barrier's state, custody (what is in reach) and an actor's quest instance. Split
+// from runtime/decision.ts (c1-equipment).
 import type {
   BarrierState,
   CharacterId,
@@ -13,10 +14,21 @@ import type {
 import { LIMITS } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import { has, type QuestRow, type Steps, type World } from '../runtime/decision.ts';
+import { value } from './fact.ts';
 
 /** The room's exit in a direction, if it has one. */
 export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
   (room.exits as Readonly<Record<string, Connection>>)[direction];
+
+/**
+ * True while the exit in `direction` is hidden from `actor` (toolbox row 11): it declares
+ * hidden_until and the actor's value of its fact differs. A hidden exit does not exist for that
+ * actor: not listed, not seen through, not mapped, and a move through it is not_found.
+ */
+export function hidden(world: World, room: RoomDefinition, direction: string, actor: CharacterId) {
+  const until = exitOf(room, direction)?.hidden_until;
+  return !!until && value(world, actor, until.fact) !== until.equals;
+}
 
 /** The room a direction's exit leads to, if the room has that exit. */
 export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef | undefined =>

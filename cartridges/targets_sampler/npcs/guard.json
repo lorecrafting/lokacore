@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

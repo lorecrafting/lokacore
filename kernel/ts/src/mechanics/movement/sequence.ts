@@ -13,14 +13,14 @@ import * as water from '../water/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import * as patrol from '../patrol/sequence.ts';
 import * as expedition from '../expedition/sequence.ts';
-import { exitTo } from '../lookups.ts';
+import { exitTo, hidden } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
 import { engage } from '../disposition.ts';
-import { fall, fare, hidden, passage } from './shared.ts';
+import { fall, fare, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
 type MoveCommand = {

@@ -1,0 +1,32 @@
+{
+  "title": "room.tower.title",
+  "description": "room.tower.description",
+  "exits": {
+    "west": {
+      "to": "barracks"
+    }
+  },
+  "details": {
+    "kitchen": {
+      "aliases": [
+        "kitchen"
+      ],
+      "description": "detail.kitchen",
+      "cues": [
+        {
+          "sense": "smell",
+          "text": "cue.stew",
+          "range": 2,
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "lock_picked",
+              "equals": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}

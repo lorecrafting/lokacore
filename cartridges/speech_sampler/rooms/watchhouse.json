@@ -1,0 +1,9 @@
+{
+  "title": "room.watchhouse.title",
+  "description": "room.watchhouse.description",
+  "exits": {
+    "west": {
+      "to": "square"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "facts": {
+    "elder_heard": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The elder heard the player speak."
+    },
+    "watchman_alerted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The watchman heard a shout for help."
+    },
+    "miller_heard": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The miller heard the player speak."
+    }
+  }
+}

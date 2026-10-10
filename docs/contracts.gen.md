@@ -46,6 +46,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | faction@1 | portable | portable_capability |  |
 | narration@1 | portable | portable_capability | client_notification |
 | sense_cue@1 | portable | portable_capability |  |
+| speech@1 | portable | portable_capability |  |
 | escort@1 | portable | portable_capability |  |
 | patrol@1 | portable | portable_capability |  |
 | transport@1 | portable | portable_capability |  |
@@ -139,6 +140,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
 - **TargetSpec**: The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.
   - `none`: The action takes no target.
   - `entity`: One entity from the listed scopes.
+- **Word**: One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.
 
 ## Capability contracts (`protocol/capability.schema.json`)
 
@@ -213,6 +215,9 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `sleep`: Sleep (position@1): the actor's position becomes sleeping; already sleeping is invalid_state. Acting while asleep and waking on damage are LATER (combat).
   - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.
   - `talk`: Talk to a character.
+  - `say`: Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.
+  - `shout`: Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).
+  - `whisper`: Whisper one word to one NPC in the actor's room; no one else hears it (speech@1; toolbox row G9).
   - `accept_quest`: Activate an offered quest.
   - `choose`: Resolve a pending choice.
   - `close_choice`: Close a pending choice without choosing.
@@ -287,6 +292,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `encounter.open`
   - `encounter.advance`
   - `encounter.close`
+  - `encounter.target`: Toolbox row 6a: the player's chosen target in an open roster encounter becomes its primary; the row must equal expected and npc_id must be a present active member other than the current primary.
   - `job.cancel`
   - `escort.transition`: Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed.
   - `quest.retire`: API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only.
@@ -341,7 +347,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
-- **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.
+- **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active timed row owns its pending tick job; a permanent one (toolbox row W8) has no ends_at, next_tick_at or job_id.
   - `true`
   - `false`
 - **VisitedRoom**: One actor’s committed room visit; keyed by actor and room. Its count (variety@1) is the number of entries, absent while it is 1.
@@ -357,6 +363,7 @@ DialogueDefinition (06 §17, §18, §33, §37, §43; 04 §5.3 Choice/continuatio
 - **DialogueRole**: A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).
   - `npc`
   - `item`
+- **SpokenKeyword**: An authored spoken keyword (speech@1; toolbox row G9): 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.
 
 ## Effect contracts (`protocol/effect.schema.json`)
 
@@ -376,6 +383,8 @@ Effects and the effect registry's durability and idempotency classifications (04
 Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.
 
 - **AttackProfile**: Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max.
+- **Cue**: A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1; needs kernel_api at least 1.48. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.
+- **Cues**: A source's sense cues (Cue; toolbox row G6), in authored order.
 - **DamageKind**: A damage kind (toolbox row G2): a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.
 - **FuelRow**: Exact-instance fuel history: bounded remaining charge, confirmed settlement time and stored ignition state. Supplies are never lit.
 - **FuelSpec**: Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys.
@@ -446,6 +455,8 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `status_ticked`: Toolbox row G3: one due tick of an active status on a body, NPC or thing (body_id), after its resource change, if any.
   - `status_expired`: Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none.
   - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
+  - `spoken`: Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent.
+- **Loudness**: How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 ## Fact contracts (`protocol/fact.schema.json`)
 
@@ -481,8 +492,9 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **CombatView**: The current encounter and visible opponent presented to the player.
-- **ConditionView**: One active body status: its authored label, end, next tick and per-tick resource change (absent for a status that never ticks, row 2c).
+- **ConditionView**: One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c).
 - **ContentView**: An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
+- **CueView**: One sense cue reaching the actor's room (toolbox row G6): its sense, authored text and, for a cue from another room, the direction of the first exit on the shortest way to its source.
 - **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
 - **DreamView**: Bed-local saved checkpoint; safe exact offers never replace ordinary World or dialogue.
 - **EntityView**: A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
@@ -641,6 +653,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `visited_count`: The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.
   - `status_active`: The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. Needs kernel_api at least 1.46. Owned by status@1.
   - `npc_present`: The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.
+  - `cue_perceived`: The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1. Needs kernel_api at least 1.48.
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
 - **VersionedPolicy**: A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.
 
