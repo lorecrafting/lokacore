@@ -13,6 +13,8 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { holds } from '../src/mechanics/policy.ts';
+import { reactions } from '../src/content/cartridge_reactions.ts';
+import type { Checks } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-rumour-'));
 let artifact: Uint8Array;
@@ -136,4 +138,25 @@ test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
     }),
     'loaded',
   );
+});
+
+// Breaks: a consequence op's kernel_api floor dropped from FLOORS, so a cartridge below it loads
+// and an older host faults at runtime (twin of content_rumour_test.exs). Called directly: any
+// sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
+// row: its only legal trigger, quest_resolved, carries the same 1.8 floor.
+test('each consequence op is refused just below its kernel_api floor', () => {
+  const refused = (op: string, at_least: string) =>
+    reactions(
+      {
+        manifest: { requires: { kernel_api: { at_least } } },
+        reactions: { r: { on: { event: 'fact_changed' }, apply: [{ op }] } },
+      },
+      { named() {}, typedValue() {} } as unknown as Checks,
+    ).some((d) => d.code === 'KERNEL_API_RANGE_INVALID');
+  for (const [op, floor] of [
+    ['quest.resolve', 12],
+    ['quest.fail', 12],
+    ['population.suppress', 35],
+  ] as const)
+    assert.deepEqual([refused(op, `1.${floor - 1}`), refused(op, `1.${floor}`)], [true, false], op);
 });

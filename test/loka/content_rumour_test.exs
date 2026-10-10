@@ -34,5 +34,28 @@ defmodule Loka.ContentRumourTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, plain() ++ [unfiltered])
   end
 
+  # Breaks: a consequence op's kernel_api floor dropped from @floors, so a cartridge below it
+  # compiles and an older host faults at runtime (twin of rumour.test.ts). Called directly: any
+  # sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
+  # row: its only legal trigger, quest_resolved, carries the same 1.8 floor.
+  test "each consequence op is refused just below its kernel_api floor" do
+    registry = "protocol/capability_registry.json" |> File.read!() |> JSON.decode!()
+
+    refused = fn op, v ->
+      m = %{"requires" => %{"kernel_api" => %{"at_least" => v}, "capabilities" => %{}}}
+      rule = %{"on" => %{"event" => "fact_changed"}, "apply" => [%{"op" => op}]}
+      defs = %{"reaction" => %{"r" => {"reactions/r", [], rule}}}
+
+      Loka.Content.Reactions.check(m, defs, {nil, %{}}, registry)
+      |> Enum.any?(&(&1["code"] == "KERNEL_API_RANGE_INVALID"))
+    end
+
+    for {op, floor} <- [{"quest.resolve", 12}, {"quest.fail", 12}, {"population.suppress", 35}],
+        do:
+          assert(
+            {op, refused.(op, "1.#{floor - 1}"), refused.(op, "1.#{floor}")} == {op, true, false}
+          )
+  end
+
   defp codes(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 end
