@@ -167,4 +167,9 @@ test('a generic deadline job row that does not match the save is save_corrupt', 
   }
   forge({});
   assert.equal(opened(), 'open');
+  // A retired instance (a repeatable re-run) leaves its stale job pending; that save is lawful.
+  s.p.sql
+    .prepare("DELETE FROM state_row WHERE section='quests' AND key=?")
+    .run(original.quest_instance_id);
+  assert.equal(opened(), 'open');
 });
