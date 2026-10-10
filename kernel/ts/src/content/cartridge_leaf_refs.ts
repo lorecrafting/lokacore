@@ -9,4 +9,5 @@ export const LEAF_REFS: Readonly<Record<string, Readonly<Record<string, string>>
   stat_compare: { attribute: 'attribute' },
   resource_compare: { resource: 'resource' },
   has_tag: { item: 'item', barrier: 'barrier', room: 'room' },
+  visited_count: { room: 'room' },
 };

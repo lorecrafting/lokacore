@@ -1,0 +1,22 @@
+{
+  "title": "room.garden.title",
+  "description": "room.garden.description",
+  "exits": {
+    "south": {
+      "to": "hall"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "visited_count",
+          "room": "garden",
+          "at_least": 10
+        }
+      },
+      "description": "room.garden.familiar"
+    }
+  ]
+}

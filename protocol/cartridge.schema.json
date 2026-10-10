@@ -181,6 +181,20 @@
             "text": {
               "$ref": "text.schema.json#/$defs/TextCatalog"
             },
+            "alternates": {
+              "description": "Narration variety (variety@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG. Needs kernel_api at least 1.45.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_.]{0,127}$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              }
+            },
             "barriers": {
               "description": "The cartridge's barriers, keyed by DefinitionRefString of kind barrier; absent when it has none (R5 S7, an optional map: the tag stays).",
               "type": "object",

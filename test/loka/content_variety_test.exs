@@ -1,0 +1,39 @@
+defmodule Loka.ContentVarietyTest do
+  use ExUnit.Case, async: true
+
+  # Breaks (toolbox row W7): the compiler drops cartridge.json alternates, accepts an alternate or
+  # key the text catalog lacks, skips alternates' or visited_count's owner check, or accepts
+  # alternates or a visited_count leaf below kernel_api 1.45 (each alone included).
+  test "alternates reach the artifact, name catalog keys and need variety@1 and 1.45" do
+    dir = Loka.ContentSource.copy("cartridges/variety_sampler")
+    assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, [])
+
+    assert JSON.decode!(artifact)["cartridge"]["alternates"] == %{
+             "narration.walk" => ["narration.walk_b", "narration.walk_c"]
+           }
+
+    alternate = &put_in(&1, ["alternates", "narration.walk"], ["narration.walk_b", "nope"])
+    key = &put_in(&1, ["alternates"], %{"narration.gone" => ["narration.walk_b"]})
+    drop = &update_in(&1, ["requires", "capabilities"], fn m -> Map.delete(m, "variety") end)
+    api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.44")
+    floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
+    plain = {"rooms/garden.json", &Map.delete(&1, "variants")}
+
+    cases = [
+      {[{"cartridge.json", alternate}],
+       {"UNRESOLVED_REFERENCE", "cartridge.alternates[\"narration.walk\"][1]"}},
+      {[{"cartridge.json", key}],
+       {"UNRESOLVED_REFERENCE", "cartridge.alternates[\"narration.gone\"]"}},
+      {[{"cartridge.json", drop}], {"UNDECLARED_CAPABILITY", "cartridge.alternates"}},
+      {[{"cartridge.json", drop}],
+       {"UNDECLARED_CAPABILITY", "rooms/garden.variants[0].when.root.op"}},
+      {[{"cartridge.json", api}, plain], floor},
+      {[{"cartridge.json", &(&1 |> api.() |> Map.delete("alternates"))}], floor}
+    ]
+
+    for {changes, {code, path}} <- cases do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
+      assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
+end

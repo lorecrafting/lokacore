@@ -349,6 +349,28 @@
             "lunar"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): 0 before the first entry (a new character's start is not an entry), 1 after it. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "visited_count"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "room",
+            "at_least"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

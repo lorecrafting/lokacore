@@ -55,6 +55,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | expedition@1 | portable | portable_capability |  |
 | knowledge@1 | portable | portable_capability |  |
 | tags@1 | portable | portable_capability |  |
+| variety@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -341,7 +342,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.
   - `true`
   - `false`
-- **VisitedRoom**: One actor’s committed room visit; keyed by actor and room.
+- **VisitedRoom**: One actor’s committed room visit; keyed by actor and room. Its count (variety@1) is the number of entries, absent while it is 1.
 - **WriterGroup**: Coordinator-assigned writer-group identity of one explicit sequence (04 §5.3): the root sequence or one reaction delivery. Content never chooses it.
 
 ## Dialogue contracts (`protocol/dialogue.schema.json`)
@@ -627,6 +628,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `light_off`
   - `has_tag`: The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).
   - `sky`: The derived sky at the committed clock, never stored (toolbox row 10): lunar holds when the current lunar phase (the calendar.lunar cut containing ((clock - origin) mod period)) is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the calendar's lunar cuts do not name, or no lunar cuts (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.
+  - `visited_count`: The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): 0 before the first entry (a new character's start is not an entry), 1 after it. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
 - **VersionedPolicy**: A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.
 

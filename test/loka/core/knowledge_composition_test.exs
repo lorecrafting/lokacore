@@ -35,4 +35,23 @@ defmodule Loka.Core.KnowledgeCompositionTest do
              bad
     end
   end
+
+  # Break: the invariant accepts a counterfeit write of a skipped, stale-based or first-visit count.
+  test "independent invariant refuses forged counted visits" do
+    for bad <- ~w(visit-count-cannot-skip stale-visit-from-refuses first-visit-has-no-count) do
+      c = Enum.find(@cases, &(&1["id"] == bad))
+      [op] = c["ops"]
+
+      forged = %{
+        "changes" => [%{"target" => c["expected"]["fault"]["target"], "value" => op["value"]}]
+      }
+
+      refute Invariants.check("delta_preconditions_hold", %{
+               "state" => c["state"],
+               "delta" => %{"ops" => c["ops"]},
+               "result" => forged
+             }),
+             bad
+    end
+  end
 end

@@ -1,5 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
-// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
+import { vary } from '../mechanics/variety.ts';
+// size: allow 341, typed quest reactions, same-plan deadline pairing and narration variety share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply } from './apply.ts';
@@ -94,7 +95,7 @@ export function propose(
       delta: { ops: knowledgeLast(ops) },
       events: p.events,
       rng: p.rng,
-      ...(p.narration.length && { narration: p.narration }),
+      ...(p.narration.length && { narration: vary(world.cartridge, command.id, p.narration) }),
     },
   };
 }
