@@ -38,8 +38,11 @@ function attempts(world: World, db: Db, scope: string, id: string, row: ChoiceRo
   const receipts = db.getAllSync<Receipt>(
     `SELECT command_id,command,response,revision FROM receipt
     WHERE scope=? AND json_extract(response,'$.kind')='accepted' AND
-    json_extract(command,'$.payload.continuation_id')=? ORDER BY revision LIMIT ?`,
+    (json_extract(command,'$.payload.continuation_id')=? OR EXISTS (SELECT 1 FROM
+    json_each(response,'$.delta.ops') WHERE json_extract(value,'$.op')='choice.close' AND
+    json_extract(value,'$.continuation_id')=?)) ORDER BY revision LIMIT ?`,
     scope,
+    id,
     id,
     row.attempts!.limit + 2,
   );
@@ -66,6 +69,10 @@ function attempts(world: World, db: Db, scope: string, id: string, row: ChoiceRo
   if (row.attempts!.count !== count || row.status !== status) invalidRiddle();
 }
 
+// A talk's choice.open, after the Leave of the conversation it ends, if any (dialogue@1).
+const opened = (decision: Extract<DecisionResult, { kind: 'accepted' }>) =>
+  decision.delta.ops.find((o) => o.op === 'choice.open');
+
 function openEvidence(
   world: World,
   id: string,
@@ -75,7 +82,7 @@ function openEvidence(
   decision: Extract<DecisionResult, { kind: 'accepted' }>,
 ) {
   const p = command.payload,
-    op = decision.delta.ops[0];
+    op = opened(decision);
   const d = world.cartridge.dialogues![refString(row.source)];
   if (
     !receiptValid(world, r, command, decision) ||
@@ -87,8 +94,10 @@ function openEvidence(
     minted(world.context, command.id, 0) !== id ||
     decision.outcome !== 'choice_opened' ||
     !openedEvent(world, id, row, command, decision) ||
-    decision.delta.ops.length !== 1 ||
-    op.op !== 'choice.open' ||
+    decision.delta.ops.some(
+      (o) => o !== op && (o.op !== 'choice.close' || o.continuation_id === id),
+    ) ||
+    op?.op !== 'choice.open' ||
     !same(op, {
       op: 'choice.open',
       writer_group: 0,
@@ -115,6 +124,12 @@ function answerEvidence(
   count: number,
 ) {
   const p = command.payload;
+  // dialogue@1: a talk to another speaker or the dream's Continue leaves the riddle first.
+  if (p.type === 'talk' || p.type === 'continue') {
+    if (!decision.delta.ops.some((o) => o.op === 'choice.close' && o.continuation_id === id))
+      invalidRiddle();
+    return { count, status: 'closed' as const };
+  }
   if (p.type === 'close_choice') {
     if (
       !same(decision.delta.ops, [{ op: 'choice.close', writer_group: 0, continuation_id: id }]) ||
@@ -172,7 +187,7 @@ export function selectorSave(world: World, db: Db, meta: Meta) {
     const command = JSON.parse(r.command) as Command,
       decision = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
     if (!receiptValid(world, r, command, decision)) invalidRiddle();
-    const op = decision.delta.ops[0],
+    const op = opened(decision),
       row = op?.op === 'choice.open' && world.state.choices?.[op.continuation_id];
     if (!row || op.op !== 'choice.open') invalidRiddle();
     checkRow(world, op.continuation_id, row);

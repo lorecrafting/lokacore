@@ -164,3 +164,22 @@ test('the loader checks each accept: a quest, no dialogue quest, no hand_over', 
     `${O}.hand_over`,
   );
 });
+
+// Breaks (loka-x6t.5, twin of test/loka/content_ferry_test.exs): the loader admitting, in a
+// dialogue that reopens after each answer (no quest, two choices), an answer without the once-only
+// accept that receives an item, which a player could give back and receive again.
+test('a reopening dialogue rejects a repeatable receive', () => {
+  const G = `.cartridge.dialogues["${F}:dialogue/bram_offer"].choices.give`;
+  fails(
+    (c) => {
+      offer(c).roles.lantern = { role: 'item', item: ref('item', 'lantern') };
+      offer(c).choices.give = {
+        label: 'dialogue.bram.leave',
+        narration: 'narration.bram.leave',
+        receive: { item: 'lantern', from: 'bram' },
+      };
+    },
+    'OUTCOME_MISMATCH',
+    `${G}.receive`,
+  );
+});

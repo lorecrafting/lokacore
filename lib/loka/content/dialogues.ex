@@ -273,7 +273,8 @@ defmodule Loka.Content.Dialogues do
       hand_over(rel, steps, o, d) ++
       receive_item(rel, steps, o, d, ctx) ++
       payment(rel, steps, o, d, ctx) ++
-      Loka.Content.Skills.choice(rel, steps, o, d, ctx)
+      Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.Hub.choice(rel, steps, o, d)
   end
 
   defp sequence(rel, steps, o, ctx) do

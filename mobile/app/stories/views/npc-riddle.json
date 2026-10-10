@@ -530,7 +530,7 @@
       }
      },
      {
-      "available": false,
+      "available": true,
       "action_key": "wren",
       "label": "action.talk",
       "target": {
@@ -539,10 +539,7 @@
         "room_occupants"
        ]
       },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
+      "input": []
      }
     ]
    }

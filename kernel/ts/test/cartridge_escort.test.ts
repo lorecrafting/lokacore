@@ -22,6 +22,7 @@ function load(change: (c: any) => void = () => {}) {
   c.lock.capabilities.escort = 1;
   delete dialogue(c).quest;
   dialogue(c).choices.carry.escort = { npc: 'bram', quest, transition: 'start' };
+  delete dialogue(c).choices.leave; // an escort start is a one-shot offer (loka-x6t.5)
   c.quests[prefix + 'quest/other'] = { ...c.quests[prefix + 'quest/lantern'], key: 'other' };
   change(c);
   const content_hash = createHash('sha256').update(encode(c)).digest('hex');
@@ -94,6 +95,13 @@ test('loader rejects incompatible and unresolved escort bindings', () => {
       'OUTCOME_MISMATCH',
       (c) => {
         dialogue(c).quest = quest;
+      },
+    ],
+    [
+      'OUTCOME_MISMATCH', // loka-x6t.5: in a dialogue that reopens, the start could repeat
+      (c) => {
+        const { label, narration } = dialogue(c).choices.carry;
+        dialogue(c).choices.stay = { label, narration };
       },
     ],
     [

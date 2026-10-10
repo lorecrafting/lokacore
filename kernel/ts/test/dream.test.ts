@@ -195,23 +195,28 @@ test('both exact branches keep World usable and award memory only after shown fi
   }
 });
 
-// Breaks: pending ordinary choice suppresses first credit or a dormant scene choice blocks real dialogue/elapsed/travel.
-test('first credit defers presentation behind the unchanged ordinary choice', () => {
-  let w = fresh((c) => {
-    c.npcs['ashmere_missing_child@0.0.28:npc/peg'].room = ref('room', 'drowned_lantern');
-  });
-  const talk = step(w, command(w, 1, { type: 'talk', target_id: entity(w, 'npc', 'peg') }), 1);
-  assert.equal(talk.decision.kind, 'accepted', JSON.stringify(talk.decision));
-  w = talk.world;
-  const ordinary = gameView(w).choice!;
+// Breaks: pending ordinary choice suppresses first credit; (loka-x6t.5) an open conversation
+// blocking the dream, or Continue leaving it open: it ends first, in the same decision, as Leave.
+test('first credit and the dream Continue leave an open conversation first', () => {
+  const a = route(
+    fresh((c) => {
+      c.npcs['ashmere_missing_child@0.0.28:npc/peg'].room = ref('room', 'inn_rooms');
+    }),
+  );
+  a.invoke({ type: 'talk', target_id: entity(a.world, 'npc', 'peg') });
+  const ordinary = gameView(a.world).choice!;
   assert.ok(ordinary);
-  const a = route(w);
   a.invoke({ type: 'rest' });
   assert.deepEqual(phase(a.world), started);
   assert.equal(gameView(a.world).choice?.continuation_id, ordinary.continuation_id);
-  assert.equal(dream(a.world).available, false);
-  a.invoke({ type: 'close_choice', continuation_id: ordinary.continuation_id }, 'close_choice');
   assert.equal(dream(a.world).available, true);
+  const next = a.invoke({ type: 'continue', scene: sceneRef, line: 1 }, 'dream_next');
+  assert.deepEqual((next.decision as any).delta.ops[0], {
+    op: 'choice.close',
+    writer_group: 0,
+    continuation_id: ordinary.continuation_id,
+  });
+  assert.equal(gameView(a.world).choice, undefined);
 });
 
 // Breaks: scene-owned pending rows hijack real S2 dialogue/handoff or prevent the ordinary Bell modal scene from taking foreground.

@@ -5,13 +5,14 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, entity, genesis, ref } from '../../../kernel/ts/test/transport_fixture.ts';
+import { bundle, entity, genesis, prefix, ref } from '../../../kernel/ts/test/transport_fixture.ts';
 import { gameView } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
 const configure = (c: any) => {
   c.entry = ref('room', 'ferry_landing');
+  c.npcs[`${prefix}:npc/ada`].room = ref('room', 'ferry_landing'); // a second speaker at hand
 };
 const release = { bundle: bundle(configure), fresh: genesis(configure) };
 
@@ -107,4 +108,46 @@ test('real SQLite hub answer survives failed and lost COMMIT, replay and cold re
     send('close_choice', { continuation_id: pending(reopened.world())[0]![0] });
     assert.equal(gameView(reopened.world()).choice, undefined, kind);
   }
+});
+
+// Breaks (loka-x6t.5 ruling): an open conversation that outlives the player walking away, or that
+// a talk to another speaker cannot end (or GameView still refusing that talk); either close not
+// committed with its decision, so a cold reopen restores the old conversation or refuses the save.
+test('real SQLite: walking away or talking to another speaker ends the open hub; reopen agrees', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-hub-leave-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const away = atElspeth(join(dir, 'away.db'));
+  const [[hub]] = pending(away.story.world());
+  assert.equal(
+    away.story.invoke(away.invocation('move', [], { direction: 'north' }) as never).kind,
+    'saved',
+  );
+  assert.equal(away.story.world().state.choices![hub]!.status, 'closed');
+  assert.deepEqual(pending(away.open().world()), []);
+
+  const other = atElspeth(join(dir, 'other.db'));
+  const [[open]] = pending(other.story.world());
+  const adaId = entity(other.story.world(), 'npc', 'ada');
+  const offered = (w: ReturnType<typeof other.story.world>, id: string, key: string) =>
+    gameView(w)
+      .entities.find((e) => e.id === id)!
+      .actions.find((a) => a.action_key === key)!;
+  // GameView agrees with the rule: Ada's talk is offered, Elspeth's own stays refused.
+  assert.equal(offered(other.story.world(), adaId, 'ada').available, true);
+  assert.equal(
+    offered(other.story.world(), entity(other.story.world(), 'npc', 'elspeth'), 'elspeth')
+      .available,
+    false,
+  );
+  const ada = other.invocation('ada', [adaId]);
+  const r = other.story.invoke(ada as never);
+  assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
+  const ops = (r as any).decision.delta.ops.map((o: any) => [o.op, o.continuation_id === open]);
+  assert.deepEqual(ops, [
+    ['choice.close', true],
+    ['choice.open', false],
+  ]);
+  const reopened = other.open().world();
+  assert.equal(reopened.state.choices![open]!.status, 'closed');
+  assert.equal(gameView(reopened).choice?.speaker_id, entity(reopened, 'npc', 'ada'));
 });

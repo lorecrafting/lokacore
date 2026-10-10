@@ -39,9 +39,10 @@ import {
   choiceIds,
   continuationId,
   definition,
-  pending,
+  leave,
   speaks,
   spokenBy,
+  talking,
 } from './shared.ts';
 import { assigned, adjusted, type Assigned } from '../fact.ts';
 import { acceptRefused, activation, boundActivation, resolution } from '../quest/lifecycle.ts';
@@ -72,7 +73,7 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
   const p = command.payload;
   if (!speaks(world, p.target_id)) return rejected('not_found');
   const d = spokenBy(world, p.actor_id, p.target_id, steps, p.dialogue);
-  if (!d || pending(world, p.actor_id)) return rejected('invalid_state');
+  if (!d || talking(world, p.actor_id, p.target_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const op = {
@@ -93,7 +94,8 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
     }),
   } as const;
   const opened = { type: 'choice_opened', continuation_id } as const;
-  return accepted(world, 'choice_opened', [op], [event(world, command, mint, 1, opened)]);
+  const ops = [...leave(world, p.actor_id), op];
+  return accepted(world, 'choice_opened', ops, [event(world, command, mint, 1, opened)]);
 }
 
 function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {

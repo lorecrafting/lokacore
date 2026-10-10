@@ -1,4 +1,4 @@
-// size: allow 700, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// size: allow 730, dialogue@1's rule and loader checks, story points included, share the ferry harness
 // dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
 // close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
 // choice reaches, and the loader's dialogue and story point checks.
@@ -416,6 +416,12 @@ test('an answer returns to the hub: a fresh pending row re-offers the same choic
     [2, 'choice_resolved'],
     [3, 'choice_opened'],
   ]);
+  // With no fact_changed (sorted by position) the array order shows: an answer that sets no fact.
+  const bare = ok(open(hub((d) => delete d.choices.carry.sequence)), choose('carry'), 4).decision;
+  assert.deepEqual(events(bare), [
+    [1, 'choice_resolved'],
+    [2, 'choice_opened'],
+  ]);
   assert.equal(w.state.choices![C]!.status, 'resolved');
   const view = gameView(w).choice!;
   assert.deepEqual(
@@ -431,6 +437,21 @@ test('an answer returns to the hub: a fresh pending row re-offers the same choic
   );
   refused(w, talk, 'invalid_state');
   assert.equal(gameView(ok(w, close(NEXT), 5).world).choice, undefined);
+});
+
+// Breaks (loka-x6t.5 ruling): an open hub outliving the speaker leaving the room (Bram's
+// scheduled walk to the green) or the player's; the close another op than Leave's.
+test('a hub conversation ends as Leave would once the speaker or the player leaves', () => {
+  const left = ok(open(hub()), wait, 4).world;
+  assert.equal(left.state.containers[BRAM], GREEN);
+  assert.equal(left.state.choices![C]!.status, 'closed');
+  const { decision, world: away } = ok(open(hub()), { type: 'move', direction: 'north' }, 4);
+  assert.deepEqual(decision.delta.ops.at(-1), {
+    op: 'choice.close',
+    writer_group: 1,
+    continuation_id: C,
+  });
+  assert.equal(gameView(away).choice, undefined);
 });
 
 // Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's

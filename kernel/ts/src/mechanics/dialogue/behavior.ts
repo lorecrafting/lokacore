@@ -1,6 +1,5 @@
 import type {
   Command,
-  ContinuationId,
   DialogueChoice,
   DialogueDefinition,
   DeltaOp,
@@ -15,6 +14,8 @@ import {
   type Mint,
   type World,
 } from '../../runtime/decision.ts';
+import { continuationId } from './shared.ts';
+import { reopens } from './selection.ts';
 
 export function wrongAnswer(
   world: World,
@@ -77,10 +78,9 @@ export function hub<T extends { kind: string }>(
   option: DialogueChoice,
   decided: T,
 ): T {
-  if (decided.kind !== 'accepted' || d.quest || d.riddle || option.patrol) return decided;
-  if (row.choice_ids.length < 2) return decided;
+  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol) return decided;
   const a = decided as unknown as Accepted;
-  const continuation_id = mint() as ContinuationId;
+  const continuation_id = continuationId(mint);
   const { actor_id, source, beat, roles, choice_ids } = row;
   const op = {
     op: 'choice.open',

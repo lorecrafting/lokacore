@@ -39,7 +39,7 @@ defmodule Loka.ContentEscortTest do
 
         if transition == "complete",
           do: Map.put(d, "quest", "lantern"),
-          else: Map.delete(d, "quest")
+          else: d |> Map.delete("quest") |> update_in(["choices"], &Map.delete(&1, "leave"))
       end)
 
       assert {:ok, bytes, []} = Loka.Content.compile(dir)

@@ -29,6 +29,7 @@ import {
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
+import { reopens } from '../mechanics/dialogue/selection.ts';
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.dialogues ?? {}) as Obj).map(([ref, d]) => [
@@ -225,6 +226,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (e.transition === 'complete' ? !same(d.quest, e.quest) : d.quest !== undefined)
       out.push(diag('OUTCOME_MISMATCH', `${path}.escort.quest`));
   }
+  out.push(...once(o, path, d));
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);
@@ -236,4 +238,19 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
         diag('UNRESOLVED_REFERENCE', `${path}.hand_over.${field}`, { target: h[field] }),
       ),
   );
+}
+
+// dialogue@1 hub: a dialogue with no quest, no riddle and several choices reopens after an answer,
+// so an answer receiving an item (the player may give it back), granting a topic or starting an
+// escort could repeat (save proofs count one such receipt): it needs the once-only accept
+// (acceptRefused) or a patrol ending. A hand_over cannot repeat: the NPC keeps the item.
+function once(o: Obj, path: string, d: Obj): Diagnostic[] {
+  if (!reopens(d as never) || o.accept || o.patrol) return [];
+  return [
+    ...(o.receive ? [`${path}.receive`] : []),
+    ...(o.escort?.transition === 'start' ? [`${path}.escort`] : []),
+    ...(o.sequence ?? []).flatMap((s: Obj, i: number) =>
+      s.op === 'topic.grant' ? [`${path}.sequence[${i}].op`] : [],
+    ),
+  ].map((at) => diag('OUTCOME_MISMATCH', at));
 }
