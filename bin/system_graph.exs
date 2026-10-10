@@ -1,10 +1,12 @@
 # The data model graph behind Storybook's System pages (docs/design/system-dashboard/spec.md §5),
 # rendered by bin/contracts.exs into docs/system-graph.gen.json. Inputs: protocol/*.schema.json,
-# the capability registry, the save-table block of docs/system/save.md and @layers below. A file
+# the capability registry, the save-table block of docs/system/save.md, protocol/README.md's
+# fixture column, docs/state-sections.gen.json (a kernel test writes it) and @layers below. A file
 # missing from @layers gets layer null (test/loka/system_graph_test.exs fails it), so a planted
 # schema still reaches the stale-file check. Fails on a registry command, event or policy op no
 # schema declares, and on a missing save-table block. Save holds no schema: its column is the
-# save tables. A definition kind with no CompiledCartridge map keyed `:kind/` has node null.
+# save tables. A definition kind with no CompiledCartridge map keyed `:kind/` takes the key-name
+# rule (by_name/3), else node null.
 defmodule SystemGraph do
   @layer_order ~w(Content Capabilities Change State Save View)
   @layers %{
@@ -26,16 +28,16 @@ defmodule SystemGraph do
 
   defp build(root, registry, defs) do
     docs = Enum.map(Enum.sort(Path.wildcard(Path.join(root, "protocol/*.schema.json"))), &doc/1)
-    kinds = definition_kinds(defs)
+    kinds = by_name(registry, definition_kinds(defs), defs)
     nodes = nodes(docs, defs, definition_owners(registry, kinds), spec_files(root))
 
     %{
       "layers" => @layer_order,
-      "files" => Enum.map(docs, &Map.take(&1, ~w(file title layer))),
+      "files" => files(docs, fixtures(root)),
       "capabilities" => Enum.map(registry, &capability(&1, kinds, defs)),
       "nodes" => nodes,
       "edges" => Enum.flat_map(nodes, &edges(&1["name"], defs)),
-      "saveTables" => save_tables(root)
+      "saveTables" => save_tables(root, state_sections(root))
     }
   end
 
@@ -122,25 +124,37 @@ defmodule SystemGraph do
   defp type(%{"type" => t}), do: t
   defp type(_), do: "const"
 
-  # Archived spec files a description cites as `NN §M`; an NN without exactly one
-  # docs/archive/spec/NN-*.md links nothing.
+  # Archived spec files a description cites as `NN §M`, linked to the heading `M` (`## 5. …`,
+  # `### 5.1 …`) when the file has one; an NN without exactly one docs/archive/spec/NN-*.md links
+  # nothing.
   defp spec_files(root) do
-    root
-    |> Path.join("docs/archive/spec/*.md")
-    |> Path.wildcard()
-    |> Enum.map(&Path.relative_to(&1, root))
-    |> Enum.group_by(
-      &(Regex.run(~r{/(\d\d[a-z]?)-[^/]+$}, &1)
-        |> then(fn m -> m && List.last(m) end))
-    )
+    for path <- Path.wildcard(Path.join(root, "docs/archive/spec/*.md")),
+        [_, nn] <- [Regex.run(~r{/(\d\d[a-z]?)-[^/]+$}, path)],
+        reduce: %{} do
+      acc -> Map.update(acc, nn, [{Path.relative_to(path, root), File.read!(path)}], &[nil | &1])
+    end
   end
 
   defp cited(text, specs) do
-    for [_, nn] <- Regex.scan(~r/\b(\d\d[a-z]?) §/, text),
-        [path] <- [specs[nn] || []],
+    for [cite, nn | sec] <-
+          Regex.scan(~r/\b(\d\d[a-z]?) §(?:([0-9A-Z](?:[0-9A-Za-z.]*[0-9A-Za-z])?))?/, text),
+        [{path, md}] <- [specs[nn] || []],
         uniq: true,
-        do: path
+        do: %{"cite" => cite, "path" => path <> anchor(md, sec)}
   end
+
+  defp anchor(md, [sec]) do
+    case Regex.run(~r/^#+ (#{Regex.escape(sec)}\.?\s.*)$/m, md) do
+      # GitHub's heading slug: lower case, punctuation dropped, each space a hyphen.
+      [_, h] ->
+        "#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(h), ""), " ", "-")
+
+      nil ->
+        ""
+    end
+  end
+
+  defp anchor(_, _), do: ""
 
   # Definition kind => contract, from CompiledCartridge's maps (key pattern `:kind/`).
   defp definition_kinds(defs) do
@@ -150,6 +164,15 @@ defmodule SystemGraph do
         [_, kind] <- [Regex.run(~r/\):([a-z_]+)\//, p)],
         into: %{},
         do: {kind, r}
+  end
+
+  # The key-name rule for a kind no map names: the first of `<Kind>Definition`, `<Kind>` and
+  # `<Kind>Spec` that is a contract (status => StatusDefinition), else null.
+  defp by_name(registry, kinds, defs) do
+    for e <- registry, k <- e["definitions"] || [], !kinds[k], into: kinds do
+      camel = Macro.camelize(k)
+      {k, Enum.find(["#{camel}Definition", camel, "#{camel}Spec"], &defs[&1])}
+    end
   end
 
   defp definition_owners(registry, kinds) do
@@ -199,8 +222,35 @@ defmodule SystemGraph do
 
   defp refs(_, _, _), do: []
 
+  defp files(docs, fixtures) do
+    for d <- docs,
+        do: Map.put(Map.take(d, ~w(file title layer)), "fixtures", fixtures[d["file"]] || [])
+  end
+
+  # protocol/README.md's table: each schema file's fixtures (its last column).
+  defp fixtures(root) do
+    for line <- String.split(File.read!(Path.join(root, "protocol/README.md")), "\n"),
+        [_, files, fixtures] <- [Regex.run(~r/^\| (.*?) \|.*\| ([^|]*) \|$/, line)],
+        [_, stem] <- Regex.scan(~r/`(\w+)\.schema\.json`/, files),
+        into: %{},
+        do:
+          {"protocol/#{stem}.schema.json",
+           for([_, f] <- Regex.scan(~r/`([\w.]+\.json)`/, fixtures), do: f)}
+  end
+
+  # docs/state-sections.gen.json (kernel/ts/test/state_sections.test.ts): MutationTarget kind =>
+  # State section, turned into the sections a state_row holds and the kinds kept in each.
+  defp state_sections(root) do
+    Path.join(root, "docs/state-sections.gen.json")
+    |> File.read!()
+    |> JSON.decode!()
+    |> Enum.group_by(&elem(&1, 1), &elem(&1, 0))
+    |> Enum.map(fn {section, kinds} -> %{"section" => section, "targets" => Enum.sort(kinds)} end)
+    |> Enum.sort_by(& &1["section"])
+  end
+
   # The `| Table | Rows |` block under "## The save file" in docs/system/save.md.
-  defp save_tables(root) do
+  defp save_tables(root, sections) do
     text = File.read!(Path.join(root, "docs/system/save.md"))
 
     [_, block] =
@@ -215,7 +265,9 @@ defmodule SystemGraph do
         Regex.run(~r/^\| `(\w+)` \| (.*) \|$/, row) ||
           raise "docs/system/save.md: save table row is not '| `table` | rows |': #{row}"
 
-      %{"table" => table, "rows" => rows}
+      if table == "state_row",
+        do: %{"table" => table, "rows" => rows, "sections" => sections},
+        else: %{"table" => table, "rows" => rows}
     end
   end
 end

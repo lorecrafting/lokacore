@@ -12,11 +12,13 @@ function Choose({
   value,
   set,
   options,
+  none = 'all',
 }: {
   label: string;
   value: string;
   set: (v: string) => void;
   options: string[];
+  none?: string; // what the empty value means
 }) {
   const c = usePalette();
   return (
@@ -27,7 +29,7 @@ function Choose({
         onChange={(e) => set(e.target.value)}
         style={{ font: 'inherit', color: c.fg, background: c.card }}
       >
-        <option value="">all</option>
+        <option value="">{none}</option>
         {options.map((o) => (
           <option key={o}>{o}</option>
         ))}
@@ -107,6 +109,13 @@ export const Toolbar = ({ filter, change, selected }: Props) => (
       value={filter.res}
       set={(res) => change({ res })}
       options={residencies}
+    />
+    <Choose
+      label="Hops"
+      value={filter.hops}
+      set={(hops) => change({ hops })}
+      options={['2', '3']}
+      none="1"
     />
     <CopyLink selected={selected} />
   </div>
