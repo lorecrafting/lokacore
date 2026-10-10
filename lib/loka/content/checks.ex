@@ -446,6 +446,5 @@ defmodule Loka.Content.Checks do
     do: {k, expand(v, m)}
 
   defp exit_field({"climb", v}, m), do: {"climb", Map.update!(v, "item", &ref(&1, "item", m))}
-
   defp exit_field({k, v}, m), do: {k, ref(v, if(k == "to", do: "room", else: k), m)}
 end

@@ -21,14 +21,7 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
         typedValue(until.fact, until.equals, `${at}.exits.${dir}.hidden_until.equals`);
         if (exit.barrier) out.push(diag('BARRIER_MISMATCH', `${at}.exits.${dir}.hidden_until`));
       }
-      if (exit.climb) {
-        // Toolbox row 30: a fall costs HP, so the cartridge needs the pool.
-        hasClimb = true;
-        named(exit.climb.item, 'item', `${at}.exits.${dir}.climb.item`);
-        text(exit.climb, ['fell'], `${at}.exits.${dir}.climb`);
-        if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
-          out.push(diag('RESOURCE_SPEC_INVALID', `${at}.exits.${dir}.climb`));
-      }
+      if (exit.climb) hasClimb = climb(c, exit.climb, `${at}.exits.${dir}.climb`, check, out);
       if (exit.knock) {
         hasKnock = true;
         named(exit.knock.npc, 'npc', `${at}.exits.${dir}.knock.npc`);
@@ -48,6 +41,15 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   mapPositions(c, named, out);
   return out;
+}
+
+// Toolbox row 30: a climb names its item and fell text; a fall costs HP, so the pool must exist.
+function climb(c: Obj, face: Obj, at: string, { named, text }: Checks, out: Diagnostic[]) {
+  named(face.item, 'item', `${at}.item`);
+  text(face, ['fell'], at);
+  if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
+    out.push(diag('RESOURCE_SPEC_INVALID', at));
+  return true;
 }
 
 function mapPositions(c: Obj, named: Checks['named'], out: Diagnostic[]) {

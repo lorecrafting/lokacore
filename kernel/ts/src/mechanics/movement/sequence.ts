@@ -37,8 +37,6 @@ export function moveSequence(
   const plan = movementPlan(world, actor_id, direction, steps, outcome === 'fled');
   if (typeof plan === 'string') return rejected(plan);
   const { body, here, there, paid } = plan;
-  // A climb without its item falls (toolbox row 30): after the fare, once every admission passed.
-  const fell = fall(world, world.rooms[here], direction, body, 'levels' in paid ? paid.levels : {});
   const transfer = {
     op: 'entity.transfer',
     writer_group: 0,
@@ -49,7 +47,6 @@ export function moveSequence(
   const ops = [
     ...paid.ops,
     transfer,
-    ...(fell?.ops ?? []),
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeMovementEncounter(world, body, mint),
@@ -61,20 +58,19 @@ export function moveSequence(
     room_id: there,
   });
   const progress = routeProgress(world, command, plan, ops, mint, steps);
-  const narration = [...(fell ? [fell.narration] : []), ...(progress.narration ?? [])];
   return accepted(
     world,
     outcome,
     [...ops, ...progress.ops],
     [entered, ...progress.events],
-    narration.length ? narration : undefined,
+    progress.narration,
   );
 }
 
 function routeProgress(
   world: World,
   command: MoveCommand,
-  { here, there }: Exclude<ReturnType<typeof movementPlan>, string>,
+  { body, here, there, paid }: Exclude<ReturnType<typeof movementPlan>, string>,
   ops: Parameters<typeof patrol.travel>[4],
   mint: Mint,
   steps: { n: number },
@@ -89,9 +85,12 @@ function routeProgress(
     mint,
     steps,
   );
-  const narration = [...joined.narration, ...ventured.narration];
+  // A climb without its item falls (toolbox row 30): after the fare, once every admission passed.
+  const levels = 'levels' in paid ? paid.levels : {};
+  const fell = fall(world, world.rooms[here], command.payload.direction, body, levels);
+  const narration = [...(fell ? [fell.narration] : []), ...joined.narration, ...ventured.narration];
   return {
-    ops: [...joined.ops, ...ventured.ops],
+    ops: [...(fell?.ops ?? []), ...joined.ops, ...ventured.ops],
     events: [...joined.events, ...ventured.events],
     narration: narration.length ? narration : undefined,
   };
