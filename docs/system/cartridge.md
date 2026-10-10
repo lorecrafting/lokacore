@@ -1523,7 +1523,7 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 ## Quest deadlines
 
-Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields, needing `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. The legacy debt floor (1.14) applies to legacy deadlines only.
+Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields, needing `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. A reaction on `quest_failed` also needs 1.46. The legacy debt floor (1.14) applies to legacy deadlines only.
 
 ## Quest stage hints
 

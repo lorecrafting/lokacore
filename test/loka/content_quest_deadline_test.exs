@@ -5,7 +5,7 @@ defmodule Loka.ContentQuestDeadlineTest do
 
   # Breaks (toolbox row W24, twin of kernel/ts/test/quest_deadline.test.ts): the compiler accepts a
   # mixed legacy and generic deadline, both or neither of after and at, a legacy deadline missing a
-  # field, or a generic deadline below kernel_api 1.46.
+  # field, or a generic deadline or a quest_failed reaction below kernel_api 1.46.
   test "a deadline is legacy or generic, and a generic one needs 1.46" do
     dir = Loka.ContentSource.copy("cartridges/quest_sampler")
     at = "quests/find_key.deadline"
@@ -25,13 +25,25 @@ defmodule Loka.ContentQuestDeadlineTest do
       ]
     end
 
+    assign = %{"op" => "fact.assign", "fact" => "floor_searched", "value" => true}
+    reacts = &put_in(&1, ["requires", "capabilities", "reaction"], 1)
+
+    late = [
+      {"quests/find_key.json", &(pop_in(&1, ["journal", "hints"]) |> elem(1))},
+      {"recipes/search_floor.json", &Map.delete(&1, "tip")},
+      {"cartridge.json",
+       &(&1 |> reacts.() |> put_in(["requires", "kernel_api", "at_least"], "1.45"))},
+      {"reactions/late.json", %{"on" => %{"event" => "quest_failed"}, "apply" => [assign]}}
+    ]
+
     cases =
       [
         {put.(%{"after" => 60, "outcome" => "late", "trust_amount" => -1}), "SCHEMA_VIOLATION",
          at},
         {put.(%{"after" => 60, "at" => 5, "outcome" => "late"}), "SCHEMA_VIOLATION", at},
         {put.(%{"outcome" => "late"}), "SCHEMA_VIOLATION", at},
-        {lower.("1.45"), "KERNEL_API_RANGE_INVALID", @floor}
+        {lower.("1.45"), "KERNEL_API_RANGE_INVALID", @floor},
+        {late, "KERNEL_API_RANGE_INVALID", @floor}
       ] ++
         for field <- ~w(at fact trust_fact trust_amount),
             do: {put.(Map.delete(legacy, field)), "SCHEMA_VIOLATION", at}

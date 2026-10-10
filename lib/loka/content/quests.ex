@@ -41,7 +41,18 @@ defmodule Loka.Content.Quests do
     Enum.flat_map(
       all(defs),
       &quest(&1, %{m: m, defs: defs, text: text, events: events, taken: taken})
-    )
+    ) ++ failed_floor(m, defs)
+  end
+
+  # Toolbox row W24: a reaction on quest_failed needs kernel_api 1.46 (as G3's status_ triggers).
+  # Twin of cartridge_quests.ts.
+  defp failed_floor(m, defs) do
+    failed =
+      for {_, {_, [], r}} <- defs["reaction"] || %{}, r["on"]["event"] == "quest_failed", do: r
+
+    if failed != [] and api(m) < [1, 46],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
 
   defp quest({rel, q}, ctx) do

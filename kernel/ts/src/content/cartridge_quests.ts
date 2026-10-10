@@ -39,6 +39,12 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
       named(q.objective.item_acquired, 'item', `${at}.objective.item_acquired`);
     if (q.deadline) out.push(...deadline(c, q.deadline, `${at}.deadline`, named));
   }
+  // Toolbox row W24: a reaction on quest_failed needs kernel_api 1.46 (as G3's status_ triggers).
+  const failed = Object.values((c.reactions ?? {}) as Obj).some(
+    (r) => r.on.event === 'quest_failed',
+  );
+  if (failed && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
 

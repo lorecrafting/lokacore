@@ -163,6 +163,16 @@ test('an absolute deadline already past expires on the next advance, at its due 
   );
 });
 
+// Break: a job whose instance row is gone faults or fails something instead of only completing.
+test('a deadline job whose instance is gone only completes', () => {
+  const w = play(fresh(), { type: 'accept_quest', quest });
+  const [id, job] = Object.entries(w.state.jobs ?? {}).find(([, j]) => j.quest_instance_id)!;
+  const quests = { ...w.state.quests };
+  delete quests[job.quest_instance_id!];
+  const r = wait({ ...w, state: { ...w.state, quests } } as World, 11);
+  assert.deepEqual([r.w.state.jobs?.[id]?.status, failedEvents(r.events)], ['completed', []]);
+});
+
 // Break: a job whose instance belongs to another actor fails that instance instead of faulting.
 test('a deadline job bound to another actor faults', () => {
   const w = play(fresh(), { type: 'accept_quest', quest });
@@ -201,13 +211,21 @@ test('a deadline due inside the proposal advance is scheduled one past its targe
 });
 
 // Breaks (loader twin of test/loka/content_quest_deadline_test.exs): a mixed legacy and generic
-// deadline, both or neither of after and at, a legacy one missing a field, or a generic one below
-// kernel_api 1.46, loads.
+// deadline, both or neither of after and at, a legacy one missing a field, or a generic deadline or
+// a quest_failed reaction below kernel_api 1.46, loads.
 test('the loader refuses a deadline that is neither legacy nor generic, and a generic one below 1.46', () => {
   const at = `.cartridge.quests["${QUEST}"].deadline`;
   const floor = '.cartridge.manifest.requires.kernel_api.at_least';
   const ref = { ...quest, kind: 'fact', key: 'floor_searched' };
   const d = (c: Obj) => c.quests[QUEST].deadline;
+  // Below 1.46 with the sampler's other 1.46 features (hints, tip) and one W24 feature removed.
+  const below = (c: Obj, without: 'late' | 'deadline') => {
+    delete c.quests[QUEST].journal.hints;
+    delete c.recipes['quest_sampler@0.0.1:recipe/search_floor'].tip;
+    if (without === 'late') delete c.reactions['quest_sampler@0.0.1:reaction/late'];
+    else delete c.quests[QUEST].deadline;
+    c.manifest.requires.kernel_api.at_least = '1.45';
+  };
   const rows: [(c: Obj) => void, string, string][] = [
     [(c) => (d(c).trust_amount = -1), 'SCHEMA_VIOLATION', at],
     [(c) => (d(c).at = 5), 'SCHEMA_VIOLATION', at],
@@ -224,15 +242,8 @@ test('the loader refuses a deadline that is neither legacy nor generic, and a ge
         at,
       ],
     ),
-    [
-      (c) => {
-        delete c.quests[QUEST].journal.hints;
-        delete c.recipes['quest_sampler@0.0.1:recipe/search_floor'].tip;
-        c.manifest.requires.kernel_api.at_least = '1.45';
-      },
-      'KERNEL_API_RANGE_INVALID',
-      floor,
-    ],
+    [(c) => below(c, 'late'), 'KERNEL_API_RANGE_INVALID', floor],
+    [(c) => below(c, 'deadline'), 'KERNEL_API_RANGE_INVALID', floor],
   ];
   for (const [change, code, path] of rows) {
     const r = load(change);
