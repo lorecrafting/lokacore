@@ -40,13 +40,13 @@ export function commerce(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Exactly one condition: a skill of this cartridge, or (row 15) friendly with a friendly disposition.
+// A skill of this cartridge, or (row 15) friendly with a friendly disposition (the schema admits exactly one).
 function discountValid(c: Obj, s: Obj, npc: Obj) {
   const d = s.buy_discount;
   return (
     !d ||
     ((d.friendly
-      ? !d.skill && npc.disposition?.friendly
+      ? npc.disposition?.friendly
       : c.manifest.requires.capabilities.skills &&
         d.skill?.kind === 'skill' &&
         c.skills?.[refString(d.skill)]) &&

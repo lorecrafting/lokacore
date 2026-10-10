@@ -902,6 +902,10 @@
             "denominator",
             "minimum"
           ],
+          "exactlyOneRequired": [
+            "skill",
+            "friendly"
+          ],
           "additionalProperties": false
         }
       },

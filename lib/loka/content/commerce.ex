@@ -39,9 +39,9 @@ defmodule Loka.Content.Commerce do
 
   defp discount(_, _, _, _, _), do: []
 
-  # Exactly one: a skill of this cartridge, or (toolbox row 15) friendly with a friendly disposition.
-  defp condition?(_, _, npc, %{"friendly" => true} = d),
-    do: not is_map_key(d, "skill") and is_map_key(npc["disposition"] || %{}, "friendly")
+  # A skill of this cartridge, or (toolbox row 15) friendly with a friendly disposition (the schema admits exactly one).
+  defp condition?(_, _, npc, %{"friendly" => true}),
+    do: is_map_key(npc["disposition"] || %{}, "friendly")
 
   defp condition?(m, defs, _, d),
     do:

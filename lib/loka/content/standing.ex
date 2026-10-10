@@ -4,7 +4,8 @@ defmodule Loka.Content.Standing do
   an NPC's disposition is on an authored NPC, with an engage line exactly when it is hostile and
   has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47.
   Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
-  checked with every entity's (Loka.Content.Entities).
+  checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
+  that accepts, hands over or receives (refused while hostile): HOSTILE_QUEST_SPEAKER, a warning.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
   alias Loka.Content.Refs
@@ -16,7 +17,17 @@ defmodule Loka.Content.Standing do
     npcs = for {_, {rel, [], npc}} <- defs["npc"] || %{}, do: {rel, npc}
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
-    shapes(npcs) ++ ints(adjusts, m, defs) ++ floor(m, npcs, adjusts)
+    shapes(npcs) ++ ints(adjusts, m, defs) ++ floor(m, npcs, adjusts) ++ speakers(m, defs)
+  end
+
+  # Not an error: a giver who turns on the player may be intended (PM ruling, loka-kgd.54).
+  defp speakers(m, defs) do
+    for {_, {rel, [], d}} <- defs["dialogue"] || %{},
+        {_, _, %{"disposition" => %{"hostile" => _}}} <- [Refs.resolve(d["npc"], "npc", m, defs)],
+        Enum.any?(d["choices"], fn {_, c} ->
+          Enum.any?(~w(accept hand_over receive), &is_map_key(c, &1))
+        end),
+        do: Map.put(diag("HOSTILE_QUEST_SPEAKER", at(rel, ["npc"]), %{}), "severity", "warning")
   end
 
   defp adjusts(r) do
