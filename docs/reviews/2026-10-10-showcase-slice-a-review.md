@@ -35,3 +35,20 @@
 Developer `/code-review` result: not reported in the Beads handoff (commit `e0a616f9` is titled self-review fixes); report it in the fix round.
 
 Not checked: Book web rendering of the showcase; the four sky variants of `fell_top` beyond frost, rain and drought; the fold's garment mixes beyond the frost chill and the Drover.
+
+## Re-check: fix round at 47894c6d
+
+- Head `47894c6d49b05ef8bca119fbad944e5c1e375974`; reviewed fix commits `3204b3a8`, `711a8c36` and the PM plan edit `47894c6d` only. Hosted ci and book-e2e green on the head (per PM).
+- Verdict: **APPROVE WITH NOTES**: findings 1 to 4 closed; one new nit in the plan edit.
+
+| Finding | Disposition | Proof |
+|---|---|---|
+| 1 signposts | fixed | `sign_hub`, `sign_body`, `sign_world` are room details with `readable` (`rooms/crossroads_inn.json`, `fell_gate.json`, `shore_steps.json`), linked in every room prose variant. `loka play` reads all three in place with no Take. Hub, body 1 and world 1 assert the exact line; red control (fell_gate sign text key swapped to `readable.sign_hub`) fails body 1. The `detail()` helper in `showcase_fixture.ts` is scoped to the player's room. Dropping body 1's topic assertion is accepted: `readable/rule.ts:42` grants topics from items only. |
+| 2 spare rope | fixed | item and its three text keys gone. |
+| 3 nits | accepted as deviations | Replay is pinned by `kernel/ts/test/variety.test.ts:75` ("the same command ids replay the same lines"). There is no kernel `search` command: a typed `search` resolves to `perform` through the recipe alias (`kernel/ts/play/main.ts:240-246`), so the perform refusal is the same check. |
+| 4 "An oilskin" | fixed | both `item.oilskin.room` and `item.fold_oilskin.room`. |
+| hash re-pin | holds | recompiling the head source reproduces the fixture with no diff; `content_showcase_test.exs` and both walkthroughs pass. |
+
+Playability correction: the developer reports the web author preview (`bin/loka dev` with `npm run author`) renders the showcase; my first-round note covered only the Chapter 1 Book preview. Not re-run here.
+
+New nit: `docs/showcase/hub-and-first-districts.md:243`: the sandbox paragraph still lists "the spare rope" after the plan edit removed it from the `tide_pools` row. Failure: a slice B or recorder author follows the paragraph and looks for a rope that ruling 3 dropped. Delete those three words.
