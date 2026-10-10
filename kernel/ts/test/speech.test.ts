@@ -250,8 +250,8 @@ test('speech is neither offered nor accepted while a conversation is open', () =
 // the record schema then rejects and the CLI crashes on.
 test('loka play makes a say or shout Command only from a word of letters', () => {
   assert.deepEqual(parse('SAY Ward'), { type: 'say', word: 'ward' });
-  assert.equal(parse('say x9'), 'Just one word.');
-  assert.equal(parse(`shout ${'a'.repeat(33)}`), 'Just one word.');
+  assert.equal(parse('say x9'), 'One word of 1 to 32 letters.');
+  assert.equal(parse(`shout ${'a'.repeat(33)}`), 'One word of 1 to 32 letters.');
 });
 
 // Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48, a

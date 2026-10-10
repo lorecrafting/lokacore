@@ -8,6 +8,7 @@ import { exitOf } from '../src/mechanics/lookups.ts';
 import { describe, describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { normalize } from '../src/commands/target.ts';
+import { folded } from '../src/mechanics/speech/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { status as calendarStatus } from '../src/mechanics/calendar.ts';
 
@@ -21,7 +22,7 @@ export type Parsed =
   | { type: 'scan' }
   | { type: 'stand' | 'sit' | 'rest' | 'sleep' } // position@1
   | { type: 'move'; direction: string }
-  | { type: 'say' | 'shout'; word: string } // speech@1 (row G9): the kernel validates the word
+  | { type: 'say' | 'shout'; word: string } // speech@1 (row G9): a Word (folded), else a message
   | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'; to?: string }
   | { choose: string }
   | 'bye'
@@ -72,8 +73,7 @@ const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'
  * `choose` <choice id> and `bye` (the pending choice: choose an option or close it), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
  * omitted], `brief` (brief mode on or off), `quit`/`q`, `say`/`shout` <1 to 32 letters>. Only the
  * six compass words become a move, only a Word a say: any other is a message, never a Command, so
- * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
- * that."
+ * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand that."
  */
 export function parse(text: string): Parsed {
   const words = text.trim().toLowerCase().split(/\s+/);
@@ -95,7 +95,7 @@ export function parse(text: string): Parsed {
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
   if ((words[0] === 'say' || words[0] === 'shout') && words.length === 2)
-    return /^[a-z]{1,32}$/.test(words[1]) ? { type: words[0], word: words[1] } : 'Just one word.';
+    return folded(words[1]) ? { type: words[0], word: words[1] } : 'One word of 1 to 32 letters.';
   if (words[0] === 'accept') return { accept: rest.toLowerCase() };
   if (words[0] === 'choose' && words.length === 2) return { choose: words[1] };
   if (LOOK.includes(words[0])) {
