@@ -1,8 +1,9 @@
 // The Data model detail panel: one contract (or save table) with its fields, owner, sources and
-// 1-hop references; every named contract is a button that selects it.
+// 1-hop references and impact; every named contract is a button that selects it.
 import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
 import { contracts, graph, repo, type Contract } from './graph.ts';
+import { Sections } from './Save.tsx';
 import { cell, Link, Prose } from './ui.tsx';
 
 type Select = (name: string) => void;
@@ -79,13 +80,45 @@ const Source = ({ n }: { n: Contract }) => (
     {n.kind} · {n.layer} · owner {n.owner ?? 'foundation'} · source{' '}
     <Link href={repo(n.file, n.line)}>{`${n.file}:${n.line}`}</Link>
     {n.spec.map((s) => (
-      <span key={s}>
+      <span key={s.cite}>
         {' · spec '}
-        <Link href={repo(s)}>{s.split('/').pop()}</Link>
+        <Link href={repo(s.path)}>{s.cite}</Link>
       </span>
     ))}
   </p>
 );
+
+// What a change to `name` can break: every contract that reaches it through references (the
+// reverse closure), by layer, and the protocol/README.md fixtures of their files.
+function Impact({ name, onSelect }: { name: string; onSelect: Select }) {
+  const reach = new Set([name]);
+  for (const at of reach) for (const e of graph.edges) if (e.to === at) reach.add(e.from);
+  reach.delete(name);
+  const files = new Set([name, ...reach].map((r) => contracts.get(r)!.file));
+  const fixtures = [...new Set(graph.files.flatMap((f) => (files.has(f.file) ? f.fixtures : [])))];
+  return (
+    <details>
+      <summary>Impact ({reach.size})</summary>
+      {graph.layers.map((l) => {
+        const names = [...reach].filter((r) => contracts.get(r)!.layer === l).sort();
+        return names.length ? (
+          <Related key={l} label={l} names={names} onSelect={onSelect} />
+        ) : null;
+      })}
+      <p>
+        Fixtures:{' '}
+        {fixtures.length
+          ? fixtures.map((f, i) => (
+              <span key={f}>
+                {i ? ', ' : ''}
+                <Link href={repo(`protocol/fixtures/${f}`)}>{f}</Link>
+              </span>
+            ))
+          : 'none'}
+      </p>
+    </details>
+  );
+}
 
 const Examples = ({ examples }: { examples: unknown[] }) => (
   <details>
@@ -106,6 +139,7 @@ export function Panel({ name, onSelect }: { name: string; onSelect: Select }) {
         <p>
           Save table (docs/system/save.md, loka-save-v1): <Prose text={table.rows} />
         </p>
+        {table.sections && <Sections sections={table.sections} />}
       </aside>
     );
   if (!n) return null;
@@ -130,6 +164,7 @@ export function Panel({ name, onSelect }: { name: string; onSelect: Select }) {
         names={graph.edges.filter((e) => e.to === name).map((e) => e.from)}
         onSelect={onSelect}
       />
+      <Impact name={name} onSelect={onSelect} />
       {n.examples && <Examples examples={n.examples} />}
     </aside>
   );

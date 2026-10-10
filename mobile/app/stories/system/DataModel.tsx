@@ -1,5 +1,5 @@
 // System/Data model: every contract as a chip, columns by layer, rows by owning capability (else
-// file); search, filters, a detail panel and the selection's 1-hop edges (spec §2).
+// file); search, filters, a detail panel and the selection's edges to 1-3 hops (spec §2).
 import { useEffect, useState } from 'react';
 import { space } from '../../book/tokens.ts';
 import { contracts, graph, page } from './graph.ts';
@@ -16,7 +16,14 @@ type Props = {
 
 export function DataModel({ node = '', layer = '', onSelect }: Props) {
   const [selected, setSelected] = useState(node);
-  const [filter, setFilter] = useState<Filter>({ query: '', layer, owner: '', kind: '', res: '' });
+  const [filter, setFilter] = useState<Filter>({
+    query: '',
+    layer,
+    owner: '',
+    kind: '',
+    res: '',
+    hops: '',
+  });
   // A globals change without a remount (Back, an edited URL) still reaches the page.
   useEffect(() => setSelected(node), [node]);
   useEffect(() => setFilter((f) => ({ ...f, layer })), [layer]);

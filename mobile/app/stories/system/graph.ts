@@ -14,7 +14,7 @@ export type Contract = {
   fields: Field[];
   enum: unknown[] | null;
   examples: unknown[] | null;
-  spec: string[];
+  spec: { cite: string; path: string }[]; // path#heading of the archived spec
 };
 export type Capability = {
   id: string;
@@ -27,11 +27,16 @@ export type Capability = {
 };
 export type Graph = {
   layers: string[];
-  files: { file: string; title: string; layer: string }[];
+  files: { file: string; title: string; layer: string; fixtures: string[] }[];
   capabilities: Capability[];
   nodes: Contract[];
   edges: { from: string; to: string; kind: string; field: string | null }[];
-  saveTables: { table: string; rows: string }[];
+  // state_row carries the State sections and the MutationTarget kinds kept in each.
+  saveTables: {
+    table: string;
+    rows: string;
+    sections?: { section: string; targets: string[] }[];
+  }[];
 };
 
 export const graph: Graph = JSON.parse(raw);

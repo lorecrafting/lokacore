@@ -1,5 +1,5 @@
 // The Data model's chips: one column per layer, a row per owner (else file), and SVG lines from
-// the selected chip to its 1-hop neighbours (decorative: the panel lists the same references).
+// the selected chip out to its n-hop neighbours (decorative: the panel lists the same references).
 import {
   useLayoutEffect,
   useRef,
@@ -14,7 +14,14 @@ import { capabilities, contracts, graph, type Contract } from './graph.ts';
 import { hue } from './palette.ts';
 import { heading, small } from './ui.tsx';
 
-export type Filter = { query: string; layer: string; owner: string; kind: string; res: string };
+export type Filter = {
+  query: string;
+  layer: string;
+  owner: string;
+  kind: string;
+  res: string;
+  hops: string; // '' is 1
+};
 type Line = { x1: number; y1: number; x2: number; y2: number };
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -39,11 +46,32 @@ const keep = (f: Filter) => (n: Contract) =>
   (!f.res || (n.owner ? capabilities.get(n.owner)?.residency : 'none') === f.res) &&
   matches(n.name, f.query);
 
+// The selection's neighbourhood out to `hops` edges, either direction: each reached contract with
+// the one it was reached from, so every line is a real edge.
+function reach(selected: string, hops: number) {
+  const from = new Map<string, string>();
+  let ring = new Set(selected ? [selected] : []);
+  for (let i = 0; i < hops; i++) {
+    const next = new Set<string>();
+    for (const { from: a, to: b } of graph.edges)
+      for (const [x, y] of [
+        [a, b],
+        [b, a],
+      ] as const)
+        if (ring.has(x) && y !== selected && !from.has(y)) {
+          from.set(y, x);
+          next.add(y);
+        }
+    ring = next;
+  }
+  return from;
+}
+
 // Lines between chip centres, measured after layout.
 function useEdges(
   grid: RefObject<HTMLDivElement | null>,
   selected: string,
-  neighbours: Set<string>,
+  near: Map<string, string>,
   filter: Filter,
 ) {
   const [lines, setLines] = useState<Line[]>([]);
@@ -51,16 +79,17 @@ function useEdges(
     const box = grid.current;
     if (!box) return;
     const measure = () => {
-      const from = box.querySelector(`[data-chip="${selected}"]`);
-      if (!from) return setLines([]);
       const o = box.getBoundingClientRect();
-      const mid = (el: Element) => {
-        const r = el.getBoundingClientRect();
-        return [r.left + r.width / 2 - o.left, r.top + r.height / 2 - o.top];
+      const mid = (name: string) => {
+        const r = box.querySelector(`[data-chip="${name}"]`)?.getBoundingClientRect();
+        return r && [r.left + r.width / 2 - o.left, r.top + r.height / 2 - o.top];
       };
-      const [x1, y1] = mid(from);
-      const tos = [...neighbours].map((n) => box.querySelector(`[data-chip="${n}"]`));
-      setLines(tos.flatMap((to) => (to ? [{ x1, y1, x2: mid(to)[0], y2: mid(to)[1] }] : [])));
+      setLines(
+        [...near].flatMap(([to, at]) => {
+          const [a, b] = [mid(at), mid(to)];
+          return a && b ? [{ x1: a[0], y1: a[1], x2: b[0], y2: b[1] }] : [];
+        }),
+      );
     };
     measure();
     const reflow = new ResizeObserver(measure); // a resize or late font moves the chips
@@ -200,10 +229,9 @@ const box: CSSProperties = {
 
 export function Grid({ filter, selected, select }: GridProps) {
   const grid = useRef<HTMLDivElement>(null);
-  const near = new Set(
-    graph.edges.flatMap((e) => (e.from === selected ? [e.to] : e.to === selected ? [e.from] : [])),
-  );
-  const lines = useEdges(grid, selected, near, filter);
+  const reached = reach(selected, Number(filter.hops || 1));
+  const near = new Set(reached.keys());
+  const lines = useEdges(grid, selected, reached, filter);
   const shown = graph.nodes.filter(keep(filter));
   const unfiltered = !filter.owner && !filter.kind && !filter.res;
   const tables = unfiltered

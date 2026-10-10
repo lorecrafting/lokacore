@@ -3,6 +3,8 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useGlobals } from 'storybook/preview-api';
 import { expect, userEvent, within } from 'storybook/test';
+import { PaletteContext } from '../book/palette.ts';
+import { color } from '../book/tokens.ts';
 import { DataModel } from './system/DataModel.tsx';
 
 const meta = {
@@ -35,9 +37,12 @@ export const Selected: Story = {
     await expect(source.getAttribute('href')).toMatch(
       new RegExp(`#L${source.textContent!.split(':')[1]}$`),
     );
-    await expect(
-      panel.getByRole('link', { name: '04-command-event-effect-protocol.md' }),
-    ).toBeVisible();
+    await expect(panel.getByRole('link', { name: '04 §5.1' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(
+        /\/04-command-event-effect-protocol\.md#51-proposal-state-semantics-and-statedelta-composition$/,
+      ),
+    );
     // One edge per neighbour: DeltaOp, which it references, and the contracts that use it.
     const neighbours = panel.getAllByRole('button').map((b) => b.textContent);
     await expect(neighbours).toContain('DeltaOp');
@@ -105,4 +110,69 @@ export const SearchAndKeys: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(canvas.queryByRole('complementary', { name: 'Detail' })).toBeNull();
   },
+};
+
+// n-hop focus: BleedRow is two edges from StatusRow (through DeltaOp), so it is dimmed at one hop
+// and lit at two, and the lines reach past the first ring.
+export const TwoHops: Story = {
+  globals: { node: 'StatusRow' },
+  play: async ({ canvas, canvasElement }) => {
+    const bleed = canvas.getByRole('button', { name: 'BleedRow' });
+    await expect(bleed).toHaveStyle({ color: color.light.dim });
+    const one = canvasElement.querySelectorAll('svg line').length;
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Hops' }), '2');
+    await expect(bleed).toHaveStyle({ color: color.light.fg });
+    const lines = [...canvasElement.querySelectorAll('svg line')];
+    await expect(lines.length).toBeGreaterThan(one);
+    // Real edges only: no line joins the selection to a chip two hops out (not an edge).
+    const origin = canvasElement.querySelector('svg')!.getBoundingClientRect();
+    const mid = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return [r.left + r.width / 2 - origin.left, r.top + r.height / 2 - origin.top];
+    };
+    const [s, b] = [mid(canvas.getByRole('button', { name: 'StatusRow' })), mid(bleed)];
+    const joins = lines.filter((l) => {
+      const p = ['x1', 'y1', 'x2', 'y2'].map((k) => Number(l.getAttribute(k)));
+      const near = (x: number, y: number, c: number[]) => Math.hypot(x - c[0], y - c[1]) < 2;
+      return near(p[0], p[1], s) && near(p[2], p[3], b);
+    });
+    await expect(joins).toHaveLength(0);
+  },
+};
+
+// The impact view: FactType's reverse closure (read off the schemas by hand) by layer, and the
+// README fixtures of the files involved (cartridge.schema.json's; fact.schema.json lists none).
+export const Impact: Story = {
+  globals: { node: 'FactType' },
+  play: async ({ canvas }) => {
+    const panel = within(canvas.getByRole('complementary', { name: 'Detail' }));
+    await userEvent.click(panel.getByText('Impact (3)'));
+    const group = (layer: string) =>
+      within(panel.getByText(`${layer}:`).closest('p')!)
+        .getAllByRole('button')
+        .map((b) => b.textContent);
+    await expect(group('Content')).toEqual(['CartridgeArtifact', 'CompiledCartridge']);
+    await expect(group('State')).toEqual(['FactSpec']);
+    const fixtures = panel.getByText('Fixtures:').closest('p')!;
+    await expect(
+      within(fixtures)
+        .getAllByRole('link')
+        .map((a) => a.textContent),
+    ).toEqual([
+      'cartridge_hash.json',
+      'cartridge_rooms_hash.json',
+      'cartridge_ferry_hash.json',
+      'cartridge_lantern_hash.json',
+      'cartridge_loader.json',
+    ]);
+  },
+};
+
+// Axe on the night palette with a selection (dimmed chips, lines, the panel).
+export const Dark: Story = {
+  render: () => (
+    <PaletteContext value={color.dark}>
+      <DataModel node="StatusRow" />
+    </PaletteContext>
+  ),
 };
