@@ -1,4 +1,4 @@
-// size: allow 515, the existing headless action generator also consumes exact service offers
+// size: allow 540, the existing headless action generator also consumes exact service offers
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -8,9 +8,10 @@
 // accepted, adopt exactly what its delta composes to; its canonical decision and state hash feed
 // the sequence digest. A failure is shrunk by greedy step deletion and reported with its seed,
 // the generator version, the command that reproduces it and a `loka play` playback.
-//   node kernel/ts/test/sim.ts <seed>...   prints each seed's digest and failure, if any
+//   node kernel/ts/test/sim.ts [--cartridge <artifact>] <seed>...   prints each seed's
+//   cartridge, digest and failure, if any
 import { createHash } from 'node:crypto';
-import { globSync, mkdirSync, writeFileSync } from 'node:fs';
+import { globSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
 import { compose, key, same } from '../src/foundation/compose.ts';
 import type { Command, DecisionResult, Key } from '../src/contracts.gen.ts';
@@ -69,7 +70,8 @@ export const CHECKED = {
 export type Kernel = { step: typeof step; gameView: typeof gameView };
 export const KERNEL: Kernel = { step, gameView };
 
-type Loaded = { cartridge: Cartridge; hash: string; artifact: string };
+// `path`: the `--cartridge` artifact the reproduce line names; fixture cartridges have none.
+type Loaded = { cartridge: Cartridge; hash: string; artifact: string; path?: string };
 export const CARTRIDGES: Loaded[] = globSync('protocol/fixtures/cartridge_*hash.json', {
   cwd: ROOT,
 })
@@ -78,12 +80,16 @@ export const CARTRIDGES: Loaded[] = globSync('protocol/fixtures/cartridge_*hash.
     read(path.replace(/cartridge_(items|locks|sampler)_hash/, 'containers_cartridge_$1_hash')),
   )
   .filter((k) => k.value.format === 'loka-cartridge-v2')
-  .map((k) => {
-    const artifact = `{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`;
-    const r = loadCartridge(utf8(artifact), INSTALLED);
-    if (!r.ok) throw new Error(`${k.value.manifest.id}: ${encode(r.diagnostic as never)}`);
-    return { cartridge: r.cartridge as Cartridge, hash: r.hash, artifact };
-  });
+  .map((k) =>
+    loaded(`{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`, k.value.manifest.id),
+  );
+
+/** A cartridge from its artifact bytes (a fixture's, or `mix loka.compile` output). */
+export function loaded(artifact: string, name = 'cartridge'): Loaded {
+  const r = loadCartridge(utf8(artifact), INSTALLED);
+  if (!r.ok) throw new Error(`${name} refused: ${encode(r.diagnostic as never)}`);
+  return { cartridge: r.cartridge as Cartridge, hash: r.hash, artifact };
+}
 
 // The generator's own stream: the kernel's xoshiro128** over a state of its own (the seed's
 // SHA-256), never a world's.
@@ -459,9 +465,10 @@ function boundaries(world: World): number[] {
 /** start, a playback. */
 export function report(o: Outcome, kernel = KERNEL): string {
   const f = o.failure!;
+  const flags = o.loaded.path ? `--cartridge ${JSON.stringify(o.loaded.path)} ` : '';
   const commands = shrink(o, f.id, kernel);
   const name = o.loaded.cartridge.manifest.id;
-  const head = `simulation failure: ${f.id} (${f.detail}) at step ${f.at + 1}\ngenerator ${GENERATOR}, seed ${o.seed}, cartridge ${name}, ${o.drained ? `drained start: ${o.drained}` : 'fresh start'}\nreproduce (re-checks every invariant): node kernel/ts/test/sim.ts ${o.seed}\n`;
+  const head = `simulation failure: ${f.id} (${f.detail}) at step ${f.at + 1}\ngenerator ${GENERATOR}, seed ${o.seed}, cartridge ${name}, ${o.drained ? `drained start: ${o.drained}` : 'fresh start'}\nreproduce (re-checks every invariant): node kernel/ts/test/sim.ts ${flags}${o.seed}\n`;
   const body = `shrunk from ${o.commands.length} to ${commands.length} commands:\n${commands.map((c) => `${encode(c as never)}\n`).join('')}`;
   const none = 'no playback: `loka play` starts fresh, not drained; use the reproduce command\n';
   return head + body + (o.drained ? none : transcript(o, commands));
@@ -508,8 +515,22 @@ function transcript(o: Outcome, commands: readonly Command[]): string {
   return `${stop}${label}: node kernel/ts/play/main.ts ${artifact} --replay ${trace}\n`;
 }
 
-if (import.meta.main)
-  for (const seed of process.argv.slice(2).map(Number)) {
-    const o = simulate(seed);
-    process.stdout.write(o.failure ? report(o) : `${seed} ${o.digest}\n`);
+// `--cartridge <artifact>`: every seed runs on that compiled cartridge (a toolbox sampler,
+// docs/MECHANICS-TOOLBOX.md) instead of a seed-picked fixture cartridge.
+if (import.meta.main) {
+  const args = process.argv.slice(2);
+  const only = args[0] === '--cartridge';
+  if (only && !args[1]) {
+    console.error('usage: node kernel/ts/test/sim.ts [--cartridge <artifact>] <seed>...');
+    process.exit(2);
   }
+  const cartridges = only
+    ? [{ ...loaded(readFileSync(args[1]!, 'utf8')), path: args[1] }]
+    : CARTRIDGES;
+  for (const seed of args.slice(only ? 2 : 0).map(Number)) {
+    const o = simulate(seed, KERNEL, cartridges);
+    process.stdout.write(
+      o.failure ? report(o) : `${seed} ${o.loaded.cartridge.manifest.id} ${o.digest}\n`,
+    );
+  }
+}

@@ -27,6 +27,7 @@ import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
 import { bleed } from './cartridge_bleed.ts';
+import { status } from './cartridge_status.ts';
 import { liquids } from './cartridge_liquids.ts';
 import { population } from './cartridge_population.ts';
 
@@ -131,6 +132,7 @@ const DEFINITION_MAPS = [
   'services',
   'transports',
   'bleeds',
+  'statuses',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -271,6 +273,7 @@ function declarations(c: Obj): Diagnostic[] {
     ...services(c),
     ...food(c),
     ...bleed(c),
+    ...status(c),
     ...population(c),
     ...transports(c),
   ];

@@ -181,7 +181,10 @@
     "key": "status",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "status"
+    ]
   },
   {
     "key": "check",

@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "dummy"
+  ],
+  "short": "npc.dummy.short",
+  "room_line": "npc.dummy.room",
+  "description": "npc.dummy.description",
+  "room": "yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 20,
+    "start": 20,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

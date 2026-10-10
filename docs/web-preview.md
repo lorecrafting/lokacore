@@ -61,8 +61,11 @@ The `Live` stories run the real Book over the local authority, restored from a c
 headers (and a secure context: `localhost`, not a LAN address), so the smoke skips them. `mise exec -- npm run storybook:live` starts a dev server on a free
 port, runs every Live story and its click-through headless, then a sidebar switch (one database
 open after it) and a second tab on the same origin (Storybook's sqlite keeps no saves), and stops it (about 50 s warm,
-85 s on a first run, so `book-e2e.yml` runs it nightly rather than the pre-push hook).
+85 s on a first run, so `book-e2e.yml` runs it, never the M1).
 What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).
+The `System/` pages (Overview, Data model, Save, Capabilities) draw `docs/system-graph.gen.json`, which
+`elixir bin/contracts.exs` writes ([design](design/system-dashboard/spec.md)); a Data model link carries
+its selection as `&globals=node:<Contract>` (bare contract names: Storybook drops a URL global with a `.`).
 `bin/preview_update.sh` brings the preview checkout (`~/dev/lokacore-preview`) to `origin/main`, runs
 `npm ci` only for a changed `package-lock.json` and restarts Storybook, the web preview and (if running) Expo on
 8081 by listening PID; servers already serving it keep running. `bin/polish_session.sh start|close` serves a
@@ -71,8 +74,7 @@ preview again. The PM starts the owner's servers only with these scripts, never 
 
 **Agents** ([owner decision](decisions/owner-decision-storybook-mcp-2026-10-09.md)): the dev server
 answers MCP at `/mcp` (`@storybook/addon-mcp`): list and read components and stories, story-writing
-instructions, previews, and `test-run` (play function and axe for chosen stories; it runs outside
-the check lock, so not during a smoke or `bin/check_all.sh`). The repo's
+instructions, previews, and `test-run` (play function and axe for chosen stories). The repo's
 `.mcp.json` points Claude Code at the owner's http://localhost:6006/mcp (approve it once per
 machine). Those tools see only the checkout that server serves, so an agent testing its own
 worktree runs Storybook on another port and calls that port's `/mcp` instead. For the browser

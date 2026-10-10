@@ -6,13 +6,16 @@ import type {
   CommandId,
   DeltaOp,
   DomainEvent,
+  EntityId,
   EventPayload,
   FactValue,
   ReactionRule,
+  TextKey,
 } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import {
   accepted,
+  bodyOf,
   event,
   refString,
   type Decision,
@@ -26,6 +29,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
+import { applyStatus, specOf } from './status/shared.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
 
@@ -77,9 +81,13 @@ export function sequence(
   if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
+  const applied = new Set<string>();
   const ops: DeltaOp[] = [];
   const events: DomainEvent[] = [];
+  const narration: { key: TextKey }[] = [];
   let position = 0;
+  const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
+  const emit = (payload: EventPayload) => events.push(event(then, by, mint, ++position, payload));
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
       if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
@@ -87,40 +95,35 @@ export function sequence(
       const started = activation(mint, actor, step.quest);
       activated.add(refString(step.quest));
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
-      events.push(
-        event(
-          then,
-          { id: cause.id as string as CommandId, payload: { actor_id: actor } },
-          mint,
-          ++position,
-          started.payload,
-        ),
-      );
+      emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
       if (rule.on.event !== 'fact_changed') return { kind: 'fault', code: 'precondition_failed' };
       const result = terminal(world, actor, step, group, steps);
       if (!result) return { kind: 'fault', code: 'precondition_failed' };
       ops.push(...result.ops);
-      if ('payload' in result)
-        events.push(
-          event(
-            then,
-            { id: cause.id as string as CommandId, payload: { actor_id: actor } },
-            mint,
-            ++position,
-            result.payload,
-          ),
-        );
+      if ('payload' in result) emit(result.payload);
     } else if (step.op === 'population.suppress') {
       ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
+    } else if (step.op === 'status.apply') {
+      const body = bodyOf(then, actor);
+      if (!body) return { kind: 'fault', code: 'precondition_failed' };
+      if (!applies(cause, body) || applied.has(refString(step.status))) continue;
+      applied.add(refString(step.status)); // one row write per status per rule
+      ops.push(...applyStatus(then, body, step.status, group, mint));
+      const label = specOf(then, step.status)?.narration.applied;
+      if (label) narration.push({ key: label });
     } else {
       const assigned = assignment(world, actor, step, group, set);
       ops.push(assigned);
       if (assigned.expected !== step.value) position++;
     }
   }
-  return accepted(world, 'reacted', ops, events);
+  return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
+
+// An entry applies a status only to the entering body: a scheduled NPC walking in poisons no one.
+const applies = (cause: DomainEvent, body: EntityId) =>
+  cause.payload.type !== 'entity_entered_room' || cause.payload.entity_id === body;
 
 function assignment(
   world: World,

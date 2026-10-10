@@ -1,10 +1,11 @@
+// size: allow 520, the --cartridge artifact runs and its reproduce line join the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI (500 elsewhere),
 // each step keeping every registered invariant; determinism in and across processes; and red
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -18,7 +19,16 @@ import type {
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/runtime/world.ts';
 import { check } from '../src/runtime/invariants.ts';
-import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
+import {
+  CHECKED,
+  GENERATOR,
+  KERNEL,
+  loaded,
+  report,
+  shrink,
+  simulate,
+  type Kernel,
+} from './sim.ts';
 import { read } from './read.ts';
 import { fresh } from './sim_batch.ts';
 
@@ -200,23 +210,52 @@ test('each regression seed still issues the command type it was kept for', () =>
 // Breaks: anything nondeterministic in the kernel or the generator (time, Math.random, host
 // iteration order), which would make a failing seed unreproducible.
 test('a seed gives byte-identical steps twice in one process and in another process', () => {
-  const digests = seeds.map((s) => simulate(s).digest);
+  const outcomes = seeds.map((s) => simulate(s));
+  const digests = outcomes.map((o) => o.digest);
   assert.deepEqual(
     seeds.map((s) => simulate(s).digest),
     digests,
   );
-  const r = spawnSync('node', [new URL('sim.ts', import.meta.url).pathname, ...seeds.map(String)], {
-    encoding: 'utf8',
-  });
-  assert.equal(r.stdout, seeds.map((s, i) => `${s} ${digests[i]}\n`).join(''), r.stderr);
+  const r = spawnSync('node', [SIM, ...seeds.map(String)], { encoding: 'utf8' });
+  const named = outcomes.map((o) => `${o.seed} ${o.loaded.cartridge.manifest.id} ${o.digest}\n`);
+  assert.equal(r.stdout, named.join(''), r.stderr);
+});
+
+const SIM = new URL('sim.ts', import.meta.url).pathname;
+// Breaks: `--cartridge` is ignored, so the seeds run on the seed-picked fixture set (seeds 1-8
+// pick seven other cartridges, the coverage test above), or a forged content hash is accepted.
+test('--cartridge runs every seed on that artifact and refuses a forged one', () => {
+  const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
+  const dir = mkdtempSync(join(tmpdir(), 'loka-sim-'));
+  after(() => rmSync(dir, { recursive: true, force: true }));
+  const eight = ['1', '2', '3', '4', '5', '6', '7', '8'];
+  const cli = (name: string, sha256: string) => {
+    writeFileSync(join(dir, name), `{"cartridge":${kat.canonical},"content_hash":"${sha256}"}`);
+    return spawnSync('node', [SIM, '--cartridge', join(dir, name), ...eight], { encoding: 'utf8' });
+  };
+  const r = cli('sampler.json', kat.sha256);
+  assert.equal(r.status, 0, r.stderr);
+  const named = r.stdout
+    .trim()
+    .split('\n')
+    .map((l) => l.split(' ').slice(0, 2).join(' '));
+  assert.deepEqual(
+    named,
+    eight.map((s) => `${s} ashmere_sampler`),
+    r.stdout,
+  );
+  const forged = cli('forged.json', '0'.repeat(64));
+  assert.notEqual(forged.status, 0);
+  assert.match(forged.stderr, /cartridge refused/);
+  assert.equal(forged.stdout, '');
 });
 
 const planted = (k: Partial<Kernel>): Kernel => ({ ...KERNEL, ...k });
 
 // The first of seeds 1, 2, ... whose sequence fails on `kernel`, shrunk and reported.
-function caught(kernel: Kernel) {
+function caught(kernel: Kernel, cartridges?: Parameters<typeof simulate>[2]) {
   for (let seed = 1; seed <= 2000; seed++) {
-    const o = simulate(seed, kernel);
+    const o = simulate(seed, kernel, cartridges);
     if (o.failure)
       return { ...o.failure, shrunk: shrink(o, o.failure.id, kernel), text: report(o, kernel) };
   }
@@ -243,17 +282,17 @@ test('red control: input mutation is caught before rollback checks read the chan
   assert.equal(outcome.failure?.id, 'input_mutated');
 });
 
+const dropsIntoItself = planted({
+  step: (w, c, r) => {
+    const s = step(w, c, r);
+    if (c.payload.type !== 'drop' || s.decision.kind !== 'accepted') return s;
+    const containers = { ...s.world.state.containers, [c.payload.item_id]: c.payload.item_id };
+    return { ...s, world: { ...s.world, state: { ...s.world.state, containers } } };
+  },
+});
+
 test('red control: a planted rule bug (drop puts the item inside itself) is found and shrunk', () => {
-  const f = caught(
-    planted({
-      step: (w, c, r) => {
-        const s = step(w, c, r);
-        if (c.payload.type !== 'drop' || s.decision.kind !== 'accepted') return s;
-        const containers = { ...s.world.state.containers, [c.payload.item_id]: c.payload.item_id };
-        return { ...s, world: { ...s.world, state: { ...s.world.state, containers } } };
-      },
-    }),
-  );
+  const f = caught(dropsIntoItself);
   assert.equal(f.id, 'containment_acyclic');
   // moves to an item, take, drop; a drained start may need a wait first (which seed finds it
   // depends on the demo cartridges; lantern_proof's nearest item is three moves from the entry).
@@ -263,6 +302,17 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
     /^simulation failure: containment_acyclic .*\ngenerator 17, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
+});
+
+// Breaks: the reproduce line drops `--cartridge <artifact>`, so it reruns the seed on the fixture set.
+test('a failure on a --cartridge artifact reproduces on that artifact', () => {
+  const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
+  const artifact = `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`;
+  const f = caught(dropsIntoItself, [{ ...loaded(artifact), path: 'tmp/a sampler.json' }]);
+  assert.match(
+    f.text,
+    /\nreproduce .*: node kernel\/ts\/test\/sim.ts --cartridge "tmp\/a sampler.json" \d+\n/,
+  );
 });
 
 // Breaks: job_complete_owned_by_run not checked per step, or blind to a job.complete in the

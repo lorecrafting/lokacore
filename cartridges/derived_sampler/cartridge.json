@@ -1,0 +1,131 @@
+{
+  "api_version": "loka/v3",
+  "id": "derived_sampler",
+  "version": "0.0.1",
+  "title": "Derived Stats Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.39",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "fact": 1,
+      "policy": 1,
+      "attributes": 1,
+      "combat": 1,
+      "schedule": 1,
+      "death": 1,
+      "behavior": 1,
+      "description_variant": 1,
+      "calendar": 1,
+      "position": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "hall",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "ancestries": {
+    "strong": {
+      "label": "ancestry.strong.label",
+      "description": "ancestry.strong.description",
+      "attribute": "str",
+      "modifier": 10
+    },
+    "nimble": {
+      "label": "ancestry.nimble.label",
+      "description": "ancestry.nimble.description",
+      "attribute": "dex",
+      "modifier": 5
+    }
+  },
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "carry": {
+      "max_grams": 10000
+    },
+    "derived": {
+      "hit_chance": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 5,
+            "pivot": 10
+          }
+        ]
+      },
+      "damage": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 1,
+            "pivot": 10
+          }
+        ],
+        "divisor": 2
+      },
+      "carry_grams": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 1000,
+            "pivot": 10
+          }
+        ]
+      }
+    },
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "hall",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 4,
+        "damage_max": 4
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      }
+    }
+  }
+}

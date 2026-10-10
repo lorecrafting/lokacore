@@ -45,6 +45,8 @@ and not repeated here.
   and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
   World time starts at first entry (D11 selection); before it there is no world clock to pause
   ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
+- Every new toolbox mechanic is opt-in by a cartridge field; Chapter 1 and the seeded corpus stay
+  unchanged. The toolbox is ranked vocabulary first ([record](../decisions/owner-decision-toolbox-rerank-2026-10-09.md)).
 - Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
 
 - The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
@@ -161,8 +163,7 @@ and not repeated here.
 
 ## Process
 
-- During pre-production, metadata-only changes skip engine and browser checks (pre-push lanes since the [merge gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md)) and Book-only changes skip engine jobs only after relevant green ancestors; unknown or source changes run broad checks ([owner decision](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md)).
-- During pre-production, no PR runs hosted CI on its own: CI runs nightly on `main` and by hand ([owner decision](../decisions/owner-decision-preproduction-gate-2026-10-08.md); drafts before it: [record](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
+- During pre-production, hosted CI runs on every pushed branch head, nightly on `main` and by hand, and a green run on the exact head is the merge gate; no local pre-push checks, no check lock, no agent-count cap (load under 8 instead), focused tests only on the M1; review records only for save, protocol or kernel contract slices ([owner decision](../decisions/owner-decision-two-lane-ci-2026-10-09.md); earlier lanes: [scope](../decisions/owner-decision-preproduction-ci-scope-2026-10-06.md), [gate](../decisions/owner-decision-preproduction-gate-2026-10-08.md), [drafts](../decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)).
 - Move forward: fold recurring failure classes into lessons first, then delete records of closed or superseded work; links become pinned permalinks. Protocol fixtures, in-force decisions and open work stay ([owner decision](../decisions/owner-decision-move-forward-2026-10-07.md)).
 - After Chapter 1 E3, adopt fast iteration, full PR and milestone check lanes through a separate reviewed change; current gates and save safety remain in force until then ([owner decision](../decisions/owner-decision-tiered-ci-after-chapter-one-2026-10-06.md)).
 
@@ -190,9 +191,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Mechanics PRs use one fresh independent reviewer by default; a second opinion
   is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
   ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
-- Merge: APPROVE or APPROVE WITH NOTES with nothing open on a head that passed the pre-push hook;
-  hosted CI runs nightly and by hand, and must be green first for save, protocol or kernel PRs, the
-  release candidate and E3 ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM
+- Merge: APPROVE or APPROVE WITH NOTES with nothing open on a head whose hosted runs are green
+  ([record](../decisions/owner-decision-two-lane-ci-2026-10-09.md)); the PM
   merges PRs ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)); admins (the owner, or
   the PM when asked or for status-only commits) may push to `main` or merge directly, never for
   unreviewed code or past a red check ([record](../decisions/owner-decision-preproduction-gate-2026-10-08.md)); the PM runs a slice to its
@@ -201,14 +201,13 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Gates are slim: the owner's play when there is something touchable, one fresh Opus audit (Fable for E2–E3) of the
   riskiest code, and a short checklist with one reviewer; no second review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Claude Code runs every role: a fresh Opus reviewer and fix re-check; Fable only for the E1 closure second opinion
+- Claude Code runs every role: a fresh Opus reviewer and fix re-check for every item, infra and polish PR; Fable only for one review per mechanics batch on its final head ([record](../decisions/owner-decision-two-lane-ci-2026-10-09.md)), the E1 closure second opinion
   ([record](../decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), the E2 and E3 gate closures and audits, the release-candidate certification audit, and once the pre-polish area audits ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)); Codex and cross-vendor review are retired; Beads Rust is the
   permanent PM tracker; a second opinion never replaces the independent reviewer ([record](../decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)).
 - A `designer` (Opus; Fable for the polish phase, [record](../decisions/owner-decision-designer-fable-2026-10-08.md)) is the single writer of the Book UI design system and its spec text, consulted by every UI-changing slice; its design review plus a quick correctness pass is the independent review only for a pure UI polish batch ([record](../decisions/owner-decision-designer-role-2026-10-07.md)). In a live polish session the owner's approval is the design review and a Sonnet designer may take a nit ([record](../decisions/owner-decision-live-polish-session-2026-10-09.md)).
 - Opus drafts briefs; the PM keeps one persistent worktree, the integration checkout
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-- Developers default to Sonnet; Opus where the [routing table](../WORKFLOW.md#work-routing) says
-  ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
+- Developers default to Opus; Sonnet only for a bounded content or docs edit ([record](../decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding the [Sonnet default](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - Mechanical PM chores and docs-only slices run on Sonnet, searches on Haiku (`Explore` override), briefs paste `ast-grep outline` signatures, plugin changes are allowed mid-session, and `bin/sync_pr.sh` merges `main` into each open PR once after the last of several close merges ([record](../decisions/owner-decision-agent-tooling-2026-10-08.md)).
 - Self-review is one pass, `/code-review medium`, reported in the PR description (the reviewer notes a missing one). Full-suite mutant sweeps run only at release-candidate certification and the E3 gate; elsewhere `bin/mutate.sh` runs narrow first, reviewers sample 2-3 mutants, and any run expected over ~10 minutes is announced to the owner first ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A retro (at most 5 evidence-backed items, kept as `housekeeping` Beads issues) is written at every handoff and as a pattern retro at each milestone gate; `bin/session_status.sh` reminds ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).

@@ -2,7 +2,16 @@
 import type { ReactElement } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
+import {
+  bleedingLine,
+  branch,
+  conditionLine,
+  pools,
+  said,
+  sky,
+  toneOf,
+  type Pool,
+} from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
@@ -17,6 +26,7 @@ type StatusProps = {
   calendar?: GameView['calendar_status'];
   resources?: readonly Pool[];
   bleeding?: GameView['bleeding'];
+  conditions?: GameView['conditions'];
   position?: GameView['position'];
   text: (key: string) => string;
   locked: boolean;
@@ -46,6 +56,7 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
     .filter(Boolean)
     .join(', ');
 
+// size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const time = calendarLine(p.calendar);
@@ -63,6 +74,19 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
+    ...(p.conditions ?? []).map((x, i) => {
+      const line = conditionLine(x, p.time, p.text);
+      return (
+        <Text
+          key={`${x.label}-${i}`}
+          numberOfLines={1}
+          style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
+          accessibilityLabel={line.replaceAll(' · ', ', ')}
+        >
+          {line}
+        </Text>
+      );
+    }),
     <Contents key="contents" {...p} resources={pools(p.resources)} />,
   ].filter(Boolean);
   return (

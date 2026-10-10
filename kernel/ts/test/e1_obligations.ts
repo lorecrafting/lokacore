@@ -420,6 +420,8 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           same(o.scope, scopeOf(before, actor, step.fact)) &&
           o.value === step.value,
       );
+    if (step.op === 'status.apply')
+      return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(

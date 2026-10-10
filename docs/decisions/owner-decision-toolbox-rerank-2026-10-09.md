@@ -1,0 +1,37 @@
+# Owner decision: re-rank the mechanics toolbox, vocabulary first — 2026-10-09
+
+(paraphrased) The owner adopted the re-rank proposed by the
+[mechanics roadmap review](../reviews/2026-10-09-mechanics-roadmap-review.md) (Beads `loka-kgd.14`).
+
+## Effect
+
+- **Order:** [MECHANICS-TOOLBOX.md](../MECHANICS-TOOLBOX.md#ranked-toolbox) follows the review's
+  batches M3 to M15: shared vocabulary rows first (property tags, damage kinds, statuses and
+  attributes on NPCs and things), then the dungeon-crawl rows, then economy and law.
+- **Gap rows G1 to G13** join the table; G13 (hunger, thirst, fatigue) is content only.
+- **Merges and splits** as the review proposes; retired rows stay in the table as
+  `merged into row N` or `split into …`. Row ids stay stable because code, tests and anchors cite
+  them; a Rank column carries the order.
+- **Two conflicts fixed:** row 17's sampler is a same-room first strike, adjacent rooms later
+  ([toolbox decision §2](owner-decision-mechanics-toolbox-2026-10-08.md#answers-to-the-open-questions));
+  row 32 fast travel never skips the clock: a transport job over real elapsed time, or instant
+  with no clock change ([fixed time](owner-decision-fixed-time-2026-10-03.md)).
+- **Opt-in rule:** every new mechanic is opt-in by a cartridge field; Chapter 1 and the seeded
+  corpus stay unchanged.
+- **Settlement rows S1 to S4** (furnishing, construction, settlement, settlement defense) come
+  from an owner question on housing and real town building (PM addition, same day): Realm-first in
+  value, sampled in Story mode. S2's runtime-created rooms and exits change the world-graph
+  contract and need their own decision record first.
+- **G7 locks (owner-requested):** any entity, exit or container may declare locks per access type
+  (enter, traverse, get, put, open, lock, furnish, build, control), evaluated by the existing
+  policy engine with new `owner`, `role` and `holder` leaves; runtime grant and revoke commands
+  write saved grant rows (owner reference: Evennia lockstrings).
+- **Row R1, staff and builder permissions (owner-requested):** an account-level hierarchy, a
+  `perm` policy leaf and staff-only build tools; deferred to the online Realm, after the
+  settlement rows, depending on G7 and Realm authority.
+- **Where the review is silent or differs:** its batch table governs over recommendation 3's
+  shorthand (row 15 stays in M6, before traps in M7). The PM placed rows the review left without a
+  batch: G13 and 42 in M5 as row-1 content, 32 in M14 as transport content; G samplers are drawn
+  from the review's own examples.
+- The review's other risks (rows 3 and 4 as attribute writers, row 9 RNG, row 29 incantation
+  input, row 48 last) are raised at each row's brief, not decided here.

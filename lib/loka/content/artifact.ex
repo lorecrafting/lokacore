@@ -31,11 +31,11 @@ defmodule Loka.Content.Artifact do
 
     optional =
       for k <-
-            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed),
+            ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute skill topic liquid service transport population population_bundle bleed status),
           defs[k] != %{},
           into: %{},
           do:
-            {if(k == "population_bundle", do: "population_bundles", else: k <> "s"),
+            {%{"population_bundle" => "population_bundles", "status" => "statuses"}[k] || k <> "s",
              keyed(m, k, defs)}
 
     cartridge(m, defs, nil)

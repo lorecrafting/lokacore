@@ -1,4 +1,4 @@
-# size: allow 326, ancestry and static map source wiring join the existing compiler boundary
+# size: allow 333, ancestry, static map and status source wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -13,7 +13,7 @@ defmodule Loka.Content.Compiler do
     Requires
   }
 
-  alias Loka.Content.{Entities, Position, Resources, Scenes}
+  alias Loka.Content.{Derived, Entities, Position, Resources, Scenes, Water}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -68,10 +68,9 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
-      Loka.Content.Food.check(manifest, defs, v2),
-      Loka.Content.Bleed.check(manifest, defs, v2),
+      timed_checks(manifest, defs, v2),
       Loka.Content.Transports.check(manifest, defs, v2),
-      Loka.Content.Water.check(manifest, defs, located, v2),
+      Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -85,6 +84,13 @@ defmodule Loka.Content.Compiler do
       final_checks(manifest, defs, v2, located, registry)
     ])
   end
+
+  # Food, bleed and status in their original order, one call to keep `checks` within ABC.
+  defp timed_checks(manifest, defs, v2),
+    do:
+      Loka.Content.Food.check(manifest, defs, v2) ++
+        Loka.Content.Bleed.check(manifest, defs, v2) ++
+        Loka.Content.Status.check(manifest, defs, v2)
 
   defp final_checks(manifest, defs, v2, located, registry),
     do:
@@ -154,7 +160,7 @@ defmodule Loka.Content.Compiler do
   end
 
   defp settings(extra, m),
-    do: extra |> Map.delete("entry") |> Loka.Content.Water.settings(m) |> Checks.expand(m)
+    do: Map.delete(extra, "entry") |> Water.settings(m) |> Derived.settings(m) |> Checks.expand(m)
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
   # not resolved against it).
@@ -188,7 +194,8 @@ defmodule Loka.Content.Compiler do
     {"population_bundle", :population_bundle, "PopulationBundle"},
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
-    {"bleed", :bleed, "BleedDefinition"}
+    {"bleed", :bleed, "BleedDefinition"},
+    {"status", :status, "StatusDefinition"}
   ]
 
   defp definitions(files, m) do

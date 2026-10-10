@@ -39,6 +39,7 @@ import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
 import { carrying } from '../mechanics/crow/behavior.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
+import { activeStatuses } from '../mechanics/status/shared.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -61,6 +62,7 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
+// size: allow 49, one projection lists every GameView section, conditions included
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
@@ -74,6 +76,14 @@ export function gameView(world: World): GameView {
   const at = position.positionOf(world, world.character) as Key | undefined;
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   const bleed = currentBleed(world, world.body);
+  const conditions = activeStatuses(world, world.body).map(({ spec, row }) => ({
+    label: spec.label,
+    ends_at: row.ends_at,
+    next_tick_at: row.next_tick_at,
+    resource: spec.resource.key as Key,
+    per_tick: spec.per_tick,
+    tick_every: spec.tick_every,
+  }));
   const view: GameView = {
     actor_id: world.character,
     ...knowledgeView(world, steps),
@@ -82,6 +92,7 @@ export function gameView(world: World): GameView {
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
+    ...(conditions.length > 0 && { conditions }),
     place: placeView(world, here, steps),
     exits: exits(world, actions.door, steps),
     actions: actions.place,

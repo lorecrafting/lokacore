@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "antidote",
+    "vial"
+  ],
+  "short": "item.antidote.short",
+  "room_line": "item.antidote.room",
+  "description": "item.antidote.description",
+  "mass_grams": 50,
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 1,
+    "label": "action.eat",
+    "narration": "narration.eat_antidote",
+    "cures": [
+      "poison"
+    ]
+  }
+}

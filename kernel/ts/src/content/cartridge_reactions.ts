@@ -36,7 +36,7 @@ export const uses = (c: Obj) =>
     ),
   ]) as ['definition' | 'event', string, string][];
 
-// size: allow 52, finite reaction API and typed suppression references stay in one ordered check
+// size: allow 53, finite reaction API, typed suppression and status references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
@@ -81,7 +81,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
-      } else {
+      } else if (s.op !== 'status.apply') {
+        // status.apply references are checked with the status declarations (cartridge_status.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
       }
