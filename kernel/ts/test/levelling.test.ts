@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
+import { decide } from '../src/mechanics/attributes/rule.ts';
 import { gameView } from '../src/view/view.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-levelling-sampler-'));
@@ -133,6 +134,9 @@ test('Raise STR spends the point, raises the derived damage by 1 and is then ref
   };
   const forged = step(raised.world, command as never, n, 'raise_attribute' as never);
   assert.notEqual(forged.decision.kind, 'accepted');
+  // The rule itself keeps the points within the grant: composition does not (mechanics.md row 4).
+  const ruled = decide(raised.world, command as never, undefined as never);
+  assert.deepEqual(ruled.kind === 'rejected' && ruled.error.code, 'invalid_state');
 });
 
 // Breaks (PM ruling, loka-kgd.11): Raise CON writes no zero-amount hp settle first, so the 4 hours
