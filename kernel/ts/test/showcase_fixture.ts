@@ -26,6 +26,8 @@ export const DAY = 24 * HOUR;
 export const fresh = (context: string) => newWorld(content, context as never, [1, 2, 3, 4]);
 export const ref = (kind: string, key: string) => `toolbox_showcase@0.0.1:${kind}/${key}`;
 export const id = (w: World, kind: string, key: string) => w.entityIds[ref(kind, key)]!;
+export const detail = (w: World, key: string) =>
+  Object.keys(w.details).find((k) => w.details[k].key === key)!;
 export const pool = (w: World, key: string) => level(w, w.body, resourceRef(w, key));
 export const labels = (w: World) => gameView(w).conditions?.map((c) => c.label as string) ?? [];
 export const attribute = (w: World, key: string) =>

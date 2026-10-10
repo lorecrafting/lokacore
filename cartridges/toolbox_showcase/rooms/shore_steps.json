@@ -23,6 +23,18 @@
         "sea"
       ],
       "description": "detail.horizon"
+    },
+    "sign_world": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_world.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_world",
+        "title": "detail.sign_world.title"
+      }
     }
   },
   "variants": [

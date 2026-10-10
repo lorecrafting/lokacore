@@ -22,6 +22,7 @@ import {
   pool,
   ref,
   refused,
+  detail,
   take,
   wait,
 } from './showcase_fixture.ts';
@@ -44,10 +45,7 @@ let w: World;
 // misses a re-entry.
 test('world 1: the signpost reads; twelve looks show all three lines; a second visit', () => {
   w = go(fresh(WORLD), 'east').world;
-  const read = play(take(w, 'sign_world'), {
-    type: 'read',
-    target_id: id(w, 'item', 'sign_world'),
-  });
+  const read = play(w, { type: 'read', target_id: detail(w, 'sign_world') });
   assert.ok(read.lines.includes('readable.sign_world'), JSON.stringify(read.lines));
   const seen = new Set<string>();
   for (let i = 0; i < 12; i += 1) {

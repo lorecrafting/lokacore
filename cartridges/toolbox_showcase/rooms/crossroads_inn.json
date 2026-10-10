@@ -8,5 +8,19 @@
     "east": {
       "to": "shore_steps"
     }
+  },
+  "details": {
+    "sign_hub": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_hub.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_hub",
+        "title": "detail.sign_hub.title"
+      }
+    }
   }
 }

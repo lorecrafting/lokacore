@@ -23,6 +23,7 @@ import {
   pool,
   ref,
   refused,
+  detail,
   take,
   wait,
 } from './showcase_fixture.ts';
@@ -37,7 +38,7 @@ const shown = (w: World, npc: string) =>
 const hpOf = (w: World, npc: string) => level(w, id(w, 'npc', npc), resourceRef(w, 'hp'));
 const where = (w: World, npc: string) => w.state.containers[id(w, 'npc', npc)];
 
-// Breaks: the entry room, a pool's start, an attribute's start or an exit is wrong; Hob's asleep
+// Breaks: the entry room, a pool's start, an attribute's start, an exit or the in-place sign is wrong; Hob's asleep
 // variant reads the wrong hours.
 test('hub: a new character starts in the inn at 07:00 day 1 with the planned pools', () => {
   const w = fresh(BODY);
@@ -55,6 +56,8 @@ test('hub: a new character starts in the inn at 07:00 day 1 with the planned poo
       .sort(),
     ['east', 'north'],
   );
+  const sign = play(w, { type: 'read', target_id: detail(w, 'sign_hub') });
+  assert.deepEqual(sign.lines, ['readable.sign_hub']);
   assert.equal(shown(w, 'hob')?.name, 'npc.hob.short');
   assert.equal(shown(wait(w, DAY + HOUR).world, 'hob')?.name, 'npc.hob.short_asleep');
 });
@@ -65,10 +68,7 @@ let atGate: World;
 // Breaks: the sign grants a topic or reads other text.
 test('body 1: the Fell Road signpost reads its text and grants no topic', () => {
   atGate = go(fresh(BODY), 'north').world;
-  const r = play(take(atGate, 'sign_body'), {
-    type: 'read',
-    target_id: id(atGate, 'item', 'sign_body'),
-  });
+  const r = play(atGate, { type: 'read', target_id: detail(atGate, 'sign_body') });
   assert.ok(r.lines.includes('readable.sign_body'), JSON.stringify(r.lines));
   assert.equal(gameView(r.world).topics, undefined);
 });
