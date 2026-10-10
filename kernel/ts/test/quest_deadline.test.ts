@@ -91,7 +91,7 @@ function play(w: World, p: object): World {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-function wait(w: World, minutes: number) {
+function wait(w: World, minutes: number, kind = 'accepted') {
   n += 1;
   const run_id = 'aaaaaaaa-2424-4000-8000-000000000010';
   const until = w.state.clock + minutes * MINUTE;
@@ -102,9 +102,9 @@ function wait(w: World, minutes: number) {
     { id: id as never, world_context_id: w.context, payload: payload as never },
     n,
   );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  const events = r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload) : [];
-  return { w: r.world, events };
+  assert.equal(r.decision.kind, kind, JSON.stringify(r.decision));
+  const all = r.decision.kind === 'accepted' ? r.decision.events : [];
+  return { w: r.world, events: all.map((e) => e.payload), all };
 }
 const row = (w: World) => Object.values(w.state.quests ?? {})[0]!;
 const lateNoted = (w: World) =>
@@ -148,13 +148,31 @@ test('a deadline job of a quest resolved earlier only completes', () => {
   );
 });
 
-// Break: a deadline already past at activation faults the accept (nonfuture_job) or never expires.
-test('an absolute deadline already past expires on the next advance', () => {
+// Breaks: a deadline already past at activation faults the accept (nonfuture_job) or never
+// expires; quest_failed stamped with the advance target instead of the job's due time.
+test('an absolute deadline already past expires on the next advance, at its due time', () => {
   const w = fresh((c) => (c.quests[QUEST].deadline = { at: 0, outcome: 'late' }));
   const accepted = play(wait(w, 1).w, { type: 'accept_quest', quest });
   assert.equal(row(accepted).state, 'active');
   const r = wait(accepted, 1);
-  assert.deepEqual([row(r.w).state, failedEvents(r.events).length], ['failed', 1]);
+  assert.equal(row(r.w).state, 'failed');
+  const failed = r.all.filter((e) => e.payload.type === 'quest_failed');
+  assert.deepEqual(
+    failed.map((e) => e.logical_time),
+    [accepted.state.clock + 1],
+  );
+});
+
+// Break: a job whose instance belongs to another actor fails that instance instead of faulting.
+test('a deadline job bound to another actor faults', () => {
+  const w = play(fresh(), { type: 'accept_quest', quest });
+  const [id, job] = Object.entries(w.state.jobs ?? {}).find(([, j]) => j.quest_instance_id)!;
+  const other = '00000000-0000-4000-8000-0000000000ff';
+  const forged = {
+    ...w,
+    state: { ...w.state, jobs: { ...w.state.jobs, [id]: { ...job, actor_id: other } } },
+  };
+  wait(forged as World, 11, 'fault');
 });
 
 // Break: the horizon read from the clock alone, so an activation inside an advance schedules a job

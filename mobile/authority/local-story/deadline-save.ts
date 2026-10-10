@@ -1,5 +1,4 @@
 // Reconcile a bound deadline against the original choices, due job, facts and conserved payment.
-import type { QuestDefinition } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { DefinitionRef } from '../../../kernel/ts/src/contracts.gen.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
@@ -12,6 +11,7 @@ import {
   expiryReceipt,
   invalid,
   terminalAxis,
+  type Deadline,
   within,
 } from './deadline-receipts.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
@@ -19,8 +19,6 @@ import type { Db, Meta } from './store.ts';
 
 const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
   world.state.resources?.[key({ kind: 'resource', resource: ref, entity_id })];
-// A legacy (S2) deadline: the loader guarantees all four fields when fact is present.
-type Deadline = Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>;
 type Choices = [string, ChoiceRow][];
 
 export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false) {

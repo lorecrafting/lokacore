@@ -16,6 +16,8 @@ import type { Db } from './store.ts';
 export const invalid = (): never => {
   throw new SyntaxError('malformed JSON: inconsistent bound deadline');
 };
+// A legacy (S2) deadline: the loader guarantees all four fields when fact is present (row W24).
+export type Deadline = Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>;
 type ReceiptRow = { command_id: string; actor_id: string; command: string; response: string };
 
 export function terminalAxis(
@@ -114,7 +116,7 @@ export function expiryReceipt(
   scope: string,
   instance: string,
   job: string,
-  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
+  deadline: Deadline,
 ) {
   const rows = db.getAllSync<ReceiptRow>(
     'SELECT command_id,actor_id,command,response FROM receipt WHERE scope=?',
@@ -128,11 +130,7 @@ export function expiryReceipt(
     });
 }
 
-function dueElapsed(
-  world: World,
-  r: ReceiptRow,
-  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
-): Accepted | undefined {
+function dueElapsed(world: World, r: ReceiptRow, deadline: Deadline): Accepted | undefined {
   const command: Command = JSON.parse(r.command),
     decision: DecisionResult = JSON.parse(r.response);
   if (
@@ -182,7 +180,7 @@ function expires(
   decision: Accepted,
   instance: string,
   job: string,
-  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
+  deadline: Deadline,
 ) {
   const ops: readonly DeltaOp[] = decision.delta.ops;
   const fact = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, deadline.fact));

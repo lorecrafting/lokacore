@@ -21,6 +21,7 @@ import type { Mint, QuestRow, Steps, World } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 import { ready } from '../dialogue/exchange.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { add } from '../../foundation/int.ts';
 
 /** The cartridge's definition of `quest` (the loader resolves every quest reference). */
 const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
@@ -74,14 +75,15 @@ export function begun(
   at: number,
   prior: readonly DeltaOp[],
   mint: Mint,
-): DeltaOp[] {
+): readonly DeltaOp[] {
+  if (!ops.some((o) => o.op === 'quest.activate')) return stamp(world, ops, at);
   let horizon = world.state.clock;
   for (const o of [...prior, ...ops]) if (o.op === 'time.advance') horizon = o.to;
   const jobs = ops.flatMap((o) => {
     if (o.op !== 'quest.activate' || o.scope.kind !== 'player') return [];
     const d = definition(world, o.quest).deadline;
     if (!d || d.fact) return [];
-    const due_time = Math.max(d.at ?? at + d.after!, horizon + 1);
+    const due_time = Math.max(d.at ?? add(at, d.after!), horizon + 1);
     const job_id = mint() as JobId;
     const actor_id = o.scope.character_id;
     const { writer_group, quest: job, instance_id: quest_instance_id } = o;
