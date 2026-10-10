@@ -208,7 +208,10 @@ export const History: Story = {
   globals: { node: 'StateDelta' },
   play: async ({ canvas }) => {
     const panel = within(canvas.getByRole('complementary', { name: 'Detail' }));
+    const entries = history.length;
     await userEvent.click(panel.getAllByRole('button', { name: 'DeltaOp' })[0]);
+    // Checked before Back: without the pick's entry, Back would leave the story's frame.
+    await expect(history.length).toBe(entries + 1);
     const pressed = (name: string) =>
       expect(canvas.getByRole('button', { name, pressed: true })).toBeVisible();
     await waitFor(() => pressed('DeltaOp'));
