@@ -222,6 +222,7 @@ function lockStage(c: Obj): Diagnostic[] {
     const at = `.cartridge.recipes${step(ref)}`;
     use('definition', 'recipe', at);
     if (r.check) use('event', 'check_passed', `${at}.check`);
+    if (r.tip) use('event', 'fact_changed', `${at}.tip`); // its seen_tip_<key> assignment
     for (const [name, o] of Object.entries(r.outcomes as Obj))
       o.sequence.forEach((s: Obj, i: number) => {
         if (s.op !== 'resource.adjust')

@@ -209,8 +209,9 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = kinds(files)
     {facts, d5} = Scenes.facts(facts, m, defs)
     {facts, d6} = Loka.Content.Skills.facts(facts, m, defs)
+    {facts, d7} = Recipes.tip_facts(facts, defs)
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5, d6])}
+    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5, d6, d7])}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.

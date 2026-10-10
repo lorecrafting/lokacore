@@ -49,14 +49,48 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
-  defp reserved?(key, m) do
-    api =
+  defp api(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    key in commands() and (key not in ~w(where knock) or api >= [1, 37])
+  defp reserved?(key, m),
+    do: key in commands() and (key not in ~w(where knock) or api(m) >= [1, 37])
+
+  @doc "Toolbox row W23: the engine-owned fact a recipe's tip sets once it is shown."
+  def tip_spec(key),
+    do: %{
+      "key" => "seen_tip_" <> key,
+      "version" => 1,
+      "value_type" => %{"type" => "bool", "default" => false},
+      "scopes" => ["player"],
+      "meaning" => "Recipe #{key}'s tip was shown (action_recipe@1): only that recipe writes it."
+    }
+
+  @doc "The facts with each tipped recipe's seen_tip_<key> added; an authored one is RESERVED_FACT."
+  def tip_facts(facts, defs) do
+    for {key, {_, _, %{"tip" => _}}} <- defs["recipe"], reduce: {facts, []} do
+      {acc, ds} ->
+        name = "seen_tip_" <> key
+        authored = for {rel, steps, _} <- [acc[name]], do: diag("RESERVED_FACT", at(rel, steps))
+        {Map.put(acc, name, {"cartridge.json", [], tip_spec(key)}), ds ++ authored}
+    end
   end
+
+  # A tip needs kernel_api 1.46 and a key that leaves room for seen_tip_ in a 64-character Key.
+  defp tip(rel, %{"tip" => _} = r, m),
+    do:
+      if(String.length(r["key"]) <= 55,
+        do: [],
+        else: [diag("SCHEMA_VIOLATION", at(rel, ["key"]), %{"error" => "invalid_value"})]
+      ) ++
+        if(api(m) < [1, 46],
+          do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+          else: []
+        )
+
+  defp tip(_, _, _), do: []
 
   defp recipe({rel, r}, ctx) do
     taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
@@ -69,6 +103,7 @@ defmodule Loka.Content.Recipes do
       duplicate,
       mismatch(rel, r),
       duration(rel, r, ctx.m),
+      tip(rel, r, ctx.m),
       shared(rel, r, ctx.shared)
     ])
   end
@@ -134,8 +169,11 @@ defmodule Loka.Content.Recipes do
     check =
       if is_map_key(r, "check"), do: owned(at(rel, ["check"]), "check_passed", events), else: []
 
+    tip = if is_map_key(r, "tip"), do: owned(at(rel, ["tip"]), "fact_changed", events), else: []
+
     owned(at(rel, []), "recipe", {caps, owners(registry, ["definitions"])}) ++
       check ++
+      tip ++
       for {s, steps} <- steps(r),
           event = @step_event[s["op"]],
           event != nil,
@@ -200,11 +238,12 @@ defmodule Loka.Content.Recipes do
   defp texts(rel, r, text) do
     for {steps, key} <- [
           {["label"], r["label"]}
-          | for(
-              {name, o} <- r["outcomes"],
-              {k, v} <- Map.take(o["narration"], ~w(actor observers)),
-              do: {["outcomes", name, "narration", k], v}
-            )
+          | for({k, v} <- Map.take(r, ["tip"]), do: {[k], v}) ++
+              for(
+                {name, o} <- r["outcomes"],
+                {k, v} <- Map.take(o["narration"], ~w(actor observers)),
+                do: {["outcomes", name, "narration", k], v}
+              )
         ],
         not is_map_key(text, key),
         do: unresolved(rel, steps, key)

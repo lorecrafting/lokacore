@@ -38,7 +38,8 @@ const quest = {
   key: 'find_key',
 };
 let n = 0;
-function play(w: World, p: object): World {
+const play = (w: World, p: object): World => run(w, p).world;
+function run(w: World, p: object) {
   n += 1;
   const r = step(
     w,
@@ -50,7 +51,7 @@ function play(w: World, p: object): World {
     n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
+  return r;
 }
 function wait(w: World, minutes: number): World {
   n += 1;
@@ -141,5 +142,48 @@ test('the loader refuses unordered hints, hints without real time and hints belo
       INSTALLED,
     );
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
+  }
+});
+
+// Breaks (action tip): the tip shown on every perform (seen_tip_ never read or never assigned),
+// never shown, or shown before the outcome's own line.
+test('a recipe tip is read once, on the first perform, after its narration', () => {
+  const lines = (r: ReturnType<typeof run>) =>
+    r.decision.kind === 'accepted' ? r.decision.narration?.map((l) => l.key) : r.decision;
+  const first = run(fresh(), { type: 'perform', action: 'search_floor' });
+  assert.deepEqual(lines(first), ['narration.search_floor', 'tip.search_floor']);
+  const again = run(first.world, { type: 'perform', action: 'search_floor' });
+  assert.deepEqual(lines(again), ['narration.search_floor']);
+});
+
+// Breaks (loader twin of the compiler's RESERVED_FACT): an artifact whose recipe writes the
+// engine's seen_tip_<key>, or whose seen_tip_<key> FactSpec is missing, loads.
+test('the loader refuses a write of seen_tip_<key> and a missing seen_tip_<key> spec', () => {
+  const recipe = `.cartridge.recipes["quest_sampler@0.0.1:recipe/search_floor"]`;
+  const seen = 'quest_sampler@0.0.1:fact/seen_tip_search_floor';
+  const rows: [(c: Obj) => void, string][] = [
+    [
+      (c) => {
+        const step =
+          c.recipes['quest_sampler@0.0.1:recipe/search_floor'].outcomes.success.sequence[0];
+        step.fact = { ...step.fact, key: 'seen_tip_search_floor' };
+      },
+      `${recipe}.outcomes.success.sequence[0].fact`,
+    ],
+    [(c) => delete c.facts[seen], `.cartridge.facts["${seen}"]`],
+  ];
+  for (const [change, path] of rows) {
+    const c = structuredClone(content) as unknown as Obj;
+    change(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
+      'RESERVED_FACT',
+      path,
+    ]);
   }
 });

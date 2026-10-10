@@ -5,6 +5,15 @@ import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
+/** Toolbox row W23: the FactSpec the compiler adds for a recipe's tip (recipes.ex tip_spec). */
+export const tipSpec = (key: string) => ({
+  key: `seen_tip_${key}`,
+  version: 1,
+  value_type: { type: 'bool', default: false },
+  scopes: ['player'],
+  meaning: `Recipe ${key}'s tip was shown (action_recipe@1): only that recipe writes it.`,
+});
+
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room,
@@ -14,6 +23,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 // actor names an NPC or item of it, as its role says; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
+// Toolbox row W23: a tip resolves, needs kernel_api 1.46 and a key of at most 55 characters.
 export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const taken = new Set([
@@ -50,7 +60,13 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
         if (p.role !== 'actor')
           named(p[p.role], p.role, `${path}.narration.participants${step(n)}.${p.role}`);
     }
-    text(r, ['label'], at);
+    text(r, ['label', 'tip'], at);
+    if (r.tip && r.key.length > 55)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.key`, { error: 'invalid_value' }));
+    if (r.tip && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
   }
   return [...out, ...contributions(c), ...attributes(c, { named, text, typedValue })];
 }

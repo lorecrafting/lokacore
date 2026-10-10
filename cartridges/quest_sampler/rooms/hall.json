@@ -1,5 +1,14 @@
 {
   "title": "room.hall.title",
   "description": "room.hall.description",
-  "exits": {}
+  "exits": {},
+  "details": {
+    "floor": {
+      "aliases": [
+        "floor",
+        "dust"
+      ],
+      "description": "detail.floor"
+    }
+  }
 }

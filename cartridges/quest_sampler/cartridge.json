@@ -15,7 +15,10 @@
       "containment": 1,
       "policy": 1,
       "quest": 1,
-      "schedule": 1
+      "schedule": 1,
+      "inspectable_detail": 1,
+      "fact": 1,
+      "action_recipe": 1
     },
     "client_features": []
   },

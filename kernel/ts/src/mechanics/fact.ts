@@ -51,7 +51,7 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
-  owner?: 'skills' | 'patrol' | 'service' | 'scene',
+  owner?: 'skills' | 'patrol' | 'service' | 'scene' | 'tip',
 ): R {
   ownership(world, s.fact, owner);
   const scope = scopeOf(world, actor, s.fact);
@@ -69,16 +69,32 @@ export function assigned<R extends Assigned>(
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
 }
 
+/** Toolbox row W23: the engine-owned fact a recipe's tip sets once shown (compiler-added). */
+export const seenTip = (world: World, recipe: string): DefinitionRef => ({
+  cartridge_id: world.cartridge.manifest.id,
+  cartridge_version: world.cartridge.manifest.version,
+  kind: 'fact',
+  key: `seen_tip_${recipe}` as DefinitionRef['key'],
+});
+
 function ownership(
   world: World,
   ref: DefinitionRef,
-  owner?: 'skills' | 'patrol' | 'service' | 'scene',
+  owner?: 'skills' | 'patrol' | 'service' | 'scene' | 'tip',
 ) {
   if (
     owner !== 'skills' &&
     Object.values(world.cartridge.skills ?? {}).some(
       (skill) =>
         ref.key === `skill_${skill.key}` || (skill.growth && ref.key === `uses_${skill.key}`),
+    )
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'tip' &&
+    ref.key.startsWith('seen_tip_') &&
+    Object.values(world.cartridge.recipes ?? {}).some(
+      (r) => r.tip && ref.key === `seen_tip_${r.key}`,
     )
   )
     throw new KernelError('precondition_failed');

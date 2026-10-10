@@ -1,0 +1,34 @@
+{
+  "label": "actions.search_floor",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "floor"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "floor_searched",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_floor"
+      }
+    }
+  },
+  "tip": "tip.search_floor"
+}
