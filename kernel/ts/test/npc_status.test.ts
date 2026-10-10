@@ -15,6 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));
@@ -146,6 +147,11 @@ test('a fatal tick kills the guard and ends its other status', () => {
   assert.equal(row(w, 'npc', 'guard', 'burning')?.active, false);
   const corpses = Object.values(w.state.created ?? {}).filter((c) => c.origin.kind === 'death');
   assert.equal(corpses.length, 1);
+  // Breaks: a dead NPC taking a fresh status (an entity_died reaction's subject is the victim).
+  assert.deepEqual(
+    applyStatus(w, id(w, 'npc', 'guard'), ref('status', 'poison'), 1, () => 'x'),
+    [],
+  );
 });
 
 // Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field

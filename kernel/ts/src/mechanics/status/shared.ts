@@ -6,6 +6,8 @@ import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
 import { type Mint, refString, type World } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { HOLDERS } from '../../foundation/compose_status.ts';
+import { living } from '../death/shared.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -51,14 +53,13 @@ export const endStatus = (
 });
 
 /** The authored NPC or item instance `body` declares `status` immune (row G3). */
+// ponytail: authored instances only; read created.definition when a spawned pack needs immunity.
 export const immune = (world: World, body: EntityId, status: DefinitionRef) =>
   !!world.entities[body]?.immune?.some((s) => refString(s) === refString(status));
 
-const HOLDERS = new Set(['body', 'npc', 'item']); // never a room, detail or slot
-
 /**
- * Apply or refresh `status` on `body` (a body, NPC or item) at the world's clock; an unknown or
- * immune status, or another kind of entity, changes nothing.
+ * Apply or refresh `status` on `body` (a body, a living NPC or an item) at the world's clock; an
+ * unknown or immune status, a dead NPC or another kind of entity changes nothing.
  */
 // size: allow 45, a first application writes the row and schedules its job; a refresh writes only the end
 export function applyStatus(
@@ -69,8 +70,8 @@ export function applyStatus(
   mint: Mint,
 ): DeltaOp[] {
   const spec = specOf(world, status);
-  if (!spec || !HOLDERS.has(world.knownEntities[body]?.kind ?? '') || immune(world, body, status))
-    return [];
+  const holds = HOLDERS.includes(world.knownEntities[body]?.kind ?? '') && living(world, body);
+  if (!spec || !holds || immune(world, body, status)) return [];
   const prior = world.state.statuses?.[statusKey(body, status)];
   const active = prior?.active ? (prior as Active) : undefined;
   const now = world.state.clock;
