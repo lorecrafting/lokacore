@@ -33,6 +33,10 @@ export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.
   return result.world;
 }
 
+// Row 6b: an ally strikes the player's target, last; a round whose rejected draws left fewer
+// than two of its eight (hit, damage) skips the ally's turn rather than exhausting the budget.
+const allyFits = (r: Round) => r.draws <= 6;
+
 function draw(r: Round, bound: number) {
   const [value, rng, spent] = uniformCounted(r.rng, bound, 8 - r.draws);
   r.rng = rng;
@@ -51,8 +55,8 @@ export function attack(
   close: DeltaOp,
 ) {
   const player = attacker_id === row.body_id;
-  // Toolbox row 6b: an ally strikes the player's target; only a foe strikes the player.
   const foe = !player && !ally(world, attacker_id);
+  if (!player && !foe && !allyFits(r)) return;
   const target_id = foe ? row.body_id : row.npc_id;
   const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);

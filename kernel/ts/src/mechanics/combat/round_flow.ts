@@ -128,7 +128,7 @@ function packTurns({
       !eligible(at, row, target) ||
       !living(at, row.body_id)
     )
-      break;
+      continue;
     if (attacker === row.body_id && !standing(at, row.character_id)) continue;
     if (attacker === selected && maybeFlight(at, selected, job, r, settings)) continue;
     attack(at, command, mint, encounter_id, { ...current, npc_id: target }, attacker, r, close);

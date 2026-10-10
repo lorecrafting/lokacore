@@ -249,3 +249,48 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
   // 6 HP: at +150 the tick takes 1 and the round the player's 2 and the guard's 1.
   assert.deepEqual([hp(after, a), hp(after, b)], [6, 2]);
 });
+
+// Toolbox row 6b. Breaks: the guard's turn is lost when the player's blow kills the opponent
+// whose turn comes next (the pack loop stops instead of passing to the guard).
+test('when the player kills the striking goblin, the guard still hits the other', () => {
+  const [w, a, b] = engaged();
+  const den = w.state.containers[w.body];
+  const moved = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [guardOf(w)]: den } },
+  };
+  const weak = apply(moved, [adjust(moved, a as never, resourceRef(w, 'hp'), -4, {}).op], false);
+  assert.ok('world' in weak);
+  const after = round(weak.world);
+  assert.deepEqual([hp(after, a), hp(after, b)], [0, 5]);
+});
+
+// Toolbox row 6b. Breaks: the guard's two draws (hit, damage 1-2) run past the round's eight,
+// faulting the wait, or the guard is skipped while two remain. The player's hit (bound 100) loses
+// its first four, three or two raw draws to rejection in these states; the player's and the
+// raider's damage rolls (1-3, 1-2) and the raider's hit then leave the guard none, one or two.
+test('a round with fewer than two of its eight draws left skips the guard; with two it strikes', () => {
+  const c = structuredClone(content) as any;
+  c.world.combat.player_attack.damage_max = 3;
+  c.npcs['targets_sampler@0.0.1:npc/raider'].attack.damage_max = 2;
+  c.npcs['targets_sampler@0.0.1:npc/guard'].attack.damage_max = 2;
+  for (const [rng, strikes] of [
+    [[2094537, 1697854259, 1831315020, 1130250676], false],
+    [[0, 3291316952, 3775549605, 2703766232], false],
+    [[0, 889565275, 2048508316, 0], true],
+  ] as const) {
+    n = 0;
+    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    const raider = w.entityIds['targets_sampler@0.0.1:npc/raider']!;
+    w = ok(
+      play(ok(play(w, { type: 'move', direction: 'south' })), {
+        type: 'attack',
+        target_id: raider,
+      }),
+    );
+    const r = advance({ ...w, state: { ...w.state, rng } } as World);
+    ok(r);
+    const keys = r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key) : [];
+    assert.equal(keys.includes('combat.ally_hit'), strikes, keys.join());
+  }
+});

@@ -22235,5 +22235,35 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "allies": [
+        "guard"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allies/0",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]
