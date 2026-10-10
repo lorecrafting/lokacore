@@ -41,6 +41,23 @@ export const CharacterUnknown: StoryObj = {
   name: 'Character unknown',
 };
 export const CharacterFull: StoryObj = { ...pageStory(CharacterFullView), name: 'Character full' };
+// Chapter 1 authors no levelling, so the generated Character view gets the levelling sampler's
+// level-2 projection (kernel/ts/test/levelling.test.ts) and its one raise_attribute offer.
+const raise = { action_key: 'raise_attribute', label: 'action.raise_attribute', available: true };
+export const CharacterPointsToSpend: StoryObj = {
+  ...pageStory({
+    ...CharacterFullView,
+    view: {
+      ...CharacterFullView.view,
+      levelling: { level: 2, experience: 30, next: 100, unspent: 1 },
+      actions: [
+        ...CharacterFullView.view.actions,
+        { ...raise, target: { kind: 'none' }, input: ['attribute'] },
+      ],
+    },
+  }),
+  name: 'Character with points to spend',
+};
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
 export const Ancestry: StoryObj = { ...pageStory(AncestryView), name: 'Ancestry' };

@@ -164,7 +164,7 @@ accepted `removed`, one transfer holder → body. These checks are one read-only
 rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
 `has_item` climbs containers, so a worn item still counts. A worn item's affects move its
 wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)); when the hp maximum
-is derived, wearing or removing an item with affects first settles hp ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). Slot compatibility
+is derived, wearing or removing an item with affects first settles hp, as every attribute writer does ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). Slot compatibility
 and dual wield, curses and no-remove items are LATER ([ROADMAP](../ROADMAP.md)).
 
 <a id="position1-kerneltssrcrulespositionts"></a>
@@ -280,9 +280,11 @@ The player body's hp maximum moves with the derived `hp_max` table
 its effective maximum is the authored `maximum` plus the bonus, saturated to the ResourceInt range and never below `minimum`, read on
 each use and never stored. Every bound above uses it: queries, saturation, costs, regeneration
 (which stops there), the GameView maximum and band, the status tick and the death restore (capped
-at it). The start value is unchanged, so a raised maximum is reached by regeneration. Wearing or
-removing an item with affects first settles hp with a zero-amount `resource.adjust` under the old
-maximum, as position@1 does, so credit banked while capped is discarded and never granted by the new
+at it). The start value is unchanged, so a raised maximum is reached by regeneration. Every writer
+of an attribute change that can move it first settles hp with a zero-amount `resource.adjust` under
+the old maximum, as position@1 does: wear and remove of an item with affects ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)),
+`raise_attribute` ([row 4](#experience-and-levelling-toolbox-row-4)) and `choose_ancestry`
+([D11](#d11-character-choice-selected-contract)), and any later attribute writer (PM ruling 2026-10-09, `loka-kgd.11`), so credit banked while capped is discarded and never granted by the new
 maximum. Composition
 carries it as the non-saved `resource_maxima` map, keyed by the exact canonical resource target,
 in both kernels' composition and independent replay; an entry replaces the spec's `maximum` for
@@ -1722,10 +1724,10 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 
 [Toolbox row 4](../MECHANICS-TOOLBOX.md#ranked-toolbox); the PM decision is in Beads `loka-kgd.11` (2026-10-09): class-free (owner 2026-10-08), a new per-character row, the D11 selection row stays immutable. Draft by the developer (`loka-kgd.11` notes); items marked *completion* fill places where the decision was silent.
 
-- **Declaration.** A cartridge may declare `world.levelling`: `thresholds`, the strictly increasing positive experience totals that reach levels 2, 3 and so on; `points_per_level`, the attribute points each level grants (at least 1); `kills`, a list of `{npc, experience}`, the experience a credited kill of that NPC definition grants. Every number is the cartridge's. It needs attributes@1.
+- **Declaration.** A cartridge may declare `world.levelling`: `thresholds`, the strictly increasing positive experience totals that reach levels 2, 3 and so on; `points_per_level`, the attribute points each level grants (at least 1); `kills`, a list of `{npc, experience}`, the experience a credited kill of that NPC definition grants; `level_up`, the TextKey of the level-up line. Every number is the cartridge's. It needs attributes@1.
 - **Row.** One `levelling` row per character, `{experience, allocated}`, `allocated` mapping an attribute's DefinitionRefString to the points spent on it; absent reads as zero experience and nothing allocated. *Completion:* level and unspent points are derived on read, never stored: level is 1 plus the count of thresholds at or below the experience; unspent is `points_per_level × (level − 1) − Σ allocated`.
 - **Write.** The delta op `levelling.set {character_id, expected, value}` composes, in both kernels, only when the stored row equals `expected` (null when absent) and neither the experience nor any allocated count falls. The story rule keeps Σ allocated within the granted points.
 - **Experience.** Each death the combat credit names for the player character, whose victim definition matches a `kills` entry, adds its experience; several kills in one decision chain their writes. The reaction step `experience.grant {amount}` adds `amount` for the acting character, so a quest's `quest_resolved` reaction rewards it. Experience saturates at the ResourceInt maximum.
-- **Spending.** `raise_attribute {attribute}` is offered once per authored attribute while unspent points remain and adds one allocated point; with none left nothing is offered, and a forged invocation is refused by keyed admission. Replay returns the original receipt.
-- **Reading.** [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads selected (else starting) value plus allocated points plus worn affects (row 3), saturated as in row 2, so every derived stat follows. The GameView carries `{level, experience, next, unspent}` (`next` absent at the top level); reaching a level adds one receipt narration line.
-- **Sampler.** `cartridges/levelling_sampler`: rats grant 10 experience, level 2 at 30; three kills reach level 2 with one point; Raise STR moves the derived damage by the cartridge's table.
+- **Spending.** One `raise_attribute` action with an `attribute` input (an authored attribute's DefinitionRef) is offered while unspent points remain; the Book shows one Raise card per authored attribute. It first settles a derived hp maximum ([resource@1](#resource1-kerneltssrcmechanicsresourcets)), then adds one allocated point; with none left nothing is offered, and a forged invocation is refused by keyed admission (the rule also refuses it, `invalid_state`). Replay returns the original receipt.
+- **Reading.** [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads selected (else starting) value plus allocated points plus worn affects (row 3), saturated as in row 2, so every derived stat follows. The GameView carries `{level, experience, next, unspent}` (`next` absent at the top level); reaching a level adds one receipt narration line, the `level_up` text: *completion:* after the whole proposal (root, reactions and jobs) is composed, the last `levelling.set` of the player character in it is compared with the stored row before the step, and the line is appended once at the end of the narration when its level is higher, so a step that crosses two thresholds still adds one line.
+- **Sampler.** `cartridges/levelling_sampler`: three rats grant 10 experience each, thresholds 30 and 100, one point per level; three kills reach level 2 with one point; resolving the den quest grants 20 by `experience.grant`; Raise STR moves the derived damage (STR, divisor 1) and Raise CON the derived hp maximum (CON, hp regenerating 1 per hour) by the cartridge's tables.

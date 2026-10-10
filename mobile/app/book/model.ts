@@ -80,7 +80,18 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
     return [...stack.slice(0, gone), { kind: 'dialogue', speaker: page.id }];
   return stack.slice(0, gone);
 }
-const OWN = ['flee', 'look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep'];
+const OWN = [
+  'flee',
+  'look',
+  'choose',
+  'close_choice',
+  'continue',
+  'stand',
+  'sit',
+  'rest',
+  'sleep',
+  'raise_attribute', // the Character page's own cards
+];
 
 export function group(buttons: Button[]) {
   const dir = (b: Button) => (b.input as { direction?: string }).direction;

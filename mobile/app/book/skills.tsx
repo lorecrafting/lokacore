@@ -3,6 +3,8 @@ import { Text } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Thing } from './model.ts';
 import { note, prose, usePalette } from './palette.ts';
+import { ActionCard, Cards } from './actions.tsx';
+import type { Button } from './presenter.ts';
 
 export function SkillDetails(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
@@ -26,6 +28,35 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
             {p.text(s.label)} — {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
           </Text>
         ))}
+    </>
+  );
+}
+
+type Levelling = NonNullable<GameView['levelling']>;
+const points = (n: number) => (n ? `, ${n} point${n === 1 ? '' : 's'} to spend` : '');
+/** The Character page's level line (row 4), after the ancestry line. */
+export const levelLine = (l: Levelling) => `Level ${l.level}${points(l.unspent)}`;
+/** The resource block's last line, plain like pennies: no band tone, no next at the top level. */
+export const xpLine = (l: Levelling) =>
+  `xp  ${l.experience}${l.next === undefined ? '' : ` / ${l.next}`}`;
+
+/** The Raise cards, the Character page's last block, while raise_attribute is offered. */
+export function RaiseCards(p: {
+  buttons?: Button[];
+  pending?: boolean;
+  press?: (b: Button) => void;
+}) {
+  const c = usePalette();
+  return (
+    <>
+      <Cards>
+        {p.buttons
+          ?.filter((b) => b.action_key === 'raise_attribute')
+          .map((b) => (
+            <ActionCard key={b.label} b={b} press={p.press!} />
+          ))}
+      </Cards>
+      {p.pending && <Text style={note(c)}>save not confirmed</Text>}
     </>
   );
 }

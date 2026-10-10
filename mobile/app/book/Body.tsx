@@ -97,7 +97,17 @@ function sectionPage(p: BodyProps, page: Page) {
   const openThing = (id: string) => p.open({ kind: 'thing', id });
   if (page.kind === 'contents')
     return <ContentsPage open={(kind: Section) => p.open({ kind })} world={p.world} />;
-  if (page.kind === 'character') return <CharacterPage view={view} text={text} world={p.world} />;
+  if (page.kind === 'character')
+    return (
+      <CharacterPage
+        view={view}
+        text={text}
+        world={p.world}
+        buttons={p.screen.buttons}
+        pending={p.screen.pending}
+        press={p.press}
+      />
+    );
   if (page.kind === 'map')
     return (
       <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} world={p.world} />
