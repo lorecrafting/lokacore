@@ -17,6 +17,8 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -440,7 +442,7 @@ test('an answer returns to the hub: a fresh pending row re-offers the same choic
 });
 
 // Breaks (loka-x6t.5 ruling): an open hub outliving the speaker leaving the room (Bram's
-// scheduled walk to the green) or the player's; the close another op than Leave's.
+// scheduled walk to the green), the player's or the speaker's death; the close another op than Leave's.
 test('a hub conversation ends as Leave would once the speaker or the player leaves', () => {
   const left = ok(open(hub()), wait, 4).world;
   assert.equal(left.state.containers[BRAM], GREEN);
@@ -452,6 +454,21 @@ test('a hub conversation ends as Leave would once the speaker or the player leav
     continuation_id: C,
   });
   assert.equal(gameView(away).choice, undefined);
+  // Bram dies where he stands (controlled: HP-bearing, HP row at 0); the next action ends it.
+  const w = open(hub());
+  const hp = key({ kind: 'resource', entity_id: BRAM, resource: resourceRef(w, 'hp') } as never);
+  const dead = {
+    ...w,
+    entities: { ...w.entities, [BRAM]: { ...w.entities[BRAM]!, hp: true } },
+    state: {
+      ...w.state,
+      resources: { ...w.state.resources, [hp]: { value: 0, at: w.state.clock } },
+    },
+  } as World;
+  const { decision: d, world: after } = ok(dead, drop, 4);
+  assert.equal(after.state.containers[BRAM], after.state.containers[BODY]);
+  assert.deepEqual(d.delta.ops.at(-1), { op: 'choice.close', writer_group: 1, continuation_id: C });
+  assert.equal(gameView(after).choice, undefined);
 });
 
 // Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
