@@ -103,6 +103,7 @@ function attackEvent(
   };
 }
 
+// size: allow 42, the fatal branch passes the round's RNG to drop rolls and takes it back
 function injure(
   world: World,
   command: Pick<Command, 'id'>,
@@ -135,7 +136,9 @@ function injure(
         credited_character_id: player ? row.character_id : null,
       },
       mint,
+      r.rng,
     );
+    r.rng = died.rng!;
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
   } else {

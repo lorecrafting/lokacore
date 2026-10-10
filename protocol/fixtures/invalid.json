@@ -8215,7 +8215,7 @@
         },
         "north": {}
       },
-      "tags": []
+      "labels": []
     },
     "errors": [
       {
@@ -8231,7 +8231,7 @@
         "code": "pattern_mismatch"
       },
       {
-        "path": "/tags",
+        "path": "/labels",
         "code": "unknown_property"
       },
       {
@@ -12501,6 +12501,310 @@
       {
         "path": "/daily_schedule/6",
         "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": []
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "missing_property"
+      },
+      {
+        "path": "/drops/0/item",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 0
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 101
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": "50"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50,
+          "weight": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/weight",
+        "code": "unknown_property"
       }
     ]
   },
@@ -18963,6 +19267,221 @@
       {
         "path": "/levelling/unspent",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_unknown_tag",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "silver"
+    },
+    "errors": [
+      {
+        "path": "/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_actor_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "actor",
+      "tag": "metal"
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_two_subjects",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "room",
+      "barrier": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "barrier",
+        "key": "door"
+      },
+      "tag": "metal"
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_no_subject_no_tag",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag"
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/tag",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "item_tags_not_a_list",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": "burnable"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "item_tags_empty",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": []
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "item_tag_unknown",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": [
+        "silver"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "room_tags_not_a_list",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hall",
+      "title": "room.hall.title",
+      "description": "room.hall.description",
+      "exits": {},
+      "tags": "wooden"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "room_tag_unknown",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hall",
+      "title": "room.hall.title",
+      "description": "room.hall.description",
+      "exits": {},
+      "tags": [
+        "silver"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "barrier_tags_not_a_list",
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "barrier.door.short",
+      "initial": "closed",
+      "tags": "metal"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "barrier_tag_unknown",
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "barrier.door.short",
+      "initial": "closed",
+      "tags": [
+        "silver"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
       }
     ]
   }

@@ -1,0 +1,72 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "tags": [
+    "wooden"
+  ],
+  "exits": {
+    "north": {
+      "to": "north_room",
+      "barrier": "wooden_door"
+    },
+    "east": {
+      "to": "east_room",
+      "barrier": "iron_door"
+    }
+  },
+  "details": {
+    "wooden_door": {
+      "aliases": [
+        "wooden_door",
+        "door"
+      ],
+      "description": "detail.wooden_door",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "has_tag",
+              "barrier": "wooden_door",
+              "tag": "burnable"
+            }
+          },
+          "description": "detail.wooden_door.burnable"
+        }
+      ]
+    },
+    "iron_door": {
+      "aliases": [
+        "iron_door",
+        "door"
+      ],
+      "description": "detail.iron_door",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "has_tag",
+              "barrier": "iron_door",
+              "tag": "burnable"
+            }
+          },
+          "description": "detail.iron_door.burnable"
+        }
+      ]
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "has_tag",
+          "subject": "room",
+          "tag": "wooden"
+        }
+      },
+      "description": "room.hall.wooden"
+    }
+  ]
+}

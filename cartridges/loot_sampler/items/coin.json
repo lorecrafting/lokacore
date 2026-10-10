@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "coin"
+  ],
+  "short": "item.coin.short",
+  "room_line": "item.coin.room",
+  "description": "item.coin.description",
+  "location": {
+    "in": "npc",
+    "npc": "rat"
+  },
+  "mass_grams": 0
+}
