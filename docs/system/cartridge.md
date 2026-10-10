@@ -1543,6 +1543,10 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is a recipe on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. `kernel_api` at least **1.45** (for `opens_when`). Sampler: `cartridges/barrier_sampler`.
 
+## Trap declarations
+
+[Traps](mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12) add no field: two instance bool facts, a status, reactions on `entity_entered_room`, `check_failed {check}` and a reset event, and search and disarm recipes on a room detail with a `rating`, as the [status](#status-declarations), reaction, [skill growth and rating](#skill-growth-and-rating-declarations) declarations already check. `kernel_api` at least **1.46** when the reset is on `clock_hour`. Sampler: `cartridges/traps_sampler`.
+
 ## Quest deadlines
 
 Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields, needing `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. A reaction on `quest_failed` also needs 1.46. The legacy debt floor (1.14) applies to legacy deadlines only. Sampler: `cartridges/quest_sampler` (find_key).

@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "check_failed",
+    "check": "disarm_plate"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "poison"
+    }
+  ]
+}

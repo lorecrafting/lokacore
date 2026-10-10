@@ -1,0 +1,35 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "vault"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "plate_sprung",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "plate_disarmed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "poison"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "plate_sprung",
+      "value": true
+    }
+  ]
+}

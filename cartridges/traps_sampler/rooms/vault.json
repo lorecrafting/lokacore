@@ -1,0 +1,9 @@
+{
+  "title": "room.vault.title",
+  "description": "room.vault.description",
+  "exits": {
+    "south": {
+      "to": "antechamber"
+    }
+  }
+}
