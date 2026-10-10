@@ -65,20 +65,13 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   app,
   screen,
 }) => {
-  // Pennies stay off the status line; the Character section shows them.
-  const money = async () => {
-    await screen.getByRole('button', /; opens Contents$/).tap();
-    await screen.getByRole('button', 'Character, open').tap();
-    await expect(screen.getByText(/^pennies\s+18 \/ 1000$/)).toBeVisible();
-    await screen.getByRole('button', 'Back to World').tap();
-  };
   await begin({ app, screen }, 'Fey-touched');
   await go(screen, 'west', 'Boathouse');
   await screen.getByRole('button', 'Rope ferry, open').tap();
   await expect(screen.getByText('Fare: 2p.')).toBeVisible();
   await screen.getByRole('button', 'Board — 2p').doubleTap();
   await expect(screen.getByRole('button', 'Fen Isle Landing, look')).toBeVisible();
-  await money();
+  await money(screen);
   await go(screen, 'east', 'Isle Hut');
   await screen.getByRole('button', /^Mother Sedge is here\./).tap();
   await screen.getByRole('button', 'Learn swim — free Mother Sedge').tap();
@@ -86,25 +79,33 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   await expect(
     screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
   ).toBeVisible();
-  await money();
+  await money(screen);
   await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Isle Hut, look')).toBeVisible();
-  await screen.getByRole('button', /^Mother Sedge is here\./).tap();
-  await expect(
-    screen.getByText('Mother Sedge teaches you to keep afloat and swim. You have learned swim.'),
-  ).toBeVisible();
-  await screen.getByRole('button', 'Leave').tap();
+  // A fresh visit hides the past talk (book-ui.md, NPC dialogue); Character shows the lesson.
+  await screen.getByRole('button', /; opens Contents$/).tap();
+  await screen.getByRole('button', 'Character, open').tap();
+  await expect(screen.getByText(/^Swim — /)).toBeVisible();
+  await screen.getByRole('button', 'Back to World').tap();
   await isleTour(screen);
   await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Return — free').tap();
   await expect(screen.getByRole('button', 'Boathouse, look')).toBeVisible();
-  await money();
+  await money(screen);
   await reopen({ app, screen });
   await expect(screen.getByRole('button', 'Boathouse, look')).toBeVisible();
-  await money();
+  await money(screen);
 });
 
 // Every isle room from Isle Hut, ending at the Fen Isle Landing.
+// Pennies stay off the status line; the Character section shows them.
+async function money(screen: Screen) {
+  await screen.getByRole('button', /; opens Contents$/).tap();
+  await screen.getByRole('button', 'Character, open').tap();
+  await expect(screen.getByText(/^pennies\s+18 \/ 1000$/)).toBeVisible();
+  await screen.getByRole('button', 'Back to World').tap();
+}
+
 async function isleTour(screen: Screen) {
   await go(screen, 'up', 'Hut Loft');
   await go(screen, 'down', 'Isle Hut');
