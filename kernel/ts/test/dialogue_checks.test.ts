@@ -113,7 +113,8 @@ test('a check naming another NPC makes that NPC its subject', () => {
 });
 
 // Breaks: a failure applies the choice's sequence, resolves the choice (choice_resolved), keeps
-// the conversation open so the same sitting retries, skips the use, or GameView still offers a
+// the conversation open so the same sitting retries, skips the use, names the actor (not the
+// speaker) as the check's subject, or GameView still offers a
 // choice the choose would refuse; or a use is not counted, so the second talk fails again.
 test('a failed check reads its failure line, closes the talk, counts a use; a new talk passes', () => {
   const g = play(source);
@@ -127,6 +128,7 @@ test('a failed check reads its failure line, closes the talk, counts a use; a ne
       [2, 'fact_changed'],
     ],
   );
+  assert.equal(d.events[0].payload.subject_id, g.entity(`${P}:npc/guard`));
   assert.equal(d.narration[0].key, 'narration.guard.intimidate_failed');
   assert.equal(g.fact('gate_open'), undefined);
   assert.equal(g.fact('uses_intimidate'), 1);

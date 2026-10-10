@@ -68,7 +68,8 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
  * pending row of the same sitting (`choice.open` of the row's own bound fields, never rebound) and
  * its `choice_opened` after `choice_resolved`, unless the answer ends the conversation: its
  * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, it was checked (row 14:
- * a pass may not be re-chosen for free uses), or it was the only choice.
+ * the reopened hub row could not drop the one choice; see mechanics.md Retry rule), or it was the
+ * only choice.
  */
 export function hub<T extends { kind: string }>(
   world: World,
