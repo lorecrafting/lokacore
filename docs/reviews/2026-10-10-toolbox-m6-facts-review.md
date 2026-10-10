@@ -37,3 +37,16 @@
 
 - A future despawn or entity-removal row must pin the known-subject check (`fact.ts:219-223`, `facts-save.ts`) first; `proposal_adopt.ts:28` checks only `typedFact`, so an unknown subject would commit and then refuse at reopen.
 - `Loka.Content.Floors` exists to keep `compiler.ex` within its allowance; it is 10 lines with one call site, and is acceptable.
+
+## Fix round 1 (head `4669c2a6a94499cfb00a3f4ab04b8d0f91e37972`)
+
+Scope: commits `004e3dac`, `a16160c6`, `4669c2a6`, plus the code they touch and its direct callers (`dialogue-receipt.ts` `consequences`, `dialogue-save.ts` `checkAssignments`, `topics-save.ts`, `deadline-save.ts`). Hosted ci and book-e2e green (coordinator report).
+
+- **F1 resolved.** `assignmentEvidence` builds the target with `targetOf` at the speaker. The speaker is the row's binding of the dialogue's npc role, and that row is checked against `bind(source)` first. Both the op's `subject_id` and the `fact_changed` payload are compared. `BOUND` is now escort, receive and hand_over (`dialogue-save.ts` `checkAssignments` reads them with `value` and no subject), a riddle answer with `wrong_limit` (`topics-save.ts:21-23`) and a legacy `deadline.fact` quest dialogue (`deadline-save.ts`). This matches the readers I found. The accept, payment, exchange, lesson_payment and patrol choices now go through the subject-aware check. My repros rerun: riddle dialogue and `skill.acquire` + `fact.assign trust 2` both reopen and replay, with the smith at 2 and the miller at 0.
+- **F2 resolved.** Removing the `policy.ts:95` guard now fails "fact_compare at subject target with no target reads false".
+- **N3 resolved.** The loader refuses `subject: "target"` under reactions, quests, barriers and skills. Elixir has no site walk, so the compiler still emits such an artifact and the loader refuses it at install. This is the same split as the existing FACT_SCOPE_UNSUPPORTED checks: no rule result differs between the kernels, and authors still get a typed diagnostic. Accepted.
+- Mutants, all caught: payload `subject_id` dropped (2 mobile tests); op `subject_id` compare dropped (the moved-subject receipt test); TARGETLESS branch disabled (kernel loader test); `policy.ts:95` guard removed.
+- Row 15 probe (sampler copy, not committed): `greet` `fact.assign trust 1` (pair fact at the speaker), then the `item_acquired` reaction `fact.assign trust 2` on giving the apple, writes the same smith row (smith 2, miller 0). It survives cold reopen and replay. A reaction `fact.adjust` is still row 15's work.
+- Open, not findings: a room variant's `subject: "target"` still loads and reads false; recovery skips `fact.adjust` steps (as before W2); a despawn row must pin the known-subject check.
+
+Verdict after fix round 1: **APPROVE WITH NOTES**.
