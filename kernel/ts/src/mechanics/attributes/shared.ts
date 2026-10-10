@@ -4,6 +4,7 @@ import type {
   DefinitionRef,
   DerivedStat,
   EntityId,
+  Tag,
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { divide, saturate } from '../../foundation/int.ts';
@@ -34,21 +35,31 @@ export function value(world: World, actor: CharacterId, attribute: DefinitionRef
   return base === undefined ? base : saturate(base + allocated + bonus);
 }
 
+/** The items worn by the actor's body: those in its slot holders (equipment@1). */
+function wornItems(world: World, actor: CharacterId) {
+  const body = bodyOf(world, actor);
+  if (!body) return [];
+  const holders = new Set(values(world.slots).filter((h) => world.state.containers[h] === body));
+  // ponytail: scans every placement per read; index worn items if worlds with affects grow large.
+  return Object.entries(world.state.containers).flatMap(([item, at]) => {
+    const e = holders.has(at) ? world.entities[item] : undefined;
+    return e?.kind === 'item' ? [e] : [];
+  });
+}
+
 /** The saturated sum of `attribute`'s affects on the items worn by the actor's body (row 3). */
 export function worn(world: World, actor: CharacterId, attribute: DefinitionRef) {
-  const body = bodyOf(world, actor);
-  if (!body || !Object.values(world.cartridge.items ?? {}).some((i) => i.affects)) return 0;
-  const holders = new Set(values(world.slots).filter((h) => world.state.containers[h] === body));
+  if (!Object.values(world.cartridge.items ?? {}).some((i) => i.affects)) return 0;
   const ref = refString(attribute);
-  let sum = 0;
-  // Plain sums of 32-bit amounts stay exact. ponytail: scans every placement per read; index worn items if worlds with affects grow large.
-  for (const [item, at] of Object.entries(world.state.containers)) {
-    const e = holders.has(at) ? world.entities[item] : undefined;
-    if (e?.kind === 'item')
-      for (const a of e.affects ?? []) if (refString(a.attribute) === ref) sum += a.modifier;
-  }
+  let sum = 0; // plain sums of 32-bit amounts stay exact
+  for (const e of wornItems(world, actor))
+    for (const a of e.affects ?? []) if (refString(a.attribute) === ref) sum += a.modifier;
   return saturate(sum);
 }
+
+/** The `wearing` leaf (toolbox row W25): a worn item's definition declares `tag`. */
+export const wearing = (world: World, actor: CharacterId, tag: Tag) =>
+  wornItems(world, actor).some((e) => e.tags?.includes(tag));
 
 /**
  * The saturated sum of `attribute`'s `modifies` over the statuses active on `holder` (row 2c): one

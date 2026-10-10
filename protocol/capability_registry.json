@@ -73,6 +73,9 @@
     ],
     "definitions": [
       "slot"
+    ],
+    "policies": [
+      "wearing"
     ]
   },
   {
@@ -319,6 +322,9 @@
     ],
     "policies": [
       "time_window"
+    ],
+    "events": [
+      "clock_hour"
     ]
   },
   {
