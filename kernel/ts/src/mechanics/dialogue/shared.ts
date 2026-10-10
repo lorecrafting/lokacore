@@ -24,7 +24,6 @@ import type {
   PatrolDraw,
   RoleBinding,
   TextKey,
-  VersionedPolicy,
 } from '../../contracts.gen.ts';
 import { same } from '../../foundation/compose.ts';
 import {
@@ -35,7 +34,7 @@ import {
   type Steps,
   type World,
 } from '../../runtime/decision.ts';
-import { holds } from '../policy.ts';
+import { ALWAYS, holds } from '../policy.ts';
 import { carrying } from '../containment/shared.ts';
 import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
@@ -249,7 +248,6 @@ export function choiceView(
 
 export { speaks, spokenBy, talkRefused, talks, pending, talking, leave } from './selection.ts';
 
-export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */
 export const MODAL: readonly string[] = ['choose', 'close_choice'];
 

@@ -52,7 +52,23 @@ const act = (w: World, p: object) => {
   assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
   return s.world;
 };
-const fresh = () => newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+const fresh = (c = content) => newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+// The sampler loaded with a test-local change to its compiled cartridge.
+const reload = (change: (c: any) => void) => {
+  const c = structuredClone(source);
+  change(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  return loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+};
+const variant = (change: (c: any) => void) => {
+  const r = reload(change);
+  assert.ok(r.ok, JSON.stringify(r));
+  return r.cartridge as Cartridge;
+};
 // Talk to Maud and pick `choice`.
 const maud = (w: World, choice: string) => {
   const talked = act(w, { type: 'talk', target_id: id(w, 'npc', 'maud') });
@@ -139,8 +155,56 @@ test('low standing makes Peg refuse and the guard engage, unless he trusts the p
   assert.equal(engaged(calm, calm.body), undefined);
 });
 
+// Breaks: friendly is read before hostile, so an NPC for whom both hold sells at the discount
+// and talks (mechanics.md G11: hostile while its condition holds, else friendly).
+test('hostile wins over friendly when both hold', () => {
+  const always = variant((c) => {
+    c.npcs[`${S}:npc/peg`].disposition.friendly.root = { op: 'all', items: [] };
+  });
+  assert.equal(bread(fresh(always)).price, 2);
+  const low = maud(fresh(always), 'wrong');
+  assert.equal(bread(low).available, false);
+  assert.equal(
+    run(low, { type: 'talk', target_id: id(low, 'npc', 'peg') }).decision.kind,
+    'rejected',
+  );
+});
+
+// Breaks: a hostile NPC engages in a sanctuary, or on a flight into its room (G11 Limits).
+test('no engage in a sanctuary or on a flight into a hostile room; a walk-in engages', () => {
+  const calm = variant((c) => (c.rooms[`${S}:room/gate`].sanctuary = true));
+  const safe = act(maud(fresh(calm), 'wrong'), { type: 'move', direction: 'east' });
+  assert.equal(engaged(safe, safe.body), undefined);
+  // Peg armed as the guard is: hostile at low standing, she engages a walk-in to the square.
+  const armed = variant((c) => {
+    const peg = c.npcs[`${S}:npc/peg`];
+    const guard = c.npcs[`${S}:npc/guard`];
+    Object.assign(peg, { hp: guard.hp, attack: guard.attack });
+    peg.disposition.engage = guard.disposition.engage;
+  });
+  const fight = act(maud(fresh(armed), 'wrong'), { type: 'move', direction: 'east' });
+  assert.equal(engaged(fight, fight.body)?.row.npc_id, id(fight, 'npc', 'guard'));
+  const fled = act(fight, { type: 'flee' });
+  assert.equal(fled.state.containers[fled.body], fled.roomIds[`${S}:room/square`]);
+  assert.equal(engaged(fled, fled.body), undefined);
+  let w = act(fresh(armed), { type: 'take', item_id: id(fresh(armed), 'item', 'apple') });
+  w = act(w, { type: 'move', direction: 'east' });
+  w = act(w, {
+    type: 'give',
+    item_id: id(w, 'item', 'apple'),
+    recipient_id: id(w, 'npc', 'guard'),
+  });
+  w = act(maud(act(w, { type: 'move', direction: 'west' }), 'wrong'), {
+    type: 'move',
+    direction: 'east',
+  });
+  w = act(w, { type: 'move', direction: 'west' });
+  assert.equal(engaged(w, w.body)?.row.npc_id, id(w, 'npc', 'peg'));
+});
+
 // Breaks: the loader admits row 15 or G11 below 1.47, a reaction fact.adjust on a non-int fact,
-// an engage line on an NPC without an attack, or a friendly discount without a friendly
+// an engage line on an NPC without an attack, a disposition on a spawn template (its walk-in
+// encounter has no active_ids, so the save would not reopen), or a friendly discount without a friendly
 // disposition, or one with a skill too (the schema's exactlyOneRequired).
 test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a friendly NPC', () => {
   const guard = `.cartridge.npcs[${JSON.stringify(`${S}:npc/guard`)}]`;
@@ -176,6 +240,11 @@ test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a f
     ],
     [(c) => delete c.npcs[`${S}:npc/guard`].attack, 'SCHEMA_VIOLATION', `${guard}.disposition`],
     [
+      (c) => (c.npcs[`${S}:npc/guard`].spawn_template = true),
+      'SCHEMA_VIOLATION',
+      `${guard}.disposition`,
+    ],
+    [
       (c) => delete c.npcs[`${S}:npc/peg`].disposition.friendly,
       'RESOURCE_SPEC_INVALID',
       `${peg}.shop.buy_discount`,
@@ -193,14 +262,7 @@ test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a f
     ],
   ];
   for (const [change, code, path] of rows) {
-    const c = structuredClone(source);
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
+    const r = reload(change);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
 });

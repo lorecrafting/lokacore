@@ -11,9 +11,10 @@ defmodule Loka.ContentStandingTest do
 
   # Breaks (toolbox rows 15 and G11), twins of the loader's in kernel/ts/test/standing.test.ts: the
   # compiler accepts a disposition, a friendly discount or a reaction fact.adjust below 1.47, a
-  # fact.adjust of a non-int fact, an engage line on an NPC without an attack, or a friendly
-  # discount without a friendly disposition or (schema) with a skill too; or leaves a fact.adjust's npc short reference
-  # unexpanded (the loader would reject the artifact).
+  # fact.adjust of a non-int fact, an engage line on an NPC without an attack, a disposition on
+  # a spawn template, or a friendly discount without a friendly disposition or (schema) with a
+  # skill too; or leaves a fact.adjust's npc short reference unexpanded (the loader would reject
+  # the artifact).
   test "rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a friendly NPC" do
     dir = Loka.ContentSource.copy("cartridges/standing_sampler")
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.46")}
@@ -38,6 +39,8 @@ defmodule Loka.ContentStandingTest do
       {[{"facts.json", &put_in(&1, ["facts", "flag"], flag)}, gift.("fact", "flag")],
        {"FACT_TYPE_MISMATCH", "reactions/gift_apple.apply[0].fact"}},
       {[{"npcs/guard.json", &Map.delete(&1, "attack")}],
+       {"SCHEMA_VIOLATION", "npcs/guard.disposition"}},
+      {[{"npcs/guard.json", &Map.put(&1, "spawn_template", true)}],
        {"SCHEMA_VIOLATION", "npcs/guard.disposition"}},
       {[
          {"npcs/peg.json", &update_in(&1, ["disposition"], fn d -> Map.delete(d, "friendly") end)}
