@@ -59,8 +59,9 @@ test('a permanent scar row reopens and keeps through the next round', (t) => {
     if (s.kind !== 'open') throw new Error(s.kind);
     return s;
   };
-  let story = openStory(p.db, releases, p.host);
-  if (story.kind !== 'open') throw new Error(story.kind);
+  const first = openStory(p.db, releases, p.host);
+  if (first.kind !== 'open') throw new Error(first.kind);
+  let story = first;
   let n = 0;
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) =>
     story.invoke({
