@@ -7,7 +7,7 @@ defmodule Loka.Content.Reactions do
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`).
   """
-  import Loka.Content.Source, only: [at: 2, diag: 2]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6, resolve: 4]
 
   @doc "Each schema-valid reaction's `when` root, as `{rel, steps, root}`."
@@ -135,7 +135,9 @@ defmodule Loka.Content.Reactions do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, npc} ->
         if npc["spawn_template"] || s["item"],
-          do: [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "npc"]))],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "npc"]), %{"error" => "invalid_value"})
+          ],
           else: []
 
       _ ->

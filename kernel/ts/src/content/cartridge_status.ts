@@ -45,7 +45,7 @@ export function status(c: Obj): Diagnostic[] {
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   for (const [at, ref, table] of named)
     if (!c[table]?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
-  return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at))];
+  return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
 // Row G3: each NPC's or item's immune list entry; each step naming an item and (row 2c) each status
@@ -64,10 +64,10 @@ function rowG3(c: Obj) {
             .filter((f) => s[f])
             .map((f) => [`.cartridge.reactions${step(ref)}.apply[${i}].${f}`, s[f], `${f}s`, s]),
     ),
-  ) as [string, Obj, string, Obj?][];
+  ) as [string, Obj, string, Obj][];
   // Row 42: a step names one holder, and a spawn template has no instance to take it.
   const lone = items.flatMap(([at, ref, table, s]) =>
-    table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s?.item) ? [at] : [],
+    table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s.item) ? [at] : [],
   );
   const modifies = Object.entries(c.statuses ?? {}).flatMap(([ref, s]: [string, any]) =>
     ((s.modifies ?? []) as Obj[]).map((m, n) => [
