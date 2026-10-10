@@ -39,8 +39,9 @@ export function knownTopics(world: World, actor: CharacterId) {
 }
 
 // Toolbox row 46: the topics plus each deduction (a recipe whose policy is an all requiring two or
-// more topics' facts true and whose success assigns another topic's fact true) the actor can make
-// now: it knows those topics and not that one. Absent when none, so a cartridge opts in by content.
+// more topics' facts true and whose success assigns another topic's fact true) while the actor
+// knows those topics and not that one; the recipe's other policy items show on its own action.
+// Absent when none, so a cartridge opts in by content.
 export function lore(world: World, actor: CharacterId) {
   const topics = Object.values(world.cartridge.topics ?? {});
   const topicOf = (fact: DefinitionRef) =>
@@ -50,9 +51,13 @@ export function lore(world: World, actor: CharacterId) {
     .sort((a, b) => cmp(a.key, b.key))
     .flatMap((r) => {
       const root = r.policy.root;
-      const from = (root.op === 'all' ? root.items : []).flatMap((p) =>
-        p.op === 'fact_compare' && p.equals === true ? (topicOf(p.fact) ?? []) : [],
-      );
+      const from = [
+        ...new Set(
+          (root.op === 'all' ? root.items : []).flatMap((p) =>
+            p.op === 'fact_compare' && p.equals === true ? (topicOf(p.fact) ?? []) : [],
+          ),
+        ),
+      ];
       const grants = r.outcomes.success.sequence.find(
         (s) => s.op === 'fact.assign' && s.value === true && topicOf(s.fact),
       );

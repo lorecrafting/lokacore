@@ -21962,6 +21962,10 @@
             "topic.a"
           ],
           "extra": true
+        },
+        {
+          "action": "a",
+          "label": "l"
         }
       ]
     },
@@ -21980,6 +21984,10 @@
       },
       {
         "path": "/deductions/0/label",
+        "code": "missing_property"
+      },
+      {
+        "path": "/deductions/1/from",
         "code": "missing_property"
       }
     ]

@@ -2,7 +2,7 @@
 // tap does is passed in by Book.tsx.
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { expeditionLine, plain, timeLeft } from './model.ts';
+import { expeditionLine, plain, timeLeft, why } from './model.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { ActionCard } from './actions.tsx';
@@ -52,7 +52,8 @@ export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () =
 }
 
 /** The Journal's lore (toolbox row 46; wording pending designer, loka-x6t.14): the known topics, then
- * each deduction's topics and its card, unavailable away from the place that offers it. */
+ * each deduction's topics and its card: refused with the view's reason when listed here but unavailable,
+ * "Not here" when this place does not list it. */
 function LoreDetails(p: {
   view: GameView;
   text: (key: string) => string;
@@ -71,13 +72,17 @@ function LoreDetails(p: {
       ))}
       {p.view.deductions?.map((d) => {
         const b = p.buttons?.find((x) => x.action_key === d.action);
+        const offer = p.view.actions.find((a) => a.action_key === d.action);
         return (
           <View key={d.action}>
             <Text style={note(c)}>{d.from.map(p.text).join(' + ')}</Text>
             {b ? (
               <ActionCard b={b} press={p.press!} />
             ) : (
-              <ActionCard label={p.text(d.label)} reason={LABEL.notHere} />
+              <ActionCard
+                label={p.text(d.label)}
+                reason={offer ? why(offer, p.text) : LABEL.notHere}
+              />
             )}
           </View>
         );
