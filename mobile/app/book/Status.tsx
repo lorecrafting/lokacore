@@ -56,6 +56,7 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
     .filter(Boolean)
     .join(', ');
 
+// size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const items = [
