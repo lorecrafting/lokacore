@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
+import { oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attributes/rule.ts';
 import { gameView } from '../src/view/view.ts';
 
@@ -271,4 +272,49 @@ test('experience saturates at the ResourceInt maximum', () => {
   const c = variant((l) => (l.kills[0].experience = max));
   const w = kill(play(fresh(c), { type: 'move', direction: 'east' }).world, 'rat_a').world;
   assert.equal(gameView(kill(w, 'rat_b').world).levelling!.experience, max);
+});
+
+// Breaks (#344 batch review, finding 1): the kill grant (fatal group) and the quest reward
+// (reaction group) each write the levelling row, so the killing step faults conflicting_write.
+test('a kill that also resolves a rewarding quest writes experience once and levels up once', () => {
+  const c = structuredClone(content);
+  const ref = (kind: string, key: string) => ({ ...attr(key), kind });
+  c.world!.death_credit = [
+    { npc: ref('npc', 'rat_a'), room: ref('room', 'pit'), fact: ref('fact', 'den_found') },
+  ] as never;
+  let w = play(fresh(c), { type: 'accept_quest', quest: ref('quest', 'cull') }, 'cull').world;
+  w = play(w, { type: 'move', direction: 'east' }).world;
+  const r = kill(w, 'rat_a');
+  const ops = (r.decision as { delta: { ops: { op: string }[] } }).delta.ops;
+  assert.deepEqual(
+    ops.filter((o) => o.op === 'levelling.set').map((o) => [(o as any).expected, (o as any).value]),
+    [[null, { experience: 30, allocated: {} }]],
+  );
+  assert.deepEqual(gameView(r.world).levelling, {
+    level: 2,
+    experience: 30,
+    next: 100,
+    unspent: 1,
+  });
+  assert.equal(narration(r).filter((k) => k === LEVEL_UP).length, 1);
+});
+
+// Breaks: several credited kills in one decision (fatal groups 1 and 2, not reachable in play
+// while Attack is single-opponent) keep one write each, or the collapse merges across characters
+// or keeps the last write's own expected instead of the row before the first write.
+test('one levelling write per character keeps the last value and the first expected', () => {
+  const [a, b] = ['a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000002'];
+  const row = (experience: number) => ({ experience, allocated: {} });
+  const set = (g: number, c: string, from: number | null, to: number) => ({
+    op: 'levelling.set' as const,
+    writer_group: g,
+    character_id: c as never,
+    expected: from === null ? null : row(from),
+    value: row(to),
+  });
+  const other = { op: 'time.advance', writer_group: 0, from: 0, to: 1 } as never;
+  assert.deepEqual(
+    oneWrite([set(1, a, null, 10), other, set(1, b, 5, 15), set(2, a, 10, 20), set(3, a, 20, 40)]),
+    [other, set(1, b, 5, 15), set(3, a, null, 40)],
+  );
 });
