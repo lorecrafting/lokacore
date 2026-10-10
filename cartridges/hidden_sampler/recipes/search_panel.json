@@ -1,0 +1,34 @@
+{
+  "label": "actions.search_panel",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "panel"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "panel_found",
+      "equals": false
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "panel_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_panel"
+      }
+    }
+  }
+}

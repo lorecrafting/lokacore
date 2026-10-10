@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "panel_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has found the panel in the hall's east wall."
+    }
+  }
+}
