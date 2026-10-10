@@ -1,9 +1,10 @@
 // speech@1 (toolbox row G9): who hears a word and whether it is an authored keyword.
 import type { CharacterId, EntityId, SpokenKeyword } from '../../contracts.gen.ts';
 import { cmp } from '../../foundation/validate.ts';
-import type { Steps, World } from '../../runtime/decision.ts';
+import { refString, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { spokenBy } from '../dialogue/shared.ts';
+import { around } from '../senses.ts';
 
 /**
  * The word case-folded, or undefined unless it is 1 to 32 ASCII letters. Free text (toolbox trap
@@ -30,16 +31,34 @@ export const authored = (w: World, word: string) =>
     (r) => r.on.event === 'spoken' && r.on.word === word,
   );
 
-/** The keyed dialogue of the first hearer, in order, that answers `word` for `actor`. */
+/** Who hears: a whisper its addressee; a say the room's NPCs; a shout those within one exit. */
+export const hearers = (
+  w: World,
+  p: { type: 'say' | 'shout' | 'whisper'; actor_id: CharacterId; target_id?: EntityId },
+  room: string,
+  steps: Steps,
+) =>
+  p.type === 'whisper'
+    ? [p.target_id!]
+    : npcsIn(w, p.type === 'shout' ? [...around(w, p.actor_id, room, steps, 1).keys()] : [room]);
+
+/**
+ * The dialogue a say or whisper of `word` opens: of the dialogues keyed by it, in key order, the
+ * first whose speaker hears and answers (its policy holds, not hostile; spokenBy).
+ */
 export function answer(
   w: World,
   actor: CharacterId,
-  hearers: readonly EntityId[],
+  heard: readonly EntityId[],
   word: string,
   steps: Steps,
 ) {
-  for (const npc of hearers) {
-    const d = spokenBy(w, actor, npc, steps, undefined, word);
+  const keyed = Object.values(w.cartridge.dialogues ?? {})
+    .filter((d) => d.keyword === word)
+    .sort((a, b) => cmp(a.key, b.key));
+  for (const { npc } of keyed) {
+    const speaker = w.entityIds[refString(npc)]!;
+    const d = heard.includes(speaker) && spokenBy(w, actor, speaker, steps, undefined, word);
     if (d) return d;
   }
   return undefined;

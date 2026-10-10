@@ -37,9 +37,21 @@ const ref = (kind: string, key: string) =>
 const id = (w: World, key: string) => w.entityIds[`speech_sampler@0.0.1:npc/${key}`] as EntityId;
 const fact = (w: World, key: string) => value(w, w.character, ref('fact', key));
 
+// The sampler changed by `change`, loaded again.
+function reload(change: (c: Obj) => void) {
+  const c = structuredClone(content) as unknown as Obj;
+  change(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  return loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+}
+
 let n = 0;
-const fresh = () =>
-  newWorld(content, '7e1f0c2a-5d3b-4c8e-9a6f-000000000009' as never, [1, 2, 3, 4]);
+const fresh = (c: Cartridge = content) =>
+  newWorld(c, '7e1f0c2a-5d3b-4c8e-9a6f-000000000009' as never, [1, 2, 3, 4]);
 function play(w: World, p: object) {
   n += 1;
   return step(
@@ -118,6 +130,7 @@ test('a shout reaches the next room, not two rooms away, and its word filters re
   assert.equal(fact(help.world, 'watchman_alerted'), true);
   assert.equal(fact(help.world, 'miller_heard'), false);
   assert.ok(heard(help).some((p) => p.entity_id === id(w, 'watchman')));
+  assert.equal(accepted(w, { type: 'shout', word: 'ward' }).decision.outcome, 'spoken');
   const hello = accepted(w, { type: 'shout', word: 'hello' });
   assert.equal(fact(hello.world, 'watchman_alerted'), false);
   const walked = accepted(w, { type: 'move', direction: 'west' }).world;
@@ -125,6 +138,51 @@ test('a shout reaches the next room, not two rooms away, and its word filters re
     fact(accepted(walked, { type: 'shout', word: 'hello' }).world, 'miller_heard'),
     true,
   );
+});
+
+// Breaks: hearers' dialogues tried in EntityId order (the elder's id sorts before the smith's), so
+// which of two dialogues keyed by one word opens would not follow the authored keys.
+test('of two dialogues keyed by one word, a say opens the first by key', () => {
+  const r = reload((c) => {
+    const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
+    const smith = ref('npc', 'smith');
+    Object.assign(d, {
+      key: 'a_smith_ward',
+      npc: smith,
+      roles: { smith: { role: 'npc', npc: smith } },
+    });
+    c.dialogues['speech_sampler@0.0.1:dialogue/a_smith_ward'] = d;
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = fresh(r.cartridge as Cartridge);
+  assert.ok(id(w, 'elder') < id(w, 'smith'));
+  const opened = accepted(w, { type: 'say', word: 'ward' }).world;
+  assert.equal(Object.values(opened.state.choices ?? {})[0]?.source.key, 'a_smith_ward');
+});
+
+// Breaks: a talk that opens a keyword dialogue (the elder's elder_ward sorts before her plain
+// elder_yarn), or an unnamed reaction step not landing on the hearer (the spoken subject).
+test('talk opens the plain dialogue; an unnamed reaction step lands on each hearer', () => {
+  const r = reload((c) => {
+    const d = structuredClone(c.dialogues['speech_sampler@0.0.1:dialogue/elder_ward']) as Obj;
+    delete d.keyword;
+    c.dialogues['speech_sampler@0.0.1:dialogue/elder_yarn'] = { ...d, key: 'elder_yarn' };
+    c.facts['speech_sampler@0.0.1:fact/heard'] = {
+      ...c.facts['speech_sampler@0.0.1:fact/elder_heard'],
+      key: 'heard',
+      per_subject: true,
+    };
+    const hears = c.reactions['speech_sampler@0.0.1:reaction/elder_hears'];
+    hears.on = { event: 'spoken' };
+    hears.apply = [{ op: 'fact.assign', fact: ref('fact', 'heard'), value: true }];
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = fresh(r.cartridge as Cartridge);
+  const talked = accepted(w, { type: 'talk', target_id: id(w, 'elder') }).world;
+  assert.equal(Object.values(talked.state.choices ?? {})[0]?.source.key, 'elder_yarn');
+  const said = accepted(w, { type: 'say', word: 'hello' }).world;
+  const heard = (npc: string) => value(said, said.character, ref('fact', 'heard'), id(w, npc));
+  assert.deepEqual([heard('elder'), heard('smith'), heard('watchman')], [true, true, false]);
 });
 
 // Breaks: speech while a conversation is open, which would close it unlike any saved row allows.
@@ -140,14 +198,7 @@ test('speech is refused while a conversation is open', () => {
 // keyword without speech@1, or a keyword on a riddle (whose save proof needs a talk receipt).
 test('the loader refuses keywords and spoken reactions below 1.48, without speech or on a riddle', () => {
   const load = (change: (c: Obj) => void) => {
-    const c = structuredClone(content) as unknown as Obj;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
+    const r = reload(change);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path.split('.').pop()];
   };
   const elder = (c: Obj) => Object.values(c.dialogues as Obj)[0] as Obj;

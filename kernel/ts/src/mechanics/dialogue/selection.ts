@@ -79,39 +79,38 @@ export const talkRefused = (
  */
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
-  return Object.values(world.cartridge.dialogues ?? {}).flatMap(
-    ({ key, npc, policy, label, keyword }) => {
-      const speaker = world.entityIds[refString(npc)]!;
-      if (keyword || !living(world, speaker) || world.state.containers[speaker] !== here) return [];
-      const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
-      const talk = {
+  const talked = Object.values(world.cartridge.dialogues ?? {}).filter((d) => !d.keyword); // row G9
+  return talked.flatMap(({ key, npc, policy, label }) => {
+    const speaker = world.entityIds[refString(npc)]!;
+    if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
+    const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
+    const talk = {
+      key,
+      label: label ?? ('action.talk' as TextKey),
+      target,
+      input: [],
+      priority: 0,
+      policy,
+    };
+    return [
+      [
         key,
-        label: label ?? ('action.talk' as TextKey),
-        target,
-        input: [],
-        priority: 0,
-        policy,
-      };
-      return [
-        [
-          key,
-          {
-            ...talk,
-            command: 'talk' as Key,
-            speaker,
-            ...(label && {
-              dialogue: {
-                cartridge_id: world.cartridge.manifest.id,
-                cartridge_version: world.cartridge.manifest.version,
-                kind: 'dialogue',
-                key,
-              },
-            }),
-          },
-        ],
-      ];
-    },
-  );
+        {
+          ...talk,
+          command: 'talk' as Key,
+          speaker,
+          ...(label && {
+            dialogue: {
+              cartridge_id: world.cartridge.manifest.id,
+              cartridge_version: world.cartridge.manifest.version,
+              kind: 'dialogue',
+              key,
+            },
+          }),
+        },
+      ],
+    ];
+  });
 }
 
 const open = (c: ChoiceRow) => c.source.kind === 'dialogue' && c.status === 'pending';
