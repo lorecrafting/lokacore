@@ -4,12 +4,12 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain, type group, type Pool } from './model.ts';
+import { cap, cueLine, plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { EntityLine, LogLines, Note } from './lines.tsx';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
@@ -168,7 +168,7 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
     .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
 
 // NPCs, then every other entity as the room's items; no headings, an empty group omitted
-// (book-ui.md, World and status entry).
+// (book-ui.md, World and status entry); then the sense cues (book-ui.md, Sense cues details).
 function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   const npcs = p.view.entities.filter((e) => e.kind === 'npc');
   const items = p.view.entities.filter((e) => e.kind !== 'npc');
@@ -181,11 +181,20 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
       onPress={() => p.open(e.id)}
     />
   );
-  return [npcs, items]
-    .filter((group) => group.length > 0)
-    .map((group) => (
-      <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
-    ));
+  return [
+    ...[npcs, items]
+      .filter((group) => group.length > 0)
+      .map((group) => (
+        <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
+      )),
+    p.view.cues && (
+      <View key="cues">
+        {p.view.cues.map((cue, i) => (
+          <Note key={i /* two equal cues are two lines */}>{cueLine(cue, p.text)}</Note>
+        ))}
+      </View>
+    ),
+  ];
 }
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside

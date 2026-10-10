@@ -11,6 +11,7 @@ import RoomNoticesView from './views/room-notices.json';
 import RoomLongLogView from './views/room-long-log.json';
 import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
+import senses from '../../../cartridges/senses_sampler/text.json';
 
 const meta: Meta = {
   title: 'Pages/Room',
@@ -46,4 +47,35 @@ export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Ref
 export const AtNight: StoryObj = {
   ...pageStory(RoomAtNightView),
   name: 'At night',
+};
+
+// The senses sampler's GameView cues (kernel/ts/test/senses.test.ts) on a generated room, worded by
+// the sampler's own text: the hall hears the forge one room east and smells the tower's stew.
+const cued = (cues: object[]): StoryObj => ({
+  ...pageStory({ ...RoomFirstView, view: { ...RoomFirstView.view, cues } }),
+  args: { words: senses },
+});
+// Breaks: the direction phrase is dropped, so a cue next door reads as if it were here.
+export const SenseCues: StoryObj = {
+  ...cued([
+    { sense: 'sound', text: 'cue.hammering', direction: 'east' },
+    { sense: 'smell', text: 'cue.stew', direction: 'north' },
+  ]),
+  name: 'Sense cues',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Hammering from the east')).toBeVisible();
+    await expect(canvas.getByText('The smell of stew from the north')).toBeVisible();
+  },
+};
+// Breaks: a cue from the player's own room gets a direction phrase it has none of.
+export const SenseCuesHere: StoryObj = {
+  ...cued([
+    { sense: 'heat', text: 'cue.forge_heat' },
+    { sense: 'sound', text: 'cue.hammering' },
+  ]),
+  name: 'Sense cues here',
+  play: async ({ canvas }) => {
+    await expect(await canvas.findByText('Heat beats out from the forge.')).toBeVisible();
+    await expect(canvas.getByText('Hammering')).toBeVisible();
+  },
 };
