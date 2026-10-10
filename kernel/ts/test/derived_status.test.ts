@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { gameView } from '../src/view/view.ts';
-import { MIGHT, content, dummy, play, chosen, wait, seen, hpView } from './derived_fixture.ts';
+import { MIGHT, act, content, dummy, play, chosen, wait, seen, hpView } from './derived_fixture.ts';
 
 // Breaks (row 2c): value() ignores an active status's modifies, adds it to another attribute, or
 // keeps it after expiry.
@@ -105,6 +105,8 @@ test('a con -6 might expiring at +3600 and the dummy round at +3650 commit in on
   assert.deepEqual(hpView(w), [3, 10]);
 });
 
+// Breaks (row 2c): a round in its own writer group conflicts with a reaction's status.apply hp
+// settle on the player (conflicting_write), or the settle is skipped for a con status.
 test('might applied by the dummy round (attack_result) commits with the round: +6 9 of 16, -6 4 of 4', () => {
   for (const [modifier, after] of [
     [6, [9, 16]],
@@ -139,4 +141,16 @@ test('a tonic eaten at hp 10 of 13 (might con -3) cures it and restores 2: hp 12
   assert.deepEqual(hpView(w), [10, 13]);
   w = play(w, { type: 'eat', item_id: tonic(w) });
   assert.deepEqual(hpView(w), [12, 16]);
+});
+
+// Breaks (row 2c): settleFor writes the hp settle for a status naming no hp_max term (str only),
+// an extra hp write that can conflict with another writer in the advance.
+test('entering the shrine writes an hp settle for might with con +6 only, not str-only might', () => {
+  const hpWrites = (c: Cartridge) => {
+    const r = act(chosen('strong', c), north);
+    assert.equal(r.decision.kind, 'accepted');
+    const ops = r.decision.kind === 'accepted' ? r.decision.delta.ops : [];
+    return ops.filter((o) => o.op === 'resource.adjust' && o.resource.key === 'hp').length;
+  };
+  assert.deepEqual([hpWrites(content), hpWrites(mightCon(6))], [0, 1]);
 });
