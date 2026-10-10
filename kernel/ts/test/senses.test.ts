@@ -132,6 +132,18 @@ test('a failed pick is heard by the guard next door, not the sentry two rooms aw
   assert.deepEqual([fact('guard_alerted'), fact('sentry_alerted')], [true, false]);
 });
 
+// Breaks: ambient noise counted in a reaction to a recipe outcome: with the rattle removed and the
+// guardroom itself noisy, the guard must still not be alerted by the failed pick.
+test('in a reaction to a failed pick only the outcome cues are heard', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  Object.values(c.recipes as Obj)[0].outcomes.failure.cues = undefined;
+  const guardroom = Object.values(c.rooms as Obj).find((r) => r.key === 'guardroom');
+  guardroom.cues = [{ sense: 'sound', text: 'cue.hammering', range: 0 }];
+  const w = play(fresh(c as unknown as Cartridge), { type: 'move', direction: 'west' });
+  const picked = play(w, { type: 'perform', action: 'pick_lock' });
+  assert.equal(value(picked, picked.character, ref('fact', 'guard_alerted')), false);
+});
+
 // Breaks: the walk not charged to query_steps. The sentry smells its own pipe; from the barracks
 // the walk crosses 6 exits, so 5 steps short of the limit it is exhausted (uncharged, 3 suffice).
 test('an exhausted query budget perceives nothing', () => {

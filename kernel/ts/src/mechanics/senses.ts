@@ -5,10 +5,11 @@ import {
   type CharacterId,
   type Cue,
   type DomainEvent,
+  type EntityId,
   type Key,
   type Policy,
 } from '../contracts.gen.ts';
-import { refString, type Steps, type World } from '../runtime/decision.ts';
+import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { cmp } from '../foundation/validate.ts';
 import { living } from './death/shared.ts';
 import { fuelView } from './light/shared.ts';
@@ -61,55 +62,60 @@ function sources(w: World, steps: Steps): Source[] {
   };
   for (const [id, r] of Object.entries(w.rooms)) add(id, r.cues);
   for (const d of Object.values(w.details)) add(d.room, d.cues);
-  for (const [id, e] of Object.entries(w.entities)) if (e.cues) add(roomOf(w, id, steps), e.cues);
+  for (const [id, e] of Object.entries(w.entities))
+    if (e.cues && (e.kind !== 'npc' || living(w, id as EntityId)))
+      add(roomOf(w, id, steps), e.cues);
   for (const [id, f] of Object.entries(w.fuelSpecs))
     if (f.kind === 'source' && f.cues && fuelView(w, id)?.lit) add(roomOf(w, id, steps), f.cues);
   for (const [at, row] of Object.entries(w.state.statuses ?? {})) {
+    if (!row.active) continue;
     const { body_id, status } = JSON.parse(at);
-    const cues = row.active ? specOf(w, status)?.cues : undefined;
-    if (cues) add(roomOf(w, body_id, steps), cues);
+    add(roomOf(w, body_id, steps), specOf(w, status)?.cues);
   }
   return out;
 }
 
-// The transient cues of the recipe outcome that caused a reaction, from its target's room.
-function outcomeCues(w: World, cause: DomainEvent | undefined): Source[] {
+// The transient cues of the recipe outcome that caused a reaction, from the actor's room;
+// undefined when the cause is no recipe outcome event.
+function outcomeCues(w: World, actor: CharacterId, cause: DomainEvent | undefined) {
   const p = cause?.payload;
   if (p?.type !== 'check_failed' && p?.type !== 'check_passed' && p?.type !== 'action_completed')
-    return [];
+    return undefined;
   const recipe = Object.values(w.cartridge.recipes ?? {}).find((r) =>
     p.type === 'action_completed' ? r.key === p.action : r.check?.key === p.check.key,
   );
   const cues = recipe?.outcomes[p.type === 'check_failed' ? 'failure' : 'success']?.cues ?? [];
-  const room = w.details[p.subject_id]?.room;
-  return room ? cues.map((cue) => ({ room, cue })) : [];
+  const body = bodyOf(w, actor);
+  const room = body && w.state.containers[body];
+  return room ? cues.map((cue): Source => ({ room, cue })) : [];
 }
 
 /**
  * The cues reaching `room` for `actor`, each with its distance and first direction: within its
- * range and with its `when` holding for the actor. A cue's `when` never perceives (no recursion).
- * Empty without sense_cue@1, so a cartridge without it pays no step.
+ * range and with its `when` holding for the actor, from the declared sources or only `heard`. A
+ * cue's `when` never perceives (no recursion). Empty without sense_cue@1, so a cartridge without
+ * it pays no step.
  */
 export function reaching(
   w: World,
   actor: CharacterId,
   room: string,
   steps: Steps,
-  extra: Source[],
+  heard?: Source[],
 ) {
   if (!w.cartridge.lock.capabilities.sense_cue) return [];
   const near = around(w, actor, room, steps);
-  return [...sources(w, steps), ...extra].flatMap(({ room: at, cue }) => {
+  return (heard ?? sources(w, steps)).flatMap(({ room: at, cue }) => {
     const n = near.get(at);
-    const heard =
+    const reached =
       n && n.d <= cue.range && (!cue.when || holds(w, actor, cue.when.root, { steps, cue: true }));
-    return heard ? [{ cue, ...n }] : [];
+    return reached ? [{ cue, ...n }] : [];
   });
 }
 
 /** GameView cues: those reaching the actor's room, nearest first, then by direction and text. */
 export function cueViews(w: World, steps: Steps) {
-  const cues = reaching(w, w.character, w.state.containers[w.body]!, steps, [])
+  const cues = reaching(w, w.character, w.state.containers[w.body]!, steps)
     .sort(
       (a, b) =>
         a.d - b.d || cmp(a.direction ?? '', b.direction ?? '') || cmp(a.cue.text, b.cue.text),
@@ -122,7 +128,10 @@ export function cueViews(w: World, steps: Steps) {
   return cues.length > 0 ? { cues } : {};
 }
 
-/** cue_perceived: the living NPC's room is reached by a cue of `sense` (and the cause's). */
+/**
+ * cue_perceived: the living NPC's room is reached by a cue of `sense`; in a reaction to a recipe
+ * outcome, only by that outcome's transient cues (the action was heard, not the ambient noise).
+ */
 export function perceived(
   w: World,
   actor: CharacterId,
@@ -132,6 +141,6 @@ export function perceived(
   const npc = w.entityIds[refString(p.npc)];
   const room = npc && living(w, npc) ? roomOf(w, npc, ctx.steps) : undefined;
   if (ctx.cue || !room) return false;
-  const cues = reaching(w, actor, room, ctx.steps, outcomeCues(w, ctx.cause));
+  const cues = reaching(w, actor, room, ctx.steps, outcomeCues(w, actor, ctx.cause));
   return cues.some(({ cue }) => cue.sense === p.sense) && ctx.steps.n <= LIMITS.query_steps;
 }
