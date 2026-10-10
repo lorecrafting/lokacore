@@ -22,7 +22,11 @@ export const conditionLine = (
   time: number,
   text: Say,
 ) =>
-  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`;
+  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining` +
+  // A status that never ticks (row 2c) shows no tick part.
+  (c.per_tick === undefined
+    ? ''
+    : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
 export const expeditionLine = (
   e: NonNullable<GameView['journal'][number]['expedition']>,
   text: Say,

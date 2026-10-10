@@ -2,7 +2,6 @@
   "duration": 3600,
   "tick_every": 600,
   "resource": "mv",
-  "per_tick": 1,
   "modifies": [
     {
       "attribute": "str",

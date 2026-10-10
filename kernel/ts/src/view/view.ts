@@ -81,7 +81,7 @@ export function gameView(world: World): GameView {
     ends_at: row.ends_at,
     next_tick_at: row.next_tick_at,
     resource: spec.resource.key as Key,
-    per_tick: spec.per_tick,
+    ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
     tick_every: spec.tick_every,
   }));
   const view: GameView = {

@@ -114,7 +114,7 @@ export function applyStatus(
         active: true,
         generation: (prior?.generation ?? 0) + 1,
         ends_at,
-        next_tick_at: add(now, spec.tick_every),
+        next_tick_at: spec.per_tick === undefined ? ends_at : add(now, spec.tick_every),
         job_id: mint() as JobId,
       };
   const change: DeltaOp = {

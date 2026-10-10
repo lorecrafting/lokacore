@@ -2298,7 +2298,7 @@
       "additionalProperties": false
     },
     "StatusDefinition": {
-      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active.",
+      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).",
       "examples": [
         {
           "key": "poison",
@@ -2341,7 +2341,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0 (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, and required unless modifies is present (compiler and loader SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2381,7 +2381,6 @@
         "duration",
         "tick_every",
         "resource",
-        "per_tick",
         "label",
         "narration"
       ],

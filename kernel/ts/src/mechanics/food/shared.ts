@@ -54,8 +54,8 @@ export function transition(
         source_id: body,
         destination_id: world.consumed,
       },
+      ...cured, // first, so a cure's hp settle (row 2c) reads the hp before the meal
       ...(by > 0 ? [adjust(world, body, edible.resource, by, {}).op] : []),
-      ...cured,
     ],
   };
 }

@@ -44,7 +44,8 @@ test('status rows, transitions and condition views require their complete shape'
     tick_every: 60,
   };
   assert.deepEqual(validate('ConditionView', view), []);
-  for (const field of Object.keys(view)) {
+  // per_tick is absent for a status that never ticks (row 2c).
+  for (const field of Object.keys(view).filter((f) => f !== 'per_tick')) {
     const partial: Record<string, unknown> = { ...view };
     delete partial[field];
     assert.deepEqual(validate('ConditionView', partial), [
@@ -78,7 +79,8 @@ test('a status definition requires every field and positive times', () => {
     },
   };
   assert.deepEqual(validate('StatusDefinition', def), []);
-  for (const field of Object.keys(def)) {
+  // per_tick may be omitted with modifies (row 2c); the compiler and loader require it otherwise.
+  for (const field of Object.keys(def).filter((f) => f !== 'per_tick')) {
     const partial: Record<string, unknown> = { ...def };
     delete partial[field];
     assert.deepEqual(validate('StatusDefinition', partial), [

@@ -74,8 +74,14 @@ function wait(w: World, seconds: number): World {
     n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  if (r.decision.kind === 'accepted')
+    seen.push(
+      ...r.decision.events.map((e) => e.payload.type as string),
+      ...(r.decision.narration ?? []).map((t) => t.key as string),
+    );
   return r.world;
 }
+const seen: string[] = []; // every elapsed run's event types, then its narration keys
 
 // Breaks: truncation instead of floor (nimble damage -2), a dropped divisor or pivot, or the
 // definition start read instead of the selected value (strong would match nimble).
@@ -279,29 +285,88 @@ test("the shrine's might (+3 str for an hour) lifts the strong hit from 6 to 8; 
   });
   assert.equal(hp(strike(w)), 12); // 20 - (4 + floor((18 - 10) / 2))
   assert.deepEqual(hpView(w), [10, 10]); // might names str only: con 10 keeps the hp maximum
-  for (let tick = 0; tick < 5; tick += 1) w = wait(w, 600); // one might job per elapsed command
+  w = wait(w, 3000); // might never ticks: its one job is the expiry
   assert.equal(hp(strike(w)), 12);
   w = wait(w, 600); // the expiry at application + 3600
   assert.equal(hp(strike(w)), 14);
 });
 
+const MIGHT = 'derived_sampler@0.0.1:status/might';
+// The sampler with might also giving con `modifier`, and a held-in-hall tonic (hp +2, cures might).
+function mightCon(modifier: number) {
+  const c = structuredClone(content) as any;
+  const str = c.statuses[MIGHT].modifies[0];
+  c.statuses[MIGHT].modifies.push({ attribute: { ...str.attribute, key: 'con' }, modifier });
+  c.lock.capabilities.food = 1;
+  const anvil = c.items['derived_sampler@0.0.1:item/anvil'];
+  const edible = { resource: { ...str.attribute, kind: 'resource', key: 'hp' }, amount: 2 };
+  const cures = [{ ...str.attribute, kind: 'status', key: 'might' }];
+  c.items['derived_sampler@0.0.1:item/tonic'] = {
+    ...anvil,
+    keywords: ['tonic'],
+    mass_grams: 10,
+    edible: { ...edible, cures, label: anvil.short, narration: anvil.short },
+  };
+  return c as Cartridge;
+}
+const tonic = (w: World) => w.entityIds['derived_sampler@0.0.1:item/tonic'];
+const north = { type: 'move', direction: 'north' };
+
 // Breaks (row 2c, as loka-kgd.10 for wear): applying a con-modifying status does not settle hp
 // first, so 4 h idle at the cap banks credit the raised maximum grants at once (16/16).
 test('a status lifting con after 4 h idle at full hp keeps hp 10 of 16, then regenerates', () => {
-  const tough = structuredClone(content) as any; // might also gives con +6: hp maximum 16
-  tough.statuses['derived_sampler@0.0.1:status/might'].modifies.push({
-    attribute: {
-      ...tough.statuses['derived_sampler@0.0.1:status/might'].modifies[0].attribute,
-      key: 'con',
-    },
-    modifier: 6,
-  });
-  let w = wait(chosen('strong', tough), 4 * 3600);
+  let w = wait(chosen('strong', mightCon(6)), 4 * 3600);
   assert.deepEqual(hpView(w), [10, 10]);
   w = play(w, { type: 'move', direction: 'north' });
   assert.deepEqual(hpView(w), [10, 16]);
-  for (let tick = 0; tick < 6; tick += 1) w = wait(w, 600); // to the expiry at +3600
+  w = wait(w, 3600); // to the expiry
   assert.deepEqual(hpView(w), [10, 10]);
+});
+
+// Breaks (row 2c): expiry ends a con-lowering status without the hp settle, so the credit banked
+// under the lowered maximum pays out at once (16/16); or a status without per_tick ticks,
+// narrates a tick, shows a tick part, or expires at its first end after a refresh.
+test('a tickless might with con -6, refreshed at +1800, expires at +5400 with hp 10 of 16', () => {
+  seen.length = 0;
+  let w = play(chosen('hardy', mightCon(-6)), north);
+  const t0 = w.state.clock;
+  assert.deepEqual(hpView(w), [10, 10]);
+  w = wait(w, 1800);
+  w = play(play(w, { type: 'move', direction: 'south' }), north); // refresh: ends at t0 + 5400
+  w = wait(w, t0 + 3600 - w.state.clock); // the first job, at the old end
+  const line = gameView(w).conditions!;
+  assert.deepEqual([line.length, line[0]!.per_tick, line[0]!.ends_at], [1, undefined, t0 + 5400]);
+  assert.deepEqual(hpView(w), [10, 10]);
+  w = wait(w, t0 + 5400 - w.state.clock - 1);
+  assert.equal(gameView(w).conditions?.length, 1);
+  w = wait(w, 1);
+  assert.equal(gameView(w).conditions, undefined);
+  assert.deepEqual(hpView(w), [10, 16]);
+  assert.deepEqual(
+    seen.filter((k) => /status_|might/.test(k)),
+    ['status_expired', 'narration.might.expired'],
+  );
+});
+
+// Breaks (row 2c): a cure ends a con-lowering status without the hp settle (an edible eaten at
+// full hp, so it restores nothing), and the hour of regen banked at the cap pays out.
+test('a tonic cures a refreshed might with con -6 after 4000 s at 10 of 10: hp reads 10 of 16', () => {
+  let w = chosen('hardy', mightCon(-6));
+  w = wait(play(play(w, { type: 'take', item_id: tonic(w) }), north), 1800);
+  w = wait(play(play(w, { type: 'move', direction: 'south' }), north), 2200); // ends at +5400
+  w = play(w, { type: 'eat', item_id: tonic(w) });
+  assert.equal(gameView(w).conditions, undefined);
+  assert.deepEqual(hpView(w), [10, 16]);
+});
+
+// Breaks (row 2c): the meal's hp gain precedes the cure's settle, whose stale `from` faults
+// composition (precondition_failed), or the cure leaves the lowered maximum.
+test('a tonic eaten at hp 10 of 13 (might con -3) cures it and restores 2: hp 12 of 16', () => {
+  let w = chosen('hardy', mightCon(-3));
+  w = play(play(w, { type: 'take', item_id: tonic(w) }), north);
+  assert.deepEqual(hpView(w), [10, 13]);
+  w = play(w, { type: 'eat', item_id: tonic(w) });
+  assert.deepEqual(hpView(w), [12, 16]);
 });
 
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,
@@ -321,6 +386,11 @@ test('the loader refuses each unsound derived table', () => {
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
     [
+      (c) => delete c.statuses[MIGHT].modifies, // only a modifying status may omit per_tick
+      'SCHEMA_VIOLATION',
+      `.cartridge.statuses[${JSON.stringify(MIGHT)}].per_tick`,
+    ],
+    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.39'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
@@ -337,7 +407,8 @@ test('the loader refuses each unsound derived table', () => {
         delete c.lock.capabilities.attributes;
         delete c.attributes;
         delete c.ancestries;
-        delete c.statuses['derived_sampler@0.0.1:status/might'].modifies; // row 2c names str
+        delete c.statuses[MIGHT].modifies; // row 2c names str; without it, might must tick
+        c.statuses[MIGHT].per_tick = 1;
       },
       'UNDECLARED_CAPABILITY',
       at,

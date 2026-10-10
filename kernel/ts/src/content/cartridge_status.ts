@@ -32,7 +32,9 @@ export function status(c: Obj): Diagnostic[] {
     if (!c.resources?.[refString(s.resource)])
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
     if (s.tick_every >= s.duration) out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
-    if (s.per_tick === 0) out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+    // Only a modifying status (row 2c) may omit its tick.
+    if (s.per_tick === 0 || (s.per_tick === undefined && !s.modifies))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
     if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));

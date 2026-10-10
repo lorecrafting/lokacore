@@ -42,7 +42,7 @@ export function runStatus(
   const now = job.due_time;
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;
-  const due = !expired && now >= row.next_tick_at;
+  const due = !expired && spec.per_tick !== undefined && now >= row.next_tick_at;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
   const ops: DeltaOp[] = [done];
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
@@ -63,8 +63,9 @@ export function runStatus(
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
     return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
   }
-  // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : row.next_tick_at;
+  // A due tick on an unreadable pool is skipped, never re-due at the same clock; a status that
+  // never ticks (row 2c) follows a refreshed end.
+  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : untick(spec, row);
   ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
   return accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
 }
@@ -78,7 +79,7 @@ function amount(visit: World, body: EntityId, spec: StatusDefinition) {
   const pool = resourceSpec(visit, body, spec.resource);
   if (visit.entities[body]?.kind === 'item' || current === undefined || !pool)
     return { by: 0, fatal: false };
-  const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick));
+  const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick!));
   return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };
 }
 
@@ -138,6 +139,9 @@ const happened = (
   correlation_id: run.id as string as DomainEvent['correlation_id'],
   payload: { type, body_id, status },
 });
+
+const untick = (spec: StatusDefinition, row: Active) =>
+  spec.per_tick === undefined ? row.ends_at : row.next_tick_at;
 
 // The row's next job, due at the earlier of its next tick and its end.
 const successor = (

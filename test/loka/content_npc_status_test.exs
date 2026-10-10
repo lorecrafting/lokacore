@@ -26,8 +26,9 @@ defmodule Loka.ContentNpcStatusTest do
     end
   end
 
-  # Breaks (row 2c): a status modifier naming no attribute compiles, or one under kernel_api 1.46
-  # compiles (the derived sampler's might is its only 1.46 field).
+  # Breaks (row 2c): a status modifier naming no attribute compiles, a status with neither
+  # modifies nor per_tick compiles, or a modifier under kernel_api 1.46 compiles (the derived
+  # sampler's might is its only 1.46 field).
   test "status modifiers keep their attribute and API floor", %{dir: dir} do
     luck = &put_in(&1, ["modifies", Access.at(0), "attribute"], "luck")
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"statuses/fury.json", luck}])
@@ -37,6 +38,15 @@ defmodule Loka.ContentNpcStatusTest do
              &{&1["code"], &1["path"]}
            ),
            inspect(diags)
+
+    # Only a modifying status may omit per_tick (fury has none).
+    plain = &Map.delete(&1, "modifies")
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"statuses/fury.json", plain}])
+
+    assert {"SCHEMA_VIOLATION", "statuses/fury.per_tick"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           )
 
     derived = Loka.ContentSource.copy("cartridges/derived_sampler")
     api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")

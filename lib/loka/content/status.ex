@@ -67,10 +67,17 @@ defmodule Loka.Content.Status do
         do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
         else: []
       ) ++
-      if(s["per_tick"] == 0, do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))], else: []) ++
+      per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
       modifies(rel, s, m, defs)
+  end
+
+  # Never 0; only a modifying status (row 2c) may omit it.
+  defp per_tick(rel, s) do
+    if s["per_tick"] == 0 or (s["per_tick"] == nil and s["modifies"] == nil),
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
+      else: []
   end
 
   # Row 2c: each status modifier names a real attribute.
