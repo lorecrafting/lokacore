@@ -91,6 +91,45 @@ test('the goal is not narrated when the player is elsewhere', () => {
   assert.deepEqual(narration, []);
 });
 
+// Child lost, back in the cottage, waiting to 08:00 (the reaction sets `child_lost` in the woods).
+const lostAt8 = (w: World) =>
+  play(
+    play(play(w, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' }),
+    at(9),
+  );
+
+// Breaks: the last holding case taken instead of the first (find -> findLast).
+test('the first holding case wins when two hold', () => {
+  const w = lostAt8(
+    fresh((c) => {
+      const cases = c.npcs[MAUD].schedule_cases['8'];
+      cases.push({ ...structuredClone(cases[0]), room: { ...cases[0].room, key: 'woods' } });
+    }),
+  );
+  assert.equal(room(w), roomId(w, 'green'));
+});
+
+// Breaks: the goal narrated when the case holds but she already stands in its room (no move).
+test('the goal is not narrated when the NPC is already in the case room', () => {
+  narration.length = 0;
+  const w = lostAt8(fresh((c) => (c.npcs[MAUD].schedule_cases['8'][0].room.key = 'cottage')));
+  assert.equal(room(w), roomId(w, 'cottage'));
+  assert.deepEqual(narration, []);
+});
+
+// Breaks: the NPC not passed as the target, so a `target_present` case never holds.
+test("a case's target leaf reads the NPC", () => {
+  const w = play(
+    fresh((c) => {
+      c.manifest.requires.capabilities.target_resolution = 1;
+      c.lock.capabilities.target_resolution = 1;
+      c.npcs[MAUD].schedule_cases['8'][0].when.root = { op: 'target_present' };
+    }),
+    at(9),
+  );
+  assert.equal(room(w), roomId(w, 'green'));
+});
+
 // Breaks: the condition read at the advance's end instead of the job's due time, so a single
 // wait from 07:00 to 11:00 reads an 08:00-09:00 window as false and she goes to the garden.
 test("a case's time window is read at the hour's due time, not the end of the wait", () => {
