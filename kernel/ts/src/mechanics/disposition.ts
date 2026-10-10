@@ -10,6 +10,7 @@ import { living } from './death/shared.ts';
 import { engaged, encounterId, npcRef } from './combat/shared.ts';
 import { jobId } from './schedule/behavior.ts';
 import { attacked } from './crow/behavior.ts';
+import { running } from './scene/shared.ts';
 
 export type Disposition = 'hostile' | 'wary' | 'friendly';
 
@@ -75,12 +76,13 @@ export function engage(
 
 /**
  * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
- * line, hostile to `actor`; none in a sanctuary or without combat. ponytail: read before the
- * body arrives, so a room- or presence-relative leaf reads the room left; move the read after
- * the transfer when a sampler needs one.
+ * line, hostile to `actor`; none in a sanctuary, during a scene or without combat.
+ * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
+ * leaf reads the room left; read after them when a sampler needs one.
  */
 function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
-  if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary) return;
+  if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary || running(world, actor))
+    return;
   const candidates = Object.keys(world.entities)
     .filter((id) => {
       const npc = world.entities[id] as NpcDefinition;
