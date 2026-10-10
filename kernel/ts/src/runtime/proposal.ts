@@ -32,8 +32,7 @@ import { deathCredit } from '../mechanics/combat/credit.ts';
 import { dropped as crowDrop, taken as crowTake } from '../mechanics/crow/behavior.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
-export { adopt } from './proposal_adopt.ts';
-export type { Stepped } from './proposal_adopt.ts';
+export { adopt, type Stepped } from './proposal_adopt.ts';
 export type Actor = Parameters<typeof event>[1];
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 type Corr = DomainEvent['correlation_id'];
@@ -250,6 +249,7 @@ function react(p: P): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
+      p.narration.push(...(delivered.narration ?? []));
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
       const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);

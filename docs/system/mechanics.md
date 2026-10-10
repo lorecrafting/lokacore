@@ -628,6 +628,15 @@ reaction's quest composition, caused by the source event and correlated with the
 The resulting events trigger further rules, FIFO, to quiescence, within the deliveries,
 `reaction_depth` and `query_steps` budgets. Matching [scene starts](#scene1-mechanicsscenerulets)
 follow authored rules in scene-key order, using the same delivery machinery.
+A delivery's narration lines (today only a `status.apply` first application on the player's own
+body says a line, [row 1](#status-effects-over-time-toolbox-row-1); a refresh while active is
+silent) join the receipt's narration as the delivery is admitted (`runtime/proposal.ts` `react`):
+the root command's own lines first, then its reactions' lines in delivery order, cascades
+included; then each due job's line, followed by its reactions' lines; the
+[level-up](#experience-and-levelling-toolbox-row-4) line last. Fixed in Beads `loka-kgd.13`
+(2026-10-10): before it, the proposal dropped reaction lines. Where reopen replays receipt
+history, a save holding such an unvoiced first application re-decides differently and opens
+`save_corrupt` with Start over ([save.md](save.md)); no Chapter 1 reaction says a line, so Chapter 1 receipts are unchanged.
 
 <a id="schedule1-behavior1-calendar1-mechanicsschedulerulets-kernelts-srcmechanicsschedulebehaviorts"></a>
 
