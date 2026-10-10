@@ -33,6 +33,14 @@ defmodule Loka.Content.Barriers do
       items(m, defs) ++ lockout(entry, m, defs)
   end
 
+  @doc "Each barrier's opens_when policy root (toolbox row 10), located for the policy checks."
+  def conditions(defs),
+    do:
+      for(
+        {_, {rel, [], %{"opens_when" => p}}} <- defs["barrier"] || %{},
+        do: {rel, ["opens_when", "root"], p["root"]}
+      )
+
   defp knock(m, defs) do
     for {_, {rel, [], r}} <- defs["room"],
         {dir, e} <- r["exits"],

@@ -41,4 +41,16 @@ defmodule Loka.ContentTimeTest do
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks: a keyed barrier's expand clause rewrites key_item only, so a short reference inside
+  # its opens_when stays a bare string (the loader then rejects the artifact).
+  test "a keyed barrier's opens_when references expand" do
+    m = %{"id" => "c", "version" => "1.0.0"}
+    root = %{"op" => "barrier_state", "barrier" => "gate", "equals" => "open"}
+    door = %{"key_item" => "key", "opens_when" => %{"policy_version" => 1, "root" => root}}
+    out = Loka.Content.Checks.expand(door, m)
+    ref = &%{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => &1, "key" => &2}
+    assert out["key_item"] == ref.("item", "key")
+    assert out["opens_when"]["root"]["barrier"] == ref.("barrier", "gate")
+  end
 end

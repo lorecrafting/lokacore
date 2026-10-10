@@ -9,39 +9,47 @@ defmodule Loka.Content.Calendar do
 
     day = hour * hours
     invalid = fn path -> diag("SCHEMA_VIOLATION", path, %{"error" => "not_in_enum"}) end
+    nodes = policy_nodes(defs)
 
     base(calendar, day, hour, subdivision, invalid) ++
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
       lunar(calendar["lunar"], invalid) ++
       schedules(defs["npc"], hours, invalid) ++
-      windows(defs, hours, invalid) ++
-      sky(calendar, defs, m, invalid)
+      windows(nodes, hours, invalid) ++
+      sky(calendar, nodes, {m, defs}, invalid)
   end
 
   # Toolbox row 10: each sky leaf names a lunar phase the calendar cuts; it and a barrier's
   # opens_when need kernel_api 1.45.
-  defp sky(calendar, defs, m, invalid) do
+  defp sky(calendar, nodes, {m, defs}, invalid) do
+    leaves = for {%{"op" => "sky"} = node, rel, path} <- nodes, do: {node, rel, path}
+    gated = leaves != [] or Enum.any?(defs["barrier"] || %{}, &opens_when?/1)
+    phases(calendar, leaves, invalid) ++ floor(m, gated)
+  end
+
+  defp phases(calendar, leaves, invalid) do
     phases = for cut <- get_in(calendar, ["lunar", "phases"]) || [], do: cut["phase"]
 
-    leaves =
-      for {node, rel, path} <- policy_nodes(defs), node["op"] == "sky", do: {node, rel, path}
+    for {node, rel, path} <- leaves,
+        node["lunar"] not in phases,
+        do: invalid.(at(rel, path ++ ["lunar"]))
+  end
 
-    gated =
-      leaves != [] or Enum.any?(defs["barrier"] || %{}, fn {_, {_, _, b}} -> b["opens_when"] end)
+  defp opens_when?({_, {_, _, barrier}}), do: is_map_key(barrier, "opens_when")
 
+  # A missing or schema-invalid manifest (nil) has its own diagnostics.
+  defp floor(nil, _), do: []
+  defp floor(_, false), do: []
+
+  defp floor(m, true) do
     api =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    for(
-      {node, rel, path} <- leaves,
-      node["lunar"] not in phases,
-      do: invalid.(at(rel, path ++ ["lunar"]))
-    ) ++
-      if gated and api < [1, 45],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-        else: []
+    if api < [1, 45],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
+      else: []
   end
 
   defp base(calendar, day, hour, subdivision, invalid) do
@@ -98,8 +106,8 @@ defmodule Loka.Content.Calendar do
         do: invalid.(at(rel, ["daily_schedule", key]))
   end
 
-  defp windows(defs, hours, invalid) do
-    for {node, rel, path} <- policy_nodes(defs),
+  defp windows(nodes, hours, invalid) do
+    for {node, rel, path} <- nodes,
         node["op"] == "time_window",
         node["from"] >= hours or node["to"] >= hours,
         do: invalid.(at(rel, path))
