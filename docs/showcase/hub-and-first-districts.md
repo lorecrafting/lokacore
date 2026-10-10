@@ -228,12 +228,12 @@ their description why the door is shut (a `sky` variant).
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | Read `sign_world`; `look_about` twelve times; step west into the inn and back (visit 2 of the shore). | All three lines appear; the same command ids give the same lines on replay. | |
-| 2 | Open `tidegate` at 07:00 day 1. | Refused `invalid_state` (tide high from 06:00 to 12:00: 21600..43200 of the 43200 cycle); the room's high-tide variant says so; no Open offered. | tide x hidden x night x climb |
-| 3 | North twice to `cliff_top`; move down without the rope. | The move happens; the fall line; hp 7 (10 - 3); the player is on `smugglers_stair`. | tide x hidden x night x climb |
+| 2 | Open `tidegate` at 07:00 day 1. | Refused `invalid_state` (tide high from 06:00 to 12:00: 21600..43200 of the 43200 cycle); the room's high-tide variant says so; no Open offered. | tide gate x hidden exit x time window x climb |
+| 3 | North twice to `cliff_top`; move down without the rope. | The move happens; the fall line; hp 7 (10 - 3); the player is on `smugglers_stair`. | tide gate x hidden exit x time window x climb |
 | 4 | Up (plain), take `rope`, down. | No fall, no line, hp 7. | |
-| 5 | Down to `sea_cave`; `search_cleft` at 10:00. | Unavailable (outside the window); a typed `search` is refused; the cave's Exits list only west. | tide x hidden x night x climb |
+| 5 | Down to `sea_cave`; `search_cleft` at 10:00. | Unavailable (outside the window); a typed `search` is refused; the cave's Exits list only west. | tide gate x hidden exit x time window x climb |
 | 6 | Wait to 12:00; open `tidegate`; west. | Opens at low tide; this is the shore's third visit, so its description is the familiar one-liner. | tide gate x hidden exit x time window x climb |
-| 7 | Wait to 20:00; east (the gate stays open at high tide); `search_cleft`. | Success line plus the tip once; Exits now list up; the map links the cave to the stair; a move up succeeds. | tide x hidden x night x climb |
+| 7 | Wait to 20:00; east (the gate stays open at high tide); `search_cleft`. | Success line plus the tip once; Exits now list up; the map links the cave to the stair; a move up succeeds. | tide gate x hidden exit x time window x climb |
 | 8 | Reach day 4 (winter) by one-day waits; at 03:00 pass Idony. | Her name reads the dozing variant; after 06:00 the base; her description reads the winter variant. | NPC status x variants x schedule (the variant half) |
 | 9 | Reach the first full moon (172800 from the lunar origin: day 3, 00:00) by one-day waits; open `moon_door` on `cliff_top`; east. | Opens; the player is in `tide_pools`; at a new moon the Open is refused and the cliff's variant says why. | tide gate x hidden exit x time window x climb |
 
@@ -290,7 +290,7 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
   all(`fact_compare {fact: knows_fire, subject: target, equals: true}`, not `topic_fire_known`);
   no quest) with one choice only, `press` (`check {key: press_nell, kind: opposed, skill:
   intimidate, rating: 2, failure}`, sequence `fact.assign topic_fire_known true`): a checked
-  choice whose sequence assigns a fact is refused (`OUTCOME_MISMATCH`) in a dialogue with two or
+  choice whose sequence assigns a fact the save proves by one receipt (a topic fact) is refused (`OUTCOME_MISMATCH`) in a dialogue with two or
   more choices, so this dialogue has no `leave`, and once the topic is known its policy fails;
   then `nell_talk` (empty policy, one `leave` choice) so Talk always opens something.
 - **The Reeve**: dialogue `reeve_talk` (no quest): `accept` (`accept: carry_letter`), `help`
