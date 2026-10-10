@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { sequence } from '../src/mechanics/reaction.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-exposure-sampler-'));
@@ -143,16 +144,17 @@ test('a frosty day on the fell chills a cloakless body; a worn cloak stops it; t
   assert.equal(hp(warm), 10);
 });
 
-// Breaks: an expiry and a clock_hour re-application in one settlement merge into a write
-// compose_status refuses (active generation 1 to active 2), so the settlement faults
-// precondition_failed and the host retries the same step forever. Literals: entering at 1000
+// Breaks: an expiry and a clock_hour re-application in one settlement fault (two groups write the
+// status row, so the host retries the same step forever) or keep the expired generation instead
+// of opening the next one (row 1). Literals: entering at 1000
 // ends at 10000; one advance 9500 to 11000 expires it at 10000 and re-applies it at the committed
 // clock 11000 (ends 20000); entering at 1800 ends at 10800, where expiry and the calendar job tie.
-test('an expiry and a re-application in one settlement keep one generation', () => {
+test('an expiry and a re-application in one settlement open the next generation', () => {
   const chilled = (w: World) =>
     Object.values(w.state.statuses ?? {}).filter((r) => r.active) as {
       generation: number;
       ends_at: number;
+      job_id: string;
     }[];
   for (const [enter, step] of [
     [1000, (w: World) => elapse(w, 11000).w],
@@ -165,15 +167,63 @@ test('an expiry and a re-application in one settlement keep one generation', () 
     w = wait(w, 9500);
     assert.equal(hp(w), 9);
     w = play(w, { type: 'remove', item_id: id(w, 'cloak') });
+    // At the 10800 tie due jobs run in job-id order: the calendar job first is a refresh while
+    // active (generation 1 kept), the status job first an expiry then a re-application.
+    const clock = Object.entries(w.state.jobs ?? {}).find(
+      ([, j]) => j.status === 'pending' && j.job.kind === 'calendar',
+    )![0];
+    const refreshFirst = clock < chilled(w)[0]!.job_id;
     w = step(w);
     assert.deepEqual(
       chilled(w).map((r) => r.generation),
-      [1],
+      [enter === 1800 && refreshFirst ? 1 : 2],
       `entered at ${enter}`,
     );
     assert.equal(hp(w), 9);
-    if (enter === 1000) assert.equal(chilled(w)[0]!.ends_at, 20000);
+    assert.equal(chilled(w)[0]!.ends_at, enter === 1000 ? 20000 : 19800);
   }
+});
+
+// Breaks: every hourly refresh repeats the applied line, or a first application loses it.
+// Checked at the reaction step (its narration does not reach the receipt yet, loka-kgd.13).
+test('a clock_hour refresh is silent; only a first application says the applied line', () => {
+  const rule = Object.values(content.reactions!).find(
+    (r) => r.on.event === 'clock_hour' && JSON.stringify(r).includes('"chilled"'),
+  )!;
+  const said = (w: World, cause: object) => {
+    const d = sequence(
+      w,
+      w.character,
+      rule,
+      cause as never,
+      1,
+      { n: 0 },
+      () => 'dddddddd-0000-4000-8000-0000000000aa',
+    );
+    assert.equal(d?.kind, 'accepted');
+    return d!.kind === 'accepted' ? d!.narration : undefined;
+  };
+  const hourly = (r: { events: { payload: { type: string } }[] }) =>
+    r.events.find((e) => e.payload.type === 'clock_hour')!;
+  let w = play(fresh(), { type: 'take', item_id: id(fresh(), 'cloak') });
+  w = play(w, { type: 'wear', item_id: id(w, 'cloak') });
+  w = play(w, { type: 'move', direction: 'north' });
+  const first = elapse(w, HOUR);
+  assert.equal(labels(first.w), undefined);
+  w = play(first.w, { type: 'remove', item_id: id(first.w, 'cloak') });
+  assert.deepEqual(said(w, hourly(first)), [{ key: 'narration.chilled.applied' }]);
+  const second = elapse(w, 2 * HOUR);
+  assert.deepEqual(labels(second.w), ['condition.chilled']);
+  assert.equal(said(second.w, hourly(second)), undefined);
+});
+
+// Breaks: the sampler's drains can kill (trap 6): a cloakless body left on a frosty fell all day
+// would die at about 72000 (hp 10, 1 every 7200) without the pool minimum of 1.
+test('a whole frosty day on the fell leaves a cloakless body alive at hp 1', () => {
+  let w = play(fresh(), { type: 'move', direction: 'north' });
+  w = wait(w, 24 * HOUR - 1);
+  assert.equal(hp(w), 1);
+  assert.equal(w.state.statuses && Object.values(w.state.statuses).some((r) => r.active), true);
 });
 
 // Breaks: a condition's reaction names the wrong weather, or its label is missing (trap 12).

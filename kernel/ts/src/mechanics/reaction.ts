@@ -191,8 +191,10 @@ function statusStep(
   const joined = holders.get(holder) ?? group;
   const ops = applyStatus(world, holder, step.status, joined, mint);
   if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
+  // Only a first application schedules its tick job; a refresh while active is silent (row W25).
+  const first = ops.some((o) => o.op === 'job.schedule');
   const label = specOf(world, step.status)?.narration.applied;
-  return { ops, narration: label && ops.length && holder === body ? [{ key: label }] : [] };
+  return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
 }
 
 function assignment(

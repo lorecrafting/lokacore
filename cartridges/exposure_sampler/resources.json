@@ -33,7 +33,7 @@
       ]
     },
     "hp": {
-      "minimum": 0,
+      "minimum": 1,
       "maximum": 10,
       "start": 10,
       "gain": 0

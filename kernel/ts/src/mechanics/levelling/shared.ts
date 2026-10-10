@@ -1,12 +1,12 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, LevellingRow, StatusRow, Text } from '../../contracts.gen.ts';
+import type { CharacterId, DeltaOp, LevellingRow, Text } from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
 import type { World } from '../../runtime/decision.ts';
-import { statusKey } from '../status/shared.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
+type Set = Extract<DeltaOp, { op: 'levelling.set' }>;
 type Spec = NonNullable<NonNullable<World['cartridge']['world']>['levelling']>;
 /** How many thresholds `experience` has reached (the level minus 1). */
 const reached = (spec: Spec, experience: number) =>
@@ -38,54 +38,25 @@ export function levelUp(world: World, ops: readonly DeltaOp[]): Text[] {
   return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 
-// The rows a proposal writes at most once (compose faults a row written by two groups): a
-// character's levelling (row 4) and a body's status (row 1: a due tick and a clock_hour refresh,
-// row W25, can land in one settlement).
-const merged = (o: DeltaOp) =>
-  o.op === 'levelling.set'
-    ? `levelling:${o.character_id}`
-    : o.op === 'status.transition'
-      ? statusKey(o.body_id, o.status)
-      : undefined;
-type Merged = Extract<DeltaOp, { op: 'levelling.set' | 'status.transition' }>;
-
 /**
- * One write per merged row per proposal: each row's last write, which already holds every
- * earlier one (each sequence reads the proposal so far), expecting the row before the first.
- * A single write is returned unchanged.
+ * One levelling write per character per proposal (row 4; compose faults a row written by two
+ * groups): each character's last write, which already holds every earlier grant, expecting the
+ * row before the first. A single write is returned unchanged.
  */
 export function oneWrite(ops: readonly DeltaOp[]): DeltaOp[] {
-  const first = new Map<string, Merged>();
-  const last = new Map<string, Merged>();
-  for (const o of ops) {
-    const k = merged(o);
-    if (!k) continue;
-    if (!first.has(k)) first.set(k, o as Merged);
-    last.set(k, o as Merged);
-  }
+  const first = new Map<CharacterId, Set>();
+  const last = new Map<CharacterId, Set>();
+  for (const o of ops)
+    if (o.op === 'levelling.set') {
+      if (!first.has(o.character_id)) first.set(o.character_id, o);
+      last.set(o.character_id, o);
+    }
   return ops.flatMap((o): DeltaOp[] => {
-    const k = merged(o);
-    if (!k) return [o];
-    if (last.get(k) !== o) return [];
-    const { expected } = first.get(k)!;
-    if (expected === (o as Merged).expected) return [o];
-    return o.op === 'status.transition'
-      ? statusChain(o, expected as StatusRow | null)
-      : [{ ...o, expected } as DeltaOp];
+    if (o.op !== 'levelling.set') return [o];
+    if (last.get(o.character_id) !== o) return [];
+    const { expected } = first.get(o.character_id)!;
+    return [expected === o.expected ? o : { ...o, expected }];
   });
-}
-
-// A status row written several times (an expiry, then a clock_hour re-application) as one
-// transition compose_status accepts: active to active keeps the stored generation, a new
-// activation is the stored one plus 1, and inactive to inactive writes nothing (its orphaned job
-// completes harmlessly, row 1).
-function statusChain(
-  o: Extract<DeltaOp, { op: 'status.transition' }>,
-  expected: StatusRow | null,
-): DeltaOp[] {
-  if (!o.value.active && !expected?.active) return [];
-  const generation = expected?.active ? expected.generation : (expected?.generation ?? 0) + 1;
-  return [{ ...o, expected, value: { ...o.value, generation } }];
 }
 
 /** The checked write of the actor's row to `value`, expecting the row `world` holds. */
