@@ -8,7 +8,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -105,6 +107,45 @@ test('a belt of +2 STR and +4 CON lifts the stone and raises the hp maximum unti
   w = play(w, { type: 'remove', item_id: id(w, 'belt') });
   assert.deepEqual([hp().current, hp().maximum], [10, 10]);
   assert.deepEqual(stat(w, 'str'), [10, 0]);
+});
+
+// Breaks (loka-kgd.8 review): level() reads a stored hp above a lowered maximum uncapped, so
+// after a write of 13 under the belt (max 14) and its removal the GameView shows 13/10 (or the band
+// lookup throws) and the next write starts from 13.
+test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next write starts there', () => {
+  const regen = structuredClone(content) as any;
+  const by_position = { standing: 4, sitting: 4, resting: 4, sleeping: 4 };
+  regen.resources['affects_sampler@0.0.1:resource/hp'].gain = 4;
+  regen.resources['affects_sampler@0.0.1:resource/hp'].regen = { every: 3600, by_position };
+  let w = taken(
+    newWorld(regen, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]),
+    'belt',
+  );
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
+  const until = w.state.clock + 3600;
+  const run_id = 'aaaaaaaa-0000-4000-8000-000000000041';
+  const r = stepElapsed(
+    w,
+    {
+      id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
+      world_context_id: w.context,
+      payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
+    } as never,
+    ++n,
+  );
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const hp = resourceRef(w, 'hp');
+  const spend = (x: World) => {
+    const done = apply(x, [adjust(x, x.body, hp, -1, {}).op]);
+    assert.ok('world' in done, JSON.stringify(done));
+    return done.world;
+  };
+  w = spend(r.world); // 14 regenerated (10 + 4), 13 stored
+  assert.equal(level(w, w.body, hp), 13);
+  w = play(w, { type: 'remove', item_id: id(w, 'belt') });
+  const view = gameView(w).resources!.find((x) => x.resource.key === 'hp')!;
+  assert.deepEqual([view.current, view.maximum], [10, 10]);
+  assert.equal(level(spend(w), w.body, hp), 9);
 });
 
 // Breaks: checked arithmetic in an attribute, derived or maximum read (loka-kgd.8 ruling), so an
