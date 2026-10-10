@@ -9,6 +9,12 @@
         "flagstones"
       ],
       "description": "detail.floor"
+    },
+    "hook": {
+      "aliases": [
+        "hook"
+      ],
+      "description": "detail.hook"
     }
   }
 }

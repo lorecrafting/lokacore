@@ -18,7 +18,8 @@
       "schedule": 1,
       "inspectable_detail": 1,
       "fact": 1,
-      "action_recipe": 1
+      "action_recipe": 1,
+      "reaction": 1
     },
     "client_features": []
   },

@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "word_left"
+  },
+  "apply": [
+    {
+      "op": "quest.resolve",
+      "quest": "find_key",
+      "outcome": "done"
+    }
+  ]
+}

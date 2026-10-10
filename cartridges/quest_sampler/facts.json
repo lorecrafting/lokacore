@@ -10,6 +10,30 @@
         "player"
       ],
       "meaning": "This character has searched the hall floor."
+    },
+    "word_left": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has left word by the hook that the key is found."
+    },
+    "keeper_trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 2,
+        "default": 2
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The key's keeper's trust in this character."
     }
   }
 }

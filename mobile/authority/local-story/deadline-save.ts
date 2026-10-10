@@ -15,6 +15,7 @@ import {
   within,
 } from './deadline-receipts.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
+import { foreignDeadlineJob } from './deadline-jobs.ts';
 import type { Db, Meta } from './store.ts';
 
 const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
@@ -30,7 +31,8 @@ export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false
       validate('DefinitionRef', job.job).length ||
       (job.quest_instance_id !== undefined &&
         (validate('QuestInstanceId', job.quest_instance_id).length ||
-          validate('CharacterId', job.actor_id).length))
+          validate('CharacterId', job.actor_id).length ||
+          foreignDeadlineJob(world, job)))
     )
       invalid();
   for (const [questRef, definition] of Object.entries(world.cartridge.quests ?? {})) {

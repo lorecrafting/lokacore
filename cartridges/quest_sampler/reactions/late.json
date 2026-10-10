@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "quest_failed",
+    "quest": "find_key",
+    "outcome": "late"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "keeper_trust",
+      "value": 0
+    }
+  ]
+}
