@@ -2374,6 +2374,10 @@
             "$ref": "entity.schema.json#/$defs/ItemAffect"
           },
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it (kernel_api at least 1.46)."
+        },
+        "cues": {
+          "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6).",
+          "$ref": "entity.schema.json#/$defs/Cues"
         }
       },
       "required": [
