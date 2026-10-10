@@ -1,4 +1,5 @@
-// NightSky: the stars and shooting star over the night page (BOOK-UI-COMPONENTS.md, Night sky).
+// NightSky: the stars and shooting star over the night page (BOOK-UI-COMPONENTS.md, Night sky);
+// see it on the toolbar's dark palette (the Book shows it at night only).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { NightSky } from '../book/NightSky.tsx';
@@ -6,7 +7,6 @@ import { NightSky } from '../book/NightSky.tsx';
 const meta = {
   title: 'Book/NightSky',
   component: NightSky,
-  globals: { palette: 'dark' },
   render: () => (
     <View style={{ height: '100vh' as never }}>
       <NightSky />

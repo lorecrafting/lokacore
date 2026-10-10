@@ -37,17 +37,17 @@ type Streak = { x: number; y: number; k: Animated.Value }; // one shooting star:
 
 export function NightSky() {
   const reduced = useReducedMotion();
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [box, setBox] = useState({ width: 0, height: 0 });
   const [falling, setFalling] = useState<Streak>();
   useEffect(() => {
-    if (reduced || !size.width) return;
+    if (reduced || !box.width) return;
     let timer: ReturnType<typeof setTimeout>;
     const later = () => (timer = setTimeout(fall, -streak.every * Math.log(1 - Math.random())));
     const fall = () => {
       const k = new Animated.Value(0);
       setFalling({
-        x: (0.2 + 0.9 * Math.random()) * size.width,
-        y: 0.3 * Math.random() * size.height,
+        x: (0.2 + 0.9 * Math.random()) * box.width,
+        y: 0.3 * Math.random() * box.height,
         k,
       });
       Animated.timing(k, {
@@ -59,13 +59,13 @@ export function NightSky() {
     };
     later();
     return () => clearTimeout(timer);
-  }, [reduced, size.width, size.height]);
+  }, [reduced, box.width, box.height]);
   const along = (from: number, by: number) =>
     falling!.k.interpolate({ inputRange: [0, 1], outputRange: [from, from + by] });
   return (
     <View
       {...over}
-      onLayout={({ nativeEvent: { layout: l } }) => setSize({ width: l.width, height: l.height })}
+      onLayout={({ nativeEvent: { layout: l } }) => setBox({ width: l.width, height: l.height })}
     >
       {field.map((s, i) => (
         <View
