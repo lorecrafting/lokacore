@@ -388,7 +388,7 @@ the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:177`). The conversation then
+whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:295`). The conversation then
 returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same
 decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
@@ -396,7 +396,9 @@ source, beat, roles and choice ids, and its `choice_opened` after `choice_resolv
 ends the conversation instead, opening nothing, when its dialogue resolves a quest (story points
 and scene starts follow only such answers) or declares a riddle, when the answer has a `patrol`
 transition (the speaker sets off on a leg), or when the dialogue has a single choice (one-shot
-offers, lessons, escort starts and authored farewells such as "Take your leave"). The reopened options keep their
+offers, lessons, escort starts and single-choice farewells such as "Take your leave";
+`mechanics/dialogue/rule.ts:201`). A farewell choice in a dialogue with other choices, such as Aldric's "Leave
+Aldric.", returns to the hub like any other answer. The reopened options keep their
 declared availability: an answer whose effects make the dialogue's policy or an option fail shows
 those options unavailable with the usual codes, and Leave the conversation stays offered. A
 riddle's wrong answer keeps its row, as below. `close_choice {continuation_id}`: the

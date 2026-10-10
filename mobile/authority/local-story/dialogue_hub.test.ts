@@ -56,10 +56,15 @@ const pending = (w: ReturnType<ReturnType<typeof atElspeth>['story']['world']>) 
 test('real SQLite hub answer survives failed and lost COMMIT, replay and cold reopen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hub-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  for (const kind of ['failed', 'lost'] as const) {
-    const p = atElspeth(join(dir, `${kind}.db`));
+  for (const [kind, choice_id] of [
+    ['failed', 'directions'],
+    ['lost', 'directions'],
+    ['failed', 'accept'],
+    ['lost', 'accept'],
+  ] as const) {
+    const p = atElspeth(join(dir, `${kind}-${choice_id}.db`));
     const [[talked]] = pending(p.story.world());
-    const answer = p.invocation('choose', [], { continuation_id: talked, choice_id: 'directions' });
+    const answer = p.invocation('choose', [], { continuation_id: talked, choice_id });
     if (kind === 'failed')
       p.sql.exec(
         'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',

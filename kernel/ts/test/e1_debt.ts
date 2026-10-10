@@ -31,8 +31,8 @@ export function debtLate(a: CaseHost) {
   a.invoke('a_peg_debt', [peg]);
   refuse(a, 'accept_on_time');
   a.choose('accept_late');
+  a.reopen(); // a cold reopen with Peg's hub still pending
   a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-  a.reopen();
   assert.equal(debt(a)?.state, 'active');
   assert.equal(a.flag('priory_tithe_delivered'), 'pending');
   assert.equal(a.story.world().state.containers[ledger], a.story.world().body);
