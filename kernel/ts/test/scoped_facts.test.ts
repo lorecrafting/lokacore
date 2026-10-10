@@ -96,18 +96,27 @@ test('two NPCs remember the player separately; a stranger does not', () => {
 });
 
 // Breaks: a reaction's entity fact lands on the actor's body or a fixed row instead of the event's
-// subject (the NPC given the apple), or fact_compare ignores its named npc.
-test('an apple given to the smith marks her fed, at the instance scope, and not the miller', () => {
-  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
-  const apple = w.entityIds[`${S}:item/apple`];
-  w = act(w, { type: 'take', item_id: apple });
-  w = act(w, { type: 'give', item_id: apple, recipient_id: npc(w, 'smith') });
-  const smith = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
-  assert.ok(compare(w, 'fed', true, { npc: { ...smith, key: 'smith' } }));
-  assert.ok(compare(w, 'fed', false, { npc: { ...smith, key: 'miller' } }));
-  const [row] = Object.keys(w.state.facts ?? {}).map((k) => JSON.parse(JSON.stringify(decode(k))));
-  assert.deepEqual(row.scope, { kind: 'instance', world_context_id: CONTEXT });
-  assert.equal(row.subject_id, npc(w, 'smith'));
+// subject (the NPC given the apple) or the step's named npc, or fact_compare ignores its named npc.
+test('an apple given to the smith marks her fed (or the named miller), at the instance scope', () => {
+  const named = structuredClone(content) as any;
+  const ref = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
+  named.reactions[`${S}:reaction/fed`].apply[0].npc = { ...ref, key: 'miller' };
+  for (const [c, fed, hungry] of [
+    [content, 'smith', 'miller'],
+    [named, 'miller', 'smith'],
+  ] as const) {
+    let w = newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+    const apple = w.entityIds[`${S}:item/apple`];
+    w = act(w, { type: 'take', item_id: apple });
+    w = act(w, { type: 'give', item_id: apple, recipient_id: npc(w, 'smith') });
+    assert.ok(compare(w, 'fed', true, { npc: { ...ref, key: fed } }), fed);
+    assert.ok(compare(w, 'fed', false, { npc: { ...ref, key: hungry } }), hungry);
+    const rows = Object.keys(w.state.facts ?? {}).map((k) => JSON.parse(JSON.stringify(decode(k))));
+    assert.deepEqual(
+      rows.map((r) => [r.scope, r.subject_id]),
+      [[{ kind: 'instance', world_context_id: CONTEXT }, npc(w, fed)]],
+    );
+  }
 });
 
 // Breaks: the loader admits a per_subject fact below 1.47, or one named where no subject is known
