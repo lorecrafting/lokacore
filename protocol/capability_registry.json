@@ -188,6 +188,10 @@
     "residency": "portable_capability",
     "definitions": [
       "status"
+    ],
+    "events": [
+      "status_ticked",
+      "status_expired"
     ]
   },
   {

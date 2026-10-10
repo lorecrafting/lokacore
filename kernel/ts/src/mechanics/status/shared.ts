@@ -1,11 +1,13 @@
-// status@1 (toolbox row 1): timed statuses on the player's body, one generation per body/status
-// pair; the tick job is unbound and finds its row by job id, so a stale one completes harmlessly.
-// ponytail: only world.body carries statuses (the job names no body); add a job binding for NPCs.
+// status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
+// generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
+// stale one completes harmlessly.
 import type { DefinitionRef, DeltaOp, EntityId, JobId, StatusRow } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
 import { type Mint, refString, type World } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { HOLDERS } from '../../foundation/compose_status.ts';
+import { living } from '../death/shared.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -50,7 +52,21 @@ export const endStatus = (
   value: { active: false, generation: row.generation },
 });
 
-/** Apply or refresh `status` on `body` at the world's clock; unknown statuses change nothing. */
+/**
+ * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
+ * its template's list (runtime/created.ts).
+ */
+export const immune = (world: World, body: EntityId, status: DefinitionRef) =>
+  !!world.entities[body]?.immune?.some((s) => refString(s) === refString(status));
+
+/** `body` can hold a status: the player's body, a living NPC or an item (row G3). */
+const holds = (world: World, body: EntityId) =>
+  HOLDERS.includes(world.knownEntities[body]?.kind ?? '') && living(world, body);
+
+/**
+ * Apply or refresh `status` on `body` (a body, a living NPC or an item) at the world's clock; an
+ * unknown or immune status, a dead NPC or another kind of entity changes nothing.
+ */
 // size: allow 43, a first application writes the row and schedules its job; a refresh writes only the end
 export function applyStatus(
   world: World,
@@ -60,7 +76,7 @@ export function applyStatus(
   mint: Mint,
 ): DeltaOp[] {
   const spec = specOf(world, status);
-  if (!spec) return [];
+  if (!spec || !holds(world, body) || immune(world, body, status)) return [];
   const prior = world.state.statuses?.[statusKey(body, status)];
   const active = prior?.active ? (prior as Active) : undefined;
   const now = world.state.clock;

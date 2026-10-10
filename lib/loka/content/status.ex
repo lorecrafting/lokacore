@@ -1,5 +1,5 @@
 defmodule Loka.Content.Status do
-  @moduledoc "Checks toolbox row 1 status declarations, their appliers and the foods that cure them."
+  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them and (row G3) the NPCs and items immune to them."
   import Loka.Content.Source, only: [at: 2, diag: 2]
   alias Loka.Content.Refs
 
@@ -13,25 +13,47 @@ defmodule Loka.Content.Status do
       for {_, {rel, _, i}} <- defs["item"],
           cures = get_in(i, ["edible", "cures"]),
           cures,
-          do: {rel, cures}
+          do: {rel, ["edible", "cures"], cures}
 
-    if statuses == %{} and cures == [],
+    {immune, g3} = row_g3(defs)
+
+    if statuses == %{} and cures == [] and not g3,
       do: [],
-      else: gate(m) ++ values(statuses, m, defs, text) ++ foods(cures, m, defs)
+      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
   end
 
+  # Row G3: each NPC's or item's immune list, and whether any G3 field (those, a step naming an
+  # item, or a tick or expiry trigger) is used.
+  defp row_g3(defs) do
+    immune =
+      for kind <- ~w(npc item),
+          {_, {rel, _, e}} <- defs[kind] || %{},
+          e["immune"],
+          do: {rel, ["immune"], e["immune"]}
+
+    {immune, immune != [] or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
+  end
+
+  defp trigger?({_, {_, _, %{} = r}}),
+    do:
+      String.starts_with?(r["on"]["event"], "status_") or
+        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and &1["item"] != nil))
+
+  defp trigger?(_), do: false
+
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
-  defp gate(m) do
+  defp gate(m, g3) do
     caps = m["requires"]["capabilities"]
 
-    [major, minor] =
+    version =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if caps["status"] == 1 and caps["death"] == 1 and (major > 1 or (major == 1 and minor >= 38)),
-      do: [],
-      else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
+    if caps["status"] == 1 and caps["death"] == 1 and
+         version >= if(g3, do: [1, 46], else: [1, 38]),
+       do: [],
+       else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
   end
 
   defp values(statuses, m, defs, text) do
@@ -57,10 +79,10 @@ defmodule Loka.Content.Status do
       else: [diag("SCHEMA_VIOLATION", at(rel, path))]
   end
 
-  defp foods(cures, m, defs) do
-    for {rel, list} <- cures,
+  defp foods(lists, m, defs) do
+    for {rel, path, list} <- lists,
         {s, i} <- Enum.with_index(list),
         Refs.resolve(s, "status", m, defs) == :unresolved,
-        do: diag("UNRESOLVED_REFERENCE", at(rel, ["edible", "cures", i]))
+        do: diag("UNRESOLVED_REFERENCE", at(rel, path ++ [i]))
   end
 end

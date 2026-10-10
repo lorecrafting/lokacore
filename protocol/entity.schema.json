@@ -248,6 +248,15 @@
           "items": {
             "$ref": "entity.schema.json#/$defs/Tag"
           }
+        },
+        "immune": {
+          "description": "Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status (kernel_api 1.46).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
         }
       },
       "required": [
@@ -534,6 +543,15 @@
         },
         "resistances": {
           "$ref": "entity.schema.json#/$defs/Resistances"
+        },
+        "immune": {
+          "description": "Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status (kernel_api 1.46).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
         }
       },
       "required": [

@@ -440,6 +440,8 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `drank`
   - `rested`: An accepted actor-owned Rest after prior-rate settlement, at its actual body/room.
   - `clock_hour`: The world's calendar job crossed one or more game-hour boundaries in one settlement (toolbox row W25): one event at the committed clock, never one per elapsed hour.
+  - `status_ticked`: Toolbox row G3: one due tick of an active status on a body, NPC or thing (body_id), after its resource change, if any.
+  - `status_expired`: Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none.
 
 ## Fact contracts (`protocol/fact.schema.json`)
 
@@ -652,7 +654,7 @@ QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation p
 
 ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.
 
-- **ReactionRule**: Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits only the event's subject body (docs/system/mechanics.md reaction@1). Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
+- **ReactionRule**: Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
 
 ## Relation and provenance contracts (`protocol/relation.schema.json`)
 

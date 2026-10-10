@@ -1068,7 +1068,7 @@ Cold reopen accepts each complete intermediate: dropped before acquisition with 
 
 ## Status recovery
 
-Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
+Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) the holder in that key may be an NPC or item; the row and job shapes are unchanged, so an older save's rows load as before, and the due job finds its row, and so its holder, by job id on reopen as in play. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
 
 ## Levelling recovery
 

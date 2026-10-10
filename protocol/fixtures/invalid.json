@@ -12995,7 +12995,7 @@
     "value": {
       "key": "k",
       "on": {
-        "event": "status_ticked",
+        "event": "status_cured",
         "fact": {
           "cartridge_id": "c",
           "cartridge_version": "1.0.0",
@@ -20613,6 +20613,295 @@
       {
         "path": "/from/room_id",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "status_ticked_trigger_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked",
+        "status": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/status",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "status_expired_trigger_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_expired",
+        "status": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/status",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "status_apply_item_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_expired"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "burning"
+          },
+          "item": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/item",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "npc_immune_empty",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "golem",
+      "keywords": [
+        "golem"
+      ],
+      "short": "npc.golem.short",
+      "room_line": "npc.golem.room",
+      "description": "npc.golem.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "immune": []
+    },
+    "errors": [
+      {
+        "path": "/immune",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "item_immune_too_many",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "item.door.short",
+      "room_line": "item.door.room",
+      "description": "item.door.description",
+      "location": {
+        "in": "template"
+      },
+      "immune": [
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s0"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s1"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s2"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s3"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s4"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s5"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s6"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s7"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s8"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s9"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s10"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s11"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s12"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s13"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s14"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s15"
+        },
+        {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "status",
+          "key": "s16"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/immune",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "item_immune_not_a_ref",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "item.door.short",
+      "room_line": "item.door.room",
+      "description": "item.door.description",
+      "location": {
+        "in": "template"
+      },
+      "immune": [
+        1
+      ]
+    },
+    "errors": [
+      {
+        "path": "/immune/0",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "status_ticked_missing_fields",
+    "contract": "EventPayload",
+    "value": {
+      "type": "status_ticked"
+    },
+    "errors": [
+      {
+        "path": "/body_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "status_expired_extra_field",
+    "contract": "EventPayload",
+    "value": {
+      "type": "status_expired",
+      "body_id": "12121212-3434-4565-8787-909090909090",
+      "status": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "status",
+        "key": "burning"
+      },
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
       }
     ]
   },

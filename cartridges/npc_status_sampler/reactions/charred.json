@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "burning"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "charred",
+      "value": true
+    }
+  ]
+}
