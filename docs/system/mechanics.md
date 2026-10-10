@@ -676,8 +676,9 @@ Invariant `job_complete_owned_by_run`: each completion belongs to its job's own 
 outside the root command's writer group 0, and the job is due by the advance's target.
 Equal-due combat round/bleed and population deadline pairs may share a writer group, and a
 combat round joins the status writer group of its body and every roster member in the advance
-(row 2c; [row 6b](#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)), and its bleed
-pair's (a bleed tick joins its body's status group too): when those are different groups, the lowest is kept and the proposal's earlier writes in
+(row 2c; [row 6b](#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)); a bleed tick joins
+its body's group too, which is how an equal-due round/bleed pair shares one. When those are
+different groups, the lowest is kept and the proposal's earlier writes in
 the others take its number, so every write to those rows composes in order (loka-x2gv); the group
 does not identify a unique job completion. A job's ops `at` its due time hydrate
 from the advance's base clock, as the whole proposal composes (`now` in `runtime/proposal.ts`).
