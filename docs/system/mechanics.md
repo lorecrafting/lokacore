@@ -163,7 +163,8 @@ in the body `invalid_state` (not worn), anywhere but one of the actor's holders 
 accepted `removed`, one transfer holder → body. These checks are one read-only function the
 rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
 `has_item` climbs containers, so a worn item still counts. A worn item's affects move its
-wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)). Slot compatibility
+wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)); when the hp maximum
+is derived, wearing or removing an item with affects first settles hp ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). Slot compatibility
 and dual wield, curses and no-remove items are LATER ([ROADMAP](../ROADMAP.md)).
 
 <a id="position1-kerneltssrcrulespositionts"></a>
@@ -279,7 +280,10 @@ The player body's hp maximum moves with the derived `hp_max` table
 its effective maximum is the authored `maximum` plus the bonus, saturated to the ResourceInt range and never below `minimum`, read on
 each use and never stored. Every bound above uses it: queries, saturation, costs, regeneration
 (which stops there), the GameView maximum and band, the status tick and the death restore (capped
-at it). The start value is unchanged, so a raised maximum is reached by regeneration. Composition
+at it). The start value is unchanged, so a raised maximum is reached by regeneration. Wearing or
+removing an item with affects first settles hp with a zero-amount `resource.adjust` under the old
+maximum, as position@1 does, so credit banked while capped is discarded and never granted by the new
+maximum. Composition
 carries it as the non-saved `resource_maxima` map, keyed by the exact canonical resource target,
 in both kernels' composition and independent replay; an entry replaces the spec's `maximum` for
 that target, and a row stored at or above it (the maximum fell since) reads as the maximum with

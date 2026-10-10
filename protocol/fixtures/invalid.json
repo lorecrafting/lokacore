@@ -17301,5 +17301,253 @@
         "code": "above_maximum"
       }
     ]
+  },
+  {
+    "contract": "ItemAffect",
+    "value": {
+      "modifier": 2
+    },
+    "errors": [
+      {
+        "path": "/attribute",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemAffect",
+    "value": {
+      "attribute": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "attribute",
+        "key": "per"
+      }
+    },
+    "errors": [
+      {
+        "path": "/modifier",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemAffect",
+    "value": {
+      "attribute": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "attribute",
+        "key": "per"
+      },
+      "modifier": 2,
+      "extra": 1
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "belt",
+      "keywords": [
+        "belt"
+      ],
+      "short": "item.belt.short",
+      "room_line": "item.belt.room",
+      "description": "item.belt.description",
+      "location": {
+        "in": "template"
+      },
+      "slot": "waist",
+      "affects": []
+    },
+    "errors": [
+      {
+        "path": "/affects",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "belt",
+      "keywords": [
+        "belt"
+      ],
+      "short": "item.belt.short",
+      "room_line": "item.belt.room",
+      "description": "item.belt.description",
+      "location": {
+        "in": "template"
+      },
+      "slot": "waist",
+      "affects": [
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "per"
+          },
+          "modifier": 2
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/affects",
+        "code": "too_many_items"
+      }
+    ]
   }
 ]

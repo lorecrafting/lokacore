@@ -109,21 +109,9 @@ test('a belt of +2 STR and +4 CON lifts the stone and raises the hp maximum unti
   assert.deepEqual(stat(w, 'str'), [10, 0]);
 });
 
-// Breaks (loka-kgd.8 review): level() reads a stored hp above a lowered maximum uncapped, so
-// after a write of 13 under the belt (max 14) and its removal the GameView shows 13/10 (or the band
-// lookup throws) and the next write starts from 13.
-test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next write starts there', () => {
-  const regen = structuredClone(content) as any;
-  const by_position = { standing: 4, sitting: 4, resting: 4, sleeping: 4 };
-  regen.resources['affects_sampler@0.0.1:resource/hp'].gain = 4;
-  regen.resources['affects_sampler@0.0.1:resource/hp'].regen = { every: 3600, by_position };
-  let w = taken(
-    newWorld(regen, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]),
-    'belt',
-  );
-  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
-  const until = w.state.clock + 3600;
-  const run_id = 'aaaaaaaa-0000-4000-8000-000000000041';
+function idle(w: World, seconds: number): World {
+  const until = w.state.clock + seconds;
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
   const r = stepElapsed(
     w,
     {
@@ -134,13 +122,63 @@ test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next 
     ++n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+}
+
+// The belt sampler with hp regenerating `rate` an hour at every position (regen requires position@1).
+function regenerating(rate: number) {
+  const regen = structuredClone(content) as any;
+  regen.lock.capabilities.position = 1;
+  regen.facts['affects_sampler@0.0.1:fact/position'] = {
+    key: 'position',
+    version: 1,
+    value_type: {
+      type: 'enum',
+      values: ['standing', 'sitting', 'resting', 'sleeping'],
+      default: 'standing',
+    },
+    scopes: ['player'],
+    meaning: 'position@1',
+  };
+  const by_position = { standing: rate, sitting: rate, resting: rate, sleeping: rate };
+  regen.resources['affects_sampler@0.0.1:resource/hp'].gain = rate;
+  regen.resources['affects_sampler@0.0.1:resource/hp'].regen = { every: 3600, by_position };
+  return taken(
+    newWorld(regen, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]),
+    'belt',
+  );
+}
+
+// Breaks (PM ruling loka-kgd.10): wear and remove do not settle hp first, so 4 h idle at the cap
+// banks 4 hp that the belt's raised maximum grants at once (14/14, and again after remove and wear).
+test('wearing the belt after 4 h idle at full hp keeps hp 10 of 14, then regenerates from there', () => {
+  let w = idle(regenerating(1), 4 * 3600);
+  const hp = () => gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+  assert.deepEqual([hp().current, hp().maximum], [10, 10]);
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
+  assert.deepEqual([hp().current, hp().maximum], [10, 14]);
+  w = idle(w, 3600);
+  assert.equal(hp().current, 11);
+  w = play(play(w, { type: 'remove', item_id: id(w, 'belt') }), {
+    type: 'wear',
+    item_id: id(w, 'belt'),
+  });
+  assert.equal(hp().current, 10);
+});
+
+// Breaks (loka-kgd.8 review): level() reads a stored hp above a lowered maximum uncapped, so
+// after a write of 13 under the belt (max 14) and its removal the GameView shows 13/10 (or the band
+// lookup throws) and the next write starts from 13.
+test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next write starts there', () => {
+  let w = regenerating(4);
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
   const hp = resourceRef(w, 'hp');
   const spend = (x: World) => {
     const done = apply(x, [adjust(x, x.body, hp, -1, {}).op]);
     assert.ok('world' in done, JSON.stringify(done));
     return done.world;
   };
-  w = spend(r.world); // 14 regenerated (10 + 4), 13 stored
+  w = spend(idle(w, 3600)); // 14 regenerated (10 + 4), 13 stored
   assert.equal(level(w, w.body, hp), 13);
   w = play(w, { type: 'remove', item_id: id(w, 'belt') });
   const view = gameView(w).resources!.find((x) => x.resource.key === 'hp')!;
@@ -227,28 +265,8 @@ test('the loader refuses each unsound item affect', () => {
   }
 });
 
-// Breaks: an affect without its attribute or amount, with an extra field, or an empty or
-// oversized affects list validates; finger leaves the slot keys.
-test('an item affect requires its attribute and amount', () => {
-  const affect = {
-    attribute: { cartridge_id: 'c', cartridge_version: '1.0.0', kind: 'attribute', key: 'per' },
-    modifier: 2,
-  };
-  assert.deepEqual(validate('ItemAffect', affect), []);
+// Breaks: finger leaves the slot keys. The ItemAffect schema rows are in
+// protocol/fixtures/invalid.json (validate.test.ts and contracts_test.exs).
+test('finger is a slot key', () => {
   assert.deepEqual(validate('SlotKey', 'finger'), []);
-  const rows: [string, unknown, string, string][] = [
-    ['ItemAffect', { modifier: 2 }, '/attribute', 'missing_property'],
-    ['ItemAffect', { attribute: affect.attribute }, '/modifier', 'missing_property'],
-    ['ItemAffect', { ...affect, extra: 1 }, '/extra', 'unknown_property'],
-  ];
-  for (const [contract, value, path, code] of rows)
-    assert.deepEqual(validate(contract, value), [{ path, code }], path);
-  const item = content.items!['affects_sampler@0.0.1:item/belt'];
-  for (const [affects, code] of [
-    [[], 'too_few_items'],
-    [Array(17).fill(affect), 'too_many_items'],
-  ] as const)
-    assert.deepEqual(validate('ItemDefinition', { ...item, affects }), [
-      { path: '/affects', code },
-    ]);
 });

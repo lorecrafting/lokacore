@@ -2,7 +2,7 @@
 // wear and remove an item by its id. A worn item is inside the actor's body's holder for its slot
 // (a fresh world makes one per declared slot, capacity 1, finger 2; runtime/fresh.ts), so both are one
 // entity.transfer, whose custody, cycle and capacity preconditions foundation/compose.ts re-checks, and no
-// event. Checks and codes: mechanics.md equipment@1.
+// event; an item with affects first settles hp (settle below). Checks and codes: mechanics.md equipment@1.
 import type { CharacterId, EntityId, ErrorCode } from '../../contracts.gen.ts';
 import {
   accepted,
@@ -14,6 +14,7 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
+import { adjust, maxima, resourceRef } from '../resource.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];
@@ -28,10 +29,22 @@ export const decide: Rule<'equipment'> = (world, command) => {
   if (typeof t === 'string') return rejected(t);
   const [source_id, destination_id] = t;
   const ops = [
+    ...settle(world, item_id),
     { op: 'entity.transfer', writer_group: 0, entity_id: item_id, source_id, destination_id },
   ] as const;
   return accepted(world, type === 'wear' ? 'worn' : 'removed', ops, []);
 };
+
+/**
+ * A zero-amount hp adjust when an item with affects moves and the hp maximum is derived, so credit
+ * banked under the old maximum settles there and the new one is reached by regeneration (resource@1).
+ */
+const settle = (world: World, item: EntityId) =>
+  world.entities[item].kind === 'item' &&
+  world.entities[item].affects &&
+  values(maxima(world)).length
+    ? [adjust(world, world.body, resourceRef(world, 'hp'), 0, {}).op]
+    : [];
 
 /**
  * Why step would refuse `type` (wear or remove) of `item` by `actor` now, else the transfer's
