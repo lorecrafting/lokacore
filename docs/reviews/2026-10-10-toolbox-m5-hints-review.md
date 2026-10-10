@@ -30,3 +30,31 @@
 4. nit: the compact save evidence of [Review stance](../WORKFLOW.md#review-stance) (reopen, failed-COMMIT, lost-ack, receipt-replay) is not in the Beads notes; hosted mobile ran them green on the head.
 
 Open: Book Journal "Hint:" wording awaits the designer; `book-ui.md` gets the line then.
+
+## Re-check: fixes and the action tip (`toolbox/m5-deadline` at `6a94f4eaf40008132deb3be3228c9a0a6923eab5`)
+
+- Scope: `ddb65809..6a94f4ea` (W23 fixes, action `tip`). Row W24 is out of scope (Beads `loka-kgd.45`). Governing: [mechanics.md action tip](../system/mechanics.md#quest-stage-hints-toolbox-row-w23), [cartridge.md](../system/cartridge.md#quest-stage-hints), `protocol/action.schema.json` `ActionRecipe.tip`.
+- Hosted CI on the head: ci success, book-e2e success.
+- Verdict: **APPROVE WITH NOTES** (one should-fix, one nit, no blocker).
+
+### Must be true (tip)
+
+1. The first accepted perform by an actor, with any outcome, assigns `seen_tip_<key>` and shows the tip after the outcome line. Later performs show nothing. The value comes from state only, so replay gives the same result.
+2. The fact is reserved like `skill_<key>`: an authored spec or any write of it is `RESERVED_FACT` in both kernels. Reading it is allowed.
+3. The loader and the compiler agree on `UNRESOLVED_REFERENCE`, `UNDECLARED_CAPABILITY` (fact@1) and the 1.46 floor. A key over 55 characters is refused.
+4. Recipes without a tip add no fact, so the Chapter 1 bytes stay the same.
+
+### Dispositions
+
+- F1 (removed `prior`): accepted. An earned exit always gets a new writer group (`proposal.ts:211`). Compose faults `conflicting_write` when two groups write one quest target (`foundation/compose.ts:66-70`; `sightRebindValid` applies only to sight). A test already pins the dialogue accept plus handover case (`quest_delivery.test.ts:130-145`). Activations in the same group are still found in `ops` (`lifecycle.ts:55`). So `prior` could only affect a proposal that is already refused. The rest of the group argument: `sightRebindValid` is true only for a `population.slot` bind (`compose_sight_rebind.ts:22-23`). Every `join` call gets a new group (`proposal.ts:88` root, `:236-238` reaction, `:284-286` job, `:301-304` crow). The one exception is `creditDelivery` (`:190`), which reuses the fatal group but carries only `fact.assign` and levelling ops (`combat/credit.ts:36-50`), never quest ops.
+- Chapter 1 bytes: the diff touches no `cartridges/ashmere_*`, corpus or transcript file. `expectedFacts` and the `position.ex` reserved list add `seen_tip_` only for recipes with a `tip`, and only `quest_sampler` has one (`grep "tip" cartridges`).
+- N2: fixed (`composition.json` id `...-stored-then-removed`).
+- N3: deferral accepted. It is tracked in `loka-kgd.45` and only affects the display.
+- Dispute on the TS 55-character check: accepted. `seen_tip_` plus 56 characters breaks the `Key` limit `maxLength 64` (`action.schema.json:10`). An artifact that omits the FactSpec instead fails `RESERVED_FACT`.
+- Mutants run on the focused files. Red: the unseen check dropped (`rule.ts:105`), the tip placed before the outcome line (`rule.ts:90`), the assignment dropped, TS `expectedFacts` tip (`cartridge_position.ts:99`), Elixir `position.ex:96` seen_tip write site, and the `recipes.ex` authored `RESERVED_FACT`. Green: see finding 1.
+- Row W23 can be marked "done (batch M5)". The designer's approval of the Journal "Hint:" wording is an open designer item, not a build gap.
+
+### Findings
+
+1. should-fix, `kernel/ts/src/mechanics/action_recipe/rule.ts:73`: the mutant `rolled?.outcome === 'failure' ? [ran, []] : tip(...)` leaves `quest_hints.test.ts` green, and no other test uses a tip. The spec says the tip shows on "success, failure or performed" (`mechanics.md:1932`, `action.schema.json` `ActionRecipe`). Failure scenario: a regression that skips failed performs means a player who fails a checked search first never sees the tip until a later success. Fix: one test with a checked recipe whose first perform fails, asserting the tip line and `fact_changed` with no `action_completed`.
+2. nit, `kernel/ts/src/mechanics/quest/lifecycle.ts:46-48`: `stamp` now depends on the compose rule that `quest_delivery.test.ts:138` marks as an open PM question ("fault, or widen the rule"). If that rule is widened, only the `both` assertion changes. The unstamped transition would then return with no failing test. Fix: when the rule is widened, restore the lookup together with a test.
