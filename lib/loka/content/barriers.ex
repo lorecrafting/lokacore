@@ -30,6 +30,7 @@ defmodule Loka.Content.Barriers do
     Enum.concat(barriers) ++
       Enum.flat_map(defs["room"], &exits(&1, m, defs)) ++
       knock(m, defs) ++
+      hidden(m, defs) ++
       items(m, defs) ++ lockout(entry, m, defs)
   end
 
@@ -48,13 +49,8 @@ defmodule Loka.Content.Barriers do
       reference(rel, path ++ ["knock"], "npc", response, m, defs) ++
         reference(rel, path ++ ["knock"], "room", response, m, defs)
 
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
     refs =
-      if api >= [1, 37],
+      if api(m) >= [1, 37],
         do: refs,
         else: [diag("KERNEL_API_RANGE_INVALID", at(rel, path ++ ["knock"])) | refs]
 
@@ -62,6 +58,31 @@ defmodule Loka.Content.Barriers do
       do: refs,
       else: [diag("BARRIER_MISMATCH", at(rel, path ++ ["knock"])) | refs]
   end
+
+  # Toolbox row 11: a hidden face names its fact, has no barrier (so no door verb finds it) and
+  # needs kernel_api 1.45; twin of the hidden_until rows in cartridge_knowledge.ts.
+  defp hidden(m, defs) do
+    faces =
+      for {_, {rel, [], r}} <- defs["room"],
+          {dir, %{"hidden_until" => _} = e} <- r["exits"],
+          do: {rel, ["exits", dir, "hidden_until"], e}
+
+    Enum.flat_map(faces, fn {rel, path, e} -> hidden_face(rel, path, e, m, defs) end) ++
+      if faces != [] and api(m) < [1, 45],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+  end
+
+  defp hidden_face(rel, path, e, m, defs) do
+    refs = reference(rel, path, "fact", e["hidden_until"], m, defs)
+    if e["barrier"], do: [diag("BARRIER_MISMATCH", at(rel, path)) | refs], else: refs
+  end
+
+  defp api(m),
+    do:
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
 
   # Each item's barrier is a reference that no exit and no other item names.
   defp items(m, defs) do

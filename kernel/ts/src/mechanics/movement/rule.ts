@@ -2,15 +2,16 @@ import { dark, illuminated } from '../light/shared.ts';
 import { darkSight } from '../attributes/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
-// A direction outside the compass is invalid_target; a compass direction without an exit here
-// is not_found, and one through a closed or locked barrier (barrier@1) exit_closed or exit_locked
-// (passage); then, under position@1, an actor not standing is invalid_state (position.ts
-// standing). A move costs the body the cartridge's world.movement.cost, else 1 mv where it
-// declares the mv pool (resource@1; 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot
-// pay is insufficient_resource ("You are too exhausted."). Accepted: that resource.adjust (none
-// without a cost), one entity.transfer of the actor's body and entity_entered_room; no resource
-// event. D6's exact authored water edges share movementPlan for entry debit/free Surface.
-// Other exits retain the ordinary world fare. scan (00 §4.1) is accepted
+// A direction outside the compass is invalid_target; a compass direction without an exit here,
+// or with one hidden from the actor (hidden_until, toolbox row 11), is not_found, and one through
+// a closed or locked barrier (barrier@1) exit_closed or exit_locked (passage); then, under
+// position@1, an actor not standing is invalid_state (position.ts standing). A move costs the
+// body the cartridge's world.movement.cost, else 1 mv where it declares the mv pool (resource@1;
+// 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot pay is insufficient_resource
+// ("You are too exhausted."). Accepted: that resource.adjust (none without a cost), one
+// entity.transfer of the actor's body and entity_entered_room; no resource event. D6's exact
+// authored water edges share movementPlan for entry debit/free Surface. Other exits retain the
+// ordinary world fare. scan (00 §4.1) is accepted
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
@@ -26,7 +27,7 @@ import {
 import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
 import { exitTo } from '../lookups.ts';
 import { moveSequence } from './sequence.ts';
-import { passage } from './shared.ts';
+import { hidden, passage } from './shared.ts';
 export { passage, fare } from './shared.ts';
 
 export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 }) =>
@@ -43,7 +44,8 @@ export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 })
  */
 export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
-  return COMPASS.filter((d) => has(room.exits, d)).map((direction) => {
+  const shown = (d: string) => has(room.exits, d) && !hidden(world, room, d, world.character);
+  return COMPASS.filter(shown).map((direction) => {
     const barred = passage(world, room, direction, world.character, steps);
     if (barred) return { direction, code: barred };
     if (dark(world, world.character, steps)) return { direction };

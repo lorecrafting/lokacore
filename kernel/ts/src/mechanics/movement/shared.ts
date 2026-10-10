@@ -52,6 +52,16 @@ export function passage(
 }
 
 /**
+ * True while the exit in `direction` is hidden from `actor` (toolbox row 11): it declares
+ * hidden_until and the actor's value of its fact differs. A hidden exit does not exist for that
+ * actor: not listed, not seen through, not mapped, and a move through it is not_found.
+ */
+export function hidden(world: World, room: RoomDefinition, direction: string, actor: CharacterId) {
+  const until = exitOf(room, direction)?.hidden_until;
+  return !!until && value(world, actor, until.fact) !== until.equals;
+}
+
+/**
  * What a move costs `body`: the cartridge's world.movement.cost, else 1 mv where it declares the
  * pool, else nothing; undefined when the body cannot pay. Read-only, shared with the GameView's
  * exits (view/view.ts).

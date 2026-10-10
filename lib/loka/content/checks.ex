@@ -442,6 +442,8 @@ defmodule Loka.Content.Checks do
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
 
-  defp exit_field({k, v}, m) when k in ~w(corpse_ingress knock), do: {k, expand(v, m)}
+  defp exit_field({k, v}, m) when k in ~w(corpse_ingress hidden_until knock),
+    do: {k, expand(v, m)}
+
   defp exit_field({k, v}, m), do: {k, ref(v, if(k == "to", do: "room", else: k), m)}
 end

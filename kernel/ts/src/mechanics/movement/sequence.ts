@@ -19,7 +19,7 @@ import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
-import { fare, passage } from './shared.ts';
+import { fare, hidden, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
 type MoveCommand = {
@@ -107,7 +107,7 @@ export function movementPlan(
   const here = world.state.containers[body];
   const to = exitTo(world.rooms[here], direction);
   const there = to && world.roomIds[refString(to)];
-  if (!there) return 'not_found' as const;
+  if (!there || hidden(world, world.rooms[here], direction, actor_id)) return 'not_found' as const;
   const barred = passage(world, world.rooms[here], direction, actor_id, steps);
   if (barred) return barred;
   const wet = water.edge(world, here, there, direction);

@@ -126,8 +126,11 @@ defmodule Loka.Content.Expedition do
           })
   end
 
-  defp wrong_edge?({_, _, room}, edge),
-    do: get_in(room, ["exits", edge["direction"], "to"]) != edge["to"]
+  # A route over a hidden face (toolbox row 11) would show it in the quest journal.
+  defp wrong_edge?({_, _, room}, edge) do
+    exit = room["exits"][edge["direction"]]
+    exit["to"] != edge["to"] or exit["hidden_until"] != nil
+  end
 
   defp wrong_edge?(_, _), do: false
 

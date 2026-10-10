@@ -11987,6 +11987,34 @@
     ]
   },
   {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "hidden_until": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/hidden_until/equals",
+        "code": "missing_property"
+      },
+      {
+        "path": "/hidden_until/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/hidden_until/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "CompiledCartridge",
     "value": {
       "format": "loka-cartridge-v2",

@@ -41,6 +41,23 @@
           ],
           "additionalProperties": false
         },
+        "hidden_until": {
+          "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages; kernel_api at least 1.45): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
+          "type": "object",
+          "properties": {
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "equals": {
+              "$ref": "delta.schema.json#/$defs/FactValue"
+            }
+          },
+          "required": [
+            "fact",
+            "equals"
+          ],
+          "additionalProperties": false
+        },
         "knock": {
           "$ref": "room.schema.json#/$defs/KnockResponse"
         }

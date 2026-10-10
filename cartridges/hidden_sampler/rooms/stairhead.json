@@ -1,0 +1,12 @@
+{
+  "title": "room.stairhead.title",
+  "description": "room.stairhead.description",
+  "exits": {
+    "west": {
+      "to": "gallery"
+    },
+    "south": {
+      "to": "study"
+    }
+  }
+}
