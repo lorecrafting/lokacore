@@ -77,7 +77,7 @@ status), 6a/6b/6c, 20a/20b, 29a/29b, 37a/37b, 43a/43b
 and 48a/48b/48c are splits. Size: S under a day, M a few days, L a week or a split. **Today**:
 have / partial / missing per the audit. Ids in parentheses are the
 [archived queue](archive/LATER-MECHANICS.md) rows, whose acceptance seams still apply. Status is
-`todo` until the slice PR flips it to `done #N`; `in progress #N` marks an open batch PR;
+`todo` until the slice PR flips it to `done #N` (then `elixir bin/contracts.exs` regenerates the System/Toolbox page's `docs/toolbox.gen.json`); `in progress #N` marks an open batch PR;
 `merged into row N` and `split into …` keep a retired row's history; `content only` means the row
 closes with cartridge content and no engine change.
 

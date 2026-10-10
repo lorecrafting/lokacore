@@ -6,7 +6,7 @@ import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
 import { capabilities, contracts, graph, page } from './graph.ts';
 import { hue } from './palette.ts';
-import { heading, Link, Sheet } from './ui.tsx';
+import { Choose, heading, Link, Sheet } from './ui.tsx';
 
 const lanes = ['Host', 'Kernel', 'Save', 'View'];
 // [lane, contract or save table, what happens there], in order (docs/system/architecture.md: the
@@ -40,18 +40,9 @@ function Command() {
   const c = capabilities.get(commands.get(type) ?? '');
   return (
     <p>
-      <label>
-        Trace a command{' '}
-        <select onChange={(e) => setType(e.target.value)} defaultValue="">
-          <option value="">(any)</option>
-          {[...commands.keys()].map((t) => (
-            <option key={t}>{t}</option>
-          ))}
-        </select>
-      </label>
+      <Choose label="Trace a command" options={[...commands.keys()]} set={setType} />
       {c && (
         <span>
-          {' '}
           owner {c.id} · events {c.events.join(', ') || 'none'} · definitions{' '}
           {c.definitions.map((d) => d.kind).join(', ') || 'none'}
         </span>
@@ -100,9 +91,13 @@ function Stage({
 }
 
 export function Lifecycle() {
+  const [lane, setLane] = useState('');
   return (
     <Sheet>
       <Command />
+      <p>
+        <Choose label="Lane" options={lanes} set={setLane} />
+      </p>
       <ol
         aria-label="Command lifecycle"
         style={{
@@ -118,9 +113,11 @@ export function Lifecycle() {
             {l}
           </li>
         ))}
-        {stages.map(([lane, name, what], i) => (
-          <Stage key={name} lane={lane} name={name} what={what} row={i + 2} />
-        ))}
+        {stages
+          .filter(([l]) => !lane || l === lane)
+          .map(([l, name, what], i) => (
+            <Stage key={name} lane={l} name={name} what={what} row={i + 2} />
+          ))}
       </ol>
     </Sheet>
   );

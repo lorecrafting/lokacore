@@ -34,6 +34,20 @@ export const Page: Story = {
   },
 };
 
+// Breaks: the lane filter ignored or matching another lane: Save holds state_row, receipt and
+// CommittedEvent.
+export const SaveLane: Story = {
+  play: async ({ canvas }) => {
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Lane' }), 'Save');
+    const stages = within(canvas.getByRole('list', { name: 'Command lifecycle' }));
+    await expect(stages.getAllByRole('link').map((a) => a.textContent)).toEqual([
+      'state_row',
+      'receipt',
+      'CommittedEvent',
+    ]);
+  },
+};
+
 // Axe on the night palette (the lane rules, the error branch).
 export const Dark: Story = {
   render: () => (

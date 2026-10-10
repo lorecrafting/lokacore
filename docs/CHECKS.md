@@ -55,8 +55,10 @@ their rules and red controls remain available for resumption.
   from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column,
   the authored file names under `cartridges/*/<map>/` and `cartridges/*/<map>.json` and
   `docs/state-sections.gen.json`, which `kernel/ts/test/state_sections.test.ts` keeps current:
-  `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/` (run without
-  `--check` to regenerate); an
+  `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/`, and the System
+  Checks and Toolbox pages' `docs/checks.gen.json` and `docs/toolbox.gen.json` match this page's
+  bullets and the [toolbox](MECHANICS-TOOLBOX.md) table with its `docs/system/mechanics.md` rules
+  (run without `--check` to regenerate, also after editing any of the three); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
   does a registry command, event or policy op that no schema declares.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
