@@ -17,7 +17,12 @@ import {
   type ChoiceRow,
   type World,
 } from '../../../kernel/ts/src/runtime/decision.ts';
-import { answerFits, bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import {
+  answerFits,
+  bind,
+  choiceIds,
+  speakerOf,
+} from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import type { Story } from './save.ts';
@@ -135,7 +140,7 @@ function consequences(
   const ops = d.delta.ops.filter((o) => o.writer_group === 0);
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, command, row, option, ops, events)) return false;
-  if (!assignmentEvidence(s, row, option, ops, events)) return false;
+  if (!assignmentEvidence(s, row, option, ops, events, speakerOf(source, row)!)) return false;
   if (!paymentEvidence(s, row, option, ops)) return false;
   if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;

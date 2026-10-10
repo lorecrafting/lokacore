@@ -178,18 +178,47 @@ test('row W2 needs 1.47 and a known subject, at fact sites only', () => {
 });
 
 // Breaks: a per_subject fact written by a choice whose save recovery reconciles its facts without
-// a subject (a payment, or a riddle's answer) loads, and that save would not reopen.
+// a subject (a hand_over, a riddle answer with a wrong_limit, a legacy deadline quest's dialogue)
+// loads, and that save would not reopen; or one whose receipt recovery checks at the speaker (a
+// payment, a riddle without a wrong_limit) is refused; or subject "target" loads in a reaction's
+// `when`, which has no target.
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
-  const at = `.cartridge.dialogues[${JSON.stringify(smith)}].choices.help.sequence[0].fact`;
-  const paid = structuredClone(source);
-  paid.dialogues[smith].choices.help.payment = { from: 'smith', amount: 1 };
-  const riddle = structuredClone(source);
-  riddle.dialogues[smith].riddle = { choice_id: 'help' };
-  for (const c of [paid, riddle])
-    assert.deepEqual(
-      scopeSites(c).map((d) => d.path),
-      [at],
-    );
+  const at = (k: string) =>
+    `.cartridge.dialogues[${JSON.stringify(smith)}].choices.${k}.sequence[0].fact`;
+  const variant = (change: (d: any, c: any) => void) => {
+    const c = structuredClone(source);
+    change(c.dialogues[smith], c);
+    return scopeSites(c).map((d) => d.path);
+  };
+  const quest = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'quest' };
+  const refused: [(d: any, c: any) => void, string[]][] = [
+    [(d) => (d.choices.help.hand_over = { item: 'apple', to: 'smith' }), [at('help')]],
+    [(d) => (d.riddle = { choice_id: 'help', wrong_limit: 1 }), [at('help')]],
+    [
+      (d, c) => {
+        d.quest = { ...quest, key: 'errand' };
+        c.quests = { [`${S}:quest/errand`]: { deadline: { fact: fact('errand_done') } } };
+      },
+      [at('greet'), at('help')],
+    ],
+  ];
+  for (const [change, paths] of refused) assert.deepEqual(variant(change), paths);
+  for (const change of [
+    (d: any) => (d.choices.help.payment = { from: 'smith', amount: 1 }),
+    (d: any) => (d.riddle = { choice_id: 'help' }),
+  ])
+    assert.deepEqual(variant(change), []);
+  const fed = `${S}:reaction/fed`;
+  const root = { op: 'fact_compare', fact: fact('trust'), equals: 0, subject: 'target' };
+  const when = variant((_, c) => (c.reactions[fed].when = { policy_version: 1, root }));
+  assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.root.subject`]);
   assert.deepEqual(scopeSites(source), []);
+});
+
+// Breaks (policy.ts compared): a subject "target" read with no target faults (evaluator_error)
+// instead of reading false, in any policy evaluated without one.
+test('fact_compare at subject target with no target reads false', () => {
+  const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  assert.equal(compare(w, 'trust', 0, { subject: 'target' }), false);
 });

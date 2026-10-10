@@ -3,9 +3,9 @@
 // docs/system/save.md, Scoped fact recovery).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, type TestContext } from 'node:test';
 import { decode, encode } from '../../../kernel/ts/src/foundation/canonical.ts';
@@ -20,29 +20,45 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
-const scratch = mkdtempSync(join(tmpdir(), 'loka-scoped-facts-save-'));
-const file = join(scratch, 'artifact.json');
-let artifact;
-try {
-  execFileSync('mix', ['loka.compile', 'cartridges/scoped_facts_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
-  artifact = JSON.parse(readFileSync(file, 'utf8'));
-} finally {
-  rmSync(scratch, { recursive: true });
+const root = fileURLToPath(new URL('../../../', import.meta.url));
+const SAMPLER = join(root, 'cartridges/scoped_facts_sampler');
+
+// The sampler compiled (after `change` edits a copy of its sources), and one release of it.
+function build(change?: (dir: string) => void) {
+  const scratch = mkdtempSync(join(tmpdir(), 'loka-scoped-facts-save-'));
+  try {
+    const src = change ? join(scratch, 'src') : SAMPLER;
+    if (change) {
+      cpSync(SAMPLER, src, { recursive: true });
+      change(src);
+    }
+    const file = join(scratch, 'artifact.json');
+    execFileSync('mix', ['loka.compile', src, file], { cwd: root, stdio: 'pipe' });
+    const artifact = JSON.parse(readFileSync(file, 'utf8'));
+    const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
+    if (!loaded.ok) throw new Error(JSON.stringify(loaded));
+    const bundle = {
+      canonical: encode(artifact.cartridge),
+      sha256: artifact.content_hash as string,
+    };
+    const initial = newWorld(
+      loaded.cartridge as Cartridge,
+      '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+      [1, 2, 3, 4],
+    );
+    return {
+      initial,
+      bundle,
+      releases: [{ fresh: initial, content_hash: bundle.sha256 }] as const,
+    };
+  } finally {
+    rmSync(scratch, { recursive: true });
+  }
 }
-const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
-if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-const bundle = { canonical: encode(artifact.cartridge), sha256: artifact.content_hash as string };
-const initial = newWorld(
-  loaded.cartridge as Cartridge,
-  '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-  [1, 2, 3, 4],
-);
-const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
+type Release = ReturnType<typeof build>;
+const base = build();
 const S = 'scoped_facts_sampler@0.0.1';
-const id = (k: string) => initial.entityIds[`${S}:${k}`]!;
+const id = (k: string, r: Release = base) => r.initial.entityIds[`${S}:${k}`]!;
 const fact = (key: string) =>
   ({
     cartridge_id: 'scoped_facts_sampler',
@@ -51,10 +67,11 @@ const fact = (key: string) =>
     key,
   }) as const;
 const read = (w: World, key: string, who: string) =>
-  value(w, w.character, fact(key) as never, id(who) as never);
+  value(w, w.character, fact(key) as never, w.entityIds[`${S}:${who}`] as never);
 
 // One save file in a fresh directory: invocations that save, cold reopen and replay once.
-function save(t: TestContext, name: string) {
+function save(t: TestContext, name: string, r: Release = base) {
+  const { releases, bundle, initial } = r;
   const dir = mkdtempSync(join(tmpdir(), 'loka-scoped-facts-saves-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, `${name}.db`);
@@ -83,12 +100,12 @@ function save(t: TestContext, name: string) {
     const again = h.story.invoke(i);
     assert.equal(again.kind === 'saved' && again.replay, true, action_key);
   };
-  // Talk to `who` (its dialogue's key is the talk action), then pick `choice_id`.
-  h.chat = (who: string, choice_id: string) => {
-    h.run(`${who}_talk`, [id(`npc/${who}`)]);
+  // Talk to `who` by dialogue `talk` (its key is the talk action), then pick `choice_id`.
+  h.chat = (who: string, choice_id: string, talk = `${who}_talk`, input = {}) => {
+    h.run(talk, [id(`npc/${who}`, r)]);
     const rows = Object.entries(h.story.world().state.choices ?? {}) as [string, any][];
-    const continuation_id = rows.find(([, r]) => r.status === 'pending')![0];
-    h.run('choose', [], { choice_id, continuation_id });
+    const continuation_id = rows.find(([, row]) => row.status === 'pending')![0];
+    h.run('choose', [], { choice_id, continuation_id, ...input });
   };
   return h;
 }
@@ -121,7 +138,7 @@ test('a forged fact row is save_corrupt', (t) => {
     sql.prepare("DELETE FROM state_row WHERE section='facts'").run();
     sql.prepare("INSERT INTO state_row VALUES ('facts', ?, ?)").run(key, v);
   };
-  const opened = () => openStory(h.p.db, releases, h.p.host).kind;
+  const opened = () => openStory(h.p.db, base.releases, h.p.host).kind;
   const { subject_id: _, ...bare } = target;
   for (const [key, v] of [
     [encode(bare), '1'],
@@ -137,4 +154,72 @@ test('a forged fact row is save_corrupt', (t) => {
   write(String(row.key), String(row.value));
   assert.equal(opened(), 'open');
   sql.close();
+});
+
+// The sampler with entity-fact writes in choices that save recovery re-checks (dialogue-receipt.ts
+// detailNeeded): a riddle answer (the stranger), a choice that also acquires a skill (the miller)
+// and a dialogue of a quest with a generic deadline (the smith's errand). Each assigns trust 2.
+const put = (dir: string, file: string, o: object) => {
+  mkdirSync(dirname(join(dir, file)), { recursive: true });
+  writeFileSync(join(dir, file), JSON.stringify(o));
+};
+const json = (dir: string, file: string, edit: (o: any) => object) =>
+  put(dir, file, edit(JSON.parse(readFileSync(join(dir, file), 'utf8'))));
+const trust2 = { op: 'fact.assign', fact: 'trust', value: 2 };
+const all = { policy_version: 1, root: { op: 'all', items: [] } };
+const variant = build((dir) => {
+  json(dir, 'cartridge.json', (c) => {
+    Object.assign(c.requires.capabilities, { skills: 1, quest: 1 });
+    return c;
+  });
+  json(dir, 'dialogues/stranger_talk.json', (d) => {
+    d.riddle = { choice_id: 'help', answer: 'ab', bank: ['A', 'B'], wrong: 'narration.talk.greet' };
+    d.choices.help.sequence = [trust2];
+    return d;
+  });
+  json(dir, 'dialogues/miller_talk.json', (d) => {
+    d.choices.help.sequence = [{ op: 'skill.acquire', skill: 'pick' }, trust2];
+    return d;
+  });
+  json(dir, 'text.json', (t) => ({
+    ...t,
+    'skill.pick': 'Lockpicking.',
+    'quest.errand': 'Errand.',
+  }));
+  put(dir, 'skills/pick.json', {
+    label: 'skill.pick',
+    requirement: 'skill.pick',
+    qualification: all,
+  });
+  put(dir, 'quests/errand.json', {
+    title: 'quest.errand',
+    offer: { label: 'quest.errand', policy: all },
+    objective: { evidence: 'current_state', policy: all },
+    deadline: { after: 120000, outcome: 'late' },
+  });
+  put(dir, 'dialogues/smith_errand.json', {
+    npc: 'smith',
+    policy: { policy_version: 1, root: { op: 'quest_state', quest: 'errand', state: 'active' } },
+    prompt: 'dialogue.talk.prompt',
+    roles: { smith: { role: 'npc', npc: 'smith' } },
+    quest: 'errand',
+    choices: {
+      done: { label: 'dialogue.talk.help', narration: 'narration.talk.help', sequence: [trust2] },
+    },
+  });
+});
+
+// Breaks (dialogue-consequences.ts): recovery checks a re-checked choice's fact.assign and its
+// fact_changed without the speaker's subject_id, so its own legitimate receipt reopens as
+// save_corrupt, or at a subject other than the speaker's.
+test('entity-fact writes in riddle, skill and deadline-quest choices reopen', (t) => {
+  const h = save(t, 'rechecked', variant);
+  h.chat('stranger', 'help', 'stranger_talk', { answer: 'ab' });
+  h.chat('miller', 'help');
+  h.run('errand');
+  h.chat('smith', 'done', 'smith_errand');
+  const w = h.story.world();
+  const trust = ['stranger', 'miller', 'smith'].map((who) => read(w, 'trust', `npc/${who}`));
+  assert.deepEqual(trust, [2, 2, 2]);
+  h.p.sql.close();
 });

@@ -2,7 +2,7 @@
 // need kernel_api 1.47 (twin of lib/loka/content/scoped_facts.ex); in the loader only
 // (FACT_SCOPE_UNSUPPORTED), such a fact is named only where a subject is known (a fact_compare, a
 // fact.assign or fact.adjust step, a reaction's fact_changed trigger), and a subject field names
-// one NPC or item instance, of such a fact only.
+// one NPC or item instance, of such a fact only, and subject "target" only where a target can be.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
@@ -10,18 +10,14 @@ import { apiCmp } from './cartridge_installed.ts';
 
 const SITES = ['fact_compare', 'fact.assign', 'fact.adjust', 'fact_changed'];
 const SUBJECTS = ['subject', 'npc', 'item'];
-// Choice fields whose saves are reconciled against their facts on reopen.
-const BOUND = [
-  'accept',
-  'hand_over',
-  'receive',
-  'payment',
-  'escort',
-  'exchange',
-  'lesson_payment',
-  'patrol',
-];
-
+// Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
+// and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
+// dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
+// at the speaker (dialogue-consequences).
+const BOUND = ['escort', 'receive', 'hand_over'];
+// Definitions whose policies are read with no action target (reaction when, quest offer, objective
+// and journal, barrier opens_when, skill qualification): subject "target" there never holds.
+const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills'].map((k) => `.cartridge.${k}`);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 const fieldsOf = (o: Obj) =>
   SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
@@ -60,16 +56,23 @@ export function scopeSites(c: Obj): Diagnostic[] {
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);
+    else if (o.subject === 'target' && TARGETLESS.some((p) => at.startsWith(p)))
+      out.push(`${at}.subject`);
     else if (o.op === 'fact_compare' && !fields.length && subjective(o.fact)) out.push(at);
   });
-  // ponytail: save recovery reconciles these choices' facts without a subject (mobile
-  // dialogue-save, topics-save, deadline-receipts); a per_subject fact there waits for a subject.
-  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Record<string, Obj>))
+  // ponytail: a per_subject fact there waits for a subject-aware reconciler.
+  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Record<string, Obj>)) {
+    const legacy = !!d.quest && !!c.quests?.[refString(d.quest)]?.deadline?.fact;
     for (const [key, o] of Object.entries(d.choices as Record<string, Obj>))
-      if (BOUND.some((f) => Object.hasOwn(o, f)) || d.riddle?.choice_id === key)
+      if (
+        legacy ||
+        BOUND.some((f) => Object.hasOwn(o, f)) ||
+        (d.riddle?.choice_id === key && d.riddle.wrong_limit !== undefined)
+      )
         (o.sequence ?? []).forEach((x: Obj, i: number) => {
           if (x.fact && subjective(x.fact))
             out.push(`.cartridge.dialogues${step(ref)}.choices${step(key)}.sequence[${i}].fact`);
         });
+  }
   return out.map((at) => diag('FACT_SCOPE_UNSUPPORTED', at));
 }
