@@ -1,3 +1,5 @@
+Code.require_file("bin/system_graph.exs")
+
 defmodule Loka.SystemGraphTest do
   # docs/system-graph.gen.json (bin/system_graph.exs) against protocol/ read here directly;
   # `elixir bin/contracts.exs --check` keeps the committed file current.
@@ -124,6 +126,27 @@ defmodule Loka.SystemGraphTest do
 
     assert map_size(named) == 18
     assert contract("StatusDefinition")["owner"] == "status@1"
+  end
+
+  # Breaks: a kind bound by name to a contract outside the Content layer (AccountId is State).
+  test "the key-name rule binds only Content-layer contracts" do
+    registry = [%{"key" => "x", "version" => 1, "definitions" => ["account_id", "status"]}]
+    graph = JSON.decode!(SystemGraph.json(".", registry))
+    [row] = graph["capabilities"]
+
+    assert row["definitions"] == [
+             %{"kind" => "account_id", "node" => nil},
+             %{"kind" => "status", "node" => "StatusDefinition"}
+           ]
+  end
+
+  # Breaks: a slug that drifts from the heading, leaving a cited section without its anchor.
+  test "every cited section links to a heading anchor" do
+    registry = JSON.decode!(File.read!("protocol/capability_registry.json"))
+    graph = JSON.decode!(SystemGraph.json(".", registry))
+    cited = for n <- graph["nodes"], s <- n["spec"], do: s
+    assert cited != []
+    assert Enum.all?(cited, &(&1["path"] =~ "#"))
   end
 
   # Breaks: a registry command no CommandPayload variant declares passes silently.

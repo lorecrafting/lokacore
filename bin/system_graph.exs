@@ -28,7 +28,7 @@ defmodule SystemGraph do
 
   defp build(root, registry, defs) do
     docs = Enum.map(Enum.sort(Path.wildcard(Path.join(root, "protocol/*.schema.json"))), &doc/1)
-    kinds = by_name(registry, definition_kinds(defs), defs)
+    kinds = by_name(registry, definition_kinds(defs), content_defs(docs))
     nodes = nodes(docs, defs, definition_owners(registry, kinds), spec_files(root))
 
     %{
@@ -179,8 +179,11 @@ defmodule SystemGraph do
         do: {kind, r}
   end
 
+  defp content_defs(docs),
+    do: for(d <- docs, d["layer"] == "Content", {n, s} <- d["defs"], into: %{}, do: {n, s})
+
   # The key-name rule for a kind no map names: the first of `<Kind>Definition`, `<Kind>` and
-  # `<Kind>Spec` that is a contract (status => StatusDefinition), else null.
+  # `<Kind>Spec` that is a Content-layer contract (status => StatusDefinition), else null.
   defp by_name(registry, kinds, defs) do
     for e <- registry, k <- e["definitions"] || [], !kinds[k], into: kinds do
       camel = Macro.camelize(k)

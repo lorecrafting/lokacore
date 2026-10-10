@@ -122,7 +122,21 @@ export const TwoHops: Story = {
     const one = canvasElement.querySelectorAll('svg line').length;
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Hops' }), '2');
     await expect(bleed).toHaveStyle({ color: color.light.fg });
-    await expect(canvasElement.querySelectorAll('svg line').length).toBeGreaterThan(one);
+    const lines = [...canvasElement.querySelectorAll('svg line')];
+    await expect(lines.length).toBeGreaterThan(one);
+    // Real edges only: no line joins the selection to a chip two hops out (not an edge).
+    const origin = canvasElement.querySelector('svg')!.getBoundingClientRect();
+    const mid = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return [r.left + r.width / 2 - origin.left, r.top + r.height / 2 - origin.top];
+    };
+    const [s, b] = [mid(canvas.getByRole('button', { name: 'StatusRow' })), mid(bleed)];
+    const joins = lines.filter((l) => {
+      const p = ['x1', 'y1', 'x2', 'y2'].map((k) => Number(l.getAttribute(k)));
+      const near = (x: number, y: number, c: number[]) => Math.hypot(x - c[0], y - c[1]) < 2;
+      return near(p[0], p[1], s) && near(p[2], p[3], b);
+    });
+    await expect(joins).toHaveLength(0);
   },
 };
 
