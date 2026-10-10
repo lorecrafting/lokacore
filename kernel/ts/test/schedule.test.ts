@@ -138,8 +138,8 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
 });
 
 // Breaks: the successor scheduled from the job's own hour (a wait crossing two listed hours faults
-// nonfuture_job, loka-qi0r), the NPC left in the first crossed hour's room, the loop stopping one
-// hour short or running past the target, or the arrival reported at the job's hour, not the last.
+// nonfuture_job, loka-qi0r), the NPC left in the first crossed hour's room, the last crossed hour
+// missed when it is the target itself, or the arrival stamped off the job's time (its run's cause).
 test('one wait across two or three listed hours commits with Bram in the last hour room', () => {
   const w = world();
   // 19:00 green, 06:00 landing: he ends where he started, with no move, the next job at 19:00.
@@ -147,14 +147,14 @@ test('one wait across two or three listed hours commits with Bram in the last ho
   assert.equal(two.decision.kind, 'accepted');
   assert.equal(two.world.state.containers[BRAM_ID], LANDING);
   assert.deepEqual(two.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(43)) });
-  // 19:00, 06:00, then 19:00 again: the green, entered at the last hour, the next job at 06:00.
+  // 19:00, 06:00, then 19:00 again: the green, entered at the job's 19:00, the next job at 06:00.
   const three = wait(w, H(43));
   assert.equal(three.decision.kind, 'accepted');
   assert.equal(three.world.state.containers[BRAM_ID], GREEN);
   assert.deepEqual(three.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(54)) });
   assert.deepEqual(
     three.decision.kind === 'accepted' && three.decision.events.map((e) => e.logical_time),
-    [H(43)],
+    [H(19)],
   );
   assert.deepEqual(wait(w, H(43)), three);
 });

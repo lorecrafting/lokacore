@@ -5,7 +5,8 @@
 //
 // run_job is authority-internal (04 §1): only the host's drain builds it, never a client
 // invocation. It runs one pending job of an NPC's daily schedule (mechanics/schedule/behavior.ts), reading the
-// time from the job's due time: the NPC moves to the room listed for that hour (or its first holding
+// hour from the job's due time, or the last listed hour the advance also crosses: the NPC moves to
+// the room listed for that hour (or its first holding
 // case, toolbox row W10: behavior.ts placeOf) unless it is
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
 // hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
@@ -112,7 +113,7 @@ function scheduledJob(
       { op: 'job.complete', writer_group: 0, job_id: job_id },
       { op: 'job.schedule', writer_group: 0, job_id: jobId(mint), job: row.job, due_time },
     ],
-    move.length ? [entered(world, command, mint, npc, room, hour)] : [],
+    move.length ? [entered(world, command, mint, npc, room, row.due_time)] : [],
     seen ? [{ key: goal }] : [],
   );
 }
