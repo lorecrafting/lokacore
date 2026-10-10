@@ -56,7 +56,10 @@ export function journal(world: World, steps: Steps): QuestView[] {
       const failed = expedition.expedition?.status === 'failed';
       const met =
         q.state === 'objectives_complete' ||
-        (q.state === 'active' && !variant && holdsNow(world, world.character, q.quest, { n: 0 }));
+        (q.state === 'active' &&
+          !failed &&
+          !variant &&
+          holdsNow(world, world.character, q.quest, { n: 0 }));
       const journal = failed
         ? j.failed
         : met
