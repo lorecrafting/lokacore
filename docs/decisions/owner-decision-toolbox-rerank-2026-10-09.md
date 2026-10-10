@@ -21,8 +21,13 @@
 - **Settlement rows S1 to S4** (furnishing, construction, settlement, settlement defense) come
   from an owner question on housing and real town building (PM addition, same day): Realm-first in
   value, sampled in Story mode. S2's runtime-created rooms and exits change the world-graph
-  contract and need their own decision record first. G7 becomes per-entity access locks evaluated
-  by the existing policy engine (owner reference: Evennia lockstrings); staff and builder
-  permissions stay out of scope as Realm authority.
+  contract and need their own decision record first.
+- **G7 locks (owner-requested):** any entity, exit or container may declare locks per access type
+  (enter, traverse, get, put, open, lock, furnish, build, control), evaluated by the existing
+  policy engine with new `owner`, `role` and `holder` leaves; runtime grant and revoke commands
+  write saved grant rows (owner reference: Evennia lockstrings).
+- **Row R1, staff and builder permissions (owner-requested):** an account-level hierarchy, a
+  `perm` policy leaf and staff-only build tools; deferred to the online Realm, after the
+  settlement rows, depending on G7 and Realm authority.
 - The review's other risks (rows 3 and 4 as attribute writers, row 9 RNG, row 29 incantation
   input, row 48 last) are raised at each row's brief, not decided here.
