@@ -14,6 +14,8 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { statusKey } from '../src/mechanics/status/shared.ts';
+import { key } from '../src/foundation/compose.ts';
 import { artifact as derived, MIGHT } from './derived_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-scars-sampler-'));
@@ -32,6 +34,19 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const SCAR = 'scars_sampler@0.0.1:status/scar';
+const WOLF = 'scars_sampler@0.0.1:npc/wolf';
+const scarRow = (w: World, body: string) =>
+  w.state.statuses?.[
+    statusKey(
+      body as never,
+      {
+        cartridge_id: 'scars_sampler',
+        cartridge_version: '0.0.1',
+        kind: 'status',
+        key: 'scar',
+      } as never,
+    )
+  ];
 
 let n = 0;
 function accepted(r: ReturnType<typeof step>) {
@@ -99,6 +114,8 @@ test('a wolf bite leaves a scar that survives death and return, and the salve cu
   assert.equal(w.state.containers[w.body], w.roomIds['scars_sampler@0.0.1:room/hall']);
   assert.equal(hp(w), 10);
   assert.deepEqual(conditions(w), SCARRED);
+  // Generation 1: the return kept the row; a cleared one would come back as generation 2 from the killing bite.
+  assert.deepEqual(scarRow(w, w.body), { active: true, generation: 1 });
   const salve = w.entityIds['scars_sampler@0.0.1:item/salve']!;
   w = play(w, { type: 'take', item_id: salve });
   w = play(w, { type: 'eat', item_id: salve });
@@ -144,4 +161,26 @@ test('the loader refuses each unsound permanent status', () => {
     );
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
+});
+
+// Breaks: an NPC's death keeps its permanent status, so status_active still holds on the dead wolf
+// (only the player's same-body return keeps one).
+test("the wolf's death clears its scar", () => {
+  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const wolf = w.entityIds[WOLF]!;
+  w = play(w, { type: 'move', direction: 'east' });
+  w = play(w, { type: 'attack', target_id: wolf });
+  w = round(w);
+  assert.deepEqual(scarRow(w, wolf), { active: true, generation: 1 });
+  const at = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: wolf } as never);
+  w = {
+    ...w,
+    state: {
+      ...w.state,
+      resources: { ...w.state.resources, [at]: { value: 1, at: w.state.clock } },
+    },
+  };
+  w = round(w); // the player's strike takes the wolf from 1 to 0
+  assert.equal(level(w, wolf, resourceRef(w, 'hp')), 0);
+  assert.deepEqual(scarRow(w, wolf), { active: false, generation: 1 });
 });
