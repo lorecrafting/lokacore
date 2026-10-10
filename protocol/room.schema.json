@@ -97,6 +97,10 @@
           "minItems": 1,
           "maxItems": 16
         },
+        "rating": {
+          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks; kernel_api at least 1.44): the value an opposed recipe check against this detail must reach.",
+          "type": "integer"
+        },
         "readable": {
           "description": "Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog.",
           "type": "object",

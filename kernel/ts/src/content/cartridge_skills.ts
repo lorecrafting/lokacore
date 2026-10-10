@@ -1,5 +1,6 @@
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
@@ -10,6 +11,15 @@ export const skillSpec = (key: string) => ({
   meaning: `Skill ${key}'s acquisition (skills@1): only skills@1 writes it.`,
 });
 
+/** Toolbox row 5: the reserved use count of a skill with growth (mechanics.md skill growth). */
+export const usesSpec = (key: string, growth: number[]) => ({
+  key: `uses_${key}`,
+  version: 1,
+  value_type: { type: 'int', default: 0, minimum: 0, maximum: growth.at(-1) },
+  scopes: ['player'],
+  meaning: `Skill ${key}'s use count (skills@1): only skills@1 writes it.`,
+});
+
 export function skills(c: Obj, checks: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
@@ -17,6 +27,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
     const at = `.cartridge.skills${step(ref)}`;
     checks.text(s, ['label', 'requirement'], at);
     if (s.key.length > 58) bad(`${at}.key`);
+    if (s.growth) out.push(...growth(c, s.growth, at));
     for (const capability of ['skills', 'policy', 'fact'])
       if (c.lock.capabilities[capability] !== 1)
         out.push(diag('UNDECLARED_CAPABILITY', at, { capability }, [`${capability}@1`]));
@@ -48,6 +59,18 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
       );
   }
   return out;
+}
+
+// Toolbox row 5: growth thresholds strictly increase and need API 1.44.
+function growth(c: Obj, g: number[], at: string): Diagnostic[] {
+  return [
+    ...(g.some((t, i) => i > 0 && t <= g[i - 1]!)
+      ? [diag('SCHEMA_VIOLATION', `${at}.growth`, { error: 'invalid_value' })]
+      : []),
+    ...(apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : []),
+  ];
 }
 
 export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diagnostic[] {

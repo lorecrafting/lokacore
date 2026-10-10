@@ -80,10 +80,28 @@ function contributions(c: Obj): Diagnostic[] {
 }
 
 function attributes(c: Obj, { named }: Checks) {
-  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj))
-    if (r.check?.attribute)
-      named(r.check.attribute, 'attribute', `.cartridge.recipes${step(ref)}.check.attribute`);
-  return [];
+  const out: Diagnostic[] = [];
+  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
+    const at = `.cartridge.recipes${step(ref)}`;
+    if (r.check?.attribute) named(r.check.attribute, 'attribute', `${at}.check.attribute`);
+    if (r.check?.kind === 'opposed') out.push(...opposed(c, r, at, named));
+  }
+  return out;
+}
+
+// Toolbox rows 5 and G5: an opposed check names a skill of this cartridge (its attribute is
+// checked with attribute_threshold's), its target detail declares a rating, and API 1.44.
+function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
+  if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
+  const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
+  return [
+    ...(detail && detail.rating === undefined
+      ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
+      : []),
+    ...(apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : []),
+  ];
 }
 
 function reservedCommands(c: Obj): string[] {

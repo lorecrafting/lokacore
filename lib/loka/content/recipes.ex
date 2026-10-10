@@ -49,14 +49,15 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
-  defp reserved?(key, m) do
-    api =
+  @doc "The manifest's kernel_api floor as a list of integers."
+  def api(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    key in commands() and (key not in ~w(where knock) or api >= [1, 37])
-  end
+  defp reserved?(key, m),
+    do: key in commands() and (key not in ~w(where knock) or api(m) >= [1, 37])
 
   defp recipe({rel, r}, ctx) do
     taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
@@ -90,6 +91,32 @@ defmodule Loka.Content.Recipes do
   end
 
   defp shared(_, _, _), do: []
+
+  # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge, its
+  # target detail declares a rating, and API 1.44.
+  defp opposed(rel, %{"check" => c, "target" => t}, m, defs) do
+    side = if is_map_key(c, "skill"), do: "skill", else: "attribute"
+
+    reference(rel, ["check"], side, c, m, defs) ++
+      if(rated?(t, m, defs),
+        do: [],
+        else: [diag("SCHEMA_VIOLATION", at(rel, ["check"]), %{"error" => "invalid_value"})]
+      ) ++
+      if api(m) >= [1, 44],
+        do: [],
+        else: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
+  end
+
+  # An unresolved room or detail is the target's own diagnostic.
+  defp rated?(t, m, defs) do
+    case resolve(t["room"], "room", m, defs) do
+      {_, _, %{"details" => %{} = details}} ->
+        is_map_key(details[t["detail"]] || %{"rating" => 0}, "rating")
+
+      _ ->
+        true
+    end
+  end
 
   defp mismatch(rel, r) do
     if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
@@ -142,6 +169,9 @@ defmodule Loka.Content.Recipes do
 
   defp attributes(rel, %{"check" => %{"kind" => "attribute_threshold"} = c}, m, defs),
     do: reference(rel, ["check"], "attribute", c, m, defs)
+
+  defp attributes(rel, %{"check" => %{"kind" => "opposed"}} = r, m, defs),
+    do: opposed(rel, r, m, defs)
 
   defp attributes(_, _, _, _), do: []
 

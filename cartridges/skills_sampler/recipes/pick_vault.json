@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_vault",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "vault_room",
+    "detail": "vault"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "vault_open",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_vault",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "vault_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_vault.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_vault.failure"
+      }
+    }
+  }
+}

@@ -1764,6 +1764,16 @@
         },
         "qualification": {
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        },
+        "growth": {
+          "description": "Toolbox row 5 (docs/system/mechanics.md skill growth; kernel_api at least 1.44): strictly increasing use counts reaching levels 2, 3 and so on above the base; the count is the reserved player fact uses_<key>.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 1,
+          "maxItems": 8
         }
       },
       "required": [
