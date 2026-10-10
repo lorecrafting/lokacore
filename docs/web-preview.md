@@ -91,7 +91,7 @@ done | stopped, model, summary, sha}`, `{id, time, state: 'moved', beads, summar
 'suggest-close', reason}`; `bin/polish_status.sh log "<text>"` adds `{time, type: 'log', text}`, a
 muted PM line in the conversation (routed, waiting); `bin/polish_status.sh suggest "<text>"` adds
 `{time, type: 'suggest', text}`, the PM's next prompt: the empty composer shows the latest one as
-ghost text until the owner sends a prompt, and Tab fills it in. The panel polls it and, while a pick works,
+ghost text until the owner sends a prompt (or Close, Keep going), and Tab fills it in. The panel polls it and, while a pick works,
 shows an activity line above the composer. Outside a session, [`/polish-intake`](../.claude/commands/polish-intake.md) moves waiting
 picks to Beads. `mise exec -- npm run storybook:picker` runs the picker end to end on a dev server with
 its own queue directory (about a minute; nightly in `book-e2e.yml`).

@@ -138,6 +138,8 @@ try {
     await page
       .waitForSelector('textarea[placeholder="What should change?"]', { timeout: 5_000 })
       .catch(() => fail('the suggestion stayed after a sent prompt'));
+    const note = lines('picks.jsonl').at(-1).note;
+    if (note !== 'Close batch') fail(`sent ${JSON.stringify(note)}, want the suggestion`);
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();

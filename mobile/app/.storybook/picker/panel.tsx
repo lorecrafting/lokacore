@@ -173,8 +173,8 @@ export const Panel = () => {
     </Button>
   );
   const close = { button, confirm, setConfirm };
-  // The latest PM suggestion, until the owner sends a prompt after it.
-  const sent = Math.max(0, ...feed.picks.filter((p) => !p.type).map((p) => p.time));
+  // The latest PM suggestion, until the owner sends a prompt (or Close, Keep going) after it.
+  const sent = Math.max(0, ...feed.picks.map((p) => p.time));
   const suggestion = feed.status
     .filter((s): s is Extract<Status, { type: 'suggest' }> => 'type' in s && s.type === 'suggest')
     .at(-1);
