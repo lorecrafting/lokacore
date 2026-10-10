@@ -1,7 +1,7 @@
 name: ci
 
-# Pre-production: every push to a branch, every pull request (for the e1-recorder job), nightly on
-# main and by hand; a green run on the exact head is the merge gate
+# Pre-production: every push to a branch, every pull request (all jobs again, on the merge commit, so
+# e1-recorder runs in full), nightly on main and by hand; a green run on the exact head is the merge gate
 # (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md).
 on:
   push:
