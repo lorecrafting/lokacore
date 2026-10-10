@@ -31,7 +31,7 @@ rooms and steps and the build slice is still to come; `later` means no brief cov
 | statuses x reactions | body | `fell_top` (exposure by weather), `still_room` (draught, song) | `kernel/ts/test/showcase_body.test.ts` | planned (plan 1) |
 | sky x exposure x equipment | body | `fell_gate` garments, `fell_top` | `showcase_body.test.ts` | planned (plan 1) |
 | disposition x commerce x dialogue | social | `village_green` (Nell's shop and prices, the Reeve's `help`/`wrong`, the apple), `warden_gate` (engage) | `kernel/ts/test/showcase_social.test.ts` | planned (plan 1) |
-| deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | `showcase_social.test.ts` | planned (plan 1) |
+| deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | an app test beside `mobile/app/book/recap.test.ts` (the block is Book-side); `showcase_social.test.ts` for the facts | planned (plan 1) |
 | combat x loot x levelling x death | | | | later (combat district) |
 | hidden exits x senses x traps | world (hidden exits only) | `sea_cave` night search | `kernel/ts/test/showcase_world.test.ts` | partly planned (plan 1); senses and traps later |
 | quests x deadlines x hints | social | `carry_letter` from the Reeve to Wat | `showcase_social.test.ts` | planned (plan 1) |
@@ -42,6 +42,8 @@ rooms and steps and the build slice is still to come; `later` means no brief cov
 | potion x derived carry | body | `still_room` (the quern lifts only under `might`) | `showcase_body.test.ts` | planned (plan 1) |
 | NPC status x variants x schedule | body | Wat on `fell_top` at 08:00 | `showcase_body.test.ts` | planned (plan 1) |
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` | planned (plan 1) |
+| pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` | planned (plan 1) |
+| schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` | planned (plan 1) |
 
 ## How a batch adds a district
 
