@@ -269,10 +269,14 @@ function exits(
   });
 }
 
+// One entry per place in a holder: the finger holder lists two (toolbox row 3).
 function equipmentViews(world: World, actions: Lists, steps: Steps) {
-  return Object.entries(world.slots).map(([slot, holder]) => {
-    const [item] = within(world, actions, holder, actions.worn, steps);
-    return { slot: slot as SlotKey, ...(item && { item }) };
+  return Object.entries(world.slots).flatMap(([slot, holder]) => {
+    const items = within(world, actions, holder, actions.worn, steps);
+    return Array.from({ length: world.capacities[holder] }, (_, i) => ({
+      slot: slot as SlotKey,
+      ...(items[i] && { item: items[i] }),
+    }));
   });
 }
 

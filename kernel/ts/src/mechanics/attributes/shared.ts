@@ -32,7 +32,8 @@ export function worn(world: World, actor: CharacterId, attribute: DefinitionRef)
   for (const [item, at] of Object.entries(world.state.containers)) {
     const e = holders.has(at) ? world.entities[item] : undefined;
     if (e?.kind === 'item')
-      for (const a of e.affects ?? []) if (refString(a.attribute) === ref) sum = add(sum, a.by);
+      for (const a of e.affects ?? [])
+        if (refString(a.attribute) === ref) sum = add(sum, a.modifier);
   }
   return sum;
 }

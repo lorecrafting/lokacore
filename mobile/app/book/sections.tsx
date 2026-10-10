@@ -150,8 +150,8 @@ export function CarryingPage(p: {
         <>
           <SectionTitle>Worn</SectionTitle>
           <View>
-            {p.equipment!.map(({ slot, item }) => (
-              <View key={slot}>
+            {p.equipment!.map(({ slot, item }, i) => (
+              <View key={`${slot}-${i}`}>
                 <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />

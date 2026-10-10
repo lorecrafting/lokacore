@@ -57,19 +57,27 @@ const stat = (w: World, k: string) => {
   return [a.value, a.worn ?? 0];
 };
 const room = (w: World) => gameView(w).place!.description.key;
+const fingers = (w: World) =>
+  gameView(w)
+    .equipment!.filter((e) => e.slot === 'finger')
+    .map((e) => e.item?.id ?? 'empty')
+    .sort();
 
 // Breaks: finger capacity 1 (the second ring is refused), occupancy that ignores capacity (the
 // third is worn), affects not read (PER stays 10), stat_compare reading the base value (the hall
-// keeps its plain text at 14), or a removed ring still counting.
+// keeps its plain text at 14), a removed ring still counting, or the GameView listing one finger
+// (the second ring has no Remove).
 test('a +2 PER ring counts on either finger, two stack, a third is refused and removal restores', () => {
   let w = taken(fresh(), 'ring_left', 'ring_right', 'ring_spare');
   assert.deepEqual(stat(w, 'per'), [10, 0]);
+  assert.deepEqual(fingers(w), ['empty', 'empty']);
   w = play(w, { type: 'wear', item_id: id(w, 'ring_left') });
   assert.deepEqual(stat(w, 'per'), [12, 2]);
   assert.equal(room(w), 'room.hall.description');
   w = play(w, { type: 'wear', item_id: id(w, 'ring_right') });
   assert.deepEqual(stat(w, 'per'), [14, 4]);
   assert.equal(room(w), 'room.hall.sharp');
+  assert.deepEqual(fingers(w), [id(w, 'ring_left'), id(w, 'ring_right')].sort());
   assert.deepEqual(act(w, { type: 'wear', item_id: id(w, 'ring_spare') }).decision, {
     kind: 'rejected',
     error: { code: 'invalid_state' },
@@ -99,7 +107,8 @@ test('a belt of +2 STR and +4 CON lifts the stone and raises the hp maximum unti
 });
 
 // Breaks: the loader drops an affects check, so an affect on an unworn item, a dangling
-// attribute, a missing attributes@1 or an old API floor loads and misbehaves in play.
+// attribute, a missing attributes@1 or an old API floor (also for finger rings without affects)
+// loads and misbehaves in play.
 test('the loader refuses each unsound item affect', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const belt = 'affects_sampler@0.0.1:item/belt';
@@ -111,6 +120,14 @@ test('the loader refuses each unsound item affect', () => {
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
     [(c) => delete c.items[belt].slot, 'SCHEMA_VIOLATION', at],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.40';
+        for (const i of Object.values(c.items) as any[]) delete i.affects;
+      },
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
     [
       (c) => (c.items[belt].affects[1].attribute.key = 'luck'),
       'UNRESOLVED_REFERENCE',
@@ -146,13 +163,13 @@ test('the loader refuses each unsound item affect', () => {
 test('an item affect requires its attribute and amount', () => {
   const affect = {
     attribute: { cartridge_id: 'c', cartridge_version: '1.0.0', kind: 'attribute', key: 'per' },
-    by: 2,
+    modifier: 2,
   };
   assert.deepEqual(validate('ItemAffect', affect), []);
   assert.deepEqual(validate('SlotKey', 'finger'), []);
   const rows: [string, unknown, string, string][] = [
-    ['ItemAffect', { by: 2 }, '/attribute', 'missing_property'],
-    ['ItemAffect', { attribute: affect.attribute }, '/by', 'missing_property'],
+    ['ItemAffect', { modifier: 2 }, '/attribute', 'missing_property'],
+    ['ItemAffect', { attribute: affect.attribute }, '/modifier', 'missing_property'],
     ['ItemAffect', { ...affect, extra: 1 }, '/extra', 'unknown_property'],
   ];
   for (const [contract, value, path, code] of rows)

@@ -14,11 +14,11 @@
   "affects": [
     {
       "attribute": "str",
-      "by": 2
+      "modifier": 2
     },
     {
       "attribute": "con",
-      "by": 4
+      "modifier": 4
     }
   ]
 }

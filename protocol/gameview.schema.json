@@ -677,7 +677,7 @@
       ]
     },
     "WornSlotView": {
-      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
+      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order, one entry per place: the finger holder has two (toolbox row 3).",
       "type": "object",
       "properties": {
         "slot": {

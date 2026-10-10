@@ -14,7 +14,7 @@
   "affects": [
     {
       "attribute": "per",
-      "by": 2
+      "modifier": 2
     }
   ]
 }

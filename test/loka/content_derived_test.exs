@@ -34,7 +34,7 @@ defmodule Loka.ContentDerivedTest do
   end
 
   # Breaks: an item affect on an unworn item, naming no attribute, lacking attributes@1 or under
-  # API 1.41 compiles (toolbox row 3).
+  # API 1.41 compiles, or a finger ring without affects compiles under API 1.41 (toolbox row 3).
   test "item affects keep their slot, references, owner and API floor" do
     dir = Loka.ContentSource.copy("cartridges/affects_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -54,5 +54,14 @@ defmodule Loka.ContentDerivedTest do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
+
+    # Finger rings without affects still need API 1.41.
+    plain =
+      for f <- ~w(ring_left ring_right ring_spare belt), do: {"items/#{f}.json", drop.("affects")}
+
+    api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.40")}
+
+    assert {:error, [%{"code" => "KERNEL_API_RANGE_INVALID"}]} =
+             Loka.ContentSource.compile(dir, [api | plain])
   end
 end
