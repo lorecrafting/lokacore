@@ -2,6 +2,7 @@
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { same } from '../foundation/compose.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export function death(c: Obj, named: Checks['named']): Diagnostic[] {
@@ -27,6 +28,7 @@ export function death(c: Obj, named: Checks['named']): Diagnostic[] {
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
     if (i.location.in === 'item' && c.items[refString(i.location.item)]?.location.in === 'template')
       bad(`.cartridge.items${step(ref)}.location.item`);
+  out.push(...drops(c, named));
   if (!d) return out;
   out.push(...requirements(c));
   named(d.shrine, 'room', '.cartridge.world.death.shrine');
@@ -56,5 +58,27 @@ function requirements(c: Obj): Diagnostic[] {
           `${capability}@1`,
         ]),
       );
+  return out;
+}
+
+// Toolbox row 8: each drop names a distinct item its NPC holds at genesis; drops need world.death.
+function drops(c: Obj, named: Checks['named']): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const tables = Object.entries((c.npcs ?? {}) as Obj).filter(([, n]) => n.drops);
+  if (tables.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.43') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  for (const [ref, npc] of tables) {
+    const at = `.cartridge.npcs${step(ref)}.drops`;
+    if (!c.world?.death) out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+    const seen = new Set<string>();
+    for (const [i, { item }] of (npc.drops as Obj[]).entries()) {
+      named(item, 'item', `${at}[${i}].item`);
+      const location = c.items?.[refString(item)]?.location;
+      const held = location?.in === 'npc' && refString(location.npc) === ref;
+      if (seen.has(refString(item)) || (location && !held))
+        out.push(diag('SCHEMA_VIOLATION', `${at}[${i}]`, { error: 'invalid_value' }));
+      seen.add(refString(item));
+    }
+  }
   return out;
 }

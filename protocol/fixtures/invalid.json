@@ -12505,6 +12505,310 @@
     ]
   },
   {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": []
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "missing_property"
+      },
+      {
+        "path": "/drops/0/item",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 0
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 101
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": "50"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50,
+          "weight": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/weight",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "Calendar",
     "value": {
       "x": 1

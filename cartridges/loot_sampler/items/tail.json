@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "tail"
+  ],
+  "short": "item.tail.short",
+  "room_line": "item.tail.room",
+  "description": "item.tail.description",
+  "location": {
+    "in": "npc",
+    "npc": "rat"
+  },
+  "mass_grams": 0
+}

@@ -1,0 +1,30 @@
+{
+  "keywords": [
+    "rat"
+  ],
+  "short": "npc.rat.short",
+  "room_line": "npc.rat.room",
+  "description": "npc.rat.description",
+  "room": "pit",
+  "hp": {
+    "minimum": 0,
+    "maximum": 4,
+    "start": 4,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "drops": [
+    {
+      "item": "tail",
+      "chance": 50
+    },
+    {
+      "item": "coin",
+      "chance": 10
+    }
+  ]
+}

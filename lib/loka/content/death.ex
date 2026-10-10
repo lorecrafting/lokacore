@@ -11,11 +11,54 @@ defmodule Loka.Content.Death do
     |> Map.update!("shrine", &ref(&1, "room", m))
   end
 
+  @doc "Expands an NPC's drop items (toolbox row 8), then its services."
+  def npc(%{"drops" => drops} = n, m) do
+    expanded = for d <- drops, do: Map.update!(d, "item", &ref(&1, "item", m))
+    Loka.Content.Services.npc(%{n | "drops" => expanded}, m)
+  end
+
+  def npc(n, m), do: Loka.Content.Services.npc(n, m)
+
   def check(nil, _, _), do: []
 
   def check(m, defs, {_, settings}) do
     death = get_in(settings, ["world", "death"])
-    templates(m, defs, death) ++ if(death, do: settings(m, defs, death), else: [])
+
+    templates(m, defs, death) ++
+      drops(m, defs, death) ++ if(death, do: settings(m, defs, death), else: [])
+  end
+
+  # Toolbox row 8: each drop names a distinct item its NPC holds at genesis; drops need world.death.
+  defp drops(m, defs, death) do
+    tables = for {key, {rel, _, %{"drops" => list}}} <- defs["npc"] || %{}, do: {key, rel, list}
+
+    api =
+      if tables == [] or version(m) >= [1, 43],
+        do: [],
+        else: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
+
+    api ++ Enum.flat_map(tables, &drop_table(&1, m, defs, death))
+  end
+
+  defp drop_table({key, rel, list}, m, defs, death) do
+    table = {rel, %{"in" => "npc", "npc" => ref(key, "npc", m)}, Enum.map(list, & &1["item"])}
+    owner = if death, do: [], else: [bad(at(rel, ["drops"]))]
+    owner ++ Enum.flat_map(Enum.with_index(list), &drop(&1, table, m, defs))
+  end
+
+  defp drop({d, i}, {rel, held, items}, m, defs) do
+    reference(rel, ["drops", i], {"item", "item"}, d, m, defs) ++
+      if d["item"] in Enum.take(items, i) or location(d, m, defs, held) != held,
+        do: [bad(at(rel, ["drops", i]))],
+        else: []
+  end
+
+  # An unresolved item reports UNRESOLVED_REFERENCE only.
+  defp location(d, m, defs, held) do
+    case resolve(d["item"], "item", m, defs) do
+      {_, _, item} -> item["location"]
+      _ -> held
+    end
   end
 
   defp templates(m, defs, death) do
@@ -25,7 +68,7 @@ defmodule Loka.Content.Death do
   # ponytail: the one corpse template check keeps its population exception beside death validation. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp template({"item", rel, %{"location" => %{"in" => "template"}} = i}, m, defs, death) do
     item_ref = ref(i["key"], "item", m)
-    corpse = death && item_ref in [death["player_corpse"], death["npc_corpse"]]
+    corpse = death != nil and item_ref in [death["player_corpse"], death["npc_corpse"]]
 
     bundle_roles =
       for {_, {_, _, b}} <- defs["population_bundle"] || %{},
@@ -80,14 +123,15 @@ defmodule Loka.Content.Death do
         do: bad("cartridge.world.death.restore." <> pool)
   end
 
-  defp requirements(m) do
-    version =
+  defp version(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
+  defp requirements(m) do
     api =
-      if version < [1, 5],
+      if version(m) < [1, 5],
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 

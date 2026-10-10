@@ -646,7 +646,8 @@ when empty and have no decay.
 
 `entity_died` names victim, optional victim definition (none for a player body), death
 room, killer and credited character where known, and corpse. The producer allocates
-attack-result EventId before death EventId before corpse EntityId, with no death RNG.
+attack-result EventId before death EventId before corpse EntityId, with no death RNG
+unless the victim declares [drops](#loot-tables-and-random-drops-toolbox-row-8).
 The actual M6 producer owns lethal loss and encounter/job closure in the same writer
 group before this sequence; no public death/damage command or test-only engine verb
 exists. The installed combat producer below provides live Attack/round/death/escape integration.
@@ -1765,3 +1766,13 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Spending.** One `raise_attribute` action with an `attribute` input (an authored attribute's DefinitionRef) is offered while unspent points remain; the Book shows one Raise card per authored attribute. It first settles a derived hp maximum ([resource@1](#resource1-kerneltssrcmechanicsresourcets)), then adds one allocated point; with none left nothing is offered, and a forged invocation is refused by keyed admission (the rule also refuses it, `invalid_state`). Replay returns the original receipt.
 - **Reading.** [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads selected (else starting) value plus allocated points plus worn affects (row 3), saturated as in row 2, so every derived stat follows. The GameView carries `{level, experience, next, unspent}` (`next` absent at the top level); reaching a level adds one receipt narration line, the `level_up` text: *completion:* after the whole proposal (root, reactions and jobs) is composed, the last `levelling.set` of the player character in it is compared with the stored row before the step, and the line is appended once at the end of the narration when its level is higher, so a step that crosses two thresholds still adds one line.
 - **Sampler.** `cartridges/levelling_sampler`: three rats grant 10 experience each, thresholds 30 and 100, one point per level; three kills reach level 2 with one point; resolving the den quest grants 20 by `experience.grant`; Raise STR moves the derived damage (STR, divisor 1) and Raise CON the derived hp maximum (CON, hp regenerating 1 per hour) by the cartridge's tables.
+
+## Loot tables and random drops (toolbox row 8)
+
+[Toolbox row 8](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#drop-declarations) govern it; the PM brief is in Beads `loka-kgd.20` (2026-10-10). The table lives on the creature, not the population: an NPC definition may declare `drops`, an ordered list of `{item, chance}`, each item an authored item the NPC holds at genesis and `chance` an integer percentage 1 to 100. Authored creatures (rats) are not population members, so a population plan could not carry their table; populations keep their fixed `loot_role` pelt or hide. Drops create no entity: they decide the custody of items that already exist.
+
+- **Roll.** When combat's fatal producer runs the [death sequence](#death1--corpse-custody-and-same-body-return-m5-b-foundation) for an NPC with `drops`, the sequence draws one uniform integer in [0, 100) per entry, in table order, from the world RNG after the round's attack draws; an entry passes when roll < chance. Each entry draws even when its item is no longer held, so later entries keep their draw. Each draw has its own eight-raw-draw budget and does not count against the round's budget. A death without `drops` draws nothing, as before.
+- **Custody.** Death custody transfers the victim's sorted held item roots to the corpse, except a held drop item whose entry failed: it stays held by the dead NPC, which nothing reaches. Items the NPC holds that no entry names always transfer. Only combat kills an NPC; the bleed, status and water deaths are the player's body and draw nothing.
+- **Replay.** The rolls are part of the committed proposal and its RNG state, so a replay returns the same receipt and state.
+- **Book.** A dropped item appears in the corpse's Contents, where existing loot appears; the player sees no new line.
+- **Sampler.** `cartridges/loot_sampler`: a rat holds a tail (chance 50) and a coin (chance 10); one player attack kills it. From seed `[1, 1, 1, 1]` the hit draw is followed by rolls 60 and 20 (nothing drops); from `[1, 2, 3, 4]` by 0 and 40 (the tail drops); from `[9, 10, 11, 12]` by 80 and 0 (the coin drops); from `[5, 6, 7, 8]` by 40 and 0 (both drop).
