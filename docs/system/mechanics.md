@@ -389,14 +389,18 @@ rule other than a dialogue choice resolves or fails a quest with an outcome.
 
 `talk {target_id}`: a target that speaks no dialogue `not_found`. A speaker may have several
 dialogues; the talk opens the first, in key order, whose own policy holds: none holding, or the
-actor already having a pending choice, `invalid_state`. Accepted
+actor already in conversation with that speaker, `invalid_state`. A talk to another speaker
+while a conversation is open ends that one first, as Leave would: the same decision's
+`choice.close` of the open row precedes the new `choice.open` (owner ruling 2026-10-09 in Beads
+loka-x6t.5, paraphrased: an open conversation must not block the world;
+`mechanics/dialogue/selection.ts:144`). Accepted
 `choice_opened`: one `choice.open` of a new continuation (ordinal 0 of this command), the
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
 actor's or not offering the choice `invalid_state`; the pinned dialogue policy is
 re-evaluated for that actor at Choose and pending-option projection, refusing
 `invalid_state` when no longer true; a bound NPC not in the room `not_present`;
-a bound item not held `not_owned` (`kernel/ts/src/mechanics/dialogue/shared.ts:66`; the GameView shows the same); then the
+a bound item not held `not_owned` (`kernel/ts/src/mechanics/dialogue/shared.ts:85`; the GameView shows the same); then the
 dialogue's quest resolves (above), or the choice's `accept` activates its quest as
 `accept_quest` does, `invalid_state` when `accept_quest` would be: the actor already has an
 instance, or the quest's offer, if declared, has a policy that fails (the talk-time policy may be
@@ -407,14 +411,41 @@ the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:177`). `close_choice {continuation_id}`: the
-actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
+whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:279`). The conversation then
+returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+to the person's topics; the conversation stays open until Leave the conversation): the same
+decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
+source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer
+ends the conversation instead, opening nothing, when its dialogue resolves a quest (story points
+and scene starts follow only such answers) or declares a riddle, when the answer has a `patrol`
+transition (the speaker sets off on a leg), or when the dialogue has a single choice (one-shot
+offers, lessons, escort starts and single-choice farewells such as "Take your leave";
+`mechanics/dialogue/behavior.ts:72`). A farewell choice in a dialogue with other choices, such as Aldric's "Leave
+Aldric.", returns to the hub like any other answer. The reopened options keep their
+declared availability: an answer whose effects make the dialogue's policy or an option fail shows
+those options unavailable with the usual codes, and Leave the conversation stays offered. A
+riddle's wrong answer keeps its row, as below. `close_choice {continuation_id}`: the
+actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`; it is
+Leave the conversation, offered while any dialogue row is pending (`modal`, `closable: true`).
+A hub conversation (a dialogue that returns to its hub, above) also ends as Leave would, with no
+event, once its actor and speaker no longer share a room or the speaker dies: the player moves
+away or the speaker leaves. The proposal, once composed with its due jobs, appends the
+`choice.close` of each such row in id order (`kernel/ts/src/runtime/proposal.ts:102`,
+`mechanics/dialogue/selection.ts:154`). A one-shot dialogue's row stays pending when either
+leaves, its options `not_present`
+([adverse case](../spec/conformance/adverse-cases.json) `walked-away-rejects-new-choice`).
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
-contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:151`). Only a dialogue's speaker, present in the room,
-offers its talk (`:138`), one per dialogue under the dialogue's key, available while that
+contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:264`). Only a dialogue's speaker, present in the room,
+offers its talk (`mechanics/dialogue/selection.ts:73`), one per dialogue under the dialogue's key, available while that
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
-decision conflict), both `OUTCOME_MISMATCH`.
+decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
+that could repeat must not reach a once-per-lineage save proof: the loader and the compiler
+reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
+of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
+bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
+conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:248`, twin
+`lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
 The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII
@@ -1429,7 +1460,10 @@ as a running modal scene. Its choice is offered only through its dream detail,
 not as an ordinary pending dialogue choice; it neither blocks another dialogue
 nor overwrites one. Close returns to the real bed/World without a gameplay write.
 A saved checkpoint is resumable only by a living actor at its exact room anchor,
-with no encounter, modal or ordinary pending choice. Travel, damage/return or
+with no encounter or modal. An open ordinary conversation does not block Continue: Continue
+ends it first, as Leave would, in the same decision (owner ruling 2026-10-09, loka-x6t.5;
+`mechanics/scene/sequence.ts:42`); the dream's own choice is still refused while one is open.
+Travel, damage/return or
 another modal makes presentation unavailable, preserves the beat/branch, and
 leaves normal Stand/Flee/movement/recovery available. Return legally and Resume;
 no teleport, immunity, time pause, rerun of first Rest or mandatory dream screen.

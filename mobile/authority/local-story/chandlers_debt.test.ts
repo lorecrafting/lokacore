@@ -18,8 +18,9 @@ test('saved B2 acceptance and funded turn-in reopen with their exact rows', () =
   a.move('north', 'west');
   a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
   a.answer('accept_on_time');
-  a.reopen();
+  a.reopen(); // with Peg's hub still pending (loka-x6t.5)
   assert.equal(a.world().state.containers[a.entity('item', 'tithe_ledger')], fresh.body);
+  a.invoke('close_choice');
   a.move('east', 'north', 'north', 'north', 'north');
   a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);
   a.answer('on_time');

@@ -198,6 +198,7 @@ const lead = (p: ReturnType<typeof setup>) =>
 const acceptLead = (p: ReturnType<typeof setup>) => {
   p.invoke('elspeth', [elspethId]);
   p.answer('accept');
+  p.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
 };
 
 // Breaks: informational talk auto-starts Q1, the wrong item grants readiness, dropping
@@ -209,6 +210,7 @@ test('Q1 explicit acceptance, held drawing gate, report priority and durable onc
   let p = setup(path);
   p.invoke('elspeth', [elspethId]);
   p.answer('directions');
+  p.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   assert.equal(lead(p), undefined);
   acceptLead(p);
   assert.equal(lead(p)?.journal, 'quest.first_lead.active');

@@ -7,11 +7,11 @@ import { childReturn, search } from './e1_paths.ts';
 const journal = (a: CaseHost) =>
   a.view().journal.find((q) => q.quest.key === 'missing_child')!.journal;
 
+// One sitting: each answer returns to Elspeth's hub until Leave the conversation (loka-x6t.5).
 function elspethTalks(a: CaseHost, child: 'rescued' | 'stays') {
-  for (const choice of ['acknowledge', 'directions', 'inn']) {
-    a.invoke(`b_elspeth_${child}`, [a.entity('npc', 'elspeth')]);
-    a.choose(choice);
-  }
+  a.invoke(`b_elspeth_${child}`, [a.entity('npc', 'elspeth')]);
+  for (const choice of ['acknowledge', 'directions', 'inn']) a.choose(choice);
+  a.invoke('close_choice');
 }
 
 export function rejoin(a: CaseHost) {

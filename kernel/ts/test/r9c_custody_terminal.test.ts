@@ -195,6 +195,7 @@ function belfry() {
   const p = player();
   p.run('elspeth', [npc('elspeth')]);
   p.choose('accept');
+  p.run('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   p.move('north', 'north');
   p.run('take', [item('fox_drawing')]);
   p.move('south', 'south');

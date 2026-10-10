@@ -385,6 +385,7 @@ test('authored training/shop/S2 orders retain conserved pennies and trained five
         move('west');
         a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
         choose('accept_on_time');
+        a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
         a.reopen();
         move('east', 'north', 'north', 'north', 'north');
         a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);

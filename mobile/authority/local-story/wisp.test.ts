@@ -7,6 +7,9 @@ import { join } from 'node:path';
 import { bundle, fresh, ids } from '../../../kernel/ts/test/wisp_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
+import { dreamHost } from './__tests__/dream-host.test.ts';
+import { entity } from '../../../kernel/ts/test/dream_fixture.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
 import { presenter } from '../../app/book/presenter.ts';
 
 function setup(path = ':memory:') {
@@ -320,4 +323,50 @@ test('cold-open verifies the ward Talk selector against its saved source', () =>
     .run(JSON.stringify(command), r.command_id);
   assert.equal(a.reopen().kind, 'save_corrupt');
   a.sql.close();
+});
+
+// Breaks (loka-x6t.5 save re-check): riddle-save not counting a Talk or the dream's Continue that
+// left the wisp riddle (riddle-save.ts receipt query and talk/continue branch), so a reachable
+// Chapter 1 save (wrong once, walk away, then Talk or Continue) cold-opens as save_corrupt.
+test('real SQLite: a wisp riddle left by a Talk or Continue reopens closed at count one', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-wisp-left-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  for (const via of ['talk', 'continue'] as const) {
+    const a = dreamHost(join(dir, `${via}.db`), (c) => {
+      c.entry.key = 'ferry_landing';
+      c.npcs['ashmere_missing_child@0.0.28:npc/elspeth'].room.key = 'mire_crossing';
+    });
+    const v = () => gameView(a.story.world()),
+      move = (...dirs: string[]) => dirs.forEach((direction) => a.invoke('move', { direction })),
+      wisp = entity(a.initial, 'npc', 'wisp');
+    move('south', 'south', 'south', 'east');
+    a.invoke('seek_wisp');
+    a.invoke('a_wisp_offer', {}, [wisp]);
+    a.invoke('choose', { choice_id: 'accept', continuation_id: v().choice!.continuation_id });
+    a.invoke('b_wisp_riddle', {}, [wisp]);
+    const id = v().choice!.continuation_id;
+    a.invoke('choose', { choice_id: 'answer', answer: 'EDIT', continuation_id: id });
+    move('west');
+    assert.equal(a.story.world().state.choices![id]!.status, 'pending', via);
+    if (via === 'talk') {
+      a.invoke('elspeth', {}, [entity(a.initial, 'npc', 'elspeth')]);
+      const ops = JSON.parse(
+        a.sql.prepare('SELECT response FROM receipt ORDER BY revision DESC LIMIT 1').get()!
+          .response as string,
+      ).delta.ops;
+      assert.ok(ops.some((o: any) => o.op === 'choice.close' && o.continuation_id === id));
+    } else {
+      move('north', 'north', 'north', 'north', 'east');
+      a.start();
+      assert.equal(a.story.world().state.choices![id]!.status, 'pending', via);
+      a.next();
+    }
+    a.reopen();
+    assert.deepEqual(
+      [a.story.world().state.choices![id]!.status, a.story.world().state.choices![id]!.attempts],
+      ['closed', { count: 1, limit: 3 }],
+      via,
+    );
+    a.sql.close();
+  }
 });

@@ -109,6 +109,7 @@ export function staged(stage: Stage) {
   if (stage === 'late') elapse(151201);
   a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
   a.answer(stage === 'late' ? 'accept_late' : 'accept_on_time');
+  a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   if (stage === 'deliver' || stage === 'kept') {
     a.move('east', 'north', 'north', 'north', 'north');
     a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);

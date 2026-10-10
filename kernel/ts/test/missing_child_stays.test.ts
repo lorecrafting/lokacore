@@ -95,6 +95,7 @@ function setup() {
   const ready = () => {
     talk('elspeth');
     choose('accept');
+    run({ type: 'close_choice', continuation_id: gameView(world).choice!.continuation_id }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     run({ type: 'take', item_id: ids['item/fox_drawing'] });
     move('south', 'south');

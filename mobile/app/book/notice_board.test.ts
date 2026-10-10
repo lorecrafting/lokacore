@@ -415,6 +415,8 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
   a.tap('Elspeth');
   assert.equal(a.stack().at(-1).id, elspeth);
   assert.ok(a.text().some((s) => s.includes('her eyes search every face')));
+  // One conversation: each reply returns to Elspeth's topics until Leave (loka-x6t.5).
+  a.tap('Talk to Elspeth');
   for (const [label, key, answer] of [
     [
       '“Which way is the village?”',
@@ -432,7 +434,6 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
       '“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”',
     ],
   ]) {
-    a.tap('Talk to Elspeth');
     assert.equal(a.game.view().view.choice?.speaker_id, elspeth);
     a.tap(label);
     assert.equal(a.game.lastNarration()?.lines[0].key, key);
@@ -441,7 +442,6 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
   }
   assert.deepEqual(a.game.view().view.journal, []);
   assert.deepEqual(storyRows(a), before);
-  a.tap('Talk to Elspeth');
   a.tap('Leave');
   assert.deepEqual(a.stack(), []);
   assert.deepEqual(a.presenter().screen().log, []);
@@ -519,6 +519,7 @@ const startSearch = (a: ReturnType<typeof preview>) => {
     });
   invoke('elspeth', ['a443f590-c8d3-86d8-9972-75e09b637bed']);
   answer('accept');
+  invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   invoke('move', [], { direction: 'north' });
   invoke('move', [], { direction: 'north' });
   invoke('take', ['1f15fe56-3e56-8cfa-812b-1f231844c782']);
