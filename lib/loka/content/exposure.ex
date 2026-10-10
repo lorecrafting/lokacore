@@ -22,7 +22,7 @@ defmodule Loka.Content.Exposure do
   defp clock_hour?(nil), do: false
 
   defp clock_hour?(reactions),
-    do: Enum.any?(reactions, fn {_, {_, _, r}} -> r["on"]["event"] == "clock_hour" end)
+    do: Enum.any?(reactions, &match?({_, {_, _, %{"on" => %{"event" => "clock_hour"}}}}, &1))
 
   defp wearing?(%{"op" => "wearing"}), do: true
   defp wearing?(v) when is_map(v), do: Enum.any?(Map.values(v), &wearing?/1)
