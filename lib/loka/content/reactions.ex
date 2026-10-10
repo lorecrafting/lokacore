@@ -3,7 +3,7 @@ defmodule Loka.Content.Reactions do
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
   the reaction checks of `kernel/ts/src/content/cartridge.ts` (lock) and `kernel/ts/src/content/cartridge_refs.ts`
   (references): each rule's owner (reaction@1), its trigger event's owner and each fact.assign's
-  (fact@1, by its fact_changed) is required; its trigger names a fact or room of this cartridge
+  (fact@1, by its fact_changed) is required; each trigger filter names a definition of this cartridge
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`).
   """
@@ -28,18 +28,34 @@ defmodule Loka.Content.Reactions do
     Enum.flat_map(all(defs), &rule(&1, ctx))
   end
 
-  defp rule({rel, %{"on" => %{"event" => event} = on} = r}, ctx) do
-    kind =
-      %{"fact_changed" => "fact", "entity_entered_room" => "room", "quest_resolved" => "quest"}[
-        event
-      ]
+  @filters %{
+    "fact" => "fact",
+    "room" => "room",
+    "quest" => "quest",
+    "item" => "item",
+    "victim" => "npc",
+    "story_point" => "story_point",
+    "barrier" => "barrier",
+    "scene" => "scene",
+    "kind" => "liquid"
+  }
+  @doc "Each trigger filter that names a definition (W1), with that definition's kind."
+  @spec filters() :: %{String.t() => String.t()}
+  def filters, do: @filters
 
+  defp rule({rel, %{"on" => %{"event" => event} = on} = r}, ctx) do
     api(r, ctx.m) ++
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
-      reference(rel, ["on"], kind, on, ctx.m, ctx.defs) ++
+      named(rel, on, ctx) ++
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
+
+  defp named(rel, on, ctx),
+    do:
+      Enum.flat_map(Map.take(@filters, Map.keys(on)), fn {f, kind} ->
+        reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
+      end)
 
   # ponytail: three finite reaction API floors stay in their one declaration check. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp api(r, manifest) do

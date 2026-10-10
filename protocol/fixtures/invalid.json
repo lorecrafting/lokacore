@@ -12663,7 +12663,7 @@
     "value": {
       "key": "k",
       "on": {
-        "event": "item_dropped",
+        "event": "status_ticked",
         "fact": {
           "cartridge_id": "c",
           "cartridge_version": "1.0.0",
@@ -12688,6 +12688,440 @@
       {
         "path": "/on/event",
         "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "trigger_item_acquired_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_acquired",
+        "item": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_item_dropped_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_dropped",
+        "item": 1,
+        "room": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_shooed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "shooed",
+        "item": 1,
+        "room": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_quest_activated_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "quest_activated",
+        "quest": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/quest",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_choice_opened_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "choice_opened",
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_choice_resolved_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "choice_resolved",
+        "choice": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/choice",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_story_point_reached_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "story_point_reached",
+        "outcome": 1,
+        "story_point": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/outcome",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/story_point",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_custom_event_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "custom_event",
+        "custom": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/custom",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_action_completed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "action_completed",
+        "action": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/action",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_check_passed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "check_passed",
+        "check": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/check",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_check_failed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "check_failed",
+        "check": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/check",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_barrier_changed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "barrier_changed",
+        "barrier": 1,
+        "to": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/barrier",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/to",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_scene_ended_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "scene_ended",
+        "scene": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/scene",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_entity_died_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_died",
+        "room": 1,
+        "victim": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/victim",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_attack_result_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "attack_result",
+        "hit": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/hit",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_filled_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "filled",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_poured_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "poured",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_drank_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "drank",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
       }
     ]
   },

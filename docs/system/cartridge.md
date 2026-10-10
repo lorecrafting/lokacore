@@ -129,6 +129,12 @@ and `quest.fail {quest, outcome}`. Both require a local quest reference and ques
 resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
 `quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
 evidence check as reaction delivery. The compiler expands these short quest references.
+Toolbox row W1: `on.event` may be any registered event kind, with the optional filters of the
+[reaction@1 table](mechanics.md#reaction1-kerneltssrcmechanicsreactionts); no new `kernel_api`
+floor. The compiler expands each short definition filter (`item`, `room`, `quest`, `story_point`,
+`barrier`, `scene`, `kind`, `victim`) and both kernels refuse one that names no local definition
+of its kind. `cartridges/reactions_sampler` is the sampler: dropping the bone in the yard sets
+`crow_drawn`, whose room variant shows the crow; dropping the pebble does not.
 
 ## Carrying settings and item mass
 

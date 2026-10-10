@@ -224,7 +224,7 @@ test('a cure listed twice ends the status once', () => {
 });
 
 // Breaks: an entry rule poisons the player when another entity (a scheduled NPC) enters the room.
-test('an entry applies the status only to the entering body', () => {
+test("a status reaction applies only to its event's subject body", () => {
   const w = fresh();
   const r = step(
     w,
@@ -239,12 +239,12 @@ test('an entry applies the status only to the entering body', () => {
   if (r.decision.kind !== 'accepted') return;
   const entry = r.decision.events.find((e) => e.payload.type === 'entity_entered_room')!;
   const rule = Object.values(content.reactions!).find((x) => x.key === 'dart')!;
-  const transitions = (entity_id: string) => {
+  const transitions = (payload: object) => {
     const d = sequence(
       r.world,
       w.character,
       rule,
-      { ...entry, payload: { ...entry.payload, entity_id } } as never,
+      { ...entry, payload } as never,
       1,
       { n: 0 },
       () => 'dddddddd-0000-4000-8000-000000000001',
@@ -254,8 +254,16 @@ test('an entry applies the status only to the entering body', () => {
       ? d!.delta.ops.filter((o) => o.op === 'status.transition').length
       : -1;
   };
-  assert.equal(transitions(w.body), 1);
-  assert.equal(transitions(antidote(w)), 0);
+  // W1 subjects (docs/system/mechanics.md reaction@1): the entrant, an attack's target, a death's
+  // victim. Breaks: a hit on, or the death of, an NPC poisoning the player.
+  for (const [type, field] of [
+    ['entity_entered_room', 'entity_id'],
+    ['attack_result', 'target_id'],
+    ['entity_died', 'victim_id'],
+  ]) {
+    assert.equal(transitions({ ...entry.payload, type, [field]: w.body }), 1, type);
+    assert.equal(transitions({ ...entry.payload, type, [field]: antidote(w) }), 0, type);
+  }
 });
 
 // Breaks: the loader drops one of its status checks, so the artifact loads and fails in play.

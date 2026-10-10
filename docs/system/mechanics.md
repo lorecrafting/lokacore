@@ -574,11 +574,42 @@ starts a scene or writes its consequences.
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 
 Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact,
-`entity_entered_room` into its room, or exact `quest_resolved {quest, outcome}`, in rule-key order.
+`entity_entered_room` into its room, exact `quest_resolved {quest, outcome}`, `rested` in its
+room, or (toolbox row W1) any other registered event kind with optional filters, in rule-key order.
+Every filter present must equal its payload field; a filter means the same field in every kind:
+
+| Trigger `on.event` | Optional filters (payload field) | Subject (status.apply target) |
+|---|---|---|
+| `item_acquired` | `item` (item_id) | holder_id |
+| `item_dropped`, `shooed` | `item` (item_id), `room` (room_id) | the actor's body |
+| `quest_activated` | `quest` | the actor's body |
+| `choice_opened` | none | the actor's body |
+| `choice_resolved` | `choice` (choice_id) | the actor's body |
+| `story_point_reached` | `story_point`, `outcome` | the actor's body |
+| `custom_event` | `custom` (the event's key) | subject_id |
+| `action_completed` | `action` | subject_id |
+| `check_passed`, `check_failed` | `check` (the check's key) | subject_id |
+| `barrier_changed` | `barrier`, `to` | the actor's body |
+| `scene_ended` | `scene` | the actor's body |
+| `entity_died` | `victim` (victim_definition), `room` (room_id) | victim_id |
+| `attack_result` | `hit` | target_id |
+| `filled`, `poured`, `drank` | `kind` | the actor's body |
+| `entity_entered_room` | `room` (required) | entity_id |
+| `rested` | `room` (required) | body_id |
+| `fact_changed` | `fact` (required) | the actor's body |
+| `quest_resolved` | `quest`, `outcome` (both required) | the actor's body |
+
+Attribution: every delivery runs for the command actor (the quest-resolution exception below),
+so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
+taking an item) still reads the actor's `when` and writes the actor's facts, quests and
+experience; only `status.apply` follows the subject and skips when the subject is not the
+actor's body (statuses on NPCs and things wait for row G3). A filter naming a definition (`item`,
+`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim` as an NPC) must name one of
+this cartridge; key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
+and a key no event carries never matches.
 For quest resolution, the source instance must exist at player scope, be resolved with the
 event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
-`precondition_failed`. The instance's actor owns the delivery. Legacy fact/room triggers retain
-the command actor. Its `when` is read on the proposal so far at the event's logical time.
+`precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
 `quest.fail {quest, outcome}` transitions. Resolve and fail are legal only on a

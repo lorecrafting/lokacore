@@ -33,23 +33,46 @@ import { applyStatus, specOf } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 
-type Payload<T> = Extract<EventPayload, { type: T }>;
+type On = ReactionRule['on'];
+// Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
+// A field means the same payload field in every event kind that declares it.
+type Match = (w: World, want: any, p: any) => boolean;
+const same =
+  (field: string): Match =>
+  (_, want, p) =>
+    refString(want) === refString(p[field]);
+const equal =
+  (field: string): Match =>
+  (_, want, p) =>
+    want === p[field];
+const FILTERS: Record<string, Match> = {
+  fact: same('fact'),
+  room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
+  item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
+  victim: same('victim_definition'),
+  custom: (_, want, p) => want === p.event.key,
+  check: (_, want, p) => want === p.check.key,
+  choice: equal('choice_id'),
+  quest: same('quest'),
+  story_point: same('story_point'),
+  barrier: same('barrier'),
+  scene: same('scene'),
+  kind: same('kind'),
+  outcome: equal('outcome'),
+  action: equal('action'),
+  to: equal('to'),
+  hit: equal('hit'),
+};
 
 /**
- * The cartridge's rules whose trigger `e` meets (its event type, and the fact that changed or the
- * room entered), in rule-key order (UTF-8 bytes; 04 §5.2 step 6), never the map's order.
+ * The cartridge's rules whose trigger `e` meets (its event type and every filter it declares),
+ * in rule-key order (UTF-8 bytes; 04 §5.2 step 6), never the map's order.
  * ponytail: scans every rule per event; index them by event type when cartridges have many.
  */
 export function triggered(world: World, e: DomainEvent): ReactionRule[] {
   const meets = ({ on }: ReactionRule) =>
     on.event === e.payload.type &&
-    (on.event === 'fact_changed'
-      ? key(on.fact) === key((e.payload as Payload<'fact_changed'>).fact)
-      : on.event === 'quest_resolved'
-        ? refString(on.quest) === refString((e.payload as Payload<'quest_resolved'>).quest) &&
-          on.outcome === (e.payload as Payload<'quest_resolved'>).outcome
-        : world.roomIds[refString(on.room)] ===
-          (e.payload as Payload<'entity_entered_room'>).room_id);
+    Object.entries(on).every(([f, want]) => f === 'event' || FILTERS[f]!(world, want, e.payload));
   const authored = Object.values(world.cartridge.reactions ?? {})
     .filter(meets)
     .sort((a, b) => cmp(a.key, b.key));
@@ -127,9 +150,24 @@ export function sequence(
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
 
-// An entry applies a status only to the entering body: a scheduled NPC walking in poisons no one.
-const applies = (cause: DomainEvent, body: EntityId) =>
-  cause.payload.type !== 'entity_entered_room' || cause.payload.entity_id === body;
+// The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table); any
+// other event's subject is the actor's own body. A status applies only to its subject body: a
+// scheduled NPC walking in, or a hound's death, poisons no one.
+const SUBJECT: Partial<Record<On['event'], string>> = {
+  entity_entered_room: 'entity_id',
+  item_acquired: 'holder_id',
+  custom_event: 'subject_id',
+  action_completed: 'subject_id',
+  check_passed: 'subject_id',
+  check_failed: 'subject_id',
+  entity_died: 'victim_id',
+  attack_result: 'target_id',
+  rested: 'body_id',
+};
+const applies = (cause: DomainEvent, body: EntityId) => {
+  const field = SUBJECT[cause.payload.type as On['event']];
+  return !field || (cause.payload as Record<string, unknown>)[field] === body;
+};
 
 function assignment(
   world: World,
