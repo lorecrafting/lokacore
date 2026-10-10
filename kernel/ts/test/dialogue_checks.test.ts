@@ -13,6 +13,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { choiceView } from '../src/mechanics/dialogue/shared.ts';
+import { checkKeys } from '../src/content/cartridge_recipes.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-persuade-'));
 let artifact: Uint8Array;
@@ -73,7 +74,8 @@ function play(c: unknown) {
 }
 
 // Breaks: the check reads the actor's cha as the rating or the guard's start (6 vs 6 passes either
-// way, so the guard at 7 must fail), or `>=` becomes `>`.
+// way, so the guard at 7 must fail), or `>=` becomes `>`; or the hub reopens after a pass, so the
+// checked choice can be chosen again for free uses.
 test('cha 6 talks the guard (cha 5) round; the same words fail on a guard of cha 7', () => {
   const g = play(source);
   const d = g.choose(g.talk(), 'persuade');
@@ -84,10 +86,10 @@ test('cha 6 talks the guard (cha 5) round; the same words fail on a guard of cha
       [1, 'check_passed', 'persuade_guard'],
       [2, 'fact_changed', undefined],
       [3, 'choice_resolved', undefined],
-      [4, 'choice_opened', undefined],
     ],
   );
   assert.equal(g.fact('gate_open'), true);
+  assert.equal(g.view(), undefined);
   const strong = structuredClone(source);
   strong.npcs[`${P}:npc/guard`].attributes[0].value = 7;
   const s = play(strong);
@@ -193,4 +195,14 @@ test('the loader refuses each unsound dialogue choice check', () => {
     const r = load(c);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
   }
+});
+
+// Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice (one
+// check DefinitionRef) both define one key and load.
+test('check keys gather every recipe check and every dialogue choice check', () => {
+  const c = {
+    recipes: { a: { check: { key: 'k' } }, b: {} },
+    dialogues: { d: { choices: { x: { check: { key: 'k' } }, y: {} } } },
+  };
+  assert.deepEqual(checkKeys(c), ['k', 'k']);
 });

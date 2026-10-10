@@ -49,4 +49,17 @@ defmodule Loka.ContentChoiceChecksTest do
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect({path, diags})
     end
   end
+
+  # Breaks: the duplicate-key scan drops recipes or choices, so a recipe and a dialogue choice
+  # (one check DefinitionRef) both define one key and compile.
+  test "check keys gather every recipe check and every dialogue choice check" do
+    defs = %{
+      "recipe" => %{"a" => {"recipes/a.json", [], %{"check" => %{"key" => "k"}}}},
+      "dialogue" => %{
+        "d" => {"dialogues/d.json", [], %{"choices" => %{"x" => %{"check" => %{"key" => "k"}}}}}
+      }
+    }
+
+    assert Loka.Content.Recipes.shared_checks(defs) == MapSet.new(["k"])
+  end
 end

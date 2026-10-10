@@ -17,6 +17,7 @@ import {
   type Mint,
   type Rule,
   type World,
+  refString,
 } from '../../runtime/decision.ts';
 import { grant } from '../topics/shared.ts';
 import { acquire, opposed, practised } from '../skills.ts';
@@ -58,7 +59,7 @@ export function sequence(
 
 // A dialogue choice's opposed check (toolbox row 14; mechanics.md dialogue skill checks): read at
 // the choose like a recipe's (skills.ts opposed; no RNG), its check event at position 1 with the
-// speaker as subject, then one use of a skill with growth. A pass returns that start for the
+// named NPC, else the speaker, as subject, then one use of a skill with growth. A pass returns that start for the
 // choice's own sequence; a failure is the whole decision: the actor reads the check's failure,
 // nothing else of the choice applies and the conversation closes (the retry rule: a new talk
 // offers the choice again, so a later check passes only once the actor's value has risen).
@@ -76,16 +77,18 @@ export function checked(
 ) {
   const { actor_id, continuation_id, choice_id } = command.payload;
   const check = d.choices[choice_id]!.check!;
-  const speaker = row.roles.find((r) => {
-    const role = d.roles[r.role];
-    return role?.role === 'npc' && same(role.npc, d.npc);
-  })!.entity_id;
+  const subject_id = check.npc
+    ? world.entityIds[refString(check.npc)]!
+    : row.roles.find((r) => {
+        const role = d.roles[r.role];
+        return role?.role === 'npc' && same(role.npc, d.npc);
+      })!.entity_id;
   const passed = opposed(world, actor_id, check, check.rating!);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: Extract<EventPayload, { type: 'check_passed' | 'check_failed' }> = {
     type: passed ? 'check_passed' : 'check_failed',
     check: { cartridge_id, cartridge_version, kind: 'check', key: check.key },
-    subject_id: speaker,
+    subject_id,
   };
   const run = practised(world, actor_id, { ops: [], position: 1, facts: {} }, check);
   const events = [event(world, command, mint, 1, payload)];

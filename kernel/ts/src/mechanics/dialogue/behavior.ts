@@ -67,7 +67,8 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
  * The dialogue hub (mechanics.md dialogue@1; owner OK in Beads loka-x6t.5): `decided` plus a fresh
  * pending row of the same sitting (`choice.open` of the row's own bound fields, never rebound) and
  * its `choice_opened` after `choice_resolved`, unless the answer ends the conversation: its
- * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, or it was the only choice.
+ * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, it was checked (row 14:
+ * a pass may not be re-chosen for free uses), or it was the only choice.
  */
 export function hub<T extends { kind: string }>(
   world: World,
@@ -78,7 +79,7 @@ export function hub<T extends { kind: string }>(
   option: DialogueChoice,
   decided: T,
 ): T {
-  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol) return decided;
+  if (decided.kind !== 'accepted' || !reopens(d) || option.patrol || option.check) return decided;
   const a = decided as unknown as Accepted;
   const continuation_id = continuationId(mint);
   const { actor_id, source, beat, roles, choice_ids } = row;

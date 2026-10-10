@@ -44,7 +44,7 @@ defmodule Loka.Content.Recipes do
       text: text,
       registry: registry,
       actions: actions,
-      shared: shared(defs)
+      shared: shared_checks(defs)
     }
 
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
@@ -85,9 +85,15 @@ defmodule Loka.Content.Recipes do
 
   # An inline check's key is its check definition's key: no two checks (a recipe's or a dialogue
   # choice's, row 14) may share one.
-  defp shared(defs) do
-    checks = for({_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"])
-    Loka.Content.ChoiceChecks.duplicates(checks, defs)
+  @doc "The check keys (each recipe's and each dialogue choice's, row 14) more than one check has."
+  def shared_checks(defs) do
+    choices =
+      for {_, {_, [], d}} <- defs["dialogue"] || %{},
+          {_, %{"check" => %{"key" => k}}} <- d["choices"],
+          do: k
+
+    checks = for({_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"]) ++ choices
+    for {k, n} <- Enum.frequencies(checks), n > 1, into: MapSet.new(), do: k
   end
 
   defp shared(rel, %{"check" => %{"key" => k}}, shared) do

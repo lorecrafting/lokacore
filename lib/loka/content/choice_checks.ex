@@ -13,20 +13,14 @@ defmodule Loka.Content.ChoiceChecks do
 
   @plain ~w(label narration sequence availability check)
 
-  @doc "The duplicated keys among `recipe_keys` and every dialogue choice's check key."
-  def duplicates(recipe_keys, defs) do
-    keys = recipe_keys ++ for {_, o} <- checked(defs), do: o["check"]["key"]
-    for {k, n} <- Enum.frequencies(keys), n > 1, into: MapSet.new(), do: k
-  end
-
   @doc "A choice check needs kernel_api 1.47: one diagnostic per cartridge."
   def floor(m, defs) do
-    [major, minor] =
+    version =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if checked(defs) != [] and [major, minor] < [1, 47],
+    if checked(defs) != [] and version < [1, 47],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
@@ -41,7 +35,7 @@ defmodule Loka.Content.ChoiceChecks do
       failure_text(rel, at, c["failure"], ctx.text) ++
       rated(rel, at, c, ctx) ++
       plain(rel, at, o, d) ++
-      if(c["key"] in duplicates(recipe_keys(ctx.defs), ctx.defs),
+      if(c["key"] in Loka.Content.Recipes.shared_checks(ctx.defs),
         do: [diag("DUPLICATE_DEFINITION", at(rel, at))],
         else: []
       )
@@ -54,9 +48,6 @@ defmodule Loka.Content.ChoiceChecks do
         {id, %{"check" => _} = o} <- d["choices"],
         do: {id, o}
   end
-
-  defp recipe_keys(defs),
-    do: for({_, {_, [], %{"check" => %{"key" => k}}}} <- defs["recipe"] || %{}, do: k)
 
   defp failure_text(_, _, _, :unknown), do: []
 
