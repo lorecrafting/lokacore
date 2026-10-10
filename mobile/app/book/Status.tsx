@@ -13,7 +13,6 @@ import {
   type Pool,
 } from './model.ts';
 import { band, Tap } from './pages.tsx';
-import { Note } from './lines.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
 
@@ -93,7 +92,9 @@ export function StatusLine(p: StatusProps) {
       <View style={statusRow}>
         {items.map((item, i) => (i ? joined(c, item as ReactElement) : item))}
       </View>
-      <View style={{ alignItems: 'center' }}>{p.pending && <Note>save not confirmed</Note>}</View>
+      <View style={{ alignItems: 'center' }}>
+        {p.pending && <Text style={{ ...type.small, color: c.dim }}>save not confirmed</Text>}
+      </View>
     </View>
   );
 }
