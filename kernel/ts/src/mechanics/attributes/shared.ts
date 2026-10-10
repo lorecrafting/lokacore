@@ -14,14 +14,16 @@ export const initialValues = (world: World, ancestry: AncestrySpec) => {
 export const choice = (world: World, actor: CharacterId) => world.state.characters?.[actor];
 
 /**
- * The actor's attribute: its selected (else starting) value plus what its worn items grant,
+ * The actor's attribute: its selected (else starting) value plus its allocated levelling points
+ * (row 4) plus what its worn items grant,
  * saturated to the ResourceInt range so no read outside an action can fault (mechanics.md row 3).
  */
 export function value(world: World, actor: CharacterId, attribute: DefinitionRef) {
   const base =
     choice(world, actor)?.attributes[refString(attribute)] ?? world.attributes[key(attribute)];
+  const allocated = world.state.levelling?.[actor]?.allocated[refString(attribute)] ?? 0;
   const bonus = worn(world, actor, attribute);
-  return base === undefined ? base : saturate(base + bonus);
+  return base === undefined ? base : saturate(base + allocated + bonus);
 }
 
 /** The saturated sum of `attribute`'s affects on the items worn by the actor's body (row 3). */

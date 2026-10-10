@@ -19,6 +19,7 @@
       "type": "object",
       "properties": {
         "ancestry": { "$ref": "#/$defs/Key" },
+        "attribute": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
         "direction": {
           "$ref": "#/$defs/Key"
         },
@@ -334,6 +335,7 @@
       "description": "An input parameter an action requires (06 §20), one of the ActionInput fields.",
       "enum": [
         "ancestry",
+        "attribute",
         "direction",
         "choice_id",
         "continuation_id",

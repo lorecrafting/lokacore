@@ -204,6 +204,27 @@
           "additionalProperties": false
         },
         {
+          "description": "Spend one unspent attribute point on an authored attribute (attributes@1; toolbox row 4).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "raise_attribute"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "attribute"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Move through a connection.",
           "type": "object",
           "properties": {

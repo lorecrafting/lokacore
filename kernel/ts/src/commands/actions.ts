@@ -27,6 +27,7 @@ import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
+import { levelling } from '../mechanics/levelling/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -51,6 +52,9 @@ export type Offered = {
   readonly engine?: true;
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
+
+// Toolbox row 4: Raise is offered only while the cartridge levels and points remain.
+const points = (world: World, actor: CharacterId) => (levelling(world, actor)?.unspent ?? 0) > 0;
 
 export const needsAncestry = (world: World, actor: CharacterId) =>
   !!world.cartridge.ancestries && !characterChoice(world, actor);
@@ -86,6 +90,7 @@ function engine(world: World): ActionSet {
           !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
+      .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;

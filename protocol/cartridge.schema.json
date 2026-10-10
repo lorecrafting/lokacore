@@ -1274,6 +1274,57 @@
           },
           "additionalProperties": false
         },
+        "levelling": {
+          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attributes@1, kernel_api at least 1.42). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "type": "object",
+          "properties": {
+            "thresholds": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            },
+            "points_per_level": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "kills": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "npc": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "experience": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  }
+                },
+                "required": [
+                  "npc",
+                  "experience"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "level_up": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "thresholds",
+            "points_per_level",
+            "level_up"
+          ],
+          "additionalProperties": false
+        },
         "death": {
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },

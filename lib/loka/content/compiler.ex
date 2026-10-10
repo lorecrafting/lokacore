@@ -13,7 +13,7 @@ defmodule Loka.Content.Compiler do
     Requires
   }
 
-  alias Loka.Content.{Derived, Entities, Position, Resources, Scenes, Water}
+  alias Loka.Content.{Derived, Entities, Levelling, Position, Resources, Scenes, Water}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -160,7 +160,12 @@ defmodule Loka.Content.Compiler do
   end
 
   defp settings(extra, m),
-    do: Map.delete(extra, "entry") |> Water.settings(m) |> Derived.settings(m) |> Checks.expand(m)
+    do:
+      Map.delete(extra, "entry")
+      |> Water.settings(m)
+      |> Derived.settings(m)
+      |> Levelling.settings(m)
+      |> Checks.expand(m)
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
   # not resolved against it).

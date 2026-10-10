@@ -4,6 +4,7 @@ import { same } from '../../foundation/compose.ts';
 import { jobCommandId } from '../../foundation/id_source.ts';
 import { resourceRef } from '../resource.ts';
 import { value } from '../fact.ts';
+import { grant } from '../levelling/shared.ts';
 
 type Death = DomainEvent & { payload: Extract<DomainEvent['payload'], { type: 'entity_died' }> };
 type Attack = Extract<DomainEvent['payload'], { type: 'attack_result' }>;
@@ -24,19 +25,29 @@ export function deathCredit(
       world.entityIds[refString(m.npc)] === p.victim_id &&
       world.roomIds[refString(m.room)] === p.room_id,
   );
-  if (!mapping || value(world, p.credited_character_id, mapping.fact) !== false) return [];
+  const fact = mapping && value(world, p.credited_character_id, mapping.fact) === false;
+  // Toolbox row 4: a credited kill of a listed NPC definition grants its experience.
+  const kill = world.cartridge.world?.levelling?.kills?.find((k) =>
+    same(k.npc, p.victim_definition),
+  );
+  if (!fact && !kill) return [];
   const group = fatalGroup(world, { ...event, payload: p }, ops, events);
   if (group === undefined) return [];
-  return [
-    {
-      op: 'fact.assign',
-      writer_group: group,
-      fact: mapping.fact,
-      scope: { kind: 'player', character_id: p.credited_character_id },
-      expected: false,
-      value: true,
-    },
-  ];
+  const credited: DeltaOp[] = fact
+    ? [
+        {
+          op: 'fact.assign',
+          writer_group: group,
+          fact: mapping.fact,
+          scope: { kind: 'player', character_id: p.credited_character_id },
+          expected: false,
+          value: true,
+        },
+      ]
+    : [];
+  return kill
+    ? [...credited, ...grant(world, p.credited_character_id, kill.experience, group)]
+    : credited;
 }
 
 function fatalGroup(

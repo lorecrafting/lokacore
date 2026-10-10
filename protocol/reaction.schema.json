@@ -185,6 +185,16 @@
                 },
                 "required": ["op", "status"],
                 "additionalProperties": false
+              },
+              {
+                "description": "Add amount experience to the acting character's levelling row (toolbox row 4), saturating at the ResourceInt maximum; needs world.levelling.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "experience.grant" },
+                  "amount": { "type": "integer", "minimum": 1, "maximum": 2147483647 }
+                },
+                "required": ["op", "amount"],
+                "additionalProperties": false
               }
             ]
           }

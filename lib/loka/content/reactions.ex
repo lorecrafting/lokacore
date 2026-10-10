@@ -99,6 +99,9 @@ defmodule Loka.Content.Reactions do
       typed ++ pack ++ reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
   end
 
+  # Checked with world.levelling (Loka.Content.Levelling).
+  defp consequence(_, {%{"op" => "experience.grant"}, _}, _, _), do: []
+
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, _, ctx),
     do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
 
