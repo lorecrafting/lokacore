@@ -53,7 +53,7 @@ export const AtNight: StoryObj = {
 // the sampler's own text: the hall hears the forge one room east and smells the tower's stew.
 const cued = (cues: object[]): StoryObj => ({
   ...pageStory({ ...RoomFirstView, view: { ...RoomFirstView.view, cues } }),
-  args: { words: senses },
+  args: { words: Object.fromEntries(Object.entries(senses).filter(([k]) => k.startsWith('cue.'))) },
 });
 // Breaks: the direction phrase is dropped, so a cue next door reads as if it were here.
 export const SenseCues: StoryObj = {
