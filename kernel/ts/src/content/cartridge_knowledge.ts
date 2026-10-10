@@ -6,11 +6,22 @@ import type { Diagnostic } from '../contracts.gen.ts';
 
 export function knowledge(c: Obj, check: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const { named, text } = check;
+  const { named, text, typedValue } = check;
   let hasKnock = false;
+  let hasHidden = false;
+  let hasClimb = false;
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
     for (const [dir, exit] of Object.entries(r.exits as Obj)) {
+      const until = exit.hidden_until;
+      if (until) {
+        // Toolbox row 11: a hidden face has no barrier, so no door verb can find it.
+        hasHidden = true;
+        named(until.fact, 'fact', `${at}.exits.${dir}.hidden_until.fact`);
+        typedValue(until.fact, until.equals, `${at}.exits.${dir}.hidden_until.equals`);
+        if (exit.barrier) out.push(diag('BARRIER_MISMATCH', `${at}.exits.${dir}.hidden_until`));
+      }
+      if (exit.climb) hasClimb = climb(c, exit.climb, `${at}.exits.${dir}.climb`, check, out);
       if (exit.knock) {
         hasKnock = true;
         named(exit.knock.npc, 'npc', `${at}.exits.${dir}.knock.npc`);
@@ -26,8 +37,19 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
     apiCmp(c.manifest.requires.kernel_api.at_least, '1.37') < 0
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  if ((hasHidden || hasClimb) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   mapPositions(c, named, out);
   return out;
+}
+
+// Toolbox row 30: a climb names its item and fell text; a fall costs HP, so the pool must exist.
+function climb(c: Obj, face: Obj, at: string, { named, text }: Checks, out: Diagnostic[]) {
+  named(face.item, 'item', `${at}.item`);
+  text(face, ['fell'], at);
+  if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
+    out.push(diag('RESOURCE_SPEC_INVALID', at));
+  return true;
 }
 
 function mapPositions(c: Obj, named: Checks['named'], out: Diagnostic[]) {

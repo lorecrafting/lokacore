@@ -16,16 +16,7 @@ export function record(
   if (!body) return [];
   const room_id = world.state.containers[body];
   if (!world.rooms[room_id]) return [];
-  const ops: DeltaOp[] = [];
-  const visit = { kind: 'visit', actor_id, room_id } as const;
-  if (entry && !world.state.visited_rooms?.[key(visit)])
-    ops.push({
-      op: 'visit.record',
-      writer_group: 0,
-      actor_id,
-      room_id,
-      value: { actor_id, room_id },
-    });
+  const ops = entry ? visit(world, actor_id, room_id) : [];
   for (const [id, npc] of Object.entries(world.entities)) {
     if (
       npc.kind !== 'npc' ||
@@ -44,7 +35,20 @@ export function record(
   return ops;
 }
 
-/** Knowledge is one writer after causal mechanics; no rule consumes these rows mid-command. */
+// A first entry records the room; with variety@1 each later one counts it (VisitedRoom.count).
+function visit(world: World, actor_id: CharacterId, room_id: EntityId): DeltaOp[] {
+  const from = visitRow(world, actor_id, room_id);
+  const op = { op: 'visit.record', writer_group: 0, actor_id, room_id } as const;
+  if (!from) return [{ ...op, value: { actor_id, room_id } }];
+  if (!world.cartridge.lock.capabilities.variety) return [];
+  return [{ ...op, from, value: { actor_id, room_id, count: (from.count ?? 1) + 1 } }];
+}
+
+/**
+ * Knowledge is one writer after causal mechanics. A same-command reaction or policy reading
+ * visited_count sees the proposal with the entry already recorded (the current entry included);
+ * only the writer group moves last.
+ */
 export function knowledgeLast(ops: readonly DeltaOp[]): readonly DeltaOp[] {
   const isKnowledge = (op: DeltaOp) => op.op === 'visit.record' || op.op === 'observation.record';
   const writes = ops.filter(isKnowledge);
@@ -66,6 +70,15 @@ export function enteredActors(world: World, ops: readonly DeltaOp[]): Set<Charac
   }
   return actors;
 }
+
+/** The actor's accepted entries into `room` (0 before the first; a row without count is 1). */
+export const visits = (world: World, actor_id: CharacterId, room_id: EntityId): number => {
+  const row = visitRow(world, actor_id, room_id);
+  return row ? (row.count ?? 1) : 0;
+};
+
+const visitRow = (world: World, actor_id: CharacterId, room_id: EntityId) =>
+  world.state.visited_rooms?.[key({ kind: 'visit', actor_id, room_id })];
 
 export const observation = (world: World, actor: CharacterId, npc: EntityId) =>
   world.state.observed_npcs?.[key({ kind: 'observation', actor_id: actor, npc_id: npc })];

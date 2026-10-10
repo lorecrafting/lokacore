@@ -51,7 +51,9 @@ function route(c: Obj, e: Obj, at: string, checks: Checks, bad: (field: string) 
     checks.named(edge.from, 'room', `${at}.expedition.route[${i}].from`);
     checks.named(edge.to, 'room', `${at}.expedition.route[${i}].to`);
     const from = c.rooms[refString(edge.from)];
-    if (from && refString(from.exits[edge.direction]?.to ?? {}) !== refString(edge.to))
+    const exit = from?.exits[edge.direction];
+    // A route over a hidden face (toolbox row 11) would show it in the quest journal.
+    if (from && (refString(exit?.to ?? {}) !== refString(edge.to) || exit.hidden_until))
       bad(`route[${i}]`);
     if (
       i === 0

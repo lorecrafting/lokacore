@@ -6,7 +6,8 @@ import { value } from '../fact.ts';
 import { living } from '../death/shared.ts';
 import { LIMITS } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { level, pay, resourceRef } from '../resource.ts';
+import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
+import { held } from '../policy.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
 
@@ -49,6 +50,36 @@ export function passage(
     }
   }
   return 'exit_closed';
+}
+
+/**
+ * True while the exit in `direction` is hidden from `actor` (toolbox row 11): it declares
+ * hidden_until and the actor's value of its fact differs. A hidden exit does not exist for that
+ * actor: not listed, not seen through, not mapped, and a move through it is not_found.
+ */
+export function hidden(world: World, room: RoomDefinition, direction: string, actor: CharacterId) {
+  const until = exitOf(room, direction)?.hidden_until;
+  return !!until && value(world, actor, until.fact) !== until.equals;
+}
+
+/**
+ * The fall of a climb (toolbox row 30) when `body` crosses the exit in `direction` without the
+ * climb's item: its HP loss after `levels`, stopping at 1 or the pool's minimum (a fall never
+ * kills), and its narration key. Undefined when the exit is no climb or the body holds the item.
+ */
+export function fall(
+  world: World,
+  room: RoomDefinition,
+  direction: string,
+  body: EntityId,
+  levels: Levels,
+) {
+  const climb = exitOf(room, direction)?.climb;
+  if (!climb || held(world, world.entityIds[refString(climb.item)], body)) return undefined;
+  const hp = resourceRef(world, 'hp');
+  const { op } = adjust(world, body, hp, -climb.damage, levels);
+  const to = Math.max(op.to, 1, resourceSpec(world, body, hp).minimum);
+  return { ops: to < op.from ? [{ ...op, to }] : [], narration: { key: climb.fell } };
 }
 
 /**

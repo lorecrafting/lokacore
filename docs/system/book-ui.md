@@ -82,7 +82,12 @@ stay off the status line and show plain in Character (owner, polish pick mv1j35l
 cartridge calendar, status shows the sky as one glyph from the confirmed solar and lunar phase
 labels (the sun by its phase while up, the moon by its phase at night, per the catalogue's
 [Status line](../BOOK-UI-COMPONENTS.md#component-catalogue)); the confirmed day, displayed time
-and phase words are its accessible label, not shown. It updates from confirmed GameView
+and phase words are its accessible label, not shown. With an authored weather table
+([derived sky](mechanics.md#derived-sky-weather-season-and-tide-toolbox-row-31)) the day's
+weather shows as a word after the glyph in the same item (`☀ rain`; trap 12: the sign is in the
+words), and the label adds weather, season and tide (`day 1, 00:00, night, full moon, rain,
+autumn, high tide`); season and tide are not shown (proposed wording, pending designer approval,
+loka-kgd.30). It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).

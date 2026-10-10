@@ -366,6 +366,9 @@
     "residency": "portable_capability",
     "definitions": [
       "calendar"
+    ],
+    "policies": [
+      "sky"
     ]
   },
   {
@@ -560,6 +563,20 @@
     "events": [],
     "policies": [
       "has_tag"
+    ]
+  },
+  {
+    "key": "variety",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "alternates"
+    ],
+    "events": [],
+    "policies": [
+      "visited_count"
     ]
   }
 ]

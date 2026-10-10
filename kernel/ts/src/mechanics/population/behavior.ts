@@ -20,7 +20,7 @@ import {
 } from '../../runtime/decision.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
-import { exitTo } from '../lookups.ts';
+import { exitOf, exitTo } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
 import { planRef } from './refs.ts';
 
@@ -202,6 +202,8 @@ function refuge(
     if (
       !there ||
       !plan.area.some((r) => refString(r) === refString(exit)) ||
+      exitOf(room, direction)!.hidden_until ||
+      exitOf(room, direction)!.climb ||
       passage(world, room, direction)
     )
       continue;

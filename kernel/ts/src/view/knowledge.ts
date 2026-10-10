@@ -2,6 +2,7 @@ import { present } from '../commands/target.ts';
 import type { EntityId, GameView, Key } from '../contracts.gen.ts';
 import { COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
 import { exitOf } from '../mechanics/lookups.ts';
+import { hidden } from '../mechanics/movement/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { refusal, resolved } from '../commands/actions.ts';
 
@@ -25,7 +26,9 @@ export function knowledgeView(
     COMPASS.flatMap((direction) => {
       const exit = exitOf(world.rooms[id], direction);
       const to = exit && world.roomIds[refString(exit.to)];
-      return to && visited.has(to) ? [{ from: id, to, direction }] : [];
+      return to && visited.has(to) && !hidden(world, world.rooms[id], direction, world.character)
+        ? [{ from: id, to, direction }]
+        : [];
     }),
   );
   return {

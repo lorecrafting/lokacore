@@ -3,7 +3,7 @@ defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
-  alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
+  alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
@@ -57,8 +57,10 @@ defmodule Loka.Content.Checks do
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
-    exit = fn {d, e} -> {d, Map.new(e, &exit_field(&1, m))} end
-    room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
+    room
+    |> Map.delete("exits")
+    |> expand(m)
+    |> Map.put("exits", Exits.expand(exits, m, &expand/2))
   end
 
   def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
@@ -103,8 +105,9 @@ defmodule Loka.Content.Checks do
       when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
 
   # A barrier (a details map may have a detail keyed key_item, whose value is a map).
+  # Its other members (opens_when's policy) expand as usual.
   def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
-    do: Map.put(barrier, "key_item", ref(k, "item", m))
+    do: barrier |> Map.delete("key_item") |> expand(m) |> Map.put("key_item", ref(k, "item", m))
 
   # An ItemLocation (`in` a kind, and that kind's field) or an NPC (its room_line a text key).
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
@@ -377,21 +380,7 @@ defmodule Loka.Content.Checks do
     Enum.flat_map(RoomParts.parts(r), fn {steps, kind} ->
       owned(at(rel, steps), kind, required)
     end) ++
-      Enum.flat_map(r["exits"], fn {dir, exit} ->
-        reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs) ++
-          if(exit["corpse_ingress"],
-            do:
-              reference(
-                rel,
-                ["exits", dir, "corpse_ingress"],
-                {"fact", "fact"},
-                exit["corpse_ingress"],
-                m,
-                defs
-              ),
-            else: []
-          )
-      end)
+      Exits.check(rel, r["exits"], m, defs)
   end
 
   defp text_keys(_, _, :unknown), do: []
@@ -426,7 +415,8 @@ defmodule Loka.Content.Checks do
       Quests.conditions(defs),
       Reactions.conditions(defs),
       Dialogues.conditions(defs),
-      Loka.Content.Skills.conditions(defs)
+      Loka.Content.Skills.conditions(defs),
+      Loka.Content.Barriers.conditions(defs)
     ])
   end
 
@@ -441,7 +431,4 @@ defmodule Loka.Content.Checks do
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
-
-  defp exit_field({k, v}, m) when k in ~w(corpse_ingress knock), do: {k, expand(v, m)}
-  defp exit_field({k, v}, m), do: {k, ref(v, if(k == "to", do: "room", else: k), m)}
 end

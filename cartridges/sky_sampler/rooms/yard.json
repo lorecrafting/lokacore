@@ -1,0 +1,24 @@
+{
+  "title": "room.yard.title",
+  "description": "room.yard.description",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "east": {
+      "to": "shed"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "rain"
+        }
+      },
+      "description": "room.yard.rain"
+    }
+  ]
+}

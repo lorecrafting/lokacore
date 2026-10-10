@@ -1,9 +1,9 @@
 import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
-// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag; 21 §3.2,
-// §4 Policy; 06 §20-21): pure, over committed state, for one actor and the target of the action
-// evaluated, if any.
+// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
+// variety@1's visited_count; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
@@ -12,7 +12,8 @@ import { value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
-import { hourOf } from './calendar.ts';
+import { hourOf, skyPhase } from './calendar.ts';
+import { visits } from './knowledge/shared.ts';
 import { value as attributeValue } from './attributes/shared.ts';
 
 /**
@@ -51,6 +52,12 @@ export function holds(
       const hour = hourOf(world.cartridge, world.state.clock);
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
+    case 'sky': {
+      const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
+      return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
+    }
+    case 'visited_count':
+      return visits(world, actor, world.roomIds[refString(p.room)]!) >= p.at_least;
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
     case 'light_off':
@@ -99,7 +106,7 @@ function tagsOf(
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose
 // keep containers acyclic, so the climb ends at a room).
-function held(world: World, item: string, holder: string | undefined): boolean {
+export function held(world: World, item: string, holder: string | undefined): boolean {
   for (let at = world.state.containers[item]; at !== undefined; at = world.state.containers[at])
     if (at === holder) return true;
   return false;

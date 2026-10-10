@@ -12,7 +12,7 @@ defmodule Loka.Content.RoomParts do
 
   def variant_texts(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, t} <- description_keys(r),
+        {steps, t} <- description_keys(r) ++ climb_keys(r),
         not is_map_key(text, t),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => t})
   end
@@ -30,6 +30,11 @@ defmodule Loka.Content.RoomParts do
       do: [{["dark_description"], r["dark_description"]} | variants ++ knock],
       else: variants ++ knock
   end
+
+  # Toolbox row 30: each climb face's fall narration.
+  defp climb_keys(r),
+    do:
+      for({dir, %{"climb" => c}} <- r["exits"], do: {["exits", dir, "climb", "fell"], c["fell"]})
 
   @doc "Each description variant of room `r` and of its details, with its steps in the room file."
   @spec variants(map()) :: [{list(), map()}]

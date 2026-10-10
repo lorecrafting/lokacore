@@ -1,0 +1,13 @@
+{
+  "room.hall.title": "Hall",
+  "room.hall.description": "A panelled hall. One [panel](panel) in the east wall sits a little proud of the rest.",
+  "room.gallery.title": "Gallery",
+  "room.gallery.description": "A long gallery north of the hall.",
+  "room.stairhead.title": "Stairhead",
+  "room.stairhead.description": "A stairhead above the study stairs.",
+  "room.study.title": "Study",
+  "room.study.description": "A small study. A panel in the west wall stands open onto the hall.",
+  "detail.panel": "A wooden panel, cool to the touch.",
+  "actions.search_panel": "Search the panel",
+  "narration.search_panel": "Your fingers find a catch. The panel swings inward: a way east."
+}

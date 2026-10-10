@@ -1044,7 +1044,7 @@
       ]
     },
     "CalendarStatus": {
-      "description": "Confirmed cartridge calendar projection. Phase fields appear only when authored.",
+      "description": "Confirmed cartridge calendar projection. Phase fields appear only when authored; weather, season and tide (toolbox row 31) are derived on read, never stored.",
       "type": "object",
       "properties": {
         "day": {
@@ -1064,6 +1064,18 @@
           "pattern": "^[a-z][a-z0-9_]*$"
         },
         "lunar": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "weather": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "season": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "tide": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         }

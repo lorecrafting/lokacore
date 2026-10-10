@@ -30,8 +30,19 @@ defmodule Loka.Content.Barriers do
     Enum.concat(barriers) ++
       Enum.flat_map(defs["room"], &exits(&1, m, defs)) ++
       knock(m, defs) ++
+      hidden(m, defs) ++
+      climbs(m, defs) ++
+      face_floor(m, defs) ++
       items(m, defs) ++ lockout(entry, m, defs)
   end
+
+  @doc "Each barrier's opens_when policy root (toolbox row 10), located for the policy checks."
+  def conditions(defs),
+    do:
+      for(
+        {_, {rel, [], %{"opens_when" => p}}} <- defs["barrier"] || %{},
+        do: {rel, ["opens_when", "root"], p["root"]}
+      )
 
   defp knock(m, defs) do
     for {_, {rel, [], r}} <- defs["room"],
@@ -48,13 +59,8 @@ defmodule Loka.Content.Barriers do
       reference(rel, path ++ ["knock"], "npc", response, m, defs) ++
         reference(rel, path ++ ["knock"], "room", response, m, defs)
 
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
     refs =
-      if api >= [1, 37],
+      if api(m) >= [1, 37],
         do: refs,
         else: [diag("KERNEL_API_RANGE_INVALID", at(rel, path ++ ["knock"])) | refs]
 
@@ -62,6 +68,52 @@ defmodule Loka.Content.Barriers do
       do: refs,
       else: [diag("BARRIER_MISMATCH", at(rel, path ++ ["knock"])) | refs]
   end
+
+  # Toolbox row 11: a hidden face names its fact and has no barrier (so no door verb finds it);
+  # its API floor is face_floor/2; twin of the hidden_until rows in cartridge_knowledge.ts.
+  defp hidden(m, defs) do
+    faces =
+      for {_, {rel, [], r}} <- defs["room"],
+          {dir, %{"hidden_until" => _} = e} <- r["exits"],
+          do: {rel, ["exits", dir, "hidden_until"], e}
+
+    Enum.flat_map(faces, fn {rel, path, e} -> hidden_face(rel, path, e, m, defs) end)
+  end
+
+  defp hidden_face(rel, path, e, m, defs) do
+    refs = reference(rel, path, "fact", e["hidden_until"], m, defs)
+    if e["barrier"], do: [diag("BARRIER_MISMATCH", at(rel, path)) | refs], else: refs
+  end
+
+  # Toolbox row 30: a climb face names its item (API floor: face_floor/2); twin of the climb rows
+  # in cartridge_knowledge.ts (fell: RoomParts; hp is a default pool here, so no pool check).
+  defp climbs(m, defs) do
+    faces =
+      for {_, {rel, [], r}} <- defs["room"],
+          {dir, %{"climb" => c}} <- r["exits"],
+          do: {rel, ["exits", dir, "climb"], c}
+
+    Enum.flat_map(faces, fn {rel, path, c} -> reference(rel, path, "item", c, m, defs) end)
+  end
+
+  # A hidden (row 11) or climb (row 30) face needs kernel_api 1.45: one diagnostic, as the loader.
+  defp face_floor(m, defs) do
+    faces =
+      for {_, {_, [], r}} <- defs["room"],
+          {_, e} <- r["exits"],
+          e["hidden_until"] || e["climb"],
+          do: e
+
+    if faces != [] and api(m) < [1, 45],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp api(m),
+    do:
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
 
   # Each item's barrier is a reference that no exit and no other item names.
   defp items(m, defs) do

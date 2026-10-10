@@ -1,0 +1,32 @@
+{
+  "label": "actions.walk",
+  "aliases": [
+    "walk"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "floor"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "walked"
+        }
+      ],
+      "narration": {
+        "actor": "narration.walk"
+      }
+    }
+  }
+}

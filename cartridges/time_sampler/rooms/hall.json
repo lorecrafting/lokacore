@@ -1,0 +1,26 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "north": {
+      "to": "moon_room",
+      "barrier": "moon_door"
+    },
+    "east": {
+      "to": "hour_room",
+      "barrier": "hour_door"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "lunar": "full"
+        }
+      },
+      "description": "room.hall.full_moon"
+    }
+  ]
+}

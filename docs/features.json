@@ -1049,5 +1049,30 @@
       "unknown_types_fail_closed"
     ],
     "implemented_in": "toolbox row G1 (loka-kgd.17): tags on item, barrier and room definitions; has_tag"
+  },
+  "variety": {
+    "spec": "docs/system/mechanics.md narration variety and visit tiers (toolbox row W7)",
+    "contracts": [
+      "CompiledCartridge",
+      "Policy",
+      "VisitedRoom",
+      "DeltaOp"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/variety.ts",
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/mechanics/knowledge/shared.ts",
+      "kernel/ts/src/content/cartridge_variety.ts",
+      "lib/loka/content/variety.ex",
+      "lib/loka/core/compose_knowledge.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/knowledge_composition.json",
+      "protocol/fixtures/invalid.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold"
+    ],
+    "implemented_in": "toolbox row W7 (loka-kgd.29): narration alternates by command-id hash; visited_count"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "room.yard.title": "Yard",
+  "room.yard.description": "An open yard under the sky. A shed stands east.",
+  "room.yard.rain": "An open yard under the sky. Rain falls on it; under it no flame will catch. A shed stands east.",
+  "room.shed.title": "Shed",
+  "room.shed.description": "A dry shed with a roof.",
+  "item.torch.short": "a torch",
+  "item.torch.room": "A [[torch|torch]] lies here.",
+  "item.torch.description": "A torch with an oiled wick.",
+  "item.oil.short": "a flask of oil",
+  "item.oil.room": "A flask of [[oil|oil]] stands here.",
+  "item.oil.description": "Lamp oil.",
+  "light.ignited": "You light the torch.",
+  "light.doused": "You douse the torch.",
+  "light.refueled": "You refill the torch."
+}

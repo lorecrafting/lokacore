@@ -1,0 +1,25 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "north": {
+      "to": "gallery"
+    },
+    "east": {
+      "to": "study",
+      "hidden_until": {
+        "fact": "panel_found",
+        "equals": true
+      }
+    }
+  },
+  "details": {
+    "panel": {
+      "aliases": [
+        "panel",
+        "wall"
+      ],
+      "description": "detail.panel"
+    }
+  }
+}

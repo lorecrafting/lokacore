@@ -44,17 +44,27 @@ const statusRow = {
 const group = { flexDirection: 'row', alignItems: 'center', columnGap: space.sm } as const;
 const shrink = { flexShrink: 1, minWidth: 0 } as const;
 
-// The calendar in words, the sky glyph's accessible label: day and hour, then the solar term and
-// the moon when the world has them.
+// The calendar in words, the sky glyph's accessible label: day and hour, then the solar term, the
+// moon, the weather, the season and the tide when the world has them (toolbox row 31).
+const words = (s?: string) => s?.replaceAll('_', ' ');
 const calendarLine = (calendar: StatusProps['calendar']) =>
   calendar &&
   [
     `day ${calendar.day}, ${String(calendar.hour).padStart(2, '0')}:${String(calendar.subdivision).padStart(2, '0')}`,
-    calendar.solar?.replaceAll('_', ' '),
-    calendar.lunar && `${calendar.lunar.replaceAll('_', ' ')} moon`,
+    words(calendar.solar),
+    calendar.lunar && `${words(calendar.lunar)} moon`,
+    words(calendar.weather),
+    words(calendar.season),
+    calendar.tide && `${words(calendar.tide)} tide`,
   ]
     .filter(Boolean)
     .join(', ');
+
+// The sky glyph, then the day's weather as a word (trap 12: the sign is in the words).
+const skyText = (p: StatusProps) =>
+  [sky(p.calendar?.solar, p.calendar?.lunar) ?? branch(p.time).glyph, words(p.calendar?.weather)]
+    .filter(Boolean)
+    .join(' ');
 
 // size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
@@ -65,7 +75,7 @@ export function StatusLine(p: StatusProps) {
       style={{ ...type.small, color: c.dim }}
       accessibilityLabel={calendarLine(p.calendar) ?? branch(p.time).label}
     >
-      {sky(p.calendar?.solar, p.calendar?.lunar) ?? branch(p.time).glyph}
+      {skyText(p)}
     </Text>,
     p.position && <Position key="position" value={p.position} open={p.openPosition} />,
     p.bleeding && (

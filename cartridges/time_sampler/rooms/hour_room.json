@@ -1,0 +1,10 @@
+{
+  "title": "room.hour_room.title",
+  "description": "room.hour_room.description",
+  "exits": {
+    "west": {
+      "to": "hall",
+      "barrier": "hour_door"
+    }
+  }
+}

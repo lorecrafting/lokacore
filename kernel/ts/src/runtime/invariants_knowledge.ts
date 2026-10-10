@@ -14,7 +14,9 @@ export function knowledgeHolds(state: Any, ops: readonly DeltaOp[], result: Any)
     if (before === null || op.value.actor_id !== op.actor_id) return false;
     if (op.op === 'visit.record') {
       if (
-        before !== undefined ||
+        (before === undefined
+          ? op.from !== undefined || op.value.count !== undefined
+          : !same(before, op.from) || op.value.count !== (before.count ?? 1) + 1) ||
         op.value.room_id !== op.room_id ||
         validate('VisitedRoom', op.value).length
       )

@@ -331,6 +331,63 @@
             "room"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "sky"
+            },
+            "lunar": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "weather": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "season": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "tide": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "exactlyOneRequired": [
+            "lunar",
+            "weather",
+            "season",
+            "tide"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "visited_count"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "room",
+            "at_least"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

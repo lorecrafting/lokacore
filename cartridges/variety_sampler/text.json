@@ -1,0 +1,12 @@
+{
+  "room.hall.title": "Hall",
+  "room.hall.description": "A long hall with a worn [floor](floor). A door leads north to the garden.",
+  "detail.floor": "Boards worn smooth by pacing.",
+  "room.garden.title": "Garden",
+  "room.garden.description": "A walled garden you have not seen before: gravel paths between box hedges, a stone bench under a pear tree, and a door south to the hall.",
+  "room.garden.familiar": "The garden, as you know it well.",
+  "actions.walk": "Walk the hall",
+  "narration.walk": "You walk the length of the hall and back.",
+  "narration.walk_b": "You pace the hall, counting the boards.",
+  "narration.walk_c": "You stroll the hall slowly, listening to the boards creak."
+}

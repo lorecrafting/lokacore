@@ -93,7 +93,7 @@ test('controlled calendar drives schedule, window and displayed subdivisions', (
     [1000, 2, 0, 0],
     [1001, 2, 0, 0],
   ])
-    assert.deepEqual(status(c, time), {
+    assert.deepEqual(status(c, '', time), {
       day,
       hour,
       subdivision,
@@ -137,7 +137,7 @@ test('a 30-hour calendar accepts hour 29 and a start on day two', () => {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const c = loaded.cartridge as Cartridge;
   assert.equal(nextHour(c, { '29': true }, 3000), 5900);
-  assert.equal(status(c, 3000)?.day, 2);
+  assert.equal(status(c, '', 3000)?.day, 2);
   const w = newWorld(c, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as World['context'], [1, 2, 3, 4]);
   const window = { op: 'time_window', from: 29, to: 2 } as Policy;
   assert.equal(holds({ ...w, state: { ...w.state, clock: 2900 } }, w.character, window), true);
@@ -160,7 +160,7 @@ test('solar and lunar cuts include their start and wrap at their cycle', () => {
     [800, 'night'],
     [1000, 'night'],
   ] as const)
-    assert.equal(status(c, time)?.solar, solar);
+    assert.equal(status(c, '', time)?.solar, solar);
   for (const [time, lunar] of [
     [6, 'waning_crescent'],
     [7, 'new'],
@@ -168,7 +168,7 @@ test('solar and lunar cuts include their start and wrap at their cycle', () => {
     [47, 'full'],
     [87, 'new'],
   ] as const)
-    assert.equal(status(c, time)?.lunar, lunar);
+    assert.equal(status(c, '', time)?.lunar, lunar);
 });
 
 // Breaks: the bundled chapter day/time or phase pin drifts from its authored release.
@@ -181,7 +181,7 @@ test('chapter time renders the hand-checked evening and following days', () => {
     [151200, 2, 18, 0, 'dusk', 'new'],
     [237600, 3, 18, 0, 'dusk', 'new'],
   ] as const)
-    assert.deepEqual(status(c, time), { day, hour, subdivision, solar, lunar });
+    assert.deepEqual(status(c, '', time), { day, hour, subdivision, solar, lunar });
 });
 
 // Breaks: an authored legacy gain interval still uses the fixed hourly boundary.
@@ -290,7 +290,10 @@ test('calendar schema guards refuse malformed bounded fields', () => {
     const parts = errors[0].path.split('/').slice(1);
     const missing = code === 'missing_property' ? parts.pop() : undefined;
     let guard = defs[contract];
-    for (const part of parts) guard = guard.properties[part];
+    for (const part of parts) {
+      guard = guard.properties[part];
+      if (guard.$ref) guard = defs[guard.$ref.split('/').pop()]; // lunar is a CalendarCycle
+    }
     if (missing) guard.required = guard.required.filter((field: string) => field !== missing);
     else
       delete guard[
