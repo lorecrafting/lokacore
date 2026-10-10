@@ -143,7 +143,7 @@ function resolve(
 }
 
 // An opposed check's rating: the named NPC's value of the attribute, read at use wherever the NPC
-// is (row G3; presence is the recipe policy's), else the target detail's rating.
+// is (row G3; no leaf gates its presence yet), else the target detail's rating.
 const rating = (
   world: World,
   check: { npc?: DefinitionRef; attribute?: DefinitionRef },
