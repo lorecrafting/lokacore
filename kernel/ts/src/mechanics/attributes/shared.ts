@@ -50,7 +50,7 @@ export function worn(world: World, actor: CharacterId, attribute: DefinitionRef)
 
 /**
  * The NPC instance's attribute (row G3): its definition's declared value, else the attribute's
- * start, read at use. The one NPC-side reader, so row 2c adds the holder's active modifiers here.
+ * start, read at use. The one NPC-side reader, so row 2c will add the holder's active modifiers here.
  */
 export function npcValue(world: World, npc: EntityId, attribute: DefinitionRef) {
   const e = world.entities[npc];

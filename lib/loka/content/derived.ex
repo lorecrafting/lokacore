@@ -92,7 +92,14 @@ defmodule Loka.Content.Derived do
 
   defp dup(rel, list, a, i) do
     if a["attribute"] in Enum.map(Enum.take(list, i), & &1["attribute"]),
-      do: [diag("SCHEMA_VIOLATION", at(rel, ["attributes", i, "attribute"]))],
+      do: [
+        diag(
+          "SCHEMA_VIOLATION",
+          at(rel, ["attributes", i, "attribute"]),
+          %{"error" => "invalid_value"},
+          []
+        )
+      ],
       else: []
   end
 
