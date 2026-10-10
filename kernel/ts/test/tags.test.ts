@@ -13,7 +13,8 @@ import { holds } from '../src/mechanics/policy.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { LEAF_REFS, type Obj } from '../src/content/cartridge_refs.ts';
+import { LEAF_REFS } from '../src/content/cartridge_leaf_refs.ts';
+import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tags-sampler-'));

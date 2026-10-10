@@ -33,8 +33,9 @@ const content = loaded.cartridge as Cartridge;
 let n = 0;
 const id = () => `aaaaaaaa-1010-4010-8010-${String(++n).padStart(12, '0')}` as never;
 // Runs the commands in order from a fresh world; returns each decision's outcome or refusal code.
-function play(...payloads: object[]) {
-  let w: World = newWorld(content, '5b7d9f1a-3c5e-4a7b-9d1f-4a6c8e0b2d4f' as never, [1, 2, 3, 4]);
+const play = (...payloads: object[]) => playIn(content, ...payloads);
+function playIn(cartridge: Cartridge, ...payloads: object[]) {
+  let w: World = newWorld(cartridge, '5b7d9f1a-3c5e-4a7b-9d1f-4a6c8e0b2d4f' as never, [1, 2, 3, 4]);
   return payloads.map((p) => {
     const r = step(
       w,
@@ -50,7 +51,8 @@ const wait = (until: number) => ({ type: 'wait', until });
 const door = (type: string, direction: string) => ({ type, direction });
 
 // Breaks: opens_when ignored (the door opens at new moon), the sky leaf reading the wrong phase or
-// the time without the lunar period (still full at 2000), or the gate also refusing close.
+// the time without the lunar period (still full at 2000), or the gate also refusing a close
+// outside the window (the door opened at full moon closes at 2000).
 test('the silver door opens only at full moon', () => {
   const north = (t: string) => door(t, 'north');
   assert.deepEqual(
@@ -60,8 +62,8 @@ test('the silver door opens only at full moon', () => {
       north('open'),
       wait(1000),
       north('open'),
-      north('close'),
       wait(2000),
+      north('close'),
       north('open'),
       wait(3000),
       north('open'),
@@ -72,13 +74,21 @@ test('the silver door opens only at full moon', () => {
       'invalid_state',
       'waited',
       'opened',
-      'closed',
       'waited',
+      'closed',
       'invalid_state',
       'waited',
       'opened',
     ],
   );
+});
+
+// Breaks: the gate checked before the state, so a locked door outside its window answers
+// invalid_state instead of exit_locked.
+test('a locked gated door outside its window is exit_locked', () => {
+  const locked = structuredClone(content);
+  locked.barriers!['time_sampler@0.0.1:barrier/moon_door'].initial = 'locked';
+  assert.deepEqual(playIn(locked, door('open', 'north')), ['exit_locked']);
 });
 
 // Breaks: the hour door reads the moon or ignores its window's ends (hour 2 is 200 to 299, hour 4
@@ -112,11 +122,17 @@ test('the brass door opens only in hours 2 to 4', () => {
 });
 
 // Breaks: the loader does not walk a barrier's opens_when (so a window past the day loads), accepts
-// a sky phase the lunar cuts do not name, or accepts the new fields below kernel_api 1.45.
+// a sky phase the lunar cuts do not name, or accepts the new fields below kernel_api 1.45: a sky
+// leaf alone (the hall's variant, no opens_when) or a barrier's opens_when alone (no sky leaf).
 test('the loader refuses a bad window or phase in opens_when and an API below 1.45', () => {
   const at = (key: string) => `.cartridge.barriers["time_sampler@0.0.1:barrier/${key}"]`;
   const root = (c: Obj, key: string) =>
     c.barriers[`time_sampler@0.0.1:barrier/${key}`].opens_when.root;
+  const ungate = (c: Obj, key: string) =>
+    delete c.barriers[`time_sampler@0.0.1:barrier/${key}`].opens_when;
+  const api = (c: Obj) => (c.manifest.requires.kernel_api.at_least = '1.44');
+  const floor = '.cartridge.manifest.requires.kernel_api.at_least';
+  const hall = 'time_sampler@0.0.1:room/hall';
   const rows: [(c: Obj) => void, string, string][] = [
     [
       (c) => (root(c, 'hour_door').to = 10),
@@ -128,10 +144,16 @@ test('the loader refuses a bad window or phase in opens_when and an API below 1.
       'SCHEMA_VIOLATION',
       `${at('moon_door')}.opens_when.root.lunar`,
     ],
+    [api, 'KERNEL_API_RANGE_INVALID', floor],
     [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.44'),
+      (c) => (api(c), ungate(c, 'moon_door'), ungate(c, 'hour_door')),
       'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
+      floor,
+    ],
+    [
+      (c) => (api(c), ungate(c, 'moon_door'), delete c.rooms[hall].variants),
+      'KERNEL_API_RANGE_INVALID',
+      floor,
     ],
   ];
   for (const [change, code, path] of rows) {
