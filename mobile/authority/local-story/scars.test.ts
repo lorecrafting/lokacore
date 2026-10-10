@@ -46,9 +46,12 @@ const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }]
 // Breaks: load or recovery refuses or rewrites an active status row with no ends_at, next_tick_at
 // or job_id, or an elapsed run after reopen faults on it (a status job looked up by its job id).
 test('a permanent scar row reopens and keeps through the next round', (t) => {
-  t.after(() => rmSync(saves, { recursive: true, force: true }));
   const path = join(saves, 'scar.db');
   let p = elapsedHost(path, undefined, bundle);
+  t.after(() => {
+    p.sql.close();
+    rmSync(saves, { recursive: true, force: true });
+  });
   const reopen = () => {
     p.sql.close();
     p = elapsedHost(path, undefined, bundle);
@@ -79,5 +82,4 @@ test('a permanent scar row reopens and keeps through the next round', (t) => {
   assert.equal(round(), 'saved');
   story = reopen();
   assert.deepEqual(gameView(story.world()).conditions, SCARRED);
-  p.sql.close();
 });

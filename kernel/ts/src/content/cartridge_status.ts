@@ -48,10 +48,11 @@ export function status(c: Obj): Diagnostic[] {
     )
       out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
     // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
-    s.modifies?.forEach((m: Obj, n: number) => {
-      if (lasting(s) && hp.has(refString(m.attribute)))
-        out.push(diag('SCHEMA_VIOLATION', `${at}.modifies[${n}].attribute`));
-    });
+    if (lasting(s))
+      s.modifies?.forEach((m: Obj, n: number) => {
+        if (hp.has(refString(m.attribute)))
+          out.push(diag('SCHEMA_VIOLATION', `${at}.modifies[${n}].attribute`));
+      });
     if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
