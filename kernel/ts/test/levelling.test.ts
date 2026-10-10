@@ -230,3 +230,45 @@ test('the loader refuses each unsound levelling declaration', () => {
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path], path);
   }
 });
+
+/** The sampler with its loaded levelling declaration changed by `change`. */
+function variant(change: (l: any) => void) {
+  const c = structuredClone(content);
+  change(c.world!.levelling!);
+  return c;
+}
+
+// Breaks (#344 review, finding 1): credit matches any kills entry, so a kill of an NPC the
+// cartridge does not list still grants experience.
+test('killing an NPC that kills does not list leaves experience unchanged', () => {
+  const { w } = cull(variant((l) => (l.kills = l.kills.filter((k: any) => k.npc.key !== 'rat_c'))));
+  assert.deepEqual(gameView(w).levelling, { level: 1, experience: 20, next: 30, unspent: 0 });
+});
+
+// Breaks (#344 review, finding 2): unspent ignores points_per_level (one point per level).
+test('a level with points_per_level 2 grants two unspent points', () => {
+  const { w } = cull(variant((l) => (l.points_per_level = 2)));
+  assert.equal(gameView(w).levelling!.unspent, 2);
+});
+
+// Breaks (#344 review, finding 3): Raise accepts an attribute the cartridge does not declare and
+// spends the point on it.
+test('a forged Raise of an unknown attribute is refused not_found and keeps the point', () => {
+  const { w } = cull();
+  const command = {
+    id: id(),
+    world_context_id: w.context,
+    payload: { type: 'raise_attribute', actor_id: w.character, attribute: attr('luck') },
+  };
+  const r = step(w, command as never, n, 'raise_attribute' as never);
+  assert.equal(r.decision.kind === 'rejected' && r.decision.error.code, 'not_found');
+  assert.equal(gameView(r.world).levelling!.unspent, 1);
+});
+
+// Breaks (#344 review, finding 4): a kill grant past the ResourceInt maximum does not saturate.
+test('experience saturates at the ResourceInt maximum', () => {
+  const max = 2147483647;
+  const c = variant((l) => (l.kills[0].experience = max));
+  const w = kill(play(fresh(c), { type: 'move', direction: 'east' }).world, 'rat_a').world;
+  assert.equal(gameView(kill(w, 'rat_b').world).levelling!.experience, max);
+});

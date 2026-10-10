@@ -1065,3 +1065,7 @@ Cold reopen accepts each complete intermediate: dropped before acquisition with 
 ## Status recovery
 
 Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
+
+## Levelling recovery
+
+[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) persist the `levelling` row, keyed by its canonical target text, with the kill, reaction or Raise that wrote it, the head and the receipt, in the normal changed-row transaction before adoption and reply. Level and unspent points are derived on reopen from the row and the cartridge's thresholds; nothing else is stored. Cold reopen re-decides the accepted kill, `experience.grant` and Raise like any other receipt, and replay of a Raise returns the original receipt without spending a second point.
