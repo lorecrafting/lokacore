@@ -11,25 +11,24 @@ import type { World } from '../src/runtime/decision.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
-  act,
   attribute,
   DAY,
   fresh,
+  go,
   HOUR,
   id,
   labels,
   play,
+  perform,
   pool,
   ref,
   refused,
+  take,
   wait,
 } from './showcase_fixture.ts';
 
 const BODY = '5ca5e000-0000-4000-8000-000000000241';
 const AT_SEVEN = 7 * HOUR;
-const go = (w: World, direction: string) => play(w, { type: 'move', direction });
-const take = (w: World, item: string) =>
-  play(w, { type: 'take', item_id: id(w, 'item', item) }).world;
 const wear = (w: World, item: string) =>
   play(take(w, item), { type: 'wear', item_id: id(w, 'item', item) }).world;
 const place = (w: World) => gameView(w).place.description.key;
@@ -37,7 +36,6 @@ const shown = (w: World, npc: string) =>
   gameView(w).entities.find((e) => e.id === id(w, 'npc', npc));
 const hpOf = (w: World, npc: string) => level(w, id(w, 'npc', npc), resourceRef(w, 'hp'));
 const where = (w: World, npc: string) => w.state.containers[id(w, 'npc', npc)];
-const perform = (w: World, action: string) => play(w, { type: 'perform', action });
 
 // Breaks: the entry room, a pool's start, an attribute's start or an exit is wrong; Hob's asleep
 // variant reads the wrong hours.
@@ -95,6 +93,16 @@ test('body 3: two hours on the fell: one chill tick, two need ticks, a silent re
   );
   assert.ok(!r.lines.includes('narration.chilled.applied'), JSON.stringify(r.lines));
   w = r.world;
+  // Wat arrived at 08:00 with the bare player on the moor: only his own frost rule's chill, none
+  // of the player's needs or other drains (his `immune` list).
+  const wat = id(w, 'npc', 'wat');
+  const his = Object.entries(w.state.statuses ?? {}).filter(
+    ([k, r]) => r.active && k.includes(wat),
+  );
+  assert.deepEqual(
+    his.map(([k]) => JSON.parse(k).status.key),
+    ['chilled'],
+  );
 });
 
 // Breaks: shelter keeps refreshing, or the refresh moved more than ends_at (row 1): the 09:00
@@ -133,7 +141,9 @@ test('body 6: on a rain day the cloak lets the rain in; the oilskin keeps it out
 // 36000 (hp 9), the end at 37800 (10:30). The cloak keeps the player's own frost rule off him.
 test('body 7: Wat arrives at 08:00, is chilled, leaves at 09:00, ticks at 10:00, recovers at 10:30', () => {
   let x = go(wear(atGate, 'cloak'), 'north').world;
-  x = wait(x, 8 * HOUR).world;
+  const arrival = wait(x, 8 * HOUR);
+  assert.ok(!arrival.lines.includes('narration.chilled.applied'), JSON.stringify(arrival.lines));
+  x = arrival.world;
   assert.equal(where(x, 'wat'), x.roomIds[ref('room', 'fell_top')]);
   const line = (v: World) => describeEntity(v, v.character, id(v, 'npc', 'wat'), 'room_line');
   assert.equal(line(x), 'npc.wat.room_chilled');

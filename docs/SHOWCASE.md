@@ -41,7 +41,7 @@ rooms and steps and the build slice is still to come; `built` means the pin walk
 | visit tiers x codex badge | social | five rooms grant "Wardle walker" | `showcase_social.test.ts` | planned (plan 1) |
 | tide gate x hidden exit x time window x climb | world | `shore_steps` to `sea_cave` loop | `showcase_world.test.ts` (world 2 to 7, 9) | built |
 | potion x derived carry | body | `still_room` (the quern lifts only under `might`) | `showcase_body.test.ts` (body 9-10) | built |
-| NPC status x variants x schedule | body | Wat on `fell_top` at 08:00; Idony's dozing and winter variants | `showcase_body.test.ts` (body 7); `showcase_world.test.ts` (world 8) | built |
+| NPC status x variants x schedule | body and world | Wat on `fell_top` at 08:00; Idony's dozing and winter variants | `showcase_body.test.ts` (body 7); `showcase_world.test.ts` (world 8) | built |
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` | planned (plan 1) |
 | pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` | planned (plan 1) |
 | schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` | planned (plan 1) |

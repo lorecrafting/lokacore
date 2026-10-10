@@ -14,12 +14,11 @@ const kat = JSON.parse(
     'utf8',
   ),
 ) as { canonical: string; sha256: string };
-export const loaded = loadCartridge(
+const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
   INSTALLED,
 );
 assert.ok(loaded.ok, JSON.stringify(loaded));
-export const SHA256 = kat.sha256;
 const content = loaded.cartridge as Cartridge;
 
 export const HOUR = 3600;
@@ -54,6 +53,10 @@ export function play(w: World, p: object) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r;
 }
+export const go = (w: World, direction: string) => play(w, { type: 'move', direction });
+export const take = (w: World, item: string) =>
+  play(w, { type: 'take', item_id: id(w, 'item', item) }).world;
+export const perform = (w: World, action: string) => play(w, { type: 'perform', action });
 /** The refusal code of a command the rules must refuse. */
 export function refused(w: World, p: object) {
   const r = act(w, p);

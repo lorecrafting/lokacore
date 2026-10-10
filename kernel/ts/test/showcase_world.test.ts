@@ -10,26 +10,35 @@ import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import type { World } from '../src/runtime/decision.ts';
-import { act, DAY, fresh, HOUR, id, play, pool, ref, refused, wait } from './showcase_fixture.ts';
+import {
+  act,
+  DAY,
+  fresh,
+  go,
+  HOUR,
+  id,
+  perform,
+  play,
+  pool,
+  ref,
+  refused,
+  take,
+  wait,
+} from './showcase_fixture.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-000000000268';
-const go = (w: World, direction: string) => play(w, { type: 'move', direction });
-const take = (w: World, item: string) =>
-  play(w, { type: 'take', item_id: id(w, 'item', item) }).world;
 const place = (w: World) => gameView(w).place.description.key;
 const here = (w: World) => w.state.containers[w.body];
 const exits = (w: World) =>
   gameView(w)
     .exits.map((e) => e.direction)
     .sort();
-const perform = (w: World, action: string) => play(w, { type: 'perform', action });
 const offersOpen = (w: World, direction: string) =>
   !!gameView(w)
     .exits.find((e) => e.direction === direction)
     ?.door?.actions.some((a) => a.available && a.action_key === 'open');
 
 let w: World;
-let pools: World;
 
 // Breaks: the sign reads other text, the narration key has no alternates, or the visit counter
 // misses a re-entry.
@@ -77,6 +86,8 @@ test('world 3-4: the drop without the rope hurts 3 and lands on the stair; with 
 test('world 5: at 10:00 the cleft search is unavailable and the cave shows only west', () => {
   w = wait(go(w, 'down').world, 10 * HOUR).world;
   assert.equal(here(w), w.roomIds[ref('room', 'sea_cave')]);
+  const search = gameView(w).actions.find((a) => a.action_key === 'search_cleft');
+  assert.equal(search?.available, false);
   assert.equal(act(w, { type: 'perform', action: 'search_cleft' }).decision.kind, 'rejected');
   assert.deepEqual(exits(w), ['west']);
 });
@@ -115,7 +126,6 @@ test('world 9: the moon door refuses on day 2 at 23:00 and opens at day 3, 00:00
   assert.equal(place(x), 'room.cliff_top.full_moon');
   x = go(play(x, { type: 'open', direction: 'east' }).world, 'east').world;
   assert.equal(here(x), x.roomIds[ref('room', 'tide_pools')]);
-  pools = x;
 });
 
 // Breaks: Idony's short variant reads the wrong hours or her winter variant the wrong season.
@@ -140,13 +150,15 @@ test('sandbox: the pool details show weather, tide and season; the pool cleft se
       Object.values(v.details).find((d) => d.key === key)!,
     );
   const sky = (v: World) => ['pool_sky', 'pool_water', 'pool_shore'].map((k) => shows(v, k));
-  assert.deepEqual(sky(pools), [
+  let x = go(go(fresh(WORLD), 'east').world, 'south').world;
+  assert.deepEqual(sky(x), [
     'detail.pool_sky.clear',
-    'detail.pool_water.low',
-    'detail.pool_shore.autumn',
+    'detail.pool_water.high',
+    'detail.pool_shore.spring',
   ]);
-  let x = wait(pools, 2 * DAY + 7 * HOUR).world;
-  assert.equal(shows(x, 'pool_water'), 'detail.pool_water.high');
+  assert.deepEqual(exits(go(x, 'east').world), ['west']);
+  x = wait(x, 12 * HOUR).world;
+  assert.equal(shows(x, 'pool_water'), 'detail.pool_water.low');
   x = perform(x, 'search_pool_cleft').world;
   assert.deepEqual(exits(go(x, 'east').world), ['up', 'west']);
 });

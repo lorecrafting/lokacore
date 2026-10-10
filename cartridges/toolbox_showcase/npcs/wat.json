@@ -23,6 +23,13 @@
     "8": "fell_top",
     "9": "shepherd_hut"
   },
+  "immune": [
+    "hungry",
+    "thirsty",
+    "parched",
+    "windburnt",
+    "overheated"
+  ],
   "room_line_variants": [
     {
       "when": {
