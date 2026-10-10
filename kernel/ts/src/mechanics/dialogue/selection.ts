@@ -18,6 +18,7 @@ import {
 import { cmp } from '../../foundation/validate.ts';
 import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
+import { disposition } from '../disposition.ts';
 
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
@@ -36,7 +37,8 @@ export const speaks = (world: World, target: EntityId | undefined) =>
 
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds, if any. Each policy leaf it evaluates adds one to `steps` (04 §5.4).
+ * whose own policy holds, if any; none while `target` is hostile to `actor` (toolbox row G11).
+ * Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
 export const spokenBy = (
   world: World,
@@ -45,11 +47,13 @@ export const spokenBy = (
   steps: Steps = { n: 0 },
   selected?: DefinitionRef,
 ) =>
-  spoken(world, target).find(
-    (d) =>
-      (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-      holds(world, actor, d.policy.root, { target, steps }),
-  );
+  disposition(world, actor, target, steps) === 'hostile'
+    ? undefined
+    : spoken(world, target).find(
+        (d) =>
+          (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
+          holds(world, actor, d.policy.root, { target, steps }),
+      );
 
 /**
  * Whether `target`'s dialogues refuse `actor`'s talk now, no policy of theirs holding or the actor

@@ -37,7 +37,8 @@ function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string)
 export function scopedFacts(c: Obj): Diagnostic[] {
   let used = Object.values((c.facts ?? {}) as Record<string, Obj>).some(scoped);
   nodes(c, (o) => {
-    if ((o.op === 'fact_compare' || o.op === 'fact.assign') && fieldsOf(o).length) used = true;
+    if (['fact_compare', 'fact.assign', 'fact.adjust'].includes(o.op) && fieldsOf(o).length)
+      used = true;
   });
   return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
@@ -51,7 +52,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
   nodes(c, (o, at, parent, field) => {
     if (o.kind === 'fact' && subjective(o))
       if (field !== 'fact' || !SITES.includes(parent?.op ?? parent?.event)) out.push(at);
-    if ((o.op !== 'fact_compare' && o.op !== 'fact.assign') || !o.fact) return;
+    if (!['fact_compare', 'fact.assign', 'fact.adjust'].includes(o.op) || !o.fact) return;
     const fields = fieldsOf(o);
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);

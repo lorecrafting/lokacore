@@ -25,20 +25,28 @@ defmodule Loka.Content.Commerce do
     items =
       for ref <- ids, not stocked?(ref, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
 
-    api ++ duplicate ++ funds ++ items ++ discount(m, defs, s, path)
+    api ++ duplicate ++ funds ++ items ++ discount(m, defs, npc, s, path)
   end
 
-  defp discount(m, defs, %{"buy_discount" => d, "offers" => offers}, path) do
+  defp discount(m, defs, npc, %{"buy_discount" => d, "offers" => offers}, path) do
     valid =
-      m["requires"]["capabilities"]["skills"] == 1 and
-        match?({_, _, _}, Refs.resolve(d["skill"], "skill", m, defs)) and
+      condition?(m, defs, npc, d) and
         d["numerator"] <= d["denominator"] and
         prices?(offers, d["minimum"], d["numerator"])
 
     if valid, do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
   end
 
-  defp discount(_, _, _, _), do: []
+  defp discount(_, _, _, _, _), do: []
+
+  # Exactly one: a skill of this cartridge, or (toolbox row 15) friendly with a friendly disposition.
+  defp condition?(_, _, npc, %{"friendly" => true} = d),
+    do: not is_map_key(d, "skill") and is_map_key(npc["disposition"] || %{}, "friendly")
+
+  defp condition?(m, defs, _, d),
+    do:
+      m["requires"]["capabilities"]["skills"] == 1 and
+        match?({_, _, _}, Refs.resolve(d["skill"], "skill", m, defs))
 
   defp prices?(offers, minimum, numerator),
     do:

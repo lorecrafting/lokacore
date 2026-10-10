@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { subjective, targetOf, value } from './fact.ts';
+import { bounded, subjective, targetOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
 import { activation, resolution } from './quest/lifecycle.ts';
@@ -145,7 +145,7 @@ export function sequence(
     } else {
       const assigned = assignment(world, actor, step, group, set, cause);
       if (assigned) ops.push(assigned);
-      if (assigned && assigned.expected !== step.value) position++;
+      if (assigned && assigned.expected !== assigned.value) position++;
     }
   }
   ops.push(...grant(then, actor, gained, group));
@@ -199,13 +199,14 @@ function statusStep(
   return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
 }
 
-// A fact.assign; an entity or pair fact (row W2) at the step's named NPC's or item's instance,
-// else at the event's subject when that is an NPC, item or detail (never the body fallback);
-// with no such subject the step writes nothing.
+// A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
+// fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
+// instance, else at the event's subject when that is an NPC, item or detail (never the body
+// fallback); with no such subject the step writes nothing.
 function assignment(
   world: World,
   actor: CharacterId,
-  step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' }>,
+  step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' | 'fact.adjust' }>,
   group: number,
   set: Record<string, FactValue>,
   cause: DomainEvent,
@@ -217,14 +218,11 @@ function assignment(
   const { kind: _, ...target } = targetOf(world, actor, step.fact, who);
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);
-  set[at] = step.value;
-  return {
-    op: 'fact.assign' as const,
-    writer_group: group,
-    ...target,
-    expected,
-    value: step.value,
-  };
+  const next =
+    step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
+  if (next === undefined) return undefined;
+  set[at] = next;
+  return { op: 'fact.assign' as const, writer_group: group, ...target, expected, value: next };
 }
 
 function terminal(

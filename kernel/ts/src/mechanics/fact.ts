@@ -143,13 +143,35 @@ export function adjusted<R extends Assigned>(
   run: R,
   step: { readonly fact: DefinitionRef; readonly amount: number; readonly subject?: EntityId },
 ): R | undefined {
-  const spec = world.cartridge.facts[refString(step.fact)];
-  const type = spec?.value_type;
+  const at = key(targetOf(world, actor, step.fact, step.subject));
+  const current = Object.hasOwn(run.facts, at)
+    ? run.facts[at]
+    : Object.hasOwn(world.state.facts ?? {}, at)
+      ? world.state.facts![at]
+      : world.factDefaults[key(step.fact)];
+  const next = bounded(world, step.fact, current, step.amount);
+  return next === undefined
+    ? undefined
+    : assigned(world, actor, run, { fact: step.fact, value: next, subject: step.subject });
+}
+
+/**
+ * `current` plus `amount`, clamped to the bounded int fact's minimum and maximum; undefined for
+ * a reserved, unbounded or non-int fact, an unsafe amount or a current value not of its type
+ * (a dialogue's and, since toolbox row 15, a reaction's fact.adjust).
+ */
+export function bounded(
+  world: World,
+  fact: DefinitionRef,
+  current: FactValue | undefined,
+  amount: number,
+): number | undefined {
+  const type = world.cartridge.facts[refString(fact)]?.value_type;
   const reserved =
-    (step.fact.key === 'position' && world.cartridge.lock.capabilities.position) ||
+    (fact.key === 'position' && world.cartridge.lock.capabilities.position) ||
     (world.cartridge.lock.capabilities.scene &&
       Object.values(world.cartridge.scenes ?? {}).some(
-        (scene) => step.fact.key === `scene_${scene.key}`,
+        (scene) => fact.key === `scene_${scene.key}`,
       ));
   if (
     reserved ||
@@ -157,21 +179,12 @@ export function adjusted<R extends Assigned>(
     !Number.isSafeInteger(type.minimum) ||
     !Number.isSafeInteger(type.maximum) ||
     type.minimum! > type.maximum! ||
-    !Number.isSafeInteger(step.amount)
+    !Number.isSafeInteger(amount) ||
+    current === undefined ||
+    !typed(current, type)
   )
     return;
-  const at = key(targetOf(world, actor, step.fact, step.subject));
-  const current = Object.hasOwn(run.facts, at)
-    ? run.facts[at]
-    : Object.hasOwn(world.state.facts ?? {}, at)
-      ? world.state.facts![at]
-      : world.factDefaults[key(step.fact)];
-  if (!typed(current, type)) return;
-  const next = Math.min(
-    type.maximum!,
-    Math.max(type.minimum!, add(current as number, step.amount)),
-  );
-  return assigned(world, actor, run, { fact: step.fact, value: next, subject: step.subject });
+  return Math.min(type.maximum!, Math.max(type.minimum!, add(current as number, amount)));
 }
 
 /** True when `v` is of FactType `t` (the loader checks authored values with it too). */

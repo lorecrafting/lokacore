@@ -96,9 +96,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op !== 'status.apply' && s.op !== 'experience.grant') {
-        // status.apply and experience.grant are checked with their declarations (status, levelling).
+        // status.apply, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
-        typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
+        if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
       }
     });

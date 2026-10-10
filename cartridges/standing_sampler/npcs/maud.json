@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "description": "npc.maud.description",
+  "room": "square"
+}

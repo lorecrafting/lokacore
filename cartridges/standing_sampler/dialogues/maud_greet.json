@@ -1,0 +1,47 @@
+{
+  "npc": "maud",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "village_standing",
+          "equals": 1
+        },
+        {
+          "op": "fact_compare",
+          "fact": "village_standing",
+          "equals": 2
+        },
+        {
+          "op": "fact_compare",
+          "fact": "trust",
+          "equals": 1,
+          "subject": "target"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "trust",
+          "equals": 2,
+          "subject": "target"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.maud.warm",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    }
+  },
+  "choices": {
+    "chat": {
+      "label": "dialogue.maud.chat",
+      "narration": "narration.maud.chat",
+      "sequence": []
+    }
+  }
+}

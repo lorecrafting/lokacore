@@ -439,6 +439,33 @@
                 "additionalProperties": false
               },
               {
+                "description": "Toolbox row 15 (kernel_api at least 1.47): adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.",
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "fact.adjust"
+                  },
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "npc": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "item": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "fact",
+                  "amount"
+                ],
+                "additionalProperties": false
+              },
+              {
                 "type": "object",
                 "properties": {
                   "op": {
