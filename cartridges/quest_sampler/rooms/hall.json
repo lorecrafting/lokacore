@@ -6,7 +6,7 @@
     "floor": {
       "aliases": [
         "floor",
-        "dust"
+        "flagstones"
       ],
       "description": "detail.floor"
     }

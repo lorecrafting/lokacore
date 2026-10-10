@@ -51,7 +51,7 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
-  owner?: 'skills' | 'patrol' | 'service' | 'scene' | 'tip',
+  owner?: 'skills' | 'patrol' | 'service' | 'scene',
 ): R {
   ownership(world, s.fact, owner);
   const scope = scopeOf(world, actor, s.fact);
@@ -80,21 +80,13 @@ export const seenTip = (world: World, recipe: string): DefinitionRef => ({
 function ownership(
   world: World,
   ref: DefinitionRef,
-  owner?: 'skills' | 'patrol' | 'service' | 'scene' | 'tip',
+  owner?: 'skills' | 'patrol' | 'service' | 'scene',
 ) {
   if (
     owner !== 'skills' &&
     Object.values(world.cartridge.skills ?? {}).some(
       (skill) =>
         ref.key === `skill_${skill.key}` || (skill.growth && ref.key === `uses_${skill.key}`),
-    )
-  )
-    throw new KernelError('precondition_failed');
-  if (
-    owner !== 'tip' &&
-    ref.key.startsWith('seen_tip_') &&
-    Object.values(world.cartridge.recipes ?? {}).some(
-      (r) => r.tip && ref.key === `seen_tip_${r.key}`,
     )
   )
     throw new KernelError('precondition_failed');

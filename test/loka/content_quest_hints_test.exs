@@ -59,5 +59,8 @@ defmodule Loka.ContentQuestHintsTest do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
+
+    # Break: a malformed facts.json crashes the tip's fact synthesis instead of reporting.
+    assert {:error, [_ | _]} = Loka.ContentSource.compile(dir, [{"facts.json", %{"facts" => []}}])
   end
 end

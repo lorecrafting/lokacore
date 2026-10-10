@@ -69,14 +69,18 @@ defmodule Loka.Content.Recipes do
     }
 
   @doc "The facts with each tipped recipe's seen_tip_<key> added; an authored one is RESERVED_FACT."
-  def tip_facts(facts, defs) do
-    for {key, {_, _, %{"tip" => _}}} <- defs["recipe"], reduce: {facts, []} do
+  def tip_facts(facts, defs) when is_map(facts) do
+    for {key, {_, _, %{"tip" => _}}} <- defs["recipe"],
+        String.length(key) <= 55,
+        reduce: {facts, []} do
       {acc, ds} ->
         name = "seen_tip_" <> key
         authored = for {rel, steps, _} <- [acc[name]], do: diag("RESERVED_FACT", at(rel, steps))
         {Map.put(acc, name, {"cartridge.json", [], tip_spec(key)}), ds ++ authored}
     end
   end
+
+  def tip_facts(facts, _), do: {facts, []}
 
   # A tip needs kernel_api 1.46 and a key that leaves room for seen_tip_ in a 64-character Key.
   defp tip(rel, %{"tip" => _} = r, m),

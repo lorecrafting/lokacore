@@ -17,8 +17,9 @@
 // (runtime/proposal.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
 // reads the outcome's narration, each of its participants pinned here to its EntityId (an NPC's
 // or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
-// duration one time.advance after the steps; events keep the admission time. Result bands join
-// later.
+// duration one time.advance after the steps; events keep the admission time. A recipe with a tip
+// (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
+// then also reads the tip after the outcome's line. Result bands join later.
 import type {
   ActionRecipe,
   CharacterId,
@@ -100,7 +101,7 @@ function tip(world: World, actor: CharacterId, recipe: ActionRecipe, run: Run) {
   const fact = seenTip(world, recipe.key);
   return value(world, actor, fact) === true
     ? run
-    : assigned(world, actor, run, { fact, value: true }, 'tip');
+    : assigned(world, actor, run, { fact, value: true });
 }
 
 // The narration's participants as EntityIds; the loader checked each npc or item resolves.
