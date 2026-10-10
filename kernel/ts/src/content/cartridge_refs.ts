@@ -1,4 +1,4 @@
-// size: allow 336, ancestry, bell area, Study edge and the policy leaf reference table join shared reference admission
+// size: allow 340, ancestry, bell area, Study edge, the policy leaf reference table and barrier opens_when roots join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
