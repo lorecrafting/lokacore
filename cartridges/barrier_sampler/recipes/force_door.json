@@ -1,0 +1,60 @@
+{
+  "label": "actions.force_door",
+  "aliases": [
+    "force"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "storeroom",
+    "detail": "wooden_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "door_picked",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "door_forced",
+          "equals": false
+        },
+        {
+          "op": "has_tag",
+          "barrier": "wooden_door",
+          "tag": "fragile"
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "force_door",
+    "kind": "opposed",
+    "attribute": "str"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "door_forced",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.force_door.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.force_door.failure"
+      }
+    }
+  }
+}

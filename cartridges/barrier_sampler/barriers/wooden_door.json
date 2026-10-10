@@ -1,0 +1,30 @@
+{
+  "keywords": [
+    "wooden_door",
+    "door"
+  ],
+  "short": "barrier.wooden_door.short",
+  "initial": "closed",
+  "tags": [
+    "wooden",
+    "fragile"
+  ],
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "door_picked",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "door_forced",
+          "equals": true
+        }
+      ]
+    }
+  }
+}

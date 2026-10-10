@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_lock",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "storeroom",
+    "detail": "lock"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "chest_picked",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_lock",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "chest_picked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_lock.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_lock.failure"
+      }
+    }
+  }
+}

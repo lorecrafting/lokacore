@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "lid",
+    "chest_lid"
+  ],
+  "short": "barrier.chest_lid.short",
+  "initial": "closed",
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "chest_picked",
+      "equals": true
+    }
+  }
+}

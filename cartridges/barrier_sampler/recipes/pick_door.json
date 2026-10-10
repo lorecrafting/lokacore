@@ -1,0 +1,66 @@
+{
+  "label": "actions.pick_door",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "storeroom",
+    "detail": "wooden_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "door_picked",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "door_forced",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "door_jammed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "pick_door",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "door_picked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_door.success"
+      }
+    },
+    "failure": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "door_jammed",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_door.failure"
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "title": "room.storeroom.title",
+  "description": "room.storeroom.description",
+  "exits": {
+    "north": {
+      "to": "north_room",
+      "barrier": "wooden_door"
+    },
+    "east": {
+      "to": "east_room",
+      "barrier": "iron_door"
+    }
+  },
+  "details": {
+    "lock": {
+      "aliases": [
+        "lock"
+      ],
+      "description": "detail.lock",
+      "rating": 1
+    },
+    "wooden_door": {
+      "aliases": [
+        "wooden_door",
+        "door"
+      ],
+      "description": "detail.wooden_door",
+      "rating": 5,
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "door_jammed",
+              "equals": true
+            }
+          },
+          "description": "detail.wooden_door.jammed"
+        }
+      ]
+    },
+    "iron_door": {
+      "aliases": [
+        "iron_door",
+        "door"
+      ],
+      "description": "detail.iron_door",
+      "rating": 5
+    }
+  }
+}
