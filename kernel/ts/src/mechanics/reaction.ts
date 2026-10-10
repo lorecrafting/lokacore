@@ -101,7 +101,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  holders: ReadonlyMap<string, number> = new Map(),
+  holders: Map<string, number> = new Map(),
 ): Decision<EventPayload['type']> | undefined {
   const source = resolvedActor(world, cause, actor);
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
@@ -141,7 +141,9 @@ export function sequence(
       const once = `${holder}|${refString(step.status)}`; // one row write per holder and status
       if (!holder || applied.has(once)) continue;
       applied.add(once);
-      const applying = statusStep(then, step, holder, body, holders.get(holder) ?? group, mint);
+      const joined = holders.get(holder) ?? group;
+      const applying = statusStep(then, step, holder, body, joined, mint);
+      if (applying.ops.length) holders.set(holder, joined); // a later status job joins it too
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
@@ -177,8 +179,8 @@ const subject = (cause: DomainEvent, body: EntityId) => {
 };
 
 // A status.apply on its holder: the step's named item's instance, else the event's subject (row
-// G3), in the writer group of that holder's status job when one ran in this advance (proposal.ts
-// statusGroup); only the player's own body hears the applied line.
+// G3), in the one writer group its status writes share in this advance (proposal.ts statusGroup);
+// only the player's own body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,

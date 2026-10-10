@@ -192,6 +192,36 @@ test('an expiry re-sets the door burning', () => {
   assert.equal(d.state.jobs?.[(burning as { job_id: string }).job_id]?.status, 'pending');
 });
 
+// Breaks: a reaction's status write before the holder's own status job in one advance (the
+// guard re-enters the dart room at 09:00 just as its poison ticks) left in a separate group.
+test('a re-entry refresh and a tick at one clock both commit', () => {
+  const guard = content.npcs![`${C}:npc/guard`]!;
+  const poison = content.statuses![`${C}:status/poison`]!;
+  const c = {
+    ...content,
+    npcs: {
+      ...content.npcs,
+      [`${C}:npc/guard`]: {
+        ...guard,
+        daily_schedule: {
+          ...guard.daily_schedule,
+          8: ref('room', 'hall'),
+          9: ref('room', 'dart_room'),
+        },
+      },
+    },
+    statuses: {
+      ...content.statuses,
+      [`${C}:status/poison`]: { ...poison, duration: 20000, tick_every: 600, per_tick: 1 },
+    },
+  } as Cartridge;
+  const w = wait(fresh(c), 3 * 3600);
+  assert.equal(
+    (row(w, 'npc', 'guard', 'poison') as { ends_at: number }).ends_at,
+    w.state.clock + 20000,
+  );
+});
+
 // Breaks: a rule's second status.apply of one status skipped although it names another holder.
 test('one rule burns the door and the torch', () => {
   const torch = {

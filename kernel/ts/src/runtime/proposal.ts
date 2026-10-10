@@ -300,7 +300,8 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
 }
 
 // Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
-// in sequence; a reaction's status.apply on that holder joins it too (reaction.ts statusStep, row G3).
+// in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
+// statusStep, row G3).
 function statusGroup(
   at: World,
   id: JobId,
