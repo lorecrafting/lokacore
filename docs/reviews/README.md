@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
 - [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **APPROVE**
 - [Review: toolbox row G9, social verbs say, whisper, shout, engine half (loka-kgd.71)](2026-10-10-toolbox-m7-say-review.md): **APPROVE**
+- [Review: reaction fact writes join the row's earlier writer group (loka-j2mo, toolbox M7)](2026-10-10-toolbox-m7-j2mo-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 6c, several foes with a pack plan (loka-kgd.66)](2026-10-10-toolbox-m7-foes-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G6 Book half, sense cues on the World page (loka-kgd.65, batch M7)](2026-10-10-toolbox-m7-cues-book-review.md): **APPROVE WITH NOTES**
 - [Review: NPC-vs-NPC damage, allies and kill credit, toolbox row 6b (loka-kgd.68)](2026-10-10-toolbox-m7-allies-review.md): **APPROVE WITH NOTES**
