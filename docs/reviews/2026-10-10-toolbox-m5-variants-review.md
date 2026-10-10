@@ -30,3 +30,14 @@
 2. nit, `docs/system/mechanics.md:1982`: the list of base-`short` readers omits the text player's take, drop and give narration (`kernel/ts/play/main.ts:145`): "You take a sword." while the room shows "a notched sword". Add it to the known-limit list.
 
 Note: `lib/loka/content/compiler.ex` is at its 338-line allowance; the next slice to touch it splits it (PM ruling).
+
+## Fix round 1 (`0c5a8eebe4a90c52bd5537ae58b3592988753b12`)
+
+Scoped to `34ed2345..0c5a8eeb` (record cherry-pick `f816f052`, fix `0c5a8eeb`). Hosted CI on the full sha: ci success, book-e2e success.
+
+- Finding 1, fixed: `npc_present` at every listed site: schema const, registry (`target_resolution@1` policies only; the `position@1` capability is unchanged), `policy.ts` case, header and helper comment, both leaf-ref tables, both floors, `shove.json`, invalid row `npc_present_target_subject_no_npc`, both tests, `mechanics.md:1953,1984-1985,1988`, `cartridge.md:1544`, toolbox row, and the generated `contracts.gen.ts`, `contracts.gen.md`, `features.gen.md`, `system-graph.gen.json`, `toolbox.gen.json`. The sampler keeps `"position": 1` (`cartridges/variants_sampler/cartridge.json:31`). No `op` `position`, `case 'position'` or `position {` remains in the tree.
+- Finding 2, fixed: `mechanics.md:1982` lists the text player's take, drop and give narration. Line 1984 now reads "Why not owned by position@1", which is correct.
+- Focused tests green (`variants.test.ts`, `tags.test.ts`, `content_variants_test.exs`). Mutant: `npc_present` without its `living` check is red in `variants.test.ts`.
+- New nit, `docs/system/mechanics.md:1814` (G1 two-kernel parity bullet): still says "`status_active` and `position` came with row W6". A reader who follows the leaf-set rule looks for a leaf that does not exist. Rename it to `npc_present`; the PM can fold this into the batch.
+
+Verdict after fix round 1: **APPROVE WITH NOTES** (one doc nit open).
