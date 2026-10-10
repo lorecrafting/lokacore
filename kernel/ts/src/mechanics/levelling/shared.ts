@@ -1,6 +1,6 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, LevellingRow, Text } from '../../contracts.gen.ts';
+import type { CharacterId, DeltaOp, LevellingRow, StatusRow, Text } from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
 import type { World } from '../../runtime/decision.ts';
 import { statusKey } from '../status/shared.ts';
@@ -68,8 +68,24 @@ export function oneWrite(ops: readonly DeltaOp[]): DeltaOp[] {
     if (!k) return [o];
     if (last.get(k) !== o) return [];
     const { expected } = first.get(k)!;
-    return [expected === (o as Merged).expected ? o : ({ ...o, expected } as DeltaOp)];
+    if (expected === (o as Merged).expected) return [o];
+    return o.op === 'status.transition'
+      ? statusChain(o, expected as StatusRow | null)
+      : [{ ...o, expected } as DeltaOp];
   });
+}
+
+// A status row written several times (an expiry, then a clock_hour re-application) as one
+// transition compose_status accepts: active to active keeps the stored generation, a new
+// activation is the stored one plus 1, and inactive to inactive writes nothing (its orphaned job
+// completes harmlessly, row 1).
+function statusChain(
+  o: Extract<DeltaOp, { op: 'status.transition' }>,
+  expected: StatusRow | null,
+): DeltaOp[] {
+  if (!o.value.active && !expected?.active) return [];
+  const generation = expected?.active ? expected.generation : (expected?.generation ?? 0) + 1;
+  return [{ ...o, expected, value: { ...o.value, generation } }];
 }
 
 /** The checked write of the actor's row to `value`, expecting the row `world` holds. */

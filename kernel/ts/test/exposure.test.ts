@@ -143,6 +143,39 @@ test('a frosty day on the fell chills a cloakless body; a worn cloak stops it; t
   assert.equal(hp(warm), 10);
 });
 
+// Breaks: an expiry and a clock_hour re-application in one settlement merge into a write
+// compose_status refuses (active generation 1 to active 2), so the settlement faults
+// precondition_failed and the host retries the same step forever. Literals: entering at 1000
+// ends at 10000; one advance 9500 to 11000 expires it at 10000 and re-applies it at the committed
+// clock 11000 (ends 20000); entering at 1800 ends at 10800, where expiry and the calendar job tie.
+test('an expiry and a re-application in one settlement keep one generation', () => {
+  const chilled = (w: World) =>
+    Object.values(w.state.statuses ?? {}).filter((r) => r.active) as {
+      generation: number;
+      ends_at: number;
+    }[];
+  for (const [enter, step] of [
+    [1000, (w: World) => elapse(w, 11000).w],
+    [1800, (w: World) => wait(w, 10800)],
+  ] as const) {
+    let w = elapse(fresh(), enter).w;
+    w = play(w, { type: 'take', item_id: id(w, 'cloak') });
+    w = play(w, { type: 'move', direction: 'north' });
+    w = play(w, { type: 'wear', item_id: id(w, 'cloak') });
+    w = wait(w, 9500);
+    assert.equal(hp(w), 9);
+    w = play(w, { type: 'remove', item_id: id(w, 'cloak') });
+    w = step(w);
+    assert.deepEqual(
+      chilled(w).map((r) => r.generation),
+      [1],
+      `entered at ${enter}`,
+    );
+    assert.equal(hp(w), 9);
+    if (enter === 1000) assert.equal(chilled(w)[0]!.ends_at, 20000);
+  }
+});
+
 // Breaks: a condition's reaction names the wrong weather, or its label is missing (trap 12).
 test('each day of weather gives its own labelled condition on the fell', () => {
   const rows: [number, string[] | undefined][] = [

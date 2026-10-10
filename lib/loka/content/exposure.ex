@@ -14,15 +14,19 @@ defmodule Loka.Content.Exposure do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if (used?(defs) or used?(settings)) and api < [1, 46],
+    if (wearing?(defs) or wearing?(settings) or clock_hour?(defs["reaction"])) and api < [1, 46],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
   end
 
-  defp used?(%{"op" => "wearing"}), do: true
-  defp used?(%{"event" => "clock_hour"}), do: true
-  defp used?(v) when is_map(v), do: Enum.any?(Map.values(v), &used?/1)
-  defp used?(v) when is_list(v), do: Enum.any?(v, &used?/1)
-  defp used?(v) when is_tuple(v), do: used?(Tuple.to_list(v))
-  defp used?(_), do: false
+  defp clock_hour?(nil), do: false
+
+  defp clock_hour?(reactions),
+    do: Enum.any?(reactions, fn {_, {_, _, r}} -> r["on"]["event"] == "clock_hour" end)
+
+  defp wearing?(%{"op" => "wearing"}), do: true
+  defp wearing?(v) when is_map(v), do: Enum.any?(Map.values(v), &wearing?/1)
+  defp wearing?(v) when is_list(v), do: Enum.any?(v, &wearing?/1)
+  defp wearing?(v) when is_tuple(v), do: wearing?(Tuple.to_list(v))
+  defp wearing?(_), do: false
 end
