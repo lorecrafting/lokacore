@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "description": "npc.maud.description",
+  "room": "hall",
+  "daily_schedule": {
+    "6": "hall",
+    "18": "garden"
+  }
+}

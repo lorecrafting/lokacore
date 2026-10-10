@@ -25,4 +25,6 @@ export const LABEL = {
   held: 'Held',
   worn: 'Worn',
   where: 'Where',
+  // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
+  awayRecap: 'While you were away',
 } as const;

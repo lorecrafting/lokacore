@@ -1,6 +1,9 @@
 // Entity lines and log lines (BOOK-UI-COMPONENTS.md, Entity line and Log line).
+import { useState } from 'react';
 import { Text, View } from 'react-native';
+import { LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
+import type { RecapLine } from './recap.ts';
 import { Tap } from './pages.tsx';
 import { note, prose, usePalette } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
@@ -67,6 +70,27 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
           </View>
         ),
       )}
+    </View>
+  );
+}
+
+// The away recap (toolbox row W27): one block opening the page, collapsed to its heading; open, each
+// grouped line once with its count. The heading's name says whether a tap shows or hides them.
+export function AwayRecap({ lines }: { lines: readonly RecapLine[] }) {
+  const c = usePalette();
+  const [open, setOpen] = useState(false);
+  if (!lines.length) return null;
+  return (
+    <View style={{ gap: space.sm }}>
+      <Tap label={`${LABEL.awayRecap}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
+        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{LABEL.awayRecap}</Text>
+      </Tap>
+      {open &&
+        lines.map(({ line, count }, i) => (
+          <Text key={i} style={{ ...type.log, color: c.fg }}>
+            {count > 1 ? `${line} (${count} times)` : line}
+          </Text>
+        ))}
     </View>
   );
 }

@@ -2,7 +2,13 @@
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
-import type { Game, GameView, Reply, GameSubscription } from '../../packages/game-view/session.ts';
+import type {
+  Game,
+  GameView,
+  Reply,
+  GameSubscription,
+  NarrationRecord,
+} from '../../packages/game-view/session.ts';
 import { comings, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf, things } from './model.ts';
 
@@ -31,9 +37,11 @@ import {
   pickupLine,
   resetLogs,
   restoredLogs,
+  worldLines,
   type Logs,
 } from './logs.ts';
 import { received } from './received.ts';
+import { holding, settle } from './recap.ts';
 
 function background(
   game: Game,
@@ -51,7 +59,8 @@ function background(
   const was = s.projection.view,
     now = update.projection.view;
   resetLogs(s, now);
-  s.log.push(...comings(was, now, text));
+  const held = holding(s, was, now);
+  (held ?? s.log).push(...comings(was, now, text));
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
   try {
@@ -60,19 +69,28 @@ function background(
     s.fault = (e as Error).message;
     return;
   }
-  if (last && last.command_id !== s.narrationId) {
-    const [narrated, combat] = narrationLines(last, now, text);
-    const line = pickupLine(last, text) || narrated;
-    if (combat) s.combatLog.push(combat);
-    if (line)
-      (last.detail_id
-        ? detailLines(s, last.detail_id)
-        : now.choice
-          ? detailLines(s, now.choice.speaker_id ?? 'conversation')
-          : s.log
-      ).push(line);
-    s.narrationId = last.command_id;
-  }
+  if (last && last.command_id !== s.narrationId) narrate(s, last, now, held, text);
+}
+
+// A new receipt's lines: its detail or conversation, else World (or the open settlement's lines).
+function narrate(
+  s: Logs,
+  last: NarrationRecord,
+  now: GameView,
+  held: string[] | undefined,
+  text: Say,
+) {
+  const [narrated, combat] = narrationLines(last, now, text);
+  const line = pickupLine(last, text) || narrated;
+  if (combat) s.combatLog.push(combat);
+  s.narrationId = last.command_id;
+  if (!line) return;
+  const to = last.detail_id
+    ? detailLines(s, last.detail_id)
+    : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
+  if (to) to.push(line);
+  else if (held && !last.pickup_name) held.push(...worldLines(last, now, text));
+  else (held ?? s.log).push(line);
 }
 
 const confirmed = (reply: Reply) =>
@@ -122,6 +140,7 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
+  s.recap = undefined; // the recap opens the page after an absence and goes with the next press
   s.returnDetail = undefined;
   s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
@@ -164,6 +183,7 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   s.recovered = false;
   if (update.kind === 'state') {
     background(game, update, s, text);
+    settle(s);
     return false;
   }
   if (!s.retry || update.invocation_id !== s.retry.invocation) return false;
@@ -188,6 +208,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     buttons,
     log: s.log,
     combatLog: s.combatLog,
+    recap: s.recap,
     detail: (id: string) => s.details.get(id) ?? [],
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',

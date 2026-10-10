@@ -9,6 +9,7 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
 import { withoutHeading } from './words.ts';
+import type { RecapLine } from './recap.ts';
 type Say = (key: string) => string;
 
 export function narrationLines(
@@ -29,6 +30,16 @@ export function narrationLines(
   });
 }
 
+// One receipt's World lines one by one, for the away recap's groups (toolbox row W27).
+export const worldLines = (last: NarrationRecord, view: GameView, text: Say) =>
+  [
+    ...withoutHeading(
+      last.lines.filter((_, i) => !last.combat_lines?.includes(i)),
+      view,
+    ).map((line) => liquidLine(line, text)),
+    last.cue ? text(last.cue.key) : '',
+  ].filter(Boolean);
+
 // A refused line (a barred exit) leads with its reason tag (BOOK-UI-COMPONENTS.md, Log line).
 export type DetailLine =
   string | { text: string; event: true } | { kind: 'refused'; reason: string; text: string };
@@ -45,6 +56,8 @@ export type Logs = {
   returnWorld?: boolean;
   returnDetail?: string;
   fault?: string;
+  away?: { from: number; lines: string[] }; // an open elapsed settlement's held World lines
+  recap?: RecapLine[];
 };
 
 export function pickupLine(last: NarrationRecord | undefined, text: Say) {

@@ -373,6 +373,11 @@
         "rate": {
           "type": "integer",
           "minimum": 1
+        },
+        "recap_after_minutes": {
+          "description": "Toolbox row W27, opt-in (kernel API >=1.47): an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block.",
+          "type": "integer",
+          "minimum": 1
         }
       },
       "required": [
