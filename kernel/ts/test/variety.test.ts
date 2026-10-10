@@ -100,6 +100,39 @@ test('the garden shows its long description until the tenth visit, then one line
   assert.deepEqual(garden, [...Array(9).fill('room.garden.description'), 'room.garden.familiar']);
 });
 
+// Breaks: the variety@1 lock check dropped from the knowledge recorder, so a knowledge@1-only
+// world (Chapter 1) writes from and count on every re-entry and saves differently than before.
+test('without variety@1 a re-entry records nothing and the row has no count', () => {
+  const lock = { ...content.lock, capabilities: { ...content.lock.capabilities } };
+  delete (lock.capabilities as Obj).variety;
+  let w = fresh({ ...content, lock } as Cartridge);
+  const garden = w.roomIds['variety_sampler@0.0.1:room/garden']!;
+  const ops: string[][] = [];
+  ['north', 'south', 'north'].forEach((direction, i) => {
+    const r = step(
+      w,
+      {
+        id: `aaaaaaaa-0707-4007-8207-${String(i + 1).padStart(12, '0')}`,
+        world_context_id: w.context,
+        payload: { actor_id: w.character, type: 'move', direction },
+      } as never,
+      0,
+    );
+    const d = r.decision as { kind: string; delta?: { ops: { op: string }[] } };
+    assert.equal(d.kind, 'accepted', JSON.stringify(d));
+    ops.push((d.delta?.ops ?? []).map((o) => o.op).filter((o) => o === 'visit.record'));
+    w = r.world;
+  });
+  // First garden entry records it; the hall (start room) and the garden re-entry record nothing.
+  assert.deepEqual(ops, [['visit.record'], [], []]);
+  assert.equal(visits(w, w.character, garden), 1);
+  const rows = Object.values(w.state.visited_rooms ?? {});
+  assert.ok(
+    rows.every((row) => !('count' in row)),
+    JSON.stringify(rows),
+  );
+});
+
 // Breaks (loader twin of the compiler checks): an alternate missing from the catalog accepted,
 // alternates without variety@1 accepted, alternates or visited_count below kernel_api 1.45, or an
 // empty alternates list, a key or an alternate not shaped as a TextKey accepted.

@@ -1,8 +1,8 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 341, typed quest reactions, same-plan deadline pairing and narration variety share FIFO admission
+// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
-import { encode } from '../foundation/canonical.ts';
+import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
 import { over, type Limit } from '../foundation/compose.ts';
 import {
@@ -243,30 +243,6 @@ function react(p: P): Admitted | undefined {
       if (failed) return failed;
     }
   }
-}
-
-function populationDeadlinePairs(world: World, until: number) {
-  const pairs = new Map<string, string>();
-  for (const [plan, control] of Object.entries(world.state.population_plans ?? {})) {
-    const resume = control.suppression?.job_id;
-    const regular = control.job_id;
-    const a = resume && world.state.jobs?.[resume];
-    const b = world.state.jobs?.[regular];
-    if (
-      resume &&
-      a?.status === 'pending' &&
-      b?.status === 'pending' &&
-      a.due_time === b.due_time &&
-      a.due_time === control.suppression?.ends_at &&
-      a.due_time <= until &&
-      encode(a.job) === plan &&
-      encode(b.job) === plan
-    ) {
-      pairs.set(resume, regular);
-      pairs.set(regular, resume);
-    }
-  }
-  return pairs;
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.

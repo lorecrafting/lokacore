@@ -2,9 +2,10 @@ defmodule Loka.Content.Variety do
   @moduledoc """
   variety@1 (toolbox row W7): cartridge.json alternates is owned by variety@1, names only text
   catalog keys, and it or a visited_count leaf needs kernel_api 1.45. Twin of
-  kernel/ts/src/content/cartridge_variety.ts.
+  kernel/ts/src/content/cartridge_variety.ts. A visited_count leaf without knowledge@1 always
+  fails (nothing records visits): VISITS_UNRECORDED, a compiler-only warning.
   """
-  import Loka.Content.Source, only: [at: 2, diag: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4]
   import Loka.Content.Refs, only: [owned: 3, owners: 2]
 
   # A missing or schema-invalid manifest (nil) has its own diagnostics.
@@ -13,10 +14,25 @@ defmodule Loka.Content.Variety do
   def check(m, defs, {_, settings}, {v2, registry}) do
     alternates = settings["alternates"]
     text = if is_tuple(v2), do: elem(v2, 1), else: :unknown
+    leaf = leaf?(defs) or leaf?(settings)
 
     owner(m, alternates, registry) ++
       keys(alternates || %{}, text) ++
-      floor(m, alternates != nil or leaf?(defs) or leaf?(settings))
+      floor(m, alternates != nil or leaf) ++ unrecorded(m, leaf)
+  end
+
+  defp unrecorded(_, false), do: []
+
+  defp unrecorded(m, true) do
+    if Map.has_key?(m["requires"]["capabilities"], "knowledge"),
+      do: [],
+      else: [
+        Map.put(
+          diag("VISITS_UNRECORDED", "cartridge.requires.capabilities", %{}, ["knowledge@1"]),
+          "severity",
+          "warning"
+        )
+      ]
   end
 
   defp owner(_, nil, _), do: []

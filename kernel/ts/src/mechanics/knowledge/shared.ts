@@ -44,7 +44,11 @@ function visit(world: World, actor_id: CharacterId, room_id: EntityId): DeltaOp[
   return [{ ...op, from, value: { actor_id, room_id, count: (from.count ?? 1) + 1 } }];
 }
 
-/** Knowledge is one writer after causal mechanics; no rule consumes these rows mid-command. */
+/**
+ * Knowledge is one writer after causal mechanics. A same-command reaction or policy reading
+ * visited_count sees the proposal with the entry already recorded (the current entry included);
+ * only the writer group moves last.
+ */
 export function knowledgeLast(ops: readonly DeltaOp[]): readonly DeltaOp[] {
   const isKnowledge = (op: DeltaOp) => op.op === 'visit.record' || op.op === 'observation.record';
   const writes = ops.filter(isKnowledge);

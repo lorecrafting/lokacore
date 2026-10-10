@@ -1,6 +1,7 @@
 // variety@1 at the cartridge trust boundary (toolbox row W7): alternates is owned by variety@1,
 // every key of alternates and every alternate is a text catalog key, and alternates or a
-// visited_count leaf need kernel_api 1.45.
+// visited_count leaf need kernel_api 1.45. The compiler's VISITS_UNRECORDED (visited_count
+// without knowledge@1) is a warning, and the loader reports only errors, so it stays compiler-only.
 // ponytail: a repeated alternate is not refused (no uniqueItems in either validator); it only
 // weights that line. Add a check if a cartridge ever needs strictly equal odds enforced.
 import type { Diagnostic } from '../contracts.gen.ts';
