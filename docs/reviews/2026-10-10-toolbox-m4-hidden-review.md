@@ -18,10 +18,11 @@
 
 - Baseline: `hidden_passage.test.ts` and `d10_knowledge.test.ts` pass; `content_hidden_passage_test.exs` passes.
 - Mutants, all red: A, drop `hidden` in `movementPlan` (`sequence.ts:110`); B, drop it in the map links (`knowledge.ts:29`); D, drop it in `sight` (`rule.ts:47`); C, drop the Elixir BARRIER_MISMATCH (`barriers.ex:78`).
-- Items 2-4 and 6 hold. The diff touches no cartridge outside `hidden_sampler`. Elixir `Refs.reference` gives the same FACT_TYPE_MISMATCH as TS `typedValue`. Player `flee` excludes hidden faces because `escapeDirections` (`flee.ts:30`) calls `movementPlan`.
+- Chapter 1: `mix loka.compile cartridges/ashmere_chapters` gives a byte-identical artifact at base and head (sha1 `ee93f779`).
+- Item 2 holds by order: `sequence.ts:110` returns `not_found` for a hidden face and for a missing exit, before engaged, position and fare (`:118-121`). The earlier composed `refusal` treats `direction` as a generic input (`action_input.ts:15`), so the code does not depend on the exit.
+- Items 3, 4 and 6 hold. Elixir `Refs.reference` gives the same FACT_TYPE_MISMATCH as TS `typedValue`. Player `flee` excludes hidden faces because `escapeDirections` (`flee.ts:30`) calls `movementPlan`.
 
 ## Findings
 
 1. **should-fix** (PM ruling): no route check in either kernel. `cartridge_expedition.ts:54` and its Elixir twin accept an expedition edge `hall -east-> study` over a hidden face; patrol routes likewise. Failure: `quest_journal.ts:88`/`:108` shows `direction: east` before the search. mechanics.md records this as an open "known limit"; the ruling requires a compile-time refusal.
-2. **should-fix** (PM ruling): NPC flight ignores `hidden`. `flightExit` (`combat/behavior.ts:112`) and population `refuge` (`population/behavior.ts:191`) can choose the hidden east face. Failure: `round_flow.ts:155` narrates `enemy_fled[east]` to the player before discovery. Fix: filter flight with `hidden(world, room, direction, world.character)`, add one test, and update the mechanics.md "Hidden face" bullet.
-3. **nit**, mechanics.md "Sampler" bullet: it says the hall leads east to a stairhead and south to the study. The hall has only `north` and the hidden `east`; gallery goes east to stairhead, and stairhead goes south to study (`rooms/*.json`).
+2. **should-fix** (PM ruling): NPC flight ignores `hidden`. `flightExit` (`combat/behavior.ts:112`) and population `refuge` (`population/behavior.ts:191`) can choose the hidden east face. Failure: `round_flow.ts:155` narrates `enemy_fled[east]`, and population sight narration (`population/behavior.ts:166`) narrates `narration[east]`, to the player before discovery. Fix: filter flight with `hidden(world, room, direction, world.character)`, add one test, and update the mechanics.md "Hidden face" bullet.
