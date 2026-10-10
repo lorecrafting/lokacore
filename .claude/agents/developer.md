@@ -17,7 +17,7 @@ you will mirror. The advisor re-reads the whole conversation at full price: put 
 question in one call, as early as possible, and never ask it to confirm what the brief
 decided.
 
-Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first. Scope: exactly the brief.
+Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; when `package-lock.json` matches the main checkout's, symlink its `node_modules` instead of `npm ci`. In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief.
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
@@ -25,12 +25,12 @@ spec text; the [designer](../../docs/decisions/owner-decision-designer-role-2026
 
 Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
-   the touched layer's type/compile checks and the focused tests your diff touches; never the full
+   the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) until both workflows' runs appear,
-   then `gh run watch <id> --exit-status` on each in the background and quote each verdict (job
-   names, durations) in the handoff; fix a red run before handing off. Every new check has a
+   after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every few minutes, never `gh run watch` (rate limits, timeouts);
+   wait up to ~2 minutes for both workflows' push runs, and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
+   quote each verdict (job names, durations) in the handoff; fix a red run before handing off. Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
@@ -49,6 +49,8 @@ Before handing off:
    findings with dispositions, deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
+
+At the end remove your own scratch worktrees and stop your own background watchers, by PID.
 
 Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Past about 220k tokens, hand the remaining work back to the PM for a fresh agent.
 

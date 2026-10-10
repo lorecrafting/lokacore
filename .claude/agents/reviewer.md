@@ -33,6 +33,7 @@ Rerun two of the PR body's "catches / only here / every" claims or `file:line` c
 Never use `--no-verify`, not even for a record commit; report a blocking hook.
 Run long commands with `run_in_background` and wait for the completion notice; no sleep or poll loops. No full-suite mutant sweep ([mutants](../../docs/WORKFLOW.md#token-hygiene)).
 
+Run local tests under `nice -n 10`. In a scratch worktree symlink the main checkout's `node_modules` when `package-lock.json` matches, no `npm ci`; at the end remove your own scratch worktrees and stop your own watchers, by PID. Check CI with `gh run list --commit <full sha>` every few minutes, never `gh run watch` or a manual dispatch. In a shared worktree commit with `git commit -- <your own paths>`.
 Token hygiene (docs/WORKFLOW.md): send check, test and push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
 
 Every finding has a severity (blocker / should-fix / nit, at most five nits), a
