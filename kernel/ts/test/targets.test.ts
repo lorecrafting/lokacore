@@ -96,6 +96,10 @@ test('only another roster member is a choice, and only when the cartridge opts i
     [b, true],
   ]);
   assert.equal(play(w, { type: 'attack', target_id: a }).decision.kind, 'rejected');
+  const single = structuredClone(w);
+  for (const row of Object.values(single.state.encounters ?? {}))
+    (row as { active_ids: unknown }).active_ids = [a];
+  assert.deepEqual(offered(single), [], 'a roster of one keeps the single-foe ActionSet');
   const plain = structuredClone(content) as { world: { combat: Record<string, unknown> } };
   delete plain.world.combat.target_choice;
   const [off, , other] = engaged(plain as unknown as Cartridge);
