@@ -457,17 +457,9 @@ test('a hub conversation ends as Leave would once the speaker or the player leav
   // Bram dies where he stands (controlled: HP-bearing, HP row at 0); the next action ends it.
   const w = open(hub());
   const hp = key({ kind: 'resource', entity_id: BRAM, resource: resourceRef(w, 'hp') } as never);
-  const dead = {
-    ...w,
-    entities: {
-      ...w.entities,
-      [BRAM]: { ...w.entities[BRAM]!, hp: w.cartridge.resources![`${F}:resource/hp`]! },
-    },
-    state: {
-      ...w.state,
-      resources: { ...w.state.resources, [hp]: { value: 0, at: w.state.clock } },
-    },
-  } as World;
+  const dead = structuredClone(w) as any;
+  dead.entities[BRAM].hp = w.cartridge.resources![`${F}:resource/hp`];
+  dead.state.resources[hp] = { value: 0, at: w.state.clock };
   const { decision: d, world: after } = ok(dead, drop, 4);
   assert.equal(after.state.containers[BRAM], after.state.containers[BODY]);
   assert.deepEqual(d.delta.ops.at(-1), { op: 'choice.close', writer_group: 1, continuation_id: C });
