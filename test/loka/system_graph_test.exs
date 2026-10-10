@@ -49,7 +49,7 @@ defmodule Loka.SystemGraphTest do
     end
   end
 
-  # Breaks: 00a read as 00, §5 linked to §5.1's heading, or an anchor not GitHub's heading slug.
+  # Breaks: 00a read as 00, §2 linked to the `# 23 — …` title, or not GitHub's heading slug.
   test "spec citations link the archived spec file at the cited heading" do
     assert contract("ItemLocation")["spec"] == [
              %{
@@ -57,6 +57,12 @@ defmodule Loka.SystemGraphTest do
                "path" => "docs/archive/spec/00a-chapter-one-content.md#12-hello-world-fixture"
              }
            ]
+
+    assert %{
+             "cite" => "23 §2",
+             "path" =>
+               "docs/archive/spec/23-accounts-progress-admission.md#2-three-authorities-no-new-gameplay-scope"
+           } in contract("AccountId")["spec"]
 
     decision = "docs/archive/spec/04-command-event-effect-protocol.md"
 
