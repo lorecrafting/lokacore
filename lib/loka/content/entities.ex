@@ -82,8 +82,15 @@ defmodule Loka.Content.Entities do
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
     for {_, rel, e} <- all(defs),
-        {steps, v} <- variants(e),
+        {steps, v} <- variants(e) ++ cases(e),
         do: {rel, steps ++ ["when", "root"], v["when"]["root"]}
+  end
+
+  # Toolbox row W10: each case of a source daily_schedule hour list (Loka.Content.Schedules).
+  defp cases(e) do
+    for {h, list} when is_list(list) <- Map.get(e, "daily_schedule", %{}),
+        {%{"when" => _} = c, i} <- Enum.with_index(list),
+        do: {["daily_schedule", h, i], c}
   end
 
   @doc "UNRESOLVED_REFERENCE for each entity text key without a catalog entry."
@@ -109,6 +116,8 @@ defmodule Loka.Content.Entities do
   defp shop_texts(%{"shop" => s}), do: for(f <- ~w(bought sold), do: {["shop", f], s[f]})
   defp shop_texts(_), do: []
 
+  defp goal_texts(e), do: for({s, %{"goal" => g}} <- cases(e), do: {s ++ ["goal"], g})
+
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
@@ -126,7 +135,7 @@ defmodule Loka.Content.Entities do
   defp definition_texts(e),
     do:
       for(f <- @text, do: {[f], e[f]}) ++
-        variant_texts(e) ++ shop_texts(e) ++ fuel_texts(e) ++ readable_texts(e)
+        variant_texts(e) ++ shop_texts(e) ++ fuel_texts(e) ++ readable_texts(e) ++ goal_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

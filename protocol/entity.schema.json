@@ -436,7 +436,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6).",
       "type": "object",
       "properties": {
         "key": {
@@ -484,6 +484,16 @@
           },
           "additionalProperties": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
+        },
+        "schedule_cases": {
+          "description": "Toolbox row W10 (kernel_api at least 1.47): conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler and the loader); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ScheduleCases"
           }
         },
         "hp": {
@@ -640,6 +650,57 @@
               }
             },
             "description": "npc.maud.description_bruised"
+          }
+        ]
+      ]
+    },
+    "ScheduleCases": {
+      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          },
+          "room": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "goal": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "required": [
+          "when",
+          "room"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "examples": [
+        [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "schedule_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "child_lost"
+                },
+                "equals": true
+              }
+            },
+            "room": {
+              "cartridge_id": "schedule_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "green"
+            },
+            "goal": "npc.maud.goal_green"
           }
         ]
       ]

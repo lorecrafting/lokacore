@@ -1,15 +1,24 @@
 // behavior@1 (capability_registry.json definitions; 06 §13 Behavior/schedule profiles; 21 §10):
 // an NPC's daily location schedule (entity.schema.json NpcDefinition daily_schedule), read by
 // world creation and by schedule@1's run_job (mechanics/schedule/rule.ts); and the world's calendar job below.
-import type { Command, DefinitionRef, DomainEvent, EntityId, JobId } from '../../contracts.gen.ts';
+import type {
+  Command,
+  DefinitionRef,
+  DomainEvent,
+  EntityId,
+  JobId,
+  NpcDefinition,
+} from '../../contracts.gen.ts';
 import {
   accepted,
   refString,
   type Cartridge,
   type JobRow,
   type Mint,
+  type Steps,
   type World,
 } from '../../runtime/decision.ts';
+import { holds } from '../policy.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { hourOf, nextHour, units } from '../calendar.ts';
 export { hourOf, nextHour };
@@ -24,6 +33,23 @@ export function scheduleOf(
 }
 
 export const jobId = (mint: Mint) => mint() as JobId;
+
+/**
+ * Where `npc` belongs from its schedule hour `due` (toolbox row W10): the first of the hour's
+ * `schedule_cases` whose `when` holds, read with the player as the actor, the NPC as the target
+ * and the clock at `due` (each leaf adds to `steps.n`), else the hour's daily_schedule room.
+ */
+export function placeOf(world: World, npc: EntityId, due: number, steps: Steps) {
+  const e = world.entities[npc] as NpcDefinition;
+  const hour = String(hourOf(world.cartridge, due));
+  const at = { ...world, state: { ...world.state, clock: due } };
+  const ctx = { target: npc, steps };
+  const pick = e.schedule_cases?.[hour]?.find((c) => holds(at, world.character, c.when.root, ctx));
+  return {
+    room: world.roomIds[refString(pick?.room ?? e.daily_schedule![hour])],
+    goal: pick?.goal,
+  };
+}
 
 /**
  * A fresh world's jobs (world creation, numeric profile Initial world ids): one per NPC with a
