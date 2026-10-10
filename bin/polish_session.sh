@@ -3,7 +3,7 @@
 # (default ~/dev/lokacore-session), ports as in bin/lib/serve.sh.
 #   start: new worktree on polish/session-<date>[-n] from origin/main (or the open one), npm ci
 #          only on a lockfile change, the owner's Storybook served from it. Twice: no harm.
-#          A pushed (closed) session is refused until its PR merges and after_merge removes it.
+#          A pushed (closed) session is refused (also by update) until its PR merges and after_merge removes it.
 #   update: fetch and merge origin/main into the session worktree (a fast-forward when it holds no commits); when the pull adds or renames
 #          a *.stories.tsx or *.mdx file, restart the session's Storybook (its index goes stale).
 #   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
@@ -14,6 +14,9 @@ bin=$(cd "$(dirname "$0")" && pwd)
 . "$bin/lib/serve.sh"
 GH=${GH:-gh}
 wt=$session
+# A pushed branch is a closed session: a local change would never reach its PR, and after_merge would refuse the worktree.
+closed() { b=$(git -C "$wt" branch --show-current); [ -n "$b" ] && git -C "$wt" ls-remote --exit-code origin "refs/heads/$b" > /dev/null; }
+closed_msg="$wt holds a closed session (its branch is pushed); merge its PR first (bin/after_merge.sh removes the worktree)"
 case ${1-} in
 start)
   if [ ! -d "$wt" ]; then
@@ -25,8 +28,8 @@ start)
     done
     git -C "$bin" worktree add -q -b "$b" "$wt" origin/main
     (cd "$wt" && mise exec -- mix deps.get --check-locked) || die 'mix deps.get failed'
-  elif git -C "$wt" ls-remote --exit-code --heads origin "$(git -C "$wt" branch --show-current)" > /dev/null; then
-    die "$wt holds a closed session (its branch is pushed); merge its PR first (bin/after_merge.sh removes the worktree)"
+  elif closed; then
+    die "$closed_msg"
   fi
   wt=$(cd "$wt" && pwd -P)
   if [ "$(served_from "$SB_PORT")" = "$wt/mobile/app" ]; then
@@ -40,6 +43,7 @@ start)
   urls ;;
 update)
   [ -d "$wt" ] || die "no session worktree at $wt"
+  ! closed || die "$closed_msg"
   wt=$(cd "$wt" && pwd -P)
   git -C "$wt" fetch -q origin main || die 'fetch failed'
   old=$(git -C "$wt" rev-parse HEAD)

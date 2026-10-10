@@ -214,10 +214,10 @@ CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
-# CHECKS.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.
+# CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.
 mkdir "$tmp/hk"; printf '#!/bin/sh\ncase $* in *contracts.exs*) exit 1 ;; esac\nexit 0\n' > "$tmp/hk/mise"; chmod +x "$tmp/hk/mise"
-R=$(mktemp -d); cd "$R"; git init -q; mkdir -p docs protocol; : > a.txt
-for f in docs/MECHANICS-TOOLBOX.md docs/CHECKS.md protocol/x.json a.txt; do
+R=$(mktemp -d); cd "$R"; git init -q; mkdir -p docs/system protocol; : > a.txt
+for f in docs/MECHANICS-TOOLBOX.md docs/CHECKS.md docs/system/mechanics.md protocol/x.json a.txt; do
   echo 1 >> $f; git add $f; rc=0; PATH="$tmp/hk:$PATH" sh "$bin/../.githooks/pre-commit" > /dev/null 2>&1 || rc=$?
   case $f in a.txt) want=0 ;; *) want=1 ;; esac
   [ "$rc" = $want ] || bad "pre-commit $f: exit $rc, want $want"; git reset -q
@@ -298,6 +298,11 @@ sb=$(pid $sbp); git -C "$S" commit -q --allow-empty -m tweak0; echo s > mobile/a
 run polish_session.sh update update-diverged 0
 [ "$(pid $sbp)" != "$sb" ] && [ -f "$S/mobile/app/z.mdx" ] && git -C "$S" merge-base --is-ancestor origin/main HEAD && [ -n "$(git -C "$S" log origin/main..HEAD --format=%s | grep tweak0)" ] \
   || bad 'polish_session update-diverged: session with its own commit not merged, or Storybook not restarted'
+# Break: update starts a Storybook for a session nobody serves. start then serves the session again.
+kill "$(pid $sbp)"; i=0; while [ -n "$(pid $sbp)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
+echo s > mobile/app/w.stories.tsx; git add mobile/app/w.stories.tsx; git commit -qm unserved; git push -q origin main
+run polish_session.sh update update-unserved 0; [ -z "$(pid $sbp)" ] || bad 'polish_session update-unserved: started a Storybook for an unserved session'
+run polish_session.sh start reserve 0
 sb=$(pid $sbp)
 # The preview moves with main (as preview_update would), so close's own refresh restarts nothing but Storybook.
 git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main
@@ -310,6 +315,9 @@ git ls-remote --exit-code --heads origin "$day-2" > /dev/null && grep -q '^pr cr
   || { bad 'polish_session close: not pushed, no PR, or the preview not served again'; cat "$R.gh"; }
 [ "$(pid $wp)" = "$web" ] && [ "$(pid $ep)" = "$expo" ] || bad 'polish_session close: restarted the web preview or Expo'
 run polish_session.sh start after-close 1
+# Break: update merges main into a closed session; that merge never reaches its PR and after_merge refuses the worktree.
+h=$(git -C "$S" rev-parse HEAD); echo 4 > a.txt; git add a.txt; git commit -qm after-close; git push -q origin main
+run polish_session.sh update update-after-close 1; [ "$(git -C "$S" rev-parse HEAD)" = "$h" ] || bad 'polish_session update-after-close: closed session changed'
 kill "$(pid $ep)"; i=0; while [ -n "$(pid $ep)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
 echo 3 > a.txt; git add a.txt; git commit -qm moved; git push -q origin main
 run preview_update.sh '' no-expo 0; [ -z "$(pid $ep)" ] || bad 'preview_update no-expo: started Expo that was not running'
