@@ -15,7 +15,7 @@ export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () =
   const c = usePalette();
   return (
     <Page title="Journal" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
-      {view.journal.length === 0 && <Note>Nothing written yet.</Note>}
+      {view.journal.length === 0 && !view.topics?.length && <Note>Nothing written yet.</Note>}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose(c)}>{text(q.title)}</Text>

@@ -59,8 +59,8 @@ test('the wanderer badge appears on entering the fifth room, not before', () => 
   assert.deepEqual(known(walk(four, 'west')), ['topic.wanderer']);
 });
 
-// Breaks: a deduction offered before both topics are known, offered again once its topic is
-// known, its sources unlisted, or the recipe repeatable.
+// Breaks: a deduction offered before both topics are known (or for follow_tracks, a recipe gated on
+// one topic), offered again once its topic is known, its sources unlisted, or the recipe repeatable.
 test('reading two books offers the smugglers deduction, granted once', () => {
   const study = walk(fresh(), 'south');
   const one = walk(read(study, 'carters_note'), 'north', 'west');

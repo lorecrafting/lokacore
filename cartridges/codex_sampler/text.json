@@ -24,5 +24,7 @@
   "topic.smugglers": "The smugglers",
   "topic.wanderer": "Wanderer: you have visited all five rooms",
   "actions.deduce_smugglers": "Think it through",
-  "narration.deduce_smugglers": "Night grinding and a cart that never arrived: someone is smuggling through the mill."
+  "narration.deduce_smugglers": "Night grinding and a cart that never arrived: someone is smuggling through the mill.",
+  "actions.follow_tracks": "Follow the cart tracks",
+  "narration.follow_tracks": "The ruts lead back to the mill."
 }

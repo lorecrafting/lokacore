@@ -84,8 +84,15 @@ const deduce = {
   target: { kind: 'none' },
   input: [],
 };
-const loreStory = (actions: object[], name: string): StoryObj => {
-  const story = pageStory({ ...JournalView, view: { ...JournalView.view, ...lore, actions } });
+const loreStory = (
+  actions: object[],
+  name: string,
+  journal = JournalView.view.journal,
+): StoryObj => {
+  const story = pageStory({
+    ...JournalView,
+    view: { ...JournalView.view, ...lore, actions, journal },
+  });
   return { ...story, args: { words: loreWords }, name };
 };
 export const JournalLore: StoryObj = {
@@ -100,5 +107,17 @@ export const JournalLoreAway: StoryObj = {
   ...loreStory(JournalView.view.actions, 'Journal lore, deduction elsewhere'),
   play: async ({ canvas }) => {
     await canvas.findByText('Think it through: Not here');
+  },
+};
+// No quests yet, and the deduction listed here but refused with its own reason (a cost), not "Not here".
+export const JournalLoreRefused: StoryObj = {
+  ...loreStory(
+    [{ ...deduce, available: false, reason: { code: 'insufficient_resource' } }],
+    'Journal lore only, deduction refused here',
+    [],
+  ),
+  play: async ({ canvas }) => {
+    await canvas.findByText('Think it through: too exhausted');
+    if (canvas.queryByText('Nothing written yet.')) throw new Error('empty line above Lore');
   },
 };
