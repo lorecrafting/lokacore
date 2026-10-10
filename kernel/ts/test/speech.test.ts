@@ -16,6 +16,7 @@ import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { parse } from '../play/text.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-speech-sampler-'));
 let artifact: Uint8Array;
@@ -93,10 +94,12 @@ test("saying a keyword in any case opens the speaker's keyed dialogue; talk neve
   assert.equal(fact(r.world, 'elder_heard'), true);
 });
 
-// Breaks: an unauthored word echoed into the event (free text past the trust boundary), or a
+// Breaks: an unauthored word echoed into the event (free text past the trust boundary), a
 // malformed or missing word (a space, a non-ASCII letter, 33 letters, none: RegExp.test reads a
-// missing word as "undefined") accepted or thrown on when the host skips the schema.
+// missing word as "undefined") accepted or thrown on when the host skips the schema, or the
+// 32-letter bound cut short.
 test('an unauthored word reaches no event; a malformed or missing word is refused', () => {
+  accepted(fresh(), { type: 'say', word: 'a'.repeat(32) });
   const r = accepted(fresh(), { type: 'say', word: 'Hello' });
   assert.equal(r.decision.outcome, 'spoken');
   assert.equal(heard(r).length, 2);
@@ -121,6 +124,31 @@ test('a whisper reaches only its addressee', () => {
   );
   assert.equal(fact(r.world, 'elder_heard'), false);
   assert.equal(gameView(r.world).choice, undefined);
+  assert.deepEqual(
+    play(w, { type: 'whisper', target_id: id(w, 'watchman'), word: 'ward' }).decision,
+    { kind: 'rejected', error: { code: 'not_present' } },
+  );
+});
+
+// Breaks: a dead NPC whose body stays in the room still hearing a say (its spoken reaction
+// fires, its keyword dialogue opens) or taking a whisper.
+test('a dead NPC hears nothing', () => {
+  const r = reload((c) => {
+    c.npcs['speech_sampler@0.0.1:npc/elder'].hp = { minimum: 0, maximum: 6, start: 0, gain: 0 };
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = fresh(r.cartridge as Cartridge);
+  const said = accepted(w, { type: 'say', word: 'ward' });
+  assert.equal(said.decision.outcome, 'spoken');
+  assert.deepEqual(
+    heard(said).map((p) => p.entity_id),
+    [id(w, 'smith')],
+  );
+  assert.equal(fact(said.world, 'elder_heard'), false);
+  assert.deepEqual(play(w, { type: 'whisper', target_id: id(w, 'elder'), word: 'ward' }).decision, {
+    kind: 'rejected',
+    error: { code: 'not_present' },
+  });
 });
 
 // Breaks: a shout that stays in the room (the watchman misses it), carries two rooms (the miller
@@ -212,7 +240,18 @@ test('speech is neither offered nor accepted while a conversation is open', () =
     keys.filter((k) => ['say', 'whisper', 'shout'].includes(k)),
     [],
   );
-  assert.equal(play(open, { type: 'shout', word: 'help' }).decision.kind, 'rejected');
+  assert.deepEqual(play(open, { type: 'shout', word: 'help' }).decision, {
+    kind: 'rejected',
+    error: { code: 'unsupported_capability' },
+  });
+});
+
+// Breaks (ADR-075 §6 A5): `loka play` turning a token that is not a Word into a say Command, which
+// the record schema then rejects and the CLI crashes on.
+test('loka play makes a say or shout Command only from a word of letters', () => {
+  assert.deepEqual(parse('SAY Ward'), { type: 'say', word: 'ward' });
+  assert.equal(parse('say x9'), 'Say one word of up to 32 letters.');
+  assert.equal(parse(`shout ${'a'.repeat(33)}`), 'Shout one word of up to 32 letters.');
 });
 
 // Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48, a

@@ -94,8 +94,11 @@ export function parse(text: string): Parsed {
       return { door, direction: known.direction };
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
+  // The word is free text (ADR-075 §6 A5): only a Word-shaped token becomes a Command.
   if ((words[0] === 'say' || words[0] === 'shout') && words.length === 2)
-    return { type: words[0], word: words[1] };
+    return /^[a-z]{1,32}$/.test(words[1])
+      ? { type: words[0], word: words[1] }
+      : `${capital(words[0])} one word of up to 32 letters.`;
   if (words[0] === 'accept') return { accept: rest.toLowerCase() };
   if (words[0] === 'choose' && words.length === 2) return { choose: words[1] };
   if (LOOK.includes(words[0])) {
