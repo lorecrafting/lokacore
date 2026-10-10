@@ -59,8 +59,8 @@ export function level(world: World, entity: EntityId, resource: DefinitionRef): 
   const row = world.state.resources?.[at];
   const override = world.entityResourceSpecs[at];
   if (override && !validOverrideRow(row, override, world.state.clock)) return undefined;
-  const effective = entity === world.body ? maxima(world)[at] : undefined;
-  return current(effective === undefined ? row : capped(row, effective), spec, world.state.clock);
+  const authored = override ?? world.resourceSpecs[key(resource)];
+  return current(spec === authored ? row : capped(row, spec.maximum), spec, world.state.clock);
 }
 
 /**

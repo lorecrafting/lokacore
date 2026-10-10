@@ -386,6 +386,15 @@ test('a resource_maxima entry replaces the maximum and caps a row stored above i
       5,
       { value: 5, at: 100, rate: 2, remainder: 0 },
     ],
+    // lowered to 9: the stored 9 keeps no fraction at its maximum.
+    [
+      9,
+      100,
+      { value: 9, at: 95, rate: 2, remainder: 3 },
+      9,
+      8,
+      { value: 8, at: 100, rate: 2, remainder: 0 },
+    ],
   ];
   for (const [maximum, clock, row, from, to, after] of cases) {
     const state: State = {

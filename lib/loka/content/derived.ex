@@ -4,7 +4,12 @@ defmodule Loka.Content.Derived do
   alias Loka.Content.Refs
 
   # hp_max needs the hp pool, which every compiled cartridge has (Resources @defaults).
-  @needs %{"hit_chance" => "combat", "damage" => "combat", "carry_grams" => "carry"}
+  @needs %{
+    "hit_chance" => "combat",
+    "damage" => "combat",
+    "carry_grams" => "carry",
+    "hp_max" => nil
+  }
 
   def settings(%{"world" => %{"derived" => d}} = settings, m),
     do: put_in(settings, ["world", "derived"], Map.new(d, fn {k, s} -> {k, expand(s, m)} end))
@@ -60,7 +65,7 @@ defmodule Loka.Content.Derived do
     path = ["world", "derived", key]
 
     needs =
-      if @needs[key] == nil or is_map_key(world, @needs[key]),
+      if Map.fetch!(@needs, key) in [nil | Map.keys(world)],
         do: [],
         else: [diag("SCHEMA_VIOLATION", at("cartridge.json", path))]
 

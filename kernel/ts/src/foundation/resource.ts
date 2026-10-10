@@ -93,11 +93,12 @@ export function composeAdjustment(
 }
 
 /**
- * A row stored above an effective maximum (resource@1, derived HP max) reads as that maximum
- * with no fraction: the maximum fell since the row was written.
+ * A row stored at or above an effective maximum (resource@1, derived HP max) reads as that
+ * maximum with no fraction: the maximum fell since the row was written.
  */
 export function capped(row: Stored | undefined, maximum: number): Stored | undefined {
-  if (!row || typeof row !== 'object' || !(row.value > maximum)) return row;
+  if (!row || typeof row !== 'object' || !Number.isInteger(row.value) || row.value < maximum)
+    return row;
   return 'remainder' in row ? { ...row, value: maximum, remainder: 0 } : { ...row, value: maximum };
 }
 

@@ -55,10 +55,11 @@ defmodule Loka.Core.CalendarResourceTest do
     row = &%{"value" => &1, "at" => &2, "rate" => 2, "remainder" => &3}
 
     # raised to 14: 10 s at rate 2 per 10 s gains 2 past the authored 10; lowered to 6: the
-    # stored 9 with fraction 3 reads as 6 with none.
+    # stored 9 with fraction 3 reads as 6 with none; lowered to 9: it keeps no fraction at 9.
     for {maximum, clock, stored, from, to, written} <- [
           {14, 110, row.(10, 100, 0), 12, 13, row.(13, 110, 0)},
-          {6, 100, row.(9, 95, 3), 6, 5, row.(5, 100, 0)}
+          {6, 100, row.(9, 95, 3), 6, 5, row.(5, 100, 0)},
+          {9, 100, row.(9, 95, 3), 9, 8, row.(8, 100, 0)}
         ] do
       state = %{
         "clock" => clock,

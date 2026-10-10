@@ -282,8 +282,8 @@ each use and never stored. Every bound above uses it: queries, saturation, costs
 at it). The start value is unchanged, so a raised maximum is reached by regeneration. Composition
 carries it as the non-saved `resource_maxima` map, keyed by the exact canonical resource target,
 in both kernels' composition and independent replay; an entry replaces the spec's `maximum` for
-that target, and a row stored above it (the maximum fell since) reads as the maximum with a zero
-remainder, so the next write starts there. Without an entry, a row above `maximum` still fails.
+that target, and a row stored at or above it (the maximum fell since) reads as the maximum with
+a zero remainder, so the next write starts there. Without an entry, a row above `maximum` still fails.
 NPC bodies, other pools and cartridges without `hp_max` are unchanged.
 
 <a id="attributes1"></a>

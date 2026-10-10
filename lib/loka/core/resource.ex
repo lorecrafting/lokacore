@@ -89,14 +89,14 @@ defmodule Loka.Core.Resource do
     end
   end
 
-  # A resource_maxima entry replaces the maximum; a row stored above it reads as it with no
+  # A resource_maxima entry replaces the maximum; a row stored at or above it reads as it with no
   # fraction (resource@1).
   defp effective(spec, row, maximum) when spec == nil or maximum == nil, do: {spec, row}
 
   defp effective(spec, row, maximum),
     do: {Map.put(spec, "maximum", maximum), capped(row, maximum)}
 
-  defp capped(%{"value" => v} = row, maximum) when is_integer(v) and v > maximum do
+  defp capped(%{"value" => v} = row, maximum) when is_integer(v) and v >= maximum do
     row = Map.put(row, "value", maximum)
     if is_map_key(row, "remainder"), do: Map.put(row, "remainder", 0), else: row
   end
