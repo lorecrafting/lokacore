@@ -40,6 +40,7 @@ function setup(path = ':memory:') {
   const riddle = () => {
     ok('elspeth', [ids['npc/elspeth']]);
     choose('accept');
+    ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     ok('take', [ids['item/fox_drawing']]);
     move('south', 'south');
@@ -68,6 +69,26 @@ function setup(path = ':memory:') {
   };
   return { ...a, book, view, invoke, ok, move, choose, riddle, submit, row };
 }
+
+// Breaks (loka-x6t.5): a riddle that a talk to another speaker (Wren beside Vesper) closes read
+// back as an unaccounted close, so the save opens save_corrupt, or the talk leaving it pending.
+test('a talk to Wren leaves the pending riddle; the save reopens with it closed', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-riddle-leave-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'riddle.db');
+  let a = setup(path);
+  a.riddle();
+  const riddle = a.view().choice!.continuation_id;
+  a.ok('wren', [ids['npc/wren']]);
+  a.sql.close();
+  a = setup(path);
+  const saved = a.sql
+    .prepare("SELECT value FROM state_row WHERE section='choices' AND key=?")
+    .get(riddle)!;
+  assert.equal(JSON.parse(saved.value as string).status, 'closed');
+  assert.equal(a.view().choice!.speaker_id, ids['npc/wren']);
+  a.sql.close();
+});
 
 // Breaks: saved roles/beat or narration routing is lost across reopen, answer changes evade intent identity,
 // or success restores its line to World after removing the pending continuation.

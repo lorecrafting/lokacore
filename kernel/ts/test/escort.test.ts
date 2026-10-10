@@ -69,6 +69,7 @@ function setup() {
   const ready = () => {
     talk('elspeth');
     choose('accept');
+    run({ type: 'close_choice', continuation_id: gameView(world).choice!.continuation_id }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     run({ type: 'take', item_id: ids['item/fox_drawing'] });
     move('south', 'south');
@@ -116,14 +117,14 @@ test('rescue binds the original Wren, follows each Move, and finishes beside Els
     start.delta.ops.map((op) => op.op),
     ['fact.assign', 'escort.transition', 'choice.resolve'],
   );
-  // Independent Python SHA-256: command 19 ordinal 0 opens the choice; command 9 ordinal 2 activates Q2 after its two root events.
+  // Independent Python SHA-256: command 20 ordinal 0 opens the choice; command 10 ordinal 2 activates Q2 after its two root events; command 3 leaves Elspeth's hub.
   assert.deepEqual(relation(a.world()), {
     kind: 'escort',
     actor_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
     body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
     npc_id: 'b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462',
-    quest_instance_id: '2997fe29-3612-8a90-a853-17685bcfede3',
-    continuation_id: '4d85064e-c81c-8b58-9ad8-276949353ad3',
+    quest_instance_id: '0ac84234-4782-8ee2-9859-0b3a874e3592',
+    continuation_id: 'ec640c6a-0cab-8c9f-a70d-e8804b95d91f',
     choice_id: 'rescue',
     status: 'following',
   });

@@ -4,13 +4,18 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import type { CaseHost } from './e1_case_host.ts';
 
 export function dialogueCircuit(a: CaseHost) {
-  const talk = (npc: string, dialogue: string, choice: string) => {
+  // One sitting: a hub dialogue (several choices) returns to its choices after each answer and
+  // stays open until Leave the conversation; a single-choice dialogue ends at its answer (loka-x6t.5).
+  const talk = (npc: string, dialogue: string, ...choices: string[]) => {
     a.invoke(dialogue, [a.entity('npc', npc)]);
+    for (const choice of choices) {
+      a.reopen();
+      const pending = a.view().choice!.continuation_id;
+      assert.equal(a.story.world().state.choices![pending]!.source.key, dialogue);
+      a.choose(choice);
+    }
     a.reopen();
-    const pending = a.view().choice!.continuation_id;
-    assert.equal(a.story.world().state.choices![pending]!.source.key, dialogue);
-    a.choose(choice);
-    a.reopen();
+    if (choices.length > 1) a.invoke('close_choice');
     assert.equal(a.view().choice, undefined);
   };
   const learn = (npc: string, skill: string) => {
@@ -19,7 +24,7 @@ export function dialogueCircuit(a: CaseHost) {
     assert.equal(a.flag(`skill_${skill}`), true);
   };
   a.invoke('choose_ancestry', [], { ancestry: 'hill_folk' });
-  for (const choice of ['directions', 'inn', 'wren']) talk('elspeth', 'elspeth', choice);
+  talk('elspeth', 'elspeth', 'directions', 'inn', 'wren');
   a.move('north', 'west');
   learn('peg', 'haggle');
   a.move('east', 'east');
@@ -34,7 +39,7 @@ export function dialogueCircuit(a: CaseHost) {
   );
   learn('tobin', 'dodge');
   a.move('west', 'north', 'north');
-  for (const choice of ['bell', 'leave']) talk('aldric', 'b_aldric', choice);
+  talk('aldric', 'b_aldric', 'bell', 'leave');
   a.move('north');
   talk('ash', 'ash', 'leave');
   talk('hale', 'hale', 'leave');

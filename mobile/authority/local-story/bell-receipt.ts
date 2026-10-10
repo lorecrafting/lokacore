@@ -51,8 +51,8 @@ export function choiceReceipt(
   const player = { kind: 'player', character_id: world.character };
   const instance = { kind: 'instance', world_context_id: world.context };
   return rows.some(({ command_id, actor_id, command, response }) => {
-    const c: Command = JSON.parse(command);
-    if (!bellCommand(world, c, command_id, actor_id, choice)) return false;
+    const c: Command | null = JSON.parse(command); // null: a refusal before any command
+    if (!c || !bellCommand(world, c, command_id, actor_id, choice)) return false;
     const d: DecisionResult = JSON.parse(response);
     if (validate('DecisionResult', d).length || d.kind !== 'accepted') return false;
     return bellProof({ world, c, d, q2, q3, lost, choice, player, instance });

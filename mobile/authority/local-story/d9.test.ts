@@ -99,6 +99,7 @@ function staysToBelfry(p: ReturnType<typeof setup>, elapsed = 0) {
   move('south', 'south', 'south', 'south', 'south');
   talk('elspeth', 'elspeth');
   choose('accept');
+  ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   move('north', 'north');
   ok('take', [entity(p.story.world(), 'item', 'fox_drawing')]);
   move('south', 'south');
@@ -445,6 +446,7 @@ test('terminal profiles preserve bound ledger and cellar offers through SQLite r
     move('down', 'down', 'south', 'south', 'south', 'south', 'west');
     talk('a_peg_debt', 'peg');
     choose('accept_on_time');
+    invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     reopen();
     const ledger = entity(p.story.world(), 'item', 'tithe_ledger');
     assert.equal(p.story.world().state.containers[ledger], p.story.world().body);

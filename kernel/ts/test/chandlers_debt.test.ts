@@ -97,6 +97,7 @@ function setup() {
     move('north', 'west');
     talk('peg');
     choose('accept_on_time');
+    run({ type: 'close_choice', continuation_id: gameView(world).choice!.continuation_id }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   };
   const chapel = () => {
     move('east', 'north', 'north', 'north', 'north');

@@ -220,6 +220,7 @@ test('B2 and S9 faction receipts reopen in both composed orders without changing
     const debt = () => {
       a.invoke('a_peg_debt', [id('npc', 'peg')]);
       a.answer('accept_on_time');
+      a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
       a.move('east', 'north', 'north', 'north', 'north');
       a.invoke('a_aldric_debt', [id('npc', 'aldric')]);
       a.answer('on_time');

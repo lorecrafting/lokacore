@@ -20,6 +20,7 @@ import { options, roles, reference, continueQuery, chooseQuery, line } from './d
 import { questOf } from '../lookups.ts';
 import { resolution } from '../quest/lifecycle.ts';
 import { apply } from '../../runtime/apply.ts';
+import { leave } from '../dialogue/selection.ts';
 
 type Continue = Command & { payload: Extract<CommandPayload, { type: 'continue' }> };
 type Choose = Command & { payload: Extract<CommandPayload, { type: 'choose' }> };
@@ -38,7 +39,7 @@ export function continued(
   const run = assigned(
     world,
     p.actor_id,
-    { ops: [], position: 0, facts: {} },
+    { ops: [...leave(world, p.actor_id)], position: 0, facts: {} }, // dialogue@1: Continue leaves first
     { fact: fact(world, scene), value: ended ? -1 : index + 1 },
     'scene',
   );

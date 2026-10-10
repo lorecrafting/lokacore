@@ -27,7 +27,8 @@ defmodule Loka.Content.Dialogues do
       text: text,
       taken: commands() ++ keys,
       kinds: {caps, owners(registry, ["definitions"])},
-      events: {caps, owners(registry, ["events"])}
+      events: {caps, owners(registry, ["events"])},
+      proven: Loka.Content.Hub.proven(defs)
     }
 
     Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
@@ -273,7 +274,8 @@ defmodule Loka.Content.Dialogues do
       hand_over(rel, steps, o, d) ++
       receive_item(rel, steps, o, d, ctx) ++
       payment(rel, steps, o, d, ctx) ++
-      Loka.Content.Skills.choice(rel, steps, o, d, ctx)
+      Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
   end
 
   defp sequence(rel, steps, o, ctx) do

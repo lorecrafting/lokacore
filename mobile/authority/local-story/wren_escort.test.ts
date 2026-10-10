@@ -110,6 +110,7 @@ function setup(path = ':memory:') {
   const offer = () => {
     ok('elspeth', [ids['npc/elspeth']]);
     choose('accept');
+    ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     ok('take', [ids['item/fox_drawing']]);
     move('south', 'south');
@@ -319,6 +320,7 @@ test('real SQLite rescue reopens start, death separation, Rejoin and terminal wi
   a.ok('b_elspeth_rescued', [ids['npc/elspeth']]);
   assert.equal(a.view().choice!.prompt.key, 'dialogue.elspeth_rescued.prompt');
   a.choose('directions');
+  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north', 'north');
   assert.equal(a.view().place.description.key, 'room.village_green.rescued');
   assert.equal(a.row('containers', ids['npc/wren']), ids['room/ferry_landing']);

@@ -15,6 +15,10 @@ save on the release its pin names, or saves a fresh world of the newest release 
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
 (below), else the release's own fresh world.
 
+Pre-production, a rule change in the same release can make an older save's receipt history
+re-decide differently: such a save opens `save_corrupt` with Start over, not a pin refusal
+([dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md)).
+
 Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
 receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped.
 
