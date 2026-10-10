@@ -53,9 +53,9 @@ const frostyDayOne = (drawn: string) => (c: any) => {
   [c.calendar.weather[a], c.calendar.weather[b]] = [c.calendar.weather[b], c.calendar.weather[a]];
 };
 
-// Breaks: cold reopen refuses the pending calendar job or a status row whose tick and clock_hour
-// refresh merged into one write (oneWrite), or the next tick stalls after reopen.
-test('a merged tick and refresh and the calendar job survive SQLite reopen', (t) => {
+// Breaks: cold reopen refuses the pending calendar job or a status row written by a tick and a
+// clock_hour refresh in one settlement (two writes in the holder's group), or the next tick stalls.
+test('a tick and refresh in one settlement and the calendar job survive SQLite reopen', (t) => {
   const probe = elapsedHost(':memory:', { wall: 10000, mono: 0 }, exposureBundle());
   const drawn = probe.game.view().view.calendar_status!.weather as string;
   probe.sql.close();

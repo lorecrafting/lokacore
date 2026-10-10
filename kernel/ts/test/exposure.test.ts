@@ -154,7 +154,6 @@ test('an expiry and a re-application in one settlement open the next generation'
     Object.values(w.state.statuses ?? {}).filter((r) => r.active) as {
       generation: number;
       ends_at: number;
-      job_id: string;
     }[];
   for (const [enter, step] of [
     [1000, (w: World) => elapse(w, 11000).w],
@@ -167,18 +166,14 @@ test('an expiry and a re-application in one settlement open the next generation'
     w = wait(w, 9500);
     assert.equal(hp(w), 9);
     w = play(w, { type: 'remove', item_id: id(w, 'cloak') });
-    // At the 10800 tie due jobs run in job-id order: the calendar job first is a refresh while
-    // active (generation 1 kept), the status job first an expiry then a re-application.
-    const clock = Object.entries(w.state.jobs ?? {}).find(
-      ([, j]) => j.status === 'pending' && j.job.kind === 'calendar',
-    )![0];
-    const refreshFirst = clock < chilled(w)[0]!.job_id;
     w = step(w);
-    assert.deepEqual(
-      chilled(w).map((r) => r.generation),
-      [enter === 1800 && refreshFirst ? 1 : 2],
-      `entered at ${enter}`,
-    );
+    // At the 10800 tie either order follows row 1: a refresh (generation 1) or a re-application (2).
+    if (enter === 1000)
+      assert.deepEqual(
+        chilled(w).map((r) => r.generation),
+        [2],
+      );
+    assert.equal(chilled(w).length, 1);
     assert.equal(hp(w), 9);
     assert.equal(chilled(w)[0]!.ends_at, enter === 1000 ? 20000 : 19800);
   }
