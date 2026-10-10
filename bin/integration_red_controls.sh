@@ -284,7 +284,7 @@ sb=$(pid $sbp); run polish_session.sh start start-again 0
 [ "$(pid $sbp)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
 run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
 # Break: update restarts for a change that adds no story or MDX file, leaves a stale Storybook after an added
-# or a renamed one, or stops by name; or the session worktree is not fast-forwarded.
+# or a renamed one, or stops by name; or the session worktree (with or without its own commits) is not brought to origin/main.
 echo u1 > a.txt; git add a.txt; git commit -qm plain; git push -q origin main
 run polish_session.sh update update-plain 0
 [ "$(pid $sbp)" = "$sb" ] && [ "$(git -C "$S" rev-parse HEAD)" = "$(git rev-parse HEAD)" ] || bad 'polish_session update-plain: restarted, or session not at origin/main'
@@ -294,6 +294,10 @@ run polish_session.sh update update-story 0
 sb=$(pid $sbp); git mv mobile/app/x.stories.tsx mobile/app/y.stories.tsx; git commit -qm rename; git push -q origin main
 run polish_session.sh update update-rename 0
 [ "$(pid $sbp)" != "$sb" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session update-rename: Storybook not restarted'
+sb=$(pid $sbp); git -C "$S" commit -q --allow-empty -m tweak0; echo s > mobile/app/z.mdx; git add mobile/app/z.mdx; git commit -qm mdx; git push -q origin main
+run polish_session.sh update update-diverged 0
+[ "$(pid $sbp)" != "$sb" ] && [ -f "$S/mobile/app/z.mdx" ] && git -C "$S" merge-base --is-ancestor origin/main HEAD && [ -n "$(git -C "$S" log origin/main..HEAD --format=%s | grep tweak0)" ] \
+  || bad 'polish_session update-diverged: session with its own commit not merged, or Storybook not restarted'
 sb=$(pid $sbp)
 # The preview moves with main (as preview_update would), so close's own refresh restarts nothing but Storybook.
 git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main

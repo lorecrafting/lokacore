@@ -4,7 +4,7 @@
 #   start: new worktree on polish/session-<date>[-n] from origin/main (or the open one), npm ci
 #          only on a lockfile change, the owner's Storybook served from it. Twice: no harm.
 #          A pushed (closed) session is refused until its PR merges and after_merge removes it.
-#   update: fetch and fast-forward the session worktree to origin/main; when the pull adds or renames
+#   update: fetch and merge origin/main into the session worktree (a fast-forward when it holds no commits); when the pull adds or renames
 #          a *.stories.tsx or *.mdx file, restart the session's Storybook (its index goes stale).
 #   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
 #          (or reuses the open one), then serves the preview checkout again (bin/preview_update.sh).
@@ -43,7 +43,8 @@ update)
   wt=$(cd "$wt" && pwd -P)
   git -C "$wt" fetch -q origin main || die 'fetch failed'
   old=$(git -C "$wt" rev-parse HEAD)
-  git -C "$wt" merge -q --ff-only origin/main || die "not a fast-forward of origin/main (or uncommitted work in the way): nothing restarted"
+  # A session that holds tweak commits cannot fast-forward: merge, as bin/sync_pr.sh does for a PR branch.
+  git -C "$wt" merge -q --no-edit origin/main || { git -C "$wt" merge --abort 2> /dev/null || true; die "merge of origin/main failed (conflict or uncommitted work in the way); nothing restarted"; }
   new=$(git -C "$wt" diff -M --name-only --diff-filter=AR "$old" HEAD | grep -E '\.(stories\.tsx|mdx)$' || true)
   if [ -n "$new" ] && [ "$(served_from "$SB_PORT")" = "$wt/mobile/app" ]; then
     npm_ci "$wt"

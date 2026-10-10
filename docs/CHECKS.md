@@ -103,7 +103,7 @@ their rules and red controls remain available for resumption.
   It also runs `.githooks/pre-commit` (stub `mise`): a staged `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md` or `protocol/` file runs `contracts.exs --check` and a failure blocks the commit; an unrelated file does not. A rerun of `bin/after_merge.sh` for an issue already closed skips `br close`.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
   a decoy server found only by name survives, a second run restarts nothing, `npm ci` runs only for a
-  changed lockfile, a dirty preview, a served or closed session is refused; `update` restarts Storybook only when the pull adds or renames a `*.stories.tsx` or `*.mdx` file; close pushes, opens the PR and serves
+  changed lockfile, a dirty preview, a served or closed session is refused; `update` merges `origin/main` into the session and restarts Storybook only when the pull adds or renames a `*.stories.tsx` or `*.mdx` file; close pushes, opens the PR and serves
   the preview again, leaving the web preview and Expo running.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared; a local path in the new row warns but still creates).
   It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
