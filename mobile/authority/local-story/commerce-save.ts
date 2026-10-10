@@ -122,6 +122,7 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
 }
 
 // Opted Buy quotes are already recomputed at their original revision by receiptHistory.
+// The shop's line comes first; an item_acquired reaction may add its lines after it.
 // size: allow 50, bind one whole exchange to its command, item, payment and acquired event
 function shopReceipt(
   world: World,
@@ -151,7 +152,7 @@ function shopReceipt(
     }) ||
     custody[p.item_id] !== source ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
-    !same(d.narration, [{ key: p.type === 'buy' ? shop.bought : shop.sold }])
+    !same(d.narration?.[0], { key: p.type === 'buy' ? shop.bought : shop.sold })
   )
     invalid();
   const acquired = d.events.filter((e) => e.payload.type === 'item_acquired');

@@ -14,7 +14,6 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { sequence } from '../src/mechanics/reaction.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-exposure-sampler-'));
@@ -70,6 +69,7 @@ function elapse(w: World, until: number) {
   return {
     w: r.world,
     events: (r.decision as unknown as { events: { payload: { type: string } }[] }).events,
+    narration: r.decision.kind === 'accepted' ? r.decision.narration : undefined,
   };
 }
 // As the host (mobile/authority/local-story/elapsed.ts boundary): stop at each pending job but the
@@ -179,37 +179,22 @@ test('an expiry and a re-application in one settlement open the next generation'
   }
 });
 
-// Breaks: every hourly refresh repeats the applied line, or a first application loses it.
-// Checked at the reaction step (its narration does not reach the receipt yet, loka-kgd.13).
+// Breaks: every hourly refresh repeats the applied line, or a first application loses it on the
+// way to the receipt (loka-kgd.13).
 test('a clock_hour refresh is silent; only a first application says the applied line', () => {
-  const rule = Object.values(content.reactions!).find(
-    (r) => r.on.event === 'clock_hour' && JSON.stringify(r).includes('"chilled"'),
-  )!;
-  const said = (w: World, cause: object) => {
-    const d = sequence(
-      w,
-      w.character,
-      rule,
-      cause as never,
-      1,
-      { n: 0 },
-      () => 'dddddddd-0000-4000-8000-0000000000aa',
-    );
-    assert.equal(d?.kind, 'accepted');
-    return d!.kind === 'accepted' ? d!.narration : undefined;
-  };
-  const hourly = (r: { events: { payload: { type: string } }[] }) =>
-    r.events.find((e) => e.payload.type === 'clock_hour')!;
+  const applied = { key: 'narration.chilled.applied' };
   let w = play(fresh(), { type: 'take', item_id: id(fresh(), 'cloak') });
   w = play(w, { type: 'wear', item_id: id(w, 'cloak') });
   w = play(w, { type: 'move', direction: 'north' });
   const first = elapse(w, HOUR);
   assert.equal(labels(first.w), undefined);
   w = play(first.w, { type: 'remove', item_id: id(first.w, 'cloak') });
-  assert.deepEqual(said(w, hourly(first)), [{ key: 'narration.chilled.applied' }]);
   const second = elapse(w, 2 * HOUR);
   assert.deepEqual(labels(second.w), ['condition.chilled']);
-  assert.equal(said(second.w, hourly(second)), undefined);
+  assert.deepEqual(second.narration, [applied]);
+  const third = elapse(second.w, 3 * HOUR);
+  assert.deepEqual(labels(third.w), ['condition.chilled']);
+  assert.ok(!third.narration?.some((l) => l.key === applied.key), JSON.stringify(third.narration));
 });
 
 // Breaks: the sampler's drains can kill (trap 6): a cloakless body left on a frosty fell all day
