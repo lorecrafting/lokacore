@@ -32,3 +32,18 @@
 ## Question
 
 - Reaction narration never reaches the receipt (`proposal.ts` `react()`), so row 1's applied line never shows. That contradicts `book-ui.md:989` ("appear once"). The defect predates W25. Should the PM file a Beads issue?
+
+## Fix re-check (head `3d334b7138083af57ec916745dadaa74953f3701`)
+
+Scope: `ba438342` and `3d334b71`, plus merge `68f3e33f` (batch-m5 `9a9a97d5`). Hosted ci and book-e2e green per PM. Verdict: **APPROVE WITH NOTES** (one should-fix, docs only).
+
+- F1 resolved. `levelling/shared.ts` is byte-identical to base `45e12917`. `exposure.test.ts` expects generation 2 for the 1000 case, and the "Pending PM ruling" text is gone. The tie case at 10800 asserts one active row, `ends_at` 19800 and hp 9, with no pinned generation. Accepted: both orders follow row 1 and give the same end, and pinning the generation would only detect a change in job-id order. A fault or a wrong end still fails the test. Mutants: restoring the `statusChain` file, and keeping the generation on re-activation (`status/shared.ts`), each turn the W25 test and G3's `npc_status.test.ts` "an expiry re-sets the door burning" red.
+- F2 resolved. `reaction.ts:195` emits the applied line only when `applyStatus` schedules a tick job, which happens only on a first application. Its only caller is `sequence`. Mutants: `ops.length` (refreshes repeat the line) and `false` (the line is lost) each turn the new silent-refresh test red.
+- F3 resolved. `resources.json:36` sets minimum 1. The new whole-day test is red with minimum 0. The death content (the `player_corpse` and `npc_corpse` items) stays: status@1 requires death@1, which names both templates (`cartridge.md:448`), so deleting them breaks the compile. No nit.
+- Merge resolution: `invalid.json` is exactly base, plus batch-m5 `9a9a97d5`, plus the W25 rows (827, none missing, none extra). Both schemas carry `clock_hour`, `status_ticked` and `status_expired`. `mechanics.md` keeps both sections and both reaction-table rows, with no conflict markers. `elixir bin/contracts.exs --check` exits 0. Focused kernel files (exposure, npc_status, status, reactions, reactions_sampler, levelling) and host files (exposure, status) are green.
+
+### Finding
+
+1. **should-fix**, `docs/system/mechanics.md:1932`. The PM accepted "clock_hour fires once per elapsed step while other jobs are pending" as a documented limit, but the text does not state it. It says only that "a long absence is one firing, not one per elapsed hour". Scenario: a chilled body away for ten game hours stops at each 7200 tick, so the host commits one `clock_hour` per tick step (about five), not one. Add one sentence naming the limit and loka-kgd.47.
+
+Note: `origin/toolbox/batch-m5` has moved on to `c0e1ac7b` since `9a9a97d5`, so the batch needs another sync. That is not a finding.
