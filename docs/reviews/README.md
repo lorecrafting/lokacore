@@ -16,6 +16,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row G3 second half, attributes on NPCs (loka-kgd.42)](2026-10-10-toolbox-m5-npc-attr-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row W23 quest stage hints, part 1 (loka-kgd.38, batch M5)](2026-10-10-toolbox-m5-hints-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row W25, exposure (loka-kgd.39, batch M5)](2026-10-10-toolbox-m5-exposure-review.md): **APPROVE WITH NOTES**
+- [Review: hunger and thirst drains, toolbox row G13, and W25 `dry` (loka-kgd.36, loka-kgd.44)](2026-10-10-toolbox-m5-drains-review.md): **CHANGES REQUIRED**
 - [Review: toolbox row W24 engine half, quest deadlines (loka-kgd.45, batch M5)](2026-10-10-toolbox-m5-deadlines-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox rows 13 + G12, pick and force a barrier (loka-kgd.35, batch M5)](2026-10-10-toolbox-m5-barrier-review.md): **APPROVE WITH NOTES**
 - [Review: narration variety and visit tiers, toolbox row W7 (loka-kgd.29)](2026-10-10-toolbox-m4-variety-review.md): **APPROVE**
