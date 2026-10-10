@@ -293,6 +293,44 @@
             "op"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "has_tag"
+            },
+            "tag": {
+              "$ref": "entity.schema.json#/$defs/Tag"
+            },
+            "subject": {
+              "enum": [
+                "target",
+                "room"
+              ]
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "barrier": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "tag"
+          ],
+          "exactlyOneRequired": [
+            "subject",
+            "item",
+            "barrier",
+            "room"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -393,6 +431,11 @@
             "key": "rescue"
           },
           "state": "following"
+        },
+        {
+          "op": "has_tag",
+          "subject": "target",
+          "tag": "burnable"
         }
       ]
     }

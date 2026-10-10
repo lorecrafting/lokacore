@@ -1,0 +1,21 @@
+{
+  "room.hall.title": "Hall",
+  "room.hall.description": "A bare hall. A [wooden door](wooden_door) leads north and an [iron door](iron_door) east.",
+  "room.hall.wooden": "A bare hall of creaking boards. A [wooden door](wooden_door) leads north and an [iron door](iron_door) east.",
+  "detail.wooden_door": "A plain wooden door.",
+  "detail.wooden_door.burnable": "A plain wooden door, dry enough to burn.",
+  "detail.iron_door": "A plain iron door.",
+  "detail.iron_door.burnable": "A plain iron door, dry enough to burn.",
+  "room.north_room.title": "North Room",
+  "room.north_room.description": "An empty room.",
+  "room.east_room.title": "East Room",
+  "room.east_room.description": "An empty room.",
+  "barrier.wooden_door.short": "the wooden door",
+  "barrier.iron_door.short": "the iron door",
+  "item.stick.short": "a stick",
+  "item.stick.room": "A [[stick|stick]] lies here.",
+  "item.stick.description": "A dry stick.",
+  "item.rod.short": "an iron rod",
+  "item.rod.room": "An iron [[rod|rod]] lies here.",
+  "item.rod.description": "A cold iron rod."
+}

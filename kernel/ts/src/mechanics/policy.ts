@@ -1,9 +1,10 @@
 import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
-// target_present, attributes@1's stat_compare and resource_compare; 21 §3.2, §4 Policy; 06
-// §20-21): pure, over committed state, for one actor and the target of the action evaluated, if any.
-import type { CharacterId, EntityId, Policy } from '../contracts.gen.ts';
+// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag; 21 §3.2,
+// §4 Policy; 06 §20-21): pure, over committed state, for one actor and the target of the action
+// evaluated, if any.
+import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
@@ -19,6 +20,7 @@ import { value as attributeValue } from './attributes/shared.ts';
  * (target_present is false without one); each leaf it evaluates adds one to `ctx.steps.n`
  * (04 §5.4 query_steps).
  */
+// size: allow 60, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
 export function holds(
   world: World,
   actor: CharacterId,
@@ -55,8 +57,12 @@ export function holds(
     case 'stat_compare':
     case 'resource_compare':
       return atLeast(world, actor, p, ctx.steps);
-    default:
-      throw new Error(`policy op ${(p as Policy).op} is not installed`);
+    case 'has_tag':
+      return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
+    default: {
+      const leaf: never = p; // a schema leaf without its case here fails tsc
+      throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
+    }
   }
 }
 
@@ -71,6 +77,22 @@ function atLeast(
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
   return body !== undefined && level(world, body, p.resource)! >= p.at_least;
+}
+
+// tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.
+function tagsOf(
+  world: World,
+  actor: CharacterId,
+  p: Extract<Policy, { op: 'has_tag' }>,
+  target: EntityId | undefined,
+): readonly Tag[] | undefined {
+  if (p.item) return world.cartridge.items?.[refString(p.item)]?.tags;
+  if (p.barrier) return world.cartridge.barriers?.[refString(p.barrier)]?.tags;
+  if (p.room) return world.rooms[world.roomIds[refString(p.room)]!]?.tags;
+  if (p.subject === 'room')
+    return world.rooms[world.state.containers[bodyOf(world, actor)!]!]?.tags;
+  const entity = target === undefined ? undefined : world.entities[target];
+  return entity?.kind === 'item' ? entity.tags : undefined;
 }
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose

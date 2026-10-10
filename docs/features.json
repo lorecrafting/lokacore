@@ -1025,5 +1025,28 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "D10 candidate v042/API1.37: committed actor-owned visits and visible NPC observations, truthful Map/Where; independent source review pending"
+  },
+  "tags": {
+    "spec": "docs/system/mechanics.md property tags and the policy leaf set (toolbox row G1)",
+    "contracts": [
+      "Tag",
+      "Policy",
+      "ItemDefinition",
+      "RoomDefinition",
+      "BarrierDefinition"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/content/cartridge_refs.ts",
+      "lib/loka/content/checks.ex",
+      "lib/loka/content/policies.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/invalid.json"
+    ],
+    "invariants": [
+      "unknown_types_fail_closed"
+    ],
+    "implemented_in": "toolbox row G1 (loka-kgd.17): tags on item, barrier and room definitions; has_tag"
   }
 }

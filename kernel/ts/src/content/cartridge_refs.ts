@@ -180,6 +180,8 @@ export function refStage(c: Obj): Diagnostic[] {
     if (n.op === 'quest_state' || n.op === 'escort_state') named(n.quest, 'quest', `${at}.quest`);
     if (n.op === 'stat_compare') named(n.attribute, 'attribute', `${at}.attribute`);
     if (n.op === 'resource_compare') named(n.resource, 'resource', `${at}.resource`);
+    if (n.op === 'has_tag')
+      for (const k of ['item', 'barrier', 'room'] as const) if (n[k]) named(n[k], k, `${at}.${k}`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
   out.push(...reserved(c), ...featureApi(c));
