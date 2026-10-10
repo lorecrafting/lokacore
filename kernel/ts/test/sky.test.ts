@@ -134,17 +134,21 @@ test('season and tide follow their cycles in the status and the sky leaf', () =>
   }
 });
 
-// Breaks: the loader accepts a sky phase its table does not author, a repeated weather phase, a
+// Breaks: the loader accepts a sky weather, season or tide phase its table does not author, a repeated weather phase, a
 // season cycle not starting at 0, the tables without the calendar units the status line needs, or the row 31 tables below kernel_api 1.45 (no sky leaf).
 test('the loader refuses unauthored sky phases, repeated weather and an API below 1.45', () => {
   const yard = '.cartridge.rooms["sky_sampler@0.0.1:room/yard"]';
   const root = (c: Obj) => c.rooms['sky_sampler@0.0.1:room/yard'].variants[0].when.root;
+  const sky = (leaf: Obj) => (c: Obj) =>
+    (c.rooms['sky_sampler@0.0.1:room/yard'].variants[0].when.root = { op: 'sky', ...leaf });
   const rows: [(c: Obj) => void, string, string][] = [
     [
       (c) => (root(c).weather = 'snow'),
       'SCHEMA_VIOLATION',
       `${yard}.variants[0].when.root.weather`,
     ],
+    [sky({ season: 'winter' }), 'SCHEMA_VIOLATION', `${yard}.variants[0].when.root.season`],
+    [sky({ tide: 'slack' }), 'SCHEMA_VIOLATION', `${yard}.variants[0].when.root.tide`],
     [
       (c) => (c.calendar.weather[1].phase = 'clear'),
       'SCHEMA_VIOLATION',
