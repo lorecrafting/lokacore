@@ -21,6 +21,7 @@ test('both water bottoms keep lit loot and a free Surface across browser reload'
   await go(screen, 'south', 'Ferry Landing');
   await learnSwim(screen);
   await expect(screen.getByText(/You have learned swim/)).toBeVisible();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await ferryBack(screen);
   await toWellBottom(screen);
@@ -63,6 +64,7 @@ test('expired dive returns to Chapel and recovers original belongings once after
   await go(screen, 'east', 'Well Lane');
   await go(screen, 'south', 'Ferry Landing');
   await learnSwim(screen);
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await ferryBack(screen);
   await toWellBottom(screen);

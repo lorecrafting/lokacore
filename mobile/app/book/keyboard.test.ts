@@ -233,7 +233,7 @@ test('the chapter title page leaves only Continue', () => {
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
   const button = StatusLine(status.props)
-    .props.children.flat()
+    .props.children[0].props.children.flat() // the row, then its items
     .find((c: any) => c?.key === 'contents').props.children[1]; // its " · " group: dot, button
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
@@ -243,10 +243,10 @@ test('the chapter title page leaves only Continue', () => {
   assert.deepEqual(new Set(colours(contents)), new Set(['#645c4f'])); // paper.dim
 });
 
-// Breaks: pennies (or any count) take a band colour on the status line or the Character page, or
-// the condition pools lose theirs
-// (docs/system/book-ui.md#world-and-status-entry: band colours only on hp, ma and mv).
-test('status and Character band colours mark hp, ma and mv only, never pennies', () => {
+// Breaks: pennies (or any count) reach the status line, or take a band colour on the Character
+// page, or the condition pools lose theirs
+// (docs/system/book-ui.md#world-and-status-entry: hp, ma, mv on the line; bands on those only).
+test('status shows hp, ma and mv only; Character bands those only, never pennies', () => {
   const pool = (key: string, tone: string) => ({
     resource: { key },
     current: 1,
@@ -262,8 +262,9 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children.flat().find((c: any) => c?.key === 'contents').props
-    .children[1];
+  const button = status.props.children[0].props.children
+    .flat()
+    .find((c: any) => c?.key === 'contents').props.children[1];
   const contents = button.type(button.props);
   const shown = contents.props.children.props.children.map((t: any) => [
     t.key,
@@ -272,7 +273,6 @@ test('status and Character band colours mark hp, ma and mv only, never pennies',
   assert.deepEqual(shown, [
     ['hp', '#7b2d20'], // paper.danger
     ['mv', '#845512'], // paper.warning
-    ['pennies', '#241f19'], // paper.fg
   ]);
   const character = CharacterPage({
     resources: [pool('hp', 'danger'), pool('pennies', 'danger')],

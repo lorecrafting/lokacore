@@ -44,7 +44,7 @@ registerHooks({
     };
   },
 });
-const { NpcPage } = await import('./Menu.tsx');
+const { NpcPage } = await import('./Npc.tsx');
 const bundle = JSON.parse(
   readFileSync(
     new URL('../../../protocol/fixtures/missing_child_v010_hash.json', import.meta.url),

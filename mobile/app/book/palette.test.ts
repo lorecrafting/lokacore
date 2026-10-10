@@ -30,9 +30,9 @@ const { contrast, paletteOf, useShownPalette } = await import('./palette.ts');
 test('the solar phase name picks the palette', () => {
   for (const [solar, bg] of [
     ['day', '#ebe6d7'],
-    ['dawn', '#d5d9da'],
-    ['dusk', '#2b1e16'],
-    ['night', '#0c0b09'],
+    ['dawn', '#e2d7d7'],
+    ['dusk', '#2c2846'],
+    ['night', '#10151e'],
     ['twilight', '#ebe6d7'],
     ['constructor', '#ebe6d7'],
     [undefined, '#ebe6d7'],
@@ -92,16 +92,16 @@ function mount(curve?: (t: number) => number) {
 // not switch at once under reduced motion (no curve).
 test('the shown palette: at once on mount and without a curve, else eased over motion.palette', () => {
   const still = mount();
-  assert.equal(still.render(color.dusk).bg, '#2b1e16');
+  assert.equal(still.render(color.dusk).bg, '#2c2846');
   assert.equal(still.render(color.light).bg, '#ebe6d7');
   const fade = mount((t) => t);
   assert.equal(fade.render(color.light).bg, '#ebe6d7');
   assert.equal(fade.frames.length, 0);
   fade.render(color.dawn);
   fade.frame(750);
-  assert.equal(fade.render(color.dawn).bg, '#e0e0d9'); // half-way, by hand
+  assert.equal(fade.render(color.dawn).bg, '#e7dfd7'); // half-way, by hand
   fade.frame(1500);
-  assert.equal(fade.render(color.dawn).bg, '#d5d9da');
+  assert.equal(fade.render(color.dawn).bg, '#e2d7d7');
   assert.equal(fade.frames.length, 0);
 });
 

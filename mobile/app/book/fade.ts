@@ -1,6 +1,7 @@
-// The palette cross-fade's curve, none under reduced motion; apart so node tests load the Book
-// without Reanimated.
+// The palette cross-fade's curve, none under reduced motion, and the reduced-motion flag the Book's
+// decorations read; apart so node tests load the Book without Reanimated.
 import { useReducedMotion } from 'react-native-reanimated';
+export { useReducedMotion };
 import { easing } from './easing.ts';
 import { motion } from './tokens.ts';
 

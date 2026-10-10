@@ -18,11 +18,12 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, useBookPalette, usePalette, type Palette } from './palette.ts';
-import { size, space, type } from './tokens.ts';
+import { color, size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
+import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
 
@@ -77,15 +78,18 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   }
 }
 
+const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
+  ...restoredNoticePages(s),
+  ...restoredItemPages(s.view, s.detail),
+  ...initialPages(s.view),
+];
+
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
-  const [stack, setStack] = useState<Page[]>(() => [
-    ...restoredNoticePages(pr.screen()),
-    ...restoredItemPages(pr.screen().view, pr.screen().detail),
-    ...initialPages(pr.screen().view),
-  ]);
+  const [stack, setStack] = useState(() => firstPages(pr.screen()));
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
+  const [talkingOn, talkOn] = useState<Page>();
   const screen = pr.screen();
   const { view } = screen;
   const restoreInvocation = useRef(p.game.pendingInvocation());
@@ -114,6 +118,8 @@ export default function Book(p: BookProps) {
       refused={refused}
       startOver={startOver}
       shell={p.shell}
+      talkingOn={talkingOn}
+      talkOn={talkOn}
     />
   );
 }
@@ -128,6 +134,8 @@ type ViewProps = {
   refused: (line: DetailLine) => void;
   startOver: () => void;
   shell: Shell;
+  talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
+  talkOn?: (page?: Page) => void;
 };
 
 export function BookView(p: ViewProps) {
@@ -151,10 +159,17 @@ export function BookView(p: ViewProps) {
           {p.screen.view.combat ? (
             <Combat screen={p.screen} g={g} press={p.press} />
           ) : (
-            <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
+            <Body
+              {...ctx}
+              page={page}
+              talkingOn={p.talkingOn}
+              talkOn={p.talkOn ?? (() => {})}
+              chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+            />
           )}
         </PageTurn>
         <Bottom {...ctx} page={page} />
+        {c.bg === color.dark.bg && <NightSky />}
       </SafeAreaView>
     </PaletteContext>
   );

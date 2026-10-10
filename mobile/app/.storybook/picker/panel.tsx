@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from 'storybook/internal/components';
 import { useAddonState } from 'storybook/manager-api';
 import { ADDON_ID, type Feed, type Status } from './events.ts';
-import { OwnerItem, PmCard, chipText, working } from './items.tsx';
+import { Activity, LogLine, OwnerItem, PmCard, chipText, working } from './items.tsx';
 import { escape, event, initial, pin, send, type State } from './state.ts';
 import { Area, Chip, Column, Composer, Dot, Header, List, Muted, Negative } from './styles.ts';
 
@@ -45,8 +45,10 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
     if (atBottom.current && list.current) list.current.scrollTop = list.current.scrollHeight;
   });
   const answered = Math.max(0, ...feed.picks.filter((p) => p.type).map((p) => p.time));
+  // PM log lines stay; a suggest-close card goes once answered.
   const cards = feed.status.filter(
-    (s): s is Extract<Status, { type: string }> => 'type' in s && s.time > answered,
+    (s): s is Extract<Status, { type: 'log' | 'suggest-close' }> =>
+      'type' in s && (s.type === 'log' || (s.type === 'suggest-close' && s.time > answered)),
   );
   const rows = [...feed.picks.filter((p) => !p.type), ...cards].sort((a, b) => a.time - b.time);
   return (
@@ -63,9 +65,11 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
           request without picking.
         </Muted>
       )}
-      {rows.map((r) =>
-        'reason' in r ? (
-          <PmCard key={r.time} reason={r.reason} close={close.button} />
+      {rows.map((r, i) =>
+        r.type === 'log' ? (
+          <LogLine key={`log-${r.time}-${i}`} text={r.text} />
+        ) : r.type === 'suggest-close' ? (
+          <PmCard key={`card-${r.time}`} reason={r.reason} close={close.button} />
         ) : (
           <OwnerItem key={r.id} p={r} feed={feed} />
         ),
@@ -83,27 +87,57 @@ const Pending = ({ pending }: Pick<State, 'pending'>) => (
     ))}
   </div>
 );
-const Hint = ({ failed }: { failed: string | null }) =>
+const Hint = ({ failed, suggestion }: { failed: string | null; suggestion?: string }) =>
   failed ? (
     <Negative>not sent: {failed}</Negative>
   ) : (
-    <Muted style={{ fontSize: 11 }}>⌘↩ send · esc clear · ⇧click adds an element</Muted>
+    <Muted style={{ fontSize: 11 }}>
+      {suggestion
+        ? '⇥ accept · ⇧↩ newline' // Enter with an empty box sends nothing
+        : '↩ send · ⇧↩ newline · esc clear · ⇧click adds an element'}
+    </Muted>
   );
 
-// The text and pins stay until the queue answered 200 (a failed send shows why).
-const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
+const useSend = (pending: State['pending'], suggestion?: string) => {
   const [text, setText] = useState('');
   const [failed, setFailed] = useState<string | null>(null);
+  const busy = useRef(false); // a held or double Enter sends once
+  const submit = async () => {
+    if (busy.current || (!text.trim() && !pending.length)) return;
+    busy.current = true;
+    const why = await send(text, pending).finally(() => (busy.current = false));
+    setFailed(why);
+    if (!why) setText('');
+  };
+  const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Tab' && !e.shiftKey && !text && suggestion) {
+      e.preventDefault();
+      setText(suggestion); // a programmatic value leaves the cursor at the end
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void submit();
+    } else if (e.key === 'Escape') {
+      setText('');
+      if (!text || pending.length) escape(); // text alone: only the text goes
+    }
+  };
+  return { text, setText, failed, submit, onKey };
+};
+
+// The text and pins stay until the queue answered 200 (a failed send shows why). A PM suggestion
+// shows as the placeholder; Tab in the empty composer takes it.
+const Compose = ({
+  pending,
+  focus,
+  suggestion,
+}: Pick<State, 'pending' | 'focus'> & { suggestion?: string }) => {
+  const { text, setText, failed, submit, onKey } = useSend(pending, suggestion);
   const area = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     if (focus) area.current?.focus(); // on a pick, not on mount
   }, [focus]);
-  const submit = async () => {
-    if (!text.trim() && !pending.length) return;
-    const why = await send(text, pending);
-    setFailed(why);
-    if (!why) setText('');
-  };
   return (
     <Composer>
       <Pending pending={pending} />
@@ -111,24 +145,27 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
         ref={area}
         rows={Math.min(8, Math.max(3, text.split('\n').length))}
         value={text}
-        placeholder="What should change?"
+        placeholder={suggestion ?? 'What should change?'}
         onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) void submit();
-          else if (e.key === 'Escape') {
-            setText('');
-            if (!text || pending.length) escape(); // text alone: only the text goes
-          }
-        }}
+        onKeyDown={onKey}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Hint failed={failed} />
+        <Hint failed={failed} suggestion={text ? undefined : suggestion} />
         <Button size="small" variant="solid" onClick={() => void submit()}>
           Send
         </Button>
       </div>
     </Composer>
   );
+};
+
+// The latest PM suggestion, until the owner sends a prompt (or Close, Keep going) after it.
+const suggested = (feed: Feed) => {
+  const sent = Math.max(0, ...feed.picks.map((p) => p.time));
+  const last = feed.status
+    .filter((s): s is Extract<Status, { type: 'suggest' }> => 'type' in s && s.type === 'suggest')
+    .at(-1);
+  return last && last.time > sent ? last.text : undefined;
 };
 
 export const Panel = () => {
@@ -159,7 +196,8 @@ export const Panel = () => {
     <Column>
       <Session feed={feed} close={close} />
       <Conversation feed={feed} close={close} />
-      <Compose pending={pending} focus={focus} />
+      {working(feed) > 0 && <Activity feed={feed} />}
+      <Compose pending={pending} focus={focus} suggestion={suggested(feed)} />
     </Column>
   );
 };

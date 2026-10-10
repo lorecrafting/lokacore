@@ -13,7 +13,7 @@ const go =
   };
 const talk = (npc: string, ...choices: string[]): Step[] => [
   `${npc} is here.`,
-  ...choices.flatMap((c) => [`Talk to ${npc}`, c]),
+  ...choices.flatMap((c) => [`Talk to ${npc}`, c, 'Leave the conversation']),
   'Leave',
 ];
 // The n-th of several controls that start alike (four hounds).
@@ -54,6 +54,7 @@ const wisp = [
   'Wisp is here.',
   'Speak to Wisp Wisp',
   'Accept the riddle',
+  'Leave the conversation',
   'Leave',
   'Wisp is here.',
   'Ask Wisp again Wisp',

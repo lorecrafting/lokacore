@@ -40,7 +40,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View'},PanResponder={};",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View',Value:class{},timing:()=>({start:f=>globalThis[Symbol.for('loka-animation-end')]=f})},PanResponder={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

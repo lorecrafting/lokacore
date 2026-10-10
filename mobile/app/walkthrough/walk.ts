@@ -107,6 +107,7 @@ export const talk = async (screen: Screen, npc: string, ...choices: string[]) =>
   for (const choice of choices) {
     await screen.getByRole('button', `Talk to ${npc}`).last().tap();
     await screen.getByRole('button', choice).tap();
+    await screen.getByRole('button', 'Leave the conversation').tap();
   }
   await screen.getByRole('button', 'Leave').tap();
 };

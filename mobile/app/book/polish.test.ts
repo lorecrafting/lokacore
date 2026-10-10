@@ -1,3 +1,4 @@
+// size: allow 520, the polish picks share one real session and Book renderer harness
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -231,6 +232,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   // A screen reader hears the reason too, not only the Start over button's label.
   const startOver = h.draw().find((n) => n.props?.accessibilityLabel === 'Start over');
   assert.ok(startOver && !words(startOver).includes(fault));
+  h.tap('Leave the conversation');
   h.tap('Leave');
   h.map();
   h.tap('Go north'); // a fresh move, not a replay of the committed choice
@@ -250,7 +252,8 @@ test('a postcommit narration read fault preserves the saved result and clears re
   h.sql.close();
 });
 
-// Breaks: Leave is redundant or closes optimistically, journal cues look like speech, or controls leave the log.
+// Breaks: Leave is redundant or closes optimistically, journal cues look like speech, controls leave
+// the log, or an ended conversation offers Talk again instead of Leave the conversation (owner 2026-10-09).
 test('NPC history has distinct journal events and one confirmed Leave in the foot below the log', () => {
   const h = book();
   h.tap('Old Bram');
@@ -278,18 +281,22 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   );
   const page = h.draw(); // preorder: the scroll's subtree follows it, then the foot
   const end = page.findIndex((n) => n.type === 'ScrollView') + nodes(scroll).length;
-  const leave = (n: any) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave';
+  const leave = (n: any) =>
+    n.type === 'Pressable' && n.props.accessibilityLabel === 'Leave the conversation';
   assert.equal(page.filter(leave).length, 1);
   assert.ok(page.findIndex(leave) >= end);
-  h.tap('Leave');
+  h.tap('Leave the conversation');
   assert.equal(h.game.view().view.choice, undefined);
+  assert.ok(h.labels().includes('Talk to Old Bram')); // closing returns to Bram's page, not World
+  assert.equal(h.text().includes(prompt), false); // a clean page: the left conversation is hidden
+  h.tap('Leave');
   h.tap('Old Bram');
   h.tap('Talk to Old Bram');
   h.tap(CONTENTS);
   h.tap('Map');
   h.tap('Go north'); // local section navigation preserves the pending choice
   h.tap('Continue conversation');
-  h.tap('Leave'); // actual offered Close works without a projected speaker
+  h.tap('Leave the conversation'); // actual offered Close works without a projected speaker
   assert.equal(h.game.view().view.choice, undefined);
   h.map();
   h.tap('Go south');
@@ -313,10 +320,16 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   ]);
   const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
   assert.equal(flow[cue].props.style.fontStyle, 'italic');
-  assert.ok(cue < flow.findIndex((n) => n.type === 'Pressable'));
-  h.tap('Leave');
+  // The reply ended the kernel conversation; the page stays in it: no Talk, only its Leave.
+  assert.equal(
+    flow.findIndex((n) => n.type === 'Pressable'),
+    -1,
+  );
+  assert.ok(h.labels().includes('Leave the conversation'));
+  assert.ok(!h.labels().includes('Talk to Old Bram'));
+  h.tap(CONTENTS); // leaving by Contents also ends it: the later fresh visit offers Talk again
+  h.tap('Map');
   assert.equal(h.text().includes('Journal updated'), false);
-  h.map();
   h.tap('Go north');
   h.tap('A brass lantern');
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
@@ -327,7 +340,9 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.map();
   h.tap('Go south');
   h.tap('Old Bram');
+  assert.equal(h.text().includes('Journal updated'), false); // a fresh visit hides past talk
   h.tap('Talk to Old Bram');
+  assert.ok(h.text().includes('Journal updated')); // and a new conversation shows it again
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
   assert.deepEqual(h.labels(), ['Continue']);
@@ -494,7 +509,7 @@ test('a dusk GameView draws the Book in the dusk palette', () => {
   const h = book(bundle('missing_child_v030_hash'));
   assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
   const drawn = h.draw();
-  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2b1e16');
+  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2c2846');
   const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 22); // the room title
-  assert.equal(title.props.style.color, '#f1ddc2');
+  assert.equal(title.props.style.color, '#e8e2ec');
 });

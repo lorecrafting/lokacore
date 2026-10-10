@@ -14,46 +14,52 @@ const light = {
   warning: '#845512', // the warning band
 };
 
-// The mock's unlit/lamp paper (`.ph.unlit,.ph.lamp`), without its glow; `warning` is a burnt orange
-// apart from `action`.
+// Night: the mock's moonlit page (`.ph.moon`, the one with its shooting stars), with the lamp's
+// amber for `action` (the moon page's pale periwinkle accent would read as ink) and a burnt orange
+// `warning`. NightSky.tsx draws the stars over it.
 const dark: typeof light = {
-  bg: '#0c0b09',
-  fg: '#ecdfc3',
-  dim: '#a79a83',
-  line: '#2d271f',
-  card: '#17140f',
+  bg: '#10151e',
+  fg: '#d9e0ea',
+  dim: '#8e9aab',
+  line: '#263041',
+  card: '#171e2a',
   action: '#e6a650',
-  danger: '#eb9676',
+  danger: '#e39a88',
   warning: '#d0712a',
 };
 
-// Twilight: dawn a cool grey-blue paper with dark ink, dusk a warm umber page with lamp ink.
+// Twilight, from the mock's `.dusk` sky overlay (a gradient the page cannot carry flat): dawn its
+// rose-over-slate dawn tint on the paper with the day's ink, dusk its violet-navy bottom stop with
+// lamp ink, so dusk deepens into the night without a flip.
 // Every text role (fg, dim, action, danger, warning) is at least 4.5:1 on `bg` and on `card` in all
 // four palettes; `line` is a hairline, not text. Which palette shows: the in-game solar phase,
 // docs/system/book-ui.md#world-and-status-entry.
 const dawn: typeof light = {
-  bg: '#d5d9da',
+  bg: '#e2d7d7',
   fg: '#1c2128',
-  dim: '#4e5662',
-  line: '#b3bbc0',
-  card: '#cbd1d4',
+  dim: '#474f5c',
+  line: '#b9aeb6',
+  card: '#d5ccd3',
   action: '#7b2d20',
   danger: '#7b2d20',
   warning: '#6f4a10',
 };
 
 const dusk: typeof light = {
-  bg: '#2b1e16',
-  fg: '#f1ddc2',
-  dim: '#bfa58a',
-  line: '#4a3729',
-  card: '#36271d',
+  bg: '#2c2846',
+  fg: '#e8e2ec',
+  dim: '#aca5bd',
+  line: '#474263',
+  card: '#363253',
   action: '#f0b462',
   danger: '#f2a07f',
-  warning: '#e2894a',
+  warning: '#e68f50',
 };
 
 export const color = { light, dawn, dusk, dark };
+
+// The night sky's star and shooting-star colour (the mock's meteor, rgba(255,255,245)).
+export const nightSky = { star: '#fffff5' };
 
 // Bundled family names (OFL files in ./fonts), loaded by App.tsx `fonts` through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
@@ -113,6 +119,7 @@ export const motion = {
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
   palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)
+  meteor: { duration: 700, easing: 'linear' }, // one shooting star's streak (the mock's .7 s); none under reduced motion
 };
 
 // The paper page-turn sound, on by default, off in Settings. The mock's synthesised `pageSound` plays

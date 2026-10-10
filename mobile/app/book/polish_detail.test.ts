@@ -166,7 +166,7 @@ test('elapsed confirmed boundaries retain Conversation and chapter acknowledgmen
     assert.equal(h.game.pulse().kind, 'ready');
     assert.equal(h.game.view().view.time, 68400);
     assert.ok(h.text().includes('Conversation'));
-    assert.ok(h.labels().includes('Leave'));
+    assert.ok(h.labels().includes('Leave the conversation'));
     assert.ok(h.text().includes('They are not here to answer. Find them, or close this.'));
     assert.deepEqual(h.p.screen().detail(speaker), before);
     assert.deepEqual(h.p.screen().log, ['Old Bram leaves.']);
@@ -399,6 +399,7 @@ test('the running head shows the active quest objective on room and NPC pages', 
   h.tap('Talk to Elspeth');
   h.tap('Will you look around the Green for a sign of Wren?');
   assert.ok(h.text().includes(head));
+  h.tap('Leave the conversation');
   h.tap('Leave');
   assert.ok(h.text().includes('Ferry Landing'));
   assert.ok(h.text().includes(head));

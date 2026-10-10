@@ -35,6 +35,7 @@ const childReturn = async (r: Walk, child: Child) => {
   await screen.getByRole('button', /^Vesper is here\./).tap();
   await screen.getByRole('button', 'Talk to Vesper').last().tap();
   await r.spell('LANTERN');
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   if (child === 'stays')
     await talk(screen, 'Vesper', '“I’ll take your message to Elspeth. Wren can stay.”');
@@ -114,16 +115,20 @@ walk('4-wisp-ward', 'Side quest: the wisp ward', async (r) => {
   await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Speak to Wisp Wisp').tap();
   await screen.getByRole('button', 'Accept the riddle').tap();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   for (const wrong of ['EDIT', 'DIET', 'TIED']) await r.spell(wrong);
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   await r.spell('TIDE');
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await moves(screen, 'west', ...Array(8).fill('north'));
   await screen.getByRole('button', /^Prior Aldric is here\./).tap();
   await screen.getByRole('button', 'Ask about ward Prior Aldric').tap();
   await screen.getByRole('button', 'Discuss the ward').tap();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
 });
