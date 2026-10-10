@@ -35,3 +35,16 @@ Fresh save-side reviewer on head `76523cc6` (code `919faaa6`), [PR comment](http
 
 1. **question (non-blocking)**: `dialogue-save.ts:51` (one resolved custody receive), `deadline-save.ts:61` (at most one accepted offer) and `topics-save.ts:38` (exactly one granting receipt) assume an answer resolves at most once per lineage. Current content is safe (Peg's accepts are refused after acceptance and expiry); a future hub option with receive, `topic.grant` or escort needs an availability that excludes repeats, or must end the hub.
 2. **nit**: `docs/system/save.md` does not say that a rule change under the same pin turns older receipt histories into `save_corrupt`; add one line under "Opening a story" citing the decision record.
+
+## Fix re-check (head `093e949a`; commits `9404f616`, `893939c9`, `093e949a`)
+
+Reviewed only the fix commits, the code they touch and its direct callers (`proposal.ts` `farewell`, `selection.ts` `talking`/`leave`/`parted`/`reopens`, `rule.ts` talk, `sequence.ts` Continue, `dream_shared.ts`, `riddle-save.ts`, `cartridge_dialogues.ts` `once`, `hub.ex`). Focused runs green (kernel dialogue, quest_dialogue, dream, cartridge_escort; authority dialogue_hub, dream, wren_riddle; Elixir content_escort, content_ferry 19/19).
+
+- R1 fixed: the event-order mutant (`behavior.ts:100` `[opened, ...a.events]`) now fails `dialogue.test.ts` "an answer returns to the hub".
+- R2 fixed: `behavior.ts` uses `continuationId(mint)`.
+- R3: Beads loka-x6t.9 tracks the "Leave Aldric." content removal.
+- R4 superseded by the PM ruling: a Talk to another speaker or the dream's Continue closes the open conversation first, and a hub conversation closes once the actor and speaker are apart.
+- Mutants, each red: no `farewell` (`dialogue.test.ts`); talk without `leave` (`dialogue_hub.test.ts`, real SQLite); `parted` closing one-shot rows (`dialogue.test.ts` stale-choice case, adverse case `walked-away-rejects-new-choice`); `once` without `receive` (`quest_dialogue.test.ts`); Continue without `leave` (`dream.test.ts`); `hub.ex` without `receive` (`content_ferry_test.exs`, `mix test --force`).
+- Save readers that count ops on a receipt filter by op type first (`deadline-receipts.ts:28`, `topics-save.ts:54`, `commerce-save.ts:271`); `riddle-save.ts` accepts a talk/Continue receipt that closes the riddle row. TS `once` and `hub.ex` agree (several choices; no quest, riddle, accept or patrol; receive, escort start, `topic.grant`).
+
+No new findings. Verdict: **APPROVE**.
