@@ -3,7 +3,7 @@
 - Branch `toolbox/m6-persuade`, head `1107e44c1d3f77096e98682c3ee2858c9468c709`, base `origin/toolbox/batch-m6` `f3d561e6`, 33 files. No PR; handoff in Beads `loka-kgd.55`. Record kept: the slice changes `protocol/dialogue.schema.json`, kernel `COMPOSES` and `kernel_api` 1.47 ([two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 - Governing: [row 14](../MECHANICS-TOOLBOX.md#ranked-toolbox); [dialogue@1](../system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts); [opposed checks](../system/mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5); new [row 14 section](../system/mechanics.md#dialogue-skill-checks-toolbox-row-14).
 - Hosted CI on the head: ci `38066951247` and book-e2e `38066951252`, both success.
-- Verdict: **CHANGES REQUIRED**. One blocker (a mutant survives; the fix is one assertion), two nits, one question.
+- Verdict (first round): **CHANGES REQUIRED**; after the fix round **APPROVE WITH NOTES** (see Fix re-check). One blocker (a mutant survives; the fix is one assertion), two nits, one question.
 
 ## Must be true
 
@@ -36,3 +36,14 @@
 - Conflicts: `kernel/ts/src/mechanics/dialogue/rule.ts` (semantic), `docs/system/mechanics.md`, `docs/system/cartridge.md`, `protocol/cartridge.schema.json`, `protocol/fixtures/invalid.json`, plus generated `docs/contracts.gen.md`, `docs/system-graph.gen.json`, `docs/toolbox.gen.json`, `kernel/ts/src/contracts.gen.ts` (regenerate).
 - `rule.ts`: both branches add a 6th parameter to `sequence()`: `speaker` (W2) and `start` (here). The resolution must move W2's `{...step, subject: speaker}` into `mechanics/dialogue/sequence.ts` and keep both parameters.
 - `runtime/world.ts` `kernel_api: '1.47'` merges cleanly (same line on both sides). That is correct only if both rows land in M6 together; otherwise the later one needs 1.48.
+
+## Fix re-check (head `9cd12ea1da8421c854172119adf794438ba34ac0`, fix commit `9cd12ea1`)
+
+Scope: the fix commit only (`dialogue_checks.test.ts`, `behavior.ts`, `mechanics.md`).
+
+- **F1 fixed.** `kernel/ts/test/dialogue_checks.test.ts:131` asserts the intimidate check's `subject_id` is the guard. Focused run green. Mutant rerun: `sequence.ts:82` returns `actor_id` instead of the speaker, and the test "a failed check reads its failure line…" now fails (killed).
+- **N2 fixed.** `behavior.ts:71` and `mechanics.md:2040` now give the save rule as the closing reason (a new talk may choose the choice again).
+- **N3 fixed.** `mechanics.md:2042` adds a fact set by a reaction on `check_failed` for the check's key.
+- **Question settled (PM ruling, 2026-10-10):** dialogue checks need no cost or cooldown; growth is capped by the last `growth` entry, as in row 5.
+- Hosted CI on `9cd12ea1`: ci `38068368545` and book-e2e `38068368514`, both success.
+- Verdict: **APPROVE WITH NOTES** (notes: the m6-facts merge items above).
