@@ -1,0 +1,30 @@
+# Review: Dialogue hub, conversations stay open until Leave (PR #345)
+
+- PR #345, branch `feat/dialogue-hub`, head `76523cc6` (code head `919faaa6`). Beads loka-x6t.5.
+- Governing: [dialogue@1](../system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts) (amended here); [owner decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md); [two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md) §5 (save/kernel record).
+- Verdict: **CHANGES REQUIRED** (one should-fix, R1).
+
+## Must be true
+
+1. An accepted non-ending `choose` resolves its row and, in the same decision, opens one fresh pending row with the old row's source, beat, roles and choice ids (never rebound); `choice_opened` follows `choice_resolved`.
+2. Quest-resolving or riddle dialogues, `patrol` answers and single-choice dialogues open nothing. Refusals and a riddle's wrong answer are untouched.
+3. `close_choice` on the fresh row is Leave the conversation; Talk elsewhere stays refused while it is pending.
+4. Save: a failed or lost COMMIT leaves the old row pending; retry settles one hub row; exact retry replays; cold reopen restores the hub. A save written after the change re-decides identically (no new misread); older hub answers open `save_corrupt` (accepted by the decision).
+
+## Proof
+
+- Reopening set: a script over all `cartridges/*/dialogues` lists exactly the PR's hub dialogues (missing_child and r9c: elspeth, a_elspeth_lost, b_elspeth_rescued/stays, b_aldric, a_peg_debt; tobin_watch is all `patrol`). No multi-choice non-quest dialogue carries escort, payment, lesson, exchange or `skill.acquire`, so the four endings cover every one-shot answer in content.
+- Mutants (`dialogue.test.ts`, `patrol.test.ts`): no patrol ending, exit 1; no quest ending, exit 1; single-choice threshold `< 1`, exit 1. `at` without `+ 1`: survives, but equivalent (proposal renumbers positions by array order). `events: [opened, ...a.events]`: survives `dialogue.test.ts` and `dialogue_hub.test.ts`; only `stories.test.ts` freshness fails (R1).
+- PR claims rerun: `NEXT` (`dialogue.test.ts:386`) recomputed with Python SHA-256 of `["loka-id-v1", CONTEXT, OTHER, 1]`: matches. Removing the `bell-receipt.ts:55` null guard fails `bell.test.ts` "both completed returns keep Silence..." (exit 1): holds.
+- `bell-receipt.ts`: a pre-existing crash on any refusal receipt (null command) in the scope; the fix matches `finale-save.ts:81`. Other parsers filter accepted receipts.
+- Creatures off-counter Leave (`r9c_creatures_transport.test.ts:274`): legitimate; draws key on command ids, and the file's ~77 sends cannot reach `...0ff`.
+- Save (4): choose receipt readers filter by op/event type (`dialogue-receipt.ts:100-117`); no positional check reads a choose receipt. Chained hub rows reopen cold after every answer and after Leave (`e1_dialogue_circuit.ts:9-19`, Elspeth three answers); Peg accept, reopen, Leave, later reopen (`chandlers_debt.test.ts:17-27`); both green on ci 38014962814.
+- Elspeth's policy is `all []` (`elspeth.json`), so after `accept` her other topics stay available; only Peg's hub is dead, as the PR lists.
+- Elixir: only `compose_choice.ex`/`invariants.ex` touch choice ops; op set unchanged.
+
+## Findings
+
+1. **should-fix**, `kernel/ts/test/dialogue.test.ts:390-434`: the test names "its choice_opened before choice_resolved" as a break, but its answer (`carry`) sets a fact, so `factChanged` (`mechanics/fact.ts:209`) sorts by position and hides array order. A hub answer with no fact (Elspeth `directions`) emitting `choice_opened` first passes every named test; the event stream the Book history reads changes order (regenerated `stories/views` differ under that mutant). Fix: assert the event-type order of a no-fact hub answer (e.g. `settled.decision.events` in `dialogue_hub.test.ts`).
+2. **nit**, `kernel/ts/src/mechanics/dialogue/behavior.ts:83`: `mint() as ContinuationId` restates `continuationId(mint)` (`shared.ts:51`).
+3. **nit**, `cartridges/ashmere_missing_child/dialogues/b_aldric.json:8`: "Leave Aldric." reopens the hub; the content follow-up proposed in the PR has no Beads issue yet.
+4. **question**: a hub left pending while the player walks away refuses every other Talk and the dream's Continue (`scene/dream_shared.ts:75`) until Leave. Per spec; confirm the designer's Book UI item 6 covers it.
