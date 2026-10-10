@@ -87,7 +87,7 @@ test('the silver door opens only at full moon', () => {
 // invalid_state instead of exit_locked.
 test('a locked gated door outside its window is exit_locked', () => {
   const locked = structuredClone(content);
-  locked.barriers!['time_sampler@0.0.1:barrier/moon_door'].initial = 'locked';
+  (locked.barriers!['time_sampler@0.0.1:barrier/moon_door'] as Obj).initial = 'locked';
   assert.deepEqual(playIn(locked, door('open', 'north')), ['exit_locked']);
 });
 
