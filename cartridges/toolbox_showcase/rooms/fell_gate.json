@@ -1,0 +1,15 @@
+{
+  "title": "room.fell_gate.title",
+  "description": "room.fell_gate.description",
+  "exits": {
+    "south": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "fell_top"
+    },
+    "east": {
+      "to": "the_fold"
+    }
+  }
+}

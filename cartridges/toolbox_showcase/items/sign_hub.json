@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "sign",
+    "signpost"
+  ],
+  "short": "item.sign_hub.short",
+  "room_line": "item.sign_hub.room",
+  "description": "item.sign_hub.description",
+  "location": {
+    "in": "room",
+    "room": "crossroads_inn"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_sign",
+    "text": "readable.sign_hub"
+  }
+}

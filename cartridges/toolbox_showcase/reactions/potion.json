@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "drank",
+    "kind": "draught"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "might"
+    }
+  ]
+}

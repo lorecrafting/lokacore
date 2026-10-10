@@ -1,0 +1,43 @@
+{
+  "title": "room.cliff_top.title",
+  "description": "room.cliff_top.description",
+  "exits": {
+    "south": {
+      "to": "cliff_path"
+    },
+    "down": {
+      "to": "smugglers_stair",
+      "climb": {
+        "item": "rope",
+        "damage": 3,
+        "fell": "narration.fell"
+      }
+    },
+    "east": {
+      "to": "tide_pools",
+      "barrier": "moon_door"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "lunar": "full"
+        }
+      },
+      "description": "room.cliff_top.full_moon"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "lunar": "new"
+        }
+      },
+      "description": "room.cliff_top.dark_moon"
+    }
+  ]
+}

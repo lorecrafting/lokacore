@@ -1,0 +1,43 @@
+{
+  "label": "actions.throw_fold_bones",
+  "aliases": [
+    "throw"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "the_fold",
+    "detail": "fold_bones"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "check": {
+    "key": "throw_fold_bones",
+    "kind": "opposed",
+    "attribute": "dex"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "bones"
+        }
+      ],
+      "narration": {
+        "actor": "narration.throw_bones.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.throw_bones.failure"
+      }
+    }
+  }
+}

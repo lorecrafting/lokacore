@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "sign",
+    "signpost"
+  ],
+  "short": "item.sign_body.short",
+  "room_line": "item.sign_body.room",
+  "description": "item.sign_body.description",
+  "location": {
+    "in": "room",
+    "room": "fell_gate"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_sign",
+    "text": "readable.sign_body"
+  }
+}

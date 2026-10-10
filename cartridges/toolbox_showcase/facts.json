@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "stair_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has found the stair from the sea cave."
+    }
+  }
+}

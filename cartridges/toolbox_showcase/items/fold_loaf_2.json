@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "loaf",
+    "bread"
+  ],
+  "short": "item.fold_loaf_2.short",
+  "room_line": "item.fold_loaf_2.room",
+  "description": "item.fold_loaf_2.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 200,
+  "edible": {
+    "resource": "mv",
+    "amount": 5,
+    "label": "action.eat",
+    "narration": "narration.eat_fold_loaf_2",
+    "cures": [
+      "hungry"
+    ]
+  }
+}

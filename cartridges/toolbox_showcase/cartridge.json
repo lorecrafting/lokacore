@@ -1,0 +1,189 @@
+{
+  "api_version": "loka/v3",
+  "id": "toolbox_showcase",
+  "version": "0.0.1",
+  "title": "Toolbox Showcase",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.47",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "equipment": 1,
+      "resource": 1,
+      "fact": 1,
+      "policy": 1,
+      "reaction": 1,
+      "status": 1,
+      "schedule": 1,
+      "calendar": 1,
+      "tags": 1,
+      "description_variant": 1,
+      "variety": 1,
+      "knowledge": 1,
+      "action_recipe": 1,
+      "check": 1,
+      "skills": 1,
+      "attributes": 1,
+      "liquid": 1,
+      "food": 1,
+      "readable": 1,
+      "barrier": 1,
+      "death": 1,
+      "position": 1,
+      "behavior": 1,
+      "inspectable_detail": 1,
+      "target_resolution": 1,
+      "topics": 1,
+      "quest": 1,
+      "dialogue": 1,
+      "scene": 1,
+      "commerce": 1,
+      "combat": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "crossroads_inn",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "alternates": {
+    "narration.look_about": [
+      "narration.look_about_b",
+      "narration.look_about_c"
+    ]
+  },
+  "calendar": {
+    "start": 25200,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 4,
+    "weather": [
+      {
+        "phase": "clear",
+        "weight": 2
+      },
+      {
+        "phase": "frost",
+        "weight": 1
+      },
+      {
+        "phase": "rain",
+        "weight": 1,
+        "wet": true
+      },
+      {
+        "phase": "gale",
+        "weight": 1
+      },
+      {
+        "phase": "heat",
+        "weight": 1
+      },
+      {
+        "phase": "drought",
+        "weight": 1
+      }
+    ],
+    "season": {
+      "period": 345600,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "spring"
+        },
+        {
+          "at": 86400,
+          "phase": "summer"
+        },
+        {
+          "at": 172800,
+          "phase": "autumn"
+        },
+        {
+          "at": 259200,
+          "phase": "winter"
+        }
+      ]
+    },
+    "tide": {
+      "period": 43200,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "low"
+        },
+        {
+          "at": 21600,
+          "phase": "high"
+        }
+      ]
+    },
+    "lunar": {
+      "period": 345600,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "new"
+        },
+        {
+          "at": 172800,
+          "phase": "full"
+        }
+      ]
+    }
+  },
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "carry": {
+      "max_grams": 5000
+    },
+    "derived": {
+      "carry_grams": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 1000,
+            "pivot": 10
+          }
+        ]
+      }
+    },
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "crossroads_inn",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    }
+  }
+}

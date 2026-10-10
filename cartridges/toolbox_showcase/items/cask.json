@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "cask"
+  ],
+  "short": "item.cask.short",
+  "room_line": "item.cask.room",
+  "description": "item.cask.description",
+  "location": {
+    "in": "room",
+    "room": "still_room"
+  },
+  "mass_grams": 100,
+  "vessel": {
+    "capacity": 3,
+    "unit_label": "liquid.doses",
+    "initial": {
+      "kind": "draught",
+      "quantity": 3
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "rope"
+  ],
+  "short": "item.spare_rope.short",
+  "room_line": "item.spare_rope.room",
+  "description": "item.spare_rope.description",
+  "location": {
+    "in": "room",
+    "room": "tide_pools"
+  },
+  "mass_grams": 0
+}

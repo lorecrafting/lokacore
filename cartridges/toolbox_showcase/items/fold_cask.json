@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "cask"
+  ],
+  "short": "item.fold_cask.short",
+  "room_line": "item.fold_cask.room",
+  "description": "item.fold_cask.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 100,
+  "vessel": {
+    "capacity": 3,
+    "unit_label": "liquid.doses",
+    "initial": {
+      "kind": "draught",
+      "quantity": 3
+    }
+  }
+}

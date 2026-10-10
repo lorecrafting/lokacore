@@ -1,0 +1,35 @@
+{
+  "title": "room.the_fold.title",
+  "description": "room.the_fold.description",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "west": {
+      "to": "fell_gate"
+    }
+  },
+  "details": {
+    "fold_post": {
+      "aliases": [
+        "post"
+      ],
+      "description": "detail.fold_post"
+    },
+    "fold_bones": {
+      "aliases": [
+        "knucklebones",
+        "bones"
+      ],
+      "description": "detail.fold_bones",
+      "rating": 11
+    },
+    "fold_hearth": {
+      "aliases": [
+        "hearth",
+        "fire"
+      ],
+      "description": "detail.fold_hearth"
+    }
+  }
+}

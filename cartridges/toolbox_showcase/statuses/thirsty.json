@@ -1,0 +1,12 @@
+{
+  "duration": 86400,
+  "tick_every": 3600,
+  "resource": "thirst",
+  "per_tick": -1,
+  "label": "condition.thirsty",
+  "narration": {
+    "applied": "narration.thirsty.applied",
+    "tick": "narration.thirsty.tick",
+    "expired": "narration.thirsty.expired"
+  }
+}

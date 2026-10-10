@@ -1,0 +1,33 @@
+{
+  "label": "actions.search_pool_cleft",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "tide_pools",
+    "detail": "pool_cleft"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "stair_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_pool_cleft"
+      }
+    }
+  }
+}

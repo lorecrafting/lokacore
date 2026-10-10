@@ -1,0 +1,29 @@
+{
+  "keywords": [
+    "orla",
+    "brewer"
+  ],
+  "short": "npc.orla.short",
+  "room_line": "npc.orla.room",
+  "description": "npc.orla.description",
+  "room": "still_room",
+  "attributes": [
+    {
+      "attribute": "dex",
+      "value": 11
+    }
+  ],
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "inspired"
+        }
+      },
+      "description": "npc.orla.description_inspired"
+    }
+  ]
+}

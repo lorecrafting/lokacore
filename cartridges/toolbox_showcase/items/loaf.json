@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "loaf",
+    "bread"
+  ],
+  "short": "item.loaf.short",
+  "room_line": "item.loaf.room",
+  "description": "item.loaf.description",
+  "location": {
+    "in": "room",
+    "room": "crossroads_inn"
+  },
+  "mass_grams": 200,
+  "edible": {
+    "resource": "mv",
+    "amount": 5,
+    "label": "action.eat",
+    "narration": "narration.eat_loaf",
+    "cures": [
+      "hungry"
+    ]
+  }
+}

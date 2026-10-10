@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "sign",
+    "signpost"
+  ],
+  "short": "item.sign_world.short",
+  "room_line": "item.sign_world.room",
+  "description": "item.sign_world.description",
+  "location": {
+    "in": "room",
+    "room": "shore_steps"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_sign",
+    "text": "readable.sign_world"
+  }
+}
