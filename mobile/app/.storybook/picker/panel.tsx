@@ -87,11 +87,15 @@ const Pending = ({ pending }: Pick<State, 'pending'>) => (
     ))}
   </div>
 );
-const Hint = ({ failed }: { failed: string | null }) =>
+const Hint = ({ failed, suggestion }: { failed: string | null; suggestion?: string }) =>
   failed ? (
     <Negative>not sent: {failed}</Negative>
   ) : (
-    <Muted style={{ fontSize: 11 }}>↩ send · ⇧↩ newline · esc clear · ⇧click adds an element</Muted>
+    <Muted style={{ fontSize: 11 }}>
+      {suggestion
+        ? '⇥ accept · ↩ send · ⇧↩ newline'
+        : '↩ send · ⇧↩ newline · esc clear · ⇧click adds an element'}
+    </Muted>
   );
 
 // The text and pins stay until the queue answered 200 (a failed send shows why). A PM suggestion
@@ -140,7 +144,7 @@ const Compose = ({
         }}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Hint failed={failed} />
+        <Hint failed={failed} suggestion={text ? undefined : suggestion} />
         <Button size="small" variant="solid" onClick={() => void submit()}>
           Send
         </Button>
