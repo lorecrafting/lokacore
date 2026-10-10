@@ -1,0 +1,18 @@
+{
+  "room.gate_room.title": "Gatehouse",
+  "room.gate_room.description": "A gatehouse with a [north](north) gate and a [south](south) gate, each held by a guard.",
+  "detail.north": "The north gate, held by a broad guard.",
+  "detail.south": "The south gate, held by a slight guard.",
+  "npc.strong_guard.short": "a broad guard",
+  "npc.strong_guard.room": "A [broad guard](strong_guard) holds the north gate.",
+  "npc.strong_guard.description": "A broad guard, strong as an ox.",
+  "npc.weak_guard.short": "a slight guard",
+  "npc.weak_guard.room": "A [slight guard](weak_guard) holds the south gate.",
+  "npc.weak_guard.description": "A slight guard, all elbows.",
+  "actions.shove_north": "Shove past the broad guard",
+  "narration.shove_north.success": "You shove the broad guard aside.",
+  "narration.shove_north.failure": "The broad guard does not budge.",
+  "actions.shove_south": "Shove past the slight guard",
+  "narration.shove_south.success": "You shove the slight guard aside.",
+  "narration.shove_south.failure": "The slight guard does not budge."
+}

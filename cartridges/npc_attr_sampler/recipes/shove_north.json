@@ -1,0 +1,46 @@
+{
+  "label": "actions.shove_north",
+  "aliases": [
+    "shove"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "gate_room",
+    "detail": "north"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "north_open",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "shove_north",
+    "kind": "opposed",
+    "attribute": "str",
+    "npc": "strong_guard"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "north_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.shove_north.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.shove_north.failure"
+      }
+    }
+  }
+}

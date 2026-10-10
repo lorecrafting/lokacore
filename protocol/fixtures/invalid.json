@@ -20904,5 +20904,121 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "opposed_check_npc_on_skill",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "pick_gate",
+        "kind": "opposed",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "pick"
+        },
+        "npc": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "npc",
+          "key": "guard"
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/attribute",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_attributes_entry_mistyped",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "golem",
+      "keywords": [
+        "golem"
+      ],
+      "short": "npc.golem.short",
+      "room_line": "npc.golem.room",
+      "description": "npc.golem.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "attributes": [
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "x": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/attributes/0/value",
+        "code": "missing_property"
+      },
+      {
+        "path": "/attributes/0/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

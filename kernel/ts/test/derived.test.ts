@@ -212,6 +212,34 @@ test('a real attack round commits hp 15 above the authored maximum 10', () => {
   assert.equal(fought.state.resources?.[at]?.value, 15);
 });
 
+// Breaks (row G3): an NPC's declared str ignored (loss 1) or read as the start 5 (bonus -3, loss
+// 0), or the bonus applied to an NPC that declares no attributes (str 5: loss 0, not 1).
+test('a dummy declaring str 20 hits for 1 + floor(10 / 2) = 6; without attributes for 1', () => {
+  const hit = (attributes?: object[]) => {
+    const c = structuredClone(content) as any;
+    const npc = c.npcs['derived_sampler@0.0.1:npc/dummy'];
+    npc.attack = { chance: 100, damage_min: 1, damage_max: 1 };
+    if (attributes) npc.attributes = attributes;
+    const w = chosen('nimble', c);
+    const at = encode({
+      kind: 'resource',
+      resource: resourceRef(w, 'hp'),
+      entity_id: w.body,
+    } as never);
+    const moved = play(w, { type: 'move', direction: 'east' });
+    const fought = wait(play(moved, { type: 'attack', target_id: dummy(w) }), 150);
+    return fought.state.resources?.[at]?.value ?? 10;
+  };
+  const str = {
+    cartridge_id: 'derived_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'attribute',
+    key: 'str',
+  };
+  assert.equal(hit([{ attribute: str, value: 20 }]), 4);
+  assert.equal(hit(), 9);
+});
+
 // Breaks: the death sequence restores the authored 10 above a derived maximum of 4, so the killing
 // round faults composition and the player never returns; or the maximum loses its floor at the
 // pool minimum 0 (constitution 16 at -3 per point would read -8).

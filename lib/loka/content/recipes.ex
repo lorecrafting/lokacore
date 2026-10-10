@@ -91,6 +91,24 @@ defmodule Loka.Content.Recipes do
 
   defp shared(_, _, _), do: []
 
+  # Toolbox row G3: an opposed check naming an NPC needs no rating; the NPC is an instance of this
+  # cartridge that declares the check's attribute.
+  defp opposed(rel, %{"check" => %{"npc" => n} = c}, m, defs) do
+    reference(rel, ["check"], "attribute", c, m, defs) ++
+      case resolve(n, "npc", m, defs) do
+        {_, _, npc} ->
+          if npc["spawn_template"] ||
+               !Enum.any?(npc["attributes"] || [], &(&1["attribute"] == c["attribute"])),
+             do: [
+               diag("SCHEMA_VIOLATION", at(rel, ["check", "npc"]), %{"error" => "invalid_value"})
+             ],
+             else: []
+
+        _ ->
+          reference(rel, ["check"], "npc", c, m, defs)
+      end
+  end
+
   # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge and its
   # target detail declares a rating.
   defp opposed(rel, %{"check" => c, "target" => t}, m, defs) do

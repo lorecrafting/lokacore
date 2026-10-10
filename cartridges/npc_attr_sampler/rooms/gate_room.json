@@ -1,0 +1,19 @@
+{
+  "title": "room.gate_room.title",
+  "description": "room.gate_room.description",
+  "exits": {},
+  "details": {
+    "north": {
+      "aliases": [
+        "north"
+      ],
+      "description": "detail.north"
+    },
+    "south": {
+      "aliases": [
+        "south"
+      ],
+      "description": "detail.south"
+    }
+  }
+}
