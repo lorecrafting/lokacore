@@ -292,7 +292,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Create a QuestInstance in state active. Target: quest (instance_id). Precondition: no instance of the quest is active or objectives_complete in the scope.",
+          "description": "Create a QuestInstance in state active. Target: quest (instance_id). Precondition: no instance of the quest is active or objectives_complete in the scope. API1.46 (toolbox row W23): optional started_at, the logical time the stage began, is stored on the instance row; a quest.transition without it removes the row's started_at.",
           "type": "object",
           "properties": {
             "op": {
@@ -315,6 +315,9 @@
               "items": {
                 "$ref": "#/$defs/RoleBinding"
               }
+            },
+            "started_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
             }
           },
           "required": [
@@ -327,7 +330,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Target: quest (instance_id). Preconditions: current state is `from`; from -> to is a legal 06 §1 transition; `outcome` is present exactly when `to` is resolved or failed with an outcome.",
+          "description": "Target: quest (instance_id). Preconditions: current state is `from`; from -> to is a legal 06 §1 transition; `outcome` is present exactly when `to` is resolved or failed with an outcome. API1.46 (toolbox row W23): optional started_at, the logical time the stage began, is stored on the instance row; a quest.transition without it removes the row's started_at.",
           "type": "object",
           "properties": {
             "op": {
@@ -347,6 +350,9 @@
             },
             "outcome": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "started_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
             }
           },
           "required": [

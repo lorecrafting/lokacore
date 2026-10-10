@@ -434,7 +434,7 @@
       ]
     },
     "QuestJournal": {
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending; the Journal shows the last one whose time has passed.",
       "type": "object",
       "properties": {
         "active": {
@@ -481,6 +481,58 @@
             ],
             "additionalProperties": false
           }
+        },
+        "hints": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "after": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1440
+                  },
+                  "text": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  }
+                },
+                "required": [
+                  "after",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "objectives_met": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "after": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1440
+                  },
+                  "text": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  }
+                },
+                "required": [
+                  "after",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

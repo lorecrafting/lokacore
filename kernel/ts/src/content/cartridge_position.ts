@@ -1,10 +1,11 @@
 import { skillSpec, usesSpec } from './cartridge_skills.ts';
+import { tipSpec } from './cartridge_recipes.ts';
 // The loader's engine-fact check (cartridge.md Compiler; DiagnosticCode RESERVED_FACT), twin of
 // lib/loka/content/position.ex: under position@1 the fact position is the engine's, so the
 // scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
 // and no recipe outcome, reaction apply or
-// dialogue choice or scene ending may assign it. Skill acquisition and story-point markers
-// have the same ownership check. Reading it (fact_compare, on.fact) is allowed.
+// dialogue choice or scene ending may assign it. Skill acquisition, story-point markers and
+// recipe tips (seen_tip_<key>) have the same ownership check. Reading it (fact_compare, on.fact) is allowed.
 import { markerSpec, spec } from './cartridge_scenes.ts';
 import { encode } from '../foundation/canonical.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
@@ -95,5 +96,7 @@ function expectedFacts(c: Obj): Obj {
     expected[`skill_${s.key}`] = skillSpec(s.key);
     if (s.growth) expected[`uses_${s.key}`] = usesSpec(s.key, s.growth);
   }
+  for (const r of Object.values((c.recipes ?? {}) as Obj))
+    if (r.tip) expected[`seen_tip_${r.key}`] = tipSpec(r.key);
   return expected;
 }

@@ -8,6 +8,7 @@ import { patrol } from './cartridge_patrol.ts';
 import { expedition } from './cartridge_expedition.ts';
 import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import { apiCmp } from './cartridge_installed.ts';
 
 export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
   const taken = new Set([
@@ -32,6 +33,7 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
       );
       if (q.journal.outcomes)
         text(q.journal.outcomes, Object.keys(q.journal.outcomes), `${at}.journal.outcomes`);
+      out.push(...hints(c, q.journal.hints, `${at}.journal.hints`, text));
     }
     if (q.objective.item_acquired)
       named(q.objective.item_acquired, 'item', `${at}.objective.item_acquired`);
@@ -40,6 +42,22 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
       named(q.deadline.trust_fact, 'fact', `${at}.deadline.trust_fact`);
     }
   }
+  return out;
+}
+
+// Toolbox row W23: each stage's hints resolve, their minutes strictly ascend, real minutes need the
+// real_elapsed time policy (INVALID_TIME_POLICY) and hints need kernel_api 1.46.
+function hints(c: Obj, h: Obj | undefined, at: string, text: Checks['text']): Diagnostic[] {
+  if (!h) return [];
+  const out: Diagnostic[] = [];
+  for (const [stage, list] of Object.entries(h as Record<string, Obj[]>)) {
+    list.forEach((x, i) => text(x, ['text'], `${at}.${stage}[${i}]`));
+    if (list.some((x, i) => i > 0 && x.after <= list[i - 1]!.after))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.${stage}`, { error: 'invalid_value' }));
+  }
+  if (c.manifest.time_policy?.profile !== 'real_elapsed') out.push(diag('INVALID_TIME_POLICY', at));
+  if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
 

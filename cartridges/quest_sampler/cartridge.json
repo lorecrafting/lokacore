@@ -1,0 +1,33 @@
+{
+  "api_version": "loka/v3",
+  "id": "quest_sampler",
+  "version": "0.0.1",
+  "title": "Quest Hints Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.46",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "policy": 1,
+      "quest": 1,
+      "schedule": 1,
+      "inspectable_detail": 1,
+      "fact": 1,
+      "action_recipe": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "hall",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  }
+}

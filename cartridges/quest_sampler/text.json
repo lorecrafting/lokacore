@@ -1,0 +1,21 @@
+{
+  "room.hall.title": "Hall",
+  "room.hall.description": "A bare hall with a [stone floor](floor).",
+  "item.key.short": "a small key",
+  "item.key.room": "A [small key] lies in the dust.",
+  "item.key.description": "An iron key, cold and plain.",
+  "quest.find_key.title": "The lost key",
+  "quest.find_key.accept": "Promise to find the key",
+  "quest.find_key.active": "Find the lost key.",
+  "quest.find_key.found": "You have the key. Keep it safe.",
+  "quest.find_key.done": "The key is home.",
+  "quest.find_key.failed": "The key stays lost.",
+  "quest.find_key.abandoned": "You gave up on the key.",
+  "quest.find_key.hint_look": "Look at the floor of the hall.",
+  "quest.find_key.hint_take": "Take the key from the dust.",
+  "quest.find_key.hint_return": "No one asks for the key yet; keep it.",
+  "detail.floor": "Grey flagstones under a skin of dust.",
+  "actions.search_floor": "Search the floor",
+  "narration.search_floor": "You run your hands through the dust.",
+  "tip.search_floor": "Searching takes no time here; search wherever something looks out of place."
+}

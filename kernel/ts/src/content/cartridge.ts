@@ -18,6 +18,7 @@ import {
   type Obj,
 } from './cartridge_refs.ts';
 import { uses as dialogueUses } from './cartridge_dialogues.ts';
+import { tipUses as tips } from './cartridge_recipes.ts';
 import { scenes } from './cartridge_scenes.ts';
 import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
@@ -233,7 +234,7 @@ function lockStage(c: Obj): Diagnostic[] {
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
-  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c)]) use(kind, name, at);
+  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c), ...tips(c)]) use(kind, name, at);
   return out;
 }
 

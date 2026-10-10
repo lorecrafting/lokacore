@@ -27,10 +27,12 @@ defmodule Loka.Content.Skills do
       "meaning" => "Skill #{key}'s use count (skills@1): only skills@1 writes it."
     }
 
+  # Recipe tips' seen_tip_<key> facts (Recipes.tip_facts) are reserved the same way, here.
   def facts(facts, m, defs) when is_map(facts) and m != nil do
     Enum.reduce(defs["skill"], {facts, []}, fn {key, skill}, acc ->
       Enum.reduce(reserved(key, skill), acc, &reserve(&1, skill, &2))
     end)
+    |> Loka.Content.Recipes.tip_facts(defs)
   end
 
   def facts(facts, _, _), do: {facts, []}

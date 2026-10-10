@@ -16,7 +16,7 @@ import {
 import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
-import { earned } from '../mechanics/quest/lifecycle.ts';
+import { earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -153,7 +153,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...own);
+  p.ops.push(...stamp(p.world, own, base.logical_time));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);
@@ -200,8 +200,20 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
     );
 }
 
+// A quest's earned exit to objectives_complete, stamped for W23 hints.
+function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof stamp>[2]) {
+  const op = 'quest.transition';
+  const step = {
+    op,
+    writer_group: ++p.group,
+    instance_id,
+    from: 'active',
+    to: 'objectives_complete',
+  } as const;
+  return stamp(p.world, [step], at);
+}
+
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -211,13 +223,7 @@ function react(p: P): Admitted | undefined {
       const at = now(p);
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
-      p.ops.push({
-        op: 'quest.transition',
-        writer_group: ++p.group,
-        instance_id,
-        from: 'active',
-        to: 'objectives_complete',
-      });
+      p.ops.push(...earnedExit(p, instance_id, next.cause.logical_time));
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;

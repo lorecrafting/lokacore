@@ -17,10 +17,12 @@
 // (runtime/proposal.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
 // reads the outcome's narration, each of its participants pinned here to its EntityId (an NPC's
 // or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
-// duration one time.advance after the steps; events keep the admission time. Result bands join
-// later.
+// duration one time.advance after the steps; events keep the admission time. A recipe with a tip
+// (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
+// then also reads the tip after the outcome's line. Result bands join later.
 import type {
   ActionRecipe,
+  CharacterId,
   DeltaOp,
   EntityId,
   EventPayload,
@@ -28,6 +30,7 @@ import type {
   NarrationParticipant,
   RecipeNarration,
   RecipeStep,
+  TextKey,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
@@ -41,7 +44,7 @@ import {
   type Rule,
   type World,
 } from '../../runtime/decision.ts';
-import { assigned } from '../fact.ts';
+import { assigned, seenTip, value } from '../fact.ts';
 import { add } from '../../foundation/int.ts';
 import { adjust, level, type Levels } from '../resource.ts';
 import { value as attributeValue } from '../attributes/shared.ts';
@@ -66,7 +69,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const start = { ...START, ops: paid.ops, levels: paid.levels };
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
   const begun = practised(world, actor_id, checked, check); // after the check reads the level
-  const run = sequence.reduce(step(world, command, mint, subject_id, body), begun);
+  const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
+  const [run, shown] = tip(world, actor_id, recipe, ran);
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
     rolled?.outcome === 'failure' ? [] : [event(world, command, mint, run.position + 1, done)];
@@ -83,10 +87,24 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [{ key: narration.actor, ...pinned(world, narration.participants, body) }],
+    [{ key: narration.actor, ...pinned(world, narration.participants, body) }, ...shown],
     rolled?.rng,
   );
 };
+
+// Toolbox row W23: the first accepted perform of a recipe with a tip assigns its engine-owned
+// seen_tip_<key> true, and the actor reads the tip once: the run and the tip's narration line.
+function tip(
+  world: World,
+  actor: CharacterId,
+  recipe: ActionRecipe,
+  run: Run,
+): [Run, { key: TextKey }[]] {
+  if (!recipe.tip) return [run, []];
+  const fact = seenTip(world, recipe.key);
+  if (value(world, actor, fact) === true) return [run, []];
+  return [assigned(world, actor, run, { fact, value: true }), [{ key: recipe.tip }]];
+}
 
 // The narration's participants as EntityIds; the loader checked each npc or item resolves.
 function pinned(world: World, participants: RecipeNarration['participants'], body: EntityId) {

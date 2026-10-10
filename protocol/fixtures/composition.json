@@ -2887,6 +2887,90 @@
       }
     },
     {
+      "id": "quest-transition-started-at-stored",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete",
+          "started_at": 7
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "objectives_complete",
+              "started_at": 7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "quest-transition-started-at-stored-then-removed",
+      "state": "base",
+      "ops": [
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "active",
+          "to": "objectives_complete",
+          "started_at": 7
+        },
+        {
+          "op": "quest.transition",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "from": "objectives_complete",
+          "to": "resolved",
+          "outcome": "carry"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "resolved",
+              "outcome": "carry"
+            }
+          }
+        ]
+      }
+    },
+    {
       "id": "quest-transition-skips-objectives-complete",
       "state": "base",
       "ops": [
