@@ -64,10 +64,10 @@ export function debtElapsed(a: CaseHost) {
   refuse(a, 'accept_late');
   a.choose('elapsed');
   a.reopen();
-  a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
+  assert.equal(a.view().choice?.closable, true); // elapsed resolves no quest: the hub reopens (loka-x6t.5)
+  a.invoke('close_choice'); // Leave the conversation
   assert.equal(debt(a), undefined);
   assert.equal(a.flag('priory_tithe_delivered'), 'unoffered');
   assert.equal(a.story.world().state.containers[ledger], peg);
-  assert.equal(a.view().choice, undefined);
   return { outcome: 'elapsed', quest: null };
 }
