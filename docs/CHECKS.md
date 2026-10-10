@@ -51,8 +51,10 @@ their rules and red controls remain available for resumption.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
-  (`docs/residency.gen.json`) match `protocol/` (run without `--check` to regenerate); an
-  Elixir host adapter on a `portable_capability` without a differential fails (ADR-074).
+  (`docs/residency.gen.json`) and the System pages' graph (`docs/system-graph.gen.json`, also
+  from `docs/system/save.md`'s table block) match `protocol/` (run without `--check` to regenerate); an
+  Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
+  does a registry command, event or policy op that no schema declares.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
   capability registry and `docs/features.json`; an implemented capability (a rule module) with
   a missing cell fails.

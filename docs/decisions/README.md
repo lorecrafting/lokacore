@@ -12,6 +12,8 @@ What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new 
 dated line below, newest first.
 
 - 2026-10-09 [Owner decision: dialogue hub, conversations stay open until Leave](owner-decision-dialogue-hub-2026-10-09.md)
+- 2026-10-09 [PM decision: re-rank 2, immersion rows and foundation primitives](pm-decision-toolbox-rerank-2-2026-10-09.md)
+- 2026-10-09 [Owner decision: re-rank the mechanics toolbox, vocabulary first](owner-decision-toolbox-rerank-2026-10-09.md)
 - 2026-10-09 [Owner decision: two-lane CI, hosted gate for every branch](owner-decision-two-lane-ci-2026-10-09.md)
 - 2026-10-09 [Owner decision: hosted CI gates toolbox/* branches](owner-decision-hosted-ci-toolbox-2026-10-09.md)
 - 2026-10-09 [Owner decision: live polish sessions in Storybook](owner-decision-live-polish-session-2026-10-09.md)
