@@ -32,3 +32,12 @@
 - Count as reserved fact `uses_<key>`: sound. It is refused in authored recipe, reaction, dialogue and scene writes (both kernels' walk) and at runtime by `ownership()`. `skills-save.ts` matches only `skill_` keys. Its `fact_changed` is the same as `skill_<key>`'s today, so W1 adds no new exposure.
 - Untaught growth by practice: matches the row 5 acceptance (sampler untaught). It is capped at the last threshold. Authors gate teaching through recipe policies.
 - `opposed` without RNG, no `skill_compare` leaf (no consumer, G1 rule), 1.44 floor (PM ruling), Book half deferred to loka-kgd.23: accepted.
+
+## Fix round 1 re-check (head `6b1385bc6d6540fe3947ff6f1739cd26bf0e74f8`)
+
+- Verdict: **APPROVE WITH NOTES**.
+- Finding 1 fixed. `kernel/ts/test/skill_growth.test.ts` adds a case with `pick` taught: the gate opens on the fifth attempt (four failures, then success). Expected values are literals. Focused test: 3 pass. Mutant A (taught +1 deleted) now fails this case. No Elixir change is needed: the compiler does not compute levels.
+- Finding 2 fixed. `docs/system/mechanics.md:1797` now gives levels 2, 3 for a taught skill and 1, 2 for an untaught one, which matches `level()`.
+- Finding 3: the PM reports the `/code-review` result in the #351 body (open until then).
+- Finding 4: filed as a separate toolbox follow-up.
+- Hosted CI on the new head: ci and book-e2e were still in progress at re-check time.

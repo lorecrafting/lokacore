@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **CHANGES REQUIRED**
+- [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **APPROVE WITH NOTES**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
 - [Review: Storybook current phone and tablet viewports (PR #340)](2026-10-09-storybook-viewports-340-review.md): **PASS**
