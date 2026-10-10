@@ -6,7 +6,7 @@ import { value } from '../fact.ts';
 import { living } from '../death/shared.ts';
 import { LIMITS } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { adjust, level, pay, resourceRef, type Levels } from '../resource.ts';
+import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
@@ -64,8 +64,8 @@ export function hidden(world: World, room: RoomDefinition, direction: string, ac
 
 /**
  * The fall of a climb (toolbox row 30) when `body` crosses the exit in `direction` without the
- * climb's item: its HP loss after `levels` (none at 1 HP; a fall never kills) and narration key.
- * Undefined when the exit is no climb or the body holds the item.
+ * climb's item: its HP loss after `levels`, stopping at 1 or the pool's minimum (a fall never
+ * kills), and its narration key. Undefined when the exit is no climb or the body holds the item.
  */
 export function fall(
   world: World,
@@ -76,8 +76,9 @@ export function fall(
 ) {
   const climb = exitOf(room, direction)?.climb;
   if (!climb || held(world, world.entityIds[refString(climb.item)], body)) return undefined;
-  const { op } = adjust(world, body, resourceRef(world, 'hp'), -climb.damage, levels);
-  const to = Math.max(op.to, 1);
+  const hp = resourceRef(world, 'hp');
+  const { op } = adjust(world, body, hp, -climb.damage, levels);
+  const to = Math.max(op.to, 1, resourceSpec(world, body, hp).minimum);
   return { ops: to < op.from ? [{ ...op, to }] : [], narration: { key: climb.fell } };
 }
 
