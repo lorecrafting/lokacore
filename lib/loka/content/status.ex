@@ -15,30 +15,30 @@ defmodule Loka.Content.Status do
           cures,
           do: {rel, ["edible", "cures"], cures}
 
-    # Row G13: a liquid's cures, ended by Drink, need kernel_api 1.46 like row G3's fields.
-    drinks =
-      for {_, {rel, _, l}} <- defs["liquid"] || %{}, l["cures"], do: {rel, ["cures"], l["cures"]}
+    {later, g3} = api_146(defs)
 
-    {immune, g3} = row_g3(defs)
-
-    if statuses == %{} and cures == [] and drinks == [] and not g3,
+    if statuses == %{} and cures == [] and not g3,
       do: [],
-      else:
-        gate(m, g3 or drinks != []) ++
-          values(statuses, m, defs, text) ++ foods(cures ++ drinks ++ immune, m, defs)
+      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ later, m, defs)
   end
 
-  # Row G3: each NPC's or item's immune list, and whether any G3 field (those, a step naming an
-  # item, or a tick or expiry trigger) is used.
-  defp row_g3(defs) do
+  # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item and tick or
+  # expiry triggers; row G13's liquid cures (ended by Drink). Returns the lists naming statuses
+  # and whether any field is used.
+  defp api_146(defs) do
     immune =
       for kind <- ~w(npc item),
           {_, {rel, _, e}} <- defs[kind] || %{},
           e["immune"],
           do: {rel, ["immune"], e["immune"]}
 
-    {immune, immune != [] or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
+    lists = immune ++ drinks(defs)
+    {lists, lists != [] or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
   end
+
+  defp drinks(defs),
+    do:
+      for({_, {rel, _, l}} <- defs["liquid"] || %{}, l["cures"], do: {rel, ["cures"], l["cures"]})
 
   defp trigger?({_, {_, _, %{} = r}}),
     do:
