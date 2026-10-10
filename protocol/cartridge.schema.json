@@ -969,7 +969,7 @@
       ]
     },
     "Calendar": {
-      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours.",
+      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours. Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day); they need kernel_api at least 1.45.",
       "type": "object",
       "properties": {
         "start": {
@@ -996,30 +996,21 @@
           }
         },
         "lunar": {
-          "type": "object",
-          "properties": {
-            "period": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "origin": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "phases": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "$ref": "#/$defs/CalendarCut"
-              }
-            }
-          },
-          "required": [
-            "period",
-            "origin",
-            "phases"
-          ],
-          "additionalProperties": false
+          "$ref": "#/$defs/CalendarCycle"
+        },
+        "season": {
+          "$ref": "#/$defs/CalendarCycle"
+        },
+        "tide": {
+          "$ref": "#/$defs/CalendarCycle"
+        },
+        "weather": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/WeatherEntry"
+          }
         }
       },
       "required": [
@@ -1056,6 +1047,79 @@
               }
             ]
           }
+        }
+      ]
+    },
+    "CalendarCycle": {
+      "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "origin": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "phases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/CalendarCut"
+          }
+        }
+      },
+      "required": [
+        "period",
+        "origin",
+        "phases"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "period": 80,
+          "origin": 0,
+          "phases": [
+            {
+              "at": 0,
+              "phase": "low"
+            },
+            {
+              "at": 40,
+              "phase": "high"
+            }
+          ]
+        }
+      ]
+    },
+    "WeatherEntry": {
+      "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
+      "type": "object",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "wet": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "phase",
+        "weight"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "phase": "rain",
+          "weight": 1,
+          "wet": true
         }
       ]
     },

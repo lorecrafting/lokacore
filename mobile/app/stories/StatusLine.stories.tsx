@@ -46,6 +46,27 @@ export const Dusk: Story = {
   },
 };
 
+// The day's weather shows as a word after the glyph; season and tide are in its label only.
+export const Weather: Story = {
+  args: {
+    calendar: {
+      day: 1,
+      hour: 0,
+      subdivision: 0,
+      solar: 'night',
+      lunar: 'full',
+      weather: 'rain',
+      season: 'autumn',
+      tide: 'high',
+    },
+  },
+  play: async ({ canvas }) => {
+    const sky = canvas.getByLabelText('day 1, 00:00, night, full moon, rain, autumn, high tide');
+    await expect(sky).toHaveTextContent('○ rain');
+    await expect(canvas.queryByText(/autumn/)).toBeNull();
+  },
+};
+
 // Every sky glyph the catalogue names (BOOK-UI-COMPONENTS.md, Status line): the sun by its phase,
 // the moon by its phase at night, the earthly branch for a phase the Book does not know.
 const skies: [string, string?][] = [

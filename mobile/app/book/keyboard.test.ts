@@ -290,3 +290,31 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     ],
   );
 });
+
+// Breaks (toolbox row 31, trap 12): the weather only in the accessible label (a sighted player
+// sees the same glyph in the rain), or season or tide missing from the label.
+test('the status line shows the weather in words and names season and tide', () => {
+  const status = StatusLine({
+    time: 0,
+    calendar: {
+      day: 1,
+      hour: 0,
+      subdivision: 0,
+      solar: 'night',
+      lunar: 'full',
+      weather: 'rain',
+      season: 'autumn',
+      tide: 'high',
+    },
+    text: (key: string) => key,
+    locked: false,
+    pending: false,
+    open: () => {},
+  } as any);
+  const sky = status.props.children[0].props.children[0];
+  assert.equal([sky.props.children].flat().join(''), '○ rain');
+  assert.equal(
+    sky.props.accessibilityLabel,
+    'day 1, 00:00, night, full moon, rain, autumn, high tide',
+  );
+});

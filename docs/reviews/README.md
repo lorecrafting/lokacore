@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: narration variety and visit tiers, toolbox row W7 (loka-kgd.29)](2026-10-10-toolbox-m4-variety-review.md): **APPROVE**
 - [Review: time windows, hour and moon gates, toolbox row 10 (loka-kgd.27)](2026-10-10-toolbox-m4-time-review.md): **APPROVE**
+- [Review: derived sky (weather, season, tide), toolbox row 31 + W5 (loka-kgd.30)](2026-10-10-toolbox-m4-sky-review.md): **CHANGES REQUIRED**
 - [Review: rope and climb, toolbox row 30 (loka-kgd.28)](2026-10-10-toolbox-m4-rope-review.md): **APPROVE**
 - [Review: hidden passages and search, toolbox row 11 (loka-kgd.26)](2026-10-10-toolbox-m4-hidden-review.md): **APPROVE**
 - [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **APPROVE WITH NOTES**
