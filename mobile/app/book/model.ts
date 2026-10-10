@@ -29,6 +29,9 @@ export const conditionLine = (
   (c.per_tick === undefined
     ? ''
     : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
+// Book UI Sense cues details (wording proposed; designer to approve): the direction key, none here.
+export const cueLine = (c: NonNullable<GameView['cues']>[number], text: Say) =>
+  `${text(c.text)}${c.direction ? ` from the ${c.direction}` : ''}`;
 export const expeditionLine = (
   e: NonNullable<GameView['journal'][number]['expedition']>,
   text: Say,
