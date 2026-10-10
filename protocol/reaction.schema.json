@@ -392,6 +392,16 @@
               },
               "required": ["event"],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": { "const": "quest_failed" },
+                "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+              },
+              "required": ["event"],
+              "additionalProperties": false
             }
           ]
         },

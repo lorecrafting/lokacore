@@ -82,7 +82,7 @@ defmodule Loka.Content.Requires do
     do: is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
 
   defp debt_feature?(d) do
-    is_map_key(d, "deadline") or is_map_key(d, "resource_starts") or
+    get_in(d, ["deadline", "fact"]) != nil or is_map_key(d, "resource_starts") or
       Enum.any?(Map.values(Map.get(d, "choices", %{})), fn choice ->
         is_map_key(choice, "payment") or is_map_key(choice, "availability") or
           (is_map_key(choice, "receive") and is_map_key(choice, "accept"))

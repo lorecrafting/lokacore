@@ -12,6 +12,7 @@
 // invalid_state.
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
 import { expiry } from '../water/expiry.ts';
+import { expire } from '../quest/job.ts';
 import { roundSequence } from '../combat/round.ts';
 import {
   accepted,
@@ -41,7 +42,12 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint);
-    if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
+    if (row.quest_instance_id) {
+      const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
+      return d && !d.fact
+        ? expire(world, command, payload.job_id, row, mint)
+        : deadlineJob(world, payload.job_id, row);
+    }
     if (row.job.kind === 'population_bundle')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (row.sight) return runSight(world, payload.job_id, row, steps);
@@ -114,11 +120,11 @@ function deadlineJob(world: World, jobId: JobId, row: JobRow) {
     world,
     row.actor_id!,
     { ops: [], position: 0, facts: {} },
-    { fact: deadline.fact, value: deadline.outcome },
+    { fact: deadline.fact!, value: deadline.outcome },
   );
   const trust = adjusted(world, row.actor_id!, status, {
-    fact: deadline.trust_fact,
-    amount: deadline.trust_amount,
+    fact: deadline.trust_fact!,
+    amount: deadline.trust_amount!,
   });
   if (!trust) return { kind: 'fault', code: 'precondition_failed' } as const;
   return accepted<never>(

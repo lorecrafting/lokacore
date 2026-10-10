@@ -9,13 +9,13 @@ const choice =
   chapter.dialogues['ashmere_missing_child@0.0.16:dialogue/a_aldric_debt'].choices.on_time;
 const aldric = chapter.npcs['ashmere_missing_child@0.0.16:npc/aldric'];
 
-// Breaks: dropping a deadline required field lets a quest schedule or settle without its authority.
-test('deadline requires its time, outcome, fact and trust fields', () => {
-  for (const field of ['at', 'outcome', 'fact', 'trust_fact', 'trust_amount']) {
-    const changed = structuredClone(quest);
-    delete changed.deadline[field];
-    assert.ok(validate('QuestDefinition', changed).length, field);
-  }
+// Break: a deadline without its outcome validates. Since row W24 the schema requires only the
+// outcome; a legacy deadline missing its time, fact or trust fields is the loader's
+// SCHEMA_VIOLATION (test/quest_deadline.test.ts).
+test('deadline requires its outcome', () => {
+  const changed = structuredClone(quest);
+  delete changed.deadline.outcome;
+  assert.ok(validate('QuestDefinition', changed).length);
 });
 
 // Breaks: dropping a payment field or positive amount bound admits an unpayable turn-in.
