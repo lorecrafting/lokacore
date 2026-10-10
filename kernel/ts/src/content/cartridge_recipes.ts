@@ -23,7 +23,8 @@ export const tipSpec = (key: string) => ({
 // actor names an NPC or item of it, as its role says; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
-// Toolbox row W23: a tip resolves, needs kernel_api 1.46 and a key of at most 55 characters.
+// Toolbox row W23: a tip resolves and needs kernel_api 1.46 (a tipped key over 55 characters
+// fails the schema at its seen_tip_ FactSpec).
 export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const taken = new Set([
@@ -61,8 +62,6 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
           named(p[p.role], p.role, `${path}.narration.participants${step(n)}.${p.role}`);
     }
     text(r, ['label', 'tip'], at);
-    if (r.tip && r.key.length > 55)
-      out.push(diag('SCHEMA_VIOLATION', `${at}.key`, { error: 'invalid_value' }));
     if (r.tip && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),

@@ -156,23 +156,43 @@ test('a recipe tip is read once, on the first perform, after its narration', () 
   assert.deepEqual(lines(again), ['narration.search_floor']);
 });
 
-// Breaks (loader twin of the compiler's RESERVED_FACT): an artifact whose recipe writes the
-// engine's seen_tip_<key>, or whose seen_tip_<key> FactSpec is missing, loads.
-test('the loader refuses a write of seen_tip_<key> and a missing seen_tip_<key> spec', () => {
-  const recipe = `.cartridge.recipes["quest_sampler@0.0.1:recipe/search_floor"]`;
+// Breaks (loader twin of test/loka/content_quest_hints_test.exs): an artifact whose recipe writes
+// the engine's seen_tip_<key>, lacks its FactSpec, has an unresolved tip, or a tip below 1.46 or
+// without fact@1, loads (a key too long for seen_tip_ fails the schema at its FactSpec).
+test('the loader checks a recipe tip like the compiler', () => {
+  const R = 'quest_sampler@0.0.1:recipe/search_floor';
+  const recipe = `.cartridge.recipes["${R}"]`;
   const seen = 'quest_sampler@0.0.1:fact/seen_tip_search_floor';
-  const rows: [(c: Obj) => void, string][] = [
+  const rows: [(c: Obj) => void, string, string][] = [
     [
       (c) => {
-        const step =
-          c.recipes['quest_sampler@0.0.1:recipe/search_floor'].outcomes.success.sequence[0];
+        const step = c.recipes[R].outcomes.success.sequence[0];
         step.fact = { ...step.fact, key: 'seen_tip_search_floor' };
       },
+      'RESERVED_FACT',
       `${recipe}.outcomes.success.sequence[0].fact`,
     ],
-    [(c) => delete c.facts[seen], `.cartridge.facts["${seen}"]`],
+    [(c) => delete c.facts[seen], 'RESERVED_FACT', `.cartridge.facts["${seen}"]`],
+    [(c) => (c.recipes[R].tip = 'tip.nope'), 'UNRESOLVED_REFERENCE', `${recipe}.tip`],
+    [
+      (c) => {
+        delete c.quests['quest_sampler@0.0.1:quest/find_key'].journal.hints;
+        c.manifest.requires.kernel_api.at_least = '1.45';
+      },
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [
+      (c) => {
+        delete c.manifest.requires.capabilities.fact;
+        delete c.lock.capabilities.fact;
+        c.recipes[R].outcomes.success.sequence = [{ op: 'event.emit', event: 'searched' }];
+      },
+      'UNDECLARED_CAPABILITY',
+      `${recipe}.tip`,
+    ],
   ];
-  for (const [change, path] of rows) {
+  for (const [change, code, path] of rows) {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
     const canonical = encode(c);
@@ -181,9 +201,6 @@ test('the loader refuses a write of seen_tip_<key> and a missing seen_tip_<key> 
       new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
       INSTALLED,
     );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-      'RESERVED_FACT',
-      path,
-    ]);
+    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
 });
