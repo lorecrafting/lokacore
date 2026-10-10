@@ -51,7 +51,7 @@ const fact = (key: string) =>
     key,
   }) as const;
 const read = (w: World, key: string, who: string) =>
-  value(w, w.character, fact(key), id(who) as never);
+  value(w, w.character, fact(key) as never, id(who) as never);
 
 // One save file in a fresh directory: invocations that save, cold reopen and replay once.
 function save(t: TestContext, name: string) {
