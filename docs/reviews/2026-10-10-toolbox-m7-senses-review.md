@@ -34,3 +34,19 @@
 5. **blocker**, `kernel/ts/src/mechanics/senses.ts:87`: M10 (always `'failure'`) passes; the success branch (`check_passed`, `action_completed`) is untested. Failure: a reaction on a passed check hears the failure cue.
 6. **nit**, `senses.ts:34`: "doors pass" has no case (no barrier in the sampler).
 7. **nit**: the handoff does not report the developer's `/code-review` result.
+
+## Re-check at e0c54bde (fix commits only)
+
+- Head `e0c54bdeea49a80fe7af32046dada4f46cd90b41`; hosted ci and book-e2e both success (`gh run list --commit`). Scope: `5308adc1`, `e7485d31`, `9e932471`, `d9878dbf`, `bf691065`, `e0c54bde`.
+- Verdict: **CHANGES REQUIRED**: findings 1-7 resolved; one new blocker (R1, a one-line test on the PM parity fix) and one nit.
+- Merge `5308adc1`: conflicts were only in generated docs, `mechanics.md` (one blank line) and `protocol/fixtures/invalid.json`; the fixture union keeps both sides (846 at base, +11 senses, +2 targets = 859). `INSTALLED.kernel_api` is `1.48` (`world.ts:105`); no `1.47` floor remains in `lib/` or `kernel/ts/src`.
+- Finding 1 (cycle): resolved. An import-graph walk over non-type imports finds no cycle through `policy.ts`, `senses.ts` or `dialogue/selection.ts` at the head. Red control: the same walk on `2332cde6` reports the cycle (`movement/shared.ts -> policy.ts`). `senses.ts` imports policy as a type only; `hidden` moved to `lookups.ts` unchanged. Hosted book-e2e is green on the head.
+- Findings 2, 5: M1 (hidden), M2 and M3 (living), M10 (success outcome) are now killed by `senses.test.ts`. Finding 6 (doors) has a case in `9e932471`.
+- Findings 3, 4: E1 (leaf floor) and E2 (details) are now killed by `content_cues_test.exs`. The TS leaf-only floor mutant (drop the `nodes(c)` clause, `cartridge_senses.ts:33`) is killed.
+- PM parity ruling `e0c54bde`: Elixir now passes `Checks.trees/2` roots (`checks.ex`), the twin of TS `nodes/1`. TS drops NPC `fuel` cues: `NpcDefinition` has no `fuel` property in `entity.schema.json`, so the branch was unreachable. Correct.
+- Callers' tests green: `reactions`, `world`, `chapters`, `hidden*` (TS); `content_cues_test` (Elixir).
+
+### Findings (re-check)
+
+- R1. **blocker** (one-line test fix), `lib/loka/content/cues.ex:81`: mutant E3, which drops the `"items"` clause of `perceives?`, passes. The test wraps the leaf only in `not` (`content_cues_test.exs:28`). Failure: with E3 in place, a 1.47 source whose `cue_perceived` sits inside `all`/`any` compiles, and the TS loader refuses it later; this is the parity the PM ruling exists for. Fix: nest the test leaf as `all[not[leaf]]` (or similar).
+- R2. **nit**, `kernel/ts/src/mechanics/senses.ts:74,146` (`bf691065`): mutants M11 (charge a step for a status without cues) and M6 (check `ctx.cue` after `roomOf`) pass. Only the step count changes, and the old order was already accepted in round 1. Pin the count or leave it.
