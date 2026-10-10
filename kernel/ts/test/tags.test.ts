@@ -13,17 +13,23 @@ import { holds } from '../src/mechanics/policy.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import type { Obj } from '../src/content/cartridge_refs.ts';
+import { LEAF_REFS, type Obj } from '../src/content/cartridge_refs.ts';
 
+const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tags-sampler-'));
 let artifact: Uint8Array;
+let leafRefsEx: unknown;
 try {
   const file = join(scratch, 'artifact.json');
   execFileSync('mix', ['loka.compile', 'cartridges/tags_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    cwd: root,
     stdio: 'pipe',
   });
   artifact = readFileSync(file);
+  const refs = join(scratch, 'leaf_refs.json');
+  const write = `File.write!(${JSON.stringify(refs)}, JSON.encode!(Loka.Content.LeafRefs.all()))`;
+  execFileSync('mix', ['run', '--no-start', '-e', write], { cwd: root, stdio: 'pipe' });
+  leafRefsEx = JSON.parse(readFileSync(refs, 'utf8'));
 } finally {
   rmSync(scratch, { recursive: true });
 }
@@ -55,6 +61,14 @@ test('a burnable check passes only on the wooden door, stick and the wooden hall
   ];
   for (const [p, target, expected] of rows)
     assert.equal(check({ op: 'has_tag', ...p }, target), expected, JSON.stringify(p));
+  // Breaks: subject room reads a fixed room (the entry hall), not the actor's current room.
+  const north = world.roomIds['tags_sampler@0.0.1:room/north_room']!;
+  const away = {
+    ...world,
+    state: { ...world.state, containers: { ...world.state.containers, [world.body]: north } },
+  };
+  const wooden = { op: 'has_tag', subject: 'room', tag: 'wooden' } as Policy;
+  assert.equal(holds(away, world.character, wooden, { steps: { n: 0 } }), false);
 });
 
 // Breaks: the loader skips one of has_tag's reference fields, so a policy naming no definition
@@ -99,4 +113,23 @@ test('the loader refuses a has_tag naming no definition and tags without tags@1'
     );
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
+});
+
+// Breaks: a leaf's reference field is missing from (or extra in) one kernel's table, so that
+// kernel skips expanding or resolving it. The schema gives only the fields (each DefinitionRef
+// property); the kind a field maps to is checked TS against Elixir, since it may differ from the
+// field name (mechanics.md leaf naming).
+test('LEAF_REFS, Loka.Content.LeafRefs and policy.schema.json name the same reference fields', () => {
+  const schema = JSON.parse(readFileSync(join(root, 'protocol/policy.schema.json'), 'utf8'));
+  const fromSchema: Record<string, string[]> = {};
+  for (const branch of schema.$defs.Policy.oneOf) {
+    const fields = Object.entries(branch.properties as Record<string, { $ref?: string }>)
+      .filter(([, v]) => v.$ref?.endsWith('#/$defs/DefinitionRef'))
+      .map(([k]) => k);
+    if (fields.length) fromSchema[branch.properties.op.const] = fields.sort();
+  }
+  const fieldsOf = (t: object) =>
+    Object.fromEntries(Object.entries(t).map(([op, m]) => [op, Object.keys(m).sort()]));
+  assert.deepEqual(leafRefsEx, LEAF_REFS);
+  assert.deepEqual(fieldsOf(LEAF_REFS), fromSchema);
 });

@@ -18624,6 +18624,29 @@
     ]
   },
   {
+    "name": "item_tags_empty",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": []
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
     "name": "item_tag_unknown",
     "contract": "ItemDefinition",
     "value": {

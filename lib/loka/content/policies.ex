@@ -23,9 +23,9 @@ defmodule Loka.Content.Policies do
   defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
     owned(at(rel, steps ++ ["op"]), op, required) ++
       empty_window(rel, steps, n) ++
-      for field <- List.wrap(Loka.Content.LeafRefs.all()[op]),
+      for {field, kind} <- Map.get(Loka.Content.LeafRefs.all(), op, %{}),
           is_map_key(n, field),
-          d <- reference(rel, steps, field, n, m, defs),
+          d <- reference(rel, steps, {field, kind}, n, m, defs),
           do: d
   end
 

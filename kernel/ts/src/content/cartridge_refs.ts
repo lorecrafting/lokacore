@@ -163,17 +163,17 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   return { named, typedValue, text };
 }
 
-// Each policy leaf's reference fields, each named for its definition kind; twin of
-// Loka.Content.LeafRefs (mechanics.md policy leaf set).
-const LEAF_REFS: Readonly<Record<string, readonly string[]>> = {
-  fact_compare: ['fact'],
-  has_item: ['item'],
-  quest_state: ['quest'],
-  escort_state: ['quest'],
-  barrier_state: ['barrier'],
-  stat_compare: ['attribute'],
-  resource_compare: ['resource'],
-  has_tag: ['item', 'barrier', 'room'],
+// Each policy leaf's reference fields, each mapped to its definition kind; twin of
+// Loka.Content.LeafRefs, checked in tags.test.ts (mechanics.md policy leaf set).
+export const LEAF_REFS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  fact_compare: { fact: 'fact' },
+  has_item: { item: 'item' },
+  quest_state: { quest: 'quest' },
+  escort_state: { quest: 'quest' },
+  barrier_state: { barrier: 'barrier' },
+  stat_compare: { attribute: 'attribute' },
+  resource_compare: { resource: 'resource' },
+  has_tag: { item: 'item', barrier: 'barrier', room: 'room' },
 };
 
 // In both formats, validate fact defaults and policy references, typed comparisons and windows.
@@ -185,8 +185,8 @@ export function refStage(c: Obj): Diagnostic[] {
   const check = checkers(c, out);
   const { named, typedValue, text } = check;
   for (const [n, at] of nodes(c)) {
-    for (const field of LEAF_REFS[n.op as string] ?? [])
-      if (n[field]) named(n[field], field, `${at}.${field}`);
+    for (const [field, kind] of Object.entries(LEAF_REFS[n.op as string] ?? {}))
+      if (n[field]) named(n[field], kind, `${at}.${field}`);
     if (n.op === 'fact_compare') typedValue(n.fact, n.equals, `${at}.equals`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }

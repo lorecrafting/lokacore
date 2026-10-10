@@ -7,14 +7,14 @@ defmodule Loka.Content.Checks do
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
-                "fact.assign" => "fact",
-                "fact.adjust" => "fact",
-                "skill.acquire" => "skill",
-                "topic.grant" => "topic",
-                "status.apply" => "status",
-                "quest.activate" => "quest",
-                "quest.resolve" => "quest",
-                "quest.fail" => "quest"
+                "fact.assign" => %{"fact" => "fact"},
+                "fact.adjust" => %{"fact" => "fact"},
+                "skill.acquire" => %{"skill" => "skill"},
+                "topic.grant" => %{"topic" => "topic"},
+                "status.apply" => %{"status" => "status"},
+                "quest.activate" => %{"quest" => "quest"},
+                "quest.resolve" => %{"quest" => "quest"},
+                "quest.fail" => %{"quest" => "quest"}
               })
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
@@ -26,8 +26,8 @@ defmodule Loka.Content.Checks do
     do: Map.put(step, "plan", ref(plan, "population", m))
 
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op) do
-    for f <- List.wrap(@ref_fields[op]), is_map_key(n, f), reduce: n do
-      n -> Map.update!(n, f, &ref(&1, f, m))
+    for {f, kind} <- @ref_fields[op], is_map_key(n, f), reduce: n do
+      n -> Map.update!(n, f, &ref(&1, kind, m))
     end
   end
 

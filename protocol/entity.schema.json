@@ -243,6 +243,8 @@
         "tags": {
           "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
           "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
           "items": {
             "$ref": "entity.schema.json#/$defs/Tag"
           }
