@@ -1,6 +1,6 @@
 {
   "room.storeroom.title": "Storeroom",
-  "room.storeroom.description": "A cramped storeroom. A keyless chest sits under a shelf, its [lock](lock) set in the lid. A thin [wooden door](wooden_door) leads north and an [iron door](iron_door) east.",
+  "room.storeroom.description": "A cramped storeroom. Under a shelf, the chest's [lock](lock) faces the room. A thin [wooden door](wooden_door) leads north and an [iron door](iron_door) east.",
   "room.north_room.title": "North Room",
   "room.north_room.description": "An empty room.",
   "room.east_room.title": "East Room",

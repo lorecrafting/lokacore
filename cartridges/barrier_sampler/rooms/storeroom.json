@@ -31,9 +31,19 @@
           "when": {
             "policy_version": 1,
             "root": {
-              "op": "fact_compare",
-              "fact": "door_jammed",
-              "equals": true
+              "op": "all",
+              "items": [
+                {
+                  "op": "fact_compare",
+                  "fact": "door_jammed",
+                  "equals": true
+                },
+                {
+                  "op": "fact_compare",
+                  "fact": "door_forced",
+                  "equals": false
+                }
+              ]
             }
           },
           "description": "detail.wooden_door.jammed"
