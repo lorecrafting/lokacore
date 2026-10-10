@@ -13,8 +13,11 @@ excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-dec
 
 ## Next
 
-Chapter 1 is frozen as a mechanics sample; after the foundation phase, work follows the ranked
-[mechanics toolbox](MECHANICS-TOOLBOX.md) ([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)).
+After the foundation phase, work follows the ranked [mechanics toolbox](MECHANICS-TOOLBOX.md)
+([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)). Chapters 2 and 3 are out of
+release scope; Chapter 1 is a frozen regression fixture until the [toolbox showcase](SHOWCASE.md), the
+composition proof that grows one district per batch, covers its play families
+([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
 
 ## Slices
 

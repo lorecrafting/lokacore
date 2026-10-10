@@ -51,7 +51,7 @@ or `exit_locked` (`passage`, `:62`); under [position@1](#position1-kerneltssrcme
 actor not standing, `invalid_state` (`kernel/ts/src/mechanics/position/shared.ts` `standing`); the move costs the body
 the cartridge's `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
 declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:73`).
-Per-exit and terrain costs are later (00 §11 chapter three). Accepted
+Per-exit and terrain costs are later (toolbox row 43a; the archived 00 §11 placed them in a chapter three that is no longer planned). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body, a [climb](#rope-and-climb-toolbox-row-30)'s fall when it has one, and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
 (`:31`). The GameView carries `sight` (`:88`) per exit: nothing through a barrier that bars the

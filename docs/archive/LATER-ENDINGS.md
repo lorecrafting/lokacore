@@ -1,6 +1,8 @@
 # Later-story ending table and planning proof note
 
-2026-10-04. Canonical selectors/text for the [PM-selected future policy](decisions/pm-decision-later-story-reconciliation-2026-10-04.md); source-only draft awaiting independent docs review. A planning agent supplied the supporting design at merged main `6d9712ef`. Narrative text fixes semantic distinctions for review; final literary copy still needs normal prose approval.
+**Archived 2026-10-10.** Chapters 2 and 3 left release scope ([showcase decision](../decisions/owner-decision-showcase-2026-10-10.md)); kept because the archived [later mechanics](LATER-MECHANICS.md) queues cite it.
+
+2026-10-04. Canonical selectors/text for the [PM-selected future policy](pm-decision-later-story-reconciliation-2026-10-04.md); source-only draft awaiting independent docs review. A planning agent supplied the supporting design at merged main `6d9712ef`. Narrative text fixes semantic distinctions for review; final literary copy still needs normal prose approval.
 
 This is future content policy, not frozen runtime schema or certification. The factored tables below define the complete disjoint selectors and literal semantic review text. The five base rows below preserve the current three child outcomes. The legal and reputation tables are independent selectors: concatenate exactly one paragraph from each table in **base → legal → Priory/Fen reputation → Crown reputation** order. They never assign child/allegiance/king history. This gives 135 disjoint presentation rows. Their predicates cover a conservative envelope of 6,615 well-typed inputs (5 pairs × 3 legal contexts × 21 × 21 reputation values). The coverage check is not a claim that every precise numeric reputation value is an authored reachable fixture.
 
@@ -98,7 +100,7 @@ charm/award. Declare that optional disposition port before implementing its impo
 Declared semantic ports: `memory.village_ending` enum rescued/stays/lost → `village.child_status`; `memory.fox_fate` free/bound → fox/prior allegiance; `memory.barrow_king` king_slain → king state; future optional `memory.priory_fen` integer → reputation; `memory.vault` bool → vault discovery. These mappings must be reconciled with the merged Chapter 1 export schema at CC-M01, not implemented through an unversioned rename. `memory.chapter_1_guild_tilt`, if retained by that schema, is a separate narrative memory, never a replacement for exact reputation or a class permission.
 
 A selected import is validated for campaign, source exact compatible release/hash/schema, lineage, declared keys and complete mandatory history. Malformed/unknown child, allegiance, king or missing mandatory key refuses atomically; “prior optional” does not turn malformed supplied data into a no-prior start. Unknown fields are rejected, optional defaults apply only where declared. Existing destination saves never re-import on reopen; source and destination pins remain separate. Ring/crown custody, seal memory, post-ending checkpoint and no-prior item defaults
-follow [the decision's item policies](decisions/pm-decision-later-story-reconciliation-2026-10-04.md#1-king-in-the-chamber-vault-after-defeat).
+follow [the decision's item policies](pm-decision-later-story-reconciliation-2026-10-04.md#1-king-in-the-chamber-vault-after-defeat).
 These are future CC-M03 encodings, without implicit whole inventory or prior-world import.
 
 ## Guard ordering and terminal record
