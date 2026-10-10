@@ -95,9 +95,7 @@ export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
   if (was.place.id !== now.place.id) {
     s.log.length = 0;
-    // Held and shown recap lines belong to the room left, as its log does.
-    if (s.away) s.away.log.length = s.away.lines.length = 0;
-    s.recap = undefined;
+    s.away = s.recap = undefined; // held and shown recap lines belong to the room left, as its log
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
 }

@@ -71,7 +71,7 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
   const shown = away(2 * 60 * 1000).text();
   assert.equal(count(shown, LABEL.awayRecap), 0);
   const log = shown.slice(
-    shown.indexOf(ROOM) + 3,
+    shown.indexOf('A pebble') + 1, // the log follows the last room line
     shown.indexOf('The poison fades from your blood.'),
   );
   assert.deepEqual(log, [
@@ -107,16 +107,17 @@ test('a press during catch-up ends the recap', () => {
 });
 
 // Breaks: a press in place during catch-up drops the held lines (in neither the log nor a recap) or
-// logs them out of order.
-test('a press in place during catch-up logs the held lines in order', () => {
+// logs them out of order or after the press's own line.
+test('a press in place during catch-up logs the held lines, in order, before its own', () => {
   const b = poisoned();
   b.clock.wall += HOURS3;
   b.clock.mono += HOURS3;
   assert.equal(pulse(b).kind, 'catching_up');
-  b.tap('Stone Hall, look'); // Look adds no World line of its own in this sampler
+  b.tap(/pebble/);
+  b.tap('Take a pebble');
   const shown = wait(b, 0).text();
   assert.equal(count(shown, LABEL.awayRecap), 0);
-  const log = shown.slice(shown.indexOf(ROOM) + 3);
+  const log = shown.slice(shown.indexOf(`${TICK} You shiver.`));
   assert.deepEqual(log.slice(0, 15), [
     `${TICK} You shiver.`,
     `${TICK} The chill passes.`,
@@ -126,6 +127,7 @@ test('a press in place during catch-up logs the held lines in order', () => {
     'Maud arrives.',
     'Maud leaves.',
   ]);
+  assert.ok(log.lastIndexOf('Maud arrives.') < log.indexOf('You pick up a pebble.'));
 });
 
 // Breaks: the player moved without a press keeps the old room's held lines or recap.
@@ -143,17 +145,17 @@ test('a room change drops the held lines and the recap; staying keeps them', () 
   assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'], lines: ['a'] }, ['b']]);
   const moved = logs();
   resetLogs(moved, view('garden'));
-  assert.deepEqual([moved.away, moved.recap], [{ from: 0, log: [], lines: [] }, undefined]);
+  assert.deepEqual([moved.away, moved.recap], [undefined, undefined]);
 });
 
-// Breaks: a cold reopen catches up before the Book subscribes (the fonts gate its first draw), so
-// the first steps never reach the presenter and the recap's counts start mid-settlement.
+// Breaks: the Book reports its subscription before it subscribes, so a cold reopen's catch-up (which
+// App starts on that report; App itself is not importable here) is not seen from its first step.
 test('a cold reopen catches up once the Book has subscribed: the full recap', () => {
   const a = poisoned();
   a.unmount();
   a.clock.wall += HOURS3;
   a.clock.mono += HOURS3;
-  const b = book(bundle as never, a as never, ids(100), () => wait(a, 0));
+  const b = book(bundle as never, a as never, undefined, (on) => on && wait(a, 0));
   b.tap(`${LABEL.awayRecap}, show`);
   const shown = b.text();
   assert.ok(shown.includes(`${TICK} (11 times)`) && shown.includes('Maud leaves. (6 times)'));

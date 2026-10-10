@@ -99,7 +99,7 @@ export function book(
   cartridge = fixture,
   existing?: ReturnType<typeof elapsedHost>,
   newId: () => string = randomUUID,
-  subscribed?: () => void,
+  subscribed?: (on: boolean) => void,
 ) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };

@@ -24,5 +24,8 @@
   "condition.chilled": "chilled",
   "narration.chill.applied": "A chill runs through you.",
   "narration.chill.tick": "You shiver.",
-  "narration.chill.expired": "The chill passes."
+  "narration.chill.expired": "The chill passes.",
+  "item.pebble.short": "a pebble",
+  "item.pebble.room": "A [[pebble|pebble]] lies by the door.",
+  "item.pebble.description": "A smooth grey pebble."
 }

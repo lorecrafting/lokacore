@@ -89,7 +89,7 @@ function narrate(s: Logs, last: NarrationRecord, now: GameView, away: Logs['away
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
   if (to) to.push(line);
-  else world(s, away, line, last.pickup_name ? [line] : worldLines(last, now, text));
+  else world(s, away, line, away && !last.pickup_name ? worldLines(last, now, text) : [line]);
 }
 
 const confirmed = (reply: Reply) =>

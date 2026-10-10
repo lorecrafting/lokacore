@@ -153,9 +153,9 @@ type Recovery = { notify?: (healthy: boolean) => void; booked?: boolean; onBooke
 const shellFor = (recovered: { current: Recovery }): Shell => ({
   ...shell,
   recovered: (healthy) => recovered.current.notify?.(healthy),
-  subscribed: () => {
-    recovered.current.booked = true;
-    recovered.current.onBooked?.();
+  subscribed: (on) => {
+    recovered.current.booked = on;
+    if (on) recovered.current.onBooked?.();
   },
 });
 function useElapsed(
