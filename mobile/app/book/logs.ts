@@ -50,7 +50,8 @@ export type Logs = {
   returnWorld?: boolean;
   returnDetail?: string;
   fault?: string;
-  away?: { from: number; lines: string[] }; // an open elapsed settlement's held World lines
+  // An open elapsed settlement's held World entries: as the log would show them, and line by line.
+  away?: { from: number; log: string[]; lines: string[] };
   recap?: string[]; // the away recap's lines, grouped when drawn
 };
 
@@ -94,7 +95,9 @@ export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
   if (was.place.id !== now.place.id) {
     s.log.length = 0;
-    if (s.away) s.away.lines.length = 0; // held recap lines belong to the room left, as the log's
+    // Held and shown recap lines belong to the room left, as its log does.
+    if (s.away) s.away.log.length = s.away.lines.length = 0;
+    s.recap = undefined;
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
 }

@@ -14,13 +14,12 @@ export function grouped(lines: readonly string[]): RecapLine[] {
 }
 
 /**
- * Where a background update's World lines go: the open settlement's, when a threshold is authored
+ * Where a background update's World entries go: the open settlement's, when a threshold is authored
  * and no press is retained (a press during catch-up ends the recap; its lines log in order).
  */
-export function holding(s: Logs, was: GameView, now: GameView): string[] | undefined {
+export function holding(s: Logs, was: GameView, now: GameView) {
   if (now.recap_after === undefined || s.retry) return undefined;
-  s.away ??= { from: was.time, lines: [] };
-  return s.away.lines;
+  return (s.away ??= { from: was.time, log: [], lines: [] });
 }
 
 /** Once time stops catching up: the recap if the settlement spanned the threshold, else the log. */
@@ -36,11 +35,11 @@ export function settle(s: Logs) {
     time - away.from >= recap_after
   )
     s.recap = [...(s.recap ?? []), ...away.lines]; // a second absence before a press adds to it
-  else s.log.push(...away.lines);
+  else s.log.push(...away.log);
 }
 
 /** A press ends an open settlement: its held lines go to the log before the press's own. */
 export function pressedAway(s: Logs) {
-  if (s.away) s.log.push(...s.away.lines);
+  if (s.away) s.log.push(...s.away.log);
   s.away = s.recap = undefined;
 }

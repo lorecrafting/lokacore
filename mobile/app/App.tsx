@@ -107,6 +107,7 @@ type Clock = {
   game: NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
   active: boolean;
   draining: boolean;
+  booked: boolean; // the Book has subscribed, so it sees the catch-up (away recap, book-ui.md)
   timer?: ReturnType<typeof setTimeout>;
   cleanup: () => void;
 };
@@ -131,7 +132,7 @@ function tick(c: Clock) {
   schedule(c, c.draining || draining || held ? 0 : 250);
 }
 function resume(c: Clock) {
-  if (!current(c) || !c.active) return;
+  if (!current(c) || !c.active || !c.booked) return;
   const status = c.game.pulse('resume');
   if (!current(c) || !c.active) return;
   c.draining = status.kind === 'catching_up';
@@ -147,7 +148,7 @@ function transition(c: Clock, active: boolean) {
   else c.game.pulse('pause');
 }
 
-type Recovery = { notify?: (healthy: boolean) => void };
+type Recovery = { notify?: (healthy: boolean) => void; booked?: boolean; onBooked?: () => void };
 function useElapsed(
   game: ReturnType<ReturnType<typeof localSession>['game']>,
   recovered: { current: Recovery },
@@ -159,6 +160,8 @@ function useElapsed(
       game,
       active: AppState.currentState === 'active',
       draining: false,
+      // Only an authored recap waits: without it (Chapter 1) the clock starts as before.
+      booked: !!recovered.current.booked || game.view().view.recap_after === undefined,
       cleanup: () => {},
     };
     const listener = AppState.addEventListener('change', (state) =>
@@ -168,12 +171,17 @@ function useElapsed(
       cancel(c);
       listener.remove();
       if (g.loka_clock_cleanup === c.cleanup) g.loka_clock_cleanup = undefined;
-      recovered.current.notify = undefined;
+      recovered.current.notify = recovered.current.onBooked = undefined;
     };
     g.loka_clock_cleanup = c.cleanup;
     recovered.current.notify = (healthy) => {
       if (healthy) schedule(c);
       else cancel(c);
+    };
+    recovered.current.onBooked = () => {
+      if (c.booked) return;
+      c.booked = true;
+      resume(c);
     };
     resume(c);
     return c.cleanup;
@@ -248,6 +256,10 @@ export default function App() {
     ...shell,
     recovered: (healthy) => {
       recovered.current.notify?.(healthy);
+    },
+    subscribed: () => {
+      recovered.current.booked = true;
+      recovered.current.onBooked?.();
     },
   }));
   useElapsed(game, recovered);

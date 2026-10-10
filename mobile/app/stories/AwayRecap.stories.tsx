@@ -19,12 +19,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Breaks: the grouped lines show before the tap, or the heading does not open them.
+// Breaks: the grouped lines show before the tap, or the heading's name does not say a tap shows them.
 export const Collapsed: Story = {
-  play: async ({ canvas, userEvent }) => {
+  play: async ({ canvas }) => {
     await expect(canvas.queryByText(/poison burns/)).toBeNull();
+    await expect(canvas.getByRole('button', { name: `${LABEL.awayRecap}, show` })).toBeVisible();
+  },
+};
+
+// Breaks: the heading does not open the lines, a count is missing or shown for a single line, or
+// the open heading's name does not say a tap hides them.
+export const Open: Story = {
+  play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: `${LABEL.awayRecap}, show` }));
     await expect(canvas.getByText('The poison burns in your veins. (11 times)')).toBeVisible();
     await expect(canvas.getByText('The poison fades from your blood.')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: `${LABEL.awayRecap}, hide` })).toBeVisible();
   },
 };

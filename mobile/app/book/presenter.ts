@@ -59,8 +59,8 @@ function background(
   const was = s.projection.view,
     now = update.projection.view;
   resetLogs(s, now);
-  const held = holding(s, was, now);
-  (held ?? s.log).push(...comings(was, now, text));
+  const away = holding(s, was, now);
+  for (const line of comings(was, now, text)) world(s, away, line, [line]);
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
   try {
@@ -69,17 +69,17 @@ function background(
     s.fault = (e as Error).message;
     return;
   }
-  if (last && last.command_id !== s.narrationId) narrate(s, last, now, held, text);
+  if (last && last.command_id !== s.narrationId) narrate(s, last, now, away, text);
+}
+
+// A World entry: to the log, or held by the open settlement (book-ui.md, Away recap).
+function world(s: Logs, away: Logs['away'], line: string, lines: string[]) {
+  (away?.log ?? s.log).push(line);
+  away?.lines.push(...lines);
 }
 
 // A new receipt's lines: its detail or conversation, else World (or the open settlement's lines).
-function narrate(
-  s: Logs,
-  last: NarrationRecord,
-  now: GameView,
-  held: string[] | undefined,
-  text: Say,
-) {
+function narrate(s: Logs, last: NarrationRecord, now: GameView, away: Logs['away'], text: Say) {
   const [narrated, combat] = narrationLines(last, now, text);
   const line = pickupLine(last, text) || narrated;
   if (combat) s.combatLog.push(combat);
@@ -89,8 +89,7 @@ function narrate(
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
   if (to) to.push(line);
-  else if (held && !last.pickup_name) held.push(...worldLines(last, now, text));
-  else (held ?? s.log).push(line);
+  else world(s, away, line, last.pickup_name ? [line] : worldLines(last, now, text));
 }
 
 const confirmed = (reply: Reply) =>

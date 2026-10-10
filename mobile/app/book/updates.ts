@@ -31,6 +31,7 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
     const unsubscribe = p.game.subscribe((update) => {
       if (live) applyUpdate(p, pr, s, update);
     });
+    p.shell.subscribed?.();
     return () => {
       live = false;
       unsubscribe();

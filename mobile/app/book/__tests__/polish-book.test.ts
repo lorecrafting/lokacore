@@ -99,6 +99,7 @@ export function book(
   cartridge = fixture,
   existing?: ReturnType<typeof elapsedHost>,
   newId: () => string = randomUUID,
+  subscribed?: () => void,
 ) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };
@@ -166,7 +167,7 @@ export function book(
       Book({
         game,
         startOver: () => undefined,
-        shell: { confirm: (f) => f(), learned: { seen: () => true, see: () => {} } },
+        shell: { confirm: (f) => f(), learned: { seen: () => true, see: () => {} }, subscribed },
       }),
     );
     for (const effect of queued.splice(0)) effect();

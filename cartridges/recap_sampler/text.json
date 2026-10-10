@@ -20,5 +20,9 @@
   "room.garden.description": "Beds of leeks and a bench. The hall door is south.",
   "npc.maud.short": "Maud",
   "npc.maud.room": "[Maud] sweeps the floor.",
-  "npc.maud.description": "Maud keeps the hall by day and her garden by evening."
+  "npc.maud.description": "Maud keeps the hall by day and her garden by evening.",
+  "condition.chilled": "chilled",
+  "narration.chill.applied": "A chill runs through you.",
+  "narration.chill.tick": "You shiver.",
+  "narration.chill.expired": "The chill passes."
 }

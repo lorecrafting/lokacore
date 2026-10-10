@@ -33,6 +33,7 @@ export type Shell = {
   confirm: (go: () => void) => void;
   learned: Hint;
   recovered?: (healthy: boolean) => void;
+  subscribed?: () => void; // the Book now sees every update (the away recap's catch-up waits)
 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
