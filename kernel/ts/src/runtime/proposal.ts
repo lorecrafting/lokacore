@@ -13,7 +13,7 @@ import {
   type QuestInstanceId,
   type Text,
 } from '../contracts.gen.ts';
-import { allocator, event, type JobRow, type Mint, type Steps, type World } from './decision.ts';
+import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { earned } from '../mechanics/quest/lifecycle.ts';
@@ -24,7 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { bleedRoundPair } from './proposal_bleed.ts';
-import { statusHolder } from '../mechanics/status/job.ts';
+import { statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -201,7 +201,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 46, one existing FIFO loop admits typed quest reaction deliveries with status holder groups
+// size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -211,10 +211,9 @@ function react(p: P): Admitted | undefined {
       const at = now(p);
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
-      const writer_group = ++p.group;
       p.ops.push({
         op: 'quest.transition',
-        writer_group,
+        writer_group: ++p.group,
         instance_id,
         from: 'active',
         to: 'objectives_complete',
@@ -250,13 +249,10 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 48, due job delivery joins population, bleed and status group pairing before causal reactions
+// size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
-  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
-    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
-    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
+  const { due, to } = dueJobs(p.world, root);
+  const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
   const bleedPairs = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
@@ -299,19 +295,14 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   }
 }
 
-// Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
-// in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
-// statusStep, row G3).
-function statusGroup(
-  at: World,
-  id: JobId,
-  job: JobRow,
-  holders: Map<string, number>,
-  next: number,
-) {
-  const held = job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined;
-  if (held && !holders.has(held)) holders.set(held, next);
-  return held ? holders.get(held) : undefined;
+// The root's explicit advance target (-1 without one) and its pending jobs due by then, in
+// (due_time, job_id) order.
+function dueJobs(world: World, root: Admitted & { kind: 'accepted' }) {
+  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
+  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
+    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
+    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  return { due, to: advance?.to ?? -1 };
 }
 
 function crowDelivery(p: P, next: Queued): Admitted | undefined {

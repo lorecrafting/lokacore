@@ -162,3 +162,18 @@ const successor = (
     due_time: Math.min(next_tick_at, row.ends_at),
   },
 ];
+
+// Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
+// in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
+// statusStep, row G3).
+export function statusGroup(
+  at: World,
+  id: JobId,
+  job: JobRow,
+  holders: Map<string, number>,
+  next: number,
+) {
+  const held = job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined;
+  if (held && !holders.has(held)) holders.set(held, next);
+  return held ? holders.get(held) : undefined;
+}

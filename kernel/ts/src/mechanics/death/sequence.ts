@@ -32,9 +32,10 @@ export type Fatal = {
 
 /**
  * `world` includes the fatal HP loss and producer's encounter closure at the fatal clock. `rng`
- * is the combat round's state; an NPC victim with drops needs it (toolbox row 8).
+ * is the combat round's state; an NPC victim with drops needs it (toolbox row 8). A player's
+ * statuses end in its return; a dead NPC's end here, so no tick lands on it (row G3).
  */
-// size: allow 43, drop rolls (toolbox row 8) thread the combat round's RNG through custody
+// size: allow 42, drop rolls (toolbox row 8) thread the combat round's RNG through custody
 export function deathSequence(
   world: World,
   command: Pick<Command, 'id'>,
@@ -73,7 +74,6 @@ export function deathSequence(
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group, drops.kept));
   ops.push(...crowDied(world, victim_id, writer_group));
   ops.push(...populationLoss(world, loss));
-  // A player's statuses end in its return; a dead NPC's end here, so no tick lands on it (row G3).
   ops.push(...(player ? returnBody(world, fatal) : clearStatuses(world, victim_id, writer_group)));
   const died = deathEvent(world, command, fatal, id, corpse_id, player);
   return { ops, events: [died], corpse_id, rng: drops.rng };

@@ -174,7 +174,7 @@ const subject = (cause: DomainEvent, body: EntityId) => {
 
 // A status.apply on its holder: the step's named item's instance, else the event's subject (row
 // G3), once per holder and status in a rule, in the one writer group the holder's status writes
-// share in this advance (proposal.ts statusGroup); only the player's own body hears the applied line.
+// share in this advance (status/job.ts statusGroup); only the player's own body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,

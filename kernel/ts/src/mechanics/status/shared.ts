@@ -59,11 +59,15 @@ export const endStatus = (
 export const immune = (world: World, body: EntityId, status: DefinitionRef) =>
   !!world.entities[body]?.immune?.some((s) => refString(s) === refString(status));
 
+/** `body` can hold a status: the player's body, a living NPC or an item (row G3). */
+const holds = (world: World, body: EntityId) =>
+  HOLDERS.includes(world.knownEntities[body]?.kind ?? '') && living(world, body);
+
 /**
  * Apply or refresh `status` on `body` (a body, a living NPC or an item) at the world's clock; an
  * unknown or immune status, a dead NPC or another kind of entity changes nothing.
  */
-// size: allow 45, a first application writes the row and schedules its job; a refresh writes only the end
+// size: allow 43, a first application writes the row and schedules its job; a refresh writes only the end
 export function applyStatus(
   world: World,
   body: EntityId,
@@ -72,8 +76,7 @@ export function applyStatus(
   mint: Mint,
 ): DeltaOp[] {
   const spec = specOf(world, status);
-  const holds = HOLDERS.includes(world.knownEntities[body]?.kind ?? '') && living(world, body);
-  if (!spec || !holds || immune(world, body, status)) return [];
+  if (!spec || !holds(world, body) || immune(world, body, status)) return [];
   const prior = world.state.statuses?.[statusKey(body, status)];
   const active = prior?.active ? (prior as Active) : undefined;
   const now = world.state.clock;
