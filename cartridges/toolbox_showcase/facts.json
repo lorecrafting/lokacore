@@ -125,7 +125,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "The Reeve’s letter reached Wat too late."
+      "meaning": "The Reeve's letter reached Wat too late."
     },
     "topic_parish_known": {
       "version": 1,
@@ -158,7 +158,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "The player knows the mill’s accounts."
+      "meaning": "The player knows the mill's accounts."
     },
     "topic_heir_known": {
       "version": 1,
