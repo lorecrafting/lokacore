@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
@@ -34,14 +33,13 @@ type BodyProps = {
   world: () => void;
   back: () => void;
 };
+// The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
-export function Body(p: BodyProps) {
+export function Body(p: BodyProps & Talk) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
-  // The NPC page (this visit, by identity) that is in conversation; a fresh visit is a new page.
-  const [talkingOn, talkOn] = useState<Page>();
   return (
     <View style={{ flex: 1 }}>
       {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
@@ -51,7 +49,7 @@ export function Body(p: BodyProps) {
           {surface && <VerbLine b={surface} press={p.press} />}
         </View>
       )}
-      <PageBody {...p} talkingOn={talkingOn} talkOn={talkOn} />
+      <PageBody {...p} />
     </View>
   );
 }

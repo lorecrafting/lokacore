@@ -87,6 +87,7 @@ export default function Book(p: BookProps) {
   ]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
+  const [talkingOn, talkOn] = useState<Page>();
   const screen = pr.screen();
   const { view } = screen;
   const restoreInvocation = useRef(p.game.pendingInvocation());
@@ -115,6 +116,8 @@ export default function Book(p: BookProps) {
       refused={refused}
       startOver={startOver}
       shell={p.shell}
+      talkingOn={talkingOn}
+      talkOn={talkOn}
     />
   );
 }
@@ -129,6 +132,8 @@ type ViewProps = {
   refused: (line: DetailLine) => void;
   startOver: () => void;
   shell: Shell;
+  talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
+  talkOn?: (page?: Page) => void;
 };
 
 export function BookView(p: ViewProps) {
@@ -152,7 +157,13 @@ export function BookView(p: ViewProps) {
           {p.screen.view.combat ? (
             <Combat screen={p.screen} g={g} press={p.press} />
           ) : (
-            <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
+            <Body
+              {...ctx}
+              page={page}
+              talkingOn={p.talkingOn}
+              talkOn={p.talkOn ?? (() => {})}
+              chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+            />
           )}
         </PageTurn>
         <Bottom {...ctx} page={page} />
