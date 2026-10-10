@@ -58,6 +58,13 @@ defmodule Loka.SystemGraphTest do
            ]
   end
 
+  # Breaks: every field marked required, or a union read as an object.
+  test "required marks and kinds follow the schema" do
+    fields = Map.new(contract("UnavailableReason")["fields"], &{&1["name"], &1["required"]})
+    assert fields == %{"code" => true, "message" => false}
+    assert contract("TextValue")["kind"] == "union"
+  end
+
   # Breaks: a capability row lost, or a definition kind resolved to the wrong contract.
   test "every registry capability has a row with its owned contracts" do
     registry = JSON.decode!(File.read!("protocol/capability_registry.json"))

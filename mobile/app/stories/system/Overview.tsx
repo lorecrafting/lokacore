@@ -1,16 +1,17 @@
-// System/Overview: the six layers left to right with their schema files and contract counts; a
-// layer opens Data model filtered to it (spec §1).
+// System/Overview: the six layers left to right, each with its schema files (title, file, contract
+// count), then the Book. A layer opens Data model filtered to it (spec §1).
+import type { ReactNode } from 'react';
 import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
 import { graph, page, repo } from './graph.ts';
 import { hue } from './palette.ts';
-import { heading, Link, Sheet } from './ui.tsx';
+import { heading, Link, Sheet, small } from './ui.tsx';
 
 const count = (file: string) => graph.nodes.filter((n) => n.file === file).length;
 
-function Layer({ layer }: { layer: string }) {
+// One box in the layer map, its top rule in the layer's hue (Book has none: c.line).
+function Box({ layer, href, children }: { layer: string; href: string; children?: ReactNode }) {
   const c = usePalette();
-  const files = graph.files.filter((f) => f.layer === layer);
   return (
     <li
       style={{
@@ -21,20 +22,30 @@ function Layer({ layer }: { layer: string }) {
       }}
     >
       <h2 style={{ ...heading, margin: 0 }}>
-        <Link top href={page('data-model', { layer })}>
+        <Link top={layer !== 'Book'} href={href}>
           {layer}
         </Link>
       </h2>
-      <ul style={{ paddingLeft: space.xl }}>
-        {files.map((f) => (
-          <li key={f.file}>{`${f.file.replace('protocol/', '')} (${count(f.file)})`}</li>
-        ))}
-        {layer === 'Save' &&
-          graph.saveTables.map((t) => <li key={t.table}>{`table ${t.table}`}</li>)}
-      </ul>
+      {children}
     </li>
   );
 }
+
+const Layer = ({ layer }: { layer: string }) => (
+  <Box layer={layer} href={page('data-model', { layer })}>
+    <ul style={{ paddingLeft: space.xl }}>
+      {graph.files
+        .filter((f) => f.layer === layer)
+        .map((f) => (
+          <li key={f.file}>
+            {f.title}{' '}
+            <span style={small}>{`${f.file.replace('protocol/', '')} (${count(f.file)})`}</span>
+          </li>
+        ))}
+      {layer === 'Save' && graph.saveTables.map((t) => <li key={t.table}>{`table ${t.table}`}</li>)}
+    </ul>
+  </Box>
+);
 
 export const Overview = () => (
   <Sheet>
@@ -48,6 +59,7 @@ export const Overview = () => (
       {graph.layers.map((l) => (
         <Layer key={l} layer={l} />
       ))}
+      <Box layer="Book" href={repo('docs/system/book-ui.md')} />
     </ol>
   </Sheet>
 );

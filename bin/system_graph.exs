@@ -211,7 +211,10 @@ defmodule SystemGraph do
         raise "docs/system/save.md: no `| Table | Rows |` block under ## The save file"
 
     for row <- String.split(block, "\n", trim: true) do
-      [_, table, rows] = Regex.run(~r/^\| `(\w+)` \| (.*) \|$/, row)
+      [_, table, rows] =
+        Regex.run(~r/^\| `(\w+)` \| (.*) \|$/, row) ||
+          raise "docs/system/save.md: save table row is not '| `table` | rows |': #{row}"
+
       %{"table" => table, "rows" => rows}
     end
   end

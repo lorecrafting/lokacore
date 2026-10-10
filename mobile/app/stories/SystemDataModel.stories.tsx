@@ -45,6 +45,30 @@ export const Selected: Story = {
   },
 };
 
+// Acceptance 5: an optional field carries no required mark (UnavailableReason.message).
+export const OptionalField: Story = {
+  globals: { node: 'UnavailableReason' },
+  play: async ({ canvas }) => {
+    const panel = within(canvas.getByRole('complementary', { name: 'Detail' }));
+    const message = within(panel.getByRole('row', { name: /^message/ }));
+    await expect(message.queryByText('required')).toBeNull();
+  },
+};
+
+// The Owner and Kind filters: unowned contracts count as foundation; a oneOf or anyOf is a union.
+export const Filters: Story = {
+  play: async ({ canvas }) => {
+    const owner = canvas.getByRole('combobox', { name: 'Owner' });
+    await userEvent.selectOptions(owner, 'foundation');
+    await expect(canvas.getByRole('button', { name: 'StateDelta' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'ResourceSpec' })).toBeNull();
+    await userEvent.selectOptions(owner, 'all');
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Kind' }), 'union');
+    await expect(canvas.getByRole('button', { name: 'TextValue' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'StateDelta' })).toBeNull();
+  },
+};
+
 // Acceptance 7 and keyboard use: search by a field word, the Save layer's tables, arrows, Escape.
 export const SearchAndKeys: Story = {
   play: async ({ canvas }) => {
@@ -73,6 +97,9 @@ export const SearchAndKeys: Story = {
     save.getByRole('button', { name: 'head' }).focus();
     await userEvent.keyboard('{ArrowRight}');
     await expect(save.getByRole('button', { name: 'state_row' })).toHaveFocus();
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(save.getByRole('button', { name: 'head' })).toHaveFocus();
+    await userEvent.keyboard('{ArrowRight}');
     await userEvent.keyboard('{Enter}');
     await expect(canvas.getByRole('complementary', { name: 'Detail' })).toBeVisible();
     await userEvent.keyboard('{Escape}');
