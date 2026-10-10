@@ -290,7 +290,8 @@ test('a round with fewer than two of its eight draws left skips the guard; with 
     );
     const r = advance({ ...w, state: { ...w.state, rng } } as World);
     ok(r);
-    const keys = r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key) : [];
+    const keys =
+      r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key as string) : [];
     assert.equal(keys.includes('combat.ally_hit'), strikes, keys.join());
   }
 });
