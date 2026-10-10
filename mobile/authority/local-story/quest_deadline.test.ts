@@ -102,7 +102,7 @@ test('a pending generic deadline reopens, replays and its stale job only complet
   s.saved('find_key');
   assert.equal(entry(s.story.world()).remaining, DUE);
   s.saved('take', [key]);
-  s.saved('hang_key');
+  s.saved('leave_word');
   assert.equal(entry(s.story.world()).state, 'resolved');
   const until = t0 + DUE + 3000;
   const run = { expected_run_id: s.story.runId(), from: t0, until };

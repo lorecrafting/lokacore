@@ -1,6 +1,6 @@
 // Toolbox row W24 on the compiled quest_sampler (one real minute is 3000 logical units): find_key
 // fails `late` forty minutes after acceptance; reactions/late.json lowers keeper_trust to 0 and
-// reactions/hung.json resolves the quest when recipes/hang_key.json assigns key_hung.
+// reactions/word_left.json resolves the quest when recipes/leave_word.json assigns word_left.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -115,10 +115,10 @@ test('the Journal counts down to the generic deadline job while the quest is ope
   w = wait(w, 5).w;
   w = play(w, { type: 'take', item_id: w.entityIds['quest_sampler@0.0.1:item/key'] });
   assert.equal(left(w), 35 * MINUTE);
-  assert.equal(left(play(w, { type: 'perform', action: 'hang_key' })), undefined);
+  assert.equal(left(play(w, { type: 'perform', action: 'leave_word' })), undefined);
   // The same pending job under a legacy deadline (it has a fact).
   const def = w.cartridge.quests![QUEST]!;
-  const fact = { ...quest, kind: 'fact', key: 'key_hung' } as never;
+  const fact = { ...quest, kind: 'fact', key: 'word_left' } as never;
   const legacy = { ...def, deadline: { ...def.deadline!, fact } };
   const quests = { ...w.cartridge.quests, [QUEST]: legacy };
   assert.equal(left({ ...w, cartridge: { ...w.cartridge, quests } } as World), undefined);
@@ -128,7 +128,7 @@ test('the Journal counts down to the generic deadline job while the quest is ope
 test('a deadline job of a quest resolved earlier only completes', () => {
   let w = play(fresh(), { type: 'accept_quest', quest });
   w = play(w, { type: 'take', item_id: w.entityIds['quest_sampler@0.0.1:item/key'] });
-  w = play(w, { type: 'perform', action: 'hang_key' });
+  w = play(w, { type: 'perform', action: 'leave_word' });
   assert.equal(row(w).state, 'resolved');
   const r = wait(w, 41);
   assert.deepEqual([row(r.w).state, failedEvents(r.events), trust(r.w)], ['resolved', [], 2]);

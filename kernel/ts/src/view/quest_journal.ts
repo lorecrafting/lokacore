@@ -1,5 +1,11 @@
 // Current chapter and player quest journal projections.
-import type { ChapterView, QuestJournal, QuestView, Key } from '../contracts.gen.ts';
+import type {
+  ChapterView,
+  QuestDefinition,
+  QuestJournal,
+  QuestView,
+  Key,
+} from '../contracts.gen.ts';
 import { refString, type QuestRow, type World, type Steps } from '../runtime/decision.ts';
 import * as patrol from '../mechanics/patrol/shared.ts';
 import { definition } from '../mechanics/dialogue/shared.ts';
@@ -46,7 +52,7 @@ export function journal(world: World, steps: Steps): QuestView[] {
       const progress = patrolProgress(world, id, steps);
       const expedition = expeditionProgress(world, id);
       const d = world.cartridge.quests![refString(q.quest)];
-      const left = remaining(world, id, q);
+      const left = remaining(world, id, q, d.deadline);
       const shown = {
         ...progress,
         ...expedition,
@@ -94,13 +100,12 @@ const OPEN = ['active', 'objectives_complete'];
 
 // Toolbox row W24: logical time until the open instance's pending generic deadline job is due
 // (legacy deadlines show none, so Chapter 1 views keep their bytes).
-function remaining(world: World, id: string, q: QuestRow) {
-  const d = world.cartridge.quests![refString(q.quest)].deadline;
+function remaining(world: World, id: string, q: QuestRow, d: QuestDefinition['deadline']) {
   if (!d || d.fact || !OPEN.includes(q.state)) return;
   const job = Object.values(world.state.jobs ?? {}).find(
     (j) => j.quest_instance_id === id && j.status === 'pending',
   );
-  return job && job.due_time - world.state.clock;
+  return job && Math.max(0, job.due_time - world.state.clock);
 }
 
 function expeditionProgress(world: World, id: string) {

@@ -1,7 +1,7 @@
 {
-  "label": "actions.hang_key",
+  "label": "actions.leave_word",
   "aliases": [
-    "hang"
+    "chalk"
   ],
   "target": {
     "kind": "detail",
@@ -22,12 +22,12 @@
       "sequence": [
         {
           "op": "fact.assign",
-          "fact": "key_hung",
+          "fact": "word_left",
           "value": true
         }
       ],
       "narration": {
-        "actor": "narration.hang_key"
+        "actor": "narration.leave_word"
       }
     }
   }

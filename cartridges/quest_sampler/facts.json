@@ -11,7 +11,7 @@
       ],
       "meaning": "This character has searched the hall floor."
     },
-    "key_hung": {
+    "word_left": {
       "version": 1,
       "value_type": {
         "type": "bool",
@@ -20,7 +20,7 @@
       "scopes": [
         "player"
       ],
-      "meaning": "This character has hung the found key back on its hook."
+      "meaning": "This character has left word by the hook that the key is found."
     },
     "keeper_trust": {
       "version": 1,

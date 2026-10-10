@@ -1,7 +1,7 @@
 {
   "on": {
     "event": "fact_changed",
-    "fact": "key_hung"
+    "fact": "word_left"
   },
   "apply": [
     {
