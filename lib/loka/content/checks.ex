@@ -127,7 +127,7 @@ defmodule Loka.Content.Checks do
     |> Map.merge(
       if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
     )
-    |> Loka.Content.NpcFields.expand(m)
+    |> Loka.Content.NpcFields.expand(m, &expand/2)
   end
 
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
