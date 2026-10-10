@@ -1,0 +1,39 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "time_window",
+          "from": 0,
+          "to": 6
+        }
+      },
+      "description": "npc.guard.short_asleep"
+    }
+  ],
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "tavern",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "attributes": [
+    {
+      "attribute": "str",
+      "value": 5
+    }
+  ],
+  "daily_schedule": {
+    "5": "tavern",
+    "7": "bunkroom",
+    "8": "tavern"
+  }
+}

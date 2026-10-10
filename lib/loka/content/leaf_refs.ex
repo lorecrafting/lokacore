@@ -15,6 +15,8 @@ defmodule Loka.Content.LeafRefs do
       "stat_compare" => %{"attribute" => "attribute"},
       "resource_compare" => %{"resource" => "resource"},
       "has_tag" => %{"item" => "item", "barrier" => "barrier", "room" => "room"},
-      "visited_count" => %{"room" => "room"}
+      "visited_count" => %{"room" => "room"},
+      "status_active" => %{"status" => "status"},
+      "position" => %{"npc" => "npc"}
     }
 end

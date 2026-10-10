@@ -50,7 +50,7 @@ defmodule Loka.Content.Entities do
   def carry(_, _, _), do: []
 
   @doc """
-  An entity, each of its room-line variants, an NPC's daily schedule and an item's slot, as
+  An entity, each of its text variants, an NPC's daily schedule and an item's slot, as
   `{steps, kind}` (registry definitions).
   """
   @spec parts(map(), String.t()) :: [{list(), String.t()}]
@@ -71,12 +71,14 @@ defmodule Loka.Content.Entities do
     [{[], kind} | for({steps, _} <- variants(e), do: {steps, "variant"})] ++ optional
   end
 
+  # An item's or NPC's text variant lists (TextVariants; toolbox row W6).
   defp variants(e) do
-    for {v, i} <- Enum.with_index(Map.get(e, "room_line_variants", [])),
-        do: {["room_line_variants", i], v}
+    for f <- ~w(short_variants room_line_variants description_variants),
+        {v, i} <- Enum.with_index(Map.get(e, f, [])),
+        do: {[f, i], v}
   end
 
-  @doc "Each room-line variant's condition, as `{rel, steps, root}`."
+  @doc "Each text variant's condition, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
     for {_, rel, e} <- all(defs),
@@ -112,7 +114,7 @@ defmodule Loka.Content.Entities do
 
   @doc """
   Every text of each entity as `{rel, entity key, steps, text key}`: short, room_line and
-  description, then each room-line variant's description.
+  description, then each text variant's description.
   """
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]
   def text_keys(defs) do

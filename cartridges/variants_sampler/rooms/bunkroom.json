@@ -1,0 +1,9 @@
+{
+  "title": "room.bunkroom.title",
+  "description": "room.bunkroom.description",
+  "exits": {
+    "south": {
+      "to": "tavern"
+    }
+  }
+}

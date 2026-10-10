@@ -1,0 +1,12 @@
+{
+  "duration": 36000,
+  "tick_every": 18000,
+  "resource": "hp",
+  "per_tick": 1,
+  "label": "condition.notched",
+  "narration": {
+    "applied": "narration.notched.applied",
+    "tick": "narration.notched.tick",
+    "expired": "narration.notched.expired"
+  }
+}

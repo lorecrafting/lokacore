@@ -1,0 +1,17 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "yard"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "bruised"
+    },
+    {
+      "op": "status.apply",
+      "status": "notched",
+      "item": "sword"
+    }
+  ]
+}

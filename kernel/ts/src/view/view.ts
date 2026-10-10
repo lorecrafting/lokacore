@@ -31,7 +31,7 @@ import { refusal, resolved } from '../commands/actions.ts';
 import { COMPASS, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
-import * as description_variant from '../mechanics/description_variant/rule.ts';
+import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
@@ -43,7 +43,7 @@ import { activeStatuses } from '../mechanics/status/shared.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
- * the player sees (description_variant.describe), exits in compass order (unavailable while
+ * the player sees (description_variant's describe), exits in compass order (unavailable while
  * admission refuses them: unsupported_capability without a matching composed action or
  * invalid_state when its policy fails; then exit_closed or exit_locked through a closed or locked barrier,
  * movement.passage, else invalid_state while the player is not standing, position.standing, else
@@ -90,7 +90,7 @@ export function gameView(world: World): GameView {
     ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
-    ...(fight && { combat: combatView(world, fight) }),
+    ...(fight && { combat: combatView(world, fight, steps) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...(conditions.length > 0 && { conditions }),
     place: placeView(world, here, steps),
@@ -119,7 +119,7 @@ function placeView(world: World, here: EntityId, steps: Steps) {
   return {
     id: here,
     title: text(room.title),
-    description: text(description_variant.describe(world, world.character, room, steps)),
+    description: text(describe(world, world.character, room, steps)),
   };
 }
 
@@ -201,8 +201,8 @@ const viewOf = (
   steps: Steps,
 ) => ({
   id: id as EntityId,
-  name: e.short,
-  description: e.description,
+  name: describeEntity(world, world.character, id as EntityId, 'short', steps),
+  description: describeEntity(world, world.character, id as EntityId, 'description', steps),
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.slot && { slot: e.slot }),
   ...(e.kind === 'item' &&
@@ -280,15 +280,16 @@ function equipmentViews(world: World, actions: Lists, steps: Steps) {
   });
 }
 
-function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>) {
+function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>, steps: Steps) {
+  const name = (id: EntityId) => describeEntity(world, world.character, id, 'short', steps);
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
-    name: world.entities[fight.row.npc_id].short,
+    name: name(fight.row.npc_id),
     ...(fight.row.active_ids && {
       active_opponents: fight.row.active_ids.map((id) => ({
         id,
-        name: world.entities[id].short,
+        name: name(id),
       })),
     }),
   };

@@ -1,5 +1,5 @@
 defmodule Loka.Content.NpcFields do
-  @moduledoc "Expands an NPC definition's schedule, immune list and (toolbox row G3) attributes to local DefinitionRefs; part of Loka.Content.Checks.expand."
+  @moduledoc "Expands an NPC definition's schedule, immune list, (toolbox row G3) attributes and (row W6) text variants to local DefinitionRefs; part of Loka.Content.Checks.expand."
   import Loka.Content.Source, only: [ref: 3]
 
   def expand(npc, m) do
@@ -9,6 +9,14 @@ defmodule Loka.Content.NpcFields do
     |> update("attributes", fn c ->
       Enum.map(c, fn a -> Map.update!(a, "attribute", &ref(&1, "attribute", m)) end)
     end)
+    |> Map.merge(variants(npc, m))
+  end
+
+  # Toolbox row W6: the conditions of its text variants.
+  defp variants(npc, m) do
+    for {f, v} <- Map.take(npc, ~w(short_variants room_line_variants description_variants)),
+        into: %{},
+        do: {f, Loka.Content.Checks.expand(v, m)}
   end
 
   defp update(npc, field, f) when is_map_key(npc, field), do: Map.update!(npc, field, f)

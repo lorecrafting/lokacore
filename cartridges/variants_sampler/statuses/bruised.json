@@ -1,0 +1,12 @@
+{
+  "duration": 36000,
+  "tick_every": 18000,
+  "resource": "hp",
+  "per_tick": 1,
+  "label": "condition.bruised",
+  "narration": {
+    "applied": "narration.bruised.applied",
+    "tick": "narration.bruised.tick",
+    "expired": "narration.bruised.expired"
+  }
+}

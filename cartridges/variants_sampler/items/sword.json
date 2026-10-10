@@ -1,0 +1,25 @@
+{
+  "keywords": [
+    "sword"
+  ],
+  "short": "item.sword.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "notched"
+        }
+      },
+      "description": "item.sword.short_notched"
+    }
+  ],
+  "room_line": "item.sword.room",
+  "description": "item.sword.description",
+  "location": {
+    "in": "room",
+    "room": "tavern"
+  }
+}

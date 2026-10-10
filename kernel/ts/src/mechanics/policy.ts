@@ -2,7 +2,8 @@ import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
-// variety@1's visited_count, equipment@1's wearing; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// variety@1's visited_count, equipment@1's wearing, status@1's status_active, target_resolution@1's
+// position; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
@@ -15,6 +16,8 @@ import { present } from '../commands/target.ts';
 import { hourOf, skyPhase } from './calendar.ts';
 import { visits } from './knowledge/shared.ts';
 import { value as attributeValue, wearing } from './attributes/shared.ts';
+import { currentStatus } from './status/shared.ts';
+import { living } from './death/shared.ts';
 
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
@@ -68,6 +71,10 @@ export function holds(
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
       return wearing(world, actor, p.tag);
+    case 'status_active':
+      return ctx.target !== undefined && !!currentStatus(world, ctx.target, p.status);
+    case 'position':
+      return here(world, actor, world.entityIds[refString(p.npc)]);
     default: {
       const leaf: never = p; // a schema leaf without its case here fails tsc
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
@@ -104,6 +111,14 @@ function tagsOf(
     return world.rooms[world.state.containers[bodyOf(world, actor)!]!]?.tags;
   const entity = target === undefined ? undefined : world.entities[target];
   return entity?.kind === 'item' ? entity.tags : undefined;
+}
+
+// position's presence (toolbox row W6): the entity is in the actor's room and living; no light
+// or reach test, unlike target_present. An NPC that never existed or a spawned copy reads false.
+function here(world: World, actor: CharacterId, id: string | undefined): boolean {
+  const body = bodyOf(world, actor);
+  if (id === undefined || body === undefined) return false;
+  return world.state.containers[id] === world.state.containers[body] && living(world, id);
 }
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose

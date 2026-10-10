@@ -5,7 +5,7 @@ import type { EntityId, LocatedNpc } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { COMPASS, refString } from '../src/runtime/decision.ts';
 import { exitOf } from '../src/mechanics/lookups.ts';
-import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { describe, describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { normalize } from '../src/commands/target.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -137,14 +137,9 @@ export const pinned = (t: { key: string; participants?: Readonly<Record<string, 
 export function room(cartridge: Cartridge, world: World, brief = false): string {
   const view = gameView(world);
   const text = (key: string) => say(cartridge, key);
-  const lines = view.entities.map((e) => {
-    const d = world.entities[e.id];
-    const of = {
-      description: d.room_line,
-      variants: d.kind === 'item' ? d.room_line_variants : [],
-    };
-    return `${text(describe(world, world.character, of))}\n`;
-  });
+  const lines = view.entities.map(
+    (e) => `${text(describeEntity(world, world.character, e.id, 'room_line'))}\n`,
+  );
   const mark = (e: (typeof view.exits)[number]) => ('reason' in e && BARRED[e.reason.code]) || '';
   const exits = view.exits.map((e) => `${e.direction}${mark(e)}`).join(', ') || 'none';
   const long = brief ? '' : `${text(view.place.description.key)}\n`;
@@ -208,8 +203,11 @@ export function journal(cartridge: Cartridge, world: World): string {
 
 /** A detail's (its variants) or an item's or NPC's description, in the cartridge's text. */
 export function detail(cartridge: Cartridge, world: World, id: EntityId): string {
-  const of = world.details[id] ?? world.entities[id];
-  return `${say(cartridge, describe(world, world.character, of))}\n`;
+  const d = world.details[id];
+  const key = d
+    ? describe(world, world.character, d)
+    : describeEntity(world, world.character, id, 'description');
+  return `${say(cartridge, key)}\n`;
 }
 
 /**
