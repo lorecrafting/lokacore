@@ -150,7 +150,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...stamp(p.world, own, base.logical_time, p.ops));
+  p.ops.push(...stamp(p.world, own, base.logical_time));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);
@@ -211,7 +211,7 @@ function react(p: P): Admitted | undefined {
       const writer_group = ++p.group;
       const exit = { op: 'quest.transition', writer_group, instance_id } as const;
       const to = { ...exit, from: 'active', to: 'objectives_complete' } as const;
-      p.ops.push(...stamp(p.world, [to], next.cause.logical_time, p.ops));
+      p.ops.push(...stamp(p.world, [to], next.cause.logical_time));
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;

@@ -2925,7 +2925,7 @@
       }
     },
     {
-      "id": "quest-transition-started-at-replaced-then-removed",
+      "id": "quest-transition-started-at-stored-then-removed",
       "state": "base",
       "ops": [
         {

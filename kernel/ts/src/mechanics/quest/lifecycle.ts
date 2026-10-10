@@ -42,23 +42,18 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
 /**
  * Toolbox row W23: `ops` with started_at `at` (the logical time of the sequence's cause) on each
  * quest.activate and quest.transition of a quest whose journal declares hints; other quests' ops
- * are unchanged, so their deltas and saves keep their bytes. `prior` are the proposal's earlier
- * ops, for an instance activated in the same proposal.
+ * are unchanged, so their deltas and saves keep their bytes. An instance activated by an earlier
+ * writer group of the same proposal needs no lookup: its transition there faults conflicting_write
+ * (foundation/compose.ts), so only `ops` itself is searched.
  */
-export function stamp(
-  world: World,
-  ops: readonly DeltaOp[],
-  at: number,
-  prior: readonly DeltaOp[],
-) {
+export function stamp(world: World, ops: readonly DeltaOp[], at: number) {
   const quests = world.cartridge.quests;
   const touched = ops.some((o) => o.op === 'quest.activate' || o.op === 'quest.transition');
   if (!touched || !quests || !Object.values(quests).some((q) => q.journal?.hints)) return ops;
   type Activate = Extract<DeltaOp, { op: 'quest.activate' }>;
   const refOf = (id: string) =>
     world.state.quests?.[id]?.quest ??
-    [...prior, ...ops].find((o): o is Activate => o.op === 'quest.activate' && o.instance_id === id)
-      ?.quest;
+    ops.find((o): o is Activate => o.op === 'quest.activate' && o.instance_id === id)?.quest;
   return ops.map((o) => {
     if (o.op !== 'quest.activate' && o.op !== 'quest.transition') return o;
     const ref = o.op === 'quest.activate' ? o.quest : refOf(o.instance_id);
