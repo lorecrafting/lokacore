@@ -66,7 +66,7 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/runtime/world.ts:114`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
+5. **Step** (`kernel/ts/src/runtime/world.ts:116`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)
    refuses ordinary player commands as `invalid_state` before ActionSet matching;
    `stepElapsed` (`:162`) applies the same gate to trusted elapsed (`invalid_state`). Otherwise,
    for Step, the capability owning the command type
@@ -77,7 +77,7 @@ storage half):
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `runtime/decision.ts:179`) does not own
-   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:207`).
+   (`runtime/proposal_admit.ts:13`); a `KernelError` is an `evaluator_error` fault (`runtime/world.ts:209`).
    The headless GameView/admission check classifies service invocation identity before
    comparing the observed player's offer: a nil CommandId agrees only with
    `permission_denied`; otherwise a foreign world or actor agrees only with
@@ -206,7 +206,7 @@ Admission independently revalidates its pair under the decision counter.
 `protocol/invariants.json` registers the active invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/runtime/invariants.ts:34` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:141`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`runtime/world.ts:143`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).

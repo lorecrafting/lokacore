@@ -600,6 +600,60 @@
           "additionalProperties": false
         },
         {
+          "description": "Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "say"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "word": {
+              "$ref": "action.schema.json#/$defs/Word"
+            }
+          },
+          "required": ["type", "actor_id", "word"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "shout"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "word": {
+              "$ref": "action.schema.json#/$defs/Word"
+            }
+          },
+          "required": ["type", "actor_id", "word"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Whisper one word to one NPC in the actor's room; no one else hears it (speech@1; toolbox row G9).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "whisper"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "word": {
+              "$ref": "action.schema.json#/$defs/Word"
+            }
+          },
+          "required": ["type", "actor_id", "target_id", "word"],
+          "additionalProperties": false
+        },
+        {
           "description": "Activate an offered quest.",
           "type": "object",
           "properties": {

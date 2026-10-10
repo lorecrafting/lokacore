@@ -194,12 +194,11 @@ export type Decision<E> =
 /** The command's IdSource allocator: each call is the next ordinal, from 0 (numeric profile). */
 export type Mint = () => string;
 /**
- * The capabilities whose events a capability's rule also emits, because it runs them inside its
- * own decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs,
- * checks and outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
- * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry (status@1's);
- * reactions activate quest-owned instances;
- * a choice resolves its dialogue's quest
+ * The capabilities whose events a capability's rule also emits, because it runs them inside its own
+ * decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs, checks and
+ * outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
+ * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry
+ * (status@1's); reactions activate quest-owned instances; a choice resolves its dialogue's quest
  * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
  */
 export const COMPOSES = {
@@ -213,6 +212,7 @@ export const COMPOSES = {
   commerce: ['containment'],
   scene: ['dialogue', 'quest'],
   reaction: ['quest'],
+  speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES
   ? Owned[(typeof COMPOSES)[C][number]]['event']

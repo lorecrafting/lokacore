@@ -50,6 +50,29 @@
             },
             {
               "type": "object",
+              "description": "Toolbox row G9 (speech@1; kernel_api at least 1.48): one spoken event per NPC that heard the word.",
+              "properties": {
+                "event": {
+                  "const": "spoken"
+                },
+                "npc": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "The hearer is this NPC's authored instance."
+                },
+                "word": {
+                  "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
+                },
+                "loudness": {
+                  "$ref": "event.schema.json#/$defs/Loudness"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
               "properties": {
                 "event": {
                   "const": "quest_resolved"

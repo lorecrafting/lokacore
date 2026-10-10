@@ -33,6 +33,7 @@ import * as commerce from '../mechanics/commerce/rule.ts';
 import * as containment from '../mechanics/containment/rule.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 import * as dialogue from '../mechanics/dialogue/rule.ts';
+import * as speech from '../mechanics/speech/rule.ts';
 import * as light from '../mechanics/light/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
@@ -67,6 +68,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   barrier: barrier.decide,
   quest: quest.decide,
   dialogue: dialogue.decide,
+  speech: speech.decide,
   light: light.decide,
   equipment: equipment.decide,
   position: position.decide,

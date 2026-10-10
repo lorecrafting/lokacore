@@ -89,8 +89,8 @@ defmodule Loka.Core.NominalIdsTest do
               CharacterId ClientFeature CommandId ContentHash ContinuationId CorrelationId
               DefinitionRefString EffectId EncounterId EntityId EventId EventName InvocationId
               JobId KernelApiVersion KernelVersion Key LocalProfileId PartyId QuestInstanceId
-              RealmId ReleaseVersion RequirementId StoryPointReportId StoryRunId TextKey
-              WorldContextId ZoneShardId)
+              RealmId ReleaseVersion RequirementId SpokenKeyword StoryPointReportId StoryRunId
+              TextKey Word WorldContextId ZoneShardId)
 
   # Breaks if the Elixir tag constructors (contracts.ex) or the TypeScript brands
   # (bin/contracts.exs decl, regenerated into contracts.gen.ts) stop using the one rule:

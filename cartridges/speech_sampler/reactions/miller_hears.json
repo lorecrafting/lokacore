@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "spoken",
+    "npc": "miller"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "miller_heard",
+      "value": true
+    }
+  ]
+}

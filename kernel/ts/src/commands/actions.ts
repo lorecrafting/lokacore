@@ -18,7 +18,7 @@ import {
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
-import { modal, talks } from '../mechanics/dialogue/shared.ts';
+import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
@@ -58,6 +58,8 @@ export type ActionSet = Readonly<Record<string, Offered>>;
 // Toolbox row 4: Raise is offered only while the cartridge levels and points remain.
 const points = (world: World, actor: CharacterId) => (levelling(world, actor)?.unspent ?? 0) > 0;
 
+const SPEECH = ['say', 'whisper', 'shout'];
+
 export const needsAncestry = (world: World, actor: CharacterId) =>
   !!world.cartridge.ancestries && !characterChoice(world, actor);
 
@@ -93,6 +95,8 @@ function engine(world: World): ActionSet {
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
+      // Row G9: no speech while a conversation is open (the speech rule refuses it too).
+      .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;

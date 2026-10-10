@@ -1,0 +1,15 @@
+{
+  "on": {
+    "event": "spoken",
+    "npc": "watchman",
+    "word": "help",
+    "loudness": "shout"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "watchman_alerted",
+      "value": true
+    }
+  ]
+}
