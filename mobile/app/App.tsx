@@ -149,6 +149,15 @@ function transition(c: Clock, active: boolean) {
 }
 
 type Recovery = { notify?: (healthy: boolean) => void; booked?: boolean; onBooked?: () => void };
+// The Book's shell, telling the clock when the Book is healthy again and when it has subscribed.
+const shellFor = (recovered: { current: Recovery }): Shell => ({
+  ...shell,
+  recovered: (healthy) => recovered.current.notify?.(healthy),
+  subscribed: () => {
+    recovered.current.booked = true;
+    recovered.current.onBooked?.();
+  },
+});
 function useElapsed(
   game: ReturnType<ReturnType<typeof localSession>['game']>,
   recovered: { current: Recovery },
@@ -252,16 +261,7 @@ export default function App() {
   const [, redraw] = useState({});
   const game = activeSession?.game();
   const recovered = useRef<Recovery>({});
-  const [bookShell] = useState<Shell>(() => ({
-    ...shell,
-    recovered: (healthy) => {
-      recovered.current.notify?.(healthy);
-    },
-    subscribed: () => {
-      recovered.current.booked = true;
-      recovered.current.onBooked?.();
-    },
-  }));
+  const [bookShell] = useState(() => shellFor(recovered));
   useElapsed(game, recovered);
   if (!activeSession) return null;
   if (!loaded && !fontError) return null;
