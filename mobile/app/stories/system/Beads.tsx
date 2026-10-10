@@ -1,7 +1,8 @@
 // System/Beads: the tracked Beads export (.beads/issues.jsonl) as of this build, filtered by status.
 import { useState } from 'react';
 import { repo } from './graph.ts';
-import { distinct, issues, type Issue } from './pages.ts';
+import { issues, type Issue } from './issues.ts';
+import { distinct } from './pages.ts';
 import { cell, Choose, Link, Sheet, Table } from './ui.tsx';
 
 const heads = ['Issue', 'Title', 'Status', 'Priority', 'Type', 'Labels', 'Depends on'];

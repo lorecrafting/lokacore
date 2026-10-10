@@ -27,7 +27,7 @@ defmodule Loka.SystemPagesTest do
 
   # Breaks: a cell read from the wrong column, depends not split ("–" is none), the status's
   # state missed, a `toolbox rows 5 and G5` heading linked to only one row, a row's own rules link
-  # (W1: its heading names no row) dropped, or a short row kept.
+  # (W1: its heading names no row) dropped, a link in the Today cell taken as the row's rules (29), or a short row kept.
   test "each Ranked toolbox row keeps its batch, depends, state and mechanics.md section" do
     md = """
     ## Ranked toolbox
@@ -38,6 +38,7 @@ defmodule Loka.SystemPagesTest do
     | G5 | M4 | Opposed checks | missing | S | – | – | – | in progress #360 |
     | 9 | M6 | Hirelings | missing | M | – | – | – | todo |
     | W1 | M3 | Reactions | missing | S | 1,G1 | – | – | done #351: [rules](system/mechanics.md#reaction1) |
+    | 29 | M3 | Stances | [D1](system/mechanics.md#d1) | S | – | – | – | todo |
 
     ## Next
     """
@@ -81,6 +82,15 @@ defmodule Loka.SystemPagesTest do
                "status" => "done #351: rules",
                "state" => "done",
                "section" => "docs/system/mechanics.md#reaction1"
+             },
+             %{
+               "id" => "29",
+               "batch" => "M3",
+               "title" => "Stances",
+               "depends" => [],
+               "status" => "todo",
+               "state" => "todo",
+               "section" => nil
              }
            ]
 

@@ -61,7 +61,7 @@ defmodule SystemGraph.Pages do
           "depends" => depends(depends),
           "status" => plain(status),
           "state" => Enum.find(@states, &String.starts_with?(status, &1)),
-          "section" => linked(row) || sections[id]
+          "section" => linked(status) || sections[id]
         }
 
       _ ->
@@ -74,9 +74,9 @@ defmodule SystemGraph.Pages do
   defp depends("–"), do: []
   defp depends(ids), do: String.split(ids, ~r/,\s*/)
 
-  # The rules a row's cells link to, else the heading that names the row.
-  defp linked(row) do
-    case Regex.run(~r/\]\((system\/mechanics\.md#[^)]+)\)/, row) do
+  # The rules the Status cell links to (other cells link to rules the row only mentions).
+  defp linked(status) do
+    case Regex.run(~r/\]\((system\/mechanics\.md#[^)]+)\)/, status) do
       [_, link] -> "docs/" <> link
       nil -> nil
     end
