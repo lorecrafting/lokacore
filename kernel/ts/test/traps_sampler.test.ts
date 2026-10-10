@@ -88,8 +88,8 @@ function wait(w: World, target: number): World {
 }
 
 // Breaks: the plate's `when` loses its sprung gate (the second crossing at 120 refreshes the
-// poison to 420), the spent-state write is dropped (same), or the clock_hour re-arm is missing or
-// ungated (the crossing after the hour opens no generation 2).
+// poison to 420), the spent-state write is dropped (same), or the clock_hour re-arm is missing
+// (the crossing after the hour opens no generation 2).
 test('the plate poisons the first crossing only, and the hour re-arms it', () => {
   let w = move(fresh(), 'north');
   assert.deepEqual(poison(w), { generation: 1, ends_at: 300 });
