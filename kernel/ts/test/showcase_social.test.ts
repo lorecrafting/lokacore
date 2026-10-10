@@ -235,6 +235,8 @@ test('social 9: the church makes five rooms (Wardle walker); the roll and the le
       ['think_lectern', ['topic.parish', 'topic.fire']],
     ],
   );
+  // The hall twin's card shows here too, but its lectern is in the moot hall (toolbox row 46 view).
+  assert.equal(refused(w, { type: 'perform', action: 'think_hall_lectern' }), 'not_present');
   w = perform(w, 'think_lectern').world;
   assert.deepEqual(topics(w), [
     'topic.fire',
@@ -341,8 +343,8 @@ test('social 14: the manifest sets a 30 real minute recap; 150 game hours away t
   assert.deepEqual([fact(x, 'letter_late'), fact(x, 'wardle_standing')], [true, -1]);
 });
 
-// Breaks: the sandbox twins lose their wiring: Bess ignores the standing, boast fails, lean passes
-// with practice, the hall box or cupboard ignores its fact, or the hall roll grants no topic.
+// Breaks: the sandbox twins lose their wiring: Bess ignores the standing, boast fails, lean
+// passes once practice tops out (level 2 < 3), the hall box or cupboard ignores its fact, or the hall roll grants no topic.
 test('moot hall: the sandbox has every Low Wardle mechanic behind one door', () => {
   let x = go(green(), 'south').world;
   assert.equal(bread(x, 'bess').buy.price, 4);
@@ -358,8 +360,10 @@ test('moot hall: the sandbox has every Low Wardle mechanic behind one door', () 
   }
   x = leave(say(x, 'bess', 'insult').world);
   assert.deepEqual([fact(x, 'wardle_standing'), mood(x, 'bess')], [-1, 'wary']);
+  const box = { type: 'open', target_id: id(x, 'item', 'hall_strongbox') };
+  assert.equal(refused(x, box), 'invalid_state');
   x = perform(perform(x, 'pick_hall_strongbox').world, 'pick_hall_strongbox').world;
-  x = play(x, { type: 'open', target_id: id(x, 'item', 'hall_strongbox') }).world;
+  assert.equal(outcome(play(x, box)), 'opened');
   x = perform(x, 'force_hall_cupboard').world;
   x = go(play(x, { type: 'open', direction: 'east' }).world, 'east').world;
   assert.equal(where(x, x.body), room(x, 'hall_closet'));
