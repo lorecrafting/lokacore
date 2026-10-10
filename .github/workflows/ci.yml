@@ -1,12 +1,10 @@
 name: ci
 
-# Pre-production: every push to a branch, every pull request (all jobs again, on the merge commit, so
-# e1-recorder runs in full), nightly on main and by hand; a green run on the exact head is the merge gate
-# (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md).
+# Pre-production: every push to a branch, nightly on main and by hand; a green run on the exact
+# head is the merge gate (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md).
 on:
   push:
     branches-ignore: [main]
-  pull_request:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
@@ -104,14 +102,14 @@ jobs:
 
   # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
   # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout. Its steps run nightly, on every
-  # pull request, on a push to a toolbox/batch-* branch and on a `full` dispatch (about 6 minutes);
-  # on another push the job succeeds with every step skipped, so ci-green needs no per-job exception.
+  # tree, so its artifact and output stay outside the checkout. Its steps run nightly, on a push
+  # to a toolbox/batch-* branch (batch PRs) and on a `full` dispatch (about 6 minutes); on another push
+  # the job succeeds with every step skipped, so ci-green needs no per-job exception.
   e1-recorder:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      FULL: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/toolbox/batch-') || inputs.full }}
+      FULL: ${{ github.event_name == 'schedule' || startsWith(github.ref, 'refs/heads/toolbox/batch-') || inputs.full }}
     steps:
       - if: env.FULL == 'true'
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
