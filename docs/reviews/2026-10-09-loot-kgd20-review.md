@@ -30,3 +30,11 @@
 
 - Question: `loot.test.ts:95` replays from the seed (determinism), not a retried committed command; the receipt claim in mechanics.md rests on the generic replay path.
 - `kernel_api` 1.43 collides with the G1 bump; toolbox row 8 status flip left to the PM.
+
+## Re-check: fix round 1 (`fa025ad9`)
+
+- Verdict: **APPROVE**.
+- B1 fixed: `cartridge_death.ts:74` and `death.ex:49` refuse drops unless `hp.gain` is 0 (a missing `hp` still refused); `mechanics.md` and `cartridge.md` state the rule. Red controls: the gain clause reverted to the old hp check fails `loot.test.ts` and `content_loot_test.exs`.
+- B2 fixed: `spawn_template` rows in both kernels; removing the clause fails each suite.
+- Replay question: dispute accepted. The kernel step keeps no receipt store; the same-seed rerun pins committed state and RNG byte for byte.
+- Focused `loot.test.ts` and `content_loot_test.exs` pass; `mix format --check-formatted` is clean. Hosted runs on `fa025ad9` were in progress at re-check (`e081208f` green).
