@@ -9,7 +9,6 @@ import type {
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
 import { withoutHeading } from './words.ts';
-import type { RecapLine } from './recap.ts';
 type Say = (key: string) => string;
 
 export function narrationLines(
@@ -19,12 +18,7 @@ export function narrationLines(
   past = false,
 ) {
   return [false, true].map((combat) => {
-    const line = withoutHeading(
-      (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
-      view,
-    )
-      .map((line) => liquidLine(line, text))
-      .join(' ');
+    const line = rendered(last, view, text, combat).join(' ');
     const cue = !combat && last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '';
     return [line, cue].filter(Boolean).join(' ');
   });
@@ -32,13 +26,13 @@ export function narrationLines(
 
 // One receipt's World lines one by one, for the away recap's groups (toolbox row W27).
 export const worldLines = (last: NarrationRecord, view: GameView, text: Say) =>
-  [
-    ...withoutHeading(
-      last.lines.filter((_, i) => !last.combat_lines?.includes(i)),
-      view,
-    ).map((line) => liquidLine(line, text)),
-    last.cue ? text(last.cue.key) : '',
-  ].filter(Boolean);
+  [...rendered(last, view, text, false), last.cue ? text(last.cue.key) : ''].filter(Boolean);
+
+const rendered = (last: NarrationRecord | undefined, view: GameView, text: Say, combat: boolean) =>
+  withoutHeading(
+    (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
+    view,
+  ).map((line) => liquidLine(line, text));
 
 // A refused line (a barred exit) leads with its reason tag (BOOK-UI-COMPONENTS.md, Log line).
 export type DetailLine =
@@ -57,7 +51,7 @@ export type Logs = {
   returnDetail?: string;
   fault?: string;
   away?: { from: number; lines: string[] }; // an open elapsed settlement's held World lines
-  recap?: RecapLine[];
+  recap?: string[]; // the away recap's lines, grouped when drawn
 };
 
 export function pickupLine(last: NarrationRecord | undefined, text: Say) {
@@ -98,7 +92,10 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
-  if (was.place.id !== now.place.id) s.log.length = 0;
+  if (was.place.id !== now.place.id) {
+    s.log.length = 0;
+    if (s.away) s.away.lines.length = 0; // held recap lines belong to the room left, as the log's
+  }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
 }
 

@@ -375,9 +375,10 @@
           "minimum": 1
         },
         "recap_after_minutes": {
-          "description": "Toolbox row W27, opt-in (kernel API >=1.47): an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block.",
+          "description": "Toolbox row W27, opt-in (kernel API >=1.47): an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block. At most one week (10080), a safety bound keeping the logical-second threshold a safe integer.",
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "maximum": 10080
         }
       },
       "required": [

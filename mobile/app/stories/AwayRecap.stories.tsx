@@ -28,5 +28,3 @@ export const Collapsed: Story = {
     await expect(canvas.getByText('The poison fades from your blood.')).toBeVisible();
   },
 };
-
-export const Empty: Story = { args: { lines: [] } };

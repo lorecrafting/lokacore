@@ -41,7 +41,7 @@ import {
   type Logs,
 } from './logs.ts';
 import { received } from './received.ts';
-import { holding, settle } from './recap.ts';
+import { grouped, holding, pressedAway, settle } from './recap.ts';
 
 function background(
   game: Game,
@@ -140,7 +140,7 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
-  s.recap = undefined; // the recap opens the page after an absence and goes with the next press
+  pressedAway(s); // the recap opens the page after an absence and goes with the next press
   s.returnDetail = undefined;
   s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
@@ -208,7 +208,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     buttons,
     log: s.log,
     combatLog: s.combatLog,
-    recap: s.recap,
+    recap: s.recap && grouped(s.recap),
     detail: (id: string) => s.details.get(id) ?? [],
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',

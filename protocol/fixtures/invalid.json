@@ -17552,6 +17552,20 @@
     "value": {
       "profile": "real_elapsed",
       "rate": 50,
+      "recap_after_minutes": 10081
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
       "recap_after_minutes": 0
     },
     "errors": [

@@ -79,7 +79,6 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
 export function AwayRecap({ lines }: { lines: readonly RecapLine[] }) {
   const c = usePalette();
   const [open, setOpen] = useState(false);
-  if (!lines.length) return null;
   return (
     <View style={{ gap: space.sm }}>
       <Tap label={`${LABEL.awayRecap}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
