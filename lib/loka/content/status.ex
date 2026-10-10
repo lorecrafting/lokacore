@@ -15,25 +15,31 @@ defmodule Loka.Content.Status do
           cures,
           do: {rel, ["edible", "cures"], cures}
 
-    # Row G3: an NPC's or item's immune list, a step naming an item, a tick or expiry trigger.
+    {immune, g3} = row_g3(defs)
+
+    if statuses == %{} and cures == [] and not g3,
+      do: [],
+      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
+  end
+
+  # Row G3: each NPC's or item's immune list, and whether any G3 field (those, a step naming an
+  # item, or a tick or expiry trigger) is used.
+  defp row_g3(defs) do
     immune =
       for kind <- ~w(npc item),
           {_, {rel, _, e}} <- defs[kind] || %{},
           e["immune"],
           do: {rel, ["immune"], e["immune"]}
 
-    triggers =
-      for {_, {_, _, %{} = r}} <- defs["reaction"] || %{},
-          String.starts_with?(r["on"]["event"], "status_") or
-            Enum.any?(r["apply"], &(&1["op"] == "status.apply" and &1["item"] != nil)),
-          do: r
-
-    g3 = immune != [] or triggers != []
-
-    if statuses == %{} and cures == [] and not g3,
-      do: [],
-      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
+    {immune, immune != [] or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
   end
+
+  defp trigger?({_, {_, _, %{} = r}}),
+    do:
+      String.starts_with?(r["on"]["event"], "status_") or
+        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and &1["item"] != nil))
+
+  defp trigger?(_), do: false
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m, g3) do

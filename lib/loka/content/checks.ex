@@ -117,6 +117,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"barrier" => k, "location" => _} = item, m) when is_binary(k),
     do: item |> Map.delete("barrier") |> expand(m) |> Map.put("barrier", ref(k, "barrier", m))
 
+  # ponytail: one NPC expansion pipeline; split it when another NPC field needs expanding.
+  # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t) do
     schedule = Map.get(npc, "daily_schedule", %{})
 
@@ -130,12 +132,13 @@ defmodule Loka.Content.Checks do
       if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
     )
     |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
-    |> Map.merge(
-      if npc["immune"],
-        do: %{"immune" => Enum.map(npc["immune"], &ref(&1, "status", m))},
-        else: %{}
-    )
+    |> immune(m)
   end
+
+  defp immune(%{"immune" => c} = e, m),
+    do: Map.put(e, "immune", Enum.map(c, &ref(&1, "status", m)))
+
+  defp immune(e, _), do: e
 
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
