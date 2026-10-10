@@ -37,6 +37,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
+- [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**

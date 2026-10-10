@@ -46,6 +46,7 @@ const fresh = (change?: (c: any) => void) => {
 };
 let n = 0;
 const narration: string[] = [];
+const arrivals: [number, string][] = [];
 function play(w: World, p: object): World {
   n += 1;
   const r = step(
@@ -59,6 +60,9 @@ function play(w: World, p: object): World {
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   narration.push(...(r.decision.narration ?? []).map((t) => t.key as string));
+  for (const e of r.decision.events)
+    if (e.payload.type === 'entity_entered_room')
+      arrivals.push([e.logical_time, e.payload.room_id]);
   return r.world;
 }
 const at = (hour: number) => ({ type: 'wait', until: hour * 3600 });
@@ -187,4 +191,28 @@ test('the loader checks schedule_cases rooms, goal texts, conditions, hours and 
       data,
     ]);
   }
+});
+
+// Breaks (row W3, loka-qi0r): a wait over two listed hours that faults nonfuture_job, or one that
+// collapses them, so the 17:00 arrival in the woods, and the reaction it fires, never happen; or
+// any difference from waiting hour by hour (the real-time drain's steps).
+test('a wait from 16:30 to 18:30 matches hour-by-hour play: the woods at 17:00, then home', () => {
+  const day = (c: any) =>
+    Object.assign(c.npcs[MAUD].daily_schedule, {
+      '17': { ...c.npcs[MAUD].daily_schedule['12'], key: 'woods' },
+      '18': c.npcs[MAUD].daily_schedule['12'],
+    });
+  const start = play(fresh(day), { type: 'wait', until: 16.5 * 3600 });
+  const runs = [[18.5], [17, 18, 18.5]].map((hours) => {
+    arrivals.length = 0;
+    const w = hours.reduce((x, h) => play(x, { type: 'wait', until: h * 3600 }), start);
+    return { arrivals: [...arrivals], facts: w.state.facts, room: room(w) };
+  });
+  assert.deepEqual(runs[0]!.arrivals, [
+    [17 * 3600, roomId(start, 'woods')],
+    [18 * 3600, roomId(start, 'cottage')],
+  ]);
+  assert.deepEqual(Object.values(start.state.facts ?? {}), []);
+  assert.deepEqual(Object.values(runs[0]!.facts ?? {}), [true]); // child_lost, by the woods reaction
+  assert.deepEqual(runs[0], runs[1]);
 });

@@ -10,7 +10,8 @@
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
 // hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
 // entity_entered_room (mechanics/schedule/behavior.ts entered), its id the second. A job that is not pending is
-// invalid_state.
+// invalid_state, except a crossed-hour sub-step (decideAt `at` later than its due time), which
+// schedules no job when its next hour is crossed too (so its arrival takes the first ordinal).
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
 import { expiry } from '../water/expiry.ts';
 import { expire } from '../quest/job.ts';
@@ -34,11 +35,20 @@ import { runStatus } from '../status/job.ts';
 
 import { runSight } from '../population/behavior.ts';
 
-export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
+// `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
+// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r).
+export const decideAt = (
+  world: World,
+  command: Parameters<Rule<'schedule'>>[1],
+  mint: Parameters<Rule<'schedule'>>[2],
+  steps: Steps = { n: 0 },
+  at?: number,
+): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
-    if (row?.status !== 'pending') return rejected('invalid_state');
+    if (row?.status !== 'pending' && !(row && at !== undefined && at > row.due_time))
+      return rejected('invalid_state');
     if (row.water_generation !== undefined)
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
@@ -57,8 +67,14 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint);
-    return scheduledJob(world, command, payload.job_id, row, mint, steps);
+    return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
+  return advance(world, payload);
+};
+export const decide: Rule<'schedule'> = decideAt;
+
+type Advance = Exclude<Parameters<Rule<'schedule'>>[1]['payload'], { type: 'run_job' }>;
+function advance(world: World, payload: Advance) {
   if (
     payload.type === 'elapsed' &&
     (world.cartridge.manifest.time_policy?.profile !== 'real_elapsed' ||
@@ -67,13 +83,13 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     return rejected('invalid_state');
   const from = world.state.clock;
   if (payload.until <= from) return rejected('invalid_state');
-  return accepted(
+  return accepted<never>(
     world,
     payload.type === 'elapsed' ? 'elapsed' : 'waited',
     [{ op: 'time.advance', writer_group: 0, from, to: payload.until }],
     [],
   );
-};
+}
 
 function scheduledJob(
   world: World,
@@ -82,28 +98,35 @@ function scheduledJob(
   row: JobRow,
   mint: Parameters<Rule<'schedule'>>[2],
   steps: Steps,
+  at: number,
 ) {
   const schedule = scheduleOf(world, row.job);
   const npc = world.entityIds[refString(row.job)];
-  const { room, goal } = placeOf(world, npc, row.due_time, steps);
+  const { room, goal } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const seen = goal && from !== room && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
   const move: DeltaOp[] =
     from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
-  const due_time = nextHour(world.cartridge, schedule, row.due_time);
-  return accepted(
+  const due_time = nextHour(world.cartridge, schedule, at);
+  // A next hour the advance also crosses runs as its own drain step (`next`, runtime/proposal_hours.ts); only the
+  // last step schedules the job after the target.
+  const crossed = due_time <= world.state.clock;
+  const done = { op: 'job.complete', writer_group: 0, job_id } as const;
+  const next = { op: 'job.schedule', writer_group: 0, job: row.job, due_time } as const;
+  const ran = accepted(
     world,
     'job_ran',
     [
       ...move,
-      { op: 'job.complete', writer_group: 0, job_id: job_id },
-      { op: 'job.schedule', writer_group: 0, job_id: jobId(mint), job: row.job, due_time },
+      ...(row.status === 'pending' ? [done] : []),
+      ...(crossed ? [] : [{ ...next, job_id: jobId(mint) }]),
     ],
-    move.length ? [entered(world, command, mint, npc, room, row.due_time)] : [],
+    move.length ? [entered(world, command, mint, npc, room, at)] : [],
     seen ? [{ key: goal }] : [],
   );
+  return crossed ? { ...ran, next: due_time } : ran;
 }
 
 // size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together

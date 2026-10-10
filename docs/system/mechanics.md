@@ -651,7 +651,19 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 `invalid_state` (`:23`); the NPC moves to the room listed for the job's hour (or the room of its
 first holding case, [row W10](#conditional-schedules-toolbox-row-w10)) unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
-scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`). One unit of
+scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`).
+A next listed hour the same advance also crosses (loka-qi0r) runs as a sub-step of that row's one
+`run_job` instead: the row runs and completes once, and its occurrence stays its due time, so this
+is no change to the job CommandId clause ([numeric-profile.md](../spec/conformance/numeric-profile.md)).
+Each sub-step sits in `(due_time, job_id)` order among the other due jobs, in the job's writer
+group, under the CommandId derived from the job and that hour (`jobCommandId(job_id, hour)`): the
+move, the `entity_entered_room` at that hour and its reactions, as hour-by-hour play gives them;
+only the last sub-step schedules the next job, after the target. Job rows and ids differ from
+hour-by-hour play (one row completes, no row per crossed hour). One accepted limit (loka-j2mo): a
+reaction that fires on two sub-steps of one wait writes in two writer groups and faults
+`conflicting_write`, where hour-by-hour play commits. Every drain step counts toward
+`due_jobs_per_advance`, and a wait crossing more steps faults `budget_exceeded`; while hours are
+crossed, the count also includes due jobs the drain skips, so that fault can come early. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap
