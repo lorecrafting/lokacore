@@ -52,7 +52,7 @@ Answers to the plan's open questions ([record](decisions/owner-decision-mechanic
 2. **Ranged combat** starts with a same-room first strike; shooting into adjacent rooms comes later.
 3. **Dev clock and unpinned preview** sit in a dev panel shown only with `?dev=1`; never in release.
 4. **The Chapter 1 E1 recorder stays in CI** as the engine regression net.
-5. **Spells use one engine** with per-spell requirements declared in the cartridge: spoken words (incantation text); an optional must-be-learned gate (existing learned facts, earned from quests or teachers); optional minimum level and attributes; optional reagents consumed (the crafting input consumption); a mana cost from a mana pool; optional secret words found in lore, checked like riddle answers. Intended mix: common spells open with reagents and mana, great spells are learned by quest with level and stat gates. Ranked as row 29.
+5. **Spells use one engine** with per-spell requirements declared in the cartridge: spoken words (incantation text); an optional must-be-learned gate (existing learned facts, earned from quests or teachers); optional minimum level and attributes; optional reagents consumed (the crafting input consumption); a mana cost from a mana pool; optional secret words found in lore, checked like riddle answers. Intended mix: common spells open with reagents and mana, great spells are learned by quest with level and stat gates. Ranked as row 29, now split into 29a and 29b.
 
 ## Ranked toolbox
 
@@ -61,11 +61,12 @@ Answers to the plan's open questions ([record](decisions/owner-decision-mechanic
 [roadmap review](reviews/2026-10-09-mechanics-roadmap-review.md)): shared vocabulary first (property
 tags, damage kinds, statuses and attributes on NPCs and things), then what a dungeon-crawl sampler
 needs, then social, combat, magic, gear, companions, economy, world events, law, the tail,
-settlement and meta. Batch S (settlement) comes from an owner question on housing and town
-building: Realm-first in value, sampled in Story mode. Batch R (row R1, staff and builder
+settlement and meta. Batch Settle (rows S1 to S4) comes from an owner question on housing and town
+building: Realm-first in value, sampled in Story mode. Batch Realm (row R1, staff and builder
 permissions) is deferred to the online Realm. Row ids are stable: the code, tests and
 [mechanics](system/mechanics.md) anchors cite "toolbox row N", so ids are not renumbered. G rows
-are the review's gaps, S rows the settlement group, R rows the Realm; 6a/6b/6c, 20a/20b, 29a/29b, 37a/37b, 43a/43b
+are the review's gaps, S rows the settlement group, R rows the Realm; 2b (HP maximum, in row 2's
+status), 6a/6b/6c, 20a/20b, 29a/29b, 37a/37b, 43a/43b
 and 48a/48b/48c are splits. Size: S under a day, M a few days, L a week or a split. **Today**:
 have / partial / missing per the audit. Ids in parentheses are the
 [archived queue](archive/LATER-MECHANICS.md) rows, whose acceptance seams still apply. Status is
@@ -76,8 +77,7 @@ closes with cartridge content and no engine change.
 | # | Rank | Mechanic | Today | Size | Depends on | Reuse | Sampler | Status |
 |---|---|---|---|---|---|---|---|---|
 | 1 | M1 | Status effects over time: poison, disease, buffs, regen modifiers, timed expiry | partial: only bleed (`mechanics/bleed/`); "no generic status interpreter" | M | – | `mechanics/bleed/job.ts` timed job and consumption; `mechanics/resource.ts` rates | poison dart room drains HP per tick; antidote ends it; buff shrine raises a rate for an hour | done (batch M1): `cartridges/status_sampler`, [rules](system/mechanics.md#status-effects-over-time-toolbox-row-1); a buff is a signed per-tick amount, true regen-rate modifiers deferred (PM 2026-10-09) |
-| 2 | M1 | Stats derived from attributes: hit, damage, HP, carry from str/dex/con | partial: `stat_compare` gates only (`mechanics/policy.ts`); no attribute reader in combat | M | – | `mechanics/attributes/shared.ts`; `mechanics/combat/round_attack.ts` profile; `mechanics/containment/shared.ts` carry | two dummies, str 5 vs 15, hand-fixed damage and carry differ | done (batch M1): `cartridges/derived_sampler`, [rules](system/mechanics.md#stats-derived-from-attributes-toolbox-row-2); hit, damage and carry; HP max split to `loka-kgd.8` (PM 2026-10-09); HP max is row 2b |
-| 2b | M2 | HP maximum derived from attributes (split from row 2) | partial: row 2 derives hit, damage and carry | S | 2 | `mechanics/attributes/shared.ts`; `mechanics/resource.ts` pool maximum | con raises the HP maximum, read at use | in progress #344 (`loka-kgd.8`) |
+| 2 | M1 | Stats derived from attributes: hit, damage, HP, carry from str/dex/con | partial: `stat_compare` gates only (`mechanics/policy.ts`); no attribute reader in combat | M | – | `mechanics/attributes/shared.ts`; `mechanics/combat/round_attack.ts` profile; `mechanics/containment/shared.ts` carry | two dummies, str 5 vs 15, hand-fixed damage and carry differ | done (batch M1): `cartridges/derived_sampler`, [rules](system/mechanics.md#stats-derived-from-attributes-toolbox-row-2); hit, damage and carry; HP max split to `loka-kgd.8` (PM 2026-10-09); HP max in progress #344 (`loka-kgd.8`) |
 | 3 | M2 | Item slots and affects (C2-M05): finger slots, granted modifiers | partial: slots capacity 1, no affects (`mechanics/equipment/rule.ts`) | M | 1, 2 | `mechanics/equipment/rule.ts` | ring of +2 per on either finger; remove restores | in progress #344 (`loka-kgd.10`) |
 | 4 | M2 | Experience and levelling | missing | M | 2 | `mechanics/combat/credit.ts` death credit; `mechanics/fact.ts` int facts; quest reward writers | three rat kills reach level 2 and grant one attribute point | in progress #344 (`loka-kgd.11`) |
 | G1 | M3 | Property tags on items, barriers and rooms: burnable, metal, wooden, sharp, liquid-holding, fragile | missing: rows invent private flags | S | – | item, barrier and room schemas; Elixir compiler parity | a wooden door and an iron door; a check on `burnable` passes only on the wooden one | todo |
@@ -85,7 +85,7 @@ closes with cartridge content and no engine change.
 | 7 | M3 | Critical hits and hit variance | partial: hit chance and damage range, no crit (`combat/round_attack.ts`) | S | 2 | `mechanics/combat/round_attack.ts` | seeded fight shows one doubled hit at the fixed crit chance | merged into row G2 |
 | 40 | M3 | Material-sensitive damage (C2-M04) | missing | S | 7 | `mechanics/combat/round_attack.ts` | silver vs iron against one wight: hand-fixed HP results | merged into row G2 |
 | 5 | M3 | Skill growth by use | missing: skills are bool facts (`mechanics/skills.ts`) | S | 2 | `mechanics/skills.ts`; `mechanics/action_recipe/rule.ts` check | five pick attempts raise `pick` until a harder lock opens | todo |
-| G5 | M3 | Opposed checks: actor skill or attribute vs the target's | missing: each detail checks a fixed threshold | S | 5 | `mechanics/action_recipe/rule.ts` check; `mechanics/skills.ts`; `mechanics/attributes/shared.ts` | pick 3 vs a lock rated 5 fails; pick 6 opens it (NPC-side attributes arrive with G3) | todo |
+| G5 | M3 | Opposed checks: actor skill or attribute vs the target's | missing: each detail checks a fixed threshold | S | 5 | `mechanics/action_recipe/rule.ts` check; `mechanics/skills.ts`; `mechanics/attributes/shared.ts` | one recipe check against targets rated 3 and 7: skill 5 passes the first and fails the second (NPC-side attributes extend it with G3) | todo |
 | 8 | M3 | Loot tables and random drops | missing: only fixed `loot_role` pelt/hide (`mechanics/population/birth.ts`) | S | – | `mechanics/population/birth.ts`; `mechanics/death/sequence.ts` custody; foundation RNG | rat drops a tail at 50% and a coin at 10%, seeded | todo |
 | 11 | M4 | Hidden passages and search (C2-M01) | partial: seek check finds a thing, not an exit (`cartridges/ashmere_missing_child/recipes/seek_wisp.json`) | S | – | `mechanics/movement/rule.ts`; `mechanics/action_recipe/rule.ts`; D10 discovered places | Search reveals a panel exit; forged Move refused before | todo |
 | 10 | M4 | Time windows (C2-M11): hour and moon gates | partial: calendar has solar/lunar status (`mechanics/calendar.ts`), no gate | S | – | `mechanics/calendar.ts`; `mechanics/policy.ts` | door opens only at full moon; dev clock proves both sides | todo |
@@ -140,14 +140,14 @@ closes with cartridge content and no engine change.
 | 43a | M14 | Terrain movement costs (C3-M10) | missing | M | 2 | `mechanics/movement/` | road costs one, fen refuses | todo |
 | 43b | M14 | Mount relation (C3-M10) | missing | M | 43a, G8 | `mechanics/escort/shared.ts` co-location | horse on road moves both once; fen refuses and moves neither; dismount leaves the horse | todo |
 | 44 | M14 | Race objective (C3-M11) | missing | M | 43b | `mechanics/quest/lifecycle.ts` | reach the finish before the cart's scheduled arrival | todo |
-| 31 | M14 | Weather as a room status plus a description variant | missing | M | 10, G3 | `mechanics/calendar.ts`; `mechanics/schedule/rule.ts`; `mechanics/description_variant/rule.ts` | rain on a schedule changes descriptions and a movement cost | todo |
+| 31 | M14 | Weather as a room status plus a description variant | missing | M | 10, 43a, G3 | `mechanics/calendar.ts`; `mechanics/schedule/rule.ts`; `mechanics/description_variant/rule.ts` | rain on a schedule changes descriptions and a movement cost | todo |
 | 45 | M14 | Pet growth (C2-M15) | missing | L | 9, G8 | `mechanics/population/birth.ts` | adopted pup grows at an age boundary; dead pup stays dead | todo |
 | 32 | M14 | Fast travel as transport content | partial: authored paid routes (`mechanics/transport/rule.ts`), no map travel | S | 11 | `mechanics/transport/rule.ts`; D10 visited map | an authored route between two visited waypoints for a fee; the trip runs as a transport job over real elapsed time or is instant with no clock change, never a clock skip ([fixed time](decisions/owner-decision-fixed-time-2026-10-03.md)) | todo (content only, transport) |
-| S1 | S | Functional furnishing: placed objects in an owned room grant effects by property (bed: rest bonus; forge or workbench: crafting station gate; chest: storage) | missing | M | G1, G7, 24 | G1 tags; G7 ownership; row 24 slots and `mechanics/containment/`; `mechanics/action_recipe/rule.ts` | a bed placed in an owned hut raises the rest rate; a forge there admits a smithing recipe | todo |
-| S2 | S | Construction: build a structure or room addition from materials and labour over real elapsed time, creating a new room and exit at runtime | missing: rooms and exits are authored in the cartridge | L | 20b, G7 | row 20 timed job; `mechanics/movement/`; the cartridge declares buildable sites and blueprints, the engine owns no numbers | a declared site takes timber and two hours of work, then a new room and exit exist | todo; runtime-created rooms and exits change the world-graph contract: decision record first |
-| S3 | S | Settlement: a town as an owned group of buildings with residents, services, upkeep, stock, and NPCs attracted by built structures | missing | L | S1, S2, G7, G8, 9, 22, 24 | `mechanics/population/`; `mechanics/schedule/rule.ts`; `mechanics/commerce/shared.ts`; `mechanics/containment/stock.ts` | a built smithy attracts a smith; unpaid upkeep closes the service | todo |
-| S4 | S | Settlement defense and events: raids from random encounters or world events, guards from hirelings | missing | M | S3, 6c, 37b | rows 9, 37, 22 | a raid reaches the town; hired guards defend it | todo |
-| R1 | R | Staff and builder permissions (Realm): account-level hierarchy (player < helper < builder < admin), a `perm` policy leaf, staff-only commands and build tools gated by it | missing; needs online Realm authority | M | G7 | `mechanics/policy.ts` leaves; G7 locks | a builder account may run a build command; a player account is refused | deferred: online Realm |
+| S1 | Settle | Functional furnishing: placed objects in an owned room grant effects by property (bed: rest bonus; forge or workbench: crafting station gate; chest: storage) | missing | M | G1, G7, 24 | G1 tags; G7 ownership; row 24 slots and `mechanics/containment/`; `mechanics/action_recipe/rule.ts` | a bed placed in an owned hut raises the rest rate; a forge there admits a smithing recipe | todo |
+| S2 | Settle | Construction: build a structure or room addition from materials and labour over real elapsed time, creating a new room and exit at runtime | missing: rooms and exits are authored in the cartridge | L | 20b, G7 | row 20 timed job; `mechanics/movement/`; the cartridge declares buildable sites and blueprints, the engine owns no numbers | a declared site takes timber and two hours of work, then a new room and exit exist | todo; runtime-created rooms and exits change the world-graph contract: decision record first |
+| S3 | Settle | Settlement: a town as an owned group of buildings with residents, services, upkeep, stock, and NPCs attracted by built structures | missing | L | S1, S2, G7, G8, 9, 22, 24 | `mechanics/population/`; `mechanics/schedule/rule.ts`; `mechanics/commerce/shared.ts`; `mechanics/containment/stock.ts` | a built smithy attracts a smith; unpaid upkeep closes the service | todo |
+| S4 | Settle | Settlement defense and events: raids from random encounters or world events, guards from hirelings | missing | M | S3, 6c, 37b | rows 9, 37, 22 | a raid reaches the town; hired guards defend it | todo |
+| R1 | Realm | Staff and builder permissions (Realm): account-level hierarchy (player < helper < builder < admin), a `perm` policy leaf, staff-only commands and build tools gated by it | missing; needs online Realm authority | M | G7 | `mechanics/policy.ts` leaves; G7 locks | a builder account may run a build command; a player account is refused | deferred: online Realm |
 | 46 | M15 | Achievements and collections | missing: journal only (`view/quest_journal.ts`) | S | 4 | `view/quest_journal.ts`; `mechanics/fact.ts` counters | "visited all five rooms" badge | todo (content on row 4: `fact` counters plus a journal view) |
 | 47 | M15 | Death penalty options: XP loss, item drop | have corpse custody; options missing | S | 4 | `mechanics/death/sequence.ts` | cartridge chooses XP loss on death; sampler loses 10% | todo (cartridge option on row 4) |
 | 48 | M15 | Chapter carry-over (CC-M01..03): export, import, item and knowledge ports | missing | L | 3, 4 | `mechanics/quest/`, save receipts | sampler A exports a flag and a ring; sampler B imports once | split into 48a, 48b, 48c |
@@ -165,6 +165,8 @@ closes with cartridge content and no engine change.
   with neutral ids, Elixir compiler parity for every new field, its
   [mechanics](system/mechanics.md) section, the [Book UI](system/book-ui.md) rule when the player
   sees something new, and the row's status flipped to `done #N` in the same PR.
+- **Content-only rows** (marked `content only`) ship cartridge content and its sampler on the
+  named row's engine, with no engine change; the status flips to `done #N (content only)`.
 - **Opt-in:** every new mechanic is opt-in by a cartridge field; Chapter 1 and the seeded corpus
   stay unchanged (precedent: `world.derived`).
 - **Brief:** the PM writes it in the Beads issue; no brief-drafter agent, no stage labels.
@@ -175,7 +177,7 @@ closes with cartridge content and no engine change.
 
 ## How to pick the next item
 
-Take the first `todo` row in table order (earliest **Rank**) whose **Depends on** rows are all
+Take the first `todo` row in table order (table order is the rank) whose **Depends on** rows are all
 `done`. Skip a row only when
 the owner says so, or when the foundation phase is not done. Rows with the same dependencies may run
 as parallel slices when they share no kernel files. Re-rank in a PR, not in chat.

@@ -29,5 +29,9 @@
 - **Row R1, staff and builder permissions (owner-requested):** an account-level hierarchy, a
   `perm` policy leaf and staff-only build tools; deferred to the online Realm, after the
   settlement rows, depending on G7 and Realm authority.
+- **Where the review is silent or differs:** its batch table governs over recommendation 3's
+  shorthand (row 15 stays in M6, before traps in M7). The PM placed rows the review left without a
+  batch: G13 and 42 in M5 as row-1 content, 32 in M14 as transport content; G samplers are drawn
+  from the review's own examples.
 - The review's other risks (rows 3 and 4 as attribute writers, row 9 RNG, row 29 incantation
   input, row 48 last) are raised at each row's brief, not decided here.
