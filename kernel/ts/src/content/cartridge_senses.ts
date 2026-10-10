@@ -5,7 +5,7 @@ import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, nodes, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
-/** Each cue of a room, detail, item (and its fuel source), NPC, status or recipe outcome. */
+/** Each cue of a room, detail, item (and its source fuel), NPC, status or recipe outcome. */
 export function cueParts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (d: Obj | undefined, at: string) =>
@@ -15,11 +15,12 @@ export function cueParts(c: Obj): [string, Obj, string][] {
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
       add(d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }
-  for (const kind of ['npcs', 'items'])
-    for (const [ref, e] of Object.entries((c[kind] ?? {}) as Obj)) {
-      add(e, `.cartridge.${kind}${step(ref)}`);
-      add(e.fuel, `.cartridge.${kind}${step(ref)}.fuel`);
-    }
+  for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
+    add(n, `.cartridge.npcs${step(ref)}`);
+  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
+    add(i, `.cartridge.items${step(ref)}`);
+    add(i.fuel, `.cartridge.items${step(ref)}.fuel`);
+  }
   for (const [ref, s] of Object.entries((c.statuses ?? {}) as Obj))
     add(s, `.cartridge.statuses${step(ref)}`);
   for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj))

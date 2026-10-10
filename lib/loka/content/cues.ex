@@ -43,11 +43,12 @@ defmodule Loka.Content.Cues do
         do: {rel, steps ++ ["when", "root"], w["root"]}
       )
 
-  # From Checks.rooms/4, a v2 source only; `text` is :unknown when the catalog was rejected. A
-  # missing or schema-invalid manifest (nil) has its own diagnostics.
-  def check(nil, _, _, _), do: []
+  # From Checks.rooms/4, a v2 source only; `text` is :unknown when the catalog was rejected, and
+  # `trees` every located policy root (Checks.trees/2). A missing or schema-invalid manifest (nil)
+  # has its own diagnostics.
+  def check(nil, _, _, _, _), do: []
 
-  def check(m, defs, text, registry) do
+  def check(m, defs, text, registry, trees) do
     cues = located(defs)
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
@@ -58,25 +59,25 @@ defmodule Loka.Content.Cues do
           else: [
             diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["text"]), %{"target" => cue["text"]})
           ]
-    end) ++ floor(m, cues != [] or perceives?(defs))
+    end) ++ floor(m, cues, trees)
   end
 
-  defp floor(m, true) do
+  # A cue, or a cue_perceived leaf in any policy tree, needs 1.48.
+  defp floor(m, cues, trees) do
     api =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if api < [1, 48],
+    if api < [1, 48] and (cues != [] or Enum.any?(trees, &perceives?/1)),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
   end
 
-  defp floor(_, false), do: []
-
+  # A cue_perceived leaf in a located policy tree, walked like the TS loader's nodes/1.
+  defp perceives?({_, _, root}), do: perceives?(root)
   defp perceives?(%{"op" => "cue_perceived"}), do: true
-  defp perceives?(v) when is_map(v), do: Enum.any?(Map.values(v), &perceives?/1)
-  defp perceives?(v) when is_list(v), do: Enum.any?(v, &perceives?/1)
-  defp perceives?(v) when is_tuple(v), do: perceives?(Tuple.to_list(v))
+  defp perceives?(%{"op" => "not", "item" => item}), do: perceives?(item)
+  defp perceives?(%{"items" => items}) when is_list(items), do: Enum.any?(items, &perceives?/1)
   defp perceives?(_), do: false
 end

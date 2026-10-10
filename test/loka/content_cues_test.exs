@@ -21,8 +21,13 @@ defmodule Loka.ContentCuesTest do
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
     assert floor in pairs(diags), inspect(diags)
-    # the reactions' cue_perceived leaves alone still need 1.48
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [api | no_cues])
+    # the reactions' cue_perceived leaves alone, nested under `not`, still need 1.48
+    hidden_leaf =
+      for f <- ~w(reactions/guard_hears.json reactions/sentry_hears.json),
+          do:
+            {f, &update_in(&1, ["when", "root"], fn root -> %{"op" => "not", "item" => root} end)}
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [api | no_cues ++ hidden_leaf])
     assert floor in pairs(diags), inspect(diags)
 
     unowned =
