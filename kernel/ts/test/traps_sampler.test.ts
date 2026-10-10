@@ -88,7 +88,8 @@ function wait(w: World, target: number): World {
 }
 
 // Breaks: the plate's `when` loses its sprung gate (the second crossing at 120 refreshes the
-// poison to 420), the spent-state write is dropped (same), or the clock_hour re-arm is missing
+// poison to 420), the spent-state write is dropped (same), the failed-disarm reaction loses its
+// armed gate (a failed disarm at 120 refreshes it to 420), or the clock_hour re-arm is missing
 // (the crossing after the hour opens no generation 2).
 test('the plate poisons the first crossing only, and the hour re-arms it', () => {
   let w = move(fresh(), 'north');
@@ -97,7 +98,17 @@ test('the plate poisons the first crossing only, and the hour re-arms it', () =>
   w = move(w, 'north');
   assert.deepEqual(poison(w), { generation: 1, ends_at: 300 }, 'the spent plate does not fire');
   assert.equal(sprung(w), true);
-  w = wait(move(w, 'south'), 3600);
+  w = move(w, 'south');
+  for (const [action, out] of [
+    ['search_floor', 'performed'],
+    ['disarm_plate', 'failure'], // level 0 < 1, but the plate has already fired
+  ]) {
+    const r = run(w, { type: 'perform', action });
+    assert.equal(r.out, out);
+    w = r.w;
+  }
+  assert.deepEqual(poison(w), { generation: 1, ends_at: 300 }, 'a spent plate poisons no disarmer');
+  w = wait(w, 3600);
   assert.equal(hp(w), 6, 'ticks at 60, 120, 180, 240; expiry at 300 does not tick');
   assert.equal(sprung(w), false, 'clock_hour re-armed it');
   w = move(w, 'north');
@@ -105,8 +116,9 @@ test('the plate poisons the first crossing only, and the hour re-arms it', () =>
 });
 
 // Breaks: the disarm offered before the search, a failed check that poisons nobody (check_failed
-// reaction or its subject), the skill check ignoring the rating, or the plate's `when` losing its
-// disarmed gate (the crossing at 120 refreshes the poison to 420).
+// reaction or its subject), the skill check ignoring the rating, the disarm still offered once
+// disarmed, or the plate's `when` losing its disarmed gate (the crossing at 120 refreshes the
+// poison to 420).
 test('a found plate is disarmed by check; a failed attempt poisons the doer', () => {
   let w = fresh();
   const outs: (string | undefined)[] = [];
@@ -119,6 +131,7 @@ test('a found plate is disarmed by check; a failed attempt poisons the doer', ()
   assert.deepEqual(poison(w), { generation: 1, ends_at: 300 }, 'the failed disarm poisons');
   const r = run(w, { type: 'perform', action: 'disarm_plate' });
   assert.equal(r.out, 'success');
+  assert.equal(run(r.w, { type: 'perform', action: 'disarm_plate' }).out, 'invalid_state');
   w = move(wait(r.w, 120), 'north');
   assert.deepEqual(poison(w), { generation: 1, ends_at: 300 }, 'the disarmed plate does not fire');
   assert.equal(sprung(w), false);
