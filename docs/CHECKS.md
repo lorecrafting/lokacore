@@ -131,6 +131,8 @@ their rules and red controls remain available for resumption.
   (r1-acceptance-envelope.md §3).
   The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
   on the selected v042 artifact, rebuilt from `protocol/fixtures/missing_child_v042_hash.json` and sha-checked, and
-  fails on a pending obligation, a gap or a failed case (about 6 minutes). Its steps run only nightly and
-  on a `full` dispatch (`gh workflow run ci.yml --ref <branch> -f full=true`); on a push the job
-  succeeds with every step skipped, so a green push run says nothing about E1 coverage. It is not in `bin/check_all.sh`.
+  fails on a pending obligation, a gap or a failed case (about 6 minutes). Its steps run nightly, on every
+  pull request (the `pull_request` run of `ci.yml`, on the PR's merge commit with its base), on a push to a
+  `toolbox/batch-*` branch and on a `full` dispatch (`gh workflow run ci.yml --ref <branch> -f full=true`);
+  on another push the job succeeds with every step skipped, so a green push run of an item branch says
+  nothing about E1 coverage. The dispatch on the exact head stays the E-gate and release-candidate proof. It is not in `bin/check_all.sh`.
