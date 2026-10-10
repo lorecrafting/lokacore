@@ -74,8 +74,8 @@ slice A builds alone; west is reserved for the combat district (no exit yet; the
 - **Hob**, the innkeeper, stays in the inn (no schedule). `short_variants`: "Hob, asleep over the
   bar" while `time_window {from: 0, to: 6}` ([row W6](../system/mechanics.md#entity-description-variants-toolbox-row-w6);
   `variants_sampler/npcs/guard.json`).
-- **sign_hub**, a readable item with no topic (`codex_sampler/items/carters_note.json` without
-  `topic`), text:
+- **sign_hub**, a readable room detail read in place (`ashmere_missing_child/rooms/reed_path.json`
+  `fox_prints`; a detail grants no topic), text:
 
   > Three roads leave this inn. North, the Fell Road: what weather, hunger and a strong drink do
   > to a body. East, Tidewater Steps: tide, moon, night, a hidden stair and a cliff. South, Low
@@ -98,7 +98,7 @@ Rows: 1, 2c, 18, 42, G3, G13, W6, W25 (and W25 dry). W8 scars are not merged; se
 
 | Room | Tags | Exits | Holds |
 |---|---|---|---|
-| `fell_gate` (sign; a stone shelter) | none | south `crossroads_inn`, north `fell_top`, east `the_fold` | `sign_body`; `cloak` (`warm`), `oilskin` (`waterproof`), `hat` (`cool`), `scarf` (`windproof`), each on its own slot so all four can be worn (`exposure_sampler/items`) |
+| `fell_gate` (sign; a stone shelter) | none | south `crossroads_inn`, north `fell_top`, east `the_fold` | detail `sign_body`; `cloak` (`warm`), `oilskin` (`waterproof`), `hat` (`cool`), `scarf` (`windproof`), each on its own slot so all four can be worn (`exposure_sampler/items`) |
 | `fell_top` (open moor) | `exposed` | south `fell_gate`, east `shepherd_hut`, west `still_room` | nothing |
 | `shepherd_hut` | none | west `fell_top` | **Wat**; `hut_loaf` (as the inn's loaf); `trough_skin` (waterskin, 4 units of `water`) |
 | `still_room` (Orla's brewhouse) | none | east `fell_top` | **Orla**; `cask` (vessel, 3 doses of `draught`, `buffs_sampler/items/vial.json`); `lute`; `quern` (7000 g); detail `knucklebones` (rating 11); detail `hearth` |
@@ -184,12 +184,12 @@ Rows: 10, 11, 30, 31, W6, W7.
 
 | Room | Tags | Exits | Holds |
 |---|---|---|---|
-| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools` | `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
+| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools` | detail `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
 | `cliff_path` | none | south `shore_steps`, north `cliff_top` | **Idony** |
 | `cliff_top` | none | south `cliff_path`, down `smugglers_stair` (climb face `{item: rope, damage: 3, fell}`), east `tide_pools` through barrier `moon_door` | `rope` |
 | `smugglers_stair` | none | up `cliff_top` (plain), down `sea_cave` (plain) | nothing |
 | `sea_cave` | none | west `shore_steps` through `tidegate`, up `smugglers_stair` with `hidden_until {fact: stair_found, equals: true}` | detail `cleft` |
-| `tide_pools` (sandbox) | none | north `shore_steps`, west `cliff_top` through `moon_door`, east `sea_cave` (plain, no gate) | `spare_rope`; details `pool_cleft`, `pool_sky` (one description variant per weather phase), `pool_water` (one per tide phase), `pool_shore` (one per season) |
+| `tide_pools` (sandbox) | none | north `shore_steps`, west `cliff_top` through `moon_door`, east `sea_cave` (plain, no gate) | details `pool_cleft`, `pool_sky` (one description variant per weather phase), `pool_water` (one per tide phase), `pool_shore` (one per season) |
 
 Barriers (`time_sampler/barriers`): `tidegate` `initial: closed`, `opens_when sky {tide: low}`;
 `moon_door` `initial: closed`, `opens_when sky {lunar: full}`. Both rooms on each side say in
