@@ -425,7 +425,7 @@ that could repeat must not reach a once-per-lineage save proof: the loader and t
 reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
-conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:247`, twin
+conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:248`, twin
 `lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
