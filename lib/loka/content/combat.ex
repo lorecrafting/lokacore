@@ -41,16 +41,19 @@ defmodule Loka.Content.Combat do
 
   # Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
   defp damage_api(m, defs, combat) do
-    npcs = for {_, {_, _, n}} <- defs["npc"] || %{}, do: n
-    items = for {_, {_, _, i}} <- defs["item"] || %{}, do: i["weapon"]["attack"]
-    profiles = [combat["player_attack"] | Enum.map(npcs, & &1["attack"])] ++ items
-
-    if version(m) < [1, 44] and
-         (Enum.any?(profiles, &(&1["kind"] || &1["crit"])) or
-            Enum.any?(npcs, & &1["resistances"])),
-       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-       else: []
+    if version(m) < [1, 44] and damage_fields?(defs, combat),
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
+
+  defp damage_fields?(defs, combat) do
+    npcs = for {_, {_, _, n}} <- defs["npc"] || %{}, do: n
+    profiles = [combat["player_attack"] | Enum.map(npcs, & &1["attack"])] ++ weapon_attacks(defs)
+    Enum.any?(profiles, &(&1["kind"] || &1["crit"])) or Enum.any?(npcs, & &1["resistances"])
+  end
+
+  defp weapon_attacks(defs),
+    do: for({_, {_, _, i}} <- defs["item"] || %{}, do: i["weapon"]["attack"])
 
   defp narration(_, :unknown), do: []
 
