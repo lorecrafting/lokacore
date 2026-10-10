@@ -3,7 +3,7 @@
 The ranked plan for front-loading every common RPG mechanic as a generic engine capability plus a
 tiny sampler cartridge, so the owner can later assemble their own world from finished parts
 ([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)). The composition proof
-is the [toolbox showcase](SHOWCASE.md): each batch's Fable final review adds a district, and Chapter 1
+is the [toolbox showcase](SHOWCASE.md): each approved batch adds a district, and Chapter 1
 stays a frozen regression fixture until the showcase covers its play families
 ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)). This page owns the ranking and each row's status; the rules of an
 installed mechanic live in [mechanics](system/mechanics.md), the sampler precedent is

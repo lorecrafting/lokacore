@@ -15,6 +15,8 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 - **Each district** is a guided loop of 3 to 6 rooms that opens with a signpost readable
   explaining what to try, plus one sandbox room where the district's mechanics can be combined
   freely.
+- **Quests and scenes** get their own guided loop in the social district: a quest with a deadline
+  and hints, and a scene whose dialogue choices drive reactions.
 
 ## Pairwise mechanic matrix
 
@@ -29,18 +31,27 @@ district and room that shows the pair, and the pin (test or recorder) that holds
 | deadlines x schedules x away recap | | | | todo |
 | combat x loot x levelling x death | | | | todo |
 | hidden exits x senses x traps | | | | todo |
+| quests x deadlines x hints | | | | todo |
+| scenes x dialogue x reactions | | | | todo |
 
 ## How a batch adds a district
 
-At each toolbox batch's final-head review, Fable authors that batch's district (or extends an
-existing one): the guided loop, the signpost readable and the sandbox room, using only installed
-mechanics. It adds matrix rows for the new pairs the batch makes possible and fills in the rows
+The batch's Fable final-head review stays a review only. After the batch head is approved, a
+separate Fable run in the author role writes that batch's district (or extends an existing one) on
+its own branch: the guided loop, the signpost readable and the sandbox room, using only installed
+mechanics. An Opus reviewer reviews it like any slice, and the next batch's Fable review also looks
+at it (PM ruling, 2026-10-10). The district adds matrix rows for the new pairs the batch makes possible and fills in the rows
 it covers. A pair that needs engine code to work means the toolbox rows are not finished; that
 goes back to the batch as a finding, not into the showcase.
 
 ## Retiring Chapter 1
 
-Chapter 1 stays frozen (no story or polish work) until the showcase covers each of its play
+Chapter 1 stays frozen (no story or content work; Book UI polish continues, see the
+[decision](decisions/owner-decision-showcase-2026-10-10.md)) until the showcase covers each of its play
 families: combat, death, commerce, quests, scenes and dialogue. Then Chapter 1 is retired and its
 Chapter-1-specific pins (end-to-end tests, hash fixtures, the E1 recorder) are replaced by
 showcase pins. Story-independent tests and fixtures stay.
+
+Death and commerce coverage is limited to what the toolbox has rows for. Row 47 (death penalty
+options) covers XP loss and item drop, not ghost-walk death, and no row covers barter; both need a
+toolbox row before the showcase can show them.

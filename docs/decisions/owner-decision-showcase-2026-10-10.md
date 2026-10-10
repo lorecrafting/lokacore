@@ -17,10 +17,22 @@ future stories, and drop only Chapter-1-specific pins once the showcase covers t
    [archived](../archive/README.md).
 2. **Chapter 1 is a frozen regression fixture.** No further story or polish work. It is retired
    once the showcase covers its play families (combat, death, commerce, quests, scenes,
-   dialogue); then its Chapter-1-specific pins are replaced by showcase ones.
+   dialogue; quests and scenes get a loop and matrix rows in [SHOWCASE.md](../SHOWCASE.md)); then its Chapter-1-specific pins are replaced by showcase ones.
 3. **The showcase starts now.** `cartridges/toolbox_showcase` grows one district per toolbox
-   batch, authored at that batch's Fable final review ([SHOWCASE.md](../SHOWCASE.md)).
+   batch ([SHOWCASE.md](../SHOWCASE.md)).
 4. **Story-independent tests and fixtures stay.** Only Chapter-1-specific pins go, and only
    when a showcase pin covers the same behaviour.
+
+## PM rulings and clarifications (2026-10-10)
+
+1. **Reviewer independence.** The batch's Fable final review stays a review only. A district is
+   written after the batch head is approved, by a separate Fable run in the author role, on its
+   own branch, and reviewed by an Opus reviewer like any slice; the next batch's Fable review
+   also looks at it.
+2. **Polish (PM clarification).** "No further polish on Chapter 1" means no Chapter 1 story or
+   content work. Book UI polish (components, design system, Storybook) continues and may keep
+   using Chapter 1 views until showcase views replace them.
+3. **Dropped feature rows.** Toolbox row 47 (death penalty options) covers XP loss and item drop,
+   not ghost-walk death; no toolbox row covers barter. Both need a toolbox row (PM files them).
 
 Beads: loka-exbe.
