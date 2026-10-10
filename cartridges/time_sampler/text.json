@@ -1,0 +1,11 @@
+{
+  "room.hall.title": "Hall",
+  "room.hall.description": "A bare hall. A silver door leads north and a brass door east; the silver door opens only under a full moon, the brass one only in the third and fourth hours.",
+  "room.moon_room.title": "Moon Room",
+  "room.moon_room.description": "An empty room.",
+  "room.hour_room.title": "Hour Room",
+  "room.hour_room.description": "An empty room.",
+  "barrier.moon_door.short": "the silver door",
+  "barrier.hour_door.short": "the brass door",
+  "room.hall.full_moon": "A bare hall in full moonlight. The silver door north is unsealed; a brass door leads east."
+}

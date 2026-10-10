@@ -1,6 +1,7 @@
 // Authored calendar validation at the cartridge trust boundary.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, nodes, step, type Obj } from './cartridge_refs.ts';
+import { apiCmp } from './cartridge_installed.ts';
 
 function cuts(
   values: Obj[] | undefined,
@@ -50,7 +51,15 @@ export function calendarStage(c: Obj): Diagnostic[] {
   for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj))
     for (const key of Object.keys(npc.daily_schedule ?? {}))
       if (Number(key) >= hours) invalid(`.cartridge.npcs${step(ref)}.daily_schedule${step(key)}`);
-  for (const [p, path] of nodes(c))
+  const phases = new Set((cal?.lunar?.phases ?? []).map((cut: Obj) => cut.phase));
+  let gated = Object.values((c.barriers ?? {}) as Obj).some((b) => b.opens_when);
+  for (const [p, path] of nodes(c)) {
     if (p.op === 'time_window' && (p.from >= hours || p.to >= hours)) invalid(path);
+    if (p.op === 'sky' && !phases.has(p.lunar)) invalid(`${path}.lunar`);
+    gated ||= p.op === 'sky';
+  }
+  // Toolbox row 10: the sky leaf and a barrier's opens_when need kernel_api 1.45.
+  if (gated && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

@@ -331,6 +331,24 @@
             "room"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The derived sky at the committed clock, never stored (toolbox row 10): lunar holds when the current lunar phase (the calendar.lunar cut containing ((clock - origin) mod period)) is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the calendar's lunar cuts do not name, or no lunar cuts (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "sky"
+            },
+            "lunar": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            }
+          },
+          "required": [
+            "op",
+            "lunar"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

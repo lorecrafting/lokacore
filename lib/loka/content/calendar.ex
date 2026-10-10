@@ -2,7 +2,7 @@ defmodule Loka.Content.Calendar do
   @moduledoc "Calendar cross-field checks before a cartridge artifact is emitted."
   import Loka.Content.Source, only: [at: 2, diag: 3]
 
-  def check(calendar, defs) do
+  def check(calendar, defs, m) do
     hour = Map.get(calendar, "units_per_hour", 3600)
     hours = Map.get(calendar, "hours_per_day", 24)
     subdivision = Map.get(calendar, "subdivisions_per_hour")
@@ -14,7 +14,34 @@ defmodule Loka.Content.Calendar do
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
       lunar(calendar["lunar"], invalid) ++
       schedules(defs["npc"], hours, invalid) ++
-      windows(defs, hours, invalid)
+      windows(defs, hours, invalid) ++
+      sky(calendar, defs, m, invalid)
+  end
+
+  # Toolbox row 10: each sky leaf names a lunar phase the calendar cuts; it and a barrier's
+  # opens_when need kernel_api 1.45.
+  defp sky(calendar, defs, m, invalid) do
+    phases = for cut <- get_in(calendar, ["lunar", "phases"]) || [], do: cut["phase"]
+
+    leaves =
+      for {node, rel, path} <- policy_nodes(defs), node["op"] == "sky", do: {node, rel, path}
+
+    gated =
+      leaves != [] or Enum.any?(defs["barrier"] || %{}, fn {_, {_, _, b}} -> b["opens_when"] end)
+
+    api =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    for(
+      {node, rel, path} <- leaves,
+      node["lunar"] not in phases,
+      do: invalid.(at(rel, path ++ ["lunar"]))
+    ) ++
+      if gated and api < [1, 45],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
+        else: []
   end
 
   defp base(calendar, day, hour, subdivision, invalid) do
@@ -72,13 +99,18 @@ defmodule Loka.Content.Calendar do
   end
 
   defp windows(defs, hours, invalid) do
+    for {node, rel, path} <- policy_nodes(defs),
+        node["op"] == "time_window",
+        node["from"] >= hours or node["to"] >= hours,
+        do: invalid.(at(rel, path))
+  end
+
+  defp policy_nodes(defs) do
     for {_, group} <- defs,
         is_map(group),
         {_, {rel, _, definition}} <- group,
         {node, path} <- walk(definition, []),
-        node["op"] == "time_window",
-        node["from"] >= hours or node["to"] >= hours,
-        do: invalid.(at(rel, path))
+        do: {node, rel, path}
   end
 
   defp walk(value, path) when is_map(value) do

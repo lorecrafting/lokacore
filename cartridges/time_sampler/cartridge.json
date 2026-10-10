@@ -1,0 +1,47 @@
+{
+  "api_version": "loka/v3",
+  "id": "time_sampler",
+  "version": "0.0.1",
+  "title": "Time Windows Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.45",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "barrier": 1,
+      "policy": 1,
+      "schedule": 1,
+      "calendar": 1,
+      "description_variant": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "hall",
+  "calendar": {
+    "start": 0,
+    "units_per_hour": 100,
+    "hours_per_day": 10,
+    "subdivisions_per_hour": 10,
+    "lunar": {
+      "period": 2000,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "new"
+        },
+        {
+          "at": 1000,
+          "phase": "full"
+        }
+      ]
+    }
+  }
+}

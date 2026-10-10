@@ -426,7 +426,11 @@ defmodule Loka.Content.Checks do
       Quests.conditions(defs),
       Reactions.conditions(defs),
       Dialogues.conditions(defs),
-      Loka.Content.Skills.conditions(defs)
+      Loka.Content.Skills.conditions(defs),
+      for(
+        {_, {rel, [], %{"opens_when" => p}}} <- defs["barrier"] || %{},
+        do: {rel, ["opens_when", "root"], p["root"]}
+      )
     ])
   end
 

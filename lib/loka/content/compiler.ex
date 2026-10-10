@@ -59,7 +59,7 @@ defmodule Loka.Content.Compiler do
 
   defp checks(manifest, defs, v2, located, registry) do
     Enum.concat([
-      Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs),
+      Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
       Resources.check(manifest, defs, v2, located, registry),
       Entities.carry(manifest, defs, located),
       Loka.Content.Fuel.check(manifest, defs),

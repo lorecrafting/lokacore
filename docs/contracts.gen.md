@@ -626,6 +626,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `escort_state`: API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.
   - `light_off`
   - `has_tag`: The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tags@1 (toolbox row G1).
+  - `sky`: The derived sky at the committed clock, never stored (toolbox row 10): lunar holds when the current lunar phase (the calendar.lunar cut containing ((clock - origin) mod period)) is that phase; a set of phases is an any of sky leaves. The compiler and loader reject a phase the calendar's lunar cuts do not name, or no lunar cuts (SCHEMA_VIOLATION). Needs kernel_api at least 1.45. Owned by calendar@1.
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
 - **VersionedPolicy**: A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.
 

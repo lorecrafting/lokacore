@@ -126,6 +126,11 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
+    ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
+      b.opens_when
+        ? walk(b.opens_when.root, `.cartridge.barriers${step(ref)}.opens_when.root`)
+        : [],
+    ),
   ];
 }
 
