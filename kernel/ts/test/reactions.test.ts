@@ -414,6 +414,13 @@ test('the loader checks reaction triggers, consequences and owners', () => {
     `${at('ring')}.on.room`,
     { target: `${G}:room/tower` },
   );
+  // W1: a new kind's filter naming a definition the cartridge lacks.
+  fails(
+    (c) => (rule(c, 'ring').on = { event: 'item_dropped', item: ref('item', 'nope') }),
+    'UNRESOLVED_REFERENCE',
+    `${at('ring')}.on.item`,
+    { target: `${G}:item/nope` },
+  );
   fails(
     (c) => (rule(c, 'ring').apply[0].fact = ref('fact', 'bell')),
     'UNRESOLVED_REFERENCE',

@@ -339,7 +339,7 @@ the world's RNG (at most 8 draws, `:103`) and passes below `chance`; a `threshol
 nothing and passes when the body's value of `resource` at admission (before costs) is at least
 `difficulty`. B6's `attribute_threshold` arm also draws nothing and compares the commanded
 actor's attribute to its authored difficulty; D11 selects the saved character value as its
-source after creation. It emits `check_passed` or `check_failed` at position 1 and selects the
+source after creation. An `opposed` check compares the actor's skill level or attribute with the target detail's rating ([rows 5 and G5](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)). It emits `check_passed` or `check_failed` at position 1 and selects the
 `success` or `failure` outcome. A rejected command draws no RNG.
 
 ## action_recipe@1 (`mechanics/action_recipe/rule.ts:49`)
@@ -575,11 +575,44 @@ starts a scene or writes its consequences.
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 
 Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact,
-`entity_entered_room` into its room, or exact `quest_resolved {quest, outcome}`, in rule-key order.
+`entity_entered_room` into its room, exact `quest_resolved {quest, outcome}`, `rested` in its
+room, or (toolbox row W1) any other registered event kind with optional filters, in rule-key order.
+Every filter present must equal its payload field; a filter means the same field in every kind:
+
+| Trigger `on.event` | Optional filters (payload field) | Subject (status.apply target) |
+|---|---|---|
+| `item_acquired` | `item` (item_id) | holder_id |
+| `item_dropped`, `shooed` | `item` (item_id), `room` (room_id) | the actor's body |
+| `quest_activated` | `quest` | the actor's body |
+| `choice_opened` | none | the actor's body |
+| `choice_resolved` | `choice` (choice_id) | the actor's body |
+| `story_point_reached` | `story_point`, `outcome` | the actor's body |
+| `custom_event` | `custom` (the event's key) | the actor's body |
+| `action_completed` | `action` | the actor's body |
+| `check_passed`, `check_failed` | `check` (the check's key) | the actor's body (subject_id is the target) |
+| `barrier_changed` | `barrier`, `to` | the actor's body |
+| `scene_ended` | `scene` | the actor's body |
+| `entity_died` | `victim` (victim_definition), `room` (room_id) | victim_id |
+| `attack_result` | `hit` | target_id |
+| `filled`, `poured`, `drank` | `kind` | the actor's body |
+| `entity_entered_room` | `room` (required) | entity_id |
+| `rested` | `room` (required) | body_id |
+| `fact_changed` | `fact` (required) | subject_id when present, else the actor's body |
+| `quest_resolved` | `quest`, `outcome` (both required) | the actor's body |
+
+Attribution: every delivery runs for the command actor (the quest-resolution exception below),
+so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
+taking an item) still reads the actor's `when` and writes the actor's facts, quests and
+experience; only `status.apply` follows the subject and skips when the subject is not the
+actor's body (statuses on NPCs and things wait for row G3). A check, action or custom event's subject_id
+names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
+`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim` as an NPC) must name one of
+this cartridge (`item` matches its authored instance only, never a created one such as a
+harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
+and a key no event carries never matches.
 For quest resolution, the source instance must exist at player scope, be resolved with the
 event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
-`precondition_failed`. The instance's actor owns the delivery. Legacy fact/room triggers retain
-the command actor. Its `when` is read on the proposal so far at the event's logical time.
+`precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
 `quest.fail {quest, outcome}` transitions. Resolve and fail are legal only on a
@@ -1803,3 +1836,16 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Book.** No new line: a critical or resisted hit shows only as its HP change.
 - **Sampler.** `cartridges/damage_sampler`: the player's attack is chance 100, damage 5, `physical`, crit 10 x2; a wight (HP 20) resists `physical` 50 and `fire` 75 and takes `silver` -50; an iron sword (`metal`, `sharp`) and a silver sword (`metal`, `sharp`, `silver`) lie in the hall. One round from a hit roll of 60 leaves the wight 18 with the iron sword (5 at 50%: 2) and 15 with the silver one (50 - 50 = 0%: 5); from a roll of 0 (critical) 15 and 10; with a `fire` attack 19 (75%: 1.25, so 1) and 17 (25%: 3.75, so 3). From seed `[2229621088, 1003500358, 2750031949, 1263371380]` the silver fight leaves 15, 5, 0: the second round's player roll 6 is the one doubled hit.
 - **Composition record.** Consumer: combat's attack (`kernel/ts/src/mechanics/combat/round_attack.ts`, `dealt`). Reads: the attack profile, the hit draw, the wielded item's G1 tags and the target NPC's definition; writes, events, jobs and save rows: none new. Reused: the hit draw, the equipment slot lookup, G1 tags, checked integer arithmetic and the `KERNEL_API_RANGE_INVALID` floor. New: `DamageKind`, `Resistances`, `AttackProfile.kind` and `.crit`, `NpcDefinition.resistances` and the `silver` tag; no foundation change.
+
+## Skill growth and opposed checks (toolbox rows 5 and G5)
+
+[Toolbox rows 5 and G5](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#skill-growth-and-rating-declarations) govern it; the PM brief is in Beads `loka-kgd.19` (2026-10-10).
+
+- **Growth.** A skill may declare `growth`, 1 to 8 strictly increasing positive use counts: the counts at which the level rises by one: for a taught skill they reach levels 2, 3 and so on, for an untaught one levels 1, 2 and so on. The count is a reserved player fact `uses_<key>` (int, default 0, minimum 0, maximum the last `growth` entry), synthesized beside `skill_<key>` only for a skill with growth and written only by skills@1. *Why a fact, not a row like levelling's:* fact@1 already gives the op, composition, save, replay and the typed-value invariant in both kernels, and the count is one bounded integer per character and skill; a new row would need a new delta op and its compose twins for no added rule.
+- **Level.** Derived on read, never stored: 1 when the skill is acquired (`skill_<key>`), else 0, plus the number of `growth` entries at or below the count. A skill without growth reads 1 acquired, 0 not. Qualification does not enter: it gates actions through their policies, as before.
+- **Opposed check.** A recipe check `{kind: "opposed", key}` names exactly one of `skill` or `attribute`. It draws no RNG and passes when the commanded actor's value, read at admission, is at least the `rating` of the recipe's target detail: the skill's level, or the attribute's value as [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads it. The detail of a recipe with an opposed check must declare `rating` (an integer); NPC-side ratings join with G3.
+- **Use.** Each accepted perform of a recipe whose opposed check names a skill with growth is one use, passed or failed: after the check event (position 1) the count gains 1, as a `fact.assign` whose `fact_changed` takes position 2; the outcome's sequence follows. The check reads the level before this use. At the maximum nothing is written, so practice stops at the last authored threshold and no gate exists beyond the authored ratings (trap 6). A rejected command uses nothing.
+- **No leaf.** Neither acceptance needs a policy to read a level, so `skill_compare` waits for its first gating consumer, under the [leaf-set rule](#property-tags-and-the-policy-leaf-set-toolbox-row-g1).
+- **Book.** Nothing new yet: the level reaches the player only through check outcomes; showing it on the Character page is a separate designer-approved Book change.
+- **Sampler.** `cartridges/skills_sampler`: `pick` with growth `[1, 2, 3, 4, 5]`, not taught, and STR 8; in one room a chest rated 3, a gate rated 5 and a vault rated 7. Picking the gate fails five times (levels 0 to 4) and opens on the sixth (level 5); then picking the chest passes (5 ≥ 3) and the vault fails (5 < 7), and the count stays 5; forcing the vault by STR passes (8 ≥ 7).
+- **Composition record.** Consumer: action recipes. Reads: the skill acquisition fact, the count fact, attributes@1 values and the target detail's definition. Writes: the count by `fact.assign`; events: the existing `check_passed`/`check_failed` and `fact_changed`; jobs and save rows: none new. Reused: check@1, fact@1 reserved facts and their ownership, attributes@1 `value`. New: the `growth` and `rating` fields and the `opposed` check kind; no foundation change.

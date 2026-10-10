@@ -129,6 +129,12 @@ and `quest.fail {quest, outcome}`. Both require a local quest reference and ques
 resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
 `quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
 evidence check as reaction delivery. The compiler expands these short quest references.
+Toolbox row W1: `on.event` may be any registered event kind, with the optional filters of the
+[reaction@1 table](mechanics.md#reaction1-kerneltssrcmechanicsreactionts); no new `kernel_api`
+floor. The compiler expands each short definition filter (`item`, `room`, `quest`, `story_point`,
+`barrier`, `scene`, `kind`, `victim`) and both kernels refuse one that names no local definition
+of its kind. `cartridges/reactions_sampler` is the sampler: dropping the bone in the yard sets
+`crow_drawn`, whose room variant shows the crow; dropping the pebble does not.
 
 ## Carrying settings and item mass
 
@@ -1487,3 +1493,6 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Damage kinds, resistances and critical hits](mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2) read an attack profile's optional `kind` (a `DamageKind`) and `crit` (`{chance 1..100, multiplier 2..10}`), on `world.combat.player_attack`, an NPC's `attack` or an item's `weapon.attack`, and an NPC's optional `resistances` (`Resistances`: each member a `DamageKind` or `Tag` name, an integer -100 to 100). Any of them needs `kernel_api` at least **1.44**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. The schema closes the names and bounds; the compiler copies the fields unchanged. `cartridges/damage_sampler` is the sampler.
 
+## Skill growth and rating declarations
+
+[Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the recipe check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). Each needs `kernel_api` at least **1.44**. The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/recipes.ex`) and the loader (`kernel/ts/src/content/cartridge_skills.ts`, `kernel/ts/src/content/cartridge_recipes.ts`) synthesize the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.

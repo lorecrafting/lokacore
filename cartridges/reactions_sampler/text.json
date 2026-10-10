@@ -1,0 +1,11 @@
+{
+  "room.yard.title": "Back Yard",
+  "room.yard.description": "A muddy yard behind a cottage. A fence post leans by the gate.",
+  "room.yard.crow": "A muddy yard behind a cottage. A crow sits on the fence post, eyeing the bone.",
+  "item.bone.short": "a bone",
+  "item.bone.room": "A gnawed [bone] lies in the mud.",
+  "item.bone.description": "A soup bone, picked almost clean.",
+  "item.pebble.short": "a pebble",
+  "item.pebble.room": "A round [pebble] lies in the mud.",
+  "item.pebble.description": "A smooth grey pebble."
+}

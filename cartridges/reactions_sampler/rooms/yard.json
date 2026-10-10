@@ -1,0 +1,18 @@
+{
+  "title": "room.yard.title",
+  "description": "room.yard.description",
+  "exits": {},
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "crow_drawn",
+          "equals": true
+        }
+      },
+      "description": "room.yard.crow"
+    }
+  ]
+}

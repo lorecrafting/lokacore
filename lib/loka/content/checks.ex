@@ -67,15 +67,16 @@ defmodule Loka.Content.Checks do
   def expand(%{"npc" => npc, "room" => room, "answered" => _} = knock, m),
     do: knock |> Map.put("npc", ref(npc, "npc", m)) |> Map.put("room", ref(room, "room", m))
 
-  # A reaction's trigger (ReactionRule on): its short fact or room.
-  def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "fact", ref(k, "fact", m))
-
-  def expand(%{"event" => "entity_entered_room", "room" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "room", ref(k, "room", m))
-
-  def expand(%{"event" => "quest_resolved", "quest" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "quest", ref(k, "quest", m))
+  # A reaction's trigger (ReactionRule on; the only source map with a string `event` and no
+  # `op`): its short filter references (W1).
+  def expand(%{"event" => e} = on, m) when is_binary(e) and not is_map_key(on, "op"),
+    do:
+      Map.new(on, fn {f, v} ->
+        case Reactions.filters() do
+          %{^f => kind} when is_binary(v) -> {f, ref(v, kind, m)}
+          _ -> {f, v}
+        end
+      end)
 
   # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
@@ -162,7 +163,7 @@ defmodule Loka.Content.Checks do
       |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
   # Recipe costs and thresholds expand only their owned reference fields.
-  def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
+  def expand(%{"kind" => k, "attribute" => a} = n, m) when k in ~w(attribute_threshold opposed),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))

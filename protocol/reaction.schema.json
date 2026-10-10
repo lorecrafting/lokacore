@@ -4,7 +4,7 @@
   "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "Typed reaction owned by reaction@1. Fact and room triggers retain the command actor; quest resolution verifies the source instance. Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits only the event's subject body (docs/system/mechanics.md reaction@1). Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
       "type": "object",
       "properties": {
         "key": {
@@ -77,6 +77,288 @@
               "required": [
                 "event",
                 "room"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "item_acquired"
+                },
+                "item": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "item_dropped"
+                },
+                "item": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "room": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "shooed"
+                },
+                "item": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "room": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "quest_activated"
+                },
+                "quest": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "choice_opened"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "choice_resolved"
+                },
+                "choice": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "story_point_reached"
+                },
+                "story_point": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "outcome": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "custom_event"
+                },
+                "custom": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "action_completed"
+                },
+                "action": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "check_passed"
+                },
+                "check": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "check_failed"
+                },
+                "check": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "barrier_changed"
+                },
+                "barrier": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "to": {
+                  "$ref": "room.schema.json#/$defs/BarrierState"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "scene_ended"
+                },
+                "scene": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "entity_died"
+                },
+                "victim": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "room": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "attack_result"
+                },
+                "hit": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "filled"
+                },
+                "kind": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "poured"
+                },
+                "kind": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "drank"
+                },
+                "kind": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "event"
               ],
               "additionalProperties": false
             }

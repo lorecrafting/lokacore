@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "bone"
+  ],
+  "short": "item.bone.short",
+  "room_line": "item.bone.room",
+  "description": "item.bone.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}
