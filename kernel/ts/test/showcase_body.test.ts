@@ -183,7 +183,7 @@ test('body 9-10: the quern is too heavy until the draught; a second dose never s
   assert.equal(attribute(r.world, 'str'), 13);
   w = take(r.world, 'quern');
   const ends = (v: World) =>
-    gameView(v).conditions!.find((c) => c.label === 'condition.might')!.ends_at;
+    gameView(v).conditions!.find((c) => c.label === 'condition.might')!.ends_at!;
   const before = ends(w);
   w = wait(w, w.state.clock + 60).world;
   w = drink(w).world;
