@@ -26,6 +26,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
+import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
@@ -160,9 +161,10 @@ const fighting = (world: World, actor: CharacterId) => {
 export function resolved(world: World, actor: CharacterId): ActionSet {
   const set = composed(world, actor);
   const fight = fighting(world, actor);
-  // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among its members.
-  const choosing =
-    !!world.cartridge.world?.combat?.target_choice && (fight?.row.active_ids?.length ?? 0) > 1;
+  // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among the members still here
+  // (the row's roster is pruned only at round end, rows 6a/6c).
+  const here = fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id));
+  const choosing = !!world.cartridge.world?.combat?.target_choice && (here?.length ?? 0) > 1;
   return fight
     ? Object.fromEntries(
         Object.entries(set).filter(

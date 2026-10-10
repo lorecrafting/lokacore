@@ -1,6 +1,6 @@
-// Toolbox row 6a on the compiled targets sampler: two goblins of one pack plan (6 HP, attack
-// chance 0) and a player blow that always hits for 2; with world.combat.target_choice, Attack on
-// the other roster member while engaged makes it the primary the player strikes.
+// Toolbox rows 6a and 6c on the compiled targets sampler: two goblins of one pack plan (6 HP, a
+// sure hit for 1) and a player blow that always hits for 2; with world.combat.target_choice,
+// Attack on the other roster member while engaged makes it the primary the player strikes.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -67,6 +67,10 @@ function round(w: World) {
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
   return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
 }
+const offered = (v: World) =>
+  gameView(v).entities.flatMap((e) =>
+    e.actions.filter((x) => x.action_key === 'attack').map((x) => [e.id, x.available]),
+  );
 const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
 
 // Breaks: the switch is refused, writes nothing, or the round still strikes the first primary.
@@ -87,10 +91,6 @@ test('the player picks the second goblin; the round blow lands on it, the first 
 // GameView offers Attack on a target the rule refuses.
 test('only another roster member is a choice, and only when the cartridge opts in', () => {
   const [w, a, b] = engaged();
-  const offered = (v: World) =>
-    gameView(v).entities.flatMap((e) =>
-      e.actions.filter((x) => x.action_key === 'attack').map((x) => [e.id, x.available]),
-    );
   assert.deepEqual(offered(w), [
     [a, false],
     [b, true],
@@ -121,4 +121,18 @@ test('the loader refuses target choice below API 1.48', () => {
     'KERNEL_API_RANGE_INVALID',
     '.cartridge.manifest.requires.kernel_api.at_least',
   ]);
+});
+
+// Toolbox row 6c (6a carry). Breaks: the ActionSet counts the roster row, not the members still
+// here, so a member gone between rounds (a status death or departure) keeps the Attack rows.
+test('a roster with one member left here offers no Attack', () => {
+  const [w, a, b] = engaged();
+  const gone = structuredClone(w);
+  const hall = Object.entries(w.roomIds).find(([k]) => k.endsWith('room/hall'))![1];
+  (gone.state.containers as Record<string, string>)[b] = hall;
+  assert.deepEqual(gone.state.encounters![Object.keys(gone.state.encounters!)[0]].active_ids, [
+    a,
+    b,
+  ]);
+  assert.deepEqual(offered(gone), []);
 });
