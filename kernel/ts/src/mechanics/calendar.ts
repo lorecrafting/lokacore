@@ -30,26 +30,37 @@ export function nextHour(
   );
 }
 
+// The phase of the last cut starting at or before `at` (cuts are ordered; a first cut after 0 wraps).
+function phase(cuts: readonly { at: number; phase: string }[], at: number) {
+  let selected = cuts.at(-1)!;
+  for (const cut of cuts)
+    if (cut.at <= at) selected = cut;
+    else break;
+  return selected.phase;
+}
+
+/** The lunar phase at `time`, or undefined without authored lunar cuts. */
+export function lunarPhase(cartridge: Cartridge, time: number): string | undefined {
+  const lunar = cartridge.calendar?.lunar;
+  if (!lunar) return undefined;
+  return phase(
+    lunar.phases,
+    (((time - lunar.origin) % lunar.period) + lunar.period) % lunar.period,
+  );
+}
+
 export function status(cartridge: Cartridge, time: number) {
   const calendar = cartridge.calendar;
   if (!calendar?.subdivisions_per_hour) return undefined;
   const { hour, day } = units(cartridge);
   const solar = calendar.solar;
-  const lunar = calendar.lunar;
+  const lunar = lunarPhase(cartridge, time);
   const dayTime = time % day;
-  const phase = (cuts: readonly { at: number; phase: string }[], at: number) => {
-    let selected = cuts.at(-1)!;
-    for (const cut of cuts)
-      if (cut.at <= at) selected = cut;
-      else break;
-    return selected.phase;
-  };
-  const lunarTime = lunar && (((time - lunar.origin) % lunar.period) + lunar.period) % lunar.period;
   return {
     day: Math.floor(time / day) + 1,
     hour: Math.floor(dayTime / hour),
     subdivision: Math.floor((dayTime % hour) / (hour / calendar.subdivisions_per_hour)),
     ...(solar && { solar: phase(solar, dayTime) }),
-    ...(lunar && { lunar: phase(lunar.phases, lunarTime!) }),
+    ...(lunar && { lunar }),
   };
 }

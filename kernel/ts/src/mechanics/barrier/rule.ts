@@ -6,6 +6,7 @@
 // invalid_target, out of reach (mechanics/lookups.ts reach) not_present, without a barrier
 // invalid_target. Only legal transitions (room.schema.json BarrierState): open needs closed (a
 // locked barrier is exit_locked), close needs open, lock needs closed, unlock needs locked, else
+// invalid_state; open then needs the barrier's opens_when to hold (toolbox row 10), else
 // invalid_state; lock and unlock then need the barrier's key_item held by the actor's body,
 // directly or inside what it holds (has_item), else not_owned. ponytail: has_item climbs a held
 // locked chest too, so a key inside it opens it; custody for keys if content needs it. The loader
@@ -87,7 +88,11 @@ export function transition(
   const [need, to, outcome] = MOVES[type];
   const from = barrierState(world, barrier);
   if (from !== need) return type === 'open' && from === 'locked' ? 'exit_locked' : 'invalid_state';
-  const item = world.cartridge.barriers![refString(barrier)].key_item;
+  const def = world.cartridge.barriers![refString(barrier)];
+  // Toolbox row 10: an authored condition (an hour window, a moon phase) gates opening only.
+  if (type === 'open' && def.opens_when && !holds(world, actor_id, def.opens_when.root, { steps }))
+    return 'invalid_state';
+  const item = def.key_item;
   const keyed = type === 'lock' || type === 'unlock';
   if (keyed && !(item && holds(world, actor_id, { op: 'has_item', item }, { steps })))
     return 'not_owned';

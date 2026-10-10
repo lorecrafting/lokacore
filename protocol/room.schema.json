@@ -596,6 +596,10 @@
           "items": {
             "$ref": "entity.schema.json#/$defs/Tag"
           }
+        },
+        "opens_when": {
+          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. Needs kernel_api at least 1.45.",
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         }
       },
       "required": [

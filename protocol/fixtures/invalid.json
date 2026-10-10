@@ -20065,5 +20065,81 @@
         "code": "not_in_enum"
       }
     ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "solar": "day"
+    },
+    "errors": [
+      {
+        "path": "/lunar",
+        "code": "missing_property"
+      },
+      {
+        "path": "/solar",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "lunar": "Full"
+    },
+    "errors": [
+      {
+        "path": "/lunar",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "lunar": 1
+    },
+    "errors": [
+      {
+        "path": "/lunar",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "barrier.door.short",
+      "initial": "closed",
+      "opens_when": {
+        "op": "sky",
+        "lunar": "full"
+      }
+    },
+    "errors": [
+      {
+        "path": "/opens_when/lunar",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/opens_when/op",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/opens_when/policy_version",
+        "code": "missing_property"
+      },
+      {
+        "path": "/opens_when/root",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

@@ -366,6 +366,9 @@
     "residency": "portable_capability",
     "definitions": [
       "calendar"
+    ],
+    "policies": [
+      "sky"
     ]
   },
   {

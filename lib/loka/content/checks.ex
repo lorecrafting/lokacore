@@ -103,8 +103,9 @@ defmodule Loka.Content.Checks do
       when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
 
   # A barrier (a details map may have a detail keyed key_item, whose value is a map).
+  # Its other members (opens_when's policy) expand as usual.
   def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
-    do: Map.put(barrier, "key_item", ref(k, "item", m))
+    do: barrier |> Map.delete("key_item") |> expand(m) |> Map.put("key_item", ref(k, "item", m))
 
   # An ItemLocation (`in` a kind, and that kind's field) or an NPC (its room_line a text key).
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
@@ -426,7 +427,8 @@ defmodule Loka.Content.Checks do
       Quests.conditions(defs),
       Reactions.conditions(defs),
       Dialogues.conditions(defs),
-      Loka.Content.Skills.conditions(defs)
+      Loka.Content.Skills.conditions(defs),
+      Loka.Content.Barriers.conditions(defs)
     ])
   end
 

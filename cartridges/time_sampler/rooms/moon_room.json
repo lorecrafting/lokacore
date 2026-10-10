@@ -1,0 +1,10 @@
+{
+  "title": "room.moon_room.title",
+  "description": "room.moon_room.description",
+  "exits": {
+    "south": {
+      "to": "hall",
+      "barrier": "moon_door"
+    }
+  }
+}
