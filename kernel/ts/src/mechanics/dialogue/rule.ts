@@ -144,15 +144,8 @@ function applyChoice(
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
   const boundReceive = !!(option.accept && option.receive);
-  const run = sequence(
-    world,
-    actor_id,
-    option,
-    boundReceive,
-    d.quest,
-    start?.run,
-    speakerOf(d, row),
-  );
+  const speaker = speakerOf(d, row);
+  const run = sequence(world, actor_id, option, boundReceive, d.quest, start?.run, speaker);
   if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
   const given =
     option.exchange && d.quest
