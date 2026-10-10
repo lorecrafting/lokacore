@@ -53,12 +53,14 @@ defmodule Loka.Content.Quests do
       texts(rel, q, ctx.text) ++
       item(rel, q["objective"], ctx.m, ctx.defs) ++
       deadline(rel, q["deadline"], ctx) ++
-      hints(rel, q, ctx.m) ++
       attempts(rel, q, ctx)
   end
 
   defp attempts(rel, q, ctx),
-    do: Loka.Content.Patrol.quest(rel, q, ctx) ++ Loka.Content.Expedition.quest(rel, q, ctx)
+    do:
+      Loka.Content.Patrol.quest(rel, q, ctx) ++
+        Loka.Content.Expedition.quest(rel, q, ctx) ++
+        hints(rel, q, ctx.m)
 
   defp deadline(_, nil, _), do: []
 
@@ -91,12 +93,13 @@ defmodule Loka.Content.Quests do
       for {v, i} <- Enum.with_index(Map.get(j, "active_variants", [])),
           do: {["journal", "active_variants", i, "text"], v["text"]}
 
-    hints =
-      for {stage, list} <- j["hints"] || %{},
-          {h, i} <- Enum.with_index(list),
-          do: {["journal", "hints", stage, i, "text"], h["text"]}
+    stages ++ outcomes ++ variants ++ hint_texts(j["hints"] || %{})
+  end
 
-    stages ++ outcomes ++ variants ++ hints
+  defp hint_texts(h) do
+    for {stage, list} <- h,
+        {x, i} <- Enum.with_index(list),
+        do: {["journal", "hints", stage, i, "text"], x["text"]}
   end
 
   # Toolbox row W23: each stage's minutes strictly ascend; real minutes need the real_elapsed time

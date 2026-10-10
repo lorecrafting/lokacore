@@ -209,14 +209,9 @@ function react(p: P): Admitted | undefined {
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
       const writer_group = ++p.group;
-      const exit = {
-        op: 'quest.transition',
-        writer_group,
-        instance_id,
-        from: 'active',
-        to: 'objectives_complete',
-      } as const;
-      p.ops.push(...stamp(p.world, [exit], next.cause.logical_time, p.ops));
+      const exit = { op: 'quest.transition', writer_group, instance_id } as const;
+      const to = { ...exit, from: 'active', to: 'objectives_complete' } as const;
+      p.ops.push(...stamp(p.world, [to], next.cause.logical_time, p.ops));
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
