@@ -151,15 +151,21 @@ test('a dead NPC hears nothing', () => {
   });
 });
 
-// Breaks: a shout that stays in the room (the watchman misses it), carries two rooms (the miller
-// hears it), or opens a conversation; a word filter ignored (any shout alerts the watchman).
+// Breaks: a shout that stays in the room (the watchman misses it), skips the actor's own room (the
+// elder and smith miss it), carries two rooms (the miller hears it), or opens a conversation; a
+// word filter ignored (any shout alerts the watchman).
 test('a shout reaches the next room, not two rooms away, and its word filters reactions', () => {
   const w = fresh();
   const help = accepted(w, { type: 'shout', word: 'help' });
   assert.equal(help.decision.outcome, 'spoken');
   assert.equal(fact(help.world, 'watchman_alerted'), true);
   assert.equal(fact(help.world, 'miller_heard'), false);
-  assert.ok(heard(help).some((p) => p.entity_id === id(w, 'watchman')));
+  assert.deepEqual(
+    heard(help)
+      .map((p) => p.entity_id)
+      .sort(),
+    [id(w, 'elder'), id(w, 'smith'), id(w, 'watchman')].sort(),
+  );
   assert.equal(accepted(w, { type: 'shout', word: 'ward' }).decision.outcome, 'spoken');
   const hello = accepted(w, { type: 'shout', word: 'hello' });
   assert.equal(fact(hello.world, 'watchman_alerted'), false);
