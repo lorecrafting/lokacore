@@ -30,6 +30,7 @@ import type {
   NarrationParticipant,
   RecipeNarration,
   RecipeStep,
+  TextKey,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
@@ -68,8 +69,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const start = { ...START, ops: paid.ops, levels: paid.levels };
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
   const begun = practised(world, actor_id, checked, check); // after the check reads the level
-  const steps = sequence.reduce(step(world, command, mint, subject_id, body), begun);
-  const run = tip(world, actor_id, recipe, steps);
+  const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
+  const [run, shown] = tip(world, actor_id, recipe, ran);
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
     rolled?.outcome === 'failure' ? [] : [event(world, command, mint, run.position + 1, done)];
@@ -86,22 +87,23 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [
-      { key: narration.actor, ...pinned(world, narration.participants, body) },
-      ...(run === steps ? [] : [{ key: recipe.tip! }]),
-    ],
+    [{ key: narration.actor, ...pinned(world, narration.participants, body) }, ...shown],
     rolled?.rng,
   );
 };
 
 // Toolbox row W23: the first accepted perform of a recipe with a tip assigns its engine-owned
-// seen_tip_<key> true, and the actor reads the tip once (run is then a new object).
-function tip(world: World, actor: CharacterId, recipe: ActionRecipe, run: Run) {
-  if (!recipe.tip) return run;
+// seen_tip_<key> true, and the actor reads the tip once: the run and the tip's narration line.
+function tip(
+  world: World,
+  actor: CharacterId,
+  recipe: ActionRecipe,
+  run: Run,
+): [Run, { key: TextKey }[]] {
+  if (!recipe.tip) return [run, []];
   const fact = seenTip(world, recipe.key);
-  return value(world, actor, fact) === true
-    ? run
-    : assigned(world, actor, run, { fact, value: true });
+  if (value(world, actor, fact) === true) return [run, []];
+  return [assigned(world, actor, run, { fact, value: true }), [{ key: recipe.tip }]];
 }
 
 // The narration's participants as EntityIds; the loader checked each npc or item resolves.

@@ -69,50 +69,68 @@ defmodule Loka.Content.Recipes do
     }
 
   @doc "The facts with each tipped recipe's seen_tip_<key> added; an authored one is RESERVED_FACT."
-  def tip_facts(facts, defs) when is_map(facts) do
+  def tip_facts({facts, ds}, defs) when is_map(facts) do
     for {key, {_, _, %{"tip" => _}}} <- defs["recipe"],
         String.length(key) <= 55,
-        reduce: {facts, []} do
-      {acc, ds} ->
-        name = "seen_tip_" <> key
-        authored = for {rel, steps, _} <- [acc[name]], do: diag("RESERVED_FACT", at(rel, steps))
-        {Map.put(acc, name, {"cartridge.json", [], tip_spec(key)}), ds ++ authored}
-    end
+        reduce: {facts, ds},
+        do: (acc -> reserve(acc, key))
   end
 
-  def tip_facts(facts, _), do: {facts, []}
+  defp reserve({facts, ds}, key) do
+    name = "seen_tip_" <> key
+    authored = for {rel, steps, _} <- [facts[name]], do: diag("RESERVED_FACT", at(rel, steps))
+    {Map.put(facts, name, {"cartridge.json", [], tip_spec(key)}), ds ++ authored}
+  end
 
-  # A tip needs kernel_api 1.46 and a key that leaves room for seen_tip_ in a 64-character Key.
-  defp tip(rel, %{"tip" => _} = r, m),
-    do:
-      if(String.length(r["key"]) <= 55,
-        do: [],
-        else: [diag("SCHEMA_VIOLATION", at(rel, ["key"]), %{"error" => "invalid_value"})]
-      ) ++
-        if(api(m) < [1, 46],
-          do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-          else: []
-        )
+  def tip_facts(skipped, _), do: skipped
+
+  # A tip resolves, needs fact@1 (its fact_changed), kernel_api 1.46 and a key that leaves room
+  # for seen_tip_ in a 64-character Key.
+  defp tip(rel, %{"tip" => tip} = r, %{m: m, registry: registry, text: text}) do
+    events = {m["requires"]["capabilities"], owners(registry, ["events"])}
+    long = String.length(r["key"]) > 55
+    old = api(m) < [1, 46]
+
+    owned(at(rel, ["tip"]), "fact_changed", events) ++
+      for(
+        {true, d} <- [
+          {text != :unknown and not is_map_key(text, tip), :text},
+          {long, :key},
+          {old, :api}
+        ],
+        do: tip_diag(rel, tip, d)
+      )
+  end
 
   defp tip(_, _, _), do: []
 
-  defp recipe({rel, r}, ctx) do
-    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
-    duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+  defp tip_diag(rel, tip, :text), do: unresolved(rel, ["tip"], tip)
 
+  defp tip_diag(rel, _, :key),
+    do: diag("SCHEMA_VIOLATION", at(rel, ["key"]), %{"error" => "invalid_value"})
+
+  defp tip_diag(_, _, :api),
+    do: diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")
+
+  defp duplicate(rel, r, ctx) do
+    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
+    if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+  end
+
+  defp recipe({rel, r}, ctx) do
     Enum.concat([
       owners(rel, r, ctx),
       refs(rel, r, ctx),
-      texts(rel, r, ctx.text),
-      duplicate,
+      texts(rel, r, ctx),
+      duplicate(rel, r, ctx),
       mismatch(rel, r),
-      duration(rel, r, ctx.m),
-      tip(rel, r, ctx.m),
+      duration(rel, r, ctx),
+      tip(rel, r, ctx),
       shared(rel, r, ctx.shared)
     ])
   end
 
-  defp duration(rel, r, m) do
+  defp duration(rel, r, %{m: m}) do
     if m["time_policy"] != nil and r["duration"] != nil,
       do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
       else: []
@@ -173,11 +191,8 @@ defmodule Loka.Content.Recipes do
     check =
       if is_map_key(r, "check"), do: owned(at(rel, ["check"]), "check_passed", events), else: []
 
-    tip = if is_map_key(r, "tip"), do: owned(at(rel, ["tip"]), "fact_changed", events), else: []
-
     owned(at(rel, []), "recipe", {caps, owners(registry, ["definitions"])}) ++
       check ++
-      tip ++
       for {s, steps} <- steps(r),
           event = @step_event[s["op"]],
           event != nil,
@@ -237,17 +252,16 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  defp texts(_, _, :unknown), do: []
+  defp texts(_, _, %{text: :unknown}), do: []
 
-  defp texts(rel, r, text) do
+  defp texts(rel, r, %{text: text}) do
     for {steps, key} <- [
           {["label"], r["label"]}
-          | for({k, v} <- Map.take(r, ["tip"]), do: {[k], v}) ++
-              for(
-                {name, o} <- r["outcomes"],
-                {k, v} <- Map.take(o["narration"], ~w(actor observers)),
-                do: {["outcomes", name, "narration", k], v}
-              )
+          | for(
+              {name, o} <- r["outcomes"],
+              {k, v} <- Map.take(o["narration"], ~w(actor observers)),
+              do: {["outcomes", name, "narration", k], v}
+            )
         ],
         not is_map_key(text, key),
         do: unresolved(rel, steps, key)
