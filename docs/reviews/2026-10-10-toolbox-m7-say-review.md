@@ -41,3 +41,11 @@
 ## Not checked
 
 Sim generator emitting word-less say/shout (filed P3 by the PM); Book half (`loka-kgd.72`); mobile full suite; Elixir compose differential beyond hosted CI.
+
+## Re-check: fix round 2 at `1ed60f25ee14b351ccdbbc7ec427372321ea5332`
+
+- Scope: commits `f0adbb7e`, `5bc0cb69`, `1ed60f25` (`docs/system/mechanics.md`, `kernel/ts/play/text.ts`, `kernel/ts/test/speech.test.ts`). Hosted ci and book-e2e green on the head (PM).
+- Verdict: **APPROVE**.
+- Finding 1 (blocker) resolved. I reran the mutants on `speech.test.ts`: M1 (`{1,31}`), M3 (`living` dropped) and M12 (`not_present`/`not_found` swapped) are all red now. The new cases are a 32-letter say accepted, a whisper to the watchman next door returning `not_present`, and "a dead NPC hears nothing" (elder at hp 0: a say heard by the smith only, no `elder_heard`, whisper `not_present`).
+- Finding 2 (should-fix) resolved. `text.ts:98` reuses `folded`. In `loka play`, `say x9` and `say /Users/someone` answer "One word of 1 to 32 letters." with exit 0 and no Command; `shout HELP` and `say ward` play. Removing the guard (mutant) turns the new parse test red.
+- Finding 3 (should-fix) resolved. `mechanics.md:2205` now says Step refuses speech `unsupported_capability` at admission while a conversation is open, which matches the earlier probe. `speech.test.ts` pins the exact decision. `rule.ts:13` remains as the rule's own backstop. That is consistent with the spec text, so no finding.
