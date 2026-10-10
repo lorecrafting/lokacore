@@ -325,11 +325,9 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   );
   assert.ok(h.labels().includes('Leave the conversation'));
   assert.ok(!h.labels().includes('Talk to Old Bram'));
-  h.tap('Leave the conversation');
-  assert.ok(h.labels().includes('Talk to Old Bram')); // back on Bram's own actions
-  h.tap('Leave');
+  h.tap(CONTENTS); // leaving by Contents also ends it: the later fresh visit offers Talk again
+  h.tap('Map');
   assert.equal(h.text().includes('Journal updated'), false);
-  h.map();
   h.tap('Go north');
   h.tap('A brass lantern');
   const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');

@@ -34,13 +34,14 @@ type BodyProps = {
   world: () => void;
   back: () => void;
 };
-type Talk = { talkingWith?: string; talkWith?: (id?: string) => void };
+type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
 export function Body(p: BodyProps) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
-  const [talkingWith, talkWith] = useState<string>(); // the NPC whose conversation the page shows
+  // The NPC page (this visit, by identity) that is in conversation; a fresh visit is a new page.
+  const [talkingOn, talkOn] = useState<Page>();
   return (
     <View style={{ flex: 1 }}>
       {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
@@ -50,7 +51,7 @@ export function Body(p: BodyProps) {
           {surface && <VerbLine b={surface} press={p.press} />}
         </View>
       )}
-      <PageBody {...p} talkingWith={talkingWith} talkWith={talkWith} />
+      <PageBody {...p} talkingOn={talkingOn} talkOn={talkOn} />
     </View>
   );
 }
@@ -86,6 +87,8 @@ function PageBody(p: BodyProps & Talk) {
         speaker={
           page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined
         }
+        talking={p.talkingOn === page}
+        talk={(on) => p.talkOn(on ? page : undefined)}
       />
     );
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;

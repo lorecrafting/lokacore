@@ -301,8 +301,8 @@ export function NpcDetail(p: {
   press: (b: Button, detail?: string) => void;
   speaker?: string;
   world: () => void;
-  talkingWith?: string;
-  talkWith?: (id?: string) => void;
+  talking?: boolean;
+  talk?: (on: boolean) => void;
 }) {
   const { view, text } = p.screen;
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
@@ -316,8 +316,8 @@ export function NpcDetail(p: {
       log={p.screen.detail(id)}
       press={(b) => p.press(b, id)}
       leave={p.world}
-      talking={p.talkingWith === id}
-      talk={(on) => p.talkWith?.(on ? id : undefined)}
+      talking={p.talking}
+      talk={p.talk}
     />
   );
 }
