@@ -55,18 +55,21 @@ export function weather(cartridge: Cartridge, context: string, time: number) {
   return table.find((w) => (roll -= w.weight) < 0)!;
 }
 
-/** The derived sky at `time` (toolbox rows 10 and 31): each authored table's current phase, never
- * stored or ticked. */
+const SKY = ['lunar', 'weather', 'season', 'tide'] as const;
+export type SkyField = (typeof SKY)[number];
+
+/** One derived sky field at `time` (toolbox rows 10 and 31), or undefined when not authored. */
+export function skyPhase(cartridge: Cartridge, context: string, time: number, field: SkyField) {
+  return field === 'weather'
+    ? weather(cartridge, context, time)?.phase
+    : cycle(cartridge.calendar?.[field], time);
+}
+
+/** The derived sky at `time`: each authored table's current phase, never stored or ticked. */
 export function sky(cartridge: Cartridge, context: string, time: number) {
-  const c = cartridge.calendar;
-  const [lunar, season, tide] = [c?.lunar, c?.season, c?.tide].map((x) => cycle(x, time));
-  const today = weather(cartridge, context, time)?.phase;
-  return {
-    ...(lunar && { lunar }),
-    ...(today && { weather: today }),
-    ...(season && { season }),
-    ...(tide && { tide }),
-  };
+  return Object.fromEntries(
+    SKY.map((f) => [f, skyPhase(cartridge, context, time, f)]).filter(([, v]) => v),
+  ) as Partial<Record<SkyField, string>>;
 }
 
 export function status(cartridge: Cartridge, context: string, time: number) {

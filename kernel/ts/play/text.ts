@@ -253,6 +253,9 @@ export function status(world: World): string {
   const phases = [
     sky?.solar?.replaceAll('_', ' '),
     sky?.lunar && `${sky.lunar.replaceAll('_', ' ')} moon`,
+    sky?.weather?.replaceAll('_', ' '),
+    sky?.season?.replaceAll('_', ' '),
+    sky?.tide && `${sky.tide.replaceAll('_', ' ')} tide`,
   ].filter(Boolean);
   return pools.length
     ? `${[...pools, clock(world.state.clock, world.cartridge), ...phases].join('  ')}\n`

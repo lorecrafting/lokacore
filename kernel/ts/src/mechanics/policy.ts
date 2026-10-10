@@ -12,7 +12,7 @@ import { value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
-import { hourOf, sky } from './calendar.ts';
+import { hourOf, skyPhase } from './calendar.ts';
 import { value as attributeValue } from './attributes/shared.ts';
 
 /**
@@ -52,10 +52,8 @@ export function holds(
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
     case 'sky': {
-      const now = sky(world.cartridge, world.context, world.state.clock);
-      return (['lunar', 'weather', 'season', 'tide'] as const).some(
-        (f) => p[f] !== undefined && now[f] === p[f],
-      );
+      const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
+      return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
     }
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);

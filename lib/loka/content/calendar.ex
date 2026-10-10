@@ -3,6 +3,7 @@ defmodule Loka.Content.Calendar do
   import Loka.Content.Source, only: [at: 2, diag: 3]
 
   @cycles ~w(lunar season tide)
+  @row31 ~w(weather season tide)
 
   def check(calendar, defs, m) do
     hour = Map.get(calendar, "units_per_hour", 3600)
@@ -17,6 +18,7 @@ defmodule Loka.Content.Calendar do
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
       Enum.flat_map(@cycles, &cycle(&1, calendar[&1], invalid)) ++
       weathers(calendar["weather"], invalid) ++
+      shown(calendar, subdivision, invalid) ++
       schedules(defs["npc"], hours, invalid) ++
       windows(nodes, hours, invalid) ++
       sky(calendar, nodes, {m, defs}, invalid)
@@ -28,7 +30,7 @@ defmodule Loka.Content.Calendar do
     leaves = for {%{"op" => "sky"} = node, rel, path} <- nodes, do: {node, rel, path}
 
     gated =
-      leaves != [] or Enum.any?(~w(weather season tide), &Map.has_key?(calendar, &1)) or
+      leaves != [] or Enum.any?(@row31, &Map.has_key?(calendar, &1)) or
         Enum.any?(defs["barrier"] || %{}, &opens_when?/1)
 
     phases(calendar, leaves, invalid) ++ floor(m, gated)
@@ -76,6 +78,15 @@ defmodule Loka.Content.Calendar do
        do: [invalid.(at("cartridge.json", ["calendar"]))],
        else: []
   end
+
+  # Row 31 tables show on the status line, which needs the expanded calendar's units.
+  defp shown(calendar, nil, invalid) do
+    if Enum.any?(@row31, &Map.has_key?(calendar, &1)),
+      do: [invalid.(at("cartridge.json", ["calendar"]))],
+      else: []
+  end
+
+  defp shown(_, _, _), do: []
 
   defp cycle(_, nil, _), do: []
 

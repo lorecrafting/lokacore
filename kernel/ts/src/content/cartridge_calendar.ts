@@ -54,9 +54,13 @@ export function calendarStage(c: Obj): Diagnostic[] {
 }
 
 const CYCLES = ['lunar', 'season', 'tide'] as const;
+const ROW31 = ['weather', 'season', 'tide'];
 
 // The lunar, season and tide cycles (row 31 adds the last two) and the weather table's unique phases.
 function tables(cal: Obj | undefined, invalid: (path: string) => void) {
+  // Row 31 tables show on the status line, which needs the expanded calendar's units.
+  if (ROW31.some((f) => cal?.[f]) && cal?.subdivisions_per_hour === undefined)
+    invalid('.cartridge.calendar');
   for (const name of CYCLES)
     if (cal?.[name]) {
       const { origin, period, phases } = cal[name];
@@ -82,7 +86,7 @@ function sky(c: Obj, invalid: (path: string) => void): Diagnostic[] {
         invalid(`${path}.${f}`);
   const gated =
     leaves.length > 0 ||
-    ['weather', 'season', 'tide'].some((f) => cal?.[f]) ||
+    ROW31.some((f) => cal?.[f]) ||
     Object.values((c.barriers ?? {}) as Obj).some((b) => b.opens_when);
   return gated && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
