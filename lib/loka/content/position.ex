@@ -91,7 +91,8 @@ defmodule Loka.Content.Position do
         s["benefit"]["kind"] == "entitlement",
         do: s["benefit"]["fact"]["key"]
       ),
-      Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1))
+      Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
+      for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key)
     ])
   end
 

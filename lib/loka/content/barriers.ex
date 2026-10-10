@@ -86,6 +86,7 @@ defmodule Loka.Content.Barriers do
 
   defp barrier(rel, b, m, defs, required) do
     owned(at(rel, []), "barrier", required) ++
+      if(b["tags"], do: owned(at(rel, ["tags"]), "tags", required), else: []) ++
       if b["key_item"], do: reference(rel, [], {"key_item", "item"}, b, m, defs), else: []
   end
 

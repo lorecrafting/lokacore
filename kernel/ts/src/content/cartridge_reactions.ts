@@ -1,12 +1,26 @@
 // The loader's reaction checks (reaction@1; reaction.schema.json ReactionRule; 06 §14: referenced
 // facts and targets are compile-validated), twin of lib/loka/content/reactions.ex: what each
 // reaction uses, for the lock stage (content/cartridge.ts): its own kind, its trigger's event and each
-// consequence's event; its trigger and consequences name local fact, room or quest definitions,
+// consequence's event; its trigger's filters and its consequences name local definitions,
 // with typed fact values and restricted quest activation. Its `when` is walked
 // with every other policy (content/cartridge_refs.ts nodes).
 import { refString } from '../runtime/decision.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+
+// Each trigger filter that names a definition (W1), with that definition's kind; sorted, as the
+// compiler (lib/loka/content/reactions.ex) reports them.
+const NAMED: Record<string, string> = {
+  barrier: 'barrier',
+  fact: 'fact',
+  item: 'item',
+  kind: 'liquid',
+  quest: 'quest',
+  room: 'room',
+  scene: 'scene',
+  story_point: 'story_point',
+  victim: 'npc',
+};
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.reactions ?? {}) as Obj).map(([ref, r]) => [
@@ -42,7 +56,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   for (const [r, at] of each(c)) {
     if (
-      (r.on.quest || r.apply.some((s: Obj) => s.op === 'quest.activate')) &&
+      (r.on.event === 'quest_resolved' || r.apply.some((s: Obj) => s.op === 'quest.activate')) &&
       (major < 1 || (major === 1 && minor < 8))
     )
       out.push(
@@ -62,9 +76,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
-    if (r.on.fact) named(r.on.fact, 'fact', `${at}.on.fact`);
-    if (r.on.room) named(r.on.room, 'room', `${at}.on.room`);
-    if (r.on.quest) named(r.on.quest, 'quest', `${at}.on.quest`);
+    for (const [field, kind] of Object.entries(NAMED))
+      if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);

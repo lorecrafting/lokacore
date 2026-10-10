@@ -91,6 +91,29 @@ defmodule Loka.Content.Recipes do
 
   defp shared(_, _, _), do: []
 
+  # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge and its
+  # target detail declares a rating.
+  defp opposed(rel, %{"check" => c, "target" => t}, m, defs) do
+    side = if is_map_key(c, "skill"), do: "skill", else: "attribute"
+
+    reference(rel, ["check"], side, c, m, defs) ++
+      if rated?(t, m, defs),
+        do: [],
+        else: [diag("SCHEMA_VIOLATION", at(rel, ["check"]), %{"error" => "invalid_value"})]
+  end
+
+  # An unresolved room or detail is the target's own diagnostic.
+  defp rated?(t, m, defs) do
+    case resolve(t["room"], "room", m, defs) do
+      {_, _, room} ->
+        detail = (room["details"] || %{})[t["detail"]]
+        detail == nil or is_map_key(detail, "rating")
+
+      _ ->
+        true
+    end
+  end
+
   defp mismatch(rel, r) do
     if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
       do: [],
@@ -142,6 +165,9 @@ defmodule Loka.Content.Recipes do
 
   defp attributes(rel, %{"check" => %{"kind" => "attribute_threshold"} = c}, m, defs),
     do: reference(rel, ["check"], "attribute", c, m, defs)
+
+  defp attributes(rel, %{"check" => %{"kind" => "opposed"}} = r, m, defs),
+    do: opposed(rel, r, m, defs)
 
   defp attributes(_, _, _, _), do: []
 

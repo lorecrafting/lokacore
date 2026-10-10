@@ -10,6 +10,10 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **APPROVE WITH NOTES**
+- [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
+- [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
+- [Batch review: mechanics toolbox M3, G1 tags, loot, W1, skills, damage (loka-kgd, PR #351)](2026-10-10-batch-m3-review.md): **APPROVE WITH NOTES**
 - [Book UI architecture audit (read-only, main @ 84b32e74, 2026-10-10)](2026-10-09-ui-architecture-audit.md)
 - [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
 - [Review: Storybook current phone and tablet viewports (PR #340)](2026-10-09-storybook-viewports-340-review.md): **PASS**
@@ -22,6 +26,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Loka picker + polish panel; remove Tidewave (PR #339)](2026-10-09-picker-339-review.md): **APPROVE WITH NOTES**
 - [Mechanics toolbox review: gaps, merges, order, risks](2026-10-09-mechanics-roadmap-review.md)
 - [Mechanics review 2: what makes the world feel alive](2026-10-09-mechanics-review-2.md)
+- [Review: toolbox row W1, reactions on every registered event kind (loka-kgd.21)](2026-10-09-m3-reactions-w1-review.md): **APPROVE**
+- [Review: loot tables and random drops, toolbox row 8 (loka-kgd.20)](2026-10-09-loot-kgd20-review.md): **APPROVE**
 - [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
 - [Review: experience and levelling, toolbox row 4 (PR #344, loka-kgd.11)](2026-10-09-levelling-kgd11-344-review.md): **APPROVE**
 - [Review: Housekeeping, red controls by PID, after_merge pulls (PR #338)](2026-10-09-housekeeping-338-review.md): **APPROVE WITH NOTES**

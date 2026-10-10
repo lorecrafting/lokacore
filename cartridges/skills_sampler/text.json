@@ -1,0 +1,21 @@
+{
+  "room.vault_room.title": "Vault Room",
+  "room.vault_room.description": "A bare room with a [chest](chest), a [gate](gate) and a [vault](vault) door.",
+  "detail.chest": "A small chest with a simple lock.",
+  "detail.gate": "A gate with a fair lock.",
+  "detail.vault": "A heavy vault door with a hard lock.",
+  "skill.pick.label": "Lockpicking",
+  "skill.pick.requirement": "Needs nothing; grows with practice.",
+  "actions.pick_chest": "Pick the chest",
+  "narration.pick_chest.success": "The chest gives way.",
+  "narration.pick_chest.failure": "The chest holds.",
+  "actions.pick_gate": "Pick the gate",
+  "narration.pick_gate.success": "The gate gives way.",
+  "narration.pick_gate.failure": "The gate holds.",
+  "actions.pick_vault": "Pick the vault",
+  "narration.pick_vault.success": "The vault gives way.",
+  "narration.pick_vault.failure": "The vault holds.",
+  "actions.force_vault": "Force the vault",
+  "narration.force_vault.success": "The vault gives way.",
+  "narration.force_vault.failure": "The vault holds."
+}

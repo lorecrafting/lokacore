@@ -150,7 +150,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1).",
       "type": "object",
       "properties": {
         "key": {
@@ -239,6 +239,15 @@
         },
         "bandage": {
           "$ref": "entity.schema.json#/$defs/ItemBandage"
+        },
+        "tags": {
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "entity.schema.json#/$defs/Tag"
+          }
         }
       },
       "required": [
@@ -307,6 +316,92 @@
           },
           "capacity": 2,
           "container": true
+        }
+      ]
+    },
+    "Tag": {
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here.",
+      "enum": [
+        "burnable",
+        "fragile",
+        "liquid_holding",
+        "metal",
+        "sharp",
+        "silver",
+        "wooden"
+      ],
+      "examples": [
+        "burnable",
+        "metal"
+      ]
+    },
+    "DamageKind": {
+      "description": "A damage kind (toolbox row G2): a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.",
+      "enum": [
+        "cold",
+        "fire",
+        "physical",
+        "poison"
+      ],
+      "examples": [
+        "physical",
+        "fire"
+      ]
+    },
+    "ResistancePercent": {
+      "description": "A resistance percent (toolbox row G2): negative is a weakness.",
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100,
+      "examples": [
+        50,
+        -50
+      ]
+    },
+    "Resistances": {
+      "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
+      "type": "object",
+      "properties": {
+        "cold": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "fire": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "physical": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "poison": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "burnable": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "fragile": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "liquid_holding": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "metal": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "sharp": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "silver": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "wooden": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "physical": 50,
+          "fire": 75,
+          "silver": -50
         }
       ]
     },
@@ -392,6 +487,33 @@
           },
           "minItems": 1,
           "maxItems": 8
+        },
+        "drops": {
+          "description": "Toolbox row 8 loot table (docs/system/mechanics.md loot tables; kernel_api at least 1.43, world.death): in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "chance": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "item",
+              "chance"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "resistances": {
+          "$ref": "entity.schema.json#/$defs/Resistances"
         }
       },
       "required": [
@@ -448,6 +570,30 @@
           },
           "required": [
             "effect"
+          ],
+          "additionalProperties": false
+        },
+        "kind": {
+          "$ref": "entity.schema.json#/$defs/DamageKind"
+        },
+        "crit": {
+          "description": "Toolbox row G2 (kernel_api at least 1.44): a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
+          "type": "object",
+          "properties": {
+            "chance": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "multiplier": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "chance",
+            "multiplier"
           ],
           "additionalProperties": false
         }

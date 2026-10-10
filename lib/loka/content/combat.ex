@@ -16,6 +16,7 @@ defmodule Loka.Content.Combat do
 
     settings_errors(combat, settings, m, text) ++
       npc_profiles(defs, combat) ++
+      damage_api(m, defs, combat) ++
       if(credit && !combat, do: [bad("cartridge.world.death_credit")], else: []) ++
       credits(credit || [], m, defs)
   end
@@ -38,6 +39,22 @@ defmodule Loka.Content.Combat do
         do: error
   end
 
+  # Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
+  defp damage_api(m, defs, combat) do
+    if version(m) < [1, 44] and damage_fields?(defs, combat),
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp damage_fields?(defs, combat) do
+    npcs = for {_, {_, _, n}} <- defs["npc"] || %{}, do: n
+    profiles = [combat["player_attack"] | Enum.map(npcs, & &1["attack"])] ++ weapon_attacks(defs)
+    Enum.any?(profiles, &(&1["kind"] || &1["crit"])) or Enum.any?(npcs, & &1["resistances"])
+  end
+
+  defp weapon_attacks(defs),
+    do: for({_, {_, _, i}} <- defs["item"] || %{}, do: i["weapon"]["attack"])
+
   defp narration(_, :unknown), do: []
 
   defp narration(combat, text) do
@@ -54,13 +71,14 @@ defmodule Loka.Content.Combat do
   defp profile(p, path),
     do: if(p["damage_min"] > p["damage_max"], do: [bad(path <> ".damage_max")], else: [])
 
-  defp requirements(m) do
-    version =
+  defp version(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if(version < [1, 6],
+  defp requirements(m) do
+    if(version(m) < [1, 6],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
     ) ++

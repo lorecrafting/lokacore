@@ -547,5 +547,19 @@
     ],
     "definitions": [],
     "events": []
+  },
+  {
+    "key": "tags",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "tags"
+    ],
+    "events": [],
+    "policies": [
+      "has_tag"
+    ]
   }
 ]

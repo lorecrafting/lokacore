@@ -6,23 +6,16 @@ defmodule Loka.Content.Checks do
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
-  @ref_fields %{
-    "fact_compare" => "fact",
-    "has_item" => "item",
-    "quest_state" => "quest",
-    "escort_state" => "quest",
-    "fact.assign" => "fact",
-    "fact.adjust" => "fact",
-    "skill.acquire" => "skill",
-    "topic.grant" => "topic",
-    "status.apply" => "status",
-    "quest.activate" => "quest",
-    "quest.resolve" => "quest",
-    "quest.fail" => "quest",
-    "barrier_state" => "barrier",
-    "stat_compare" => "attribute",
-    "resource_compare" => "resource"
-  }
+  @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
+                "fact.assign" => %{"fact" => "fact"},
+                "fact.adjust" => %{"fact" => "fact"},
+                "skill.acquire" => %{"skill" => "skill"},
+                "topic.grant" => %{"topic" => "topic"},
+                "status.apply" => %{"status" => "status"},
+                "quest.activate" => %{"quest" => "quest"},
+                "quest.resolve" => %{"quest" => "quest"},
+                "quest.fail" => %{"quest" => "quest"}
+              })
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
@@ -32,8 +25,11 @@ defmodule Loka.Content.Checks do
   def expand(%{"op" => "population.suppress", "plan" => plan} = step, m),
     do: Map.put(step, "plan", ref(plan, "population", m))
 
-  def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
-    do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
+  def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op) do
+    for {f, kind} <- @ref_fields[op], is_map_key(n, f), reduce: n do
+      n -> Map.update!(n, f, &ref(&1, kind, m))
+    end
+  end
 
   def expand(%{"attribute" => _, "modifier" => _} = ancestry, m),
     do: Loka.Content.Ancestries.expand(ancestry, m)
@@ -71,15 +67,16 @@ defmodule Loka.Content.Checks do
   def expand(%{"npc" => npc, "room" => room, "answered" => _} = knock, m),
     do: knock |> Map.put("npc", ref(npc, "npc", m)) |> Map.put("room", ref(room, "room", m))
 
-  # A reaction's trigger (ReactionRule on): its short fact or room.
-  def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "fact", ref(k, "fact", m))
-
-  def expand(%{"event" => "entity_entered_room", "room" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "room", ref(k, "room", m))
-
-  def expand(%{"event" => "quest_resolved", "quest" => k} = on, m) when is_binary(k),
-    do: Map.put(on, "quest", ref(k, "quest", m))
+  # A reaction's trigger (ReactionRule on; the only source map with a string `event` and no
+  # `op`): its short filter references (W1).
+  def expand(%{"event" => e} = on, m) when is_binary(e) and not is_map_key(on, "op"),
+    do:
+      Map.new(on, fn {f, v} ->
+        case Reactions.filters() do
+          %{^f => kind} when is_binary(v) -> {f, ref(v, kind, m)}
+          _ -> {f, v}
+        end
+      end)
 
   # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
@@ -121,7 +118,7 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     npc
-    |> Loka.Content.Services.npc(m)
+    |> Loka.Content.Death.npc(m)
     |> Map.delete("shop")
     |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
@@ -166,7 +163,7 @@ defmodule Loka.Content.Checks do
       |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
   # Recipe costs and thresholds expand only their owned reference fields.
-  def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
+  def expand(%{"kind" => k, "attribute" => a} = n, m) when k in ~w(attribute_threshold opposed),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
@@ -414,7 +411,7 @@ defmodule Loka.Content.Checks do
     end) ++
       Enum.flat_map(
         trees(defs, actions),
-        &Loka.Content.Policies.tree(&1, {m, defs, required}, @ref_fields)
+        &Loka.Content.Policies.tree(&1, {m, defs, required})
       )
   end
 
