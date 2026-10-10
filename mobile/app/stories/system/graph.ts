@@ -44,7 +44,10 @@ export const repo = (path: string, line?: number) =>
 
 // A System docs page in the Storybook manager (the top window), with URL globals.
 export const page = (id: string, globals: Record<string, string> = {}) => {
-  const top = window.top?.location ?? window.location;
+  let top = window.location; // a cross-origin manager (a composed ref) keeps its location to itself
+  try {
+    top = window.top?.location.origin ? window.top.location : top;
+  } catch {}
   const g = Object.entries(globals).map(([k, v]) => `${k}:${v}`);
   return `${top.origin}${top.pathname}?path=/docs/system-${id}--docs${g.length ? `&globals=${g.join(';')}` : ''}`;
 };

@@ -1,6 +1,13 @@
 // The Data model's chips: one column per layer, a row per owner (else file), and SVG lines from
 // the selected chip to its 1-hop neighbours (decorative: the panel lists the same references).
-import { useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type RefObject,
+} from 'react';
 import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
 import { capabilities, contracts, graph, type Contract } from './graph.ts';
@@ -17,7 +24,7 @@ function matches(name: string, query: string) {
   if (!query) return true;
   const n = contracts.get(name);
   const word = new RegExp(`\\b${escape(query)}\\b`, 'i');
-  if (!n) return word.test(name);
+  if (!n) return name.includes(query.toLowerCase());
   const text = [
     n.description ?? '',
     ...n.fields.map((f) => `${f.name} ${(f.enum ?? []).join(' ')}`),
@@ -42,16 +49,23 @@ function useEdges(
   const [lines, setLines] = useState<Line[]>([]);
   useLayoutEffect(() => {
     const box = grid.current;
-    const from = box?.querySelector(`[data-chip="${selected}"]`);
-    if (!box || !from) return setLines([]);
-    const o = box.getBoundingClientRect();
-    const mid = (el: Element) => {
-      const r = el.getBoundingClientRect();
-      return [r.left + r.width / 2 - o.left, r.top + r.height / 2 - o.top];
+    if (!box) return;
+    const measure = () => {
+      const from = box.querySelector(`[data-chip="${selected}"]`);
+      if (!from) return setLines([]);
+      const o = box.getBoundingClientRect();
+      const mid = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return [r.left + r.width / 2 - o.left, r.top + r.height / 2 - o.top];
+      };
+      const [x1, y1] = mid(from);
+      const tos = [...neighbours].map((n) => box.querySelector(`[data-chip="${n}"]`));
+      setLines(tos.flatMap((to) => (to ? [{ x1, y1, x2: mid(to)[0], y2: mid(to)[1] }] : [])));
     };
-    const [x1, y1] = mid(from);
-    const tos = [...neighbours].map((n) => box.querySelector(`[data-chip="${n}"]`));
-    setLines(tos.flatMap((to) => (to ? [{ x1, y1, x2: mid(to)[0], y2: mid(to)[1] }] : [])));
+    measure();
+    const reflow = new ResizeObserver(measure); // a resize or late font moves the chips
+    reflow.observe(box);
+    return () => reflow.disconnect();
   }, [selected, filter]);
   return lines;
 }
@@ -101,106 +115,111 @@ function Chip({ name, layer, selected, near, select }: ChipProps) {
 }
 
 type GridProps = { filter: Filter; selected: string; select: (n: string) => void };
+type Chips = { layer: string; selected: string; near: Set<string>; select: (n: string) => void };
 
-function Column({
-  layer,
-  names,
-  groups,
-  ...chip
-}: GridProps & {
-  layer: string;
-  names: string[];
-  groups: Map<string, string[]>;
-  near: Set<string>;
-}) {
-  const c = usePalette();
-  const chips = (ns: string[]) =>
-    ns.map((n) => (
+const Chips = ({ names, style, ...p }: Chips & { names: string[]; style: CSSProperties }) => (
+  <ul style={style}>
+    {names.map((n) => (
       <Chip
         key={n}
         name={n}
-        layer={layer}
-        selected={chip.selected}
-        near={chip.near.has(n)}
-        select={chip.select}
+        layer={p.layer}
+        selected={p.selected}
+        near={p.near.has(n)}
+        select={p.select}
       />
-    ));
+    ))}
+  </ul>
+);
+
+// Contracts of one layer by owner, else by file.
+function rows(shown: Contract[], layer: string) {
+  const by = new Map<string, string[]>();
+  for (const n of shown.filter((x) => x.layer === layer)) {
+    const g = n.owner ?? n.file.replace('protocol/', '');
+    by.set(g, [...(by.get(g) ?? []), n.name]);
+  }
+  return by;
+}
+
+function Column({
+  tables,
+  groups,
+  ...p
+}: Chips & { tables: string[]; groups: Map<string, string[]> }) {
+  const c = usePalette();
   return (
     <section
-      aria-label={layer}
-      style={{ flex: '1 1 200px', borderTop: `4px solid ${hue(layer, c)}` }}
+      aria-label={p.layer}
+      style={{ flex: '1 1 200px', borderTop: `4px solid ${hue(p.layer, c)}` }}
     >
-      <h2 style={heading}>{layer}</h2>
-      {names.length > 0 && <ul style={{ padding: 0 }}>{chips(names)}</ul>}
+      <h2 style={heading}>{p.layer}</h2>
+      {tables.length > 0 && <Chips names={tables} style={{ padding: 0 }} {...p} />}
       {[...groups].map(([g, ns]) => (
         <div key={g}>
           <h3 style={{ ...small, fontWeight: 'bold', marginBottom: 0, marginTop: space.md }}>
             {g}
           </h3>
-          <ul style={{ padding: 0, margin: 0 }}>{chips(ns)}</ul>
+          <Chips names={ns} style={{ padding: 0, margin: 0 }} {...p} />
         </div>
       ))}
     </section>
   );
 }
 
-export function Grid(props: GridProps) {
-  const { filter, selected, select } = props;
+function Lines({ lines }: { lines: Line[] }) {
   const c = usePalette();
+  const style: CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+  };
+  return (
+    <svg aria-hidden="true" style={style}>
+      {lines.map((l, i) => (
+        <line key={i} {...l} stroke={c.action} strokeWidth={1} />
+      ))}
+    </svg>
+  );
+}
+
+const box: CSSProperties = {
+  position: 'relative',
+  flex: '3 1 480px',
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: space.lg,
+};
+
+export function Grid({ filter, selected, select }: GridProps) {
   const grid = useRef<HTMLDivElement>(null);
   const near = new Set(
     graph.edges.flatMap((e) => (e.from === selected ? [e.to] : e.to === selected ? [e.from] : [])),
   );
   const lines = useEdges(grid, selected, near, filter);
   const shown = graph.nodes.filter(keep(filter));
-  const tables =
-    filter.owner || filter.kind || filter.res
-      ? []
-      : graph.saveTables.map((t) => t.table).filter((t) => matches(t, filter.query));
-  const groups = (layer: string) => {
-    const by = new Map<string, string[]>();
-    for (const n of shown.filter((x) => x.layer === layer)) {
-      const g = n.owner ?? n.file.replace('protocol/', '');
-      by.set(g, [...(by.get(g) ?? []), n.name]);
-    }
-    return by;
-  };
+  const unfiltered = !filter.owner && !filter.kind && !filter.res;
+  const tables = unfiltered
+    ? graph.saveTables.map((t) => t.table).filter((t) => matches(t, filter.query))
+    : [];
   return (
     <div
       ref={grid}
       onKeyDown={(e) => (e.key === 'Escape' ? select('') : arrows(e, grid.current))}
-      style={{
-        position: 'relative',
-        flex: '3 1 480px',
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: space.lg,
-      }}
+      style={box}
     >
-      <svg
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-        }}
-      >
-        {lines.map((l, i) => (
-          <line key={i} {...l} stroke={c.action} strokeWidth={1} />
-        ))}
-      </svg>
+      <Lines lines={lines} />
       {graph.layers
         .filter((l) => !filter.layer || l === filter.layer)
         .map((l) => (
           <Column
             key={l}
             layer={l}
-            names={l === 'Save' ? tables : []}
-            groups={groups(l)}
-            near={near}
-            {...props}
+            tables={l === 'Save' ? tables : []}
+            groups={rows(shown, l)}
+            {...{ selected, near, select }}
           />
         ))}
     </div>

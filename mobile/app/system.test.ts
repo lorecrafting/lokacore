@@ -25,9 +25,11 @@ test('no hex colour under stories/system/ outside palette.ts', () => {
   const hex = readdirSync(dir)
     .filter((f) => f !== 'palette.ts')
     .flatMap((f) =>
-      (readFileSync(new URL(f, dir), 'utf8').match(/#[0-9a-f]{6}\b/gi) ?? []).map(
-        (m) => `${f}: ${m}`,
-      ),
+      (
+        readFileSync(new URL(f, dir), 'utf8').match(
+          /#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi,
+        ) ?? []
+      ).map((m) => `${f}: ${m}`),
     );
   assert.deepEqual(hex, []);
 });

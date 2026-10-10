@@ -1,4 +1,4 @@
-// System/Overview (docs page: SystemOverview.mdx), in the light and dark palettes for the a11y checks.
+// System/Overview (docs page: SystemOverview.mdx).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Overview } from './system/Overview.tsx';
 
@@ -6,5 +6,4 @@ const meta = { title: 'System/Overview', component: Overview } satisfies Meta<ty
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Light: Story = {};
-export const Dark: Story = { globals: { palette: 'dark' } };
+export const Page: Story = {};

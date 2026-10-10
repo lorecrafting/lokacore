@@ -4,7 +4,7 @@
 # missing from @layers gets layer null (test/loka/system_graph_test.exs fails it), so a planted
 # schema still reaches the stale-file check. Fails on a registry command, event or policy op no
 # schema declares, and on a missing save-table block. Save holds no schema: its column is the
-# save tables. A definition kind with no CompiledCartridge map has node null.
+# save tables. A definition kind with no CompiledCartridge map keyed `:kind/` has node null.
 defmodule SystemGraph do
   @layer_order ~w(Content Capabilities Change State Save View)
   @layers %{
@@ -118,6 +118,7 @@ defmodule SystemGraph do
   defp type(%{"type" => "object", "additionalProperties" => v}) when is_map(v), do: "{#{type(v)}}"
   defp type(%{"anyOf" => bs}), do: Enum.map_join(bs, " | ", &type/1)
   defp type(%{"oneOf" => _}), do: "union"
+  defp type(%{"enum" => _}), do: "enum"
   defp type(%{"type" => t}), do: t
   defp type(_), do: "const"
 

@@ -36,10 +36,10 @@ function Choose({
   );
 }
 
-export function Toolbar({ filter, change, selected }: Props) {
+// The search box; `/` anywhere on the page focuses it.
+function Search({ value, change }: { value: string; change: (query: string) => void }) {
   const c = usePalette();
   const search = useRef<HTMLInputElement>(null);
-  const [copied, setCopied] = useState('');
   useEffect(() => {
     const slash = (e: KeyboardEvent) => {
       if (e.key !== '/' || e.target instanceof HTMLInputElement) return;
@@ -49,55 +49,65 @@ export function Toolbar({ filter, change, selected }: Props) {
     document.addEventListener('keydown', slash);
     return () => document.removeEventListener('keydown', slash);
   }, []);
-  const field = { font: 'inherit', color: c.fg, background: c.card };
+  return (
+    <label style={{ marginRight: space.lg }}>
+      Search{' '}
+      <input
+        ref={search}
+        type="search"
+        value={value}
+        onChange={(e) => change(e.target.value)}
+        style={{ font: 'inherit', color: c.fg, background: c.card }}
+      />
+    </label>
+  );
+}
+
+function CopyLink({ selected }: { selected: string }) {
+  const c = usePalette();
+  const [copied, setCopied] = useState('');
   const copy = () =>
     navigator.clipboard
       .writeText(page('data-model', { node: selected }))
       .then(() => setCopied(selected));
   return (
-    <div role="search" style={{ marginBottom: space.md }}>
-      <label style={{ marginRight: space.lg }}>
-        Search{' '}
-        <input
-          ref={search}
-          type="search"
-          value={filter.query}
-          onChange={(e) => change({ query: e.target.value })}
-          style={field}
-        />
-      </label>
-      <Choose
-        label="Layer"
-        value={filter.layer}
-        set={(layer) => change({ layer })}
-        options={graph.layers}
-      />
-      <Choose
-        label="Owner"
-        value={filter.owner}
-        set={(owner) => change({ owner })}
-        options={['foundation', ...capabilities.keys()]}
-      />
-      <Choose
-        label="Kind"
-        value={filter.kind}
-        set={(kind) => change({ kind })}
-        options={[...new Set(graph.nodes.map((n) => n.kind))].sort()}
-      />
-      <Choose
-        label="Residency"
-        value={filter.res}
-        set={(res) => change({ res })}
-        options={[...new Set(graph.capabilities.map((x) => x.residency)), 'none']}
-      />
-      <button
-        type="button"
-        disabled={!selected}
-        onClick={copy}
-        style={{ ...field, border: `1px solid ${c.line}` }}
-      >
-        {copied && copied === selected ? 'Copied' : 'Copy link'}
-      </button>
-    </div>
+    <button
+      type="button"
+      disabled={!selected}
+      onClick={copy}
+      style={{ font: 'inherit', color: c.fg, background: c.card, border: `1px solid ${c.line}` }}
+    >
+      {copied && copied === selected ? 'Copied' : 'Copy link'}
+    </button>
   );
 }
+
+const owners = ['foundation', ...capabilities.keys()];
+const kinds = [...new Set(graph.nodes.map((n) => n.kind))].sort();
+const residencies = [...new Set(graph.capabilities.map((x) => x.residency)), 'none'];
+
+export const Toolbar = ({ filter, change, selected }: Props) => (
+  <div role="search" style={{ marginBottom: space.md }}>
+    <Search value={filter.query} change={(query) => change({ query })} />
+    <Choose
+      label="Layer"
+      value={filter.layer}
+      set={(layer) => change({ layer })}
+      options={graph.layers}
+    />
+    <Choose
+      label="Owner"
+      value={filter.owner}
+      set={(owner) => change({ owner })}
+      options={owners}
+    />
+    <Choose label="Kind" value={filter.kind} set={(kind) => change({ kind })} options={kinds} />
+    <Choose
+      label="Residency"
+      value={filter.res}
+      set={(res) => change({ res })}
+      options={residencies}
+    />
+    <CopyLink selected={selected} />
+  </div>
+);

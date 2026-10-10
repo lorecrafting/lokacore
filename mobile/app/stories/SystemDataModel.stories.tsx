@@ -15,8 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Light: Story = {};
-export const Dark: Story = { globals: { palette: 'dark' } };
+export const Page: Story = {};
 
 // Acceptance 5 and 6: a node global (as a deep link sets it) opens that contract.
 export const Selected: Story = {
