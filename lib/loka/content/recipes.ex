@@ -83,10 +83,11 @@ defmodule Loka.Content.Recipes do
       else: []
   end
 
-  # An inline check's key is its check definition's key: two recipes' checks may not share one.
+  # An inline check's key is its check definition's key: no two checks (a recipe's or a dialogue
+  # choice's, row 14) may share one.
   defp shared(defs) do
-    checks = for {_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"]
-    for {k, n} <- Enum.frequencies(checks), n > 1, into: MapSet.new(), do: k
+    checks = for({_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"])
+    Loka.Content.ChoiceChecks.duplicates(checks, defs)
   end
 
   defp shared(rel, %{"check" => %{"key" => k}}, shared) do
@@ -97,21 +98,8 @@ defmodule Loka.Content.Recipes do
 
   # Toolbox row G3: an opposed check naming an NPC needs no rating; the NPC is an instance of this
   # cartridge that declares the check's attribute.
-  defp opposed(rel, %{"check" => %{"npc" => n} = c}, m, defs) do
-    reference(rel, ["check"], "attribute", c, m, defs) ++
-      case resolve(n, "npc", m, defs) do
-        {_, _, npc} ->
-          if npc["spawn_template"] ||
-               !Enum.any?(npc["attributes"] || [], &(&1["attribute"] == c["attribute"])),
-             do: [
-               diag("SCHEMA_VIOLATION", at(rel, ["check", "npc"]), %{"error" => "invalid_value"})
-             ],
-             else: []
-
-        _ ->
-          reference(rel, ["check"], "npc", c, m, defs)
-      end
-  end
+  defp opposed(rel, %{"check" => %{"npc" => _} = c}, m, defs),
+    do: reference(rel, ["check"], "attribute", c, m, defs) ++ rater(rel, ["check"], c, m, defs)
 
   # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge and its
   # target detail declares a rating.
@@ -122,6 +110,22 @@ defmodule Loka.Content.Recipes do
       if rated?(t, m, defs),
         do: [],
         else: [diag("SCHEMA_VIOLATION", at(rel, ["check"]), %{"error" => "invalid_value"})]
+  end
+
+  @doc "Row G3: an opposed check's npc (at `steps`) is an NPC instance declaring its attribute."
+  def rater(rel, steps, %{"npc" => n} = c, m, defs) do
+    case resolve(n, "npc", m, defs) do
+      {_, _, npc} ->
+        if npc["spawn_template"] ||
+             !Enum.any?(npc["attributes"] || [], &(&1["attribute"] == c["attribute"])),
+           do: [
+             diag("SCHEMA_VIOLATION", at(rel, steps ++ ["npc"]), %{"error" => "invalid_value"})
+           ],
+           else: []
+
+      _ ->
+        reference(rel, steps, "npc", c, m, defs)
+    end
   end
 
   # An unresolved room or detail is the target's own diagnostic.
