@@ -16,15 +16,15 @@ const file = new URL('../../../docs/state-sections.gen.json', import.meta.url);
 const plan = { cartridge_id: 'c', cartridge_version: 1, kind: 'population_plan', key: 'p' };
 
 type Branch = { properties: Record<string, { const?: string }> };
-const section = (t: MutationTarget) => row({ ...t, plan } as MutationTarget)?.[0];
+const section = (t: MutationTarget) => row({ ...t, plan } as unknown as MutationTarget)?.[0];
 
 // Breaks: a MutationTarget kind or DeltaOp added, or a section renamed in rows.ts (or an op's target
 // in compose_target.ts), with the file left stale.
 test('docs/state-sections.gen.json lists the section of every MutationTarget kind and DeltaOp', () => {
   const $defs = read('protocol/delta.schema.json').$defs;
   // The clock (time.advance) is the head row, not a section.
-  const sections = (pairs: [string, string | undefined][]) =>
-    Object.fromEntries(pairs.filter((p) => p[1]));
+  const sections = (pairs: [string, string | undefined][]): Record<string, string> =>
+    Object.fromEntries(pairs.filter((p): p is [string, string] => p[1] !== undefined));
   const kinds = sections(
     $defs.MutationTarget.oneOf.map(({ properties: p }: Branch) => {
       const kind = p.kind.const!;
