@@ -135,11 +135,6 @@ defmodule Loka.Content.Checks do
     |> immune(m)
   end
 
-  defp immune(%{"immune" => c} = e, m),
-    do: Map.put(e, "immune", Enum.map(c, &ref(&1, "status", m)))
-
-  defp immune(e, _), do: e
-
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
@@ -279,6 +274,11 @@ defmodule Loka.Content.Checks do
 
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v
+
+  defp immune(%{"immune" => c} = e, m),
+    do: Map.put(e, "immune", Enum.map(c, &ref(&1, "status", m)))
+
+  defp immune(e, _), do: e
 
   defp scheduled(schedule, m), do: Map.new(schedule, fn {h, r} -> {h, ref(r, "room", m)} end)
 
