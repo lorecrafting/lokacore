@@ -137,13 +137,7 @@ export function sequence(
     } else if (step.op === 'status.apply') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const holder = step.item ? then.entityIds[refString(step.item)] : subject(cause, body);
-      const once = `${holder}|${refString(step.status)}`; // one row write per holder and status
-      if (!holder || applied.has(once)) continue;
-      applied.add(once);
-      const joined = holders.get(holder) ?? group;
-      const applying = statusStep(then, step, holder, body, joined, mint);
-      if (applying.ops.length) holders.set(holder, joined); // a later status job joins it too
+      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
@@ -179,17 +173,24 @@ const subject = (cause: DomainEvent, body: EntityId) => {
 };
 
 // A status.apply on its holder: the step's named item's instance, else the event's subject (row
-// G3), in the one writer group its status writes share in this advance (proposal.ts statusGroup);
-// only the player's own body hears the applied line.
+// G3), once per holder and status in a rule, in the one writer group the holder's status writes
+// share in this advance (proposal.ts statusGroup); only the player's own body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
-  holder: EntityId,
+  cause: DomainEvent,
   body: EntityId,
   group: number,
+  { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
   mint: Mint,
 ) {
-  const ops = applyStatus(world, holder, step.status, group, mint);
+  const holder = step.item ? world.entityIds[refString(step.item)] : subject(cause, body);
+  const once = `${holder}|${refString(step.status)}`;
+  if (!holder || applied.has(once)) return { ops: [], narration: [] };
+  applied.add(once);
+  const joined = holders.get(holder) ?? group;
+  const ops = applyStatus(world, holder, step.status, joined, mint);
+  if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
   const label = specOf(world, step.status)?.narration.applied;
   return { ops, narration: label && ops.length && holder === body ? [{ key: label }] : [] };
 }

@@ -201,7 +201,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
+// size: allow 46, one existing FIFO loop admits typed quest reaction deliveries with status holder groups
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
