@@ -1,4 +1,4 @@
-# size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
+# size: allow 358, typed knowledge, patrol, final birth admission, status, levelling and quest started_at share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
   alias Loka.Core.{ComposeChoice, ComposePack, Creation}
