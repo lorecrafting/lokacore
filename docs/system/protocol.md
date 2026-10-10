@@ -88,7 +88,8 @@ storage half):
    that changes its fact gets a `fact_changed` at its causal position (`mechanics/fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
    (`kernel/ts/src/mechanics/quest/lifecycle.ts:75`), then each ReactionRule it triggers runs as its own writer group when its
-   `when` holds (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
+   `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
+   joins that reaction's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`runtime/proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
 7. **Adopt** (`runtime/proposal.ts:42`): a `fact.assign` outside its FactSpec faults
