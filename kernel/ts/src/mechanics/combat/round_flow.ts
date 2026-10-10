@@ -14,7 +14,7 @@ import { encode } from '../../foundation/canonical.ts';
 import { level, resourceRef } from '../resource.ts';
 import { living } from '../death/shared.ts';
 import { standing } from '../position/shared.ts';
-import { npcRef, participantsPresent } from './shared.ts';
+import { ally, allyOf, npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
 import type { CombatEvent, Round } from './round.ts';
@@ -112,11 +112,12 @@ function packTurns({
   current,
   settings,
 }: PackContext) {
+  const helper = allyOf(world, row);
   const order = row.round % 2 ? [row.body_id, selected] : [selected, row.body_id];
-  for (const attacker of order) {
+  for (const attacker of helper ? [...order, helper] : order) {
     const at = prefix(world, r.ops, r.due_time);
     const target =
-      attacker === row.body_id
+      attacker !== selected
         ? eligible(at, row, current.npc_id)
           ? current.npc_id
           : row.active_ids!.find((id) => eligible(at, row, id))
@@ -127,7 +128,7 @@ function packTurns({
       !eligible(at, row, target) ||
       !living(at, row.body_id)
     )
-      break;
+      continue;
     if (attacker === row.body_id && !standing(at, row.character_id)) continue;
     if (attacker === selected && maybeFlight(at, selected, job, r, settings)) continue;
     attack(at, command, mint, encounter_id, { ...current, npc_id: target }, attacker, r, close);
@@ -236,9 +237,13 @@ export function narrate(world: World, row: EncounterRow, events: readonly Combat
                 ? e.hit
                   ? 'player_hit'
                   : 'player_miss'
-                : e.hit
-                  ? 'npc_hit'
-                  : 'npc_miss'
-            ],
+                : ally(world, e.attacker_id)
+                  ? e.hit
+                    ? 'ally_hit'
+                    : 'ally_miss'
+                  : e.hit
+                    ? 'npc_hit'
+                    : 'npc_miss'
+            ]!,
   }));
 }

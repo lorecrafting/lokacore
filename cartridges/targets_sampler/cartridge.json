@@ -21,7 +21,8 @@
       "description_variant": 1,
       "calendar": 1,
       "position": 1,
-      "population": 1
+      "population": 1,
+      "fact": 1
     },
     "client_features": []
   },
@@ -75,10 +76,22 @@
         "npc_hit": "combat.npc_hit",
         "npc_miss": "combat.npc_miss",
         "player_died": "combat.player_died",
-        "npc_died": "combat.npc_died"
+        "npc_died": "combat.npc_died",
+        "ally_hit": "combat.ally_hit",
+        "ally_miss": "combat.ally_miss"
       },
-      "target_choice": true
-    }
+      "target_choice": true,
+      "allies": [
+        "guard"
+      ]
+    },
+    "death_credit": [
+      {
+        "npc": "raider",
+        "room": "yard",
+        "fact": "raider_slain"
+      }
+    ]
   },
   "calendar": {
     "start": 64800,

@@ -15,6 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **APPROVE**
 - [Review: toolbox row 6c, several foes with a pack plan (loka-kgd.66)](2026-10-10-toolbox-m7-foes-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G6 Book half, sense cues on the World page (loka-kgd.65, batch M7)](2026-10-10-toolbox-m7-cues-book-review.md): **APPROVE WITH NOTES**
+- [Review: NPC-vs-NPC damage, allies and kill credit, toolbox row 6b (loka-kgd.68)](2026-10-10-toolbox-m7-allies-review.md): **APPROVE WITH NOTES**
 - [Review: standing and disposition, toolbox rows 15 and G11 (loka-kgd.54)](2026-10-10-toolbox-m6-standing-review.md): **APPROVE**
 - [Review: toolbox row W10, conditional schedules (loka-kgd.56, batch M6)](2026-10-10-toolbox-m6-schedules-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W3, rumour by co-presence (loka-kgd.57, batch M6)](2026-10-10-toolbox-m6-rumour-review.md): **APPROVE WITH NOTES**
