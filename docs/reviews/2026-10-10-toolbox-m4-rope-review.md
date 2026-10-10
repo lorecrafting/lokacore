@@ -28,3 +28,13 @@
 1. **should-fix**: rope carried in a pack is untested. `kernel/ts/src/mechanics/movement/shared.ts:78`; `climb.test.ts:62` only takes the rope into the hand. A refactor to direct custody (mutant above) passes, and a player with the rope in a pack falls although mechanics.md promises otherwise. Fix: one assertion with the rope inside a carried container.
 2. **nit**: "after the fare" is untested: the sampler has no hp fare, so `sequence.ts:89` reading `{}` instead of `paid.levels` would pass, and an hp-cost cartridge would emit a stale `from`.
 3. **nit**: the Flee fall in mechanics.md "Climb face" has no test; it relies on the shared path only.
+
+## Fix round 1 re-check (8ef7a5d8ff979cd1dd8f3314bcbefeb37c4134f4)
+
+- Scope: `kernel/ts/test/climb.test.ts`, new `kernel/ts/test/climb_flee.test.ts`; no source change. The `session()` helper only moves setup; the first test's assertions are unchanged.
+- `climb.test.ts` and `climb_flee.test.ts` green locally (nice -n 10).
+- 1: rope inside a pack (edited `state.containers`) descends at 10 HP. Red control: direct-custody-only check in `fall` fails exactly that test. **Resolved.**
+- 2: 1-HP move cost gives 5 HP after descent. Red control: `fall` reading `{}` instead of `paid.levels` fails exactly that test. **Resolved.**
+- 3: Flee over a climb face lands, loses 3 HP, narrates `narration.fell`. Red control: skip the fall while engaged fails exactly that test. **Resolved.**
+- Hosted CI on 8ef7a5d8: ci and book-e2e in progress at re-check time.
+- Verdict: **APPROVED**
