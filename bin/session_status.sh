@@ -10,6 +10,8 @@ if command -v br >/dev/null 2>&1; then
 else
   echo "br not installed: see docs/BEADS.md"
 fi
+echo "## Orphaned busy processes (bin/orphans.sh; check, then stop by PID)"
+sh bin/orphans.sh
 echo "## Open PRs"
 gh pr list --limit 10 2>/dev/null || echo "gh unavailable"
 echo "## Nightly hosted CI on main"

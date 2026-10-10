@@ -35,6 +35,8 @@ m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 m python3 bin/check_beads_export.py
 m sh bin/beads_red_controls.sh
+m sh bin/orphans_red_controls.sh
+m sh bin/worktree_setup_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts mobile/app; do
   step "$d node_modules"; [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }

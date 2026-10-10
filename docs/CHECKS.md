@@ -87,6 +87,7 @@ their rules and red controls remain available for resumption.
   supplemental task and refuses both path classes, a missing or duplicate slice
   and a reserved ID, and checks the session-start PR drift report
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
+- `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` links main's `node_modules` for a matching lockfile and removes the link before `npm ci` after a lockfile change.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
