@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "waterskin",
+    "skin"
+  ],
+  "short": "item.waterskin.short",
+  "room_line": "item.waterskin.room",
+  "description": "item.waterskin.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "inn"
+  },
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "water",
+      "quantity": 4
+    }
+  }
+}

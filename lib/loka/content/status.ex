@@ -1,5 +1,5 @@
 defmodule Loka.Content.Status do
-  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers."
+  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them."
   import Loka.Content.Source, only: [at: 2, diag: 2]
   alias Loka.Content.Refs
 
@@ -15,25 +15,31 @@ defmodule Loka.Content.Status do
           cures,
           do: {rel, ["edible", "cures"], cures}
 
-    {immune, g3} = row_g3(defs)
+    {later, g3} = api_146(defs)
 
     if statuses == %{} and cures == [] and not g3,
       do: [],
-      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
+      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ later, m, defs)
   end
 
-  # Row G3: each NPC's or item's immune list, and whether any API 1.46 field (those, a step naming
-  # an item, a tick or expiry trigger, or a row 2c status modifier) is used.
-  defp row_g3(defs) do
+  # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item and tick or
+  # expiry triggers; row 2c's status modifiers; row G13's liquid cures (ended by Drink). Returns
+  # the lists naming statuses and whether any field is used.
+  defp api_146(defs) do
     immune =
       for kind <- ~w(npc item),
           {_, {rel, _, e}} <- defs[kind] || %{},
           e["immune"],
           do: {rel, ["immune"], e["immune"]}
 
+    lists = immune ++ drinks(defs)
     modifies = Enum.any?(defs["status"] || %{}, &match?({_, {_, _, %{"modifies" => _}}}, &1))
-    {immune, immune != [] or modifies or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
+    {lists, lists != [] or modifies or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
   end
+
+  defp drinks(defs),
+    do:
+      for({_, {rel, _, l}} <- defs["liquid"] || %{}, l["cures"], do: {rel, ["cures"], l["cures"]})
 
   defp trigger?({_, {_, _, %{} = r}}),
     do:

@@ -9,10 +9,10 @@ import {
   type UnavailableReason,
 } from '../../contracts.gen.ts';
 import { refusal } from '../../commands/actions.ts';
-import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
+import { bodyOf, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { adjust, level, resourceRef, resourceSpec } from '../resource.ts';
-import { activeStatuses, expire } from '../status/shared.ts';
+import { cureOps } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'eat' }>;
 export function availability(world: World, p: Payload, steps: Steps, action: Key) {
@@ -37,11 +37,7 @@ export function transition(
     current = level(world, body, edible.resource),
     spec = resourceSpec(world, body, edible.resource);
   if (current === undefined || !spec) return { code: 'precondition_failed' };
-  // Each active status once, however often `cures` lists it.
-  const cures = new Set((edible.cures ?? []).map(refString));
-  const cured = activeStatuses(world, body)
-    .filter(({ status }) => cures.has(refString(status)))
-    .flatMap(({ status, row }) => expire(world, body, status, row, 0));
+  const cured = cureOps(world, body, edible.cures);
   const by = Math.min(edible.amount, spec.maximum - current);
   if (by <= 0 && cured.length === 0) return { code: 'invalid_state' };
   return {

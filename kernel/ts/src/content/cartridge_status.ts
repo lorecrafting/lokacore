@@ -4,7 +4,7 @@ import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 /**
- * Checked toolbox row 1, G3 and 2c declarations in the loaded artifact, independent of source
+ * Checked toolbox row 1, G3, 2c and G13 (liquid cures) declarations in the loaded artifact, independent of source
  * compilation; only a status with `modifies` (row 2c) may omit `per_tick`.
  */
 export function status(c: Obj): Diagnostic[] {
@@ -23,7 +23,7 @@ export function status(c: Obj): Diagnostic[] {
       s,
     ]),
   ) as [string, Obj][];
-  const { immune, named, g3 } = rowG3(c);
+  const { immune, named, drinks, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, g3 ? '1.46' : '1.38') < 0 ||
@@ -41,16 +41,17 @@ export function status(c: Obj): Diagnostic[] {
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
   }
-  for (const [at, ref] of [...applies, ...cures, ...immune])
+  for (const [at, ref] of [...applies, ...cures, ...drinks, ...immune])
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   for (const [at, ref, table] of named)
     if (!c[table]?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   return out;
 }
 
-// Row G3: each NPC's or item's immune list entry; each step naming an item and (row 2c) each status
-// modifier's attribute, with the table it names; whether any of them or a status trigger is used.
-function rowG3(c: Obj) {
+// The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
+// expiry triggers; row 2c's status modifiers (each attribute, with the table it names); row G13's
+// liquid cures (ended by Drink). `g3` says whether any is used.
+function api146(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
       ((e.immune ?? []) as Obj[]).map((s, n) => [`.cartridge.${kind}${step(ref)}.immune[${n}]`, s]),
@@ -70,10 +71,14 @@ function rowG3(c: Obj) {
       'attributes',
     ]),
   ) as [string, Obj, string][];
+  const drinks = Object.entries(c.liquids ?? {}).flatMap(([ref, l]: [string, any]) =>
+    ((l.cures ?? []) as Obj[]).map((s, n) => [`.cartridge.liquids${step(ref)}.cures[${n}]`, s]),
+  ) as [string, Obj][];
   const g3 =
     immune.length ||
+    drinks.length ||
     items.length ||
     modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
-  return { immune, named: [...items, ...modifies], g3 };
+  return { immune, named: [...items, ...modifies], drinks, g3 };
 }

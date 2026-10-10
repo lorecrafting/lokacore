@@ -21757,5 +21757,23 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "name": "liquid_definition_empty_cures",
+    "contract": "LiquidDefinition",
+    "value": {
+      "key": "water",
+      "label": "liquid.water",
+      "unit_label": "liquid.units",
+      "grams_per_unit": 250,
+      "drink_amount": 1,
+      "cures": []
+    },
+    "errors": [
+      {
+        "path": "/cures",
+        "code": "too_few_items"
+      }
+    ]
   }
 ]

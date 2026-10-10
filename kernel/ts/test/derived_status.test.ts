@@ -133,6 +133,39 @@ test('a tonic cures a refreshed might with con -6 after 4000 s at 10 of 10: hp r
   assert.deepEqual(hpView(w), [10, 16]);
 });
 
+// Breaks (rows 2c, G13): a Drink's cure ends a con-lowering status without the hp settle (Drink
+// restores no pool), so the hour of regen banked at the cap pays out (16 of 16).
+test('a flask of water curing a refreshed might with con -6 at 10 of 10: hp reads 10 of 16', () => {
+  const c = mightCon(-6) as any;
+  const ref = c.statuses[MIGHT].modifies[0].attribute;
+  c.manifest.requires.capabilities.liquid = c.lock.capabilities.liquid = 1;
+  const water = { ...ref, kind: 'liquid', key: 'water' };
+  c.liquids = {
+    'derived_sampler@0.0.1:liquid/water': {
+      key: 'water',
+      label: 'item.anvil.short',
+      unit_label: 'item.anvil.short',
+      grams_per_unit: 250,
+      drink_amount: 1,
+      cures: [{ ...ref, kind: 'status', key: 'might' }],
+    },
+  };
+  const tonicItem = c.items['derived_sampler@0.0.1:item/tonic'];
+  c.items['derived_sampler@0.0.1:item/flask'] = {
+    ...tonicItem,
+    keywords: ['flask'],
+    edible: undefined,
+    vessel: { capacity: 1, unit_label: 'item.anvil.short', initial: { kind: water, quantity: 1 } },
+  };
+  let w = chosen('hardy', c);
+  const flask = w.entityIds['derived_sampler@0.0.1:item/flask'];
+  w = wait(play(play(w, { type: 'take', item_id: flask }), north), 1800);
+  w = wait(play(play(w, { type: 'move', direction: 'south' }), north), 2200); // ends at +5400
+  w = play(w, { type: 'drink', vessel_id: flask });
+  assert.equal(gameView(w).conditions, undefined);
+  assert.deepEqual(hpView(w), [10, 16]);
+});
+
 // Breaks (row 2c): the meal's hp gain precedes the cure's settle, whose stale `from` faults
 // composition (precondition_failed), or the cure leaves the lowered maximum.
 test('a tonic eaten at hp 10 of 13 (might con -3) cures it and restores 2: hp 12 of 16', () => {
