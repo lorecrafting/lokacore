@@ -43,7 +43,7 @@ elegance (reviews 1 and 2), but what that player misses on a Tuesday evening wit
 |---|---|---|---|---|---|
 | **W23** | **Hints when stuck**: a quest journal stage may declare `hints [{after (real minutes), text}]`; the Journal shows the first whose time since the stage began has passed; an action may declare a `tip` shown once (an engine fact `seen_tip_<key>`) | the first player who cannot find the panel exit stops playing; authored hints keep the Book's voice | quest@1 journal, `view/quest_journal.ts`, the dev clock proves the reveal | S | no RNG, no mode (one difficulty); timing is real elapsed, never a skip |
 | **W24** | **Quest deadlines**: `deadline {after or at, outcome}` on a quest; expiry fails the instance with the outcome (journal `outcomes[outcome]`), the W1 quest event carries it; the Journal shows time remaining | a world that runs while you sleep (background-time decision) needs stakes a player can read; today one chapter has one deadline by bespoke fields | quest lifecycle, engine jobs, W1 reactions (trust penalty, guard reaction), 38 protect, 44 race | S | Trap 8: the failure is an outcome, not a gate; fixed time: the clock, not the player, runs it |
-| **W25** | **Exposure**: leaf `wearing {tag}` and tag `warm` (closed set, G1 rule); content: a reaction on `entity_entered_room` and status tick (W1) whose `when` is all(`sky` cold, room `exposed`, not wearing warm) applies a short drain that refreshes while the conditions hold and expires by itself in shelter | weather that only changes a room line is wallpaper; a cloak you reach for on a frosty fell is immersion the player does | 31 sky, G1 tags, G13 drains, row 3 slots, W6 ("shivering"), 43a mud later | S + content | Traps 1 (derived), 6 (gentle, real minutes), 12 (the chill is a condition label in words) |
+| **W25** | **Exposure** (owner: cold, hot, damp, windy, dry): leaf `wearing {tag}` and tags `warm`, `cool`, `waterproof`, `windproof` (closed set, G1 rule); content per condition: a reaction on `entity_entered_room` and status tick (W1) whose `when` is all(`sky` condition, room `exposed`, not wearing its tag) applies a short drain that refreshes while the conditions hold and expires by itself in shelter; `dry` needs no tag: a thirst drain any drink ends | weather that only changes a room line is wallpaper; a cloak you reach for on a frosty fell is immersion the player does | 31 sky, G1 tags, G13 drains, row 3 slots, W6 ("shivering"), 43a mud later | S engine + M content (not split: one leaf, four enum entries, five authored tables) | Traps 1 (derived), 6 (gentle, real minutes), 12 (each condition is a label in words) |
 | **W26** | **NPCs use doors**: a schedule or wander step with `walks: true` is refused when the destination is not reachable within `query_steps` through exits whose barriers are open, closed, or locked with a key the NPC holds (G7 `traverse` applies to NPCs as to the player); a key-holder's passage opens and re-locks the barrier (`barrier_changed`); a refused step retries at the next listed hour; without the flag schedules jump as today | locking your hut and finding the thief inside breaks the contract of row 24; guards who stop at a gate they cannot open are a consequence the player can see | G7 locks, W10 schedules, population wander, W1 `barrier_changed`, 33 trespass | M | Trap 2: no needs, one bounded walk; Chapter 1 unchanged (opt-in) |
 | **W27** | **Away recap**: after an elapsed settlement longer than an authored threshold (real minutes), the next page opens with one collapsed block grouping the settlement's receipt narrations by kind with counts, then the normal page; nothing stored | the owner wants players used to a world that runs without them; forty tick lines are the opposite of a welcome back | status ticks and expiry (row 1), W24 deadlines, W10 moves seen in the room, `view/` | S-M (view) | Trap 12: text; replay-safe: built from receipts the reply already carries |
 
@@ -58,7 +58,7 @@ polish queue); **achievement toasts** (46); **emotes** (Realm value; trimmed fro
 |---|---|---|
 | 44 race objective | demote to **content only on W24** and schedule@1; drop the 43b dependency | "before the cart arrives" is a deadline plus a scheduled NPC; mounts make it winnable, not possible |
 | G9 social verbs | move to M7 beside W21; **emotes deferred to the Realm** | in single-player, say and shout exist for fear (W21) and rumour range (W3); an emote nobody reads is Realm value |
-| 36 jail | last in M14; brief must answer the fixed-time question | a sentence at 72 s per game hour is dead real time; fine or escape must be the main path or the row is cut |
+| 36 jail | resolves by fine or escape, no served sentence (owner); L to M; stays after 35 | a sentence at 72 s per game hour is dead real time |
 | 46 lore codex + deduction | up from M15 to **M6** | discovery is the text RPG's core loop and the row is S with its only dependency done |
 | 26 puzzles | up from M15 to **M8** with G4 | the two agency verbs ship together; no dependency |
 | 32 fast travel | up from M14 to **M10** | pacing: the sampler world grows past walking distance around companions and encounters |
@@ -82,20 +82,22 @@ Table order within a batch is the build order; rows in one batch touch different
 | M11 economy and property | G7, **W26 NPCs use doors**, 24, 20a, 20b, W11 | + W26 |
 | M12 world | 37a, 37b, 38, 39, W12, W13 | unchanged |
 | M13 law | 16, 33, W15, 41 | unchanged |
-| M14 tail | 35, 43a, 43b, 44 (content on W24), 45, 36 | 36 last; 32 out |
+| M14 tail | 35, 36 (fine or escape), 43a, 43b, 44 (content on W24), 45 | 32 out |
 | M15 meta | 47, G10, W16, 48a, 48b, 48c | 46, 26 out |
 | Settle, Realm | S1-S4, R1 | unchanged |
 
-## 5. Open questions for the owner
+## 5. Owner decisions on the open questions
 
-1. **Hints at all?** Some owners of literary games want the player stuck. W23 is opt-in per
-   cartridge and authored per stage; say no and the row is cut, nothing else depends on it.
-2. **Jail (36)**: fine or escape as the main path, or cut the row? Serving time against a fixed
-   clock is real minutes of nothing.
-3. **Away recap (W27)**: one collapsed block at the top of the page, or a Journal entry the player
-   opens? The first is the proposal; the second costs the same.
-4. **Exposure (W25)** adds `warm` to the closed tag set; is one clothing tag enough for the first
-   sampler, or should heat (`shade`) ship with it?
+Asked on #354; the owner answered 2026-10-10, verbatim: "keep hints, fine or escape for jail, page
+block, cold hot damp windy dry".
+
+1. **Hints (W23)**: kept as written, opt-in per cartridge, authored per stage.
+2. **Jail (36)**: resolves by paying the fine or escaping; no served sentence. Row reworded, L to M,
+   stays after 35.
+3. **Away recap (W27)**: a page block at the top of the next page, not a Journal entry.
+4. **Exposure (W25)**: five conditions, cold, hot, damp, windy, dry, each from the derived sky on
+   exposed rooms; tags `warm`, `cool`, `waterproof`, `windproof`; `dry` is a thirst drain any
+   drink ends, so it needs no tag. Resized to S engine + M content; not split.
 
 Skipped: I did not open `view/view.ts` or `quest/lifecycle.ts` line by line (claims rest on
 mechanics.md and the schemas) and did not verify whether a quest instance stores its activation
