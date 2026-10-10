@@ -13,6 +13,8 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { command, elapsed, fixture, hp } from './c5_bleed_fixture.ts';
 import { fresh, ref } from './deer_fixture.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { sightHandoffValid } from '../src/foundation/compose_sight.ts';
+import { sightHandoffHolds } from '../src/runtime/invariants_sight.ts';
 
 /** `w` with status `key` (-1 HP every `every`, for `duration`) on `holder`, its job id `job`. */
 function poisoned(
@@ -189,4 +191,32 @@ test('a lone bleed tick and a later poison tick on one body commit in one wait',
   const r = elapsed(ready, 65100, 5);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   assert.equal(hp(r.world), hp(ready)! - 2);
+});
+
+// loka-kgd.43 review finding 1. Breaks: the invariant exempts op kinds while compose exempts every
+// write outside the sighted deer's encounter, so another NPC's round that joins an older group
+// after a sight passes compose and fails the invariant; and a deer-encounter advance in that older
+// group must still fail both.
+test('after a sight, only the sighted deer encounter is held to the handoff, in both checks', () => {
+  const state = {
+    jobs: { s: { status: 'pending', sight: { member_id: 'deer' } }, r: { status: 'pending' } },
+    encounters: {
+      e1: { npc_id: 'deer', status: 'open' },
+      e2: { npc_id: 'goblin', status: 'open' },
+    },
+  } as never;
+  const ops = (encounter: string) =>
+    [
+      { op: 'job.complete', job_id: 'r0', writer_group: 1 },
+      { op: 'job.complete', job_id: 's', writer_group: 2 },
+      { op: 'encounter.advance', encounter_id: encounter, job_id: 'r', writer_group: 1 },
+      { op: 'job.complete', job_id: 'r', writer_group: 1 },
+    ] as never[];
+  for (const [encounter, ok] of [
+    ['e2', true],
+    ['e1', false],
+  ] as const) {
+    assert.equal(sightHandoffValid(state, ops(encounter)), ok, encounter);
+    assert.equal(sightHandoffHolds(state, ops(encounter), state), ok, encounter);
+  }
 });

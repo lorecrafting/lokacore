@@ -1,23 +1,26 @@
 import { key, same } from '../foundation/compose.ts';
 type Any = any;
 
-// Writes an advance may make in an older group after a sight completion without a handoff: a
-// status holder's or reaction fact row's join (loka-kgd.43), and a status tick's own job rows.
-const ORDINARY = new Set(['status.transition', 'fact.assign', 'resource.adjust']);
-const ordinary = (state: Any, row: Any) =>
-  ORDINARY.has(row.op) ||
-  (row.op === 'job.complete' && state.jobs?.[row.job_id]?.job?.kind === 'status') ||
-  (row.op === 'job.schedule' && row.job?.kind === 'status');
-
-/** Independent prior/result check for the sole nonmonotonic writer-group continuation. */
+/** Independent prior/result check for the sole nonmonotonic writer-group continuation: after a
+ * sight completion, a write to that member's encounter (as listed before or after) in a group older
+ * than the sight's must be the handoff pair. Other older-group joins follow ordinary conflicts. */
 export function sightHandoffHolds(state: Any, ops: Any[], result: Any): boolean {
-  const done = ops.findIndex((op) => op.op === 'job.complete' && state.jobs?.[op.job_id]?.sight);
-  if (done < 0) return true;
-  let high = -1;
+  const lists = (id: unknown, member: string) =>
+    [state.encounters?.[id as string], result?.encounters?.[id as string]].some(
+      (row) => row && (row.npc_id === member || (row.active_ids ?? []).includes(member)),
+    );
   const reused: { row: Any; at: number }[] = [];
   ops.forEach((row, at) => {
-    if (at > done && row.writer_group < high && !ordinary(state, row)) reused.push({ row, at });
-    high = Math.max(high, row.writer_group);
+    const older = ops
+      .slice(0, at)
+      .some(
+        (done) =>
+          done.op === 'job.complete' &&
+          done.writer_group > row.writer_group &&
+          state.jobs?.[done.job_id]?.sight &&
+          lists(row.encounter_id, state.jobs[done.job_id].sight.member_id),
+      );
+    if (older) reused.push({ row, at });
   });
   if (!reused.length) return true;
   if (reused.length !== 2) return false;
