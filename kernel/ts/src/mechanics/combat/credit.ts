@@ -5,6 +5,7 @@ import { jobCommandId } from '../../foundation/id_source.ts';
 import { resourceRef } from '../resource.ts';
 import { value } from '../fact.ts';
 import { grant } from '../levelling/shared.ts';
+import { ally } from './shared.ts';
 
 type Death = DomainEvent & { payload: Extract<DomainEvent['payload'], { type: 'entity_died' }> };
 type Attack = Extract<DomainEvent['payload'], { type: 'attack_result' }>;
@@ -93,9 +94,10 @@ function occurrenceValid(world: World, event: Death, attack: Attack) {
     !!encounter &&
     encounter.status === 'closed' &&
     encounter.character_id === p.credited_character_id &&
-    encounter.body_id === p.killer_id &&
+    // Party credit (row 6b): the player's body or a listed ally made the kill.
+    (encounter.body_id === p.killer_id || ally(world, p.killer_id)) &&
     p.credited_character_id !== null &&
-    bodyOf(world, p.credited_character_id) === p.killer_id &&
+    bodyOf(world, p.credited_character_id) === encounter.body_id &&
     encounter.npc_id === p.victim_id &&
     encounter.room_id === p.room_id &&
     !!job &&

@@ -23,6 +23,7 @@ import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
+import { ally } from './shared.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =
@@ -50,18 +51,19 @@ export function attack(
   close: DeltaOp,
 ) {
   const player = attacker_id === row.body_id;
-  const target_id = player ? row.npc_id : row.body_id;
+  // Toolbox row 6b: an ally strikes the player's target; only a foe strikes the player.
+  const foe = !player && !ally(world, attacker_id);
+  const target_id = foe ? row.body_id : row.npc_id;
   const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);
   const roll = draw(r, 100);
   const accurate = roll < profile.chance;
-  const prevented_by = accurate && !player ? defend(world, row, r) : undefined;
+  const prevented_by = accurate && foe ? defend(world, row, r) : undefined;
   const hit = accurate && !prevented_by;
-  const sleeping = !player && positionOf(world, row.character_id) === 'sleeping';
+  const sleeping = foe && positionOf(world, row.character_id) === 'sleeping';
   const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
-  const hp = resourceRef(world, 'hp');
   const loss = Math.min(
-    level(world, target_id, hp)!,
+    level(world, target_id, resourceRef(world, 'hp'))!,
     mul(damage, sleeping ? settings.sleep_multiplier : 1),
   );
   r.events.push(
@@ -123,6 +125,7 @@ function attackEvent(
   };
 }
 
+// Row 6b: an NPC's death, by the player's or an ally's blow, credits the player.
 // size: allow 42, the fatal branch passes the round's RNG to drop rolls and takes it back
 function injure(
   world: World,
@@ -136,14 +139,14 @@ function injure(
   r: Round,
   close: DeltaOp,
 ) {
-  const player = attacker_id === row.body_id;
+  const body = target_id === row.body_id;
   const fatalLoss = damage(world, target_id, loss, r);
   if (fatalLoss.to === 0) {
-    const closing = target_id === row.body_id || !row.active_ids || row.active_ids.length === 1;
+    const closing = body || !row.active_ids || row.active_ids.length === 1;
     const closingOps = [
       fatalLoss,
       ...(closing ? [close] : []),
-      ...(target_id === row.body_id ? clearBleed(world, target_id) : []),
+      ...(body ? clearBleed(world, target_id) : []),
     ];
     r.ops.push(...closingOps.slice(1));
     const died = deathSequence(
@@ -151,9 +154,9 @@ function injure(
       command,
       {
         loss: fatalLoss,
-        owner_id: player ? null : row.character_id,
+        owner_id: body ? row.character_id : null,
         killer_id: attacker_id,
-        credited_character_id: player ? row.character_id : null,
+        credited_character_id: body ? null : row.character_id,
       },
       mint,
       r.rng,
@@ -162,7 +165,7 @@ function injure(
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
   } else {
-    if (target_id === row.body_id) recordBleed(world, attacker_id, target_id, mint, r);
+    if (body) recordBleed(world, attacker_id, target_id, mint, r);
     if (sleeping) wake(prefix(world, [fatalLoss], r.due_time), row, r);
   }
 }

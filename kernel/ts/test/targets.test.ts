@@ -1,6 +1,7 @@
-// Toolbox rows 6a and 6c on the compiled targets sampler: two goblins of one pack plan (6 HP, a
+// Toolbox rows 6a, 6b and 6c on the compiled targets sampler: two goblins of one pack plan (6 HP, a
 // sure hit for 1) and a player blow that always hits for 2; with world.combat.target_choice,
-// Attack on the other roster member while engaged makes it the primary the player strikes.
+// Attack on the other roster member while engaged makes it the primary the player strikes. Row
+// 6b: the yard's guard (world.combat.allies, a sure hit for 1) fights beside the player.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -12,8 +13,11 @@ import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { apply } from '../src/runtime/apply.ts';
+import { value } from '../src/mechanics/fact.ts';
+import { applyStatus } from '../src/mechanics/status/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -30,6 +34,7 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
+const C = { cartridge_id: 'targets_sampler', cartridge_version: '0.0.1' };
 
 let n = 0;
 const id = () => `eeeeeeee-6666-4666-8666-${String(++n).padStart(12, '0')}` as never;
@@ -60,13 +65,14 @@ function engaged(cartridge = content): [World, string, string] {
   assert.ok(a && b, 'two goblins in the den');
   return [ok(play(w, { type: 'attack', target_id: a })), a, b];
 }
-function round(w: World) {
+function advance(w: World) {
   const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
   const [from, until] = [w.state.clock, w.state.clock + 150];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
-  return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
+  return stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
 }
+const round = (w: World) => ok(advance(w));
 const offered = (v: World) =>
   gameView(v).entities.flatMap((e) =>
     e.actions.filter((x) => x.action_key === 'attack').map((x) => [e.id, x.available]),
@@ -108,19 +114,53 @@ test('only another roster member is a choice, and only when the cartridge opts i
 });
 
 // Breaks: the loader admits target choice under API 1.47 (twin of content_targets_test.exs).
-test('the loader refuses target choice below API 1.48', () => {
+/** The first load diagnostic of the compiled sampler after `edit`, re-hashed. */
+function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  c.manifest.requires.kernel_api.at_least = '1.47';
+  edit(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
   const r = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
     INSTALLED,
   );
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
+  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+}
+const FLOOR = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
+
+test('the loader refuses target choice below API 1.48', () => {
+  assert.deepEqual(
+    reload((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.47';
+      delete c.world.combat.allies;
+    }),
+    FLOOR,
+  );
+});
+
+// Toolbox row 6b (twin of content_targets_test.exs). Breaks: the loader admits allies under API
+// 1.47, a spawn template, an NPC without an attack or an unknown NPC as an ally, or allies
+// without their narration.
+test('the loader keeps allies to API 1.48, authored fighters and their narration', () => {
+  const ally = '.cartridge.world.combat.allies[0]';
+  const npc = (key: string) => ({ ...C, kind: 'npc', key });
+  const cases: [(c: any) => void, unknown][] = [
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.47';
+        delete c.world.combat.target_choice;
+      },
+      FLOOR,
+    ],
+    [(c) => (c.world.combat.allies = [npc('goblin')]), ['SCHEMA_VIOLATION', ally]],
+    [(c) => delete c.npcs['targets_sampler@0.0.1:npc/guard'].attack, ['SCHEMA_VIOLATION', ally]],
+    [(c) => (c.world.combat.allies = [npc('nobody')]), ['UNRESOLVED_REFERENCE', ally]],
+    [
+      (c) => delete c.world.combat.narration.ally_miss,
+      ['SCHEMA_VIOLATION', '.cartridge.world.combat.narration.ally_miss'],
+    ],
+  ];
+  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
 });
 
 // Toolbox row 6c (6a carry). Breaks: the ActionSet counts the roster row, not the members still
@@ -135,4 +175,77 @@ test('a roster with one member left here offers no Attack', () => {
     b,
   ]);
   assert.deepEqual(offered(gone), []);
+});
+
+const guardOf = (w: World) => w.entityIds['targets_sampler@0.0.1:npc/guard']!;
+
+// Toolbox row 6b. Breaks: the guard never strikes, strikes the player, is offered or accepted as
+// a target, strikes while fallen, or its kill is not credited to the player (combat/credit.ts
+// party credit).
+test('the guard fights beside the player; its blow kills the raider and credits the player', () => {
+  n = 0;
+  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  w = ok(play(w, { type: 'move', direction: 'south' }));
+  const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
+  assert.deepEqual(offered(w), [[raider, true]], 'no Attack on the guard');
+  const refused = play(w, { type: 'attack', target_id: guard }).decision;
+  assert.deepEqual(refused.kind === 'rejected' && refused.error.code, 'invalid_target');
+  w = ok(play(w, { type: 'attack', target_id: raider }));
+  // A fallen guard (0 HP, still in the yard: an NPC's body stays where it died) never strikes.
+  const fallen = apply(w, [adjust(w, guard, resourceRef(w, 'hp'), -10, {}).op], false);
+  assert.ok('world' in fallen);
+  assert.equal(hp(round(fallen.world), raider), 1);
+  const r = advance(w);
+  const after = ok(r);
+  // Raider 3 HP: the player's 2, then the guard's 1; the player takes the raider's 1 of 10.
+  assert.deepEqual([hp(after, raider), hp(after, guard), hp(after, after.body)], [0, 10, 9]);
+  const died = r.decision.kind === 'accepted' ? r.decision.events : [];
+  const death = died.find((e) => e.payload.type === 'entity_died')?.payload as never as {
+    killer_id: string;
+    credited_character_id: string;
+  };
+  assert.deepEqual([death.killer_id, death.credited_character_id], [guard, after.character]);
+  assert.ok(
+    r.decision.kind === 'accepted' &&
+      r.decision.narration?.some((x) => x.key === 'combat.ally_hit'),
+  );
+  const fact = { ...C, kind: 'fact', key: 'raider_slain' } as never;
+  assert.equal(value(after, after.character, fact), true);
+});
+
+// Toolbox row 6b, loka-x2gv. Breaks: a round's blow on a roster member other than the job's
+// primary (the first goblin gone, the player and the guard strike the second) takes its own
+// writer group while that member's poison tick, due at the same time, holds another, so the
+// wait faults conflicting_write (status/job.ts statusGroup).
+test('a poisoned second goblin ticks and takes the player and guard blows in one wait', () => {
+  const [w, a, b] = engaged();
+  const den = w.state.containers[w.body];
+  const hall = Object.entries(w.roomIds).find(([k]) => k.endsWith('room/hall'))![1];
+  const poison = { ...C, kind: 'status', key: 'poison' } as never;
+  const statuses = {
+    'targets_sampler@0.0.1:status/poison': {
+      duration: 300,
+      tick_every: 150,
+      resource: resourceRef(w, 'hp'),
+      per_tick: -1,
+      label: 'combat.goblin_targeted',
+      narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
+    },
+  };
+  const containers = { ...w.state.containers, [a]: hall, [guardOf(w)]: den };
+  const moved = {
+    ...w,
+    cartridge: { ...w.cartridge, statuses } as never,
+    state: { ...w.state, containers },
+  } as World;
+  const job = 'cccccccc-6666-4666-8666-000000000001' as never;
+  const poisoned = apply(
+    moved,
+    applyStatus(moved, b as never, poison, 0, () => job),
+    false,
+  );
+  assert.ok('world' in poisoned, JSON.stringify(poisoned));
+  const after = round(poisoned.world);
+  // 6 HP: at +150 the tick takes 1 and the round the player's 2 and the guard's 1.
+  assert.deepEqual([hp(after, a), hp(after, b)], [6, 2]);
 });

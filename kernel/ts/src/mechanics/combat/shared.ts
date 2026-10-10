@@ -27,7 +27,7 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   if (!body) return 'not_found' as const;
   const npc = world.entities[target];
   if (!npc) return 'not_found' as const;
-  if (npc.kind !== 'npc' || !npc.attack || !world.cartridge.world?.combat)
+  if (npc.kind !== 'npc' || !npc.attack || !world.cartridge.world?.combat || ally(world, target))
     return 'invalid_target' as const;
   const origin = world.state.created?.[target]?.origin;
   if (
@@ -59,6 +59,20 @@ export function retarget(world: World, body: EntityId, target: EntityId) {
   return fight && fight.row.npc_id !== target && fight.row.active_ids?.includes(target)
     ? fight
     : undefined;
+}
+
+/** Toolbox row 6b: an authored NPC listed in world.combat.allies; never an attack target. */
+export function ally(world: World, id: EntityId | null) {
+  return !!world.cartridge.world?.combat?.allies?.some(
+    (ref) => world.entityIds[refString(ref)] === id,
+  );
+}
+
+/** The ally that strikes this round: the first listed one living in the encounter room. */
+export function allyOf(world: World, row: EncounterRow) {
+  return world.cartridge.world?.combat?.allies
+    ?.map((ref) => world.entityIds[refString(ref)])
+    .find((id) => id && living(world, id) && world.state.containers[id] === row.room_id);
 }
 
 export function closeEncounter(world: World, body: EntityId): DeltaOp[] {
