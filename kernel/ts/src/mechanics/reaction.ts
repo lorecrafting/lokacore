@@ -144,7 +144,7 @@ export function sequence(
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
-      const assigned = assignment(world, actor, step, group, set, cause);
+      const assigned = assignment(world, actor, step, group, { set, holders }, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;
     }
@@ -204,13 +204,14 @@ function statusStep(
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
-// fallback); with no such subject the step writes nothing.
+// fallback); with no such subject the step writes nothing. A row an earlier reaction of this
+// advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
   actor: CharacterId,
   step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' | 'fact.adjust' }>,
   group: number,
-  set: Record<string, FactValue>,
+  { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
 ) {
   const named = step.npc ?? step.item;
@@ -224,7 +225,9 @@ function assignment(
     step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
   if (next === undefined) return undefined;
   set[at] = next;
-  return { op: 'fact.assign' as const, writer_group: group, ...target, expected, value: next };
+  const writer_group = holders.get(at) ?? group;
+  holders.set(at, writer_group);
+  return { op: 'fact.assign' as const, writer_group, ...target, expected, value: next };
 }
 
 function terminal(
