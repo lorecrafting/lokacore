@@ -34,5 +34,6 @@ export const decide: Rule<'attributes'> = (world, command) => {
   let run: Assigned = { ops: [selection], position: 0, facts: {} };
   if (declaration.skill) run = acquire(world, actor_id, run, declaration.skill);
   if (declaration.faction) run = assigned(world, actor_id, run, declaration.faction);
-  return accepted(world, ancestry, run.ops, []);
+  // The ancestry modifier can move a derived hp maximum: settle first (resource@1).
+  return accepted(world, ancestry, [...settleMaxima(world), ...run.ops], []);
 };

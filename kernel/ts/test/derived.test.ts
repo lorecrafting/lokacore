@@ -13,6 +13,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { decide } from '../src/mechanics/attributes/rule.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
 import { carryingAdded, carryingExchange } from '../src/mechanics/containment/shared.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
@@ -164,6 +165,29 @@ test('constitution 16 raises the hp maximum to 16; the body regenerates to it an
   const spent = apply(later, [adjust(later, later.body, hp, -1, {}).op]);
   assert.ok('world' in spent, JSON.stringify(spent));
   assert.equal(level(spent.world, later.body, hp), 15);
+});
+
+// Breaks (PM ruling, loka-kgd.11): choose_ancestry writes no zero-amount hp settle before the
+// selection that moves the derived hp maximum. Not observable through step today: elapsed time is
+// refused before an ancestry is chosen, so the rule is called directly.
+test('choosing hardy settles hp at 10 before the selection raises its maximum', () => {
+  const w = newWorld(content, '1d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const command = {
+    payload: { type: 'choose_ancestry', actor_id: w.character, ancestry: 'hardy' },
+  };
+  const ruled = decide(w, command as never, undefined as never);
+  assert.ok(ruled.kind === 'accepted', JSON.stringify(ruled));
+  const [settle, select] = ruled.delta.ops;
+  assert.deepEqual(
+    [
+      settle!.op,
+      (settle as { resource: { key: string } }).resource.key,
+      (settle as { from: number }).from,
+      (settle as { to: number }).to,
+      select!.op,
+    ],
+    ['resource.adjust', 'hp', 10, 10, 'character.select'],
+  );
 });
 
 // Breaks: a combat write checks the hit against the authored maximum 10 (the round faults from 16)
