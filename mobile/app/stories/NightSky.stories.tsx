@@ -1,16 +1,20 @@
-// NightSky: the stars and shooting star over the night page (BOOK-UI-COMPONENTS.md, Night sky);
-// see it on the toolbar's dark palette (the Book shows it at night only).
+// NightSky: the stars and shooting star over the night page (BOOK-UI-COMPONENTS.md, Night sky),
+// on the night paper whatever the toolbar's palette (the Book mounts it at night only).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { NightSky } from '../book/NightSky.tsx';
+import { PaletteContext } from '../book/palette.ts';
+import { color } from '../book/tokens.ts';
 
 const meta = {
   title: 'Book/NightSky',
   component: NightSky,
   render: () => (
-    <View style={{ height: '100vh' as never }}>
-      <NightSky />
-    </View>
+    <PaletteContext value={color.dark}>
+      <View style={{ height: '100vh' as never, backgroundColor: color.dark.bg }}>
+        <NightSky />
+      </View>
+    </PaletteContext>
   ),
 } satisfies Meta<typeof NightSky>;
 export default meta;
