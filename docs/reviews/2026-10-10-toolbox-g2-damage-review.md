@@ -41,3 +41,19 @@
 2. **should-fix**, `kernel/ts/src/content/cartridge_combat.ts:41`: the TS floor for `weapon.attack` has no red test (M3 green; this is the developer's open item). Failure: a refactor drops the item site, and a 1.43 artifact with a weapon `kind` or `crit` loads. Fix: add one loader row in `damage.test.ts`; it is cheap once the swords carry real weapon profiles.
 3. **nit**: no `/code-review` result is reported; carry it into the #351 body.
 4. **nit**: `docs/MECHANICS-TOOLBOX.md:87`: the row status was not flipped. The slice process puts the flip in the same PR.
+
+## Re-check: fix round 1 (head `120c9d6d709673f36f6087272bfacceaa5d578bc`)
+
+Scope: fix commit `120c9d6d` and merge `b8ba3dde` (from `a4c01778`). Hosted ci and book-e2e are green (per PM).
+
+- Verdict: **APPROVED**.
+- **Finding 1 fixed.** `round_attack.ts:220-223`: tags now ride only on `{...weapon.attack, tags}`, and the unarmed branch returns `player_attack` bare. The `mechanics.md` Material bullet and the `Resistances` description now match. The farmer + silver row (expected 18) catches the old behaviour, which would give 15. Red control M4 (tags put back on the unarmed profile) fails `damage.test.ts`.
+- **Finding 2 fixed.** Loader rows each add one G2 field to a stripped sampler, including weapon kind and weapon crit. M3 (`...items` dropped, `cartridge_combat.ts:41`) now fails. The Elixir twin works too: M5 (`weapon_attacks` dropped, `combat.ex`) fails `content_damage_test.exs` (0/1).
+- **Ancestry deviation accepted.** `choose_ancestry` (fighter knows `swords`, farmer does not) reuses an existing mechanic to make the weapon skill unusable. It affects only the sampler. HP rows are unchanged because the swords mirror the unarmed profile.
+- **Merge kept both sides.**
+  - `invalid.json` has 792 cases. That is 752 at base, plus 26 from the batch and 14 from G2. The four `*_tag_unknown` cases use `gold`.
+  - The `mechanics.md` and `cartridge.md` diffs against `a4c01778` are pure additions (the G2 sections). The only removed line is the Tags bullet, replaced by the version that adds `silver`.
+- **Focused tests green:**
+  - TS: damage, combat, combat_content, combat_contracts, loot, tags, skill_growth, reactions_sampler, contracts.
+  - Elixir: content_damage, content_combat, content_tags, content_chapters, content_skill_growth.
+- Nits 3 and 4 remain open for #351 (`/code-review` result, row status flip).
