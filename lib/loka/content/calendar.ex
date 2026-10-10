@@ -16,9 +16,7 @@ defmodule Loka.Content.Calendar do
 
     base(calendar, day, hour, subdivision, invalid) ++
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
-      Enum.flat_map(@cycles, &cycle(&1, calendar[&1], invalid)) ++
-      weathers(calendar["weather"], invalid) ++
-      shown(calendar, subdivision, invalid) ++
+      tables(calendar, subdivision, invalid) ++
       schedules(defs["npc"], hours, invalid) ++
       windows(nodes, hours, invalid) ++
       sky(calendar, nodes, {m, defs}, invalid)
@@ -77,6 +75,12 @@ defmodule Loka.Content.Calendar do
          Map.get(calendar, "start", 0) + day > 9_007_199_254_740_991,
        do: [invalid.(at("cartridge.json", ["calendar"]))],
        else: []
+  end
+
+  # The lunar, season and tide cycles (row 31 adds the last two) and the weather table.
+  defp tables(calendar, subdivision, invalid) do
+    Enum.flat_map(@cycles, &cycle(&1, calendar[&1], invalid)) ++
+      weathers(calendar["weather"], invalid) ++ shown(calendar, subdivision, invalid)
   end
 
   # Row 31 tables show on the status line, which needs the expanded calendar's units.
