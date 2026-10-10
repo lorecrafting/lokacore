@@ -99,9 +99,18 @@ function attributes(c: Obj, { named }: Checks) {
 }
 
 // Toolbox rows 5 and G5: an opposed check names a skill of this cartridge (its attribute is
-// checked with attribute_threshold's) and its target detail declares a rating.
+// checked with attribute_threshold's) and its target detail declares a rating, unless (row G3) it
+// names an NPC instance of this cartridge that declares the check's attribute.
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
+  const npc = r.check.npc && c.npcs?.[refString(r.check.npc)];
+  if (r.check.npc) named(r.check.npc, 'npc', `${at}.check.npc`);
+  if (r.check.npc)
+    return npc &&
+      (npc.spawn_template ||
+        !npc.attributes?.some((a: Obj) => refString(a.attribute) === refString(r.check.attribute)))
+      ? [diag('SCHEMA_VIOLATION', `${at}.check.npc`, { error: 'invalid_value' })]
+      : [];
   const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
   return detail && detail.rating === undefined
     ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]

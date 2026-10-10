@@ -536,6 +536,28 @@
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
+        },
+        "attributes": {
+          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1, kernel_api 1.46), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "properties": {
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "value": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              }
+            },
+            "required": [
+              "attribute",
+              "value"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [

@@ -1,4 +1,10 @@
-import type { AncestrySpec, CharacterId, DefinitionRef, DerivedStat } from '../../contracts.gen.ts';
+import type {
+  AncestrySpec,
+  CharacterId,
+  DefinitionRef,
+  DerivedStat,
+  EntityId,
+} from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { divide, saturate } from '../../foundation/int.ts';
 import { bodyOf, refString, values, type World } from '../../runtime/decision.ts';
@@ -43,15 +49,33 @@ export function worn(world: World, actor: CharacterId, attribute: DefinitionRef)
 }
 
 /**
+ * The NPC instance's attribute (row G3): its definition's declared value, else the attribute's
+ * start, read at use. The one NPC-side reader, so row 2c will add the holder's active modifiers here.
+ */
+export function npcValue(world: World, npc: EntityId, attribute: DefinitionRef) {
+  const e = world.entities[npc];
+  const ref = refString(attribute);
+  const declared =
+    e?.kind === 'npc' ? e.attributes?.find((a) => refString(a.attribute) === ref) : undefined;
+  const base = declared?.value ?? world.attributes[key(attribute)];
+  return base === undefined ? base : saturate(base);
+}
+
+/**
  * A derived stat's attribute bonus (mechanics.md derived stats), floored toward minus infinity. Each
  * term and the sum saturate to the ResourceInt range; clamping the double product is exact, since
- * its rounding is monotone.
+ * its rounding is monotone. `read` gives an attribute's value: the player character's by default,
+ * an NPC's through npcValue (row G3).
  */
-export function derived(world: World, actor: CharacterId, stat: DerivedStat | undefined) {
+export function derived(
+  world: World,
+  actor: CharacterId,
+  stat: DerivedStat | undefined,
+  read = (a: DefinitionRef) => value(world, actor, a)!,
+) {
   if (!stat) return 0;
   let sum = 0;
-  for (const t of stat.terms)
-    sum += saturate(t.per_point * (value(world, actor, t.attribute)! - t.pivot));
+  for (const t of stat.terms) sum += saturate(t.per_point * (read(t.attribute) - t.pivot));
   const [q, r] = divide(saturate(sum), stat.divisor ?? 1);
   return r < 0 ? q - 1 : q;
 }

@@ -1,0 +1,26 @@
+{
+  "facts": {
+    "north_open": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The north gate stands open."
+    },
+    "south_open": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The south gate stands open."
+    }
+  }
+}

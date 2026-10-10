@@ -1335,7 +1335,7 @@
           "additionalProperties": false
         },
         "derived": {
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum; kernel_api at least 1.40). hit_chance and damage need world.combat; carry_grams needs world.carry. NPCs have no attributes and keep their authored profile.",
+          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attributes@1, kernel_api at least 1.39). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum; kernel_api at least 1.40). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
           "type": "object",
           "properties": {
             "hit_chance": {

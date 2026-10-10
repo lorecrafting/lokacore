@@ -832,7 +832,7 @@
               "additionalProperties": false
             },
             {
-              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating; draws no RNG. A skill with growth gains one use per perform.",
+              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3, kernel_api 1.46), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
               "type": "object",
               "properties": {
                 "key": {
@@ -846,6 +846,9 @@
                 },
                 "attribute": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "npc": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
               "required": [
@@ -856,6 +859,11 @@
                 "skill",
                 "attribute"
               ],
+              "dependentRequired": {
+                "npc": [
+                  "attribute"
+                ]
+              },
               "additionalProperties": false
             }
           ]

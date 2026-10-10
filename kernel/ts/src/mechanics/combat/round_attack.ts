@@ -1,7 +1,9 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
+  DerivedStat,
   Tag,
+  WorldSettings,
   Command,
   DeltaOp,
   DomainEvent,
@@ -16,7 +18,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
 import { deathSequence } from '../death/sequence.ts';
-import { derived } from '../attributes/shared.ts';
+import { derived, npcValue } from '../attributes/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
@@ -213,7 +215,13 @@ function attackProfile(
 ): Profile {
   const npc = world.entities[player ? row.npc_id : attacker_id];
   if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
-  if (!player) return npc.attack;
+  const table = world.cartridge.world?.derived;
+  if (!player)
+    return table && npc.attributes
+      ? bonused(npc.attack, table, (s) =>
+          derived(world, row.character_id, s, (a) => npcValue(world, attacker_id, a)!),
+        )
+      : npc.attack;
   const wielded = equipped(world, row.body_id, 'wield');
   const weapon = wielded?.weapon;
   // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
@@ -221,10 +229,18 @@ function attackProfile(
     weapon && status(world, row.character_id, weapon.skill, r.steps).usable
       ? { ...weapon.attack, tags: wielded.tags }
       : world.cartridge.world!.combat!.player_attack;
-  const table = world.cartridge.world?.derived;
-  if (!table) return base;
-  const hit = derived(world, row.character_id, table.hit_chance);
-  const damage = derived(world, row.character_id, table.damage);
+  return table ? bonused(base, table, (s) => derived(world, row.character_id, s)) : base;
+}
+
+// Row 2's hit and damage bonuses on an attack profile, each clamped (an NPC's by its own
+// attributes, row G3).
+function bonused(
+  base: Profile,
+  table: NonNullable<WorldSettings['derived']>,
+  bonus: (s?: DerivedStat) => number,
+): Profile {
+  const hit = bonus(table.hit_chance);
+  const damage = bonus(table.damage);
   return {
     ...base,
     chance: Math.min(100, Math.max(0, add(base.chance, hit))),
