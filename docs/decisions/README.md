@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-10 [Owner decision: retire the later chapters, build a toolbox showcase](owner-decision-showcase-2026-10-10.md)
 - 2026-10-09 [PM decision: HP maximum derived from attributes](pm-decision-derived-pool-max-2026-10-09.md)
 - 2026-10-09 [Owner decision: dialogue hub, conversations stay open until Leave](owner-decision-dialogue-hub-2026-10-09.md)
 - 2026-10-09 [PM decision: re-rank 2, immersion rows and foundation primitives](pm-decision-toolbox-rerank-2-2026-10-09.md)
@@ -113,7 +114,7 @@ dated line below, newest first.
 - 2026-10-04 [PM adoption: M1-B1 durable elapsed host](pm-decision-m1-b1-durable-elapsed-2026-10-04.md)
 - 2026-10-04 [PM decision: M1-A elapsed authority contract](pm-decision-m1-a-elapsed-contract-2026-10-04.md)
 - 2026-10-04 [PM decision: LegendMUD, M mechanics and The Missing Child](pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
-- 2026-10-04 [PM-selected future policy: later Ashmere story reconciliation](pm-decision-later-story-reconciliation-2026-10-04.md)
+- 2026-10-04 [PM-selected future policy: later Ashmere story reconciliation](../archive/pm-decision-later-story-reconciliation-2026-10-04.md) (archived 2026-10-10)
 - 2026-10-04 [Owner direction: shared Story and Realm mechanics with replaceable stories](owner-decision-story-realm-shared-mechanics-2026-10-04.md)
 - 2026-10-04 [Owner decision: simulator-first mechanics validation](owner-decision-simulator-first-validation-2026-10-04.md)
 - 2026-10-04 [Owner decision: fresh preproduction preview games](owner-decision-preproduction-preview-saves-2026-10-04.md)

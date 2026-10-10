@@ -1,17 +1,19 @@
 # PM-selected future policy: later Ashmere story reconciliation
 
+**Archived 2026-10-10.** Chapters 2 and 3 left release scope ([showcase decision](../decisions/owner-decision-showcase-2026-10-10.md)); kept because the archived [later mechanics](LATER-MECHANICS.md) queues cite it.
+
 2026-10-04. **Source-only planning draft; implementation and publication review pending.**
 The root PM selects these five resolutions under the
-[owner's mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md).
+[owner's mechanics delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md).
 Owner request, paraphrased: use Astra to resolve the five later-story conflicts.
 Astra supplied read-only design advice pinned to merged main `6d9712ef`; it authored
-this design and is not its independent reviewer. The governing [Legend/chapter reconciliation](pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
+this design and is not its independent reviewer. The governing [Legend/chapter reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
 is now merged in [PR #136](https://github.com/lorecrafting/lokacore/pull/136);
 its original research/formula alternatives remain historical. This decision changes future planning
 only, without changing installed contracts, the active M1–M23 sequence or archive text.
 
 The [provisional queues](../archive/LATER-MECHANICS.md) (archived; superseded by the [mechanics toolbox](../MECHANICS-TOOLBOX.md)) owned candidate boundaries and acceptance;
-[the ending table](../LATER-ENDINGS.md) owns exact ending selectors, semantic text,
+[the ending table](LATER-ENDINGS.md) owns exact ending selectors, semantic text,
 ports/defaults and proof limits. Unspecified numeric tuning and registered encodings wait
 for their actual consuming briefs. Literal narrative text is review copy, not a claim of
 owner-approved final literary prose. Existing archive clauses are retained as history:
@@ -135,7 +137,7 @@ schema. Rooms, duration, hatch, provider and possession policy remain content.
 
 ## 5. Exact histories and independent legal/faction presentation
 
-[The ending table](../LATER-ENDINGS.md) defines the selected five base histories and
+[The ending table](LATER-ENDINGS.md) defines the selected five base histories and
 separate legal/faction paragraphs, with immutable imported child/bell history. Later S7/S26
 choices change reputation/affiliation, never history. Only king_slain completes Q4 and
 admits Q5; waiting remains chapter-two progress. No unsupported spare/bind/depose ending.
