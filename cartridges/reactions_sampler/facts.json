@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "crow_drawn": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A bone lies in the yard; a crow has come down for it."
+    }
+  }
+}

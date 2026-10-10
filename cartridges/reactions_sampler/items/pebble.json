@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "pebble"
+  ],
+  "short": "item.pebble.short",
+  "room_line": "item.pebble.room",
+  "description": "item.pebble.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}
